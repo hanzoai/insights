@@ -22,7 +22,7 @@ class IngestionWarningsTable(Table):
         "timestamp": DateTimeDatabaseField(name="timestamp", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "ingestion_warnings"
 
     def to_printed_insightsql(self):

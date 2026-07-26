@@ -144,9 +144,9 @@ The client includes automatic retry for transient HTTP failures:
 - **Retry on:** Connection errors and read timeouts
 - **No retry on:** 429 (rate limiting) - retrying immediately won't help
 
-## ClickHouse Query Optimization
+## Datastore Query Optimization
 
-Event queries include a timestamp filter (`timestamp >= test_start_date - 1 day`) to benefit from ClickHouse's table partitioning and ordering, ensuring fast query performance even on large tables.
+Event queries include a timestamp filter (`timestamp >= test_start_date - 1 day`) to benefit from Datastore's table partitioning and ordering, ensuring fast query performance even on large tables.
 
 ## Notifications
 

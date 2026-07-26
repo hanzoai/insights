@@ -16,9 +16,9 @@ from insights.insightsql.database.schema.web_analytics_s3 import (
 )
 from insights.insightsql.query import InsightsQLQueryExecutor
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.escape import substitute_params
-from insights.clickhouse.query_tagging import DagsterTags, get_query_tags, tags_context
+from insights.datastore.client import sync_execute
+from insights.datastore.client.escape import substitute_params
+from insights.datastore.query_tagging import DagsterTags, get_query_tags, tags_context
 from insights.dags.common import dagster_tags
 from insights.insightsql_queries.web_analytics.web_overview import WebOverviewQueryRunner
 from insights.models import Team
@@ -64,7 +64,7 @@ def table_has_data(
 
     try:
         with tags_context(kind="dagster", dagster=tags):
-            # nosemgrep: clickhouse-fstring-param-audit - table_name from internal dagster asset config
+            # nosemgrep: datastore-fstring-param-audit - table_name from internal dagster asset config
             result = sync_execute(f"SELECT COUNT(*) FROM {table_name} LIMIT 1")
         row_count = result[0][0] if result and result[0] else 0
 
@@ -169,7 +169,7 @@ def check_export_chdb_queryable(export_type: str, log_event_name: str) -> AssetC
             error_msg = str(e)
             env_type = "Minio" if DEBUG else "S3"
 
-            # Check for common ClickHouse/S3 errors
+            # Check for common Datastore/S3 errors
             if "CANNOT_STAT" in error_msg or "Cannot stat file" in error_msg:
                 status = "file_not_found"
                 description = f"Export file not found on {env_type} - may not have been created yet"
@@ -219,7 +219,7 @@ def log_query_sql(
             query_ast = runner.to_query()
 
         executor = InsightsQLQueryExecutor(query=query_ast, team=team, modifiers=runner.modifiers)
-        sql_with_placeholders, sql_context = executor.generate_clickhouse_sql()
+        sql_with_placeholders, sql_context = executor.generate_datastore_sql()
         raw_sql = substitute_params(sql_with_placeholders, sql_context.values)
         context.log.info(f"{query_name}:\n {raw_sql}")
     except Exception as e:

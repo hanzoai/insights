@@ -46,7 +46,7 @@ pub enum EmbeddingResult {
     Failure { error: String },
 }
 
-// Records the embedding worker emits, for ingestion into clickhouse
+// Records the embedding worker emits, for ingestion into datastore
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EmbeddingRecord {
     pub team_id: i32,
@@ -55,7 +55,7 @@ pub struct EmbeddingRecord {
     pub model_name: EmbeddingModel,
     pub rendering: String,
     pub document_id: String,
-    pub timestamp: String, // This is clickhouse format
+    pub timestamp: String, // This is datastore format
     pub embedding: Vec<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,

@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.tasks.tasks import clickhouse_clear_removed_data
+from insights.tasks.tasks import datastore_clear_removed_data
 
 logger = structlog.get_logger(__name__)
 logger.setLevel(logging.INFO)
@@ -22,5 +22,5 @@ class Command(BaseCommand):
 
 def run():
     logger.info("Starting deletion of data for teams")
-    clickhouse_clear_removed_data()
+    datastore_clear_removed_data()
     logger.info("Finished deletion of data for teams")

@@ -14,7 +14,7 @@ from products.batch_exports.backend.temporal.pipeline.internal_stage import (
     insert_into_internal_stage_activity,
 )
 from products.batch_exports.backend.tests.temporal.destinations.workflows.utils import (
-    assert_clickhouse_records_in_kafka,
+    assert_datastore_records_in_kafka,
 )
 
 pytestmark = [
@@ -26,7 +26,7 @@ pytestmark = [
 async def _run_activity(
     activity_environment,
     topic: str,
-    clickhouse_client,
+    datastore_client,
     team,
     data_interval_start,
     data_interval_end,
@@ -79,8 +79,8 @@ async def _run_activity(
     )
     result = await activity_environment.run(insert_into_kafka_activity_from_stage, workflows_inputs)
 
-    await assert_clickhouse_records_in_kafka(
-        clickhouse_client=clickhouse_client,
+    await assert_datastore_records_in_kafka(
+        datastore_client=datastore_client,
         topic=topic,
         date_ranges=[(data_interval_start, data_interval_end)],
         team_id=team.pk,
@@ -96,7 +96,7 @@ async def _run_activity(
 
 @pytest.mark.parametrize("exclude_events", [None, ["test-exclude"]], indirect=True)
 async def test_insert_into_kafka_activity_from_stage_produces_data_into_topic(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     exclude_events,
     data_interval_start,
@@ -111,7 +111,7 @@ async def test_insert_into_kafka_activity_from_stage_produces_data_into_topic(
 
     await _run_activity(
         activity_environment,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         topic=topic,
         data_interval_start=data_interval_start,

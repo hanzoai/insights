@@ -9,7 +9,7 @@ import { HighLevelProducer } from 'node-rdkafka'
 import snappy from 'snappy'
 import { v4 as uuidv4 } from 'uuid'
 
-import { Clickhouse } from '../../tests/helpers/clickhouse'
+import { Datastore } from '../../tests/helpers/datastore'
 import { waitForExpect } from '../../tests/helpers/expectations'
 import { resetKafka } from '../../tests/helpers/kafka'
 import { forSnapshot } from '../../tests/helpers/snapshots'
@@ -58,7 +58,7 @@ interface PayloadConfig {
 }
 
 /**
- * Aggregated session metadata from ClickHouse.
+ * Aggregated session metadata from Datastore.
  *
  * This represents session data after it has been processed by the materialized view
  * and aggregated in the session_replay_events table. A session may have multiple
@@ -235,11 +235,11 @@ async function isPostgresAvailable(): Promise<boolean> {
 }
 
 /**
- * Checks if ClickHouse is available with the Kafka engine table.
+ * Checks if Datastore is available with the Kafka engine table.
  */
-async function isClickHouseAvailable(clickhouse: Clickhouse): Promise<boolean> {
+async function isDatastoreAvailable(datastore: Datastore): Promise<boolean> {
     try {
-        await clickhouse.query('SELECT 1')
+        await datastore.query('SELECT 1')
         return true
     } catch {
         return false
@@ -297,7 +297,7 @@ async function listS3Objects(s3Client: S3Client): Promise<string[]> {
  * Raw result from the aggregated session_replay_events table.
  * The schema uses aggregate functions that need special handling.
  */
-interface ClickHouseSessionReplayRow {
+interface DatastoreSessionReplayRow {
     session_id: string
     team_id: number
     distinct_id: string
@@ -315,14 +315,14 @@ interface ClickHouseSessionReplayRow {
 }
 
 /**
- * Queries session metadata from the ClickHouse aggregated table.
+ * Queries session metadata from the Datastore aggregated table.
  *
  * The materialized view (`session_replay_events_mv`) continuously processes data from
  * the Kafka engine table and writes aggregated results to `session_replay_events`.
  * We query this table with FINAL to get properly merged results.
  */
-async function queryClickHouseSessionMetadata(
-    clickhouse: Clickhouse,
+async function queryDatastoreSessionMetadata(
+    datastore: Datastore,
     expectedSessionIds: Set<string>,
     timeoutMs: number = 10000
 ): Promise<SessionMetadata[]> {
@@ -341,7 +341,7 @@ async function queryClickHouseSessionMetadata(
     while (Date.now() - startTime < timeoutMs) {
         // Query the aggregated table with FINAL to get merged results
         // block_urls is an array containing all S3 block URLs for this session
-        const results = await clickhouse.query<ClickHouseSessionReplayRow>(`
+        const results = await datastore.query<DatastoreSessionReplayRow>(`
             SELECT
                 session_id,
                 team_id,
@@ -831,7 +831,7 @@ describe('Session Recording Consumer Integration', () => {
     let hub: Hub
     let team: Team
     let s3Client: S3Client
-    let clickhouse: Clickhouse
+    let datastore: Datastore
 
     interface IngesterWithProducers {
         ingester: SessionRecordingIngester
@@ -866,15 +866,15 @@ describe('Session Recording Consumer Integration', () => {
             },
         })
 
-        clickhouse = Clickhouse.create()
+        datastore = Datastore.create()
 
         // Verify all required infrastructure is available
         // Tests will fail (not skip) if infrastructure is missing
-        const [s3Ok, kafkaOk, postgresOk, clickhouseOk] = await Promise.all([
+        const [s3Ok, kafkaOk, postgresOk, datastoreOk] = await Promise.all([
             isS3Available(s3Client),
             isKafkaAvailable(),
             isPostgresAvailable(),
-            isClickHouseAvailable(clickhouse),
+            isDatastoreAvailable(datastore),
         ])
 
         const missing: string[] = []
@@ -887,8 +887,8 @@ describe('Session Recording Consumer Integration', () => {
         if (!postgresOk) {
             missing.push('Postgres')
         }
-        if (!clickhouseOk) {
-            missing.push('ClickHouse')
+        if (!datastoreOk) {
+            missing.push('Datastore')
         }
 
         if (missing.length > 0) {
@@ -914,7 +914,7 @@ describe('Session Recording Consumer Integration', () => {
             SESSION_RECORDING_V2_S3_TIMEOUT_MS: TEST_CONFIG.S3_TIMEOUT_MS,
             SESSION_RECORDING_MAX_BATCH_SIZE_KB: 1,
             SESSION_RECORDING_MAX_BATCH_AGE_MS: 1000,
-            // Use the test topic (with _test suffix) to match ClickHouse's Kafka engine table
+            // Use the test topic (with _test suffix) to match Datastore's Kafka engine table
             SESSION_RECORDING_V2_REPLAY_EVENTS_KAFKA_TOPIC: KAFKA_DATASTORE_SESSION_REPLAY_EVENTS,
         })
 
@@ -967,7 +967,7 @@ describe('Session Recording Consumer Integration', () => {
         }
         await cleanupS3TestData(s3Client)
         s3Client?.destroy()
-        clickhouse?.close()
+        datastore?.close()
     })
 
     beforeEach(async () => {
@@ -1015,9 +1015,9 @@ describe('Session Recording Consumer Integration', () => {
             await kafkaMetadataProducer.disconnect()
             await testProducer.disconnect()
 
-            // Query session metadata from ClickHouse aggregated table
+            // Query session metadata from Datastore aggregated table
             // The MV processes Kafka messages asynchronously, so we poll until data appears
-            const metadata = await queryClickHouseSessionMetadata(clickhouse, expectedSessionIds, 30000)
+            const metadata = await queryDatastoreSessionMetadata(datastore, expectedSessionIds, 30000)
 
             // Read actual session events from S3 using metadata
             // A session may have multiple blocks if it was flushed multiple times

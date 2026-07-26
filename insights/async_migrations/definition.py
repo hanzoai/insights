@@ -31,7 +31,7 @@ class AsyncMigrationOperationSQL(AsyncMigrationOperation):
         sql_settings: Optional[dict] = None,
         rollback: Optional[str],
         rollback_settings: Optional[dict] = None,
-        database: AnalyticsDBMS = AnalyticsDBMS.CLICKHOUSE,
+        database: AnalyticsDBMS = AnalyticsDBMS.DATASTORE,
         timeout_seconds: int = ASYNC_MIGRATIONS_DEFAULT_TIMEOUT_SECONDS,
         per_shard: bool = False,
     ):
@@ -51,10 +51,10 @@ class AsyncMigrationOperationSQL(AsyncMigrationOperation):
             self._execute_op(query_id, self.rollback, self.rollback_settings)
 
     def _execute_op(self, query_id: str, sql: str, settings: Optional[dict]):
-        from insights.async_migrations.utils import execute_op_clickhouse, execute_op_postgres
+        from insights.async_migrations.utils import execute_op_datastore, execute_op_postgres
 
-        if self.database == AnalyticsDBMS.CLICKHOUSE:
-            execute_op_clickhouse(
+        if self.database == AnalyticsDBMS.DATASTORE:
+            execute_op_datastore(
                 sql,
                 query_id=query_id,
                 timeout_seconds=self.timeout_seconds,
@@ -79,7 +79,7 @@ class AsyncMigrationDefinition:
     # use this to add information about why this migration is needed to self-hosted users
     description = ""
 
-    # list of versions accepted for the services the migration relies on e.g. ClickHouse, Postgres
+    # list of versions accepted for the services the migration relies on e.g. Datastore, Postgres
     service_version_requirements: list[ServiceVersionRequirement] = []
 
     # list of operations the migration will perform _in order_

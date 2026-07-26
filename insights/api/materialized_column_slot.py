@@ -237,7 +237,7 @@ class MaterializedColumnSlotViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
         if not property_definition_id:
             return response.Response({"error": "property_definition_id is required"}, status=400)
 
-        # Fetch auto-materialized names outside transaction (ClickHouse query)
+        # Fetch auto-materialized names outside transaction (Datastore query)
         auto_materialized_names = get_auto_materialized_property_names()
 
         try:

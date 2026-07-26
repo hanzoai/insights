@@ -27,7 +27,7 @@ services:
     datastore:
         #
         # Note: please keep the default version in sync across
-        #       `insights` and the `charts-clickhouse` repos
+        #       `insights` and the `charts-datastore` repos
         #
         extends:
             file: docker-compose.base.yml
@@ -37,13 +37,13 @@ services:
             - kafka
         volumes:
             - ./insights/insights/idl:/idl
-            - ./insights/docker/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-            - ./insights/docker/clickhouse/config.xml:/etc/clickhouse-server/config.xml
-            - ./insights/docker/clickhouse/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
-            - ./insights/docker/clickhouse/users.xml:/etc/clickhouse-server/users.xml
-            - ./insights/docker/clickhouse/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
-            - ./insights/insights/user_scripts:/var/lib/clickhouse/user_scripts
-            - clickhouse-data:/var/lib/clickhouse
+            - ./insights/docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./insights/docker/datastore/config.xml:/etc/clickhouse-server/config.xml
+            - ./insights/docker/datastore/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
+            - ./insights/docker/datastore/users.xml:/etc/clickhouse-server/users.xml
+            - ./insights/docker/datastore/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
+            - ./insights/insights/user_scripts:/var/lib/datastore/user_scripts
+            - datastore-data:/var/lib/datastore
 
     kafka:
         extends:
@@ -414,7 +414,7 @@ volumes:
     objectstorage:
     seaweedfs:
     postgres-data:
-    clickhouse-data:
+    datastore-data:
     caddy-data:
     caddy-config:
     kv-data:

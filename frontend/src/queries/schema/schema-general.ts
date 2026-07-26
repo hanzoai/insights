@@ -416,7 +416,7 @@ export interface InsightsQLQueryModifiers {
     usePreaggregatedIntermediateResults?: boolean
     optimizeProjections?: boolean
     /** If these are provided, the query will fail if these skip indexes are not used */
-    forceClickhouseDataSkippingIndexes?: string[]
+    forceDatastoreDataSkippingIndexes?: string[]
 }
 
 export interface DataWarehouseEventsModifier {
@@ -430,8 +430,8 @@ export interface InsightsQLQueryResponse<T = any[]> extends AnalyticsQueryRespon
     results: T
     /** Input query string */
     query?: string
-    /** Executed ClickHouse query */
-    clickhouse?: string
+    /** Executed Datastore query */
+    datastore?: string
     /** Returned columns */
     columns?: any[]
     /** Types of returned columns */
@@ -1908,7 +1908,7 @@ export interface CacheMissResponse {
     query_status?: QueryStatus
 }
 
-export type ClickhouseQueryProgress = {
+export type DatastoreQueryProgress = {
     bytes_read: integer
     rows_read: integer
     estimated_rows_total: integer
@@ -1959,7 +1959,7 @@ export type QueryStatus = {
     /**  @format date-time */
     expiration_time?: string
     task_id?: string
-    query_progress?: ClickhouseQueryProgress
+    query_progress?: DatastoreQueryProgress
     labels?: string[]
 }
 
@@ -3259,7 +3259,7 @@ export interface ExperimentQueryResponse {
     /** Results grouped by breakdown value. When present, baseline and variant_results contain aggregated data. */
     breakdown_results?: ExperimentBreakdownResult[]
 
-    clickhouse_sql?: string
+    datastore_sql?: string
     insightsql?: string
 }
 
@@ -3340,7 +3340,7 @@ export interface ExperimentBreakdownResult {
 }
 
 export interface NewExperimentQueryResponse {
-    clickhouse_sql?: string
+    datastore_sql?: string
     insightsql?: string
     baseline: ExperimentStatsBaseValidated
     variant_results: ExperimentVariantResultFrequentist[] | ExperimentVariantResultBayesian[]
@@ -4392,8 +4392,8 @@ export interface WebTrendsQueryResponse extends AnalyticsQueryResponseBase {
     results: WebTrendsItem[]
     /** Input query string */
     query?: string
-    /** Executed ClickHouse query */
-    clickhouse?: string
+    /** Executed Datastore query */
+    datastore?: string
     /** Returned columns */
     columns?: any[]
     /** Types of returned columns */

@@ -15,7 +15,7 @@ from insights.batch_exports.service import BatchExportField, BatchExportInsertIn
 from insights.models import BatchExportRun
 from insights.sync import database_sync_to_async
 from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.logger import get_logger
 
 from products.batch_exports.backend.temporal.batch_exports import (
@@ -171,7 +171,7 @@ async def post_json_file_to_url(url, batch_file, session: aiohttp.ClientSession)
 @activity.defn
 @handle_non_retryable_errors(NON_RETRYABLE_ERROR_TYPES)
 async def insert_into_http_activity(inputs: HttpInsertInputs) -> BatchExportResult:
-    """Activity streams data from ClickHouse to an HTTP Endpoint."""
+    """Activity streams data from Datastore to an HTTP Endpoint."""
     bind_contextvars(
         team_id=inputs.team_id,
         destination="HTTP",
@@ -189,7 +189,7 @@ async def insert_into_http_activity(inputs: HttpInsertInputs) -> BatchExportResu
 
     async with get_client(team_id=inputs.team_id) as client:
         if not await client.is_alive():
-            raise ConnectionError("Cannot establish connection to ClickHouse")
+            raise ConnectionError("Cannot establish connection to Datastore")
 
         if inputs.batch_export_schema is not None:
             raise NotImplementedError("Batch export schema is not supported for HTTP export")
@@ -335,7 +335,7 @@ async def insert_into_http_activity(inputs: HttpInsertInputs) -> BatchExportResu
 
 @workflow.defn(name="http-export")
 class HttpBatchExportWorkflow(InsightsWorkflow):
-    """A Temporal Workflow to export ClickHouse data to an HTTP endpoint.
+    """A Temporal Workflow to export Datastore data to an HTTP endpoint.
 
     This Workflow is intended to be executed both manually and by a Temporal
     Schedule. When ran by a schedule, `data_interval_end` should be set to

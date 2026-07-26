@@ -4,12 +4,12 @@ from typing import Any, cast
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_different_timezones,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import (
@@ -28,7 +28,7 @@ from insights.models import Element, Person, Team
 from insights.models.organization import Organization
 
 
-class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _create_events(self, data: list[tuple[str, str, Any]], event="$pageview"):
@@ -252,7 +252,7 @@ class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             assert response.results[0][0]["properties"]["arr_field"] == [DOUBLE_QUOTE]
 
     @also_test_with_different_timezones
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_absolute_date_range(self):
         self._create_events(
             data=[
@@ -362,7 +362,7 @@ class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 datetime(2020, 1, 13, 2, 0, 0, tzinfo=self.team.timezone_info),
             ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21")
     def test_element_chain_property_filter(self):
         # Create an event with 'div' in elements_chain
@@ -447,7 +447,7 @@ class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0][0]["properties"]["attr"], "no div")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21")
     def test_presorted_events_table(self):
         self._create_events(
@@ -496,7 +496,7 @@ class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
 
         assert isinstance(response, CachedEventsQueryResponse)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21")
     def test_presorted_events_table_order_by_event(self):
         """Test presorted optimization when ordering by event column."""
@@ -523,7 +523,7 @@ class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert response.results[1][0]["distinct_id"] == "p2"
         assert response.results[2][0]["distinct_id"] == "p3"
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21")
     def test_presorted_events_table_order_by_property(self):
         """Test presorted optimization when ordering by property."""
@@ -555,7 +555,7 @@ class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert response.results[1][0]["distinct_id"] == "p2"
         assert response.results[2][0]["distinct_id"] == "p3"
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21")
     def test_presorted_events_table_multiple_order_by(self):
         """Test presorted optimization with multiple ORDER BY clauses."""

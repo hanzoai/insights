@@ -10,7 +10,7 @@ from insights.insightsql.constants import InsightsQLQuerySettings
 from insights.insightsql.errors import NotImplementedError, ResolutionError
 
 # Import Workload at module level for Pydantic (needed at runtime)
-from insights.clickhouse.workload import Workload
+from insights.datastore.workload import Workload
 
 if TYPE_CHECKING:
     from insights.insightsql.ast import LazyJoinType, SelectQuery
@@ -180,8 +180,8 @@ class Table(FieldOrTable):
             return self.fields[name]
         raise Exception(f'Field "{name}" not found on table {self.__class__.__name__}')
 
-    def to_printed_clickhouse(self, context: "InsightsQLContext") -> str:
-        raise NotImplementedError("Table.to_printed_clickhouse not overridden")
+    def to_printed_datastore(self, context: "InsightsQLContext") -> str:
+        raise NotImplementedError("Table.to_printed_datastore not overridden")
 
     def to_printed_insightsql(self) -> str:
         raise NotImplementedError("Table.to_printed_insightsql not overridden")
@@ -414,7 +414,7 @@ class SavedQuery(Table):
     metadata: dict[str, Any] = {}
 
     # Note: redundancy for safety. This validation is used in the data model already
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         from products.data_warehouse.backend.models import validate_saved_query_name
 
         validate_saved_query_name(self.name)

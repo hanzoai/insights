@@ -27,7 +27,7 @@ class SignalSourceTableConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     emitter: SignalEmitter
-    # Should match the source table's partition field for efficient ClickHouse queries
+    # Should match the source table's partition field for efficient Datastore queries
     partition_field: str
     # Columns to SELECT — only what the emitter and extra metadata need
     fields: tuple[str, ...]

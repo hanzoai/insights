@@ -14,7 +14,7 @@ from insights.api.external_web_analytics.serializers import (
     WebAnalyticsBreakdownRequestSerializer,
     WebAnalyticsOverviewRequestSerializer,
 )
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
 from insights.models.utils import uuid7
 from insights.models.web_preaggregated.sql import WEB_BOUNCES_INSERT_SQL, WEB_STATS_INSERT_SQL

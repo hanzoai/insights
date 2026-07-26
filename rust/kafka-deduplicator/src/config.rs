@@ -9,13 +9,13 @@ use envconfig::Envconfig;
 ///
 /// Each pipeline type handles a different event format:
 /// - `IngestionEvents`: Events from capture (CapturedEvent/RawEvent format)
-/// - `ClickhouseEvents`: Events from ingestion pipeline (ClickhouseEvent format)
+/// - `DatastoreEvents`: Events from ingestion pipeline (DatastoreEvent format)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, strum_macros::EnumString)]
 #[strum(serialize_all = "snake_case")]
 pub enum PipelineType {
     #[default]
     IngestionEvents,
-    ClickhouseEvents,
+    DatastoreEvents,
 }
 
 #[derive(Envconfig, Clone, Debug)]
@@ -24,7 +24,7 @@ pub struct Config {
     pub continuous_profiling: ContinuousProfilingConfig,
 
     /// Pipeline type determines the event format and processing logic.
-    /// Valid values: "ingestion_events" (default), "clickhouse_events"
+    /// Valid values: "ingestion_events" (default), "datastore_events"
     #[envconfig(default = "ingestion_events")]
     pub pipeline_type: PipelineType,
 

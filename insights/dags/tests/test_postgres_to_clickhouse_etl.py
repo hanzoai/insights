@@ -1,4 +1,4 @@
-"""Tests for the Postgres to ClickHouse ETL pipeline."""
+"""Tests for the Postgres to Datastore ETL pipeline."""
 
 import json
 from datetime import datetime, timedelta
@@ -10,19 +10,19 @@ from unittest.mock import MagicMock, patch
 
 from dagster import build_op_context
 
-from insights.dags.postgres_to_clickhouse_etl import (
+from insights.dags.postgres_to_datastore_etl import (
     ETLState,
-    create_clickhouse_tables,
+    create_datastore_tables,
     fetch_organizations,
     fetch_teams,
-    insert_organizations_to_clickhouse,
-    insert_teams_to_clickhouse,
-    organizations_in_clickhouse,
-    postgres_to_clickhouse_etl_job,
-    postgres_to_clickhouse_hourly_schedule,
+    insert_organizations_to_datastore,
+    insert_teams_to_datastore,
+    organizations_in_datastore,
+    postgres_to_datastore_etl_job,
+    postgres_to_datastore_hourly_schedule,
     sync_organizations,
     sync_teams,
-    teams_in_clickhouse,
+    teams_in_datastore,
     transform_organization_row,
     transform_team_row,
     verify_sync,
@@ -114,7 +114,7 @@ class TestTransformations:
 class TestDatabaseOperations:
     """Test database operation functions."""
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.psycopg2.connect")
+    @patch("insights.dags.postgres_to_datastore_etl.psycopg2.connect")
     def test_fetch_organizations(self, mock_connect):
         """Test fetching organizations from Postgres."""
         # Mock both named cursor and regular cursor
@@ -147,7 +147,7 @@ class TestDatabaseOperations:
         assert "FROM insights_organization" in call_args[0]
         assert "WHERE updated_at >" not in call_args[0]
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.psycopg2.connect")
+    @patch("insights.dags.postgres_to_datastore_etl.psycopg2.connect")
     def test_fetch_organizations_incremental(self, mock_connect):
         """Test fetching organizations incrementally."""
         mock_named_cursor = MagicMock()
@@ -166,7 +166,7 @@ class TestDatabaseOperations:
         assert "WHERE updated_at > %s" in call_args[0]
         assert call_args[1] == [last_sync]
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.psycopg2.connect")
+    @patch("insights.dags.postgres_to_datastore_etl.psycopg2.connect")
     def test_fetch_teams(self, mock_connect):
         """Test fetching teams from Postgres."""
         mock_named_cursor = MagicMock()
@@ -182,9 +182,9 @@ class TestDatabaseOperations:
         assert len(teams) == 1
         assert teams[0]["name"] == "Team 1"
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.get_cluster")
-    def test_create_clickhouse_tables(self, mock_get_cluster):
-        """Test ClickHouse table creation."""
+    @patch("insights.dags.postgres_to_datastore_etl.get_cluster")
+    def test_create_datastore_tables(self, mock_get_cluster):
+        """Test Datastore table creation."""
         # Mock the cluster and its methods
         mock_cluster = MagicMock()
         mock_futures_map = MagicMock()
@@ -192,7 +192,7 @@ class TestDatabaseOperations:
         mock_cluster.map_all_hosts.return_value = mock_futures_map
         mock_get_cluster.return_value = mock_cluster
 
-        create_clickhouse_tables()
+        create_datastore_tables()
 
         # Should have called map_all_hosts for:
         # 1. CREATE DATABASE IF NOT EXISTS models
@@ -216,9 +216,9 @@ class TestDatabaseOperations:
             for call in calls
         )
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.sync_execute")
-    def test_insert_organizations_to_clickhouse(self, mock_sync_execute):
-        """Test inserting organizations into ClickHouse."""
+    @patch("insights.dags.postgres_to_datastore_etl.sync_execute")
+    def test_insert_organizations_to_datastore(self, mock_sync_execute):
+        """Test inserting organizations into Datastore."""
         organizations = [
             {
                 "id": 1,
@@ -248,7 +248,7 @@ class TestDatabaseOperations:
             },
         ]
 
-        rows_inserted = insert_organizations_to_clickhouse(organizations, batch_size=10)
+        rows_inserted = insert_organizations_to_datastore(organizations, batch_size=10)
 
         assert rows_inserted == 2
         assert mock_sync_execute.call_count == 1
@@ -257,9 +257,9 @@ class TestDatabaseOperations:
         call_args = mock_sync_execute.call_args[0]
         assert "INSERT INTO models.insights_organization" in call_args[0]
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.sync_execute")
-    def test_insert_teams_to_clickhouse(self, mock_sync_execute):
-        """Test inserting teams into ClickHouse."""
+    @patch("insights.dags.postgres_to_datastore_etl.sync_execute")
+    def test_insert_teams_to_datastore(self, mock_sync_execute):
+        """Test inserting teams into Datastore."""
         teams = [
             {
                 "id": 1,
@@ -275,7 +275,7 @@ class TestDatabaseOperations:
             }
         ]
 
-        rows_inserted = insert_teams_to_clickhouse(teams, batch_size=10)
+        rows_inserted = insert_teams_to_datastore(teams, batch_size=10)
 
         assert rows_inserted == 1
         assert mock_sync_execute.call_count == 1
@@ -284,12 +284,12 @@ class TestDatabaseOperations:
 class TestOps:
     """Test Dagster ops."""
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.sync_execute")
-    @patch("insights.dags.postgres_to_clickhouse_etl.get_postgres_connection")
-    @patch("insights.dags.postgres_to_clickhouse_etl.create_clickhouse_tables")
+    @patch("insights.dags.postgres_to_datastore_etl.sync_execute")
+    @patch("insights.dags.postgres_to_datastore_etl.get_postgres_connection")
+    @patch("insights.dags.postgres_to_datastore_etl.create_datastore_tables")
     def test_sync_organizations_op(self, mock_create_tables, mock_get_pg_conn, mock_sync_execute):
         """Test the sync_organizations op."""
-        # Mock ClickHouse last sync query
+        # Mock Datastore last sync query
         mock_sync_execute.return_value = [[datetime(2024, 1, 1)]]
 
         # Mock Postgres connection and data
@@ -297,8 +297,8 @@ class TestOps:
         mock_get_pg_conn.return_value = mock_pg_conn
 
         with (
-            patch("insights.dags.postgres_to_clickhouse_etl.fetch_organizations_in_batches") as mock_fetch,
-            patch("insights.dags.postgres_to_clickhouse_etl.insert_organizations_to_clickhouse") as mock_insert,
+            patch("insights.dags.postgres_to_datastore_etl.fetch_organizations_in_batches") as mock_fetch,
+            patch("insights.dags.postgres_to_datastore_etl.insert_organizations_to_datastore") as mock_insert,
         ):
             # Mock the generator to yield one batch
             mock_fetch.return_value = iter([[{"id": 1, "name": "Org 1", "updated_at": datetime(2024, 1, 2)}]])
@@ -325,12 +325,12 @@ class TestOps:
             mock_fetch.assert_called_once()
             mock_insert.assert_called_once()
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.sync_execute")
-    @patch("insights.dags.postgres_to_clickhouse_etl.get_postgres_connection")
-    @patch("insights.dags.postgres_to_clickhouse_etl.create_clickhouse_tables")
+    @patch("insights.dags.postgres_to_datastore_etl.sync_execute")
+    @patch("insights.dags.postgres_to_datastore_etl.get_postgres_connection")
+    @patch("insights.dags.postgres_to_datastore_etl.create_datastore_tables")
     def test_sync_teams_op(self, mock_create_tables, mock_get_pg_conn, mock_sync_execute):
         """Test the sync_teams op."""
-        # Mock ClickHouse last sync query
+        # Mock Datastore last sync query
         mock_sync_execute.return_value = [[None]]
 
         # Mock Postgres connection
@@ -338,8 +338,8 @@ class TestOps:
         mock_get_pg_conn.return_value = mock_pg_conn
 
         with (
-            patch("insights.dags.postgres_to_clickhouse_etl.fetch_teams_in_batches") as mock_fetch,
-            patch("insights.dags.postgres_to_clickhouse_etl.insert_teams_to_clickhouse") as mock_insert,
+            patch("insights.dags.postgres_to_datastore_etl.fetch_teams_in_batches") as mock_fetch,
+            patch("insights.dags.postgres_to_datastore_etl.insert_teams_to_datastore") as mock_insert,
         ):
             # Mock the generator to yield one batch
             mock_fetch.return_value = iter(
@@ -363,10 +363,10 @@ class TestOps:
             assert result.last_sync_timestamp == datetime(2024, 1, 2)
             assert len(result.errors) == 0
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.sync_execute")
+    @patch("insights.dags.postgres_to_datastore_etl.sync_execute")
     def test_verify_sync_op(self, mock_sync_execute):
         """Test the verify_sync op."""
-        # Mock ClickHouse counts
+        # Mock Datastore counts
         mock_sync_execute.side_effect = [
             [[100]],  # organization count
             [[150]],  # team count
@@ -380,15 +380,15 @@ class TestOps:
         result = verify_sync(context, org_state, team_state)
 
         assert result["success"] is True
-        assert result["organizations"]["clickhouse_count"] == 100
-        assert result["teams"]["clickhouse_count"] == 150
+        assert result["organizations"]["datastore_count"] == 100
+        assert result["teams"]["datastore_count"] == 150
         assert result["organizations"]["rows_synced"] == 10
         assert result["teams"]["rows_synced"] == 15
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.get_cluster")
-    @patch("insights.dags.postgres_to_clickhouse_etl.sync_execute")
-    @patch("insights.dags.postgres_to_clickhouse_etl.get_postgres_connection")
-    @patch("insights.dags.postgres_to_clickhouse_etl.create_clickhouse_tables")
+    @patch("insights.dags.postgres_to_datastore_etl.get_cluster")
+    @patch("insights.dags.postgres_to_datastore_etl.sync_execute")
+    @patch("insights.dags.postgres_to_datastore_etl.get_postgres_connection")
+    @patch("insights.dags.postgres_to_datastore_etl.create_datastore_tables")
     def test_sync_organizations_full_refresh(
         self, mock_create_tables, mock_get_pg_conn, mock_sync_execute, mock_get_cluster
     ):
@@ -398,8 +398,8 @@ class TestOps:
         mock_get_pg_conn.return_value = mock_pg_conn
 
         with (
-            patch("insights.dags.postgres_to_clickhouse_etl.fetch_organizations_in_batches") as mock_fetch,
-            patch("insights.dags.postgres_to_clickhouse_etl.insert_organizations_to_clickhouse") as mock_insert,
+            patch("insights.dags.postgres_to_datastore_etl.fetch_organizations_in_batches") as mock_fetch,
+            patch("insights.dags.postgres_to_datastore_etl.insert_organizations_to_datastore") as mock_insert,
         ):
             # Mock the generator to yield no batches
             mock_fetch.return_value = iter([])
@@ -425,9 +425,9 @@ class TestOps:
 class TestErrorHandling:
     """Test error handling in the ETL pipeline."""
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.sync_execute")
-    @patch("insights.dags.postgres_to_clickhouse_etl.get_postgres_connection")
-    @patch("insights.dags.postgres_to_clickhouse_etl.create_clickhouse_tables")
+    @patch("insights.dags.postgres_to_datastore_etl.sync_execute")
+    @patch("insights.dags.postgres_to_datastore_etl.get_postgres_connection")
+    @patch("insights.dags.postgres_to_datastore_etl.create_datastore_tables")
     def test_sync_organizations_handles_errors(self, mock_create_tables, mock_get_pg_conn, mock_sync_execute):
         """Test that sync_organizations handles errors properly."""
 
@@ -437,7 +437,7 @@ class TestErrorHandling:
         mock_pg_conn = MagicMock()
         mock_get_pg_conn.return_value = mock_pg_conn
 
-        with patch("insights.dags.postgres_to_clickhouse_etl.fetch_organizations_in_batches") as mock_fetch:
+        with patch("insights.dags.postgres_to_datastore_etl.fetch_organizations_in_batches") as mock_fetch:
             mock_fetch.side_effect = Exception("Database connection failed")
 
             context = build_op_context(
@@ -460,8 +460,8 @@ class TestPartitioning:
 
     def test_hourly_partition_definition(self):
         """Test that the job has hourly partitions."""
-        assert postgres_to_clickhouse_etl_job.partitions_def is not None
-        partitions = postgres_to_clickhouse_etl_job.partitions_def.get_partition_keys()
+        assert postgres_to_datastore_etl_job.partitions_def is not None
+        partitions = postgres_to_datastore_etl_job.partitions_def.get_partition_keys()
 
         # Check that partitions are hourly
         # Get first two partition keys and verify they're 1 hour apart
@@ -476,9 +476,9 @@ class TestPartitioning:
 
     def test_hourly_schedule(self):
         """Test the hourly schedule configuration."""
-        assert postgres_to_clickhouse_hourly_schedule.cron_schedule == "0 * * * *"
-        assert postgres_to_clickhouse_hourly_schedule.execution_timezone == "UTC"
-        assert postgres_to_clickhouse_hourly_schedule.job_name == postgres_to_clickhouse_etl_job.name
+        assert postgres_to_datastore_hourly_schedule.cron_schedule == "0 * * * *"
+        assert postgres_to_datastore_hourly_schedule.execution_timezone == "UTC"
+        assert postgres_to_datastore_hourly_schedule.job_name == postgres_to_datastore_etl_job.name
 
     @freeze_time("2024-01-15 14:00:00")
     def test_schedule_execution_time(self):
@@ -486,7 +486,7 @@ class TestPartitioning:
         from datetime import datetime
 
         # The cron schedule is "0 * * * *" which means at minute 0 of every hour
-        assert postgres_to_clickhouse_hourly_schedule.cron_schedule == "0 * * * *"
+        assert postgres_to_datastore_hourly_schedule.cron_schedule == "0 * * * *"
 
         # Verify the schedule would run at the top of the hour
         # In real usage, this would trigger at 14:00:00
@@ -497,15 +497,15 @@ class TestPartitioning:
     def test_backfill_policy(self):
         """Test backfill policy for assets."""
         # Check organizations asset
-        assert organizations_in_clickhouse.partitions_def is not None
-        assert organizations_in_clickhouse.backfill_policy.max_partitions_per_run == 24
+        assert organizations_in_datastore.partitions_def is not None
+        assert organizations_in_datastore.backfill_policy.max_partitions_per_run == 24
 
         # Check teams asset
-        assert teams_in_clickhouse.partitions_def is not None
-        assert teams_in_clickhouse.backfill_policy.max_partitions_per_run == 24
+        assert teams_in_datastore.partitions_def is not None
+        assert teams_in_datastore.backfill_policy.max_partitions_per_run == 24
 
-    @patch("insights.dags.postgres_to_clickhouse_etl.get_postgres_connection")
-    @patch("insights.dags.postgres_to_clickhouse_etl.create_clickhouse_tables")
+    @patch("insights.dags.postgres_to_datastore_etl.get_postgres_connection")
+    @patch("insights.dags.postgres_to_datastore_etl.create_datastore_tables")
     def test_asset_hourly_window(self, mock_create_tables, mock_get_pg_conn):
         """Test that assets process correct hourly time windows."""
         from dagster import build_asset_context
@@ -521,7 +521,7 @@ class TestPartitioning:
         context = build_asset_context(partition_key=partition_key)
 
         # Run the asset
-        organizations_in_clickhouse(context)
+        organizations_in_datastore(context)
 
         # Verify the query was for the correct time window
         mock_cursor.execute.assert_called_once()

@@ -1,5 +1,5 @@
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import Workload
 
 
 def remove_deleted_person_data(mutations_sync=False):

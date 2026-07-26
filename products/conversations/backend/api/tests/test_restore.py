@@ -131,7 +131,7 @@ class TestRestoreService(BaseTest):
         tickets = RestoreService.find_tickets_by_email(self.team, self.customer_email)
         self.assertEqual(len(tickets), 2)
 
-    @patch.object(RestoreService, "_find_distinct_ids_by_person_email", side_effect=Exception("ClickHouse error"))
+    @patch.object(RestoreService, "_find_distinct_ids_by_person_email", side_effect=Exception("Datastore error"))
     def test_find_tickets_by_email_falls_back_on_person_lookup_failure(self, _mock):
         Ticket.objects.create_with_number(
             team=self.team,

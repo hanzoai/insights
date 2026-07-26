@@ -1,12 +1,12 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 
 from rest_framework import status
 
 from insights.models.utils import uuid7
 
 
-class TestWebVitalsAPI(ClickhouseTestMixin, APIBaseTest):
+class TestWebVitalsAPI(DatastoreTestMixin, APIBaseTest):
     def assert_values(self, results, expected_values):
         # Verify that all web vitals metrics are present in the response
         metrics = [result["action"]["custom_name"] for result in results]
@@ -146,7 +146,7 @@ class TestWebVitalsAPI(ClickhouseTestMixin, APIBaseTest):
                 },
             )
 
-            # Flush the events to ClickHouse
+            # Flush the events to Datastore
             flush_persons_and_events()
 
             response = self.client.get(f"/api/environments/{self.team.pk}/web_vitals/?pathname=/test-path")

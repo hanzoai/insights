@@ -57,14 +57,14 @@ class TestResolver(BaseTest):
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_events_table(self):
         expr = self._select("SELECT event, events.timestamp FROM events WHERE events.event = 'test'")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     def test_will_not_run_twice(self):
         expr = self._select("SELECT event, events.timestamp FROM events WHERE events.event = 'test'")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         with self.assertRaises(ResolutionError) as context:
-            expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+            expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         self.assertEqual(
             str(context.exception),
             "Type already resolved for SelectQuery (SelectQueryType). Can't run again.",
@@ -73,28 +73,28 @@ class TestResolver(BaseTest):
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_events_table_alias(self):
         expr = self._select("SELECT event, e.timestamp FROM events e WHERE e.event = 'test'")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_events_table_column_alias(self):
         expr = self._select("SELECT event as ee, ee, ee as e, e.timestamp FROM events e WHERE e.event = 'test'")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_events_table_column_alias_inside_subquery(self):
         expr = self._select("SELECT b FROM (select event as b, timestamp as c from events) e WHERE e.b = 'test'")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     def test_resolve_subquery_no_field_access(self):
-        # From ClickHouse's GitHub: "Aliases defined outside of subquery are not visible in subqueries (but see below)."
+        # From Datastore's GitHub: "Aliases defined outside of subquery are not visible in subqueries (but see below)."
         expr = self._select(
             "SELECT event, (select count() from events where event = e.event) as c FROM events e where event = '$pageview'"
         )
         with self.assertRaises(QueryError) as e:
-            expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+            expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         self.assertEqual(str(e.exception), "Unable to resolve field: e")
 
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -111,13 +111,13 @@ class TestResolver(BaseTest):
                     "tuple": ast.Constant(value=(1, 2, 3)),
                 },
             )
-            expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+            expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
             assert pretty_dataclasses(expr) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_boolean_operation_types(self):
         expr = self._select("SELECT 1 and 1, 1 or 1, not true")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     def test_resolve_errors(self):
@@ -130,14 +130,14 @@ class TestResolver(BaseTest):
         ]
         for query in queries:
             with self.assertRaises(QueryError) as e:
-                resolve_types(self._select(query), self.context, dialect="clickhouse")
+                resolve_types(self._select(query), self.context, dialect="datastore")
             self.assertIn("Unable to resolve field:", str(e.exception))
 
     def test_unresolved_field_type(self):
         query = "SELECT x"
-        # raises with ClickHouse
+        # raises with Datastore
         with self.assertRaises(QueryError):
-            resolve_types(self._select(query), self.context, dialect="clickhouse")
+            resolve_types(self._select(query), self.context, dialect="datastore")
         # does not raise with InsightsQL
         select = self._select(query)
         select = cast(ast.SelectQuery, resolve_types(select, self.context, dialect="insightsql"))
@@ -146,54 +146,54 @@ class TestResolver(BaseTest):
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_lazy_pdi_person_table(self):
         expr = self._select("select distinct_id, person.id from person_distinct_ids")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_lazy_events_pdi_table(self):
         expr = self._select("select event, pdi.person_id from events")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_lazy_events_pdi_table_aliased(self):
         expr = self._select("select event, e.pdi.person_id from events e")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_lazy_events_pdi_person_table(self):
         expr = self._select("select event, pdi.person.id from events")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_lazy_events_pdi_person_table_aliased(self):
         expr = self._select("select event, e.pdi.person.id from events e")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_virtual_events_poe(self):
         expr = self._select("select event, poe.id from events")
-        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+        expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
         assert pretty_dataclasses(expr) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_resolve_union_all(self):
         node = self._select("select event, timestamp from events union all select event, timestamp from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_call_type(self):
         node = self._select("select max(timestamp) from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     def test_resolve_cte_types(self):
         node = self._select("with cte as (select event from events) select event from cte")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert isinstance(node.select[0], ast.Alias)
 
         printed = self._print_insightsql("with cte as (select event from events) select event from cte")
@@ -378,12 +378,12 @@ class TestResolver(BaseTest):
             self._print_insightsql("WITH x AS (SELECT 1) SELECT x FROM events")
         self.assertIn("Cannot use table CTE", str(e.exception))
 
-    def test_ctes_in_subquery_for_clickhouse(self):
-        # Test that CTEs defined in a subquery remain with that subquery for ClickHouse
+    def test_ctes_in_subquery_for_datastore(self):
+        # Test that CTEs defined in a subquery remain with that subquery for Datastore
         # This is necessary because CTEs get resolved with context-specific JOINs
         # (e.g., person_id triggers events__override LEFT JOIN)
 
-        # Parse and prepare for ClickHouse dialect
+        # Parse and prepare for Datastore dialect
         from insights.insightsql.context import InsightsQLContext
         from insights.insightsql.printer import prepare_and_print_ast
 
@@ -392,7 +392,7 @@ class TestResolver(BaseTest):
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
 
         # Prepare and print in one go
-        sql, prepared = prepare_and_print_ast(query, context, "clickhouse")
+        sql, prepared = prepare_and_print_ast(query, context, "datastore")
 
         # Verify the subquery still has its CTE
         assert isinstance(prepared, ast.SelectQuery)
@@ -444,7 +444,7 @@ class TestResolver(BaseTest):
         query = self._select(query_str)
 
         # Prepare and print in one go
-        sql, prepared = prepare_and_print_ast(query, self.context, "clickhouse")
+        sql, prepared = prepare_and_print_ast(query, self.context, "datastore")
 
         # Check that the subquery has the CTE
         assert isinstance(prepared, ast.SelectQuery)
@@ -467,7 +467,7 @@ class TestResolver(BaseTest):
         node = self._select(
             "WITH my_table AS (SELECT 1 AS a) SELECT q1.a FROM my_table AS q1 INNER JOIN my_table AS q2 USING a"
         )
-        node = resolve_types(node, self.context, dialect="clickhouse")
+        node = resolve_types(node, self.context, dialect="datastore")
         assert isinstance(node, ast.SelectQuery)
         assert isinstance(node.select_from, ast.JoinExpr)
         assert isinstance(node.select_from.next_join, ast.JoinExpr)
@@ -477,7 +477,7 @@ class TestResolver(BaseTest):
         assert cast(ast.Alias, constraint.expr).alias == "a"
 
         node = self._select("SELECT q1.event FROM events AS q1 INNER JOIN events AS q2 USING event")
-        node = resolve_types(node, self.context, dialect="clickhouse")
+        node = resolve_types(node, self.context, dialect="datastore")
         assert isinstance(node, ast.SelectQuery)
         assert isinstance(node.select_from, ast.JoinExpr)
         assert isinstance(node.select_from.next_join, ast.JoinExpr)
@@ -489,7 +489,7 @@ class TestResolver(BaseTest):
     def test_asterisk_expander_table(self):
         self.setUp()  # rebuild self.database with PERSON_ON_EVENTS_OVERRIDE=False
         node = self._select("select * from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=False, PERSON_ON_EVENTS_V2_OVERRIDE=False)
@@ -497,13 +497,13 @@ class TestResolver(BaseTest):
     def test_asterisk_expander_table_alias(self):
         self.setUp()  # rebuild self.database with PERSON_ON_EVENTS_OVERRIDE=False
         node = self._select("select * from events e")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_asterisk_expander_subquery(self):
         node = self._select("select * from (select 1 as a, 2 as b)")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -512,7 +512,7 @@ class TestResolver(BaseTest):
             name="hidden_field", hidden=True, expr=ast.Field(chain=["event"])
         )
         node = self._select("select * from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -525,13 +525,13 @@ class TestResolver(BaseTest):
         )
 
         node = self._select("select e.some_expr, p.some_expr from events e left join persons p on e.uuid = p.id")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_asterisk_expander_subquery_alias(self):
         node = self._select("select x.* from (select 1 as a, 2 as b) x")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=False, PERSON_ON_EVENTS_V2_OVERRIDE=False)
@@ -539,13 +539,13 @@ class TestResolver(BaseTest):
     def test_asterisk_expander_from_subquery_table(self):
         self.setUp()  # rebuild self.database with PERSON_ON_EVENTS_OVERRIDE=False
         node = self._select("select * from (select * from events)")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     def test_asterisk_expander_multiple_table_error(self):
         node = self._select("select * from (select 1 as a, 2 as b) x left join (select 1 as a, 2 as b) y on x.a = y.a")
         with self.assertRaises(QueryError) as e:
-            resolve_types(node, self.context, dialect="clickhouse")
+            resolve_types(node, self.context, dialect="datastore")
         self.assertEqual(
             str(e.exception),
             "Cannot use '*' without table name when there are multiple tables in the query",
@@ -557,13 +557,13 @@ class TestResolver(BaseTest):
         node = self._select(
             "select x.* from (select 1 as a, 2 as b) x left join (select 1 as a, 2 as b) y on x.a = y.a"
         )
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_asterisk_expander_multiple_base_table_with_scope(self):
         node = self._select("select e.* from session_replay_events e join sessions s on s.session_id=e.session_id")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=False, PERSON_ON_EVENTS_V2_OVERRIDE=False)
@@ -571,13 +571,13 @@ class TestResolver(BaseTest):
     def test_asterisk_expander_select_union(self):
         self.setUp()  # rebuild self.database with PERSON_ON_EVENTS_OVERRIDE=False
         node = self._select("select * from (select * from events union all select * from events)")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         assert pretty_dataclasses(node) == self.snapshot
 
     def test_lambda_parent_scope(self):
         # does not raise
         node = self._select("select timestamp, arrayMap(x -> x + timestamp, [2]) as am from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
 
         # found a type
         lambda_type: ast.SelectQueryType = cast(
@@ -601,7 +601,7 @@ class TestResolver(BaseTest):
         )
 
         node = self._select("SELECT event, person.id, person.properties, person.created_at FROM events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
 
         # all columns resolve to a type in the end
         assert cast(ast.FieldType, node.select[0].type).resolve_database_field(self.context) == StringDatabaseField(
@@ -620,7 +620,7 @@ class TestResolver(BaseTest):
     def test_visit_insightsqlx_tag(self):
         node = self._select("select event from <InsightsQLQuery query='select event from events' />")
         assert isinstance(node, ast.SelectQuery)
-        node = resolve_types(node, self.context, dialect="clickhouse")
+        node = resolve_types(node, self.context, dialect="datastore")
         assert isinstance(node.select_from, ast.JoinExpr)
         table_node = node.select_from.table
         assert table_node is not None
@@ -633,7 +633,7 @@ class TestResolver(BaseTest):
     def test_visit_insightsqlx_tag_alias(self):
         node = self._select("select event from <InsightsQLQuery query='select event from events' /> a")
         assert isinstance(node, ast.SelectQuery)
-        node = resolve_types(node, self.context, dialect="clickhouse")
+        node = resolve_types(node, self.context, dialect="datastore")
         assert isinstance(node.select_from, ast.JoinExpr)
         assert node.select_from.alias == "a"
 
@@ -663,7 +663,7 @@ class TestResolver(BaseTest):
 
     def test_visit_insightsqlx_recording_button(self):
         node = self._select("select <RecordingButton sessionId={'12345-6789'} />")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         expected = ast.SelectQuery(
             select=[
                 ast.Tuple(
@@ -682,7 +682,7 @@ class TestResolver(BaseTest):
         node = self._select(
             "select <ExplainCSPReport properties={{'violated_directive': 'script-src', 'original_policy': 'script-src https://example.com'}} />"
         )
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         expected = ast.SelectQuery(
             select=[
                 ast.Tuple(
@@ -709,7 +709,7 @@ class TestResolver(BaseTest):
 
     def test_visit_insightsqlx_sparkline(self):
         node = self._select("select <Sparkline data={[1,2,3]} />")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         expected = ast.SelectQuery(
             select=[
                 ast.Tuple(
@@ -732,7 +732,7 @@ class TestResolver(BaseTest):
 
     def test_visit_insightsqlx_object(self):
         node = self._select("select {'key': {'key': 'value'}}")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         expected = ast.SelectQuery(
             select=[
                 ast.Tuple(
@@ -761,7 +761,7 @@ class TestResolver(BaseTest):
 
     def test_types_pass_outside_subqueries_two_levels(self):
         node: ast.SelectQuery = self._select("select event from (select event from events)")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
 
         assert node.select_from is not None
         assert node.select_from.table is not None
@@ -771,7 +771,7 @@ class TestResolver(BaseTest):
 
     def test_types_pass_outside_subqueries_three_levels(self):
         node: ast.SelectQuery = self._select("select event from (select event from (select event from events))")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
 
         assert node.select_from is not None
         assert node.select_from.table is not None
@@ -781,54 +781,54 @@ class TestResolver(BaseTest):
 
     def test_arithmetic_types(self):
         node: ast.SelectQuery = self._select("select 1 + 2 as key from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.IntegerType(nullable=False))
 
         node = self._select("select key from (select 1 + 2 as key from events)")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.IntegerType(nullable=False))
 
         node = self._select("select 1.0 + 2.0 as key from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.FloatType(nullable=False))
 
         node = self._select("select 100 + 2.0 as key from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.FloatType(nullable=False))
 
         node = self._select("select 1.0 + 200 as key from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.FloatType(nullable=False))
 
     def test_boolean_types(self):
         node: ast.SelectQuery = self._select("select true and false as key from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.BooleanType(nullable=False))
 
         node = self._select("select key from (select true or false as key from events)")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.BooleanType(nullable=False))
 
     def test_compare_types(self):
         node: ast.SelectQuery = self._select("select 1 < 2 from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.BooleanType(nullable=False))
 
         node = self._select("select key from (select 3 = 4 as key from events)")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.BooleanType(nullable=False))
 
         node = self._select("select key from (select 3 = null as key from events)")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.BooleanType(nullable=False))
 
     def test_function_types(self):
         node: ast.SelectQuery = self._select("select abs(3) from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.IntegerType(nullable=False))
 
         node = self._select("select plus(1, 2) from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.IntegerType(nullable=False))
 
     @parameterized.expand(
@@ -845,12 +845,12 @@ class TestResolver(BaseTest):
     )
     def test_date_trunc_return_type(self, unit, expected_type):
         node = self._select(f"select dateTrunc('{unit}', timestamp) from events")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
         self._assert_first_columm_is_type(node, expected_type(nullable=False))
 
     def test_assume_not_null_type(self):
         node = self._select(f"SELECT assumeNotNull(toDateTime('2020-01-01 00:00:00'))")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
 
         [selected] = node.select
         assert isinstance(selected.type, ast.CallType)
@@ -865,7 +865,7 @@ class TestResolver(BaseTest):
                 exprs.append(f"timestamp {operator} toInterval{granularity}(1)")
 
         node = self._select(f"""SELECT {",".join(exprs)} FROM events""")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
 
         assert len(node.select) == len(exprs)
         for selected in node.select:
@@ -875,30 +875,30 @@ class TestResolver(BaseTest):
         node: ast.SelectQuery = self._select(
             "select <RecordingButton sessionId={'12345'} recordingStatus={'active'} />"
         )
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
 
         node2 = self._select("select recordingButton('12345', 'active')")
-        node2 = cast(ast.SelectQuery, resolve_types(node2, self.context, dialect="clickhouse"))
+        node2 = cast(ast.SelectQuery, resolve_types(node2, self.context, dialect="datastore"))
         assert node == node2
 
     def test_explain_csp_report_tag(self):
         node: ast.SelectQuery = self._select(
             "select <ExplainCSPReport properties={{'violated_directive': 'script-src', 'original_policy': 'script-src https://example.com'}} />"
         )
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
 
         node2 = self._select(
             "select explainCSPReport({'violated_directive': 'script-src', 'original_policy': 'script-src https://example.com'})"
         )
-        node2 = cast(ast.SelectQuery, resolve_types(node2, self.context, dialect="clickhouse"))
+        node2 = cast(ast.SelectQuery, resolve_types(node2, self.context, dialect="datastore"))
         assert node == node2
 
     def test_sparkline_tag(self):
         node: ast.SelectQuery = self._select("select <Sparkline data={[1,2,3]} />")
-        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, self.context, dialect="datastore"))
 
         node2 = self._select("select sparkline((1,2,3))")
-        node2 = cast(ast.SelectQuery, resolve_types(node2, self.context, dialect="clickhouse"))
+        node2 = cast(ast.SelectQuery, resolve_types(node2, self.context, dialect="datastore"))
         assert node == node2
 
     def test_globals(self):
@@ -906,7 +906,7 @@ class TestResolver(BaseTest):
             team_id=self.team.pk, database=self.database, globals={"globalVar": 1}, enable_select_queries=True
         )
         node: ast.SelectQuery = self._select("select globalVar from events")
-        node = cast(ast.SelectQuery, resolve_types(node, context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.IntegerType(nullable=False))
         assert isinstance(node.select[0], ast.Constant)
         assert node.select[0].value == 1
@@ -921,7 +921,7 @@ class TestResolver(BaseTest):
             enable_select_queries=True,
         )
         node: ast.SelectQuery = self._select("select globalVar.nestedVar from events")
-        node = cast(ast.SelectQuery, resolve_types(node, context, dialect="clickhouse"))
+        node = cast(ast.SelectQuery, resolve_types(node, context, dialect="datastore"))
         self._assert_first_columm_is_type(node, ast.StringType(nullable=False))
         assert isinstance(node.select[0], ast.Constant)
         assert node.select[0].value == "banana"
@@ -934,7 +934,7 @@ class TestResolver(BaseTest):
         )
         node: ast.SelectQuery = self._select("select globalVar.nested from events")
         with self.assertRaises(QueryError) as ctx:
-            node = cast(ast.SelectQuery, resolve_types(node, context, dialect="clickhouse"))
+            node = cast(ast.SelectQuery, resolve_types(node, context, dialect="datastore"))
         self.assertEqual(str(ctx.exception), "Cannot resolve field: globalVar.nested")
 
     def test_property_access_with_arrays_zero_index_error(self):
@@ -947,7 +947,7 @@ class TestResolver(BaseTest):
             "SQL indexes start from one, not from zero. E.g: array[1]",
         ):
             node: ast.SelectQuery = self._select(query)
-            resolve_types(node, context, dialect="clickhouse")
+            resolve_types(node, context, dialect="datastore")
 
     def test_property_access_with_tuples_zero_index_error(self):
         query = f"SELECT properties.something.0 FROM events"
@@ -959,7 +959,7 @@ class TestResolver(BaseTest):
             "SQL indexes start from one, not from zero. E.g: array.1",
         ):
             node: ast.SelectQuery = self._select(query)
-            resolve_types(node, context, dialect="clickhouse")
+            resolve_types(node, context, dialect="datastore")
 
     def test_nested_table_name(self):
         table_group = TableNode(
@@ -1020,12 +1020,12 @@ class TestResolver(BaseTest):
     def test_lambda_scope(self):
         query = "SELECT arrayMap(a -> e.timestamp, [1]) as a FROM events e"
         resolve_types(self._select(query), self.context, dialect="insightsql")
-        resolve_types(self._select(query), self.context, dialect="clickhouse")
+        resolve_types(self._select(query), self.context, dialect="datastore")
 
     def test_lambda_scope_mixed_scopes(self):
         query = "SELECT arrayMap(a -> concat(a, e.event), ['str']) FROM events e"
         resolve_types(self._select(query), self.context, dialect="insightsql")
-        resolve_types(self._select(query), self.context, dialect="clickhouse")
+        resolve_types(self._select(query), self.context, dialect="datastore")
 
     def test_virtual_property_mapping(self):
         queries = [
@@ -1048,7 +1048,7 @@ class TestResolver(BaseTest):
         for msg, query, expected_chain in queries:
             with self.subTest(msg):
                 expr = self._select(query)
-                resolved_expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="clickhouse"))
+                resolved_expr = cast(ast.SelectQuery, resolve_types(expr, self.context, dialect="datastore"))
 
                 revenue_field = resolved_expr.select[0]
                 assert isinstance(revenue_field, ast.Alias)

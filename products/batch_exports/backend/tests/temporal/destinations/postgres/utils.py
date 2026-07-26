@@ -7,7 +7,7 @@ import collections.abc
 from psycopg import sql
 
 from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 
 from products.batch_exports.backend.temporal.destinations.postgres_batch_export import postgres_default_fields
 from products.batch_exports.backend.temporal.record_batch_model import SessionsRecordBatchModel
@@ -67,9 +67,9 @@ TEST_MODELS: list[BatchExportModel | BatchExportSchema | None] = [
 ]
 
 
-async def assert_clickhouse_records_in_postgres(
+async def assert_datastore_records_in_postgres(
     postgres_connection,
-    clickhouse_client: ClickHouseClient,
+    datastore_client: DatastoreClient,
     schema_name: str,
     table_name: str,
     team_id: int,
@@ -90,13 +90,13 @@ async def assert_clickhouse_records_in_postgres(
     1. Read all records inserted into given PostgreSQL table.
     2. Cast records read from PostgreSQL to a Python list of dicts.
     3. Assert records read from PostgreSQL have the expected column names.
-    4. Read all records that were supposed to be inserted from ClickHouse.
-    5. Cast records returned by ClickHouse to a Python list of dicts.
-    6. Compare each record returned by ClickHouse to each record read from PostgreSQL.
+    4. Read all records that were supposed to be inserted from Datastore.
+    5. Cast records returned by Datastore to a Python list of dicts.
+    6. Compare each record returned by Datastore to each record read from PostgreSQL.
 
     Arguments:
         postgres_connection: A PostgreSQL connection used to read inserted events.
-        clickhouse_client: A ClickHouseClient used to read events that are expected to be inserted.
+        datastore_client: A DatastoreClient used to read events that are expected to be inserted.
         schema_name: PostgreSQL schema name.
         table_name: PostgreSQL table name.
         team_id: The ID of the team that we are testing events for.

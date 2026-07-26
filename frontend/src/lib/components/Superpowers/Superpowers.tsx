@@ -116,8 +116,8 @@ function SuperpowersContent(): JSX.Element {
                 <div className="space-y-2">
                     <div className="flex items-center justify-between p-2 border rounded">
                         <div>
-                            <div className="font-medium">ClickHouse queries</div>
-                            <div className="text-sm text-secondary">View recent ClickHouse queries for this user</div>
+                            <div className="font-medium">Datastore queries</div>
+                            <div className="text-sm text-secondary">View recent Datastore queries for this user</div>
                         </div>
                         <LemonButton type="secondary" size="small" onClick={handleOpenCHQueries}>
                             Open

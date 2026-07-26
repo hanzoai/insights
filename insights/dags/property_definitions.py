@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import dagster
 import pydantic
 
-from insights.clickhouse.cluster import ClickhouseCluster, Query
+from insights.datastore.cluster import DatastoreCluster, Query
 from insights.dags.common import JobOwners
 from insights.models.property_definition import PropertyDefinition
 
@@ -23,16 +23,16 @@ class PropertyDefinitionsConfig(dagster.Config):
 
     start_at: str = pydantic.Field(
         description="The lower bound (inclusive) timestamp to be used when selecting rows to be included within the "
-        "ingestion window. The value can be provided in any format that can be parsed by ClickHouse best-effort date "
+        "ingestion window. The value can be provided in any format that can be parsed by Datastore best-effort date "
         "parsing."
     )
     duration: str = pydantic.Field(
         description="The size of the ingestion window, used to determine the upper bound (non-inclusive) of the time "
-        "range. The value can be provided in any format that can be parsed as a ClickHouse interval.",
+        "range. The value can be provided in any format that can be parsed as a Datastore interval.",
         default="1 hour",
     )
 
-    def validate(self, cluster: ClickhouseCluster) -> TimeRange:
+    def validate(self, cluster: DatastoreCluster) -> TimeRange:
         """Validate the configuration values, returning a time range."""
         [[start_time, end_time]] = cluster.any_host(
             Query(
@@ -45,7 +45,7 @@ class PropertyDefinitionsConfig(dagster.Config):
 
 @dagster.op
 def setup_job(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     config: PropertyDefinitionsConfig,
 ) -> TimeRange:
     """Validates the job configuration to be provided to other ops."""
@@ -105,7 +105,7 @@ class DetectPropertyTypeExpression:
 @dagster.op
 def ingest_event_properties(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     time_range: TimeRange,
 ) -> int:
     """
@@ -159,7 +159,7 @@ def ingest_event_properties(
 @dagster.op
 def ingest_person_properties(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     time_range: TimeRange,
 ) -> int:
     """
@@ -209,7 +209,7 @@ def ingest_person_properties(
 @dagster.op
 def ingest_group_properties(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     time_range: TimeRange,
 ) -> int:
     """
@@ -259,7 +259,7 @@ def ingest_group_properties(
 @dagster.op
 def optimize_property_definitions(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     time_range: TimeRange,
     event_count: int,
     person_count: int,
@@ -292,7 +292,7 @@ def optimize_property_definitions(
 @dagster.job(
     name="property_definitions_ingestion",
     tags={
-        "owner": JobOwners.TEAM_CLICKHOUSE.value,
+        "owner": JobOwners.TEAM_DATASTORE.value,
         "disable_slack_notifications": True,  # NOTE: remove when enabled for production use
     },
 )

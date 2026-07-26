@@ -227,7 +227,7 @@ class SearchErrorTrackingIssuesTool(MaxTool):
         results = [ErrorTrackingIssue.model_validate(r) for r in raw_results]
         has_more_from_response = cast(bool, query_results.get("hasMore", False))
 
-        # Use has_more from paginator response (based on ClickHouse results before Postgres filtering)
+        # Use has_more from paginator response (based on Datastore results before Postgres filtering)
         # Fall back to comparing result count vs limit if not available
         has_more = has_more_from_response if has_more_from_response else len(results) >= query.limit
         next_cursor = str(current_offset + query.limit) if has_more else None

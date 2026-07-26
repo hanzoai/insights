@@ -45,7 +45,7 @@ class PostgresPrinter(InsightsQLPrinter):
         return f"(NOT {self.visit(node.expr)})"
 
     def visit_table_type(self, type: ast.TableType):
-        return type.table.to_printed_clickhouse(self.context)
+        return type.table.to_printed_datastore(self.context)
 
     def _visit_in_values(self, node: ast.Expr) -> str:
         if isinstance(node, ast.Tuple):
@@ -102,7 +102,7 @@ class PostgresPrinter(InsightsQLPrinter):
             raise ImpossibleASTError(f"Unknown CompareOperationOp: {op.name}")
 
     def _print_table_ref(self, table_type: ast.TableType | ast.LazyTableType, node: ast.JoinExpr) -> str:
-        return table_type.table.to_printed_clickhouse(self.context)
+        return table_type.table.to_printed_datastore(self.context)
 
     def _ensure_team_id_where_clause(
         self,

@@ -12,7 +12,7 @@ import pytz
 # The import chain: apps.py -> tasks -> async_migrations/definition.py -> models.utils
 # triggers models/__init__.py which imports batch_exports.models. Without this import,
 # ModelActivityMixin is loaded before Django apps are ready, causing AppRegistryNotReady.
-from insights.clickhouse.client import sync_execute  # noqa: F401
+from insights.datastore.client import sync_execute  # noqa: F401
 from insights.helpers.encrypted_fields import EncryptedJSONField
 from insights.models.activity_logging.model_activity import ModelActivityMixin
 from insights.models.utils import UUIDTModel

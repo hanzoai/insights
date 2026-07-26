@@ -78,16 +78,16 @@ from insights.insightsql.timings import InsightsQLTimings
 
 from insights import settings
 from insights.caching.utils import ThresholdMode, cache_target_age, is_stale, last_refresh_from_cached_result
-from insights.clickhouse.client.connection import Workload
-from insights.clickhouse.client.execute_async import QueryNotFoundError, enqueue_process_query_task, get_query_status
-from insights.clickhouse.client.limit import (
+from insights.datastore.client.connection import Workload
+from insights.datastore.client.execute_async import QueryNotFoundError, enqueue_process_query_task, get_query_status
+from insights.datastore.client.limit import (
     get_api_team_rate_limiter,
     get_app_dashboard_queries_rate_limiter,
     get_app_org_rate_limiter,
     get_materialized_endpoints_rate_limiter,
     get_org_app_concurrency_limit,
 )
-from insights.clickhouse.query_tagging import get_query_tag_value, tag_queries
+from insights.datastore.query_tagging import get_query_tag_value, tag_queries
 from insights.event_usage import groups
 from insights.exceptions_capture import capture_exception
 from insights.insightsql_queries.query_cache import count_query_cache_hit

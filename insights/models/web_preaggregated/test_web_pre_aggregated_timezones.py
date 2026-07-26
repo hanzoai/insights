@@ -1,10 +1,10 @@
-from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_clickhouse_queries
+from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_datastore_queries
 
 from parameterized import parameterized
 
 from insights.schema import DateRange, InsightsQLQueryModifiers, WebStatsBreakdown, WebStatsTableQuery
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.web_analytics.stats_table import WebStatsTableQueryRunner
 from insights.insightsql_queries.web_analytics.test.test_web_stats_table import FloatAwareTestCase
 from insights.insightsql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
@@ -13,7 +13,7 @@ from insights.models.utils import uuid7
 from insights.models.web_preaggregated.sql import WEB_BOUNCES_INSERT_SQL, WEB_STATS_INSERT_SQL
 
 
-@snapshot_clickhouse_queries
+@snapshot_datastore_queries
 class TestTimezonePreAggregatedIntegration(WebAnalyticsPreAggregatedTestBase, FloatAwareTestCase):
     def _setup_test_data(self):
         """Required by WebAnalyticsPreAggregatedTestBase. Each test handles its own data setup."""

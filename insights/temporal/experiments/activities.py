@@ -10,7 +10,7 @@ import temporalio.activity
 
 from insights.schema import ExperimentFunnelMetric, ExperimentMeanMetric, ExperimentQuery, ExperimentRatioMetric
 
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 from insights.insightsql_queries.experiments.experiment_metric_fingerprint import compute_metric_fingerprint
 from insights.insightsql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
 from insights.insightsql_queries.experiments.utils import get_experiment_stats_method

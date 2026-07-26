@@ -50,7 +50,7 @@ class TestRevenueAnalyticsViews(BaseTest):
             external_data_source_id=self.source.id,
             credential=self.credentials,
             url_pattern="https://bucket.s3/data/*",
-            columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
+            columns={"id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}},
         )
         self.schema = ExternalDataSchema.objects.create(
             team=self.team,
@@ -174,7 +174,7 @@ class TestRevenueAnalyticsViews(BaseTest):
             external_data_source_id=self.source.id,
             credential=self.credentials,
             url_pattern="https://bucket.s3/data/*",
-            columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
+            columns={"id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}},
         )
         _customer_schema = ExternalDataSchema.objects.create(
             team=self.team,
@@ -193,7 +193,7 @@ class TestRevenueAnalyticsViews(BaseTest):
             external_data_source_id=self.source.id,
             credential=self.credentials,
             url_pattern="https://bucket.s3/data/*",
-            columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
+            columns={"id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}},
         )
         _product_schema = ExternalDataSchema.objects.create(
             team=self.team,
@@ -212,7 +212,7 @@ class TestRevenueAnalyticsViews(BaseTest):
             external_data_source_id=self.source.id,
             credential=self.credentials,
             url_pattern="https://bucket.s3/data/*",
-            columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
+            columns={"id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}},
         )
         _charge_schema = ExternalDataSchema.objects.create(
             team=self.team,
@@ -231,7 +231,7 @@ class TestRevenueAnalyticsViews(BaseTest):
             external_data_source_id=self.source.id,
             credential=self.credentials,
             url_pattern="https://bucket.s3/data/*",
-            columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
+            columns={"id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}},
         )
         _subscription_schema = ExternalDataSchema.objects.create(
             team=self.team,

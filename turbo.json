@@ -11,7 +11,7 @@
             ],
             "outputs": [],
             "cache": true,
-            "env": ["DATABASE_URL", "REDIS_URL", "CLICKHOUSE_HOST", "TEST"]
+            "env": ["DATABASE_URL", "REDIS_URL", "DATASTORE_HOST", "TEST"]
         },
         "backend:lint": {
             "inputs": ["backend/**/*.py", "!backend/**/__pycache__/**"],

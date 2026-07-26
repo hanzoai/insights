@@ -3,11 +3,11 @@ from datetime import timedelta
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.test import override_settings
@@ -21,8 +21,8 @@ from insights.models.property_definition import PropertyType
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
-    @snapshot_clickhouse_queries
+class TestEventTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
+    @snapshot_datastore_queries
     def test_event_taxonomy_query_runner(self):
         _create_person(
             distinct_ids=["person1"],
@@ -479,7 +479,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.results[0].property, "prop")
         self.assertEqual(response.results[0].sample_count, 2)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_retrieves_action_properties(self):
         action = Action.objects.create(
             team=self.team,
@@ -514,7 +514,7 @@ class TestEventTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(response.results), 2)
         self.assertListEqual([item.property for item in response.results], ["ai", "dashboard"])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_property_taxonomy_handles_numeric_property_values(self):
         _create_person(
             distinct_ids=["person1"],

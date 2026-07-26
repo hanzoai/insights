@@ -113,7 +113,7 @@ class BatchTraceSummarizationCoordinatorWorkflow(InsightsWorkflow):
         )
 
         # Discover teams dynamically via activity, falling back to guaranteed
-        # teams if the activity fails (e.g. ClickHouse timeout).
+        # teams if the activity fails (e.g. Datastore timeout).
         try:
             team_ids = await temporalio.workflow.execute_activity(
                 get_team_ids_for_llm_analytics,

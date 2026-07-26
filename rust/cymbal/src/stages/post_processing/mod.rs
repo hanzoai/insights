@@ -27,7 +27,7 @@ impl PostProcessingStage {
     }
 
     // This is expensive, since it round-trips the event through JSON.
-    // We could maybe change ClickhouseEvent to only do serde at the edges
+    // We could maybe change DatastoreEvent to only do serde at the edges
     fn add_error_to_event(
         &self,
         mut event: AnyEvent,

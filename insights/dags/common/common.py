@@ -4,14 +4,14 @@ from typing import Optional
 
 import dagster
 
-from insights.clickhouse import query_tagging
-from insights.clickhouse.query_tagging import DagsterTags
+from insights.datastore import query_tagging
+from insights.datastore.query_tagging import DagsterTags
 
 
 class JobOwners(str, Enum):
     TEAM_ANALYTICS_PLATFORM = "team-analytics-platform"
     TEAM_BILLING = "team-billing"
-    TEAM_CLICKHOUSE = "team-clickhouse"
+    TEAM_DATASTORE = "team-datastore"
     TEAM_DATA_STACK = "team-data-stack"
     TEAM_ERROR_TRACKING = "team-error-tracking"
     TEAM_EXPERIMENTS = "team-experiments"

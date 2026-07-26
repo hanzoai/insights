@@ -19,7 +19,7 @@ from insights.session_recordings.queries.session_replay_events import SessionRep
 from insights.session_recordings.session_recording_playlist_api import PLAYLIST_COUNT_REDIS_PREFIX
 from insights.sync import database_sync_to_async
 from insights.tasks.email import NotificationSetting, should_send_notification
-from insights.temporal.common.clickhouse import get_client as get_ch_client
+from insights.temporal.common.datastore import get_client as get_ch_client
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_write_only_logger
 from insights.temporal.weekly_digest.keys import TeamDataKey, UserDataKey, org_digest_key, team_data_key, user_data_key
@@ -40,7 +40,7 @@ from insights.temporal.weekly_digest.queries import (
     queryset_to_list,
 )
 from insights.temporal.weekly_digest.types import (
-    ClickHouseResponse,
+    DatastoreResponse,
     CommonInput,
     DashboardList,
     DigestProductSuggestion,
@@ -305,7 +305,7 @@ async def generate_recording_lookup(input: GenerateDigestDataBatchInput) -> None
                     ) as ch_response:
                         raw_response = await ch_response.content.read()
 
-                    response = ClickHouseResponse.model_validate_json(raw_response)
+                    response = DatastoreResponse.model_validate_json(raw_response)
                     expiring_recordings = RecordingCount.model_validate(response.data[0])
 
                     key = team_data_key(input.digest.key, TeamDataKey.EXPIRING_RECORDINGS, team.id)

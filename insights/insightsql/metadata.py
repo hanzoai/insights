@@ -25,8 +25,8 @@ def get_insightsql_metadata(
     query: InsightsQLMetadata,
     team: Team,
     insightsql_ast: Optional[Union[ast.SelectQuery, ast.SelectSetQuery]] = None,
-    clickhouse_prepared_ast: Optional[ast.AST] = None,
-    clickhouse_sql: Optional[str] = None,
+    datastore_prepared_ast: Optional[ast.AST] = None,
+    datastore_sql: Optional[str] = None,
 ) -> InsightsQLMetadataResponse:
     response = InsightsQLMetadataResponse(
         isValid=True,
@@ -74,15 +74,15 @@ def get_insightsql_metadata(
             insightsql_table_names = get_table_names(insightsql_ast)
             response.table_names = insightsql_table_names
 
-            if not clickhouse_sql or not clickhouse_prepared_ast:
-                clickhouse_sql, clickhouse_prepared_ast = prepare_and_print_ast(
+            if not datastore_sql or not datastore_prepared_ast:
+                datastore_sql, datastore_prepared_ast = prepare_and_print_ast(
                     clone_expr(insightsql_ast),
                     context=context,
-                    dialect="clickhouse",
+                    dialect="datastore",
                 )
 
-            if clickhouse_prepared_ast:
-                ch_table_names = get_table_names(clickhouse_prepared_ast)
+            if datastore_prepared_ast:
+                ch_table_names = get_table_names(datastore_prepared_ast)
                 response.ch_table_names = ch_table_names
         else:
             raise ValueError(f"Unsupported language: {query.language}")
@@ -130,7 +130,7 @@ def process_expr_on_table(
             select_query = ast.SelectQuery(select=[node], select_from=ast.JoinExpr(table=ast.Field(chain=["events"])))
 
         # Nothing to return, we just make sure it doesn't throw
-        prepare_and_print_ast(select_query, context, "clickhouse")
+        prepare_and_print_ast(select_query, context, "datastore")
     except (NotImplementedError, SyntaxError):
         raise
 

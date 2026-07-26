@@ -138,7 +138,7 @@ class ActorsQueryRunner(AnalyticsQueryRunner[ActorsQueryResponse]):
 
     def _calculate_internal(self) -> ActorsQueryResponse:
         # Funnel queries require the experimental analyzer to run correctly
-        # Can remove once clickhouse moves to version 24.3 or above
+        # Can remove once datastore moves to version 24.3 or above
         settings = None
         if isinstance(self.source_query_runner, InsightActorsQueryRunner) and isinstance(
             self.source_query_runner.source_runner, FunnelsQueryRunner
@@ -457,7 +457,7 @@ class ActorsQueryRunner(AnalyticsQueryRunner[ActorsQueryResponse]):
                             timings=self.timings,
                             modifiers=self.modifiers,
                         ),
-                        dialect="clickhouse",
+                        dialect="datastore",
                     )
                     return select_query
                 except Exception:

@@ -9,7 +9,7 @@ from insights.schema import PersonsOnEventsMode
 
 from insights.insightsql.database.database import Database
 
-from insights.clickhouse.materialized_columns import ColumnName
+from insights.datastore.materialized_columns import ColumnName
 from insights.constants import (
     FUNNEL_WINDOW_INTERVAL,
     FUNNEL_WINDOW_INTERVAL_UNIT,
@@ -39,7 +39,7 @@ from insights.queries.util import alias_poe_mode_for_legacy, correct_result_for_
 from insights.utils import generate_short_id, relative_date_parse
 
 
-class ClickhouseFunnelBase(ABC):
+class DatastoreFunnelBase(ABC):
     QUERY_TYPE = "funnel_base"  # should be overridden in subclasses
 
     _filter: Filter

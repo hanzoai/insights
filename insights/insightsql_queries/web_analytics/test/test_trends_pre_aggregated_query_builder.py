@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Optional, cast
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import MagicMock
 
 from insights.schema import InsightsQLQueryModifiers, IntervalType, WebTrendsMetric, WebTrendsQuery
@@ -13,7 +13,7 @@ from insights.insightsql.printer import prepare_and_print_ast
 from insights.insightsql_queries.web_analytics.trends_pre_aggregated_query_builder import TrendsPreAggregatedQueryBuilder
 
 
-class TestTrendsPreAggregatedQueryBuilder(ClickhouseTestMixin, APIBaseTest):
+class TestTrendsPreAggregatedQueryBuilder(DatastoreTestMixin, APIBaseTest):
     def _create_mock_runner(self, query: WebTrendsQuery, modifiers: Optional[InsightsQLQueryModifiers] = None):
         runner = MagicMock()
         runner.query = query

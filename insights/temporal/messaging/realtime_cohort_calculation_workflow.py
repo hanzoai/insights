@@ -12,14 +12,14 @@ from insights.insightsql.constants import LimitContext
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.printer import prepare_and_print_ast
 
-from insights.clickhouse.query_tagging import Feature, Product, tags_context
+from insights.datastore.query_tagging import Feature, Product, tags_context
 from insights.insightsql_queries.insightsql_cohort_query import InsightsQLRealtimeCohortQuery
 from insights.kafka_client.client import KafkaProducer
 from insights.kafka_client.topics import KAFKA_COHORT_MEMBERSHIP_CHANGED
 from insights.models.cohort.cohort import Cohort, CohortType
 from insights.sync import database_sync_to_async
 from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_logger
 
@@ -199,7 +199,7 @@ async def process_realtime_cohort_calculation_activity(inputs: RealtimeCohortCal
                 enable_select_queries=True,
                 limit_context=LimitContext.COHORT_CALCULATION,
             )
-            current_members_sql, _ = prepare_and_print_ast(current_members_query, insightsql_context, "clickhouse")
+            current_members_sql, _ = prepare_and_print_ast(current_members_query, insightsql_context, "datastore")
             return current_members_sql, insightsql_context.values
 
         for idx, cohort in enumerate(cohorts, 1):
@@ -271,7 +271,7 @@ async def process_realtime_cohort_calculation_activity(inputs: RealtimeCohortCal
                                 "team_id": cohort.team_id,
                                 "cohort_id": cohort.id,
                                 "person_id": str(person_id),
-                                # DateTime64(6) format required for Kafka JSONEachRow parsing into ClickHouse
+                                # DateTime64(6) format required for Kafka JSONEachRow parsing into Datastore
                                 "last_updated": dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M:%S.%f"),
                                 "status": status,
                             }

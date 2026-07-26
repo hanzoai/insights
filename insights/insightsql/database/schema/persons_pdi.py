@@ -95,7 +95,7 @@ class PersonsPDITable(LazyTable):
     def lazy_select(self, table_to_add: LazyTableToAdd, context, node):
         return persons_pdi_select(table_to_add.fields_accessed)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "person_distinct_id2"
 
     def to_printed_insightsql(self):

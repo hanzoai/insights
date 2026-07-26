@@ -637,7 +637,7 @@ class Alias(Expr):
     """
     Aliases are "hidden" if they're automatically created by InsightsQL when abstracting fields.
     E.g. "events.timestamp" gets turned into a "toTimeZone(events.timestamp, 'UTC') AS timestamp".
-    Hidden aliases are printed only when printing the columns of a SELECT query in the ClickHouse dialect.
+    Hidden aliases are printed only when printing the columns of a SELECT query in the Datastore dialect.
     """
     hidden: bool = False
     from_asterisk: bool = False
@@ -803,7 +803,7 @@ class Call(Expr):
     args: list[Expr]
     params: Optional[list[Expr]] = None
     """
-    Parameters apply to some aggregate functions, see ClickHouse docs:
+    Parameters apply to some aggregate functions, see Datastore docs:
     https://clickhouse.com/docs/en/sql-reference/aggregate-functions/parametric-functions
     """
     distinct: bool = False

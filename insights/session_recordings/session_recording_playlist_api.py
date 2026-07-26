@@ -23,12 +23,12 @@ from insights.api.forbid_destroy_model import ForbidDestroyModel
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
 from insights.api.utils import action
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.models import SessionRecording, SessionRecordingPlaylist, SessionRecordingPlaylistItem, User
 from insights.models.activity_logging.activity_log import Change, Detail, changes_between, log_activity
 from insights.models.team.team import Team
 from insights.models.utils import UUIDT
-from insights.rate_limit import ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle
+from insights.rate_limit import DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 from insights.rbac.user_access_control import UserAccessControlSerializerMixin
 from insights.redis import get_client
@@ -353,7 +353,7 @@ class SessionRecordingPlaylistViewSet(
     scope_object_read_actions = ["list", "retrieve", "recordings"]
     queryset = SessionRecordingPlaylist.objects.all()
     serializer_class = SessionRecordingPlaylistSerializer
-    throttle_classes = [ClickHouseBurstRateThrottle, ClickHouseSustainedRateThrottle]
+    throttle_classes = [DatastoreBurstRateThrottle, DatastoreSustainedRateThrottle]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["short_id", "created_by"]
     lookup_field = "short_id"

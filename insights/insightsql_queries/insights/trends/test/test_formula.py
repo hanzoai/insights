@@ -3,11 +3,11 @@ from typing import Optional
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest import mock
 
@@ -26,7 +26,7 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestFormula(ClickhouseTestMixin, APIBaseTest):
+class TestFormula(DatastoreTestMixin, APIBaseTest):
     CLASS_DATA_LEVEL_SETUP = False
     maxDiff = None
 
@@ -166,7 +166,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
             tqr = TrendsQueryRunner(team=self.team, query=trend_query)
             return tqr.calculate().results
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_hour_interval_hour_level_relative(self):
         data = self._run({"dateRange": {"date_from": "-24h"}, "interval": "hour"}, run_at="2020-01-03T13:05:01Z")[0][
             "data"
@@ -202,7 +202,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_hour_interval_day_level_relative(self):
         data = self._run({"dateRange": {"date_from": "-1d"}, "interval": "hour"}, run_at="2020-01-03T13:05:01Z")[0][
             "data"
@@ -292,7 +292,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
         )
         self.assertEqual(self._run({"trendsFilter": {"formula": "A/0"}})[0]["count"], 0)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_formula_with_unique_sessions(self):
         with freeze_time("2020-01-04T13:01:01Z"):
             action_response = self._run(
@@ -308,7 +308,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
             )
             self.assertEqual(action_response[0]["data"], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_regression_formula_with_unique_sessions_2x_and_duration_filter(self):
         with freeze_time("2020-01-04T13:01:01Z"):
             action_response = self._run(
@@ -336,7 +336,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
 
             self.assertEqual(action_response[0]["data"], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_regression_formula_with_unique_sessions_2x_and_duration_filter_2x(self):
         with freeze_time("2020-01-04T13:01:01Z"):
             action_response = self._run(
@@ -375,7 +375,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
 
             self.assertEqual(action_response[0]["data"], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_regression_formula_with_session_duration_aggregation(self):
         with freeze_time("2020-01-04T13:01:01Z"):
             action_response = self._run(
@@ -401,7 +401,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
 
             self.assertEqual(action_response[0]["data"], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 28860.0, 0.0])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_aggregated_one_without_events(self):
         with freeze_time("2020-01-04T13:01:01Z"):
             response = self._run(
@@ -430,7 +430,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response[0]["aggregated_value"], 1800)
         self.assertEqual(response[0]["label"], "Formula (B + A)")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown(self):
         response = self._run({"trendsFilter": {"formula": "A - B"}, "breakdownFilter": {"breakdown": "location"}})
         self.assertEqual(len(response), 2)
@@ -440,7 +440,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response[1]["label"], "Formula (A - B)")
         self.assertEqual(response[1]["breakdown_value"], "Paris")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_aggregated(self):
         response = self._run(
             {"trendsFilter": {"formula": "A - B", "display": TRENDS_PIE}, "breakdownFilter": {"breakdown": "location"}}
@@ -453,7 +453,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response[1]["label"], "Formula (A - B)")
         self.assertEqual(response[1]["breakdown_value"], "Paris")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_with_different_breakdown_values_per_series(self):
         response = self._run(
             {
@@ -581,7 +581,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_cohort(self):
         cohort: Cohort = Cohort.objects.create(
             id=999932324,
@@ -601,7 +601,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response[1]["label"], "Formula (A + B)")
         self.assertEqual(response[1]["breakdown_value"], cohort.pk)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_breakdown_insightsql(self):
         response = self._run(
             {
@@ -803,7 +803,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
             [0, 0, 0, 0, 0, 2, 2, 0],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_formula_with_insightsql_math_no_matching_events(self):
         # Regression test: formula with InsightsQL math should not crash when one series has no matching events
         # (math="insightsql" has no ifNull wrapper, so NULL values can propagate into FormulaAST)

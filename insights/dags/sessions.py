@@ -17,16 +17,16 @@ from dagster import (
     define_asset_job,
 )
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import (
-    ClickHouseUser,
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import (
+    DatastoreUser,
     NodeRole,
     Workload,
     get_http_client,
     get_kwargs_for_client,
 )
-from insights.clickhouse.cluster import get_cluster
-from insights.clickhouse.query_tagging import tags_context
+from insights.datastore.cluster import get_cluster
+from insights.datastore.query_tagging import tags_context
 from insights.cloud_utils import is_cloud
 from insights.dags.common.common import JobOwners, dagster_tags
 from insights.git import get_git_commit_short
@@ -40,12 +40,12 @@ from insights.models.raw_sessions.sessions_v3 import (
 # This is the number of days to backfill in one SQL operation
 MAX_PARTITIONS_PER_RUN = 1
 
-# Keep the number of concurrent runs low to avoid overloading ClickHouse and running into the dread "Too many parts".
+# Keep the number of concurrent runs low to avoid overloading Datastore and running into the dread "Too many parts".
 # This tag needs to also exist in Dagster Cloud (and the local dev dagster.yaml) for the concurrency limit to take effect.
 #
 # We use two levels of concurrency control:
 # 1. Global limit on total concurrent sessions backfill runs
-# 2. Per-DB-partition limit to ensure only one insert per shard per ClickHouse partition (YYYYMM)
+# 2. Per-DB-partition limit to ensure only one insert per shard per Datastore partition (YYYYMM)
 #
 # We use two tag keys (_0 and _1) because events from the 1st of a month can write to both
 # the previous and current month's DB partitions (sessions can span midnight).
@@ -103,11 +103,11 @@ def tags_for_sessions_partition(partition_key: str) -> dict[str, str]:
 class SessionsBackfillConfig(Config):
     """Config for sessions backfill jobs.
 
-    Supports custom clickhouse_settings that will be merged with default settings,
+    Supports custom datastore_settings that will be merged with default settings,
     and team_id chunking to split work into smaller inserts.
     """
 
-    clickhouse_settings: dict[str, Any] | None = None
+    datastore_settings: dict[str, Any] | None = None
     team_id_chunks: int | None = 64
     max_unmerged_parts: int = 100
     parts_check_poll_frequency_seconds: int = 30
@@ -115,7 +115,7 @@ class SessionsBackfillConfig(Config):
 
 
 class ExperimentalSessionsBackfillConfig(Config):
-    clickhouse_settings: dict[str, Any] | None = None
+    datastore_settings: dict[str, Any] | None = None
     team_id_chunks: int | None = 64
     max_unmerged_parts: int = 100
     parts_check_poll_frequency_seconds: int = 30
@@ -132,7 +132,7 @@ daily_partitions = DailyPartitionsDefinition(
 ONE_HOUR_IN_SECONDS = 60 * 60
 ONE_GB_IN_BYTES = 1024 * 1024 * 1024
 
-clickhouse_settings = {
+datastore_settings = {
     # see this run which took around 2hrs 10min for 1 day https://insights.dagster.plus/prod-us/runs/0ba8afaa-f3cc-4845-97c5-96731ec8231d?focusedTime=1762898705269&selection=sessions_v3_backfill&logs=step%3Asessions_v3_backfill
     # so to give some margin, allow 4 hours per partition
     "max_execution_time": MAX_PARTITIONS_PER_RUN * 4 * ONE_HOUR_IN_SECONDS,
@@ -154,7 +154,7 @@ def get_partition_where_clause(context: AssetExecutionContext, timestamp_field: 
 
 
 def get_db_partitions_to_check(context: AssetExecutionContext) -> list[str]:
-    """Calculate all ClickHouse DB partitions (YYYYMM) that might be affected by this backfill.
+    """Calculate all Datastore DB partitions (YYYYMM) that might be affected by this backfill.
 
     Since sessions can last 24 hours, we need to check partitions starting from 1 day before
     the Dagster partition range through the end of the range.
@@ -285,11 +285,11 @@ def _do_backfill(
 
     context.log.info(f"Config: {config}")
 
-    # Merge custom clickhouse settings with defaults
-    merged_settings = clickhouse_settings.copy()
-    if config.clickhouse_settings:
-        merged_settings.update(config.clickhouse_settings)
-        context.log.info(f"Using custom ClickHouse settings: {config.clickhouse_settings}")
+    # Merge custom datastore settings with defaults
+    merged_settings = datastore_settings.copy()
+    if config.datastore_settings:
+        merged_settings.update(config.datastore_settings)
+        context.log.info(f"Using custom Datastore settings: {config.datastore_settings}")
 
     team_id_chunks = max(1, config.team_id_chunks or 1)
 
@@ -357,9 +357,9 @@ def _do_backfill(
 def metabase_debug_query_url(run_id: str) -> Optional[str]:
     cloud_deployment = getattr(settings, "CLOUD_DEPLOYMENT", None)
     if cloud_deployment == "US":
-        return f"https://metabase.prod-us.insights.dev/question/1671-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
+        return f"https://metabase.prod-us.insights.dev/question/1671-get-datastore-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
     if cloud_deployment == "EU":
-        return f"https://metabase.prod-eu.insights.dev/question/544-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
+        return f"https://metabase.prod-eu.insights.dev/question/544-get-datastore-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
     sql = f"""
 SELECT
     hostName() as host,
@@ -426,11 +426,11 @@ def _do_experimental_backfill(
 
     context.log.info(f"Config: {config}")
 
-    # Merge custom clickhouse settings with defaults
-    merged_settings = clickhouse_settings.copy()
-    if config.clickhouse_settings:
-        merged_settings.update(config.clickhouse_settings)
-        context.log.info(f"Using custom ClickHouse settings: {config.clickhouse_settings}")
+    # Merge custom datastore settings with defaults
+    merged_settings = datastore_settings.copy()
+    if config.datastore_settings:
+        merged_settings.update(config.datastore_settings)
+        context.log.info(f"Using custom Datastore settings: {config.datastore_settings}")
 
     team_id_chunks = max(1, config.team_id_chunks or 1)
 
@@ -443,7 +443,7 @@ def _do_experimental_backfill(
         context.log.info(f"Debug query: {debug_url}")
 
     kwargs = get_kwargs_for_client(
-        workload=Workload.OFFLINE, team_id=None, readonly=False, ch_user=ClickHouseUser.DEFAULT
+        workload=Workload.OFFLINE, team_id=None, readonly=False, ch_user=DatastoreUser.DEFAULT
     )
     with get_http_client(**kwargs, **config.client_overrides) as client:
         tags = dagster_tags(context)

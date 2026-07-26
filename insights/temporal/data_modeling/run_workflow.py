@@ -34,14 +34,14 @@ from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
 
-from insights.clickhouse.query_tagging import Feature, Product, tag_queries
+from insights.datastore.query_tagging import Feature, Product, tag_queries
 from insights.exceptions_capture import capture_exception
 from insights.models import Team
 from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 from insights.settings.base_variables import TEST
 from insights.sync import database_sync_to_async
 from insights.temporal.common.base import InsightsWorkflow
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_logger
 from insights.temporal.data_imports.util import prepare_s3_files_for_querying
@@ -302,7 +302,7 @@ async def put_models_in_queue(models: collections.abc.Iterable[ModelNode], queue
 
 
 class CHQueryErrorMemoryLimitExceeded(Exception):
-    """Exception raised when a ClickHouse query exceeds memory limits."""
+    """Exception raised when a Datastore query exceeds memory limits."""
 
     pass
 
@@ -769,7 +769,7 @@ async def get_query_row_count(query: str, team: Team, logger: FilteringBoundLogg
     context.database = await database_sync_to_async(Database.create_for)(team=team, modifiers=context.modifiers)
 
     prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
-        query_node, context=context, dialect="clickhouse", settings=settings, stack=[]
+        query_node, context=context, dialect="datastore", settings=settings, stack=[]
     )
 
     if prepared_insightsql_query is None:
@@ -778,7 +778,7 @@ async def get_query_row_count(query: str, team: Team, logger: FilteringBoundLogg
     printed = await database_sync_to_async(print_prepared_ast)(
         prepared_insightsql_query,
         context=context,
-        dialect="clickhouse",
+        dialect="datastore",
         settings=settings,
         stack=[],
     )
@@ -816,7 +816,7 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger)
     context.database = await database_sync_to_async(Database.create_for)(team=team, modifiers=context.modifiers)
 
     prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
-        query_node, context=context, dialect="clickhouse", settings=settings, stack=[]
+        query_node, context=context, dialect="datastore", settings=settings, stack=[]
     )
     if prepared_insightsql_query is None:
         raise EmptyInsightsQLResponseColumnsError()
@@ -824,7 +824,7 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger)
     printed = await database_sync_to_async(print_prepared_ast)(
         prepared_insightsql_query,
         context=context,
-        dialect="clickhouse",
+        dialect="datastore",
         settings=settings,
         stack=[],
     )
@@ -833,7 +833,7 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger)
     arrow_type_conversion: dict[str, tuple[str, tuple[ast.Constant, ...]]] = {
         # Guarantee timezone is stable
         "DateTime": ("toTimeZone", (ast.Constant(value="UTC"),)),
-        # If Clickhouse detects this is a constant `NULL` column let's turn into `Nullable(String)` since ArrayFormat doesn't support `Nullable(Nothing)`
+        # If Datastore detects this is a constant `NULL` column let's turn into `Nullable(String)` since ArrayFormat doesn't support `Nullable(Nothing)`
         "Nullable(Nothing)": ("toNullableString", ()),
         # A bunch of non-supported fields, just treat them as strings
         "FIXED_SIZE_BINARY": ("toString", ()),
@@ -861,12 +861,12 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger)
                 column_name = split_arr[0]
                 ch_type = split_arr[1]
 
-                # Skip array types from conversion - they are already properly typed by ClickHouse
+                # Skip array types from conversion - they are already properly typed by Datastore
                 # and attempting to convert them causes errors like:
                 # "Illegal type Array(DateTime) of argument of function toTimezone"
                 is_array_type = ch_type.lower().startswith("array(")
 
-                # Does the clickhouse type exist in our mapping of types to convert?
+                # Does the datastore type exist in our mapping of types to convert?
                 if any(uat.lower() in ch_type.lower() for uat in arrow_type_conversion.keys()) and not is_array_type:
                     # Find which type we need to convert
                     call_tuples = [
@@ -926,17 +926,17 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger)
     settings.preferred_block_size_bytes = MB_100_IN_BYTES
 
     arrow_prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
-        query_node, context=context, dialect="clickhouse", stack=[], settings=settings
+        query_node, context=context, dialect="datastore", stack=[], settings=settings
     )
 
     if arrow_prepared_insightsql_query is None:
         raise EmptyInsightsQLResponseColumnsError()
 
     arrow_printed = await database_sync_to_async(print_prepared_ast)(
-        arrow_prepared_insightsql_query, context=context, dialect="clickhouse", stack=[], settings=settings
+        arrow_prepared_insightsql_query, context=context, dialect="datastore", stack=[], settings=settings
     )
 
-    await logger.adebug(f"Running clickhouse query: {arrow_printed}")
+    await logger.adebug(f"Running datastore query: {arrow_printed}")
 
     # Set max block size to 50,000 rows
     async with get_client(max_block_size=50_000) as client:
@@ -989,9 +989,9 @@ def _combine_batches(batches: list[pa.RecordBatch]) -> pa.RecordBatch:
 
 
 def _transform_date_and_datetimes(batch: pa.RecordBatch, types: list[tuple[str, str]]) -> pa.RecordBatch:
-    """Clickhouse can return date/datetimes as UInts. We need to transform the response back into a real date/datetime object
+    """Datastore can return date/datetimes as UInts. We need to transform the response back into a real date/datetime object
 
-    The return types from clickhouse are:
+    The return types from datastore are:
     ```
     Date/Date32 => UInt16 (days since 1970-01-01)
     DateTime => UInt32 (seconds since 1970-01-01)
@@ -1074,7 +1074,7 @@ def _transform_date_and_datetimes(batch: pa.RecordBatch, types: list[tuple[str, 
 def _transform_unsupported_decimals(batch: pa.RecordBatch) -> pa.RecordBatch:
     """
     Transform high-precision decimal columns to types supported by Delta Lake.
-    Delta Lake supports decimal up to precision 38; ClickHouse may return Decimal256 (precision 76).
+    Delta Lake supports decimal up to precision 38; Datastore may return Decimal256 (precision 76).
     """
     schema = batch.schema
     columns_to_cast: dict[str, pa.DataType] = {}

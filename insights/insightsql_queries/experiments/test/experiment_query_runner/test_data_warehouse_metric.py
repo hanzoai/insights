@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from freezegun import freeze_time
-from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_clickhouse_queries
+from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_datastore_queries
 
 from django.test import override_settings
 
@@ -25,7 +25,7 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 
 @override_settings(IN_UNIT_TESTING=True)
 class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_group_aggregation_data_warehouse_mean_metric(self):
         feature_flag = self.create_feature_flag()
         feature_flag.filters["aggregation_group_type_index"] = 0
@@ -127,7 +127,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
         self.assertEqual(control_result.sum, 6)
         self.assertEqual(test_result.sum, 7)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_data_warehouse_count_metric(self):
         table_name = self.create_data_warehouse_table_with_usage()
 
@@ -194,7 +194,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
         self.assertEqual(control_result.number_of_samples, 7)
         self.assertEqual(test_result.number_of_samples, 9)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_data_warehouse_continuous_metric(self):
         table_name = self.create_data_warehouse_table_with_usage()
 
@@ -360,7 +360,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
             ],
         ]
     )
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_with_data_warehouse_internal_filters(self, name, filter: dict, filter_expected: dict):
         table_name = self.create_data_warehouse_table_with_usage()
 
@@ -578,7 +578,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
         self.assertEqual(control_result.number_of_samples, 7)
         self.assertEqual(test_result.number_of_samples, 10)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_with_data_warehouse_subscriptions_table(self):
         subscriptions_table_name = self.create_data_warehouse_table_with_subscriptions()
 
@@ -704,7 +704,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
             ],
         ]
     )
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_data_warehouse_metric_with_property_filters(self, name, properties, expected_results):
         """Test that data warehouse metrics properly apply property filters"""
         table_name = self.create_data_warehouse_table_with_usage()
@@ -774,7 +774,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
         self.assertEqual(control_result.number_of_samples, 7)
         self.assertEqual(test_result.number_of_samples, 9)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_data_warehouse_metric_with_fixed_properties(self):
         """Test that data warehouse metrics properly apply fixedProperties"""
         table_name = self.create_data_warehouse_table_with_usage()
@@ -849,7 +849,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
         self.assertEqual(control_result.number_of_samples, 7)
         self.assertEqual(test_result.number_of_samples, 9)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_data_warehouse_metric_with_both_properties_and_fixed_properties(self):
         """Test that data warehouse metrics properly apply both properties and fixedProperties"""
         table_name = self.create_data_warehouse_table_with_usage()
@@ -929,7 +929,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
         self.assertEqual(control_result.number_of_samples, 7)
         self.assertEqual(test_result.number_of_samples, 9)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_query_runner_data_warehouse_metric_with_no_properties(self):
         """Test that data warehouse metrics work without any property filters (baseline behavior)"""
         table_name = self.create_data_warehouse_table_with_usage()
@@ -1000,7 +1000,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
         self.assertEqual(control_result.number_of_samples, 7)
         self.assertEqual(test_result.number_of_samples, 9)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ratio_metric_with_different_join_keys(self):
         """Test ratio metric where numerator and denominator use different join keys"""
         usage_table = self.create_data_warehouse_table_with_usage()

@@ -4,11 +4,11 @@ from uuid import UUID
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.utils import timezone
@@ -17,7 +17,7 @@ from insights.constants import INSIGHT_FUNNELS
 from insights.models import Cohort, Filter
 from insights.models.event.util import bulk_create_events
 from insights.models.person.util import bulk_create_persons
-from insights.queries.funnels.funnel_persons import ClickhouseFunnelActors
+from insights.queries.funnels.funnel_persons import DatastoreFunnelActors
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 from insights.test.test_journeys import journeys_for
 
@@ -27,7 +27,7 @@ COUNT_COLUMN = 1
 PERSON_ID_COLUMN = 2
 
 
-class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelPersons(DatastoreTestMixin, APIBaseTest):
     def _create_sample_data_multiple_dropoffs(self):
         for i in range(35):
             bulk_create_persons([{"distinct_ids": [f"user_{i}"], "team_id": self.team.pk}])
@@ -152,7 +152,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertEqual(35, len(results))
 
     def test_last_step(self):
@@ -171,7 +171,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertEqual(5, len(results))
 
     def test_second_step_dropoff(self):
@@ -190,7 +190,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertEqual(20, len(results))
 
     def test_last_step_dropoff(self):
@@ -209,7 +209,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
         filter = Filter(data=data)
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertEqual(10, len(results))
 
     def _create_sample_data(self):
@@ -251,11 +251,11 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
         }
 
         filter = Filter(data=data)
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertEqual(100, len(results))
 
         filter_offset = Filter(data={**data, "offset": 100})
-        _, results, _ = ClickhouseFunnelActors(filter_offset, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter_offset, self.team).get_actors()
         self.assertEqual(10, len(results))
 
     def test_steps_with_custom_steps_parameter_are_equivalent_to_funnel_step(self):
@@ -285,10 +285,10 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
 
         for funnel_step, custom_steps, expected_count in parameters:
             filter = base_filter.shallow_clone({"funnel_step": funnel_step})
-            _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+            _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
 
             new_filter = base_filter.shallow_clone({"funnel_custom_steps": custom_steps})
-            _, new_results, _ = ClickhouseFunnelActors(new_filter, self.team).get_actors()
+            _, new_results, _ = DatastoreFunnelActors(new_filter, self.team).get_actors()
 
             self.assertEqual(new_results, results)
             self.assertEqual(len(results), expected_count)
@@ -319,7 +319,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
 
         for custom_steps, expected_count in parameters:
             new_filter = base_filter.shallow_clone({"funnel_custom_steps": custom_steps})
-            _, new_results, _ = ClickhouseFunnelActors(new_filter, self.team).get_actors()
+            _, new_results, _ = DatastoreFunnelActors(new_filter, self.team).get_actors()
 
             self.assertEqual(len(new_results), expected_count)
 
@@ -340,7 +340,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
             ],
         }
 
-        _, results, _ = ClickhouseFunnelActors(Filter(data=data), self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(Filter(data=data), self.team).get_actors()
 
         self.assertEqual(len(results), 5)
 
@@ -364,17 +364,17 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
                 "breakdown": "$browser",
             }
         )
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
 
         self.assertCountEqual([val["id"] for val in results], [person1.uuid, person2.uuid])
 
-        _, results, _ = ClickhouseFunnelActors(
+        _, results, _ = DatastoreFunnelActors(
             filter.shallow_clone({"funnel_step_breakdown": "Chrome"}), self.team
         ).get_actors()
 
         self.assertCountEqual([val["id"] for val in results], [person1.uuid])
 
-        _, results, _ = ClickhouseFunnelActors(
+        _, results, _ = DatastoreFunnelActors(
             filter.shallow_clone({"funnel_step_breakdown": "Safari"}), self.team
         ).get_actors()
 
@@ -399,17 +399,17 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
                 "breakdown": ["$browser", "$browser_version"],
             }
         )
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
 
         self.assertCountEqual([val["id"] for val in results], [person1.uuid, person2.uuid])
 
-        _, results, _ = ClickhouseFunnelActors(
+        _, results, _ = DatastoreFunnelActors(
             filter.shallow_clone({"funnel_step_breakdown": ["Chrome", "95"]}), self.team
         ).get_actors()
 
         self.assertCountEqual([val["id"] for val in results], [person1.uuid])
 
-        _, results, _ = ClickhouseFunnelActors(
+        _, results, _ = DatastoreFunnelActors(
             filter.shallow_clone({"funnel_step_breakdown": ["Safari", "14"]}), self.team
         ).get_actors()
         self.assertCountEqual([val["id"] for val in results], [person2.uuid])
@@ -435,28 +435,28 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
             }
         )
 
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertCountEqual([val["id"] for val in results], [person1.uuid, person2.uuid])
 
-        _, results, _ = ClickhouseFunnelActors(
+        _, results, _ = DatastoreFunnelActors(
             filter.shallow_clone({"funnel_step_breakdown": "EE"}), self.team
         ).get_actors()
         self.assertCountEqual([val["id"] for val in results], [person2.uuid])
 
         # Check custom_steps give same answers for breakdowns
-        _, custom_step_results, _ = ClickhouseFunnelActors(
+        _, custom_step_results, _ = DatastoreFunnelActors(
             filter.shallow_clone({"funnel_step_breakdown": "EE", "funnel_custom_steps": [1, 2, 3]}),
             self.team,
         ).get_actors()
         self.assertEqual(results, custom_step_results)
 
-        _, results, _ = ClickhouseFunnelActors(
+        _, results, _ = DatastoreFunnelActors(
             filter.shallow_clone({"funnel_step_breakdown": "PL"}), self.team
         ).get_actors()
         self.assertCountEqual([val["id"] for val in results], [person1.uuid])
 
         # Check custom_steps give same answers for breakdowns
-        _, custom_step_results, _ = ClickhouseFunnelActors(
+        _, custom_step_results, _ = DatastoreFunnelActors(
             filter.shallow_clone({"funnel_step_breakdown": "PL", "funnel_custom_steps": [1, 2, 3]}),
             self.team,
         ).get_actors()
@@ -492,10 +492,10 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
             "breakdown": [cohort.pk],
         }
         filter = Filter(data=filters)
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertEqual(results[0]["id"], person.uuid)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-02 00:00:00.000Z")
     def test_funnel_person_recordings(self):
         p1 = _create_person(distinct_ids=[f"user_1"], team=self.team)
@@ -541,7 +541,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
                 "include_recordings": "true",
             }
         )
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(results[0]["matched_recordings"], [])
 
@@ -562,7 +562,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
                 "include_recordings": "true",
             }
         )
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(
             results[0]["matched_recordings"],
@@ -597,7 +597,7 @@ class TestFunnelPersons(ClickhouseTestMixin, APIBaseTest):
                 "include_recordings": "true",
             }
         )
-        _, results, _ = ClickhouseFunnelActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelActors(filter, self.team).get_actors()
         self.assertEqual(results[0]["id"], p1.uuid)
         self.assertEqual(
             results[0]["matched_recordings"],

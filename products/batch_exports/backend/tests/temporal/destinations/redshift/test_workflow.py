@@ -30,7 +30,7 @@ from products.batch_exports.backend.temporal.pipeline.internal_stage import inse
 from products.batch_exports.backend.tests.temporal.destinations.redshift.utils import (
     MISSING_REQUIRED_ENV_VARS,
     TEST_MODELS,
-    assert_clickhouse_records_in_redshift,
+    assert_datastore_records_in_redshift,
 )
 from products.batch_exports.backend.tests.temporal.utils.s3 import delete_all_from_s3
 from products.batch_exports.backend.tests.temporal.utils.workflow import mocked_start_batch_export_run
@@ -154,7 +154,7 @@ def _build_copy_inputs(mode, aws_credentials, bucket_name, bucket_region, key_pr
 @pytest.mark.parametrize("mode", ["COPY", "INSERT"], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_redshift_export_workflow(
-    clickhouse_client,
+    datastore_client,
     redshift_config,
     psycopg_connection,
     interval,
@@ -232,9 +232,9 @@ async def test_redshift_export_workflow(
         elif batch_export_model.name == "sessions":
             sort_key = "session_id"
 
-    await assert_clickhouse_records_in_redshift(
+    await assert_datastore_records_in_redshift(
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         schema_name=redshift_config["schema"],
         table_name=table_name,
         team_id=ateam.pk,
@@ -325,7 +325,7 @@ async def test_redshift_export_workflow_handles_insert_activity_non_retryable_er
 @pytest.mark.parametrize("mode", ["COPY", "INSERT"], indirect=True)
 @pytest.mark.parametrize("model", [TEST_MODELS[1]])
 async def test_redshift_export_workflow_handles_undefined_function_error(
-    clickhouse_client,
+    datastore_client,
     redshift_config,
     psycopg_connection,
     interval,
@@ -376,9 +376,9 @@ async def test_redshift_export_workflow_handles_undefined_function_error(
     assert run.status == "Completed"
     assert run.records_completed == len(events_to_export_created)
 
-    await assert_clickhouse_records_in_redshift(
+    await assert_datastore_records_in_redshift(
         redshift_connection=psycopg_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         schema_name=redshift_config["schema"],
         table_name=table_name,
         team_id=ateam.pk,

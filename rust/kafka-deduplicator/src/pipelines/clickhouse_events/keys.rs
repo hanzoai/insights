@@ -1,26 +1,26 @@
-//! Deduplication key extraction for ClickHouse events.
+//! Deduplication key extraction for Datastore events.
 
 use anyhow::{Context, Result};
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 
 use crate::pipelines::traits::DeduplicationKeyExtractor;
 use crate::store::keys::TimestampKey;
-use crate::utils::timestamp::parse_clickhouse_timestamp;
+use crate::utils::timestamp::parse_datastore_timestamp;
 
-impl DeduplicationKeyExtractor for ClickHouseEvent {
+impl DeduplicationKeyExtractor for DatastoreEvent {
     fn extract_dedup_key(&self) -> Vec<u8> {
-        let key = TimestampKey::try_from(self).expect("ClickHouseEvent must have valid timestamp");
+        let key = TimestampKey::try_from(self).expect("DatastoreEvent must have valid timestamp");
         (&key).into()
     }
 }
 
-impl TryFrom<&ClickHouseEvent> for TimestampKey {
+impl TryFrom<&DatastoreEvent> for TimestampKey {
     type Error = anyhow::Error;
 
-    fn try_from(event: &ClickHouseEvent) -> Result<Self> {
-        let timestamp = parse_clickhouse_timestamp(&event.timestamp).with_context(|| {
+    fn try_from(event: &DatastoreEvent) -> Result<Self> {
+        let timestamp = parse_datastore_timestamp(&event.timestamp).with_context(|| {
             format!(
-                "Failed to parse ClickHouse timestamp '{}' for event {}",
+                "Failed to parse Datastore timestamp '{}' for event {}",
                 event.timestamp, event.uuid
             )
         })?;
@@ -40,8 +40,8 @@ mod tests {
     use common_types::PersonMode;
     use uuid::Uuid;
 
-    fn create_test_event() -> ClickHouseEvent {
-        ClickHouseEvent {
+    fn create_test_event() -> DatastoreEvent {
+        DatastoreEvent {
             uuid: Uuid::new_v4(),
             team_id: 123,
             project_id: Some(456),
@@ -71,7 +71,7 @@ mod tests {
     }
 
     #[test]
-    fn test_clickhouse_event_dedup_key_extraction() {
+    fn test_datastore_event_dedup_key_extraction() {
         let event = create_test_event();
         let key_bytes = event.extract_dedup_key();
 
@@ -157,7 +157,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "ClickHouseEvent must have valid timestamp")]
+    #[should_panic(expected = "DatastoreEvent must have valid timestamp")]
     fn test_extract_dedup_key_panics_on_invalid_timestamp() {
         let mut event = create_test_event();
         event.timestamp = "invalid".to_string();

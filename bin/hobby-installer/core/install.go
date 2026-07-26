@@ -171,8 +171,8 @@ func GetInstallSteps() []InstallStep {
 		{
 			Name: "Check async migrations",
 			Run: func(cfg InstallConfig) InstallResult {
-				hasPostgres, hasClickhouse := CheckDockerVolumes()
-				if hasPostgres || hasClickhouse {
+				hasPostgres, hasDatastore := CheckDockerVolumes()
+				if hasPostgres || hasDatastore {
 					if err := RunAsyncMigrationsCheck(); err != nil {
 						return InstallResult{Err: err}
 					}
@@ -181,8 +181,8 @@ func GetInstallSteps() []InstallStep {
 				return InstallResult{Detail: "skipped (new install)"}
 			},
 			Skip: func(cfg InstallConfig) (bool, string) {
-				hasPostgres, hasClickhouse := CheckDockerVolumes()
-				if !hasPostgres && !hasClickhouse {
+				hasPostgres, hasDatastore := CheckDockerVolumes()
+				if !hasPostgres && !hasDatastore {
 					return true, "new install"
 				}
 				return false, ""

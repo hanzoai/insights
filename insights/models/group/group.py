@@ -18,7 +18,7 @@ class Group(models.Model):
     # used for evaluating if we need to override the value or not (value: set or set_once)
     properties_last_operation = models.JSONField(default=dict)
 
-    # current version of the group, used to sync with ClickHouse and collapse rows correctly
+    # current version of the group, used to sync with Datastore and collapse rows correctly
     version = models.BigIntegerField(null=False)
 
     class Meta:

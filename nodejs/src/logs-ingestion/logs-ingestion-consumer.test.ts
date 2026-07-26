@@ -194,7 +194,7 @@ describe('LogsIngestionConsumer', () => {
             expect(consumer['name']).toEqual('LogsIngestionConsumer')
             expect(consumer['groupId']).toEqual('ingestion-logs')
             expect(consumer['topic']).toEqual('logs_ingestion_test')
-            expect(consumer['clickhouseTopic']).toEqual('datastore_logs_test')
+            expect(consumer['datastoreTopic']).toEqual('datastore_logs_test')
             expect(consumer['overflowTopic']).toEqual('logs_ingestion_overflow_test')
             expect(consumer['dlqTopic']).toEqual('logs_ingestion_dlq_test')
         })
@@ -209,7 +209,7 @@ describe('LogsIngestionConsumer', () => {
 
             expect(customConsumer['groupId']).toBe('custom-group')
             expect(customConsumer['topic']).toBe('custom-topic')
-            expect(customConsumer['clickhouseTopic']).toBe('custom-datastore-topic')
+            expect(customConsumer['datastoreTopic']).toBe('custom-datastore-topic')
 
             await customConsumer.stop()
         })
@@ -491,7 +491,7 @@ describe('LogsIngestionConsumer', () => {
     })
 
     describe('message routing', () => {
-        it('should route messages to correct ClickHouse topic', async () => {
+        it('should route messages to correct Datastore topic', async () => {
             const logData = createLogMessage()
             const messages = await createKafkaMessages([logData], {
                 token: team.api_token,

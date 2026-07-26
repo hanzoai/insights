@@ -214,7 +214,7 @@ class TestSessionReplaySummaryTool(APIBaseTest):
         mock_recordings = [self.create_mock_session_recording(f"session_{i}") for i in range(25)]
         mock_list_recordings.side_effect = [
             (mock_recordings, False, "", None),
-            Exception("ClickHouse connection failed"),
+            Exception("Datastore connection failed"),
         ]
 
         tool = await self.create_tool()
@@ -225,7 +225,7 @@ class TestSessionReplaySummaryTool(APIBaseTest):
 
         self.assertEqual(mock_capture_exception.call_count, 1)
         captured_exception = mock_capture_exception.call_args[0][0]
-        self.assertIn("ClickHouse connection failed", str(captured_exception))
+        self.assertIn("Datastore connection failed", str(captured_exception))
 
     @patch("products.experiments.backend.max_tools.list_recordings_from_query")
     async def test_experiment_with_multiple_variants(self, mock_list_recordings):

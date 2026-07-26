@@ -233,11 +233,11 @@ import socket
 import time
 
 def loop():
-    print("Waiting for ClickHouse and Postgres to be ready")
+    print("Waiting for Datastore and Postgres to be ready")
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(('clickhouse', 9000))
-        print("Clickhouse is ready")
+            s.connect(('datastore', 9000))
+        print("Datastore is ready")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(('db', 5432))
         print("Postgres is ready")

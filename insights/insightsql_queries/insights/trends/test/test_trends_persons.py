@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 import pytest
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 from unittest.case import skip
 
 from django.test import override_settings
@@ -105,7 +105,7 @@ def get_event_count(result):
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestTrendsPersons(ClickhouseTestMixin, APIBaseTest):
+class TestTrendsPersons(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _get_actors(self, trends_query: TrendsQuery, **kwargs):

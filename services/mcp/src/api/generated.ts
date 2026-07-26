@@ -577,7 +577,7 @@ export namespace Schemas {
         usePresortedEventsTable: boolean | null
         useWebAnalyticsPreAggregatedTables: boolean | null
     }>
-    export type ClickhouseQueryProgress = {
+    export type DatastoreQueryProgress = {
         active_cpu_time: number
         bytes_read: number
         estimated_rows_total: number
@@ -596,7 +596,7 @@ export namespace Schemas {
         labels?: (Array<string> | null) | undefined
         pickup_time?: (string | null) | undefined
         query_async?: boolean | undefined
-        query_progress?: (ClickhouseQueryProgress | null) | undefined
+        query_progress?: (DatastoreQueryProgress | null) | undefined
         results?: (unknown | null) | undefined
         start_time?: (string | null) | undefined
         task_id?: (string | null) | undefined
@@ -1716,7 +1716,7 @@ export namespace Schemas {
         warnings: Array<InsightsQLNotice>
     }
     export type InsightsQLQueryResponse = {
-        clickhouse?: (string | null) | undefined
+        datastore?: (string | null) | undefined
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
@@ -2191,7 +2191,7 @@ export namespace Schemas {
         yAxis: Array<ChartAxis> | null
         yAxisAtZero: boolean | null
     }>
-    export type ClickhouseEvent = {
+    export type DatastoreEvent = {
         id: string
         distinct_id: string
         properties: string
@@ -2641,7 +2641,7 @@ export namespace Schemas {
         types: Array<string>
     }
     export type Response3 = {
-        clickhouse?: (string | null) | undefined
+        datastore?: (string | null) | undefined
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
@@ -4957,7 +4957,7 @@ export namespace Schemas {
     }>
     export type WebTrendsItem = { bucket: string; metrics: Metrics }
     export type WebTrendsQueryResponse = {
-        clickhouse?: (string | null) | undefined
+        datastore?: (string | null) | undefined
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
@@ -5523,9 +5523,9 @@ export namespace Schemas {
         previous?: (string | null) | undefined
         results: Array<BatchExportRun>
     }
-    export type PaginatedClickhouseEventList = Partial<{
+    export type PaginatedDatastoreEventList = Partial<{
         next: string | null
-        results: Array<ClickhouseEvent>
+        results: Array<DatastoreEvent>
     }>
     export type PaginatedCohortList = {
         count: number
@@ -7768,7 +7768,7 @@ export namespace Schemas {
         stdout?: (string | null) | undefined
     }
     export type QueryResponseAlternative7 = {
-        clickhouse?: (string | null) | undefined
+        datastore?: (string | null) | undefined
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
@@ -8068,7 +8068,7 @@ export namespace Schemas {
         types: Array<string>
     }
     export type QueryResponseAlternative35 = {
-        clickhouse?: (string | null) | undefined
+        datastore?: (string | null) | undefined
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
@@ -9566,7 +9566,7 @@ export namespace Endpoints {
             }>
             path: { project_id: string }
         }
-        responses: { 200: Schemas.PaginatedClickhouseEventList }
+        responses: { 200: Schemas.PaginatedDatastoreEventList }
     }
     export type get_Environments_events_retrieve = {
         method: 'GET'
@@ -9576,7 +9576,7 @@ export namespace Endpoints {
             query: Partial<{ format: 'csv' | 'json' }>
             path: { id: string; project_id: string }
         }
-        responses: { 200: Schemas.ClickhouseEvent }
+        responses: { 200: Schemas.DatastoreEvent }
     }
     export type get_Environments_events_values_retrieve = {
         method: 'GET'
@@ -12962,7 +12962,7 @@ export namespace Endpoints {
             }>
             path: { project_id: string }
         }
-        responses: { 200: Schemas.PaginatedClickhouseEventList }
+        responses: { 200: Schemas.PaginatedDatastoreEventList }
     }
     export type get_Events_retrieve = {
         method: 'GET'
@@ -12972,7 +12972,7 @@ export namespace Endpoints {
             query: Partial<{ format: 'csv' | 'json' }>
             path: { id: string; project_id: string }
         }
-        responses: { 200: Schemas.ClickhouseEvent }
+        responses: { 200: Schemas.DatastoreEvent }
     }
     export type get_Events_values_retrieve = {
         method: 'GET'

@@ -3,17 +3,17 @@ from uuid import uuid4
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     also_test_with_materialized_columns,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.utils.timezone import now
 
 from dateutil.relativedelta import relativedelta
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
+from insights.datastore.client import sync_execute
+from insights.datastore.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
 from insights.models import Cohort, Person
 from insights.session_recordings.queries.test.listing_recordings.test_utils import (
     assert_query_matches_session_ids,
@@ -24,7 +24,7 @@ from insights.session_recordings.sql.session_replay_event_sql import TRUNCATE_SE
 
 
 @freeze_time("2021-01-01T13:46:23")
-class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
+class TestSessionRecordingsListByCohort(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         sync_execute(TRUNCATE_SESSION_REPLAY_EVENTS_TABLE_SQL())
@@ -42,7 +42,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
     def an_hour_ago(self):
         return (now() - relativedelta(hours=1)).replace(microsecond=0, second=0)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(person_properties=["$some_prop"])
     def test_filter_with_cohort_properties(self) -> None:
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
@@ -130,7 +130,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                     [session_id_one],
                 )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(person_properties=["$some_prop"])
     def test_filter_with_static_and_dynamic_cohort_properties(self):
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
@@ -313,7 +313,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                     [session_id_four],
                 )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(person_properties=["$some_prop"])
     def test_filter_with_events_and_cohorts(self):
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
@@ -431,7 +431,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                     [session_id_two],
                 )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(person_properties=["$some_prop"])
     def test_internal_account_filter_with_cohort_properties(self) -> None:
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
@@ -508,11 +508,11 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                     [session_id_one],
                 )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_with_cohort_when_distinct_id_has_multiple_person_ids(self) -> None:
         """
         Test that cohort filtering works correctly when a distinct_id has multiple person_id associations
-        in ClickHouse (e.g., from person merges). The filter should only check cohort membership
+        in Datastore (e.g., from person merges). The filter should only check cohort membership
         for the CURRENT person_id, not historical ones.
 
         Regression test for bug where if:
@@ -558,7 +558,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                 )
 
                 # Simulate person merge: move distinct_id from person A to person B
-                # This creates a situation where distinct_id has multiple person_id entries in ClickHouse
+                # This creates a situation where distinct_id has multiple person_id entries in Datastore
                 from insights.models.person.util import create_person_distinct_id
 
                 # Add new version pointing to person B
@@ -620,7 +620,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                     [],
                 )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_not_in_cohort_with_many_users_outside_cohort(self) -> None:
         """
         Test that NOT IN cohort filtering works correctly when there are many users
@@ -721,7 +721,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                     [session_internal],
                 )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_not_in_cohort_with_empty_cohort(self) -> None:
         """
         Test that NOT IN cohort filtering works when the cohort is empty.
@@ -793,7 +793,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                     [],
                 )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_not_in_cohort_combined_with_other_filters(self) -> None:
         """
         Test that NOT IN cohort filtering works correctly when combined with
@@ -879,7 +879,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                     [session_premium],
                 )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_multiple_not_in_cohorts(self) -> None:
         """
         Test filtering with multiple NOT IN cohort conditions.
@@ -961,7 +961,7 @@ class TestSessionRecordingsListByCohort(ClickhouseTestMixin, APIBaseTest):
                     [session_regular],
                 )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_cohort_filter_with_or_operand(self) -> None:
         """
         Test cohort filtering with OR operand between cohorts.

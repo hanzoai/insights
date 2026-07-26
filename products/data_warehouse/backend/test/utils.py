@@ -14,7 +14,7 @@ from insights.settings import (
     XDIST_SUFFIX,
 )
 
-from products.data_warehouse.backend.models import CLICKHOUSE_INSIGHTSQL_MAPPING, clean_type
+from products.data_warehouse.backend.models import DATASTORE_INSIGHTSQL_MAPPING, clean_type
 from products.data_warehouse.backend.models.credential import DataWarehouseCredential
 from products.data_warehouse.backend.models.external_data_source import ExternalDataSource
 from products.data_warehouse.backend.models.table import DataWarehouseTable
@@ -85,8 +85,8 @@ def create_data_warehouse_table_from_csv(
     if any(isinstance(value, str) for value in table_columns.values()):
         table_columns = {
             str(key): {
-                "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[clean_type(str(value))].__name__,
-                "clickhouse": value,
+                "insightsql": DATASTORE_INSIGHTSQL_MAPPING[clean_type(str(value))].__name__,
+                "datastore": value,
                 "valid": True,
             }
             for key, value in table_columns.items()

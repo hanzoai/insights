@@ -3161,7 +3161,7 @@ const api = {
         async list(params: GroupListParams): Promise<CountedPaginatedResponse<Group>> {
             return await new ApiRequest().groups().withQueryString(toParams(params, true)).get()
         },
-        async listClickhouse(params: GroupListParams): Promise<GroupsQueryResponse> {
+        async listDatastore(params: GroupListParams): Promise<GroupsQueryResponse> {
             const groupsQuery: GroupsQuery = {
                 kind: NodeKind.GroupsQuery,
                 ...params,
@@ -3413,7 +3413,7 @@ const api = {
                 configuration: Record<string, any>
                 mock_async_functions: boolean
                 globals?: any
-                clickhouse_event?: any
+                datastore_event?: any
                 invocation_id?: string
             }
         ): Promise<CyclotronJobTestInvocationResult> {
@@ -5169,7 +5169,7 @@ const api = {
                 configuration: Record<string, any>
                 mock_async_functions: boolean
                 globals?: any
-                clickhouse_event?: any
+                datastore_event?: any
                 invocation_id?: string
                 current_action_id?: string
             }

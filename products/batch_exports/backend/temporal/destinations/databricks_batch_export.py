@@ -757,7 +757,7 @@ def databricks_default_fields() -> list[BatchExportField]:
     """
     batch_export_fields = events_model_default_fields()
     # add a metadata field for the ingested timestamp to aid with debugging
-    # (this is not strictly the time the data is ingested into Databricks but rather the time we query it from ClickHouse)
+    # (this is not strictly the time the data is ingested into Databricks but rather the time we query it from Datastore)
     batch_export_fields.append({"expression": "NOW64()", "alias": "databricks_ingested_timestamp"})
     return batch_export_fields
 
@@ -1150,7 +1150,7 @@ async def insert_into_databricks_activity_from_stage(inputs: DatabricksInsertInp
 
 @workflow.defn(name="databricks-export", failure_exception_types=[workflow.NondeterminismError])
 class DatabricksBatchExportWorkflow(InsightsWorkflow):
-    """A Temporal Workflow to export ClickHouse data into Databricks.
+    """A Temporal Workflow to export Datastore data into Databricks.
 
     This Workflow is intended to be executed both manually and by a Temporal
     Schedule. When ran by a schedule, `data_interval_end` should be set to

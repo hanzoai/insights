@@ -1,5 +1,5 @@
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
 
 """
 We want to use ML to convert session replay data to embeddings, these will let us check similarity between sessions
@@ -57,7 +57,7 @@ SETTINGS index_granularity=512
     )
 
 
-# Distributed engine tables are only created if CLICKHOUSE_REPLICATED
+# Distributed engine tables are only created if DATASTORE_REPLICATED
 
 # This table is responsible for writing to sharded_session_replay_embeddings based on a sharding key.
 

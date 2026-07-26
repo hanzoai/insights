@@ -23,7 +23,7 @@ from insights.insightsql import ast
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.query import InsightsQLQueryExecutor
 
-from insights.clickhouse.client.escape import substitute_params
+from insights.datastore.client.escape import substitute_params
 from insights.insightsql_queries.experiments import CONTROL_VARIANT_KEY
 from insights.models import Team
 
@@ -52,10 +52,10 @@ def get_experiment_query_sql(experiment_query_ast: ast.SelectQuery, team: Team) 
         team=team,
         modifiers=create_default_modifiers_for_team(team),
     )
-    clickhouse_sql_with_params, clickhouse_context_with_values = executor.generate_clickhouse_sql()
+    datastore_sql_with_params, datastore_context_with_values = executor.generate_datastore_sql()
 
     # Substitute the parameters to get the final executable query
-    return substitute_params(clickhouse_sql_with_params, clickhouse_context_with_values.values)
+    return substitute_params(datastore_sql_with_params, datastore_context_with_values.values)
 
 
 def _parse_enum_config(value: Any, enum_class: type[Enum], default: Any) -> Any:

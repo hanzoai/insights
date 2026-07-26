@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 from freezegun import freeze_time
-from insights.test.base import BaseTest, ClickhouseTestMixin, _create_event, snapshot_clickhouse_queries
+from insights.test.base import BaseTest, DatastoreTestMixin, _create_event, snapshot_datastore_queries
 
 from django.test import override_settings
 
@@ -35,7 +35,7 @@ from products.data_warehouse.backend.test.utils import create_data_warehouse_tab
 TEST_BUCKET = "test_storage_bucket-insights.insightsql.datawarehouse.trendquery"
 
 
-class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
+class TestTrendsDataWarehouseQuery(DatastoreTestMixin, BaseTest):
     def teardown_method(self, method) -> None:
         if getattr(self, "cleanUpDataWarehouse", None):
             self.cleanUpDataWarehouse()
@@ -87,10 +87,10 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
             csv_path=Path(__file__).parent / "data" / "trends_data.csv",
             table_name="test_table_1",
             table_columns={
-                "id": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "created": {"clickhouse": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
-                "prop_1": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
-                "prop_2": {"clickhouse": "String", "insightsql": "StringDatabaseField"},
+                "id": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "created": {"datastore": "DateTime64(3, 'UTC')", "insightsql": "DateTimeDatabaseField"},
+                "prop_1": {"datastore": "String", "insightsql": "StringDatabaseField"},
+                "prop_2": {"datastore": "String", "insightsql": "StringDatabaseField"},
             },
             test_bucket=TEST_BUCKET,
             team=self.team,
@@ -98,7 +98,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
 
         return table.name
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_data_warehouse(self):
         table_name = self.setup_data_warehouse()
 
@@ -123,7 +123,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
         assert set(response.columns).issubset({"date", "total"})
         assert response.results[0][1] == [1, 1, 1, 1, 0, 0, 0]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_entity_property(self):
         table_name = self.setup_data_warehouse()
 
@@ -198,7 +198,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
     def test_trends_view_quartile(self):
         assert 4 < self._avg_view_setup("p99") < 5
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_query_properties(self):
         table_name = self.setup_data_warehouse()
 
@@ -224,7 +224,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
         assert set(response.columns).issubset({"date", "total"})
         assert response.results[0][1] == [1, 0, 0, 0, 0, 0, 0]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_breakdown(self):
         table_name = self.setup_data_warehouse()
 
@@ -374,7 +374,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
         assert set(response.columns).issubset({"date", "total"})
         assert response.results[0][1] == [1, 1, 1, 1, 0, 0, 0]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_breakdown_on_view(self):
         from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 
@@ -415,7 +415,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
             response = TrendsQueryRunner(team=self.team, query=trends_query).calculate()
         assert len(response.results) == 4
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_breakdown_on_view_with_date_timestamp(self):
         from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 
@@ -457,7 +457,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
             response = TrendsQueryRunner(team=self.team, query=trends_query).calculate()
         assert len(response.results) == 4
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_breakdown_with_property(self):
         table_name = self.setup_data_warehouse()
 
@@ -521,7 +521,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
         self.assert_column_names_with_display_type(ChartDisplayType.WORLD_MAP)
         self.assert_column_names_with_display_type(ChartDisplayType.ACTIONS_LINE_GRAPH_CUMULATIVE)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_with_multiple_property_types(self):
         table_name = self.setup_data_warehouse()
 
@@ -568,7 +568,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
         assert response.results[0][1] == [1, 0, 0, 0, 0, 0, 0]
 
     @override_settings(IN_UNIT_TESTING=True)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_data_warehouse_all_time(self):
         table_name = self.setup_data_warehouse()
 
@@ -604,7 +604,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
         self.assertEqual("2023-01-01", response.results[0]["days"][0])
 
     @override_settings(IN_UNIT_TESTING=True)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_events_and_data_warehouse_all_time(self):
         table_name = self.setup_data_warehouse()
 
@@ -643,7 +643,7 @@ class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):
         self.assertEqual("2022-12-01", response.results[1]["days"][0])
 
     @override_settings(IN_UNIT_TESTING=True)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trends_events_filtering_on_warehouse_person_property(self):
         table_name = self.setup_data_warehouse()
 

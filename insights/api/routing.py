@@ -20,7 +20,7 @@ from insights.auth import (
     SharingAccessTokenAuthentication,
     SharingPasswordProtectedAuthentication,
 )
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.models.organization import Organization
 from insights.models.project import Project
 from insights.models.team import Team

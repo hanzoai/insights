@@ -44,7 +44,7 @@ class TestPollQueryPerformance(SimpleTestCase):
 
         mock_sync_execute.assert_called_once()
         mock_QueryStatusManager.assert_called_once_with("550e8400-e29b-41d4-a716-446655440000", 12345)
-        mock_manager.update_clickhouse_query_progresses.assert_called_once_with(
+        mock_manager.update_datastore_query_progresses.assert_called_once_with(
             [
                 {
                     "initial_query_id": "12345_550e8400-e29b-41d4-a716-446655440000_eO290UUI",

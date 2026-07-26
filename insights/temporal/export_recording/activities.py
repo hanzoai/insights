@@ -13,7 +13,7 @@ from django.conf import settings
 import pytz
 from temporalio import activity
 
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.models.exported_recording import ExportedRecording
 from insights.redis import get_async_client
 from insights.session_recordings.models.session_recording import SessionRecording
@@ -21,7 +21,7 @@ from insights.session_recordings.queries.session_replay_events import SessionRep
 from insights.session_recordings.session_recording_v2_service import list_blocks
 from insights.storage import session_recording_v2_object_storage
 from insights.sync import database_sync_to_async
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.logger import get_write_only_logger
 from insights.temporal.export_recording.types import ExportContext, ExportRecordingInput, RedisConfig
 
@@ -63,10 +63,10 @@ async def build_recording_export_context(input: ExportRecordingInput) -> ExportC
 
 
 @activity.defn
-async def export_replay_clickhouse_rows(input: ExportContext) -> None:
+async def export_replay_datastore_rows(input: ExportContext) -> None:
     tag_queries(product=Product.REPLAY, team_id=input.team_id)
     logger = LOGGER.bind()
-    logger.info(f"Exporting Replay ClickHouse rows for session {input.session_id}")
+    logger.info(f"Exporting Replay Datastore rows for session {input.session_id}")
 
     query: str = SessionReplayEvents.get_metadata_query(format="JSON")
     parameters = {
@@ -76,27 +76,27 @@ async def export_replay_clickhouse_rows(input: ExportContext) -> None:
     }
 
     ch_query_id = str(uuid4())
-    logger.info(f"Querying ClickHouse with query_id: {ch_query_id}")
+    logger.info(f"Querying Datastore with query_id: {ch_query_id}")
 
     raw_response: bytes = b""
     async with get_client() as client:
         async with client.aget_query(query=query, query_parameters=parameters, query_id=ch_query_id) as ch_response:
             raw_response = await ch_response.content.read()
 
-    logger.info(f"Received {len(raw_response)} bytes from ClickHouse")
+    logger.info(f"Received {len(raw_response)} bytes from Datastore")
 
     redis_key = _redis_key(input.export_id, "replay-events")
     r = get_async_client(_redis_url(input.redis_config))
     await r.setex(redis_key, input.redis_config.redis_ttl, raw_response)
 
-    logger.info(f"Wrote replay ClickHouse metadata to Redis key {redis_key}")
+    logger.info(f"Wrote replay Datastore metadata to Redis key {redis_key}")
 
 
 @activity.defn
-async def export_event_clickhouse_rows(input: ExportContext) -> None:
+async def export_event_datastore_rows(input: ExportContext) -> None:
     tag_queries(product=Product.REPLAY, team_id=input.team_id)
     logger = LOGGER.bind()
-    logger.info(f"Exporting event ClickHouse rows for session {input.session_id}")
+    logger.info(f"Exporting event Datastore rows for session {input.session_id}")
 
     query: str = """
         SELECT * EXCEPT('mat_.*|dmat_.*')
@@ -115,20 +115,20 @@ async def export_event_clickhouse_rows(input: ExportContext) -> None:
     }
 
     ch_query_id = str(uuid4())
-    logger.info(f"Querying ClickHouse with query_id: {ch_query_id}")
+    logger.info(f"Querying Datastore with query_id: {ch_query_id}")
 
     raw_response: bytes = b""
     async with get_client() as client:
         async with client.aget_query(query=query, query_parameters=parameters, query_id=ch_query_id) as ch_response:
             raw_response = await ch_response.content.read()
 
-    logger.info(f"Received {len(raw_response)} bytes from ClickHouse")
+    logger.info(f"Received {len(raw_response)} bytes from Datastore")
 
     redis_key = _redis_key(input.export_id, "events")
     r = get_async_client(_redis_url(input.redis_config))
     await r.setex(redis_key, input.redis_config.redis_ttl, raw_response)
 
-    logger.info(f"Wrote event ClickHouse data to Redis key {redis_key}")
+    logger.info(f"Wrote event Datastore data to Redis key {redis_key}")
 
 
 @activity.defn
@@ -228,17 +228,17 @@ async def store_export_data(input: ExportContext) -> None:
     s3_prefix = await r.get(_redis_key(input.export_id, "s3-prefix"))
     block_manifest_raw = await r.get(_redis_key(input.export_id, "block-manifest"))
 
-    clickhouse_dir = export_dir / "clickhouse"
-    clickhouse_dir.mkdir(parents=True, exist_ok=True)
+    datastore_dir = export_dir / "datastore"
+    datastore_dir.mkdir(parents=True, exist_ok=True)
 
     if replay_events_data:
-        replay_events_path = clickhouse_dir / "session-replay-events.json"
+        replay_events_path = datastore_dir / "session-replay-events.json"
         with replay_events_path.open("wb") as f:
             f.write(replay_events_data if isinstance(replay_events_data, bytes) else replay_events_data.encode())
         logger.info(f"Wrote replay events to {replay_events_path}")
 
     if events_data:
-        events_path = clickhouse_dir / "events.json"
+        events_path = datastore_dir / "events.json"
         with events_path.open("wb") as f:
             f.write(events_data if isinstance(events_data, bytes) else events_data.encode())
         logger.info(f"Wrote events to {events_path}")

@@ -4,11 +4,11 @@ from zoneinfo import ZoneInfo
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.forms.models import model_to_dict
@@ -29,7 +29,7 @@ from insights.test.test_journeys import journeys_for
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestExperimentExposuresQueryRunner(DatastoreTestMixin, APIBaseTest):
     def create_feature_flag(self, key="test-experiment"):
         return FeatureFlag.objects.create(
             name=f"Test experiment flag: {key}",
@@ -94,7 +94,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
 
     @freeze_time("2024-01-07T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_exposure_query_returns_correct_timeseries(self):
         ff_property = f"$feature/{self.feature_flag.key}"
 
@@ -249,7 +249,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.total_exposures["test"], 5)
 
     @freeze_time("2024-01-07T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_exposure_query_counts_users_only_on_first_exposure(self):
         ff_property = f"$feature/{self.feature_flag.key}"
 
@@ -364,7 +364,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.total_exposures["test"], 2)
 
     @freeze_time("2024-01-07T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_exposure_query_filters_test_accounts(self):
         ff_property = f"$feature/{self.feature_flag.key}"
 
@@ -562,7 +562,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ]
     )
     @freeze_time("2024-01-07T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_exposure_query_with_custom_exposure(self, exposure_event):
         if exposure_event == "$feature_flag_called":
             ff_property = f"$feature_flag_response"
@@ -682,7 +682,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.total_exposures["test"], 5)
 
     @freeze_time("2024-01-07T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_exposure_query_without_feature_flag_property(self):
         ff_property = f"$feature/{self.feature_flag.key}"
 
@@ -816,7 +816,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.total_exposures["test"], 5)
 
     @freeze_time("2024-01-07T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_exposure_query_with_multiple_variant_exposures(self):
         ff_property = f"$feature/{self.feature_flag.key}"
 
@@ -905,7 +905,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.total_exposures[MULTIPLE_VARIANT_KEY], 1)
 
     @freeze_time("2024-01-07T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_exposure_query_using_group_aggregation(self):
         self.experiment.start_date = datetime(2024, 1, 1).replace(tzinfo=ZoneInfo("UTC"))
         self.experiment.end_date = datetime(2024, 1, 28).replace(tzinfo=ZoneInfo("UTC"))
@@ -939,7 +939,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.total_exposures["test"], 3)
 
     @freeze_time("2024-01-07T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_exposure_query_multiple_variant_handling_first_seen(self):
         ff_property = f"$feature/{self.feature_flag.key}"
 
@@ -1047,7 +1047,7 @@ class TestExperimentExposuresQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertNotIn(MULTIPLE_VARIANT_KEY, response.total_exposures)
 
     @freeze_time("2024-01-07T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_exposure_query_with_action_as_exposure_criteria(self):
         # Create an action for purchase events with specific properties
         action = Action.objects.create(

@@ -10,7 +10,7 @@ from structlog.contextvars import bind_contextvars
 from structlog.typing import FilteringBoundLogger
 from temporalio import activity
 
-from insights.clickhouse.query_tagging import Feature, Product, tag_queries
+from insights.datastore.query_tagging import Feature, Product, tag_queries
 from insights.exceptions_capture import capture_exception
 from insights.models import Team
 from insights.sync import database_sync_to_async_pool

@@ -1,11 +1,11 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import Mock
 
 from insights.models import Team
 from insights.models.web_preaggregated.team_selection_strategies import ProjectSettingsStrategy
 
 
-class TestProjectSettingsStrategyIntegration(ClickhouseTestMixin, APIBaseTest):
+class TestProjectSettingsStrategyIntegration(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         self.mock_context = Mock()

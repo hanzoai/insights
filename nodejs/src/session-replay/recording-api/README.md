@@ -8,7 +8,7 @@ The `RecordingApi` exposes REST endpoints that:
 
 - **Serve recording blocks** decrypted from object storage (S3) for playback
 - **Delete recordings** via crypto-shredding (deleting the encryption key, rendering data permanently unreadable)
-- **Emit deletion metadata** to ClickHouse and clean up associated PostgreSQL records
+- **Emit deletion metadata** to Datastore and clean up associated PostgreSQL records
 
 ## Endpoints
 

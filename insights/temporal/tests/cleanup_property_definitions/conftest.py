@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 
 
 def insert_property_definition_to_ch(
@@ -14,7 +14,7 @@ def insert_property_definition_to_ch(
     property_type: int = 2,
     last_seen_at: datetime | None = None,
 ) -> None:
-    """Insert a property definition directly into ClickHouse property_definitions table.
+    """Insert a property definition directly into Datastore property_definitions table.
 
     Args:
         team_id: The team ID
@@ -40,7 +40,7 @@ def insert_property_definition_to_ch(
 
 
 def get_ch_property_definitions(team_id: int, property_type: int = 2) -> list[dict]:
-    """Get property definitions from ClickHouse for a team.
+    """Get property definitions from Datastore for a team.
 
     Args:
         team_id: The team ID
@@ -62,7 +62,7 @@ def get_ch_property_definitions(team_id: int, property_type: int = 2) -> list[di
 
 
 def cleanup_ch_property_definitions(team_id: int, names: list[str]) -> None:
-    """Delete property definitions from ClickHouse using lightweight delete.
+    """Delete property definitions from Datastore using lightweight delete.
 
     Args:
         team_id: The team ID

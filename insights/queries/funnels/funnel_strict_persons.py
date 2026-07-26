@@ -3,11 +3,11 @@ from typing import Optional
 from insights.models.filters.filter import Filter
 from insights.models.filters.mixins.utils import cached_property
 from insights.queries.actor_base_query import ActorBaseQuery
-from insights.queries.funnels.funnel_strict import ClickhouseFunnelStrict
+from insights.queries.funnels.funnel_strict import DatastoreFunnelStrict
 from insights.queries.funnels.sql import FUNNEL_PERSONS_BY_STEP_SQL
 
 
-class ClickhouseFunnelStrictActors(ClickhouseFunnelStrict, ActorBaseQuery):
+class DatastoreFunnelStrictActors(DatastoreFunnelStrict, ActorBaseQuery):
     _filter: Filter
     QUERY_TYPE = "funnel_strict_actors"
 

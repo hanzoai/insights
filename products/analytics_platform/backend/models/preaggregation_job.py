@@ -23,7 +23,7 @@ class PreaggregationJob(CreatedMetaFields, UUIDModel):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     computed_at = models.DateTimeField(null=True, blank=True)
 
-    # TTL: when the preaggregated data expires in ClickHouse
+    # TTL: when the preaggregated data expires in Datastore
     # Jobs with expires_at in the past should not be used
     expires_at = models.DateTimeField(null=True, blank=True)
 

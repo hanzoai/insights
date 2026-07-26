@@ -922,7 +922,7 @@ describe('IngestionConsumer', () => {
             const ingester = await createIngestionConsumer(hub)
             await ingester.handleKafkaBatch(messages)
 
-            // Should not produce to clickhouse
+            // Should not produce to datastore
             expect(mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')).toHaveLength(0)
 
             // Should produce to DLQ
@@ -1090,7 +1090,7 @@ describe('IngestionConsumer', () => {
                             },
                         },
                     }),
-                    // This triggers an event but not a groups clickhouse change as the max groups is already hit
+                    // This triggers an event but not a groups datastore change as the max groups is already hit
                     createEvent({
                         event: '$groupidentify',
                         properties: {

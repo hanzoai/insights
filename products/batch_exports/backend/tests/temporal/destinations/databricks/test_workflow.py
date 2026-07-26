@@ -35,11 +35,11 @@ from products.batch_exports.backend.tests.temporal.destinations.base_destination
     BaseDestinationTest,
     CommonWorkflowTests,
     RetryableTestException,
-    assert_clickhouse_records_in_destination,
+    assert_datastore_records_in_destination,
 )
 from products.batch_exports.backend.tests.temporal.utils.persons import (
-    generate_test_person_distinct_id2_in_clickhouse,
-    generate_test_persons_in_clickhouse,
+    generate_test_person_distinct_id2_in_datastore,
+    generate_test_persons_in_datastore,
 )
 
 # Note: we add _BE to the env vars to avoid conflicts with env vars the Databricks SDK is automatically looking for,
@@ -279,7 +279,7 @@ class TestDatabricksBatchExportWorkflow(CommonWorkflowTests):
         data_interval_end: dt.datetime,
         ateam,
         batch_export_for_destination,
-        clickhouse_client,
+        datastore_client,
         integration: Integration,
         setup_destination,
     ):
@@ -308,7 +308,7 @@ class TestDatabricksBatchExportWorkflow(CommonWorkflowTests):
         assert run.status == "Completed"
         _, persons_to_export_created = generate_test_data
         assert run.records_completed == len(persons_to_export_created)
-        await assert_clickhouse_records_in_destination(
+        await assert_datastore_records_in_destination(
             destination_test=destination_test,
             team_id=ateam.pk,
             data_interval_start=data_interval_start,
@@ -323,8 +323,8 @@ class TestDatabricksBatchExportWorkflow(CommonWorkflowTests):
         num_new_persons = len(persons_to_export_created) // 2
         for old_person in persons_to_export_created[:num_new_persons]:
             new_person_id = uuid.uuid4()
-            new_person, _ = await generate_test_persons_in_clickhouse(
-                client=clickhouse_client,
+            new_person, _ = await generate_test_persons_in_datastore(
+                client=datastore_client,
                 team_id=ateam.pk,
                 start_time=data_interval_start,
                 end_time=data_interval_end,
@@ -333,8 +333,8 @@ class TestDatabricksBatchExportWorkflow(CommonWorkflowTests):
                 properties={"utm_medium": "referral", "$initial_os": "Linux", "new_property": "Something"},
             )
 
-            await generate_test_person_distinct_id2_in_clickhouse(
-                clickhouse_client,
+            await generate_test_person_distinct_id2_in_datastore(
+                datastore_client,
                 ateam.pk,
                 person_id=uuid.UUID(new_person[0]["id"]),
                 distinct_id=old_person["distinct_id"],
@@ -349,7 +349,7 @@ class TestDatabricksBatchExportWorkflow(CommonWorkflowTests):
         )
         assert run.status == "Completed"
         assert run.records_completed == len(persons_to_export_created)
-        await assert_clickhouse_records_in_destination(
+        await assert_datastore_records_in_destination(
             destination_test=destination_test,
             team_id=ateam.pk,
             data_interval_start=data_interval_start,
@@ -433,7 +433,7 @@ class TestDatabricksBatchExportWorkflow(CommonWorkflowTests):
         assert run.status == "Completed"
         _, persons_to_export_created = generate_test_data
         assert run.records_completed == len(persons_to_export_created)
-        await assert_clickhouse_records_in_destination(
+        await assert_datastore_records_in_destination(
             destination_test=destination_test,
             team_id=ateam.pk,
             data_interval_start=data_interval_start,
@@ -466,7 +466,7 @@ class TestDatabricksBatchExportWorkflow(CommonWorkflowTests):
         data_interval_end: dt.datetime,
         ateam,
         batch_export_for_destination,
-        clickhouse_client,
+        datastore_client,
         integration: Integration,
         setup_destination,
     ):

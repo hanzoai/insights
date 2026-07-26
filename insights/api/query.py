@@ -32,9 +32,9 @@ from insights.api.monitoring import Feature, monitor
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.services.query import process_query_model
 from insights.api.utils import action, is_insight_actors_options_query, is_insight_actors_query, is_insight_query
-from insights.clickhouse.client.execute_async import cancel_query, get_query_status
-from insights.clickhouse.client.limit import ConcurrencyLimitExceeded
-from insights.clickhouse.query_tagging import get_query_tag_value, get_query_tags, tag_queries
+from insights.datastore.client.execute_async import cancel_query, get_query_status
+from insights.datastore.client.limit import ConcurrencyLimitExceeded
+from insights.datastore.query_tagging import get_query_tag_value, get_query_tags, tag_queries
 from insights.constants import AvailableFeature
 from insights.errors import ExposedCHQueryError, InternalCHQueryError
 from insights.exceptions_capture import capture_exception
@@ -48,8 +48,8 @@ from insights.rate_limit import (
     AISustainedRateThrottle,
     APIQueriesBurstThrottle,
     APIQueriesSustainedThrottle,
-    ClickHouseBurstRateThrottle,
-    ClickHouseSustainedRateThrottle,
+    DatastoreBurstRateThrottle,
+    DatastoreSustainedRateThrottle,
     InsightsQLQueryThrottle,
 )
 from insights.rbac.user_access_control import UserAccessControlError
@@ -112,7 +112,7 @@ class QueryViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet)
         if query := self.request.data.get("query"):
             if isinstance(query, dict) and query.get("kind") == "InsightsQLQuery":
                 return [InsightsQLQueryThrottle()]
-        return [ClickHouseBurstRateThrottle(), ClickHouseSustainedRateThrottle()]
+        return [DatastoreBurstRateThrottle(), DatastoreSustainedRateThrottle()]
 
     def check_team_api_queries_concurrency(self):
         cache_key = f"team/{self.team_id}/feature/{AvailableFeature.API_QUERIES_CONCURRENCY}"
@@ -176,7 +176,7 @@ class QueryViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet)
         except InternalCHQueryError as e:
             self.handle_column_ch_error(e)
             capture_exception(e)
-            raise APIException("ClickHouse error while executing query.")
+            raise APIException("Datastore error while executing query.")
         except UserAccessControlError as e:
             raise ValidationError(str(e))
         except ResolutionError as e:

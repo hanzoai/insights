@@ -11,41 +11,41 @@ import psycopg
 import pytest_asyncio
 import temporalio.worker
 from asgiref.sync import sync_to_async
-from infi.clickhouse_orm import Database
+from datastore_orm import Database
 from psycopg import sql
 from temporalio.testing import ActivityEnvironment
 
-from insights.conftest import create_clickhouse_tables
+from insights.conftest import create_datastore_tables
 from insights.models import Organization, Team
 from insights.models.team.util import delete_batch_exports
 from insights.models.utils import uuid7
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 from insights.temporal.common.client import connect
 from insights.temporal.common.logger import configure_logger
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
 from products.batch_exports.backend.temporal import ACTIVITIES, WORKFLOWS
 from products.batch_exports.backend.temporal.metrics import BatchExportsMetricsInterceptor
 from products.batch_exports.backend.tests.temporal.utils.persons import (
-    generate_test_person_distinct_id2_in_clickhouse,
-    generate_test_persons_in_clickhouse,
+    generate_test_person_distinct_id2_in_datastore,
+    generate_test_persons_in_datastore,
 )
 
 
 @pytest.fixture(scope="package", autouse=True)
-def clickhouse_create_db_and_tables():
+def datastore_create_db_and_tables():
     database = Database(
-        settings.CLICKHOUSE_DATABASE,
-        db_url=settings.CLICKHOUSE_HTTP_URL,
-        username=settings.CLICKHOUSE_USER,
-        password=settings.CLICKHOUSE_PASSWORD,
-        cluster=settings.CLICKHOUSE_CLUSTER,
-        verify_ssl_cert=settings.CLICKHOUSE_VERIFY,
+        settings.DATASTORE_DATABASE,
+        db_url=settings.DATASTORE_HTTP_URL,
+        username=settings.DATASTORE_USER,
+        password=settings.DATASTORE_PASSWORD,
+        cluster=settings.DATASTORE_CLUSTER,
+        verify_ssl_cert=settings.DATASTORE_VERIFY,
         randomize_replica_paths=True,
     )
 
     database.create_database()  # Create database if it doesn't exist
-    create_clickhouse_tables()  # Create all expected tables
+    create_datastore_tables()  # Create all expected tables
 
     yield
 
@@ -111,13 +111,13 @@ def activity_environment():
 
 
 @pytest_asyncio.fixture(scope="module", loop_scope="module")
-async def clickhouse_client():
-    """Provide a ClickHouseClient to use in tests."""
-    async with ClickHouseClient(
-        url=settings.CLICKHOUSE_HTTP_URL,
-        user=settings.CLICKHOUSE_USER,
-        password=settings.CLICKHOUSE_PASSWORD,
-        database=settings.CLICKHOUSE_DATABASE,
+async def datastore_client():
+    """Provide a DatastoreClient to use in tests."""
+    async with DatastoreClient(
+        url=settings.DATASTORE_HTTP_URL,
+        user=settings.DATASTORE_USER,
+        password=settings.DATASTORE_PASSWORD,
+        database=settings.DATASTORE_DATABASE,
         output_format_arrow_string_as_string="true",
         # This parameter is disabled (0) in production.
         # Durting testing, it's useful to enable it to wait for mutations.
@@ -381,7 +381,7 @@ def events_table(request) -> str | None:
 @pytest.fixture
 async def generate_test_data(
     ateam,
-    clickhouse_client,
+    datastore_client,
     exclude_events,
     data_interval_start,
     data_interval_end,
@@ -391,7 +391,7 @@ async def generate_test_data(
     count_no_prop,
     events_table,
 ):
-    """Generate test data in ClickHouse."""
+    """Generate test data in Datastore."""
     if events_table:
         table = events_table
     elif data_interval_start and data_interval_start > (dt.datetime.now(tz=dt.UTC) - dt.timedelta(days=6)):
@@ -399,8 +399,8 @@ async def generate_test_data(
     else:
         table = "sharded_events"
 
-    events_to_export_created, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    events_to_export_created, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -414,8 +414,8 @@ async def generate_test_data(
         insert_sessions="$session_id" in test_properties and insert_sessions,
     )
 
-    more_events_to_export_created, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    more_events_to_export_created, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -431,8 +431,8 @@ async def generate_test_data(
 
     if exclude_events:
         for event_name in exclude_events:
-            await generate_test_events_in_clickhouse(
-                client=clickhouse_client,
+            await generate_test_events_in_datastore(
+                client=datastore_client,
                 team_id=ateam.pk,
                 start_time=data_interval_start,
                 end_time=data_interval_end,
@@ -443,8 +443,8 @@ async def generate_test_data(
                 table=table,
             )
 
-    persons, _ = await generate_test_persons_in_clickhouse(
-        client=clickhouse_client,
+    persons, _ = await generate_test_persons_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -455,8 +455,8 @@ async def generate_test_data(
 
     persons_to_export_created = []
     for person in persons:
-        person_distinct_id, _ = await generate_test_person_distinct_id2_in_clickhouse(
-            client=clickhouse_client,
+        person_distinct_id, _ = await generate_test_person_distinct_id2_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             person_id=uuid.UUID(person["id"]),
             distinct_id=f"distinct-id-{uuid.UUID(person['id'])}",
@@ -475,10 +475,10 @@ async def generate_test_data(
 
 
 @pytest_asyncio.fixture
-async def generate_test_persons_data(ateam, clickhouse_client, data_interval_start, data_interval_end):
-    """Generate test persons data in ClickHouse."""
-    persons, _ = await generate_test_persons_in_clickhouse(
-        client=clickhouse_client,
+async def generate_test_persons_data(ateam, datastore_client, data_interval_start, data_interval_end):
+    """Generate test persons data in Datastore."""
+    persons, _ = await generate_test_persons_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=data_interval_start,
         end_time=data_interval_end,
@@ -489,8 +489,8 @@ async def generate_test_persons_data(ateam, clickhouse_client, data_interval_sta
 
     persons_to_export_created = []
     for person in persons:
-        person_distinct_id, _ = await generate_test_person_distinct_id2_in_clickhouse(
-            client=clickhouse_client,
+        person_distinct_id, _ = await generate_test_person_distinct_id2_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             person_id=uuid.UUID(person["id"]),
             distinct_id=f"distinct-id-{uuid.UUID(person['id'])}",

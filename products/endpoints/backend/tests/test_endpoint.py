@@ -3,7 +3,7 @@ from time import sleep
 from typing import Any
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest import TestCase
 
 from parameterized import parameterized
@@ -21,7 +21,7 @@ from products.endpoints.backend.models import Endpoint
 from products.endpoints.backend.tests.conftest import create_endpoint_with_version
 
 
-class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
+class TestEndpoint(DatastoreTestMixin, APIBaseTest):
     ENDPOINT = "endpoints"
 
     def setUp(self):
@@ -939,7 +939,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(endpoint.derived_from_insight, "abc123xyz")
 
 
-class TestExtractColumns(ClickhouseTestMixin, APIBaseTest):
+class TestExtractColumns(DatastoreTestMixin, APIBaseTest):
     @parameterized.expand(
         [
             (
@@ -1007,7 +1007,7 @@ class TestExtractColumns(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result, expected)
 
 
-class TestClickhouseTypeMapping(TestCase):
+class TestDatastoreTypeMapping(TestCase):
     @parameterized.expand(
         [
             ("String", "string"),
@@ -1035,7 +1035,7 @@ class TestClickhouseTypeMapping(TestCase):
             ("SomeFutureType", "unknown"),
         ]
     )
-    def test_clickhouse_type_to_serialized_type(self, ch_type: str, expected: str):
-        from products.endpoints.backend.models import _clickhouse_type_to_serialized_type
+    def test_datastore_type_to_serialized_type(self, ch_type: str, expected: str):
+        from products.endpoints.backend.models import _datastore_type_to_serialized_type
 
-        self.assertEqual(_clickhouse_type_to_serialized_type(ch_type), expected)
+        self.assertEqual(_datastore_type_to_serialized_type(ch_type), expected)

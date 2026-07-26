@@ -10,7 +10,7 @@ from insights.insightsql.database.models import FunctionCallTable
 from insights.insightsql.errors import ExposedInsightsQLError
 from insights.insightsql.escape_sql import escape_insightsql_identifier
 
-from insights.clickhouse.client.escape import substitute_params
+from insights.datastore.client.escape import substitute_params
 
 
 def build_function_call(
@@ -177,7 +177,7 @@ class S3Table(FunctionCallTable):
     def to_printed_insightsql(self):
         return escape_insightsql_identifier(self.name)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return build_function_call(
             url=self.url,
             queryable_folder=self.queryable_folder,

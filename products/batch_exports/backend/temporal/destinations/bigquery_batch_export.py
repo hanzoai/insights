@@ -930,7 +930,7 @@ class BigQueryInsertInputs(BatchExportInsertInputs):
 @activity.defn
 @handle_non_retryable_errors(NON_RETRYABLE_ERROR_TYPES)
 async def insert_into_bigquery_activity_from_stage(inputs: BigQueryInsertInputs) -> BatchExportResult:
-    """Activity streams data from ClickHouse to BigQuery."""
+    """Activity streams data from Datastore to BigQuery."""
     bind_contextvars(
         team_id=inputs.team_id,
         destination="BigQuery",
@@ -1117,7 +1117,7 @@ async def insert_into_bigquery_activity_from_stage(inputs: BigQueryInsertInputs)
 
 @workflow.defn(name="bigquery-export", failure_exception_types=[workflow.NondeterminismError])
 class BigQueryBatchExportWorkflow(InsightsWorkflow):
-    """A Temporal Workflow to export ClickHouse data into BigQuery.
+    """A Temporal Workflow to export Datastore data into BigQuery.
 
     This Workflow is intended to be executed both manually and by a Temporal
     Schedule. When ran by a schedule, `data_interval_end` should be set to

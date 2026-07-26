@@ -1,7 +1,7 @@
 from django.conf import settings
 
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
 
 TABLE_BASE_NAME = "raw_sessions"
 
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause}
     team_id Int64,
     session_id_v7 UInt128, -- integer representation of a uuidv7
 
-    -- ClickHouse will pick the latest value of distinct_id for the session
+    -- Datastore will pick the latest value of distinct_id for the session
     -- this is fine since even if the distinct_id changes during a session
     distinct_id AggregateFunction(argMax, String, DateTime64(6, 'UTC')),
 
@@ -265,7 +265,7 @@ SELECT
 FROM {database}.events
 WHERE bitAnd(bitShiftRight(toUInt128(accurateCastOrNull(`$session_id`, 'UUID')), 76), 0xF) == 7 -- has a session id and is valid uuidv7
 """.format(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         current_url=source_url_column("$current_url"),
         current_url_string=source_string_column("$current_url"),
         external_click_url=source_string_column("$external_click_url"),
@@ -394,7 +394,7 @@ GROUP BY
     cityHash64(session_id_v7),
     session_id_v7
 """.format(
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         current_url=source_url_column("$current_url"),
         current_url_string=source_string_column("$current_url"),
         external_click_url=source_string_column("$external_click_url"),
@@ -448,7 +448,7 @@ AS
         table_name=f"{TABLE_BASE_NAME}_mv",
         target_table=f"writable_{TABLE_BASE_NAME}",
         on_cluster_clause=ON_CLUSTER_CLAUSE(on_cluster=False),
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         select_sql=RAW_SESSION_TABLE_MV_SELECT_SQL(),
     )
 )
@@ -465,7 +465,7 @@ MODIFY QUERY
     )
 )
 
-# Distributed engine tables are only created if CLICKHOUSE_REPLICATED
+# Distributed engine tables are only created if DATASTORE_REPLICATED
 
 # This table is responsible for writing to sharded_sessions based on a sharding key.
 

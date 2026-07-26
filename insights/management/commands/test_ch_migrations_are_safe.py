@@ -9,7 +9,7 @@ from git import Repo
 
 logger = logging.getLogger(__name__)
 
-MIGRATIONS_DIR = "insights/clickhouse/migrations"
+MIGRATIONS_DIR = "insights/datastore/migrations"
 MAX_MIGRATION_FILE = os.path.join(MIGRATIONS_DIR, "max_migration.txt")
 
 # Pre-existing duplicate migration numbers to ignore.
@@ -79,7 +79,7 @@ def check_max_migration_file() -> bool:
 
 
 class Command(BaseCommand):
-    help = "Automated test to make sure ClickHouse migrations are safe"
+    help = "Automated test to make sure Datastore migrations are safe"
 
     def handle(self, *args, **options):
         if not check_no_duplicate_migration_numbers() or not check_max_migration_file():
@@ -126,7 +126,7 @@ class Command(BaseCommand):
                 old_migrations.append(match[0])
 
         try:
-            _, index, name = re.findall(r"([a-z]+)/clickhouse/migrations/([0-9]+)_([a-zA-Z_0-9]+)\.py", new_migration)[
+            _, index, name = re.findall(r"([a-z]+)/datastore/migrations/([0-9]+)_([a-zA-Z_0-9]+)\.py", new_migration)[
                 0
             ]
         except (IndexError, CommandError) as exc:

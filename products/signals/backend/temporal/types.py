@@ -66,7 +66,7 @@ class SignalTypeExample:
 
 @dataclass
 class SignalData:
-    """Data about a signal fetched from ClickHouse."""
+    """Data about a signal fetched from Datastore."""
 
     signal_id: str
     content: str

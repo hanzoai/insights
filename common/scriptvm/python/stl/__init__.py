@@ -458,7 +458,7 @@ def apply_interval_to_datetime(dt: dict, interval: dict) -> dict:
         month = ((month - 1) % 12) + 1
         # If day is invalid for the new month, clamp
         # For simplicity, clamp to last valid day of month
-        # This matches ClickHouse dateAdd('month',...) behavior
+        # This matches Datastore dateAdd('month',...) behavior
         while True:
             try:
                 base_dt = base_dt.replace(year=year, month=month, day=day)

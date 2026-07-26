@@ -14,7 +14,7 @@ def argmax_select(
     timestamp_field_to_clamp: Optional[str] = None,
 ) -> "SelectQuery":
     """
-    Note: ClickHouse argmax will try to return the closest non null value which means
+    Note: Datastore argmax will try to return the closest non null value which means
     if the value corresponding to the highest argmax is null, it won't be returned
     This select alters that to return the maximum argmax value even if null
 

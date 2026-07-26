@@ -99,7 +99,7 @@ async def gcs_batch_export(
 @pytest.mark.parametrize("bucket_name", [os.getenv("GCS_TEST_BUCKET")], indirect=True)
 async def test_s3_export_workflow_with_gcs_bucket_with_various_file_formats(
     s3_client,
-    clickhouse_client,
+    datastore_client,
     interval,
     gcs_batch_export,
     bucket_name,
@@ -137,6 +137,6 @@ async def test_s3_export_workflow_with_gcs_bucket_with_various_file_formats(
         interval=interval,
         data_interval_start=data_interval_start,
         data_interval_end=data_interval_end,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         s3_client=s3_client,
     )

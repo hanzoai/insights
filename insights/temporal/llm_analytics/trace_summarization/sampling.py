@@ -24,7 +24,7 @@ from insights.temporal.llm_analytics.trace_summarization.constants import (
     MAX_TRACE_PROPERTIES_SIZE,
 )
 from insights.temporal.llm_analytics.trace_summarization.models import BatchSummarizationInputs, SampledItem
-from insights.temporal.llm_analytics.trace_summarization.utils import format_datetime_for_clickhouse
+from insights.temporal.llm_analytics.trace_summarization.utils import format_datetime_for_datastore
 
 logger = structlog.get_logger(__name__)
 
@@ -61,8 +61,8 @@ async def sample_items_in_window_activity(inputs: BatchSummarizationInputs) -> l
             logger.info("Team not found in local database, skipping", team_id=team_id)
             return []
 
-        start_dt_str = format_datetime_for_clickhouse(window_start)
-        end_dt_str = format_datetime_for_clickhouse(window_end)
+        start_dt_str = format_datetime_for_datastore(window_start)
+        end_dt_str = format_datetime_for_datastore(window_end)
 
         # Build optional trace filter expression from property filters
         trace_filter_expr: ast.Expr | None = None

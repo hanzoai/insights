@@ -3,7 +3,7 @@ from typing import Literal
 import dagster
 from clickhouse_driver import Client
 
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import JobOwners
 from insights.settings import TEST
 
@@ -87,7 +87,7 @@ def find_materialized_column(table: str, column_name: str) -> MaterializedColumn
 def add_indexes_to_columns(
     context: dagster.OpExecutionContext,
     config: AddIndexConfig,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ):
     if not config.add_minmax_index and not config.add_bloom_filter_index and not config.add_ngram_lower_index:
         context.log.warning("No index types selected. Nothing to do.")
@@ -122,6 +122,6 @@ def add_indexes_to_columns(
         context.log.info(f"Finished processing column: {column_name}")
 
 
-@dagster.job(tags={"owner": JobOwners.TEAM_CLICKHOUSE.value})
+@dagster.job(tags={"owner": JobOwners.TEAM_DATASTORE.value})
 def add_index_to_materialized_column():
     add_indexes_to_columns()

@@ -1,7 +1,7 @@
-"""ClickHouse queries for trace summarization.
+"""Datastore queries for trace summarization.
 
 Simple, direct queries that avoid expensive JOINs (e.g. person table)
-which can OOM ClickHouse for teams with large AI traces.
+which can OOM Datastore for teams with large AI traces.
 """
 
 from datetime import UTC, datetime

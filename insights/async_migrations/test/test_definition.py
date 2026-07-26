@@ -1,7 +1,7 @@
 import pytest
 from insights.test.base import BaseTest
 
-from infi.clickhouse_orm.utils import import_submodules
+from datastore_orm.utils import import_submodules
 
 from insights.async_migrations.definition import AsyncMigrationDefinition, AsyncMigrationOperation
 from insights.async_migrations.setup import (

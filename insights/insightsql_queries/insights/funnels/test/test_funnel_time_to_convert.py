@@ -2,10 +2,10 @@ from typing import cast
 
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.case import skip
 
@@ -19,10 +19,10 @@ FORMAT_TIME = "%Y-%m-%d %H:%M:%S"
 FORMAT_TIME_DAY_END = "%Y-%m-%d 23:59:59"
 
 
-class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelTimeToConvert(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_auto_bin_count_single_step(self):
         _create_person(distinct_ids=["user a"], team=self.team)
         _create_person(distinct_ids=["user b"], team=self.team)
@@ -406,7 +406,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual(results, results_steps_specified)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_unordered(self):
         _create_person(distinct_ids=["user a"], team=self.team)
         _create_person(distinct_ids=["user b"], team=self.team)
@@ -503,7 +503,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
             ),
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_strict(self):
         _create_person(distinct_ids=["user a"], team=self.team)
         _create_person(distinct_ids=["user b"], team=self.team)

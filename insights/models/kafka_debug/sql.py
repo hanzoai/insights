@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from insights.clickhouse.kafka_engine import kafka_engine
-from insights.clickhouse.table_engines import MergeTreeEngine
-from insights.settings import CLICKHOUSE_CLUSTER, CLICKHOUSE_DATABASE
+from insights.datastore.kafka_engine import kafka_engine
+from insights.datastore.table_engines import MergeTreeEngine
+from insights.settings import DATASTORE_CLUSTER, DATASTORE_DATABASE
 
 
 @dataclass
@@ -18,7 +18,7 @@ class KafkaDebugKafkaTable:
 
     def get_create_table_sql(self) -> str:
         return f"""
-      CREATE TABLE IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}'
+      CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}'
       (
         payload String
       )
@@ -36,7 +36,7 @@ class KafkaDebugKafkaTable:
 
     def get_drop_table_sql(self) -> str:
         return f"""
-      DROP TABLE IF EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}'
+      DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}'
     """
 
 
@@ -51,7 +51,7 @@ class KafkaDebugTable:
     def get_create_table_sql(self) -> str:
         engine = MergeTreeEngine(self.table_name)
         return f"""
-      CREATE TABLE IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}' (
+      CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}' (
         payload String,
         _timestamp DateTime,
         _timestamp_ms Nullable(DateTime64(3)),
@@ -68,7 +68,7 @@ class KafkaDebugTable:
 
     def get_drop_table_sql(self) -> str:
         return f"""
-      DROP TABLE IF EXISTS `{CLICKHOUSE_DATABASE}`.{self.table_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}' SYNC
+      DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.{self.table_name} ON CLUSTER '{DATASTORE_CLUSTER}' SYNC
     """
 
 
@@ -83,7 +83,7 @@ class KafkaDebugMaterializedView:
 
     def get_create_view_sql(self) -> str:
         return f"""
-      CREATE MATERIALIZED VIEW IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.{self.view_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}' TO {self.to_table.table_name}
+      CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.{self.view_name} ON CLUSTER '{DATASTORE_CLUSTER}' TO {self.to_table.table_name}
       AS SELECT
         payload,
         _timestamp,
@@ -92,10 +92,10 @@ class KafkaDebugMaterializedView:
         _offset,
         _error,
         _raw_message
-      FROM `{CLICKHOUSE_DATABASE}`.{self.from_table.table_name}
+      FROM `{DATASTORE_DATABASE}`.{self.from_table.table_name}
     """
 
     def get_drop_view_sql(self) -> str:
         return f"""
-      DROP TABLE IF EXISTS `{CLICKHOUSE_DATABASE}`.{self.view_name} ON CLUSTER '{CLICKHOUSE_CLUSTER}' SYNC
+      DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.{self.view_name} ON CLUSTER '{DATASTORE_CLUSTER}' SYNC
     """

@@ -1,8 +1,8 @@
 from django.conf import settings
 
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.kafka_engine import CONSUMER_GROUP_HEATMAPS, kafka_engine, ttl_period
-from insights.clickhouse.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.kafka_engine import CONSUMER_GROUP_HEATMAPS, kafka_engine, ttl_period
+from insights.datastore.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_DATASTORE_HEATMAP_EVENTS
 
 HEATMAPS_DATA_TABLE = lambda: "sharded_heatmaps"
@@ -128,11 +128,11 @@ AS SELECT
 FROM {database}.kafka_heatmaps
 """.format(
         target_table="writable_heatmaps",
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
     )
 )
 
-# Distributed engine tables are only created if CLICKHOUSE_REPLICATED
+# Distributed engine tables are only created if DATASTORE_REPLICATED
 
 # This table is responsible for writing to sharded_heatmaps based on a sharding key.
 WRITABLE_HEATMAPS_TABLE_SQL = lambda: HEATMAPS_TABLE_BASE_SQL.format(

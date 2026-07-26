@@ -11,7 +11,7 @@ from django.utils.text import slugify
 
 from nanoid import generate
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.constants import PRODUCT_TOUR_TARGETING_FLAG_PREFIX
 from insights.models import FeatureFlag, Team, User
 from insights.models.event.sql import BULK_INSERT_EVENT_SQL

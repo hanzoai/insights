@@ -6,14 +6,14 @@ import pytest
 from insights.test.base import (
     APIBaseTest,
     BaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     clean_varying_query_parts,
     cleanup_materialized_columns,
     get_index_from_explain,
     materialized,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest import mock
 from unittest.mock import patch
@@ -51,13 +51,13 @@ from insights.insightsql.printer import prepare_and_print_ast, prepare_ast_for_p
 from insights.insightsql.property import property_to_expr
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.models import PropertyDefinition
 from insights.models.cohort.cohort import Cohort
 from insights.models.exchange_rate.sql import EXCHANGE_RATE_DICTIONARY_NAME
 from insights.models.property_definition import PropertyType
 from insights.models.team.team import WeekStartDay
-from insights.settings.data_stores import CLICKHOUSE_DATABASE
+from insights.settings.data_stores import DATASTORE_DATABASE
 
 from products.data_warehouse.backend.models import DataWarehouseCredential, DataWarehouseTable
 
@@ -71,7 +71,7 @@ class TestPrinter(BaseTest):
         self,
         query: str,
         context: Optional[InsightsQLContext] = None,
-        dialect: InsightsQLDialect = "clickhouse",
+        dialect: InsightsQLDialect = "datastore",
         settings: Optional[InsightsQLQuerySettings] = None,
         backend: InsightsQLParserBackend = "cpp-json",
     ) -> str:
@@ -101,14 +101,14 @@ class TestPrinter(BaseTest):
         return prepare_and_print_ast(
             parse_select(query, placeholders=placeholders),
             context or InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )[0]
 
     def _assert_expr_error(
         self,
         expr,
         expected_error,
-        dialect: Literal["insightsql", "clickhouse"] = "clickhouse",
+        dialect: Literal["insightsql", "datastore"] = "datastore",
     ):
         with self.assertRaises(ExposedInsightsQLError) as context:
             self._expr(expr, None, dialect)
@@ -145,7 +145,7 @@ class TestPrinter(BaseTest):
         context: Optional[InsightsQLContext] = None,
         placeholders: Optional[dict[str, ast.Expr]] = None,
         settings: Optional[InsightsQLGlobalSettings] = None,
-        dialect: Literal["insightsql", "clickhouse"] = "clickhouse",
+        dialect: Literal["insightsql", "datastore"] = "datastore",
     ) -> str:
         parsed = parse_select(query, placeholders=placeholders)
         printed, _ = prepare_and_print_ast(
@@ -327,7 +327,7 @@ class TestPrinter(BaseTest):
         self.assertEqual(self._expr("events.event[1 + 2]"), "events.event[plus(1, 2)]")
 
         self.assertEqual(self._expr("[1,2,3]?.[1]", dialect="insightsql"), "[1, 2, 3]?.[1]")
-        self.assertEqual(self._expr("[1,2,3]?.[1]", dialect="clickhouse"), "[1, 2, 3][1]")  # no nullish
+        self.assertEqual(self._expr("[1,2,3]?.[1]", dialect="datastore"), "[1, 2, 3][1]")  # no nullish
 
     def test_tuples(self):
         self.assertEqual(self._expr("(1,2)"), "tuple(1, 2)")
@@ -335,7 +335,7 @@ class TestPrinter(BaseTest):
 
     def test_tuple_access(self):
         self.assertEqual(self._expr("(1,2)?.2", dialect="insightsql"), "tuple(1, 2)?.2")
-        self.assertEqual(self._expr("(1,2)?.2", dialect="clickhouse"), "tuple(1, 2).2")  # no nullish
+        self.assertEqual(self._expr("(1,2)?.2", dialect="datastore"), "tuple(1, 2).2")  # no nullish
 
     def test_lambdas(self):
         self.assertEqual(
@@ -467,7 +467,7 @@ class TestPrinter(BaseTest):
             ),
             "properties.`$browser \\\\with a \\n\\` tick`",
         )
-        # "dot NUMBER" means "tuple access" in clickhouse. To access strings properties, wrap them in `backquotes`
+        # "dot NUMBER" means "tuple access" in datastore. To access strings properties, wrap them in `backquotes`
         self.assertEqual(
             self._expr("properties.1", InsightsQLContext(team_id=self.team.pk), "insightsql"),
             "properties.1",
@@ -606,7 +606,7 @@ class TestPrinter(BaseTest):
             unoptimized_expr = self._expr(input_expression, unoptimized_context)
             # XXX: The placeholders used in the printed expression can vary between the direct and optimized variants,
             # so we string format the context values back into the expression template. This isn't necessarily going to
-            # yield a valid ClickHouse expression, but it should generally be good enough to ensure the two expressions
+            # yield a valid Datastore expression, but it should generally be good enough to ensure the two expressions
             # are the same.
             self.assertEqual(printed_expr % context.values, unoptimized_expr % unoptimized_context.values)
 
@@ -956,10 +956,10 @@ class TestPrinter(BaseTest):
                 query=query, team=self.team, context=optimized_context, modifiers=optimized_context.modifiers
             )
 
-            assert disabled_response.clickhouse and enabled_response.clickhouse and optimized_response.clickhouse
-            assert "properties_group_custom" not in disabled_response.clickhouse
-            assert "properties_group_custom" in enabled_response.clickhouse
-            assert "properties_group_custom" in optimized_response.clickhouse
+            assert disabled_response.datastore and enabled_response.datastore and optimized_response.datastore
+            assert "properties_group_custom" not in disabled_response.datastore
+            assert "properties_group_custom" in enabled_response.datastore
+            assert "properties_group_custom" in optimized_response.datastore
             assert {row[0] for row in disabled_response.results} == labels
             assert {row[0] for row in enabled_response.results} == labels
             assert {row[0] for row in optimized_response.results} == labels
@@ -993,7 +993,7 @@ class TestPrinter(BaseTest):
             )
 
         parsed = parse_select("SELECT properties.file_type AS ft FROM events WHERE ft = 'image/svg'")
-        printed, _ = prepare_and_print_ast(parsed, build_context(PropertyGroupsMode.OPTIMIZED), dialect="clickhouse")
+        printed, _ = prepare_and_print_ast(parsed, build_context(PropertyGroupsMode.OPTIMIZED), dialect="datastore")
         assert printed == (
             "SELECT has(events.properties_group_custom, %(insightsql_val_0)s) ? events.properties_group_custom[%(insightsql_val_0)s] : null AS ft "
             "FROM events "
@@ -1007,8 +1007,8 @@ class TestPrinter(BaseTest):
         # analyzer.) Until then, this should just use the direct (simple) property group access method.
         parsed = parse_select("SELECT properties.file_type AS ft, 'image/svg' as ft2 FROM events WHERE ft = ft2")
         assert (
-            prepare_and_print_ast(parsed, build_context(PropertyGroupsMode.OPTIMIZED), dialect="clickhouse")[0]
-            == prepare_and_print_ast(parsed, build_context(PropertyGroupsMode.ENABLED), dialect="clickhouse")[0]
+            prepare_and_print_ast(parsed, build_context(PropertyGroupsMode.OPTIMIZED), dialect="datastore")[0]
+            == prepare_and_print_ast(parsed, build_context(PropertyGroupsMode.ENABLED), dialect="datastore")[0]
         )
 
     def test_methods(self):
@@ -1377,9 +1377,9 @@ class TestPrinter(BaseTest):
 
         prepared = cast(
             ast.SelectQuery,
-            prepare_ast_for_printing(select_query, context=context, dialect="clickhouse", stack=[select_query]),
+            prepare_ast_for_printing(select_query, context=context, dialect="datastore", stack=[select_query]),
         )
-        result = print_prepared_ast(prepared, context=context, dialect="clickhouse", stack=[])
+        result = print_prepared_ast(prepared, context=context, dialect="datastore", stack=[])
 
         # The main events table should have its team_id filter in WHERE
         where_start = result.find("WHERE")
@@ -1418,9 +1418,9 @@ class TestPrinter(BaseTest):
 
         prepared = cast(
             ast.SelectQuery,
-            prepare_ast_for_printing(select_query, context=context, dialect="clickhouse", stack=[select_query]),
+            prepare_ast_for_printing(select_query, context=context, dialect="datastore", stack=[select_query]),
         )
-        result = print_prepared_ast(prepared, context=context, dialect="clickhouse", stack=[])
+        result = print_prepared_ast(prepared, context=context, dialect="datastore", stack=[])
 
         # Both tables should have team_id filters in the WHERE clause for INNER JOIN
         where_start = result.find("WHERE")
@@ -2258,7 +2258,7 @@ class TestPrinter(BaseTest):
         printed, _ = prepare_and_print_ast(
             query,
             InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
         self.assertEqual(
             printed,
@@ -2272,7 +2272,7 @@ class TestPrinter(BaseTest):
         printed, _ = prepare_and_print_ast(
             query,
             InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         self.assertEqual(
@@ -2306,7 +2306,7 @@ class TestPrinter(BaseTest):
             "JOIN experiment_exposures_preaggregated b ON a.job_id = b.job_id"
         )
         with self.assertRaises(QueryError) as cm:
-            prepare_and_print_ast(query_both, context, "clickhouse")
+            prepare_and_print_ast(query_both, context, "datastore")
         assert "Conflicting" in str(cm.exception)
 
     def test_table_top_level_settings_conflict_with_query_settings(self):
@@ -2317,7 +2317,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                "clickhouse",
+                "datastore",
             )
         assert "Conflicting" in str(cm.exception)
 
@@ -2327,7 +2327,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                "clickhouse",
+                "datastore",
                 settings=InsightsQLGlobalSettings(load_balancing="round_robin"),
             )
         assert "Conflicting" in str(cm.exception)
@@ -2339,7 +2339,7 @@ class TestPrinter(BaseTest):
         printed, _ = prepare_and_print_ast(
             query,
             InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
         assert "load_balancing='in_order'" in printed
         assert printed.count("load_balancing") == 1
@@ -2349,7 +2349,7 @@ class TestPrinter(BaseTest):
         printed, _ = prepare_and_print_ast(
             query,
             InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
             settings=InsightsQLGlobalSettings(max_execution_time=30),
         )
         assert "load_balancing='in_order'" in printed
@@ -2580,7 +2580,7 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             (
-                f"SELECT if(equals(%(insightsql_val_0)s, %(insightsql_val_1)s), toDecimal64(100, 10), if(dictGetOrDefault(`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)) = 0, toDecimal64(0, 10), multiplyDecimal(divideDecimal(toDecimal64(100, 10), if(dictGetOrDefault(`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)) = 0, toDecimal64(1, 10), dictGetOrDefault(`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)))), dictGetOrDefault(`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_1)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10))))) AS currency "
+                f"SELECT if(equals(%(insightsql_val_0)s, %(insightsql_val_1)s), toDecimal64(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)) = 0, toDecimal64(0, 10), multiplyDecimal(divideDecimal(toDecimal64(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)) = 0, toDecimal64(1, 10), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)))), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_1)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10))))) AS currency "
                 "LIMIT 50000 SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
             ),
             printed,
@@ -2593,7 +2593,7 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             (
-                f"SELECT if(equals(%(insightsql_val_0)s, %(insightsql_val_1)s), toDecimal64(100, 10), if(dictGetOrDefault(`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)) = 0, toDecimal64(0, 10), multiplyDecimal(divideDecimal(toDecimal64(100, 10), if(dictGetOrDefault(`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)) = 0, toDecimal64(1, 10), dictGetOrDefault(`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)))), dictGetOrDefault(`{CLICKHOUSE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_1)s, today(), toDecimal64(0, 10))))) AS currency "
+                f"SELECT if(equals(%(insightsql_val_0)s, %(insightsql_val_1)s), toDecimal64(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)) = 0, toDecimal64(0, 10), multiplyDecimal(divideDecimal(toDecimal64(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)) = 0, toDecimal64(1, 10), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)))), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_1)s, today(), toDecimal64(0, 10))))) AS currency "
                 "LIMIT 50000 SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
             ),
             printed,
@@ -2628,42 +2628,42 @@ class TestPrinter(BaseTest):
             team=self.team,
             query="SELECT getSurveyResponse(0) FROM events",
         )
-        assert result.clickhouse is not None
+        assert result.datastore is not None
         # Dynamic key (no question_id) uses concat for key construction
-        self.assertIn("coalesce", result.clickhouse)
-        self.assertIn("nullIf", result.clickhouse)
-        self.assertIn("concat", result.clickhouse)
+        self.assertIn("coalesce", result.datastore)
+        self.assertIn("nullIf", result.datastore)
+        self.assertIn("concat", result.datastore)
         # Always uses JSONExtractString for consistent String return type
-        self.assertIn("JSONExtractString", result.clickhouse)
+        self.assertIn("JSONExtractString", result.datastore)
 
         # Test with question index and specific ID - static key
         result = execute_insightsql_query(
             team=self.team,
             query="SELECT getSurveyResponse(1, 'question123') FROM events",
         )
-        assert result.clickhouse is not None
+        assert result.datastore is not None
         # Static key also uses JSONExtractString for type consistency
-        self.assertIn("coalesce", result.clickhouse)
-        self.assertIn("nullIf", result.clickhouse)
-        self.assertIn("JSONExtractString", result.clickhouse)
+        self.assertIn("coalesce", result.datastore)
+        self.assertIn("nullIf", result.datastore)
+        self.assertIn("JSONExtractString", result.datastore)
 
         # Test with multiple choice question
         result = execute_insightsql_query(
             team=self.team,
             query="SELECT getSurveyResponse(2, 'abc123', true) FROM events",
         )
-        assert result.clickhouse is not None
+        assert result.datastore is not None
         # Multiple choice uses if() with JSONHas and JSONExtractArrayRaw
-        self.assertIn("JSONHas", result.clickhouse)
-        self.assertIn("JSONExtractArrayRaw", result.clickhouse)
-        self.assertIn("if(", result.clickhouse)
+        self.assertIn("JSONHas", result.datastore)
+        self.assertIn("JSONExtractArrayRaw", result.datastore)
+        self.assertIn("if(", result.datastore)
 
     def test_get_survey_response_with_numeric_property_type(self):
         """Test that getSurveyResponse returns consistent types even when property has Numeric type.
 
         Regression test for a bug where PropertySwapper would wrap the index-based
         property access with toFloat() when $survey_response had type=Numeric in
-        PropertyDefinition, causing a ClickHouse type mismatch error:
+        PropertyDefinition, causing a Datastore type mismatch error:
         "There is no supertype for types String, Float64"
         """
         PropertyDefinition.objects.create(
@@ -2674,7 +2674,7 @@ class TestPrinter(BaseTest):
             type=PropertyDefinition.Type.EVENT,
         )
 
-        # This should NOT raise a ClickHouse error about type mismatch
+        # This should NOT raise a Datastore error about type mismatch
         # Before the fix, this would fail with:
         # "There is no supertype for types String, Float64 because some of them
         # are String/FixedString/Enum and some of them are not"
@@ -2684,12 +2684,12 @@ class TestPrinter(BaseTest):
         )
 
         # Query should execute successfully (even with no results)
-        assert result.clickhouse is not None
+        assert result.datastore is not None
         # Both branches of coalesce should return String type (via JSONExtractString)
-        self.assertIn("JSONExtractString", result.clickhouse)
+        self.assertIn("JSONExtractString", result.datastore)
         # Should NOT contain Float64 casting which would cause type mismatch
-        self.assertNotIn("accurateCastOrNull", result.clickhouse)
-        self.assertNotIn("Float64", result.clickhouse)
+        self.assertNotIn("accurateCastOrNull", result.datastore)
+        self.assertNotIn("Float64", result.datastore)
 
     def test_unique_survey_submissions_filter(self):
         printed = self._print(
@@ -2839,21 +2839,21 @@ class TestPrinter(BaseTest):
         )
         assert printed == "SELECT 1 LIMIT 1"
 
-    def test_print_clickhouse_output_format(self):
+    def test_print_datastore_output_format(self):
         printed = self._print(
             "select 1 limit 1",
             context=InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, output_format="ArrowStream"),
         )
         assert printed == "SELECT 1 LIMIT 1 FORMAT ArrowStream"
 
-    def test_print_clickhouse_output_format_union(self):
+    def test_print_datastore_output_format_union(self):
         printed = self._print(
             "select 1 limit 1 union all select 2 limit 1",
             context=InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, output_format="ArrowStream"),
         )
         assert printed == "SELECT 1 LIMIT 1 UNION ALL SELECT 2 LIMIT 1 FORMAT ArrowStream"
 
-    def test_print_clickhouse_output_format_union_with_nested_union_subquery(self):
+    def test_print_datastore_output_format_union_with_nested_union_subquery(self):
         printed = self._print(
             "select * from (select 1 as num union all select 2 as num) limit 2",
             context=InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, output_format="ArrowStream"),
@@ -2910,7 +2910,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                dialect="clickhouse",
+                dialect="datastore",
             )
 
     def test_fails_on_parametric_function_numeric(self):
@@ -2921,7 +2921,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                dialect="clickhouse",
+                dialect="datastore",
             )
 
     def test_fails_on_parametric_function_lambda(self):
@@ -2932,7 +2932,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                dialect="clickhouse",
+                dialect="datastore",
             )
 
     def test_fails_on_parametric_function_expression(self):
@@ -2943,7 +2943,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                dialect="clickhouse",
+                dialect="datastore",
             )
 
     def test_fails_on_parametric_function_missing(self):
@@ -2952,7 +2952,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                dialect="clickhouse",
+                dialect="datastore",
             )
 
     def test_fails_on_parametric_function_invalid(self):
@@ -2963,7 +2963,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                dialect="clickhouse",
+                dialect="datastore",
             )
 
     def test_fails_on_parametric_function_with_evil_placeholder(self):
@@ -2972,7 +2972,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                dialect="clickhouse",
+                dialect="datastore",
             )
 
     def test_fails_on_placeholder_macro_expansion_depth_limit(self):
@@ -2985,7 +2985,7 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(
                 query,
                 InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-                dialect="clickhouse",
+                dialect="datastore",
             )
 
     def test_date_part_macro_does_not_expand_exponentially(self):
@@ -3023,7 +3023,7 @@ class TestPrinter(BaseTest):
                 format=DataWarehouseTable.TableFormat.DeltaS3Wrapper,
                 url_pattern="http://s3/folder/",
                 credential=credential,
-                columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True}},
+                columns={"id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True}},
             )
             modifiers = InsightsQLQueryModifiers(optimizeProjections=optimize_projections)
             context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
@@ -3058,7 +3058,7 @@ class TestPrinter(BaseTest):
                 format=DataWarehouseTable.TableFormat.DeltaS3Wrapper,
                 url_pattern="http://s3/folder/",
                 credential=credential,
-                columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True}},
+                columns={"id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True}},
             )
             printed = self._select(
                 """
@@ -3091,7 +3091,7 @@ class TestPrinter(BaseTest):
                 format=DataWarehouseTable.TableFormat.DeltaS3Wrapper,
                 url_pattern="http://s3/folder/",
                 credential=credential,
-                columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True}},
+                columns={"id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True}},
             )
             printed = self._select(
                 """
@@ -3123,7 +3123,7 @@ class TestPrinter(BaseTest):
                 format=DataWarehouseTable.TableFormat.DeltaS3Wrapper,
                 url_pattern="http://s3/folder/",
                 credential=credential,
-                columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True}},
+                columns={"id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True}},
             )
 
             printed = self._select(
@@ -3161,7 +3161,7 @@ class TestPrinter(BaseTest):
                 format=DataWarehouseTable.TableFormat.DeltaS3Wrapper,
                 url_pattern="http://s3/folder/",
                 credential=credential,
-                columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "String", "schema_valid": True}},
+                columns={"id": {"insightsql": "StringDatabaseField", "datastore": "String", "schema_valid": True}},
             )
 
             modifiers = InsightsQLQueryModifiers(optimizeProjections=optimize_projections)
@@ -3258,8 +3258,8 @@ class TestPrinter(BaseTest):
 
         assert clean_varying_query_parts(result, replace_all_numbers=False) == self.snapshot  # type: ignore
 
-    def test_cte_with_alias_in_join_clickhouse(self):
-        """Test that CTETableAliasType properly prints in ClickHouse dialect with qualified fields"""
+    def test_cte_with_alias_in_join_datastore(self):
+        """Test that CTETableAliasType properly prints in Datastore dialect with qualified fields"""
         result = self._select(
             """
             WITH
@@ -3286,8 +3286,8 @@ class TestPrinter(BaseTest):
         self.assertIn("FROM exposures AS e", result)
         self.assertIn("LEFT JOIN conversions AS c", result)
 
-    def test_cte_non_aliased_with_aliased_join_clickhouse(self):
-        """Test mixing non-aliased and aliased CTEs in ClickHouse output"""
+    def test_cte_non_aliased_with_aliased_join_datastore(self):
+        """Test mixing non-aliased and aliased CTEs in Datastore output"""
         result = self._select(
             """
             WITH users AS (SELECT event AS user_id, timestamp FROM events)
@@ -3308,7 +3308,7 @@ class TestPrinter(BaseTest):
         self.assertIn("FROM users", result)
         self.assertIn("LEFT JOIN users AS u2", result)
 
-    def test_cte_multiple_aliases_same_cte_clickhouse(self):
+    def test_cte_multiple_aliases_same_cte_datastore(self):
         """Test that the same CTE can be joined multiple times with different aliases"""
         result = self._select(
             """
@@ -3382,8 +3382,8 @@ class TestPrinter(BaseTest):
         self.assertIn("Unsupported type cast", str(ctx.exception))
 
 
-@snapshot_clickhouse_queries
-class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _expr(
@@ -3396,12 +3396,12 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         select_query = ast.SelectQuery(select=[node], select_from=ast.JoinExpr(table=ast.Field(chain=["events"])))
         prepared_select_query: ast.SelectQuery = cast(
             ast.SelectQuery,
-            prepare_ast_for_printing(select_query, context=context, dialect="clickhouse", stack=[select_query]),
+            prepare_ast_for_printing(select_query, context=context, dialect="datastore", stack=[select_query]),
         )
         return print_prepared_ast(
             prepared_select_query.select[0],
             context=context,
-            dialect="clickhouse",
+            dialect="datastore",
             stack=[prepared_select_query],
         )
 
@@ -3553,9 +3553,9 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                 query="SELECT distinct_id FROM events WHERE properties.test_prop = 'target_value' ORDER BY distinct_id",
             )
             self.assertEqual(eq_result.results, [("d1",)])
-            assert eq_result.clickhouse is not None
+            assert eq_result.datastore is not None
             index_name = get_minmax_index_name(mat_col.name)
-            assert get_index_from_explain(eq_result.clickhouse, index_name), (
+            assert get_index_from_explain(eq_result.datastore, index_name), (
                 f"Expected skip index {index_name} to be used"
             )
 
@@ -3586,7 +3586,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         - with_null: is_not_set=1 - null is treated as "not set"
         - without: is_not_set=1 - property doesn't exist
 
-        the clickhouse SQL should NOT include JSON operations
+        the datastore SQL should NOT include JSON operations
         """
         self.addCleanup(cleanup_materialized_columns)
 
@@ -3679,7 +3679,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
             query=query_ast,
             modifiers=InsightsQLQueryModifiers(personsOnEventsMode=poe_mode),
         )
-        assert result.clickhouse
+        assert result.datastore
 
         # Note: When columns are materialized, empty strings become NULL due to nullIf(nullIf(..., ''), 'null') wrapping - this is known inconsistent behaviour for materialized properties
         expected_results = {
@@ -3698,7 +3698,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
 
         # The query should never touch the json properties object if we are using the materialized column, these asserts protect against regression of the performance the bug fixed in
         # https://insights.slack.com/archives/C09B0SSQEDA/p1767698123669229?thread_ts=1767672165.250289&cid=C09B0SSQEDA
-        sql_lower = result.clickhouse.lower()
+        sql_lower = result.datastore.lower()
         # JSONHas is used in calculating is_not_set_result_historical, but nowhere else
         assert sql_lower.count("jsonhas") == 1
         if is_materialized:
@@ -3879,13 +3879,13 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                 query="SELECT distinct_id FROM events WHERE properties.test_prop = 'foo'",
                 modifiers=InsightsQLQueryModifiers(
                     materializationMode=MaterializationMode.AUTO,
-                    forceClickhouseDataSkippingIndexes=[index_name],
+                    forceDatastoreDataSkippingIndexes=[index_name],
                 ),
             )
 
             assert result.results == [("test",)]
-            assert result.clickhouse
-            assert f"force_data_skipping_indices='{index_name}'" in result.clickhouse
+            assert result.datastore
+            assert f"force_data_skipping_indices='{index_name}'" in result.datastore
 
     def test_force_data_skipping_indices_fails_when_index_cannot_be_used(self) -> None:
         with materialized("events", "test_prop", is_nullable=False, create_bloom_filter_index=True) as mat_col:
@@ -3898,7 +3898,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                     query="SELECT distinct_id FROM events WHERE concat(properties.test_prop, '') = 'foo'",
                     modifiers=InsightsQLQueryModifiers(
                         materializationMode=MaterializationMode.AUTO,
-                        forceClickhouseDataSkippingIndexes=[index_name],
+                        forceDatastoreDataSkippingIndexes=[index_name],
                     ),
                 )
 
@@ -3996,7 +3996,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
             assert ilike_matches == ilike_expected, "ilike " + str(pattern)
 
             if mat_col:
-                assert ilike_result.clickhouse
+                assert ilike_result.datastore
                 # we can only ever use the index if it exists, pattern was not NULL, and we didn't need to bail out of the optimisation
                 should_use_index = (
                     create_ngram_lower_index
@@ -4004,7 +4004,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                     and (is_nullable or (ilike_expected_if_non_nullable is None))
                 )
                 did_use_index = bool(
-                    get_index_from_explain(ilike_result.clickhouse, get_ngram_lower_index_name(mat_col.name))
+                    get_index_from_explain(ilike_result.datastore, get_ngram_lower_index_name(mat_col.name))
                 )
                 assert should_use_index == did_use_index
 
@@ -4085,12 +4085,12 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
             assert in_matches == in_expected, f"IN {in_values}"
 
             if mat_col:
-                assert in_result.clickhouse
+                assert in_result.datastore
                 # We can use the bloom filter index if it exists and we didn't need to bail out of the optimisation
                 contains_sentinel = any(v in ("", "null") for v in in_values)
                 should_use_index = create_bloom_filter_index and (is_nullable or not contains_sentinel)
                 index_name = get_bloom_filter_index_name(mat_col.name)
-                index_info = get_index_from_explain(in_result.clickhouse, index_name)
+                index_info = get_index_from_explain(in_result.datastore, index_name)
                 did_use_index = bool(index_info)
                 assert should_use_index == did_use_index, f"IN {in_values}: expected index use={should_use_index}"
 
@@ -4188,12 +4188,12 @@ class TestPostgresPrinter(BaseTest):
     def test_select_queries(self, query: str, expected: str):
         self.assertEqual(self._select(query), expected)
 
-    def test_omits_clickhouse_specific_transforms(self):
+    def test_omits_datastore_specific_transforms(self):
         postgres = self._select("SELECT event FROM events")
-        clickhouse = self._select("SELECT event FROM events", dialect="clickhouse")
+        datastore = self._select("SELECT event FROM events", dialect="datastore")
 
         self.assertNotIn("team_id", postgres)
-        self.assertNotEqual(postgres, clickhouse)
+        self.assertNotEqual(postgres, datastore)
 
     def test_boolean_and_null_literals(self):
         self.assertEqual(self._expr("true"), "true")

@@ -12,7 +12,7 @@ from insights.schema import InsightsQLQueryResponse
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.dags.common import JobOwners
 from insights.dags.common.ops import get_all_team_ids_op
 from insights.dags.common.resources import redis
@@ -45,7 +45,7 @@ QUERY = parse_select("""
 """)
 
 
-# Avoid flakiness with ClickHouse by retrying this 2 more times if it fails
+# Avoid flakiness with Datastore by retrying this 2 more times if it fails
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=10))
 def run_query(team: Team) -> InsightsQLQueryResponse:
     query_type = "sdk_versions_for_team"
@@ -60,7 +60,7 @@ def get_sdk_versions_for_team(
     logger=default_logger,
 ) -> Optional[dict[str, list[dict[str, Any]]]]:
     """
-    Query ClickHouse for events in the last 7 days and extract SDK usage.
+    Query Datastore for events in the last 7 days and extract SDK usage.
     Returns dict of SDK versions with minimal data, grouped by lib type.
     """
     try:
@@ -95,7 +95,7 @@ def get_and_cache_team_sdk_versions(
     logger=default_logger,
 ) -> Optional[dict[str, list[dict[str, Any]]]]:
     """
-    Query ClickHouse for team SDK versions and cache the result.
+    Query Datastore for team SDK versions and cache the result.
     Shared function used by both API and Dagster job.
     Returns the response data dict or None if failed.
     """
@@ -109,7 +109,7 @@ def get_and_cache_team_sdk_versions(
 
             return sdk_versions
         else:
-            logger.error(f"[SDK Doctor] No data received from ClickHouse for team {team_id}")
+            logger.error(f"[SDK Doctor] No data received from Datastore for team {team_id}")
             return None
     except Exception as e:
         logger.exception(f"[SDK Doctor] Failed to get and cache SDK versions for team {team_id}")
@@ -210,7 +210,7 @@ def aggregate_results_op(context: dagster.OpExecutionContext, results: list[list
 
 
 @dagster.job(
-    description="Queries ClickHouse for recent SDK versions and caches them in Redis",
+    description="Queries Datastore for recent SDK versions and caches them in Redis",
     # Do this slowly, 5 batches at a time at most, more than this will cause the pod to OOM
     executor_def=dagster.multiprocess_executor.configured({"max_concurrent": 5}),
     tags={"owner": JobOwners.TEAM_GROWTH.value},

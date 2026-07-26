@@ -73,7 +73,7 @@ class RawPersonDistinctIdOverridesTable(Table):
         "version": IntegerDatabaseField(name="version", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "person_distinct_id_overrides"
 
     def to_printed_insightsql(self):
@@ -91,7 +91,7 @@ class PersonDistinctIdOverridesTable(LazyTable):
     ):
         return select_from_person_distinct_id_overrides_table(table_to_add.fields_accessed)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "person_distinct_id_overrides"
 
     def to_printed_insightsql(self):

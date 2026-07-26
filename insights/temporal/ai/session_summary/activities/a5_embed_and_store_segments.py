@@ -1,6 +1,6 @@
 """
 Activity 5 of the video-based summarization workflow:
-Embedding the meaningful video segments and storing them in ClickHouse.
+Embedding the meaningful video segments and storing them in Datastore.
 (Python modules have to start with a letter, hence the file is prefixed `a5_` instead of `5_`.)
 """
 
@@ -25,7 +25,7 @@ async def embed_and_store_segments_activity(
     inputs: VideoSummarySingleSessionInputs,
     segments: list[VideoSegmentOutput],
 ) -> None:
-    """Generate embeddings for all segments and produce to Kafka for ClickHouse storage
+    """Generate embeddings for all segments and produce to Kafka for Datastore storage
 
     Each segment description is embedded with metadata including session_id, team_id,
     distinct_id, and timestamps.

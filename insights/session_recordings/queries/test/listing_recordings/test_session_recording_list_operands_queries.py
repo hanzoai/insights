@@ -1,13 +1,13 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from django.utils.timezone import now
 
 from dateutil.relativedelta import relativedelta
 from parameterized import parameterized
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
+from insights.datastore.client import sync_execute
+from insights.datastore.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
 from insights.models.utils import uuid7
 from insights.session_recordings.queries.test.listing_recordings.test_utils import (
     assert_query_matches_session_ids,
@@ -18,7 +18,7 @@ from insights.session_recordings.sql.session_replay_event_sql import TRUNCATE_SE
 
 
 @freeze_time("2021-01-01T13:46:23")
-class TestSessionRecordingsListOperandsQueries(ClickhouseTestMixin, APIBaseTest):
+class TestSessionRecordingsListOperandsQueries(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         sync_execute(TRUNCATE_SESSION_REPLAY_EVENTS_TABLE_SQL())
@@ -69,7 +69,7 @@ class TestSessionRecordingsListOperandsQueries(ClickhouseTestMixin, APIBaseTest)
 
         return session_id
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_multiple_event_filters_and_ed(self):
         self._assert_query_matches_session_ids(
             {
@@ -94,7 +94,7 @@ class TestSessionRecordingsListOperandsQueries(ClickhouseTestMixin, APIBaseTest)
             [self.target_vip_session],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_multiple_event_filters_or_ed(self):
         self._assert_query_matches_session_ids(
             {
@@ -119,7 +119,7 @@ class TestSessionRecordingsListOperandsQueries(ClickhouseTestMixin, APIBaseTest)
             [self.target_vip_session, self.target_non_vip_session, self.non_target_vip_session],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_positive_and_negative_anded(self):
         self._assert_query_matches_session_ids(
             {
@@ -144,7 +144,7 @@ class TestSessionRecordingsListOperandsQueries(ClickhouseTestMixin, APIBaseTest)
             [self.non_target_vip_session],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_two_negative_anded(self):
         self._assert_query_matches_session_ids(
             {
@@ -169,7 +169,7 @@ class TestSessionRecordingsListOperandsQueries(ClickhouseTestMixin, APIBaseTest)
             [self.non_target_non_vip_session],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_two_negative_ORed(self):
         self._assert_query_matches_session_ids(
             {
@@ -196,7 +196,7 @@ class TestSessionRecordingsListOperandsQueries(ClickhouseTestMixin, APIBaseTest)
 
 
 @freeze_time("2021-01-01T13:46:23")
-class TestSessionRecordingsNegativeFiltersWithMultipleEvents(ClickhouseTestMixin, APIBaseTest):
+class TestSessionRecordingsNegativeFiltersWithMultipleEvents(DatastoreTestMixin, APIBaseTest):
     """
     Negative filters should match sessions where NO events match the positive condition.
     A session with mixed events (some matching, some not) should be excluded.

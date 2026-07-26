@@ -275,11 +275,11 @@ def execute_bytecode(
                 push_stack(pop_stack() not in pop_stack())
             case Operation.REGEX:
                 args = [pop_stack(), pop_stack()]
-                # TODO: swap this for re2, as used in InsightsQL/ClickHouse and in the NodeJS VM
+                # TODO: swap this for re2, as used in InsightsQL/Datastore and in the NodeJS VM
                 push_stack(bool(re.search(re.compile(args[1]), args[0])) if args[0] and args[1] else False)
             case Operation.NOT_REGEX:
                 args = [pop_stack(), pop_stack()]
-                # TODO: swap this for re2, as used in InsightsQL/ClickHouse and in the NodeJS VM
+                # TODO: swap this for re2, as used in InsightsQL/Datastore and in the NodeJS VM
                 push_stack(not bool(re.search(re.compile(args[1]), args[0])) if args[0] and args[1] else False)
             case Operation.IREGEX:
                 args = [pop_stack(), pop_stack()]

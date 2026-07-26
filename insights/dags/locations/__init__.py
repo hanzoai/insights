@@ -7,7 +7,7 @@ from dagster_aws.s3.resources import S3Resource
 
 from insights.dags.common.resources import (
     ClayWebhookResource,
-    ClickhouseClusterResource,
+    DatastoreClusterResource,
     PostgresResource,
     PostgresURLResource,
     InsightsAnalyticsResource,
@@ -18,7 +18,7 @@ from insights.dags.common.resources import (
 # Define resources for different environments
 resources_by_env = {
     "prod": {
-        "cluster": ClickhouseClusterResource.configure_at_launch(),
+        "cluster": DatastoreClusterResource.configure_at_launch(),
         "io_manager": s3_pickle_io_manager.configured(
             {"s3_bucket": settings.DAGSTER_S3_BUCKET, "s3_prefix": "dag-storage"}
         ),
@@ -55,7 +55,7 @@ resources_by_env = {
         ),
     },
     "local": {
-        "cluster": ClickhouseClusterResource.configure_at_launch(),
+        "cluster": DatastoreClusterResource.configure_at_launch(),
         "io_manager": dagster.fs_io_manager,
         "redis_client": RedisResource(),
         "s3": S3Resource(

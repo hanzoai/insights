@@ -24,7 +24,7 @@ from insights.insightsql.visitor import TraversingVisitor
 from insights.batch_exports.service import BackfillDetails
 from insights.models import Team
 from insights.sync import database_sync_to_async
-from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.datastore import get_client
 from insights.temporal.common.logger import get_write_only_logger
 
 from products.batch_exports.backend.temporal.record_batch_model import RecordBatchModel
@@ -172,10 +172,10 @@ async def wait_for_schema_or_producer(queue: RecordBatchQueue, producer_task: as
 
 
 class BatchExportField(typing.TypedDict):
-    """A field to be queried from ClickHouse.
+    """A field to be queried from Datastore.
 
     Attributes:
-        expression: A ClickHouse SQL expression that declares the field required.
+        expression: A Datastore SQL expression that declares the field required.
         alias: An alias to apply to the expression (after an 'AS' keyword).
     """
 
@@ -242,7 +242,7 @@ class Producer:
     """Async producer for batch exports.
 
     Attributes:
-        clickhouse_client: ClickHouse client used to produce RecordBatches.
+        datastore_client: Datastore client used to produce RecordBatches.
         _task: Used to keep track of producer background task.
     """
 
@@ -449,7 +449,7 @@ class Producer:
         """Produce Arrow record batches for a given date range into `queue`.
 
         Arguments:
-            query: The ClickHouse query used to obtain record batches. The query should be have a
+            query: The Datastore query used to obtain record batches. The query should be have a
                 `FORMAT ArrowStream` clause, although we do not enforce this.
             full_range: The full date range of record batches to produce.
             done_ranges: Date ranges of record batches that have already been exported, and thus
@@ -463,10 +463,10 @@ class Producer:
             min_records_batch_per_batch: If slicing a record batch, each slice should contain at least
                 this number of records.
         """
-        clickhouse_url = None
+        datastore_url = None
         # 5 min batch exports should query a single node, which is known to have zero replication lag
         if is_5_min_batch_export(full_range=full_range):
-            clickhouse_url = settings.CLICKHOUSE_OFFLINE_5MIN_CLUSTER_HOST
+            datastore_url = settings.DATASTORE_OFFLINE_5MIN_CLUSTER_HOST
 
         # Data can sometimes take a while to settle, so for 5 min batch exports we wait several seconds just to be safe.
         # For all other batch exports we wait for 1 minute since we're querying the events_recent table using a
@@ -478,9 +478,9 @@ class Producer:
         end_at = full_range[1]
         await wait_for_delta_past_data_interval_end(end_at, delta)
 
-        async with get_client(team_id=team_id, clickhouse_url=clickhouse_url) as client:
+        async with get_client(team_id=team_id, datastore_url=datastore_url) as client:
             if not await client.is_alive():
-                raise ConnectionError("Cannot establish connection to ClickHouse")
+                raise ConnectionError("Cannot establish connection to Datastore")
 
             for interval_start, interval_end in generate_query_ranges(full_range, done_ranges):
                 if interval_start is not None:
@@ -666,7 +666,7 @@ def compose_filters_clause(
         values: InsightsQL placeholder values already in use.
 
     Returns:
-        A printed string with the ClickHouse SQL clause, and a dictionary
+        A printed string with the Datastore SQL clause, and a dictionary
         of placeholder to values to be used as query parameters.
     """
     team = Team.objects.get(id=team_id)
@@ -692,7 +692,7 @@ def compose_filters_clause(
                 # 2. 'persons_properties' doesn't exist in the InsightsQL 'EventsTable', so we can't use it.
                 # So, we treat this filter like an events property filter (for 1) and manually update
                 # the chain to point to 'events.poe.properties' which does exist in 'EventsTable' (for 2).
-                # This will get resolved to 'events.person_properties' in ClickHouse dialect. This is done
+                # This will get resolved to 'events.person_properties' in Datastore dialect. This is done
                 # using a visitor, which makes it slightly less of a hack.
                 # I attempted to add a new property filter just for us to use here, but it was a mess
                 # requiring multiple unnecessary (for us) file changes, and consistently failed type checks
@@ -724,14 +724,14 @@ def compose_filters_clause(
         ast.SelectQuery, prepare_ast_for_printing(select_query, context=context, dialect="insightsql", stack=[select_query])
     )
     prepared_and_expr = prepare_ast_for_printing(
-        and_expr, context=context, dialect="clickhouse", stack=[prepared_select_query]
+        and_expr, context=context, dialect="datastore", stack=[prepared_select_query]
     )
 
     try:
         printed = print_prepared_ast(
             prepared_and_expr,  # type: ignore
             context=context,
-            dialect="clickhouse",
+            dialect="datastore",
             stack=[prepared_select_query],
         )
     except (ExposedInsightsQLError, InternalInsightsQLError) as e:
@@ -743,7 +743,7 @@ def compose_filters_clause(
 async def wait_for_delta_past_data_interval_end(
     data_interval_end: dt.datetime, delta: dt.timedelta = dt.timedelta(seconds=30)
 ) -> None:
-    """Wait for some time after `data_interval_end` before querying ClickHouse."""
+    """Wait for some time after `data_interval_end` before querying Datastore."""
     if settings.TEST:
         return
 

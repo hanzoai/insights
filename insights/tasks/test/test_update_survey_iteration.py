@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from insights.test.base import ClickhouseTestMixin
+from insights.test.base import DatastoreTestMixin
 
 from django.test import TestCase
 from django.utils.timezone import now
@@ -9,7 +9,7 @@ from insights.models import FeatureFlag, Organization, Survey, Team, User
 from insights.tasks.update_survey_iteration import update_survey_iteration
 
 
-class TestUpdateSurveyIteration(TestCase, ClickhouseTestMixin):
+class TestUpdateSurveyIteration(TestCase, DatastoreTestMixin):
     def setUp(self) -> None:
         super().setUp()
 

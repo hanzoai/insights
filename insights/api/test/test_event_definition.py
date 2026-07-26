@@ -370,9 +370,9 @@ class EventData:
 def capture_event(event: EventData):
     """
     Creates an event, given an event dict. Currently just puts this data
-    directly into clickhouse, but could be created via api to get better parity
+    directly into datastore, but could be created via api to get better parity
     with real world, and could provide the abstraction over if we are using
-    clickhouse or postgres as the primary backend
+    datastore or postgres as the primary backend
     """
     from insights.models.event.util import create_event
 

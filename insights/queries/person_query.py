@@ -1,7 +1,7 @@
 from typing import Any, Optional, Union
 from uuid import UUID
 
-from insights.clickhouse.materialized_columns import ColumnName
+from insights.datastore.materialized_columns import ColumnName
 from insights.constants import PropertyOperatorType
 from insights.models import Filter
 from insights.models.cohort import Cohort
@@ -25,7 +25,7 @@ from insights.queries.util import PersonPropertiesMode
 
 class PersonQuery:
     """
-    Query class responsible for joining with `person` clickhouse table
+    Query class responsible for joining with `person` datastore table
 
     For sake of performance, this class:
     - Tries to do as much person property filtering as possible here

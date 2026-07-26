@@ -18,7 +18,7 @@ import pytz
 import pydantic
 import hanzo_insights
 
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.cloud_utils import is_cloud
 from insights.helpers.dashboard_templates import create_dashboard_from_template
 from insights.helpers.session_recording_playlist_templates import DEFAULT_PLAYLISTS
@@ -249,7 +249,7 @@ class WeekStartDay(models.IntegerChoices):
     MONDAY = 1, "Monday"
 
     @property
-    def clickhouse_mode(self) -> str:
+    def datastore_mode(self) -> str:
         return "3" if self == WeekStartDay.MONDAY else "0"
 
 
@@ -529,7 +529,7 @@ class Team(UUIDTClassicModel):
     # thrown at us. Correlation code can handle schema related issues.
     correlation_config = models.JSONField(default=dict, null=True, blank=True)
 
-    # DEPRECATED, DISUSED: recordings on CH are cleared with Clickhouse's TTL
+    # DEPRECATED, DISUSED: recordings on CH are cleared with Datastore's TTL
     session_recording_retention_period_days = models.IntegerField(null=True, default=None, blank=True)
     # DEPRECATED, DISUSED: plugins are enabled for everyone now
     plugins_opt_in = models.BooleanField(default=False)
@@ -724,7 +724,7 @@ class Team(UUIDTClassicModel):
 
     @cached_property
     def persons_seen_so_far(self) -> int:
-        from insights.clickhouse.client import sync_execute
+        from insights.datastore.client import sync_execute
         from insights.queries.person_query import PersonQuery
 
         filter = Filter(data={"full": "true"})
@@ -741,9 +741,9 @@ class Team(UUIDTClassicModel):
 
     @lru_cache(maxsize=5)  # noqa: B019 - TODO: refactor to module-level cache
     def groups_seen_so_far(self, group_type_index: GroupTypeIndex) -> int:
-        from insights.clickhouse.client import sync_execute
+        from insights.datastore.client import sync_execute
 
-        # nosemgrep: clickhouse-fstring-param-audit - no interpolation, only parameterized values
+        # nosemgrep: datastore-fstring-param-audit - no interpolation, only parameterized values
         return sync_execute(
             f"""
             SELECT

@@ -66,17 +66,17 @@ The `columns` field contains column definitions with their types:
 {
   "id": {
     "insightsql": "IntegerDatabaseField",
-    "clickhouse": "Int64",
+    "datastore": "Int64",
     "valid": true
   },
   "email": {
     "insightsql": "StringDatabaseField",
-    "clickhouse": "Nullable(String)",
+    "datastore": "Nullable(String)",
     "valid": true
   },
   "created_at": {
     "insightsql": "DateTimeDatabaseField",
-    "clickhouse": "DateTime64(3)",
+    "datastore": "DateTime64(3)",
     "valid": true
   }
 }
@@ -127,7 +127,7 @@ WHERE name = 'stripe_customers' AND NOT deleted
 **Find tables with specific column:**
 
 ```sql
-SELECT name, JSONExtractString(columns, 'email', 'clickhouse') AS email_type
+SELECT name, JSONExtractString(columns, 'email', 'datastore') AS email_type
 FROM system.data_warehouse_tables
 WHERE NOT deleted
   AND JSONHas(columns, 'email')

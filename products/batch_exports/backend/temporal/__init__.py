@@ -50,7 +50,7 @@ from products.batch_exports.backend.temporal.monitoring import (
     BatchExportMonitoringWorkflow,
     fetch_exported_event_counts,
     get_batch_export,
-    get_clickhouse_event_counts,
+    get_datastore_event_counts,
     reconcile_event_counts,
     update_batch_export_runs,
 )
@@ -88,7 +88,7 @@ ACTIVITIES = [
     noop_activity,
     update_batch_export_backfill_model_status,
     get_batch_export,
-    get_clickhouse_event_counts,
+    get_datastore_event_counts,
     update_batch_export_runs,
     insert_into_internal_stage_activity,
     fetch_exported_event_counts,

@@ -178,7 +178,7 @@ class FunnelTrendsUDF(FunnelUDFMixin, FunnelBase):
                 {"inner_event_query": inner_event_query},
             ),
         )
-        # This is necessary so clickhouse doesn't truncate timezone information when passing datetimes to and from python
+        # This is necessary so datastore doesn't truncate timezone information when passing datetimes to and from python
         inner_select.settings = InsightsQLQuerySettings(date_time_output_format="iso", date_time_input_format="best_effort")
         return inner_select
 

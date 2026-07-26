@@ -8,7 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from insights.api.routing import TeamAndOrgViewSetMixin
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 
 
 class IngestionWarningsViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):

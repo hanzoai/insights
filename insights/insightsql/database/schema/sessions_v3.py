@@ -155,7 +155,7 @@ def get_binary_fields(table: Table) -> set[str]:
 class RawSessionsTableV3(Table):
     fields: dict[str, FieldOrTable] = RAW_SESSIONS_FIELDS
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "raw_sessions_v3"
 
     def to_printed_insightsql(self):
@@ -164,7 +164,7 @@ class RawSessionsTableV3(Table):
     def avoid_asterisk_fields(self) -> list[str]:
         return list(
             {
-                *get_binary_fields(self),  # our clickhouse driver can't return aggregate states
+                *get_binary_fields(self),  # our datastore driver can't return aggregate states
                 "session_id_v7",  # InsightsQL insights currently don't support returning uint128s due to json serialisation
             }
         )
@@ -401,7 +401,7 @@ class SessionsTableV3(LazyTable):
     ):
         return select_from_sessions_table_v3(table_to_add.fields_accessed, node, context)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "sessions"
 
     def to_printed_insightsql(self):
@@ -410,7 +410,7 @@ class SessionsTableV3(LazyTable):
     def avoid_asterisk_fields(self) -> list[str]:
         return list(
             {
-                *get_binary_fields(self),  # our clickhouse driver can't return aggregate states
+                *get_binary_fields(self),  # our datastore driver can't return aggregate states
                 "session_id_v7",  # InsightsQL insights currently don't support returning uint128s due to json serialisation
                 "id",  # prefer to use session_id
                 "duration",  # alias of $session_duration, deprecated but included for backwards compatibility

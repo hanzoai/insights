@@ -4,10 +4,10 @@ from uuid import UUID
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.utils import timezone
@@ -20,7 +20,7 @@ from insights.test.test_journeys import journeys_for
 FORMAT_TIME = "%Y-%m-%d 00:00:00"
 
 
-class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
+class TestFunnelStrictStepsPersons(DatastoreTestMixin, APIBaseTest):
     def _create_sample_data_multiple_dropoffs(self):
         events_by_person = {}
         for i in range(5):
@@ -123,7 +123,7 @@ class TestFunnelStrictStepsPersons(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual(0, len(results))
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-02 00:00:00.000Z")
     def test_strict_funnel_person_recordings(self):
         p1 = _create_person(distinct_ids=[f"user_1"], team=self.team)

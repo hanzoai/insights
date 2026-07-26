@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework_dataclasses.serializers import DataclassSerializer
 
 from insights.api.utils import action
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.models.team.team import Team
 from insights.utils import relative_date_parse_with_delta_mapping
 
@@ -63,14 +63,14 @@ def fetch_app_metrics_trends(
     name: Optional[list[str]] = None,
     kind: Optional[list[str]] = None,
 ) -> AppMetricsResponse:
-    """Fetch a list of batch export log entries from ClickHouse."""
+    """Fetch a list of batch export log entries from Datastore."""
 
     name = name or []
     kind = kind or []
 
-    clickhouse_kwargs: dict[str, Any] = {}
+    datastore_kwargs: dict[str, Any] = {}
 
-    clickhouse_query = f"""
+    datastore_query = f"""
         SELECT
             toStartOfInterval(timestamp, INTERVAL 1 {interval}) as timestamp,
             metric_{breakdown_by} as breakdown,
@@ -88,20 +88,20 @@ def fetch_app_metrics_trends(
         ORDER BY timestamp ASC
     """
 
-    clickhouse_kwargs["team_id"] = team_id
-    clickhouse_kwargs["app_source"] = app_source
-    clickhouse_kwargs["app_source_id"] = app_source_id
-    clickhouse_kwargs["after"] = after.strftime("%Y-%m-%dT%H:%M:%S")
-    clickhouse_kwargs["before"] = before.strftime("%Y-%m-%dT%H:%M:%S")
-    clickhouse_kwargs["instance_id"] = instance_id
-    clickhouse_kwargs["name"] = name
-    clickhouse_kwargs["kind"] = kind
-    clickhouse_kwargs["interval"] = interval.upper()
+    datastore_kwargs["team_id"] = team_id
+    datastore_kwargs["app_source"] = app_source
+    datastore_kwargs["app_source_id"] = app_source_id
+    datastore_kwargs["after"] = after.strftime("%Y-%m-%dT%H:%M:%S")
+    datastore_kwargs["before"] = before.strftime("%Y-%m-%dT%H:%M:%S")
+    datastore_kwargs["instance_id"] = instance_id
+    datastore_kwargs["name"] = name
+    datastore_kwargs["kind"] = kind
+    datastore_kwargs["interval"] = interval.upper()
 
-    results = sync_execute(clickhouse_query, clickhouse_kwargs)
+    results = sync_execute(datastore_query, datastore_kwargs)
 
     if not isinstance(results, list):
-        raise ValueError("Unexpected results from ClickHouse")
+        raise ValueError("Unexpected results from Datastore")
 
     # We create the x values based on the date range and interval
     labels: list[str] = []
@@ -169,7 +169,7 @@ def fetch_app_metric_totals(
     name = name or []
     kind = kind or []
 
-    clickhouse_kwargs: dict[str, Any] = {
+    datastore_kwargs: dict[str, Any] = {
         "team_id": team_id,
         "app_source": app_source,
         "app_source_id": app_source_id,
@@ -177,7 +177,7 @@ def fetch_app_metric_totals(
         "before": before.strftime("%Y-%m-%dT%H:%M:%S") if before else None,
     }
 
-    clickhouse_query = f"""
+    datastore_query = f"""
         SELECT
             metric_{breakdown_by} as breakdown,
             sum(count) as count
@@ -193,10 +193,10 @@ def fetch_app_metric_totals(
         GROUP BY breakdown
     """
 
-    results = sync_execute(clickhouse_query, clickhouse_kwargs)
+    results = sync_execute(datastore_query, datastore_kwargs)
 
     if not isinstance(results, list):
-        raise ValueError("Unexpected results from ClickHouse")
+        raise ValueError("Unexpected results from Datastore")
 
     totals = {row[0]: row[1] for row in results}
     return AppMetricsTotalsResponse(totals=totals)

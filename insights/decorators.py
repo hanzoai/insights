@@ -13,7 +13,7 @@ from statshog.defaults.django import statsd
 
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.caching.utils import is_stale_filter
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.insightsql_queries.legacy_compatibility.feature_flag import get_query_method
 from insights.models.filters.utils import get_filter
 from insights.utils import refresh_requested_by_client

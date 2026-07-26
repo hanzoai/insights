@@ -14,7 +14,7 @@ from insights.api.utils import (
     get_data,
     get_target_entity,
     raise_if_user_provided_url_unsafe,
-    safe_clickhouse_string,
+    safe_datastore_string,
     PublicIPOnlyHttpAdapter,
     unparsed_hostname_in_allowed_url_list,
 )
@@ -132,8 +132,8 @@ class TestUtils(BaseTest):
             assert query == "(id = ANY (%(named_key)s::uuid[]))"
             assert ids == ordered_expected_ids
 
-    # keep in sync with insights/plugin-server/tests/utils.test.ts::safeClickhouseString
-    def test_safe_clickhouse_string_valid_strings(self):
+    # keep in sync with insights/plugin-server/tests/utils.test.ts::safeDatastoreString
+    def test_safe_datastore_string_valid_strings(self):
         valid_strings = [
             "$autocapture",
             "correlation analyzed",
@@ -156,20 +156,20 @@ class TestUtils(BaseTest):
         ]
 
         for s in valid_strings:
-            self.assertEqual(safe_clickhouse_string(s), s)
+            self.assertEqual(safe_datastore_string(s), s)
 
-    # keep in sync with insights/plugin-server/tests/utils.test.ts::safeClickhouseString
-    def test_safe_clickhouse_string_surrogates(self):
+    # keep in sync with insights/plugin-server/tests/utils.test.ts::safeDatastoreString
+    def test_safe_datastore_string_surrogates(self):
         # flake8: noqa
-        self.assertEqual(safe_clickhouse_string("foo \ud83d\ bar"), "foo \\ud83d\\ bar")
-        self.assertEqual(safe_clickhouse_string("\ud83d\ bar"), "\\ud83d\\ bar")
-        self.assertEqual(safe_clickhouse_string("\ud800\ \ud803\ "), "\\ud800\\ \\ud803\\ ")
+        self.assertEqual(safe_datastore_string("foo \ud83d\ bar"), "foo \\ud83d\\ bar")
+        self.assertEqual(safe_datastore_string("\ud83d\ bar"), "\\ud83d\\ bar")
+        self.assertEqual(safe_datastore_string("\ud800\ \ud803\ "), "\\ud800\\ \\ud803\\ ")
 
-    # keep in sync with insights/plugin-server/tests/utils.test.ts::safeClickhouseString
-    def test_safe_clickhouse_string_unicode_non_surrogates(self):
-        self.assertEqual(safe_clickhouse_string("✨"), "✨")
-        self.assertEqual(safe_clickhouse_string("foo \u2728\ bar"), "foo \u2728\ bar")
-        self.assertEqual(safe_clickhouse_string("💜 \u1f49c\ 💜"), "💜 \u1f49c\ 💜")
+    # keep in sync with insights/plugin-server/tests/utils.test.ts::safeDatastoreString
+    def test_safe_datastore_string_unicode_non_surrogates(self):
+        self.assertEqual(safe_datastore_string("✨"), "✨")
+        self.assertEqual(safe_datastore_string("foo \u2728\ bar"), "foo \u2728\ bar")
+        self.assertEqual(safe_datastore_string("💜 \u1f49c\ 💜"), "💜 \u1f49c\ 💜")
 
     def test_raise_if_user_provided_url_unsafe(self):
         # Sync test cases with plugin-server/src/utils/fetch.test.ts
@@ -222,7 +222,7 @@ class TestUtils(BaseTest):
         )  # Non-existent
 
     def test_public_ip_only_adapter(self):
-        address = "http://localhost:8123"  # Clickhouse's HTTP port
+        address = "http://localhost:8123"  # Datastore's HTTP port
 
         # We can connect OK by default
         self.assertTrue(requests.get(address).ok)

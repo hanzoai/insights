@@ -4,7 +4,7 @@ use aws_sdk_s3::primitives::ByteStreamError;
 use common_geoip::GeoIpError;
 use common_kafka::kafka_producer::KafkaProduceError;
 use common_redis::CustomRedisError;
-use common_types::{CapturedEvent, ClickHouseEvent};
+use common_types::{CapturedEvent, DatastoreEvent};
 use insights_symbol_data::SymbolDataError;
 use rdkafka::error::KafkaError;
 use serde::{Deserialize, Serialize};
@@ -32,7 +32,7 @@ pub struct PipelineFailure {
 // an error here indicates some expected/handled invalidity of the input,
 // like a missing token, or invalid timestamp. The pipeline converts a
 // vector of input items into a vector of these
-pub type PipelineResult = Result<ClickHouseEvent, EventError>;
+pub type PipelineResult = Result<DatastoreEvent, EventError>;
 
 #[derive(Debug, Error)]
 pub enum UnhandledError {

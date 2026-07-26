@@ -20,7 +20,7 @@ from insights.schema import (
     RecordingsQuery,
 )
 
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.query_tagging import Product, tag_queries
 from insights.helpers.session_recording_playlist_templates import DEFAULT_PLAYLIST_NAMES
 from insights.redis import get_client
 from insights.session_recordings.models.session_recording_playlist import SessionRecordingPlaylist

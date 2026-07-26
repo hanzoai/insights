@@ -1,12 +1,12 @@
-//! ClickHouse events pipeline implementation.
+//! Datastore events pipeline implementation.
 //!
 //! This module contains the deduplication logic for events from the
-//! `clickhouse_events_json` Kafka topic (output of the ingestion pipeline).
+//! `datastore_events_json` Kafka topic (output of the ingestion pipeline).
 //!
 //! # Event Type
 //!
-//! - `ClickHouseEvent` - Events that have been processed by the ingestion
-//!   pipeline and are ready to be written to ClickHouse
+//! - `DatastoreEvent` - Events that have been processed by the ingestion
+//!   pipeline and are ready to be written to Datastore
 //!
 //! # Deduplication Strategy
 //!
@@ -20,16 +20,16 @@ mod parser;
 mod processor;
 mod similarity;
 
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 
-pub use metadata::ClickHouseEventMetadata;
-pub use parser::ClickHouseEventParser;
-pub use processor::{ClickHouseEventsBatchProcessor, ClickHouseEventsConfig};
+pub use metadata::DatastoreEventMetadata;
+pub use parser::DatastoreEventParser;
+pub use processor::{DatastoreEventsBatchProcessor, DatastoreEventsConfig};
 
 use crate::pipelines::timestamp_deduplicator::DeduplicatableEvent;
 
-impl DeduplicatableEvent for ClickHouseEvent {
-    type Metadata = ClickHouseEventMetadata;
+impl DeduplicatableEvent for DatastoreEvent {
+    type Metadata = DatastoreEventMetadata;
 
     fn has_same_uuid(&self, metadata: &Self::Metadata) -> bool {
         metadata.is_same_uuid(self)

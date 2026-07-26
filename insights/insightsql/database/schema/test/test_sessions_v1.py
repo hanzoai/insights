@@ -1,5 +1,5 @@
 import pytest
-from insights.test.base import APIBaseTest, ClickhouseDestroyTablesMixin, ClickhouseTestMixin, _create_event
+from insights.test.base import APIBaseTest, DatastoreDestroyTablesMixin, DatastoreTestMixin, _create_event
 
 from django.db.utils import IntegrityError
 
@@ -21,7 +21,7 @@ from insights.models.sessions.sql import ALLOWED_TEAM_IDS
 from insights.models.utils import uuid7
 
 
-class TestSessionsV1(ClickhouseDestroyTablesMixin, ClickhouseTestMixin, APIBaseTest):
+class TestSessionsV1(DatastoreDestroyTablesMixin, DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
 
@@ -307,7 +307,7 @@ class TestSessionsV1(ClickhouseDestroyTablesMixin, ClickhouseTestMixin, APIBaseT
         ]
 
 
-class TestGetLazySessionProperties(ClickhouseTestMixin, APIBaseTest):
+class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
     def test_all(self):
         results = get_lazy_session_table_properties_v1(None)
         assert len(results) == 32

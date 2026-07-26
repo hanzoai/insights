@@ -6,12 +6,12 @@ from typing import Optional
 from freezegun.api import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from rest_framework import status
@@ -23,7 +23,7 @@ MATERIALIZED_COLUMN_KWARGS = {"person_properties": ["foo", "bar"]}
 TEST_PERSON_ID = uuid.UUID("12345678-0000-0000-0000-000000000001")
 
 
-class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
+class TestPersonPropertiesTimeline(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _create_person(self, properties: dict) -> str:
@@ -72,7 +72,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
         return properties_timeline.json()
 
     @also_test_with_materialized_columns(**MATERIALIZED_COLUMN_KWARGS)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timeline_for_new_actor_with_one_event_in_range(self):
         self._create_person({"foo": "abc", "bar": 123})
         self._create_event(
@@ -110,7 +110,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
         )
 
     @also_test_with_materialized_columns(**MATERIALIZED_COLUMN_KWARGS)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timeline_for_new_actor_with_one_event_before_range(self):
         self._create_person({"foo": "abc", "bar": 123})
         self._create_event(
@@ -142,7 +142,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
         )
 
     @also_test_with_materialized_columns(**MATERIALIZED_COLUMN_KWARGS)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timeline_with_two_events_in_range_using_filter_on_series(self):
         self._create_person({"foo": "abc", "bar": 123})
         self._create_event(
@@ -204,7 +204,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
         )
 
     @also_test_with_materialized_columns(**MATERIALIZED_COLUMN_KWARGS)
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timeline_with_two_events_in_range_using_breakdown(self):
         self._create_person({"foo": "abc", "bar": 123})
         self._create_event(
@@ -252,7 +252,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(**MATERIALIZED_COLUMN_KWARGS)
     def test_timeline_for_existing_actor_with_three_events_and_return_to_previous_value(self):
         self._create_person({"foo": "abc", "bar": 123})
@@ -313,7 +313,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(
         person_properties=["bar"],
     )
@@ -380,7 +380,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(
         person_properties=["bar"],
     )
@@ -445,7 +445,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(
         person_properties=["bar"],
     )
@@ -512,7 +512,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(
         person_properties=["bar"],
     )
@@ -578,7 +578,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(**MATERIALIZED_COLUMN_KWARGS)
     def test_timeline_for_existing_actor_with_six_events_but_only_two_relevant_changes(self):
         self._create_person({"foo": "abc", "bar": 123})
@@ -651,7 +651,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timeline_for_existing_actor_with_six_events_but_only_two_relevant_changes_without_filters(self):
         self._create_person({"foo": "abc", "bar": 123})
         self._create_event(
@@ -712,7 +712,7 @@ class TestPersonPropertiesTimeline(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_timeline_for_existing_actor_with_six_events_but_only_two_relevant_changes_without_events(self):
         self._create_person({"foo": "abc", "bar": 123})
         self._create_event(

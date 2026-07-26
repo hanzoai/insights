@@ -29,7 +29,7 @@ from products.batch_exports.backend.temporal.destinations.postgres_batch_export 
 from products.batch_exports.backend.temporal.pipeline.internal_stage import insert_into_internal_stage_activity
 from products.batch_exports.backend.tests.temporal.destinations.postgres.utils import (
     TEST_MODELS,
-    assert_clickhouse_records_in_postgres,
+    assert_datastore_records_in_postgres,
 )
 from products.batch_exports.backend.tests.temporal.utils.workflow import mocked_start_batch_export_run
 
@@ -43,7 +43,7 @@ pytestmark = [
 @pytest.mark.parametrize("exclude_events", [None, ["test-exclude"]], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_postgres_export_workflow(
-    clickhouse_client,
+    datastore_client,
     postgres_config,
     postgres_connection,
     postgres_batch_export,
@@ -131,9 +131,9 @@ async def test_postgres_export_workflow(
         or (isinstance(model, BatchExportModel) and model.name == "sessions" and run.records_completed == 1)
     )
 
-    await assert_clickhouse_records_in_postgres(
+    await assert_datastore_records_in_postgres(
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         schema_name=postgres_config["schema"],
         table_name=table_name,
         team_id=ateam.pk,
@@ -149,7 +149,7 @@ async def test_postgres_export_workflow(
 @pytest.mark.parametrize("exclude_events", [None], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_postgres_export_workflow_without_events(
-    clickhouse_client,
+    datastore_client,
     postgres_config,
     postgres_connection,
     postgres_batch_export,
@@ -232,7 +232,7 @@ async def test_postgres_export_workflow_without_events(
 @pytest.mark.parametrize("model", [BatchExportModel(name="persons", schema=None)])
 async def test_postgres_export_workflow_backfill_earliest_persons(
     ateam,
-    clickhouse_client,
+    datastore_client,
     postgres_config,
     postgres_connection,
     postgres_batch_export,
@@ -301,9 +301,9 @@ async def test_postgres_export_workflow_backfill_earliest_persons(
     assert run.status == "Completed"
     assert run.data_interval_start is None
 
-    await assert_clickhouse_records_in_postgres(
+    await assert_datastore_records_in_postgres(
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         schema_name=postgres_config["schema"],
         table_name=table_name,
         team_id=ateam.pk,
@@ -485,7 +485,7 @@ async def test_postgres_export_workflow_handles_cancellation(ateam, postgres_bat
 
 
 async def test_postgres_export_workflow_with_many_files(
-    clickhouse_client,
+    datastore_client,
     postgres_connection,
     interval,
     postgres_batch_export,
@@ -530,7 +530,7 @@ async def test_postgres_export_workflow_with_many_files(
             workflow_runner=UnsandboxedWorkflowRunner(),
         ):
             with override_settings(
-                BATCH_EXPORT_POSTGRES_UPLOAD_CHUNK_SIZE_BYTES=10, CLICKHOUSE_MAX_BLOCK_SIZE_DEFAULT=10
+                BATCH_EXPORT_POSTGRES_UPLOAD_CHUNK_SIZE_BYTES=10, DATASTORE_MAX_BLOCK_SIZE_DEFAULT=10
             ):
                 await activity_environment.client.execute_workflow(
                     PostgresBatchExportWorkflow.run,
@@ -547,9 +547,9 @@ async def test_postgres_export_workflow_with_many_files(
     run = runs[0]
     assert run.status == "Completed"
 
-    await assert_clickhouse_records_in_postgres(
+    await assert_datastore_records_in_postgres(
         postgres_connection=postgres_connection,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         schema_name=postgres_config["schema"],
         table_name=postgres_batch_export.destination.config["table_name"],
         team_id=ateam.pk,

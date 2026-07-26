@@ -78,7 +78,7 @@ class TestBackfillMaterializedPropertyWorkflow:
 
         @activity.defn(name="backfill_materialized_column")
         async def mock_backfill(inputs: BackfillMaterializedColumnInputs) -> int:
-            raise ApplicationError("ClickHouse mutation failed", non_retryable=True)
+            raise ApplicationError("Datastore mutation failed", non_retryable=True)
 
         @activity.defn(name="update_slot_state")
         async def mock_update_state(inputs: UpdateSlotStateInputs) -> bool:

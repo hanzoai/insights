@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person, flush_persons_and_events
 from unittest.mock import patch
 
 from django.test import override_settings
@@ -41,7 +41,7 @@ from insights.session_recordings.queries.test.session_replay_sql import produce_
 from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 
 
-class TestQuery(ClickhouseTestMixin, APIBaseTest):
+class TestQuery(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def _create_random_events(self) -> str:
@@ -772,7 +772,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 team=self.team,
                 pretty=False,
             )
-            # Following SQL tradition, ClickHouse array indexes start at 1, not from zero.
+            # Following SQL tradition, Datastore array indexes start at 1, not from zero.
             self.assertEqual(response.results, [([1, 2, 3], 10)])
             assert pretty_print_response_in_tests(response, self.team.pk) == self.snapshot
 
@@ -1050,7 +1050,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         for expr, expected in cases:
             q = f"select {expr}"
             response = execute_insightsql_query(q, team=self.team)
-            self.assertEqual(response.results, [(expected,)], [q, response.clickhouse])
+            self.assertEqual(response.results, [(expected,)], [q, response.datastore])
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_with_pivot_table_1_level(self):
@@ -1194,7 +1194,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 f"WHERE and(equals(events.team_id, {self.team.pk}), ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_46)s), ''), 'null'), '^\"|\"$', ''), %(insightsql_val_47)s), 0)) "
                 f"LIMIT 100 "
                 f"SETTINGS readonly=2, max_execution_time=60, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0",
-                response.clickhouse,
+                response.datastore,
             )
             self.assertEqual(response.results[0], tuple(random_uuid for x in alternatives))
 
@@ -1326,22 +1326,22 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             # works when selecting directly
             query = f"select {a} {op} {b}"
             response = execute_insightsql_query(query, team=self.team)
-            self.assertEqual(response.results, [(res,)], [query, response.clickhouse])
+            self.assertEqual(response.results, [(res,)], [query, response.datastore])
 
             # works when selecting via a subquery
             query = f"select a {op} b from (select {a} as a, {b} as b)"
             response = execute_insightsql_query(query, team=self.team)
-            self.assertEqual(response.results, [(res,)], [query, response.clickhouse])
+            self.assertEqual(response.results, [(res,)], [query, response.datastore])
 
             # works when selecting via a subquery
             query = f"select {a} {op} b from (select {b} as b)"
             response = execute_insightsql_query(query, team=self.team)
-            self.assertEqual(response.results, [(res,)], [query, response.clickhouse])
+            self.assertEqual(response.results, [(res,)], [query, response.datastore])
 
             # works when selecting via a subquery
             query = f"select a {op} {b} from (select {a} as a)"
             response = execute_insightsql_query(query, team=self.team)
-            self.assertEqual(response.results, [(res,)], [query, response.clickhouse])
+            self.assertEqual(response.results, [(res,)], [query, response.datastore])
 
     def test_regex_functions(self):
         query = """
@@ -1567,7 +1567,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             response = execute_insightsql_query(query, team=self.team, filters=filters, placeholders=placeholders)
             self.assertEqual(len(response.results), 1)
 
-    def test_clickhouse_timestamp_handling(self):
+    def test_datastore_timestamp_handling(self):
         query = """
             SELECT
                 issue_id AS id,

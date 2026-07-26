@@ -8,7 +8,7 @@ import { closeHub, createHub } from '../../utils/db/hub'
 import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
-    createClickhousePerson,
+    createDatastorePerson,
     createInsightsFunction,
     createKafkaMessage,
 } from '../_tests/fixtures'
@@ -65,11 +65,11 @@ describe('CDP Person Updates Consumer', () => {
         })
 
         it('should ignore message with no team', async () => {
-            const events = await processor._parseKafkaBatch([createKafkaMessage(createClickhousePerson(999999, {}))])
+            const events = await processor._parseKafkaBatch([createKafkaMessage(createDatastorePerson(999999, {}))])
             expect(events).toHaveLength(0)
         })
         it('should parse a valid message with an existing team and custom function ', async () => {
-            const event = createClickhousePerson(team.id, {
+            const event = createDatastorePerson(team.id, {
                 id: 'person-id-1',
             })
 
@@ -117,7 +117,7 @@ describe('CDP Person Updates Consumer', () => {
 
             await insertInsightsFunction(insightsFunctionEvents)
 
-            const events = await processor._parseKafkaBatch([createKafkaMessage(createClickhousePerson(team.id, {}))])
+            const events = await processor._parseKafkaBatch([createKafkaMessage(createDatastorePerson(team.id, {}))])
             const result = await processor.processBatch(events)
 
             expect(result.invocations).toHaveLength(1)

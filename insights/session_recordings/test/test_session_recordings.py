@@ -7,7 +7,7 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     FuzzyInt,
     QueryMatchingTest,
     _create_event,
@@ -26,7 +26,7 @@ from rest_framework import status
 
 from insights.schema import LogEntryPropertyFilter, RecordingsQuery
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.errors import CHQueryErrorCannotScheduleTask, CHQueryErrorTooManySimultaneousQueries
 from insights.models import Organization, Person, SessionRecording, User
 from insights.models.team import Team
@@ -35,7 +35,7 @@ from insights.session_recordings.models.session_recording_event import SessionRe
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 
 
-class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest):
+class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     def setUp(self):
         super().setUp()
 
@@ -236,7 +236,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
     @snapshot_postgres_queries
     # we can't take snapshots of the CH queries
     # because we use `now()` in the CH queries which don't know about any frozen time
-    # @snapshot_clickhouse_queries
+    # @snapshot_datastore_queries
     def test_get_session_recordings_sorted(
         self,
         _name: str,
@@ -1271,7 +1271,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         "insights.session_recordings.session_recording_api.SessionRecordingViewSet._bulk_delete_via_recording_api",
         return_value=[],
     )
-    def test_bulk_delete_creates_postgres_records_for_clickhouse_only_recordings(
+    def test_bulk_delete_creates_postgres_records_for_datastore_only_recordings(
         self, _mock_bulk_delete_via_recording_api
     ):
         Person.objects.create(
@@ -1283,7 +1283,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         base_time = now() - relativedelta(days=1)
         session_id = "bulk_delete_ch_only"
 
-        # Create recording only in ClickHouse (via produce_replay_summary)
+        # Create recording only in Datastore (via produce_replay_summary)
         self.produce_replay_summary("user1", session_id, base_time)
 
         # Verify no PostgreSQL record exists yet
@@ -1919,7 +1919,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         cache_key = f"session_recording_existence_team_{self.team.pk}_id_{session_id}"
         cache.delete(cache_key)
 
-        # First request - should query ClickHouse and cache result
+        # First request - should query Datastore and cache result
         response = self.client.post(
             f"/api/projects/{self.team.id}/session_recordings/batch_check_exists",
             {"session_ids": [session_id]},

@@ -8,11 +8,11 @@ def insightsql_functions() -> list[str]:
     (e.g. countIf, sumIf) where the base function also exists.
     """
     from insights.insightsql.functions.aggregations import INSIGHTSQL_AGGREGATIONS
-    from insights.insightsql.functions.mapping import INSIGHTSQL_CLICKHOUSE_FUNCTIONS
+    from insights.insightsql.functions.mapping import INSIGHTSQL_DATASTORE_FUNCTIONS
     from insights.insightsql.functions.udfs import UDFS
 
     all_names: set[str] = set()
-    for name in INSIGHTSQL_CLICKHOUSE_FUNCTIONS:
+    for name in INSIGHTSQL_DATASTORE_FUNCTIONS:
         if not name.startswith("_") and name not in UDFS:
             all_names.add(name)
     for name in INSIGHTSQL_AGGREGATIONS:

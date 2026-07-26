@@ -3,21 +3,21 @@ import subprocess
 from urllib.parse import quote_plus
 
 import pytest
-from insights.test.base import InsightsTestCase, run_clickhouse_statement_in_parallel
+from insights.test.base import InsightsTestCase, run_datastore_statement_in_parallel
 
 from django.conf import settings
 from django.core.management.commands.flush import Command as FlushCommand
 from django.db import connections
 
-from infi.clickhouse_orm import Database
+from datastore_orm import Database
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 
 
-def create_clickhouse_tables():
-    # Create clickhouse tables to default before running test
+def create_datastore_tables():
+    # Create datastore tables to default before running test
     # Mostly so that test runs locally work correctly
-    from insights.clickhouse.schema import (
+    from insights.datastore.schema import (
         CREATE_DATA_QUERIES,
         CREATE_DICTIONARY_QUERIES,
         CREATE_DISTRIBUTED_TABLE_QUERIES,
@@ -33,7 +33,7 @@ def create_clickhouse_tables():
         row[0]
         for row in sync_execute(
             "SELECT name FROM system.tables WHERE database = %(database)s",
-            {"database": settings.CLICKHOUSE_DATABASE},
+            {"database": settings.DATASTORE_DATABASE},
         )
     }
 
@@ -42,34 +42,34 @@ def create_clickhouse_tables():
 
     table_queries = list(map(build_query, missing(CREATE_MERGETREE_TABLE_QUERIES + CREATE_DISTRIBUTED_TABLE_QUERIES)))
     if table_queries:
-        run_clickhouse_statement_in_parallel(table_queries)
+        run_datastore_statement_in_parallel(table_queries)
 
     if settings.IN_EVAL_TESTING:
         kafka_table_queries = list(map(build_query, missing(CREATE_KAFKA_TABLE_QUERIES)))
         if kafka_table_queries:
-            run_clickhouse_statement_in_parallel(kafka_table_queries)
+            run_datastore_statement_in_parallel(kafka_table_queries)
 
     mv_queries = list(map(build_query, missing(CREATE_MV_TABLE_QUERIES)))
     if mv_queries:
-        run_clickhouse_statement_in_parallel(mv_queries)
+        run_datastore_statement_in_parallel(mv_queries)
 
     view_queries = list(map(build_query, missing(CREATE_VIEW_QUERIES)))
     if view_queries:
-        run_clickhouse_statement_in_parallel(view_queries)
+        run_datastore_statement_in_parallel(view_queries)
 
     dictionary_queries = list(map(build_query, missing(CREATE_DICTIONARY_QUERIES)))
     if dictionary_queries:
-        run_clickhouse_statement_in_parallel(dictionary_queries)
+        run_datastore_statement_in_parallel(dictionary_queries)
 
     data_queries = list(map(build_query, CREATE_DATA_QUERIES()))
-    run_clickhouse_statement_in_parallel(data_queries)
+    run_datastore_statement_in_parallel(data_queries)
 
 
-def reset_clickhouse_tables():
-    # Truncate clickhouse tables to default before running test
+def reset_datastore_tables():
+    # Truncate datastore tables to default before running test
     # Mostly so that test runs locally work correctly
-    from insights.clickhouse.dead_letter_queue import TRUNCATE_DEAD_LETTER_QUEUE_TABLE_SQL
-    from insights.clickhouse.plugin_log_entries import TRUNCATE_PLUGIN_LOG_ENTRIES_TABLE_SQL
+    from insights.datastore.dead_letter_queue import TRUNCATE_DEAD_LETTER_QUEUE_TABLE_SQL
+    from insights.datastore.plugin_log_entries import TRUNCATE_PLUGIN_LOG_ENTRIES_TABLE_SQL
     from insights.heatmaps.sql import TRUNCATE_HEATMAPS_TABLE_SQL
     from insights.models.ai.pg_embeddings import TRUNCATE_PG_EMBEDDINGS_TABLE_SQL
     from insights.models.app_metrics.sql import TRUNCATE_APP_METRICS_TABLE_SQL
@@ -93,7 +93,7 @@ def reset_clickhouse_tables():
     from products.error_tracking.backend.embedding import TRUNCATE_DOCUMENT_EMBEDDINGS_TABLE_SQL
     from products.error_tracking.backend.sql import TRUNCATE_ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES_TABLE_SQL
 
-    # REMEMBER TO ADD ANY NEW CLICKHOUSE TABLES TO THIS ARRAY!
+    # REMEMBER TO ADD ANY NEW DATASTORE TABLES TO THIS ARRAY!
     TABLES_TO_CREATE_DROP: list[str] = [
         TRUNCATE_EVENTS_TABLE_SQL(),
         TRUNCATE_EVENTS_RECENT_TABLE_SQL(),
@@ -125,17 +125,17 @@ def reset_clickhouse_tables():
             f"""
             SELECT name
             FROM system.tables
-            WHERE database = '{settings.CLICKHOUSE_DATABASE}' AND name LIKE 'kafka_%'
+            WHERE database = '{settings.DATASTORE_DATABASE}' AND name LIKE 'kafka_%'
             """,
         )
         # Using `ON CLUSTER` takes x20 more time to drop the tables: https://github.com/hanzoai/datastore/issues/15473.
         TABLES_TO_CREATE_DROP += [f"DROP TABLE {table[0]}" for table in kafka_tables]
 
-    run_clickhouse_statement_in_parallel(TABLES_TO_CREATE_DROP)
+    run_datastore_statement_in_parallel(TABLES_TO_CREATE_DROP)
 
-    from insights.clickhouse.schema import CREATE_DATA_QUERIES
+    from insights.datastore.schema import CREATE_DATA_QUERIES
 
-    run_clickhouse_statement_in_parallel(list(CREATE_DATA_QUERIES()))
+    run_datastore_statement_in_parallel(list(CREATE_DATA_QUERIES()))
 
 
 def run_persons_sqlx_migrations(keepdb: bool = False):
@@ -273,12 +273,12 @@ def _django_db_setup(django_db_keepdb, django_db_blocker):
     run_persons_sqlx_migrations(keepdb=django_db_keepdb)
 
     database = Database(
-        settings.CLICKHOUSE_DATABASE,
-        db_url=settings.CLICKHOUSE_HTTP_URL,
-        username=settings.CLICKHOUSE_USER,
-        password=settings.CLICKHOUSE_PASSWORD,
-        cluster=settings.CLICKHOUSE_CLUSTER,
-        verify_ssl_cert=settings.CLICKHOUSE_VERIFY,
+        settings.DATASTORE_DATABASE,
+        db_url=settings.DATASTORE_HTTP_URL,
+        username=settings.DATASTORE_USER,
+        password=settings.DATASTORE_PASSWORD,
+        cluster=settings.DATASTORE_CLUSTER,
+        verify_ssl_cert=settings.DATASTORE_VERIFY,
         randomize_replica_paths=True,
     )
 
@@ -290,14 +290,14 @@ def _django_db_setup(django_db_keepdb, django_db_blocker):
 
     database.create_database()  # Create database if it doesn't exist
 
-    create_clickhouse_tables()
+    create_datastore_tables()
 
     yield
 
     if django_db_keepdb:
-        # Reset ClickHouse data, unless we're running AI evals, where we want to keep the DB between runs
+        # Reset Datastore data, unless we're running AI evals, where we want to keep the DB between runs
         if not settings.IN_EVAL_TESTING:
-            reset_clickhouse_tables()
+            reset_datastore_tables()
     else:
         database.drop_database()
 

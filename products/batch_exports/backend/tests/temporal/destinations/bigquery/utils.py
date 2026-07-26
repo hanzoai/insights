@@ -9,7 +9,7 @@ import pytest
 from google.cloud import bigquery
 
 from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 
 from products.batch_exports.backend.temporal.destinations.bigquery_batch_export import bigquery_default_fields
 from products.batch_exports.backend.temporal.record_batch_model import SessionsRecordBatchModel
@@ -51,9 +51,9 @@ TEST_MODELS: list[BatchExportModel | BatchExportSchema | None] = [
 ]
 
 
-async def assert_clickhouse_records_in_bigquery(
+async def assert_datastore_records_in_bigquery(
     bigquery_client: bigquery.Client,
-    clickhouse_client: ClickHouseClient,
+    datastore_client: DatastoreClient,
     team_id: int,
     table_id: str,
     dataset_id: str,
@@ -69,11 +69,11 @@ async def assert_clickhouse_records_in_bigquery(
     expected_fields: list[str] | None = None,
     timestamp_columns: collections.abc.Sequence[str] = (),
 ) -> None:
-    """Assert ClickHouse records are written to a given BigQuery table.
+    """Assert Datastore records are written to a given BigQuery table.
 
     Arguments:
         bigquery_client: A BigQuery client used to read inserted records.
-        clickhouse_client: A ClickHouseClient used to read records that are expected to
+        datastore_client: A DatastoreClient used to read records that are expected to
             be exported.
         team_id: The ID of the team that we are testing for.
         table_id: BigQuery table id where records are exported to.

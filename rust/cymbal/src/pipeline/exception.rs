@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 use uuid::Uuid;
 
 use crate::{
@@ -29,7 +29,7 @@ pub async fn do_exception_handling(
             });
 
     // We filter out events that errored in previous stages
-    let input_batch_events: Batch<ClickHouseEvent> = Batch::from(
+    let input_batch_events: Batch<DatastoreEvent> = Batch::from(
         cloned_events
             .into_iter()
             .filter_map(|item| item.ok())

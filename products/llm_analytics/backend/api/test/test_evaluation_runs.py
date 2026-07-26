@@ -36,7 +36,7 @@ class TestEvaluationRunViewSet(APIBaseTest):
         target_event_id = str(uuid.uuid4())
         timestamp = datetime.now()
 
-        # Mock ClickHouse query to return event data
+        # Mock Datastore query to return event data
         mock_query.return_value = [
             {
                 "uuid": target_event_id.replace("-", ""),

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 import dagster
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.team.team import Team
 from insights.models.web_preaggregated.team_selection import (
     DEFAULT_TOP_TEAMS_BY_PAGEVIEWS_LIMIT,

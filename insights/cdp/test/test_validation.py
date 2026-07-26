@@ -1,6 +1,6 @@
 import json
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 from parameterized import parameterized
 from rest_framework.exceptions import ValidationError
@@ -76,7 +76,7 @@ def create_example_inputs():
     }
 
 
-class TestInsightsFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestInsightsFunctionValidation(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     filters_context: dict = {}
 
     def setUp(self):

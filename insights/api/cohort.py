@@ -40,7 +40,7 @@ from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
 from insights.api.utils import action
 from insights.cdp.filters import build_behavioral_event_expr
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.constants import LIMIT, OFFSET, PropertyOperatorType
 from insights.event_usage import report_user_action
 from insights.exceptions_capture import capture_exception
@@ -1379,7 +1379,7 @@ def will_create_loops(cohort: Cohort) -> bool:
 
 
 def insert_cohort_people_into_pg(cohort: Cohort, *, team_id: int):
-    # nosemgrep: clickhouse-fstring-param-audit - table name from constant, values parameterized
+    # nosemgrep: datastore-fstring-param-audit - table name from constant, values parameterized
     ids = sync_execute(
         f"SELECT person_id FROM {PERSON_STATIC_COHORT_TABLE} where team_id = %(team_id)s AND cohort_id = %(cohort_id)s",
         {"cohort_id": cohort.pk, "team_id": team_id},

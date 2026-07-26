@@ -49,7 +49,7 @@ QUERY_LOG_ARCHIVE_FIELDS: dict[str, FieldOrTable] = {
 class QueryLogArchiveTable(LazyTable):
     fields: dict[str, FieldOrTable] = QUERY_LOG_ARCHIVE_FIELDS
 
-    def to_printed_clickhouse(self, context) -> str:
+    def to_printed_datastore(self, context) -> str:
         return "query_log_archive"
 
     def to_printed_insightsql(self) -> str:
@@ -154,7 +154,7 @@ class RawQueryLogArchiveTable(Table):
         ),
     }
 
-    def to_printed_clickhouse(self, context) -> str:
+    def to_printed_datastore(self, context) -> str:
         return "query_log_archive"
 
     def to_printed_insightsql(self) -> str:

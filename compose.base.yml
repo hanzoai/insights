@@ -135,7 +135,7 @@ services:
     datastore:
         #
         # Note: please keep the default version in sync across
-        #       `insights` and the `charts-clickhouse` repos
+        #       `insights` and the `charts-datastore` repos
         #
         image: ${DATASTORE_SERVER_IMAGE:-ghcr.io/hanzoai/datastore:26.6.1.1}
         restart: on-failure
@@ -403,7 +403,7 @@ services:
         <<: *worker
         command: sh -c "
             python manage.py migrate
-            && python manage.py migrate_clickhouse
+            && python manage.py migrate_datastore
             && python manage.py run_async_migrations
             "
         restart: 'no'

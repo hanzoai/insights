@@ -1272,7 +1272,7 @@ async def insert_into_snowflake_activity_from_stage(
 ) -> BatchExportResult:
     """Activity to batch export data from internal S3 stage to Snowflake.
 
-    This activity reads data from our internal S3 stage instead of ClickHouse directly, and uses concurrent uploads to
+    This activity reads data from our internal S3 stage instead of Datastore directly, and uses concurrent uploads to
     improve performance.
     """
     bind_contextvars(
@@ -1436,7 +1436,7 @@ async def insert_into_snowflake_activity_from_stage(
 
 @workflow.defn(name="snowflake-export", failure_exception_types=[workflow.NondeterminismError])
 class SnowflakeBatchExportWorkflow(InsightsWorkflow):
-    """A Temporal Workflow to export ClickHouse data into Snowflake.
+    """A Temporal Workflow to export Datastore data into Snowflake.
 
     This Workflow is intended to be executed both manually and by a Temporal
     Schedule. When ran by a schedule, `data_interval_end` should be set to

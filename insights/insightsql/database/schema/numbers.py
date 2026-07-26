@@ -19,7 +19,7 @@ class NumbersTable(FunctionCallTable, DANGEROUS_NoTeamIdCheckTable):
     min_args: Optional[int] = 1
     max_args: Optional[int] = 2
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "numbers"
 
     def to_printed_insightsql(self):

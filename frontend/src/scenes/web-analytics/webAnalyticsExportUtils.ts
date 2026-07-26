@@ -61,8 +61,8 @@ export function exportTableData(tableData: string[][], format: ExporterFormat): 
     }
 }
 
-function convertClickHouseDayToStandard(clickHouseDay: number): number {
-    // ClickHouse toDayOfWeek: 1=Mon, 2=Tue, ..., 7=Sun
+function convertDatastoreDayToStandard(clickHouseDay: number): number {
+    // Datastore toDayOfWeek: 1=Mon, 2=Tue, ..., 7=Sun
     // Standard array indices: 0=Sun, 1=Mon, ..., 6=Sat
     return clickHouseDay % 7
 }
@@ -93,7 +93,7 @@ class CalendarHeatmapAdapter implements ExportAdapter {
             .fill(0)
             .map(() => Array(numCols).fill(0))
         data.forEach((item: EventsHeatMapDataResult) => {
-            const standardDay = convertClickHouseDayToStandard(item.row)
+            const standardDay = convertDatastoreDayToStandard(item.row)
             if (standardDay < numRows && item.column < numCols) {
                 matrix[standardDay][item.column] = item.value
             }
@@ -101,7 +101,7 @@ class CalendarHeatmapAdapter implements ExportAdapter {
 
         const rowAggMap: Record<number, number> = {}
         rowAggregations.forEach((item: EventsHeatMapRowAggregationResult) => {
-            const standardDay = convertClickHouseDayToStandard(item.row)
+            const standardDay = convertDatastoreDayToStandard(item.row)
             rowAggMap[standardDay] = item.value
         })
 

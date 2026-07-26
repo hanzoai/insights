@@ -26,7 +26,7 @@ from insights.schema import (
     QueryStatusResponse,
 )
 
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 from insights.insightsql_queries.experiments.experiment_exposures_query_runner import ExperimentExposuresQueryRunner
 from insights.insightsql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
 from insights.insightsql_queries.experiments.utils import get_experiment_stats_method

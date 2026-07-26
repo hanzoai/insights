@@ -10,7 +10,7 @@ from insights.insightsql.parser import parse_expr, parse_select
 from insights.insightsql.printer import to_printed_insightsql
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.insightsql_queries.ai.utils import TaxonomyCacheMixin
 from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
 

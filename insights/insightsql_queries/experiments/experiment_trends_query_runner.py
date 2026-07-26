@@ -31,7 +31,7 @@ from insights.schema import (
 
 from insights.insightsql import ast
 
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.constants import ExperimentNoResultsErrorKeys
 from insights.insightsql_queries.experiments import CONTROL_VARIANT_KEY
 from insights.insightsql_queries.experiments.trends_statistics_v2_continuous import (

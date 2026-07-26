@@ -1,12 +1,12 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, snapshot_datastore_queries
 
 from django.utils.timezone import now
 
 from dateutil.relativedelta import relativedelta
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
+from insights.datastore.client import sync_execute
+from insights.datastore.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
 from insights.models import Person
 from insights.models.group.util import create_group
 from insights.session_recordings.queries.test.listing_recordings.test_utils import assert_query_matches_session_ids
@@ -16,7 +16,7 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 
 
 @freeze_time("2020-01-01T13:46:23")
-class TestSessionRecordingsListByGroupProperties(ClickhouseTestMixin, APIBaseTest):
+class TestSessionRecordingsListByGroupProperties(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         sync_execute(TRUNCATE_SESSION_REPLAY_EVENTS_TABLE_SQL())
@@ -34,7 +34,7 @@ class TestSessionRecordingsListByGroupProperties(ClickhouseTestMixin, APIBaseTes
     def an_hour_ago(self):
         return (now() - relativedelta(hours=1)).replace(microsecond=0, second=0)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_filter_with_group_properties(self) -> None:
         # there is one person
         Person.objects.create(team_id=self.team.pk, distinct_ids=["p1"], properties={"$browser": "test"})

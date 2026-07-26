@@ -422,8 +422,8 @@ export const featureFlagsActivityResponseJson: ActivityLogItem[] = [
                         multivariate: {
                             variants: [
                                 {
-                                    key: 'Mar_20_Some_counts_and_aggregates_may_be_slightly_low_due_to_maintenance_with_ClickHouse_This_will_be_resolved_by_Monday',
-                                    name: 'ClickHouse Maintenance',
+                                    key: 'Mar_20_Some_counts_and_aggregates_may_be_slightly_low_due_to_maintenance_with_Datastore_This_will_be_resolved_by_Monday',
+                                    name: 'Datastore Maintenance',
                                     rollout_percentage: 100,
                                 },
                             ],

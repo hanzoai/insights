@@ -7,7 +7,7 @@ import structlog
 from rest_framework import status
 from rest_framework.exceptions import APIException
 
-from insights.clickhouse.query_tagging import get_query_tags
+from insights.datastore.query_tagging import get_query_tags
 from insights.cloud_utils import is_cloud
 from insights.exceptions_capture import capture_exception
 
@@ -59,28 +59,28 @@ class Conflict(APIException):
     default_code = "conflict"
 
 
-class ClickHouseAtCapacity(APIException):
+class DatastoreAtCapacity(APIException):
     status_code = 503
     default_detail = (
         "Queries are a little too busy right now. We're working to free up resources. Please try again later."
     )
 
 
-class ClickHouseEstimatedQueryExecutionTimeTooLong(APIException):
+class DatastoreEstimatedQueryExecutionTimeTooLong(APIException):
     status_code = 512  # Custom error code
     default_detail = "Estimated query execution time is too long. Try reducing its scope by changing the time range."
 
 
-class ClickHouseQuerySizeExceeded(APIException):
+class DatastoreQuerySizeExceeded(APIException):
     default_detail = "Query size exceeded."
 
 
-class ClickHouseQueryTimeOut(APIException):
+class DatastoreQueryTimeOut(APIException):
     status_code = 504
     default_detail = "Query has hit the max execution time before completing. See our docs for how to improve your query performance. You may need to materialize."
 
 
-class ClickHouseQueryMemoryLimitExceeded(APIException):
+class DatastoreQueryMemoryLimitExceeded(APIException):
     status_code = 504
     default_detail = "Query has reached the max memory limit before completing. See our docs for how to improve your query memory footprint. You may need to narrow date range or materialize."
 

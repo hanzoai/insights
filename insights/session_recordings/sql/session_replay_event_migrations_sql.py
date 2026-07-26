@@ -5,13 +5,13 @@ from insights.session_recordings.sql.session_replay_event_sql import SESSION_REP
 
 def DROP_SESSION_REPLAY_EVENTS_TABLE_MV_SQL(on_cluster=True):
     return "DROP TABLE IF EXISTS session_replay_events_mv" + (
-        f" ON CLUSTER {settings.CLICKHOUSE_CLUSTER}" if on_cluster else ""
+        f" ON CLUSTER {settings.DATASTORE_CLUSTER}" if on_cluster else ""
     )
 
 
 def DROP_KAFKA_SESSION_REPLAY_EVENTS_TABLE_SQL(on_cluster=True):
     return "DROP TABLE IF EXISTS kafka_session_replay_events" + (
-        f" ON CLUSTER {settings.CLICKHOUSE_CLUSTER}" if on_cluster else ""
+        f" ON CLUSTER {settings.DATASTORE_CLUSTER}" if on_cluster else ""
     )
 
 
@@ -31,18 +31,18 @@ ALTER_SESSION_REPLAY_ADD_CONSOLE_COLUMNS = """
 ADD_CONSOLE_COUNTS_DISTRIBUTED_SESSION_REPLAY_EVENTS_TABLE_SQL = (
     lambda: ALTER_SESSION_REPLAY_ADD_CONSOLE_COLUMNS.format(
         table_name="session_replay_events",
-        cluster=settings.CLICKHOUSE_CLUSTER,
+        cluster=settings.DATASTORE_CLUSTER,
     )
 )
 
 ADD_CONSOLE_COUNTS_WRITABLE_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_CONSOLE_COLUMNS.format(
     table_name="writable_session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_CONSOLE_COUNTS_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_CONSOLE_COLUMNS.format(
     table_name=SESSION_REPLAY_EVENTS_DATA_TABLE(),
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 # migration to add size column to the session replay table
@@ -54,17 +54,17 @@ ALTER_SESSION_REPLAY_ADD_SIZE_COLUMN = """
 
 ADD_SIZE_DISTRIBUTED_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_SIZE_COLUMN.format(
     table_name="session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_SIZE_WRITABLE_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_SIZE_COLUMN.format(
     table_name="writable_session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_SIZE_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_SIZE_COLUMN.format(
     table_name=SESSION_REPLAY_EVENTS_DATA_TABLE(),
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 # migration to add size column to the session replay table
@@ -79,18 +79,18 @@ ALTER_SESSION_REPLAY_ADD_EVENT_COUNT_COLUMN = """
 ADD_EVENT_COUNT_DISTRIBUTED_SESSION_REPLAY_EVENTS_TABLE_SQL = (
     lambda: ALTER_SESSION_REPLAY_ADD_EVENT_COUNT_COLUMN.format(
         table_name="session_replay_events",
-        cluster=settings.CLICKHOUSE_CLUSTER,
+        cluster=settings.DATASTORE_CLUSTER,
     )
 )
 
 ADD_EVENT_COUNT_WRITABLE_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_EVENT_COUNT_COLUMN.format(
     table_name="writable_session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_EVENT_COUNT_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_EVENT_COUNT_COLUMN.format(
     table_name=SESSION_REPLAY_EVENTS_DATA_TABLE(),
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 # migration to add source column to the session replay table
@@ -101,17 +101,17 @@ ALTER_SESSION_REPLAY_ADD_SOURCE_COLUMN = """
 
 ADD_SOURCE_DISTRIBUTED_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_SOURCE_COLUMN.format(
     table_name="session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_SOURCE_WRITABLE_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_SOURCE_COLUMN.format(
     table_name="writable_session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_SOURCE_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_SOURCE_COLUMN.format(
     table_name=SESSION_REPLAY_EVENTS_DATA_TABLE(),
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 # migration to add all_urls column to the session replay table
@@ -122,17 +122,17 @@ ALTER_SESSION_REPLAY_ADD_ALL_URLS_COLUMN = """
 
 ADD_ALL_URLS_DISTRIBUTED_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_ALL_URLS_COLUMN.format(
     table_name="session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_ALL_URLS_WRITABLE_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_ALL_URLS_COLUMN.format(
     table_name="writable_session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_ALL_URLS_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_ALL_URLS_COLUMN.format(
     table_name=SESSION_REPLAY_EVENTS_DATA_TABLE(),
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 # migration to add library column to the session replay table
@@ -143,17 +143,17 @@ ALTER_SESSION_REPLAY_ADD_LIBRARY_COLUMN = """
 
 ADD_LIBRARY_DISTRIBUTED_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_LIBRARY_COLUMN.format(
     table_name="session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_LIBRARY_WRITABLE_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_LIBRARY_COLUMN.format(
     table_name="writable_session_replay_events",
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 ADD_LIBRARY_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SESSION_REPLAY_ADD_LIBRARY_COLUMN.format(
     table_name=SESSION_REPLAY_EVENTS_DATA_TABLE(),
-    cluster=settings.CLICKHOUSE_CLUSTER,
+    cluster=settings.DATASTORE_CLUSTER,
 )
 
 # migration to add retention_period column to the session replay table
@@ -329,7 +329,7 @@ ADD_BLOCK_COLUMNS_DISTRIBUTED_SESSION_REPLAY_EVENTS_TABLE_SQL = lambda: ALTER_SE
 
 # =========================
 # MIGRATION: Add is_deleted column to support metadata deletion
-# When a recording is deleted via the recording-api, we mark it as deleted in ClickHouse
+# When a recording is deleted via the recording-api, we mark it as deleted in Datastore
 # so it no longer appears in session recording lists.
 # Using SimpleAggregateFunction(max, UInt8) ensures that once is_deleted=1 is written,
 # subsequent merges keep the value as 1.

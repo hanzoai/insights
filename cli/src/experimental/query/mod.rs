@@ -50,7 +50,7 @@ pub type InsightsQLQueryResult = Result<InsightsQLQueryResponse, InsightsQLQuery
 pub struct InsightsQLQueryResponse {
     pub cache_key: Option<String>,
     pub cache_target_age: Option<String>,
-    pub clickhouse: Option<String>, // Clickhouse query text
+    pub datastore: Option<String>, // Datastore query text
     #[serde(default, deserialize_with = "null_is_empty")]
     pub columns: Vec<String>, // Columns returned from the query
     pub error: Option<String>,

@@ -8,9 +8,9 @@ from insights.insightsql.visitor import CloningVisitor
 QueryType = Union[ast.SelectQuery, ast.SelectSetQuery]
 
 """
-This module provides utilities for transforming ClickHouse aggregate functions to their State and Merge variants.
+This module provides utilities for transforming Datastore aggregate functions to their State and Merge variants.
 
-ClickHouse supports a two-step aggregation pattern where:
+Datastore supports a two-step aggregation pattern where:
 1. Functions like uniq() can be converted to uniqState() for partial aggregation
 2. These state functions can then be processed with uniqMerge() to combine partial results
 
@@ -29,7 +29,7 @@ assert set(SUPPORTED_FUNCTIONS).issubset(INSIGHTSQL_AGGREGATIONS_KEYS_SET), (
     "All supported aggregation functions must be in INSIGHTSQL_AGGREGATIONS"
 )
 
-# Clickhouse allows many suffix combinations but we are trying to keep the number of transformations to just the ones we use now.
+# Datastore allows many suffix combinations but we are trying to keep the number of transformations to just the ones we use now.
 AGGREGATION_TO_STATE_MAPPING = {
     func: f"{func[:-2]}State{func[-2:]}" if func.endswith("If") else f"{func}State" for func in SUPPORTED_FUNCTIONS
 }
@@ -52,7 +52,7 @@ class AggregationStateTransformer(CloningVisitor):
     Transforms standard aggregation functions (uniq, count, sum, etc) to their State equivalents
     (uniqState, countState, sumState, etc).
 
-    This is mostly used to transform regular ClickHouse queries so we're able to combine them
+    This is mostly used to transform regular Datastore queries so we're able to combine them
     with pre-aggregated data using the corresponding Merge functions but can also be used to create
     intermediate aggregation states for other transformations.
     """

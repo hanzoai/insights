@@ -237,7 +237,7 @@ class AggregationOperations(DataWarehouseInsightQueryMixin):
 
     def get_array_fold_merge_operation(self) -> str:
         """
-        Returns the ClickHouse expression for combining two values in an arrayFold operation
+        Returns the Datastore expression for combining two values in an arrayFold operation
         when rolling up "Other" breakdown values.
 
         Used in arrayFold like: arrayMap(i -> {operation}, range(...))
@@ -308,7 +308,7 @@ class AggregationOperations(DataWarehouseInsightQueryMixin):
 
             # For DataWarehouse nodes we have a timestamp field we need to use
             # This timestamp data can be nullable, so we need to handle NULL values
-            # to avoid ClickHouse errors with dictGetOrDefault expecting non-nullable dates
+            # to avoid Datastore errors with dictGetOrDefault expecting non-nullable dates
             timestamp_expr: ast.Expr
             if isinstance(self.series, DataWarehouseNode):
                 if self.series.dw_source_type == "self-managed":

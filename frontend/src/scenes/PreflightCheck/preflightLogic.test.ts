@@ -49,8 +49,8 @@ describe('preflightLogic', () => {
                             status: 'validated',
                         },
                         {
-                            id: 'clickhouse',
-                            name: 'Analytics database · ClickHouse',
+                            id: 'datastore',
+                            name: 'Analytics database · Datastore',
                             status: 'validated',
                         },
                         {
@@ -111,8 +111,8 @@ describe('preflightLogic', () => {
                             status: 'validated',
                         },
                         {
-                            id: 'clickhouse',
-                            name: 'Analytics database · ClickHouse',
+                            id: 'datastore',
+                            name: 'Analytics database · Datastore',
                             status: 'validated',
                         },
                         {

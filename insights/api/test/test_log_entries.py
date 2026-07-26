@@ -1,10 +1,10 @@
 from datetime import UTC, datetime
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 from rest_framework import status
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.models.insights_functions.insights_function import InsightsFunction
 
 
@@ -17,7 +17,7 @@ def create_log_entry(
     instance_id: str | None = None,
     timestamp: str | None = None,
 ):
-    from insights.clickhouse.log_entries import INSERT_LOG_ENTRY_SQL
+    from insights.datastore.log_entries import INSERT_LOG_ENTRY_SQL
 
     sync_execute(
         INSERT_LOG_ENTRY_SQL,
@@ -33,7 +33,7 @@ def create_log_entry(
     )
 
 
-class TestLogEntries(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestLogEntries(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     insights_function: InsightsFunction
 
     def setUp(self):

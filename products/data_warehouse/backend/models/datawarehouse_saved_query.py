@@ -23,7 +23,7 @@ from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UUIDTMod
 from insights.sync import database_sync_to_async
 
 from products.data_warehouse.backend.models.util import (
-    CLICKHOUSE_INSIGHTSQL_MAPPING,
+    DATASTORE_INSIGHTSQL_MAPPING,
     STR_TO_INSIGHTSQL_MAPPING,
     clean_type,
     remove_named_tuples,
@@ -75,7 +75,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         default=dict,
         null=True,
         blank=True,
-        help_text="Dict of all columns with ClickHouse type (including Nullable())",
+        help_text="Dict of all columns with Datastore type (including Nullable())",
     )
     external_tables = models.JSONField(default=list, null=True, blank=True, help_text="List of all external tables")
     query = models.JSONField(default=dict, null=True, blank=True, help_text="InsightsQL query")
@@ -202,12 +202,12 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         result = getattr(response, "types", [])
 
         if result is None or isinstance(result, int):
-            raise Exception("No columns types provided by clickhouse in get_columns")
+            raise Exception("No columns types provided by datastore in get_columns")
 
         columns = {
             str(item[0]): {
-                "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
-                "clickhouse": item[1],
+                "insightsql": DATASTORE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
+                "datastore": item[1],
                 "valid": True,
             }
             for item in result
@@ -215,16 +215,16 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
         return columns
 
-    def get_clickhouse_column_type(self, column_name: str) -> Optional[str]:
-        clickhouse_type = self.columns.get(column_name, None)
+    def get_datastore_column_type(self, column_name: str) -> Optional[str]:
+        datastore_type = self.columns.get(column_name, None)
 
-        if isinstance(clickhouse_type, dict) and self.columns[column_name].get("clickhouse"):
-            clickhouse_type = self.columns[column_name].get("clickhouse")
+        if isinstance(datastore_type, dict) and self.columns[column_name].get("datastore"):
+            datastore_type = self.columns[column_name].get("datastore")
 
-            if clickhouse_type.startswith("Nullable("):
-                clickhouse_type = clickhouse_type.replace("Nullable(", "")[:-1]
+            if datastore_type.startswith("Nullable("):
+                datastore_type = datastore_type.replace("Nullable(", "")[:-1]
 
-        return clickhouse_type
+        return datastore_type
 
     @property
     def s3_tables(self):
@@ -245,7 +245,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         )
 
         node = parse_select(self.query["query"])
-        resolved_node = resolve_types(node, context, dialect="clickhouse")
+        resolved_node = resolve_types(node, context, dialect="datastore")
 
         table_collector = S3TableVisitor()
         table_collector.visit(resolved_node)
@@ -279,28 +279,28 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         columns = self.columns or {}
         fields: dict[str, FieldOrTable] = {}
 
-        from products.data_warehouse.backend.models.table import CLICKHOUSE_INSIGHTSQL_MAPPING
+        from products.data_warehouse.backend.models.table import DATASTORE_INSIGHTSQL_MAPPING
 
         for column, type in columns.items():
             # Support for 'old' style columns
             if isinstance(type, str):
-                clickhouse_type = type
+                datastore_type = type
             elif isinstance(type, dict):
-                clickhouse_type = type["clickhouse"]
+                datastore_type = type["datastore"]
             else:
                 raise Exception(f"Unknown column type: {type}")  # Never reached
 
-            if clickhouse_type.startswith("Nullable("):
-                clickhouse_type = clickhouse_type.replace("Nullable(", "")[:-1]
+            if datastore_type.startswith("Nullable("):
+                datastore_type = datastore_type.replace("Nullable(", "")[:-1]
 
             # TODO: remove when addressed https://github.com/hanzoai/datastore/issues/37594
-            if clickhouse_type.startswith("Array("):
-                clickhouse_type = remove_named_tuples(clickhouse_type)
+            if datastore_type.startswith("Array("):
+                datastore_type = remove_named_tuples(datastore_type)
 
             # Support for 'old' style columns
             if isinstance(type, str):
-                insightsql_type_str = clickhouse_type.partition("(")[0]
-                insightsql_type = CLICKHOUSE_INSIGHTSQL_MAPPING[insightsql_type_str]
+                insightsql_type_str = datastore_type.partition("(")[0]
+                insightsql_type = DATASTORE_INSIGHTSQL_MAPPING[insightsql_type_str]
             elif isinstance(type, dict):
                 insightsql_type = STR_TO_INSIGHTSQL_MAPPING[type["insightsql"]]
             else:

@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.models.distinct_id_usage.sql import TABLE_BASE_NAME, TRUNCATE_DISTINCT_ID_USAGE_TABLE_SQL
 
 
-class TestDistinctIdUsageAggregation(ClickhouseTestMixin, BaseTest):
+class TestDistinctIdUsageAggregation(DatastoreTestMixin, BaseTest):
     def setUp(self):
         super().setUp()
         sync_execute(TRUNCATE_DISTINCT_ID_USAGE_TABLE_SQL())

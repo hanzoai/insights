@@ -275,8 +275,8 @@ SURROGATES_SUBSTITUTED_COUNTER = Counter(
 )
 
 
-# keep in sync with insights/plugin-server/src/utils/db/utils.ts::safeClickhouseString
-def safe_clickhouse_string(s: str, with_counter=True) -> str:
+# keep in sync with insights/plugin-server/src/utils/db/utils.ts::safeDatastoreString
+def safe_datastore_string(s: str, with_counter=True) -> str:
     matches = SURROGATE_REGEX.findall(s or "")
     for match in matches:
         if with_counter:

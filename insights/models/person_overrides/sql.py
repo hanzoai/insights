@@ -2,14 +2,14 @@
 # `person_distinct_id_overrides` in `insights.models.person.sql` for its replacement tables, or
 # https://github.com/Hanzo Insights/insights/pull/23616 for additional context.
 
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.table_engines import ReplacingMergeTree, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_PERSON_OVERRIDE
-from insights.settings.data_stores import CLICKHOUSE_DATABASE, KAFKA_HOSTS
+from insights.settings.data_stores import DATASTORE_DATABASE, KAFKA_HOSTS
 
 PERSON_OVERRIDES_CREATE_TABLE_SQL = (
     lambda on_cluster=True: f"""
-    CREATE TABLE IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.`person_overrides`
+    CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.`person_overrides`
     {ON_CLUSTER_CLAUSE(on_cluster)} (
         team_id INT NOT NULL,
 
@@ -30,7 +30,7 @@ PERSON_OVERRIDES_CREATE_TABLE_SQL = (
         -- The timestamp rows are created. This isn't part of the JOIN process
         -- with the events table but rather a housekeeping column to allow us to
         -- see when the row was created. This shouldn't have any impact of the
-        -- JOIN as it will be stored separately with the Wide ClickHouse table
+        -- JOIN as it will be stored separately with the Wide Datastore table
         -- storage.
         created_at DateTime64(6, 'UTC') DEFAULT now(),
 
@@ -41,7 +41,7 @@ PERSON_OVERRIDES_CREATE_TABLE_SQL = (
         version INT NOT NULL
     )
 
-    -- By specifying Replacing merge tree on version, we allow ClickHouse to
+    -- By specifying Replacing merge tree on version, we allow Datastore to
     -- discard old versions of a `old_person_id` mapping. This should help keep
     -- performance in check as new versions are added. Note that given we can
     -- have partitioning by `oldest_event` which will change as we update
@@ -72,17 +72,17 @@ PERSON_OVERRIDES_CREATE_TABLE_SQL = (
     )
 )
 
-# An abstraction over Kafka that allows us to consume, via a ClickHouse
+# An abstraction over Kafka that allows us to consume, via a Datastore
 # Materialized View from a Kafka topic and insert the messages into the
-# ClickHouse MergeTree table `person_overrides`
+# Datastore MergeTree table `person_overrides`
 KAFKA_PERSON_OVERRIDES_TABLE_SQL = f"""
-    CREATE TABLE IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.`kafka_person_overrides`
+    CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.`kafka_person_overrides`
     {ON_CLUSTER_CLAUSE()}
 
     ENGINE = Kafka(
         '{",".join(KAFKA_HOSTS)}', -- Kafka hosts
         '{KAFKA_PERSON_OVERRIDE}', -- Kafka topic
-        'clickhouse-person-overrides', -- Kafka consumer group id
+        'datastore-person-overrides', -- Kafka consumer group id
         'JSONEachRow' -- Specify that we should pass Kafka messages as JSON
     )
 
@@ -101,11 +101,11 @@ KAFKA_PERSON_OVERRIDES_TABLE_SQL = f"""
         -- set as a default value in the `person_overrides` table.
         -- created_at,
         version
-    FROM `{CLICKHOUSE_DATABASE}`.`person_overrides`
+    FROM `{DATASTORE_DATABASE}`.`person_overrides`
 """
 
 DROP_KAFKA_PERSON_OVERRIDES_TABLE_SQL = f"""
-    DROP TABLE IF EXISTS `{CLICKHOUSE_DATABASE}`.`kafka_person_overrides`
+    DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`kafka_person_overrides`
     {ON_CLUSTER_CLAUSE()}
     SYNC
 """
@@ -113,9 +113,9 @@ DROP_KAFKA_PERSON_OVERRIDES_TABLE_SQL = f"""
 # Materialized View that watches the Kafka table for data and inserts into the
 # `person_overrides` table.
 PERSON_OVERRIDES_CREATE_MATERIALIZED_VIEW_SQL = f"""
-    CREATE MATERIALIZED VIEW IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.`person_overrides_mv`
+    CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`person_overrides_mv`
     {ON_CLUSTER_CLAUSE()}
-    TO `{CLICKHOUSE_DATABASE}`.`person_overrides`
+    TO `{DATASTORE_DATABASE}`.`person_overrides`
     AS SELECT
         team_id,
         old_person_id,
@@ -126,11 +126,11 @@ PERSON_OVERRIDES_CREATE_MATERIALIZED_VIEW_SQL = f"""
         -- set as a default value in the `person_overrides` table.
         -- created_at,
         version
-    FROM `{CLICKHOUSE_DATABASE}`.`kafka_person_overrides`
+    FROM `{DATASTORE_DATABASE}`.`kafka_person_overrides`
 """
 
 DROP_PERSON_OVERRIDES_CREATE_MATERIALIZED_VIEW_SQL = f"""
-    DROP VIEW IF EXISTS `{CLICKHOUSE_DATABASE}`.`person_overrides_mv`
+    DROP VIEW IF EXISTS `{DATASTORE_DATABASE}`.`person_overrides_mv`
     {ON_CLUSTER_CLAUSE()}
     SYNC
 """
@@ -141,31 +141,31 @@ SELECT
     old_person_id,
     argMax(override_person_id, version)
 FROM
-    `{CLICKHOUSE_DATABASE}`.`person_overrides` AS overrides
+    `{DATASTORE_DATABASE}`.`person_overrides` AS overrides
 GROUP BY
     team_id,
     old_person_id
 """
 
-# ClickHouse dictionaries allow us to JOIN events with their new override_person_ids (if any).
+# Datastore dictionaries allow us to JOIN events with their new override_person_ids (if any).
 PERSON_OVERRIDES_CREATE_DICTIONARY_SQL = f"""
-    CREATE DICTIONARY IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.`person_overrides_dict`
+    CREATE DICTIONARY IF NOT EXISTS `{DATASTORE_DATABASE}`.`person_overrides_dict`
     {ON_CLUSTER_CLAUSE()} (
         team_id INT,
         old_person_id UUID,
         override_person_id UUID
     )
     PRIMARY KEY team_id, old_person_id
-    SOURCE(CLICKHOUSE(QUERY '{GET_LATEST_PERSON_OVERRIDE_ID_SQL}'))
+    SOURCE(DATASTORE(QUERY '{GET_LATEST_PERSON_OVERRIDE_ID_SQL}'))
     LAYOUT(COMPLEX_KEY_HASHED(PREALLOCATE 1))
 
-    -- The LIFETIME setting indicates to ClickHouse to automatically update this dictionary
-    -- when not set to 0. When using a time range ClickHouse will pick a uniformly random time in
+    -- The LIFETIME setting indicates to Datastore to automatically update this dictionary
+    -- when not set to 0. When using a time range Datastore will pick a uniformly random time in
     -- the range. We are setting an initial update time range of 5 to 10 seconds.
     LIFETIME(MIN 5 MAX 10)
 """
 
 DROP_PERSON_OVERRIDES_CREATE_DICTIONARY_SQL = f"""
-    DROP DICTIONARY IF EXISTS `{CLICKHOUSE_DATABASE}`.`person_overrides_dict`
+    DROP DICTIONARY IF EXISTS `{DATASTORE_DATABASE}`.`person_overrides_dict`
     {ON_CLUSTER_CLAUSE()}
 """

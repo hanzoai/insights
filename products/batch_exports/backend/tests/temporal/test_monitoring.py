@@ -25,12 +25,12 @@ from products.batch_exports.backend.temporal.monitoring import (
     datetime_to_str,
     fetch_exported_event_counts,
     get_batch_export,
-    get_clickhouse_event_counts,
+    get_datastore_event_counts,
     reconcile_event_counts,
     update_batch_export_runs,
 )
-from products.batch_exports.backend.tests.temporal.utils.clickhouse import (
-    create_clickhouse_tables_and_views,
+from products.batch_exports.backend.tests.temporal.utils.datastore import (
+    create_datastore_tables_and_views,
     truncate_events,
 )
 
@@ -42,15 +42,15 @@ GENERATE_TEST_DATA_START = GENERATE_TEST_DATA_END - dt.timedelta(hours=1)
 
 
 @pytest_asyncio.fixture(scope="module", autouse=True, loop_scope="module")
-async def clickhouse_db_setup(clickhouse_client):
-    await create_clickhouse_tables_and_views(clickhouse_client)
+async def datastore_db_setup(datastore_client):
+    await create_datastore_tables_and_views(datastore_client)
 
 
 @pytest_asyncio.fixture(autouse=True)
-async def truncate(clickhouse_client):
+async def truncate(datastore_client):
     """Fixture to automatically truncate sharded_events after a test."""
     yield
-    await truncate_events(clickhouse_client)
+    await truncate_events(datastore_client)
 
 
 @pytest_asyncio.fixture
@@ -139,7 +139,7 @@ async def _run_workflow(batch_export):
             workflows=[BatchExportMonitoringWorkflow],
             activities=[
                 get_batch_export,
-                get_clickhouse_event_counts,
+                get_datastore_event_counts,
                 fetch_exported_event_counts,
                 update_batch_export_runs,
                 reconcile_event_counts,

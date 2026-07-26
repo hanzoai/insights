@@ -1,14 +1,14 @@
 import dagster
 
-from insights.clickhouse.cluster import ClickhouseCluster
-from insights.clickhouse.custom_metrics import MetricsClient
+from insights.datastore.cluster import DatastoreCluster
+from insights.datastore.custom_metrics import MetricsClient
 from insights.dags import slack_alerts
 
 from . import resources
 
 
 def report_job_status_metric(
-    context: dagster.RunStatusSensorContext, cluster: dagster.ResourceParam[ClickhouseCluster]
+    context: dagster.RunStatusSensorContext, cluster: dagster.ResourceParam[DatastoreCluster]
 ) -> None:
     MetricsClient(cluster).increment(
         "dagster_run_status",

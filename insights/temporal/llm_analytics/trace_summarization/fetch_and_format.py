@@ -21,7 +21,7 @@ from insights.temporal.llm_analytics.trace_summarization.models import (
 )
 from insights.temporal.llm_analytics.trace_summarization.queries import fetch_trace
 from insights.temporal.llm_analytics.trace_summarization.state import generate_redis_key, store_text_repr
-from insights.temporal.llm_analytics.trace_summarization.utils import format_datetime_for_clickhouse
+from insights.temporal.llm_analytics.trace_summarization.utils import format_datetime_for_datastore
 
 from products.llm_analytics.backend.text_repr.formatters import (
     FormatterOptions,
@@ -86,8 +86,8 @@ def _fetch_and_format_generation(
     """
     team = Team.objects.get(id=team_id)
 
-    start_dt_str = format_datetime_for_clickhouse(window_start)
-    end_dt_str = format_datetime_for_clickhouse(window_end)
+    start_dt_str = format_datetime_for_datastore(window_start)
+    end_dt_str = format_datetime_for_datastore(window_end)
 
     query = parse_select(
         """

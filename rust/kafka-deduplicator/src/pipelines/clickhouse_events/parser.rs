@@ -1,24 +1,24 @@
-//! Parser for ClickHouse events.
+//! Parser for Datastore events.
 //!
 //! Unlike the ingestion_events pipeline where CapturedEvent is transformed to RawEvent,
-//! the clickhouse_events pipeline uses the wire format directly since ClickHouseEvent
+//! the datastore_events pipeline uses the wire format directly since DatastoreEvent
 //! already contains all needed fields for deduplication.
 
 use anyhow::Result;
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 
 use crate::kafka::batch_message::KafkaMessage;
 use crate::pipelines::traits::EventParser;
 
-/// Parser for ClickHouse events from the `clickhouse_events_json` topic.
+/// Parser for Datastore events from the `datastore_events_json` topic.
 ///
 /// This parser performs no transformation.
 /// The clone is necessary because the trait requires returning an owned value,
 /// and the event will be stored in metadata which also requires ownership.
-pub struct ClickHouseEventParser;
+pub struct DatastoreEventParser;
 
-impl EventParser<ClickHouseEvent, ClickHouseEvent> for ClickHouseEventParser {
-    fn parse(message: &KafkaMessage<ClickHouseEvent>) -> Result<ClickHouseEvent> {
+impl EventParser<DatastoreEvent, DatastoreEvent> for DatastoreEventParser {
+    fn parse(message: &KafkaMessage<DatastoreEvent>) -> Result<DatastoreEvent> {
         message
             .get_message()
             .cloned()
@@ -33,8 +33,8 @@ mod tests {
     use common_types::PersonMode;
     use uuid::Uuid;
 
-    fn create_test_event() -> ClickHouseEvent {
-        ClickHouseEvent {
+    fn create_test_event() -> DatastoreEvent {
+        DatastoreEvent {
             uuid: Uuid::new_v4(),
             team_id: 123,
             project_id: Some(456),
@@ -72,7 +72,7 @@ mod tests {
             event.clone(),
         );
 
-        let parsed = ClickHouseEventParser::parse(&message).unwrap();
+        let parsed = DatastoreEventParser::parse(&message).unwrap();
 
         assert_eq!(parsed.uuid, event.uuid);
         assert_eq!(parsed.team_id, event.team_id);
@@ -83,7 +83,7 @@ mod tests {
 
     #[test]
     fn test_parser_returns_error_on_missing_message() {
-        let message: KafkaMessage<ClickHouseEvent> = KafkaMessage::new(
+        let message: KafkaMessage<DatastoreEvent> = KafkaMessage::new(
             Partition::new("test-topic".to_string(), 0),
             42,
             None,
@@ -93,7 +93,7 @@ mod tests {
             None,
         );
 
-        let result = ClickHouseEventParser::parse(&message);
+        let result = DatastoreEventParser::parse(&message);
         assert!(result.is_err());
         assert!(result
             .unwrap_err()

@@ -6,13 +6,13 @@ from dataclasses import dataclass
 from typing import Any
 
 import pytest
-from insights.test.base import APIBaseTest, BaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, BaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_and_print_ast
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import MaterializedColumnSlot, MaterializedColumnSlotState, PropertyDefinition
 from insights.models.property_definition import PropertyType
 from insights.temporal.backfill_materialized_property.activities import (
@@ -45,7 +45,7 @@ class TestDmatIntegration(BaseTest):
         query, _ = prepare_and_print_ast(
             expr,
             InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
 
         # Should use dmat column
@@ -65,7 +65,7 @@ class TestDmatIntegration(BaseTest):
         query, _ = prepare_and_print_ast(
             expr,
             InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
 
         # Should use JSON extraction (no dmat)
@@ -92,7 +92,7 @@ class TestDmatIntegration(BaseTest):
         query, _ = prepare_and_print_ast(
             expr,
             InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
 
         # Should NOT use dmat (slot is in BACKFILL state)
@@ -135,7 +135,7 @@ TEST_CASES = [
 ]
 
 
-class TestDmatExtractionConsistency(ClickhouseTestMixin, APIBaseTest):
+class TestDmatExtractionConsistency(DatastoreTestMixin, APIBaseTest):
     """Test that dmat column extraction matches JSON extraction behavior."""
 
     def _build_slot_mapping(self):
@@ -211,7 +211,7 @@ class TestDmatExtractionConsistency(ClickhouseTestMixin, APIBaseTest):
         )
 
         # Verify no dmat columns used (sanity check)
-        assert result_json.clickhouse is not None and "dmat_" not in result_json.clickhouse, (
+        assert result_json.datastore is not None and "dmat_" not in result_json.datastore, (
             "Should use JSON extraction, not dmat"
         )
         json_results = result_json.results[0]
@@ -270,8 +270,8 @@ class TestDmatExtractionConsistency(ClickhouseTestMixin, APIBaseTest):
         )
 
         # Verify dmat columns ARE used
-        assert result_dmat.clickhouse is not None and "dmat_" in result_dmat.clickhouse, (
-            f"Should use dmat columns. SQL: {result_dmat.clickhouse}"
+        assert result_dmat.datastore is not None and "dmat_" in result_dmat.datastore, (
+            f"Should use dmat columns. SQL: {result_dmat.datastore}"
         )
         dmat_results = result_dmat.results[0]
 
