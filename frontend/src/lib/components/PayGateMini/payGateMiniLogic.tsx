@@ -13,7 +13,7 @@ export interface PayGateMiniLogicProps {
     currentUsage?: number
 }
 
-export type GateVariantType = 'add-card' | 'contact-sales' | 'move-to-cloud' | null
+export type GateVariantType = 'add-card' | 'contact-sales' | null
 
 export const payGateMiniLogic = kea<payGateMiniLogicType>([
     props({} as PayGateMiniLogicProps),
@@ -134,13 +134,10 @@ export const payGateMiniLogic = kea<payGateMiniLogicType>([
                 if (billingLoading) {
                     return null
                 }
-                if (values.isCloudOrDev) {
-                    if (!minimumPlanWithFeature || minimumPlanWithFeature.contact_support) {
-                        return 'contact-sales'
-                    }
-                    return 'add-card'
+                if (!minimumPlanWithFeature || minimumPlanWithFeature.contact_support) {
+                    return 'contact-sales'
                 }
-                return 'move-to-cloud'
+                return 'add-card'
             },
         ],
         ctaLink: [
@@ -152,8 +149,6 @@ export const payGateMiniLogic = kea<payGateMiniLogicType>([
                     return `/organization/billing${productWithFeature?.type ? `?products=${productWithFeature.type}` : ''}`
                 } else if (gateVariant === 'contact-sales') {
                     return `mailto:sales@hanzo.ai?subject=Inquiring about ${featureInfo?.name}`
-                } else if (gateVariant === 'move-to-cloud') {
-                    return 'https://insights.hanzo.ai/signup?utm_medium=in-product&utm_campaign=move-to-cloud'
                 }
                 return undefined
             },
@@ -163,9 +158,6 @@ export const payGateMiniLogic = kea<payGateMiniLogicType>([
             (gateVariant, isPaymentEntryFlow) => {
                 if (gateVariant === 'contact-sales') {
                     return 'Contact sales'
-                }
-                if (gateVariant === 'move-to-cloud') {
-                    return 'Move to Insights Cloud'
                 }
                 if (isPaymentEntryFlow) {
                     return 'Upgrade now'
