@@ -302,7 +302,7 @@ LIMIT 100  -- Instead of 50000
 
 **Query Performance:**
 
-- **IMPORTANT**: Use specific date ranges to reduce data scanned, OLAP databases like ClickHouse can be resource-intensive and will fetch large amounts of data if not constrained to timestamp or other fields in the sorting key.
+- **IMPORTANT**: Use specific date ranges to reduce data scanned, OLAP databases like Datastore can be resource-intensive and will fetch large amounts of data if not constrained to timestamp or other fields in the sorting key.
 - Try to include the sorting key fields (`timestamp`, `event`, etc.) in your WHERE clause for better performance.
 - Consider using `async=true` for long-running queries:
 
@@ -323,7 +323,7 @@ LIMIT 100  -- Instead of 50000
 
 - `results`: Array of result rows
 - `columns`: Column names matching SELECT clause
-- `types`: ClickHouse type for each column
+- `types`: Datastore type for each column
 - `insightsql`: The executed InsightsQL query (useful for debugging)
 - `timings`: Query execution breakdown
 
@@ -437,7 +437,7 @@ WHERE or(equals(event, '$pageview'), equals(event, '$screen'))
 
 ## Debugging Queries in Tests
 
-To print the InsightsQL syntax in tests instead of ClickHouse SQL:
+To print the InsightsQL syntax in tests instead of Datastore SQL:
 
 ```python
 from insights.insightsql.printer import print_ast

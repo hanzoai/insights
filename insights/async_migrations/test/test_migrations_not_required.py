@@ -2,7 +2,7 @@ import pytest
 
 from insights.async_migrations.setup import ALL_ASYNC_MIGRATIONS
 from insights.async_migrations.test.util import AsyncMigrationBaseTest
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.person.sql import COMMENT_DISTINCT_ID_COLUMN_SQL
 
 pytestmark = pytest.mark.async_migrations

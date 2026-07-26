@@ -12,7 +12,7 @@ from insights.models import Team
 
 
 class Command(BaseCommand):
-    help = "Ingest pre-enriched video segments with embeddings directly into ClickHouse document_embeddings"
+    help = "Ingest pre-enriched video segments with embeddings directly into Datastore document_embeddings"
 
     def add_arguments(self, parser):
         parser.add_argument("yaml_file", type=str, help="Path to the YAML file containing enriched video segments")
@@ -91,7 +91,7 @@ class Command(BaseCommand):
             # Get the embedding and convert from float32 to float64 list
             embedding = embeddings[embedding_index].astype(np.float64).tolist()
 
-            # Parse timestamp to ClickHouse format: "YYYY-MM-DD HH:MM:SS.fff"
+            # Parse timestamp to Datastore format: "YYYY-MM-DD HH:MM:SS.fff"
             timestamp_iso = segment.get("timestamp", "")
             timestamp_ch = self._format_ch_datetime(timestamp_iso)
 
@@ -141,7 +141,7 @@ class Command(BaseCommand):
             )
 
     def _format_ch_datetime(self, iso_timestamp: str) -> str:
-        """Convert ISO timestamp to ClickHouse format: YYYY-MM-DD HH:MM:SS.fff"""
+        """Convert ISO timestamp to Datastore format: YYYY-MM-DD HH:MM:SS.fff"""
         if not iso_timestamp:
             return ""
         # Handle ISO format like "2026-01-19T09:56:49.714000+00:00"

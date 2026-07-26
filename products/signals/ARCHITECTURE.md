@@ -26,13 +26,13 @@ A long-running entity workflow that serializes all signal grouping for a single 
 
 **Signal processing flow** (per signal, in `_process_one_signal()`):
 
-1. **Embed** the signal description + **fetch signal type examples** from ClickHouse (parallel) → `get_embedding_activity`, `fetch_signal_type_examples_activity`
+1. **Embed** the signal description + **fetch signal type examples** from Datastore (parallel) → `get_embedding_activity`, `fetch_signal_type_examples_activity`
 2. **Generate 1-3 search queries** via LLM (receives type examples for context) → `generate_search_queries_activity`
 3. **Embed each query** → parallel `get_embedding_activity` calls
-4. **Semantic search** ClickHouse `document_embeddings` for nearest neighbors per query → `run_signal_semantic_search_activity` (uses `cosineDistance()`)
+4. **Semantic search** Datastore `document_embeddings` for nearest neighbors per query → `run_signal_semantic_search_activity` (uses `cosineDistance()`)
 5. **LLM match** — decides if signal belongs to an existing report or needs a new group → `llm_match_signal_activity`
 6. **Assign** signal to a `SignalReport` in Postgres, increment weight/count, check promotion threshold → `assign_signal_to_report_activity`
-7. **Emit to ClickHouse** via Kafka (embedding worker) → `emit_to_clickhouse_activity`
+7. **Emit to Datastore** via Kafka (embedding worker) → `emit_to_datastore_activity`
 8. If promoted (weight ≥ `WEIGHT_THRESHOLD`, default `1.0`), **spawn child** `SignalReportSummaryWorkflow` (with `ALLOW_DUPLICATE_FAILED_ONLY` reuse policy, `ParentClosePolicy.ABANDON` so it survives `continue_as_new`, silently ignores `WorkflowAlreadyStartedError`)
 
 Step 1 runs two activities in parallel. Step 2 depends on step 1 (needs the type examples). Steps 3+4 fan out in parallel for each query/embedding.
@@ -52,7 +52,7 @@ Runs when a report is promoted to `candidate` status. Summarizes the signal grou
 
 **Flow:**
 
-1. **Fetch signals** for the report from ClickHouse → `fetch_signals_for_report_activity` (max 100 signals)
+1. **Fetch signals** for the report from Datastore → `fetch_signals_for_report_activity` (max 100 signals)
 2. **Mark in-progress** in Postgres → `mark_report_in_progress_activity`
 3. **Summarize** signals into a title + summary via LLM → `summarize_signals_activity` (`summarize_signals.py`)
 4. **Safety judge** + **Actionability judge** — run **concurrently** via `asyncio.gather`:
@@ -126,7 +126,7 @@ Binary artefacts attached to reports. Used for video segments and judge results.
 
 ---
 
-## ClickHouse Storage
+## Datastore Storage
 
 Signals are stored in the **`insights_document_embeddings`** table, which is shared across products (error tracking, session replay, LLM analytics, etc.).
 
@@ -288,7 +288,7 @@ Stores result as an `actionability_judgment` artefact on the report. **Extended 
 | `MatchResult`                       | Union: `ExistingReportMatch \| NewReportMatch`                                                                                       |
 | `SignalReportSummaryWorkflowInputs` | Summary workflow input: `team_id`, `report_id`                                                                                       |
 | `SignalTypeExample`                 | One example per `(source_product, source_type)` pair: `source_product`, `source_type`, `content`, `timestamp`, `extra`               |
-| `SignalData`                        | Signal fetched from ClickHouse: `signal_id`, `content`, `source_product`, `source_type`, `source_id`, `weight`, `timestamp`, `extra` |
+| `SignalData`                        | Signal fetched from Datastore: `signal_id`, `content`, `source_product`, `source_type`, `source_id`, `weight`, `timestamp`, `extra` |
 
 ### Rendering Helpers
 

@@ -32,7 +32,7 @@ from products.batch_exports.backend.temporal.pipeline.internal_stage import (
     BatchExportInsertIntoInternalStageInputs,
     insert_into_internal_stage_activity,
 )
-from products.batch_exports.backend.tests.temporal.destinations.s3.utils import assert_clickhouse_records_in_s3
+from products.batch_exports.backend.tests.temporal.destinations.s3.utils import assert_datastore_records_in_s3
 from products.batch_exports.backend.tests.temporal.utils.workflow import mocked_start_batch_export_run
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.django_db]
@@ -225,7 +225,7 @@ async def test_s3_export_workflow_handles_cancellation(ateam, s3_batch_export, i
 
 
 async def test_s3_export_workflow_with_request_timeouts(
-    clickhouse_client,
+    datastore_client,
     ateam,
     minio_client,
     bucket_name,
@@ -361,9 +361,9 @@ async def test_s3_export_workflow_with_request_timeouts(
         elif batch_export_model.name == "sessions":
             sort_key = "session_id"
 
-    await assert_clickhouse_records_in_s3(
+    await assert_datastore_records_in_s3(
         s3_compatible_client=minio_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         bucket_name=bucket_name,
         key_prefix=expected_key_prefix,
         team_id=ateam.pk,

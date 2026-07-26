@@ -1,0 +1,19 @@
+from insights.datastore.client.connection import NodeRole
+from insights.datastore.client.migration_tools import run_sql_with_exceptions
+from insights.datastore.preaggregation.experiment_exposures_sql import (
+    DISTRIBUTED_EXPERIMENT_EXPOSURES_TABLE_SQL,
+    SHARDED_EXPERIMENT_EXPOSURES_TABLE_SQL,
+)
+
+operations = [
+    # Create sharded table on data nodes
+    run_sql_with_exceptions(
+        SHARDED_EXPERIMENT_EXPOSURES_TABLE_SQL(),
+        node_roles=[NodeRole.DATA],
+    ),
+    # Create distributed table on data + coordinator nodes
+    run_sql_with_exceptions(
+        DISTRIBUTED_EXPERIMENT_EXPOSURES_TABLE_SQL(),
+        node_roles=[NodeRole.DATA, NodeRole.COORDINATOR],
+    ),
+]

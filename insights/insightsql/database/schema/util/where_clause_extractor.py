@@ -371,7 +371,7 @@ class SessionMinTimestampWhereClauseExtractorV3(SessionMinTimestampWhereClauseEx
     time_buffer = ast.Call(name="toIntervalDay", args=[ast.Constant(value=SESSION_BUFFER_DAYS)])
 
     def session_id_str_to_timestamp_expr(self, session_id_str_expr: ast.Expr) -> Optional[ast.Expr]:
-        # this is a roundabout way of doing it, but we want to match the logic in the clickhouse table definition
+        # this is a roundabout way of doing it, but we want to match the logic in the datastore table definition
         timestamp_expr = uuid_uint128_expr_to_timestamp_expr_v3(
             ast.Call(name="_toUInt128", args=[ast.Call(name="toUUID", args=[session_id_str_expr])])
         )

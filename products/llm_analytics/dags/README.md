@@ -35,7 +35,7 @@ Tests: products/llm_analytics/dags/tests/daily_metrics/test_sql_metrics.py
 ### Daily Metrics
 
 Aggregates AI event metrics ($ai_trace, $ai_generation, $ai_span,
-$ai_embedding) by team and date into the `llma_metrics_daily` ClickHouse
+$ai_embedding) by team and date into the `llma_metrics_daily` Datastore
 table.
 
 Features:

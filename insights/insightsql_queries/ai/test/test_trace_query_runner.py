@@ -5,7 +5,7 @@ from uuid import UUID
 
 import pytest
 from freezegun import freeze_time
-from insights.test.base import BaseTest, ClickhouseTestMixin, _create_event, _create_person, snapshot_clickhouse_queries
+from insights.test.base import BaseTest, DatastoreTestMixin, _create_event, _create_person, snapshot_datastore_queries
 
 from insights.schema import (
     DateRange,
@@ -194,7 +194,7 @@ def _create_ai_embedding_event(
     )
 
 
-class TestTraceQueryRunner(ClickhouseTestMixin, BaseTest):
+class TestTraceQueryRunner(DatastoreTestMixin, BaseTest):
     def setUp(self):
         super().setUp()
         self._create_properties()
@@ -427,7 +427,7 @@ class TestTraceQueryRunner(ClickhouseTestMixin, BaseTest):
         self.assertEqual(len(response.results), 1)
         self.assertEqual(len(response.results[0].events), 2)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_property_filters(self):
         """Test filtering by event properties."""
         _create_person(distinct_ids=["person1"], team=self.team)
@@ -476,7 +476,7 @@ class TestTraceQueryRunner(ClickhouseTestMixin, BaseTest):
         ).calculate()
         self.assertEqual(len(response.results), 0)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_property_filters(self):
         """Test filtering by person properties."""
         _create_person(distinct_ids=["person1"], team=self.team, properties={"bar": "baz"})
@@ -654,7 +654,7 @@ class TestTraceQueryRunner(ClickhouseTestMixin, BaseTest):
             self.assertIn("$ai_total_cost_usd", event.properties)
 
     def test_removes_duplicate_events(self):
-        """ClickHouse might sometimes return unmerged (duplicate) events."""
+        """Datastore might sometimes return unmerged (duplicate) events."""
         trace_id = str(uuid.uuid4())
         event_id = str(uuid.uuid4())
 

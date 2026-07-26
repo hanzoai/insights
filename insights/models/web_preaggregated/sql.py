@@ -4,8 +4,8 @@ from django.conf import settings
 
 from insights.insightsql.database.schema.web_analytics_s3 import get_s3_function_args
 
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.table_engines import MergeTreeEngine, ReplicationScheme
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.table_engines import MergeTreeEngine, ReplicationScheme
 from insights.models.web_preaggregated.team_selection import WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_NAME
 
 
@@ -155,7 +155,7 @@ WEB_BOUNCES_V2_PRODUCTION_COLUMNS = """
 """
 
 # Production ORDER BY clauses extracted from production tables
-# These exclude nullable columns to avoid ClickHouse "Sorting key contains nullable columns" error
+# These exclude nullable columns to avoid Datastore "Sorting key contains nullable columns" error
 WEB_STATS_V2_PRODUCTION_ORDER_BY = """(
     team_id,
     period_bucket,

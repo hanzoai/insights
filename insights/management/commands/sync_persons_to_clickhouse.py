@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.kafka_client.client import KafkaProducer
 from insights.models.group.group import Group
 from insights.models.group.util import raw_create_group_ch
@@ -19,9 +19,9 @@ logger.setLevel(logging.INFO)
 
 
 class Command(BaseCommand):
-    help = """Sync person or distinct id tables from postgres to ClickHouse.
-        Lookup from Postgres and with a lower version in ClickHouse will be updated.
-        Note higher versions in ClickHouse will be ignored.
+    help = """Sync person or distinct id tables from postgres to Datastore.
+        Lookup from Postgres and with a lower version in Datastore will be updated.
+        Note higher versions in Datastore will be ignored.
         Recommended: run first without `--live-run` and first for person table, then distinct_id table
         """
 
@@ -33,7 +33,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--deletes",
             action="store_true",
-            help="process deletes for data in ClickHouse but not Postgres",
+            help="process deletes for data in Datastore but not Postgres",
         )
         parser.add_argument("--live-run", action="store_true", help="Run changes, default is dry-run")
 
@@ -67,7 +67,7 @@ def run(options, sync: bool = False):  # sync used for unittests
 
 def run_person_sync(team_id: int, live_run: bool, deletes: bool, sync: bool):
     logger.info("Running person table sync")
-    # lookup what needs to be updated in ClickHouse and send kafka messages for only those
+    # lookup what needs to be updated in Datastore and send kafka messages for only those
     persons = Person.objects.filter(team_id=team_id)
     rows = sync_execute(
         """
@@ -89,7 +89,7 @@ def run_person_sync(team_id: int, live_run: bool, deletes: bool, sync: bool):
         if ch_version is None or ch_version < pg_version:
             logger.info(f"Updating {person.uuid} to version {pg_version}")
             if live_run:
-                # Update ClickHouse via Kafka message
+                # Update Datastore via Kafka message
                 create_person(
                     team_id=team_id,
                     version=pg_version,
@@ -101,7 +101,7 @@ def run_person_sync(team_id: int, live_run: bool, deletes: bool, sync: bool):
                 )
         elif ch_version > pg_version:
             logger.info(
-                f"Clickhouse version ({ch_version}) for '{person.uuid}' is higher than in Postgres ({pg_version}). Ignoring."
+                f"Datastore version ({ch_version}) for '{person.uuid}' is higher than in Postgres ({pg_version}). Ignoring."
             )
 
     if deletes:
@@ -124,7 +124,7 @@ def run_person_sync(team_id: int, live_run: bool, deletes: bool, sync: bool):
 
 def run_distinct_id_sync(team_id: int, live_run: bool, deletes: bool, sync: bool):
     logger.info("Running person distinct id table sync")
-    # lookup what needs to be updated in ClickHouse and send kafka messages for only those
+    # lookup what needs to be updated in Datastore and send kafka messages for only those
     person_distinct_ids = PersonDistinctId.objects.filter(team_id=team_id).select_related("person")
     rows = sync_execute(
         """
@@ -147,7 +147,7 @@ def run_distinct_id_sync(team_id: int, live_run: bool, deletes: bool, sync: bool
         if ch_version is None or ch_version < pg_version:
             logger.info(f"Updating {person_distinct_id.distinct_id} to version {pg_version}")
             if live_run:
-                # Update ClickHouse via Kafka message
+                # Update Datastore via Kafka message
                 create_person_distinct_id(
                     team_id=team_id,
                     distinct_id=person_distinct_id.distinct_id,
@@ -160,7 +160,7 @@ def run_distinct_id_sync(team_id: int, live_run: bool, deletes: bool, sync: bool
             # This could be happening due to person deletions - check out fix_person_distinct_ids_after_delete management cmd.
             # Ignoring here to be safe.
             logger.info(
-                f"Clickhouse version ({ch_version}) for '{person_distinct_id.distinct_id}' is higher than in Postgres ({pg_version}). Ignoring."
+                f"Datastore version ({ch_version}) for '{person_distinct_id.distinct_id}' is higher than in Postgres ({pg_version}). Ignoring."
             )
             continue
 
@@ -176,7 +176,7 @@ def run_distinct_id_sync(team_id: int, live_run: bool, deletes: bool, sync: bool
 
 def run_group_sync(team_id: int, live_run: bool, sync: bool):
     logger.info("Running group table sync")
-    # lookup what needs to be updated in ClickHouse and send kafka messages for only those
+    # lookup what needs to be updated in Datastore and send kafka messages for only those
     pg_groups = Group.objects.filter(team_id=team_id).values(
         "group_type_index", "group_key", "group_properties", "created_at"
     )
@@ -202,7 +202,7 @@ def run_group_sync(team_id: int, live_run: bool, sync: bool):
                 f"Updating {pg_group['group_type_index']} - {pg_group['group_key']} with properties {pg_group['group_properties']} and created_at {pg_group['created_at']}"
             )
             if live_run:
-                # Update ClickHouse via Kafka message
+                # Update Datastore via Kafka message
                 raw_create_group_ch(
                     team_id=team_id,
                     group_type_index=pg_group["group_type_index"],

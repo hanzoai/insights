@@ -3,12 +3,12 @@ import json
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest import mock
 from unittest.mock import patch
@@ -37,10 +37,10 @@ from insights.models.property_definition import PropertyDefinition, PropertyType
 from insights.models.utils import UUIDT
 
 
-class TestQuery(ClickhouseTestMixin, APIBaseTest):
+class TestQuery(DatastoreTestMixin, APIBaseTest):
     ENDPOINT = "query"
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_insightsql_expressions(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
@@ -147,7 +147,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             )
 
     @also_test_with_materialized_columns(["key"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insightsql_property_filter(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
@@ -212,7 +212,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(len(response["results"]), 2)
 
     @also_test_with_materialized_columns(event_properties=["key", "path"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_event_property_filter(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
@@ -286,7 +286,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(len(response["results"]), 1)
 
     @also_test_with_materialized_columns(event_properties=["key"], person_properties=["email"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_property_filter(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
@@ -345,7 +345,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 2)
 
-    def test_safe_clickhouse_error_passed_through(self):
+    def test_safe_datastore_error_passed_through(self):
         query = {"kind": "EventsQuery", "select": ["timestamp + 'string'"]}
 
         with freeze_time("2024-10-16 22:10:29.691212"):
@@ -362,16 +362,16 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             )
 
     @patch(
-        "insights.clickhouse.client.execute._annotate_tagged_query", return_value=("SELECT 1&&&", {})
+        "insights.datastore.client.execute._annotate_tagged_query", return_value=("SELECT 1&&&", {})
     )  # Erroneously constructed SQL
-    def test_unsafe_clickhouse_error_is_swallowed(self, sqlparse_format_mock):
+    def test_unsafe_datastore_error_is_swallowed(self, sqlparse_format_mock):
         query = {"kind": "EventsQuery", "select": ["timestamp"]}
 
         response_post = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query})
         self.assertEqual(response_post.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @also_test_with_materialized_columns(event_properties=["key", "path"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_property_filter_aggregations(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
@@ -418,7 +418,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 1)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_event_person(self):
         with freeze_time("2020-01-10 12:00:00"):
             person = _create_person(
@@ -473,7 +473,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(response["results"][3][1], expected_user)
             self.assertEqual(response["results"][3][2], expected_user)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_events_query_all_time_date(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
@@ -525,7 +525,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(len(response["results"]), 2)
 
     @also_test_with_materialized_columns(event_properties=["key"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_full_insightsql_query(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
@@ -784,7 +784,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         api_response = self.client.post(f"/api/environments/{self.team.id}/query/")
         self.assertEqual(api_response.status_code, 400)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_full_insightsql_query_view(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
@@ -849,7 +849,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 ],
             )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_full_insightsql_query_async(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(

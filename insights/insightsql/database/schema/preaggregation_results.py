@@ -11,7 +11,7 @@ from insights.insightsql.database.models import (
     Table,
 )
 
-from insights.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
+from insights.datastore.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
 
 
 class PreaggregationResultsTable(Table):
@@ -33,7 +33,7 @@ class PreaggregationResultsTable(Table):
         "uniq_exact_state": DatabaseField(name="uniq_exact_state"),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE()
 
     def to_printed_insightsql(self):

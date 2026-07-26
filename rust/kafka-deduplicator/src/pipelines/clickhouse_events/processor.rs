@@ -1,7 +1,7 @@
-//! Batch processor for ClickHouse events pipeline.
+//! Batch processor for Datastore events pipeline.
 //!
 //! This processor implements timestamp-based deduplication for events
-//! from the `clickhouse_events_json` topic (output of ingestion pipeline).
+//! from the `datastore_events_json` topic (output of ingestion pipeline).
 //!
 //! It uses the generic `TimestampDeduplicator` for the core deduplication logic.
 
@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use axum::async_trait;
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 use futures::future::join_all;
 use itertools::Itertools;
 use tracing::error;
@@ -24,25 +24,25 @@ use crate::pipelines::traits::EventParser;
 use crate::store::DeduplicationStoreConfig;
 use crate::store_manager::StoreManager;
 
-use super::parser::ClickHouseEventParser;
+use super::parser::DatastoreEventParser;
 
-/// Configuration for the ClickHouse events deduplication processor
+/// Configuration for the Datastore events deduplication processor
 #[derive(Debug, Clone)]
-pub struct ClickHouseEventsConfig {
+pub struct DatastoreEventsConfig {
     pub store_config: DeduplicationStoreConfig,
 }
 
-/// Batch processor for ClickHouse events with timestamp-based deduplication.
+/// Batch processor for Datastore events with timestamp-based deduplication.
 ///
-/// This processor wraps `TimestampDeduplicator<ClickHouseEvent>` and implements
+/// This processor wraps `TimestampDeduplicator<DatastoreEvent>` and implements
 /// the `BatchConsumerProcessor` trait for Kafka batch consumption.
-pub struct ClickHouseEventsBatchProcessor {
-    deduplicator: TimestampDeduplicator<ClickHouseEvent>,
+pub struct DatastoreEventsBatchProcessor {
+    deduplicator: TimestampDeduplicator<DatastoreEvent>,
 }
 
 #[async_trait]
-impl BatchConsumerProcessor<ClickHouseEvent> for ClickHouseEventsBatchProcessor {
-    async fn process_batch(&self, messages: Vec<KafkaMessage<ClickHouseEvent>>) -> Result<()> {
+impl BatchConsumerProcessor<DatastoreEvent> for DatastoreEventsBatchProcessor {
+    async fn process_batch(&self, messages: Vec<KafkaMessage<DatastoreEvent>>) -> Result<()> {
         // Organize messages by partition
         let messages_by_partition = messages
             .iter()
@@ -65,12 +65,12 @@ impl BatchConsumerProcessor<ClickHouseEvent> for ClickHouseEventsBatchProcessor 
     }
 }
 
-impl ClickHouseEventsBatchProcessor {
-    /// Create a new ClickHouse events deduplication processor
-    pub fn new(_config: ClickHouseEventsConfig, store_manager: Arc<StoreManager>) -> Self {
+impl DatastoreEventsBatchProcessor {
+    /// Create a new Datastore events deduplication processor
+    pub fn new(_config: DatastoreEventsConfig, store_manager: Arc<StoreManager>) -> Self {
         let dedup_config = TimestampDeduplicatorConfig {
-            pipeline_name: "clickhouse_events".to_string(),
-            publisher: None, // ClickHouse events pipeline doesn't publish
+            pipeline_name: "datastore_events".to_string(),
+            publisher: None, // Datastore events pipeline doesn't publish
             offset_tracker: None,
         };
 
@@ -82,23 +82,23 @@ impl ClickHouseEventsBatchProcessor {
     async fn process_partition_batch(
         &self,
         partition: Partition,
-        messages: Vec<&KafkaMessage<ClickHouseEvent>>,
+        messages: Vec<&KafkaMessage<DatastoreEvent>>,
     ) -> Result<()> {
-        // Parse events (identity transform for ClickHouseEvent)
-        let parsed_events: Vec<Result<ClickHouseEvent>> = messages
+        // Parse events (identity transform for DatastoreEvent)
+        let parsed_events: Vec<Result<DatastoreEvent>> = messages
             .iter()
-            .map(|msg| ClickHouseEventParser::parse(msg))
+            .map(|msg| DatastoreEventParser::parse(msg))
             .collect();
 
         // Collect successful parses
-        let events: Vec<&ClickHouseEvent> = parsed_events
+        let events: Vec<&DatastoreEvent> = parsed_events
             .iter()
             .enumerate()
             .filter_map(|(idx, result)| {
                 if let Ok(event) = result {
                     Some(event)
                 } else if let Err(e) = &parsed_events[idx] {
-                    error!("Failed to parse ClickHouseEvent: {e:#}");
+                    error!("Failed to parse DatastoreEvent: {e:#}");
                     None
                 } else {
                     None
@@ -126,8 +126,8 @@ impl ClickHouseEventsBatchProcessor {
         &self,
         topic: &str,
         partition: i32,
-        events: Vec<&ClickHouseEvent>,
-    ) -> Result<Vec<crate::pipelines::DeduplicationResult<ClickHouseEvent>>> {
+        events: Vec<&DatastoreEvent>,
+    ) -> Result<Vec<crate::pipelines::DeduplicationResult<DatastoreEvent>>> {
         self.deduplicator
             .deduplicate_batch(topic, partition, events)
             .await
@@ -143,14 +143,14 @@ mod tests {
     use tempfile::TempDir;
     use uuid::Uuid;
 
-    fn create_test_config() -> (ClickHouseEventsConfig, TempDir) {
+    fn create_test_config() -> (DatastoreEventsConfig, TempDir) {
         let temp_dir = TempDir::new().unwrap();
         let store_config = DeduplicationStoreConfig {
             path: temp_dir.path().to_path_buf(),
             max_capacity: 1000,
         };
 
-        let config = ClickHouseEventsConfig { store_config };
+        let config = DatastoreEventsConfig { store_config };
         (config, temp_dir)
     }
 
@@ -159,8 +159,8 @@ mod tests {
         event: &str,
         distinct_id: &str,
         timestamp: &str,
-    ) -> ClickHouseEvent {
-        ClickHouseEvent {
+    ) -> DatastoreEvent {
+        DatastoreEvent {
             uuid,
             team_id: 123,
             project_id: Some(456),
@@ -202,7 +202,7 @@ mod tests {
             .await
             .unwrap();
 
-        let processor = ClickHouseEventsBatchProcessor::new(config, store_manager);
+        let processor = DatastoreEventsBatchProcessor::new(config, store_manager);
 
         let events = [
             create_test_event(
@@ -225,7 +225,7 @@ mod tests {
             ),
         ];
 
-        let event_refs: Vec<&ClickHouseEvent> = events.iter().collect();
+        let event_refs: Vec<&DatastoreEvent> = events.iter().collect();
         let results = processor
             .deduplicate_batch("test-topic", 0, event_refs)
             .await
@@ -250,7 +250,7 @@ mod tests {
             .await
             .unwrap();
 
-        let processor = ClickHouseEventsBatchProcessor::new(config, store_manager);
+        let processor = DatastoreEventsBatchProcessor::new(config, store_manager);
 
         let uuid = Uuid::new_v4();
         let event = create_test_event(uuid, "event1", "user1", "2024-01-01 12:00:00.000000");
@@ -286,7 +286,7 @@ mod tests {
             .await
             .unwrap();
 
-        let processor = ClickHouseEventsBatchProcessor::new(config, store_manager);
+        let processor = DatastoreEventsBatchProcessor::new(config, store_manager);
 
         // Same event with different UUIDs (SDK bug scenario)
         let event1 = create_test_event(
@@ -332,7 +332,7 @@ mod tests {
             .await
             .unwrap();
 
-        let processor = ClickHouseEventsBatchProcessor::new(config, store_manager);
+        let processor = DatastoreEventsBatchProcessor::new(config, store_manager);
 
         let uuid = Uuid::new_v4();
         let event = create_test_event(uuid, "event1", "user1", "2024-01-01 12:00:00.000000");
@@ -361,7 +361,7 @@ mod tests {
         ));
 
         // Don't create store - simulates revoked partition
-        let processor = ClickHouseEventsBatchProcessor::new(config, store_manager);
+        let processor = DatastoreEventsBatchProcessor::new(config, store_manager);
 
         let event = create_test_event(
             Uuid::new_v4(),

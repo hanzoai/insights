@@ -4,7 +4,7 @@ use common_kafka::{
     config::KafkaConfig,
     kafka_producer::{create_kafka_producer, send_iter_to_kafka},
 };
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 
 use cymbal::types::{event::AnyEvent, exception_properties::ExceptionProperties};
 use envconfig::Envconfig;
@@ -21,7 +21,7 @@ async fn main() {
         .await;
     let producer = create_kafka_producer(&config, handle).await.unwrap();
 
-    let exception: ClickHouseEvent = serde_json::from_str(EXCEPTION_DATA).unwrap();
+    let exception: DatastoreEvent = serde_json::from_str(EXCEPTION_DATA).unwrap();
     let exceptions = (0..10000).map(|_| exception.clone()).collect::<Vec<_>>();
     ExceptionProperties::try_from(AnyEvent::try_from(exception).unwrap()).unwrap();
 

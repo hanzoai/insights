@@ -46,9 +46,9 @@ from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.services.query import process_query_model
 from insights.api.shared import UserBasicSerializer
 from insights.api.utils import action
-from insights.clickhouse.client.connection import Workload
-from insights.clickhouse.client.limit import ConcurrencyLimitExceeded
-from insights.clickhouse.query_tagging import Product, get_query_tag_value, tag_queries
+from insights.datastore.client.connection import Workload
+from insights.datastore.client.limit import ConcurrencyLimitExceeded
+from insights.datastore.query_tagging import Product, get_query_tag_value, tag_queries
 from insights.errors import ExposedCHQueryError
 from insights.event_usage import report_user_action
 from insights.exceptions_capture import capture_exception
@@ -1329,7 +1329,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
         debug: bool = False,
         limit: int | None = None,
     ) -> Response:
-        """Execute query directly against ClickHouse."""
+        """Execute query directly against Datastore."""
         try:
             if limit is not None:
                 query = self._apply_limit_to_query(query, limit)

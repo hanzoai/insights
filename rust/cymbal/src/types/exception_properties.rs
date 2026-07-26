@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
@@ -178,10 +178,10 @@ impl TryFrom<AnyEvent> for ExceptionProperties {
     }
 }
 
-impl TryFrom<ClickHouseEvent> for ExceptionProperties {
+impl TryFrom<DatastoreEvent> for ExceptionProperties {
     type Error = EventError;
 
-    fn try_from(event: ClickHouseEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: DatastoreEvent) -> Result<Self, Self::Error> {
         let any_evt = AnyEvent::try_from(event)?;
         ExceptionProperties::try_from(any_evt)
     }

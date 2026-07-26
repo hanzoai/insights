@@ -27,7 +27,7 @@ from insights.models.integration import Integration
 from products.batch_exports.backend.temporal.destinations.azure_blob_batch_export import SUPPORTED_COMPRESSIONS
 from products.batch_exports.backend.tests.temporal.destinations.azure_blob.utils import (
     TEST_AZURE_BLOB_MODELS,
-    assert_clickhouse_records_in_azure_blob,
+    assert_datastore_records_in_azure_blob,
     run_azure_blob_batch_export_workflow,
 )
 
@@ -161,7 +161,7 @@ async def test_workflow_exports_data_successfully(
     assert run.bytes_exported is not None
     assert run.bytes_exported > 0
 
-    await assert_clickhouse_records_in_azure_blob(
+    await assert_datastore_records_in_azure_blob(
         container=azure_container,
         key_prefix=blob_prefix,
         team_id=ateam.pk,
@@ -214,7 +214,7 @@ async def test_workflow_handles_formats_and_compression(
     assert run.bytes_exported is not None
     assert run.bytes_exported > 0
 
-    await assert_clickhouse_records_in_azure_blob(
+    await assert_datastore_records_in_azure_blob(
         container=azure_container,
         key_prefix=blob_prefix,
         team_id=ateam.pk,

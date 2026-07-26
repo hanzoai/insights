@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.constants import INSIGHT_FUNNELS, FunnelVizType
 from insights.models.filters import Filter
-from insights.queries.funnels.funnel_trends_persons import ClickhouseFunnelTrendsActors
+from insights.queries.funnels.funnel_trends_persons import DatastoreFunnelTrendsActors
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 from insights.test.test_journeys import journeys_for
 
@@ -27,8 +27,8 @@ filter_data = {
 }
 
 
-class TestFunnelTrendsPersons(ClickhouseTestMixin, APIBaseTest):
-    @snapshot_clickhouse_queries
+class TestFunnelTrendsPersons(DatastoreTestMixin, APIBaseTest):
+    @snapshot_datastore_queries
     def test_funnel_trend_persons_returns_recordings(self):
         persons = journeys_for(
             {
@@ -62,14 +62,14 @@ class TestFunnelTrendsPersons(ClickhouseTestMixin, APIBaseTest):
         )
 
         filter = Filter(data={"funnel_to_step": 1, **filter_data})
-        _, results, _ = ClickhouseFunnelTrendsActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelTrendsActors(filter, self.team).get_actors()
         self.assertEqual([person["id"] for person in results], [persons["user_one"].uuid])
         self.assertEqual(
             [person["matched_recordings"][0]["session_id"] for person in results],
             ["s1b"],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_trend_persons_with_no_to_step(self):
         persons = journeys_for(
             {
@@ -104,14 +104,14 @@ class TestFunnelTrendsPersons(ClickhouseTestMixin, APIBaseTest):
         )
 
         filter = Filter(data=filter_data)
-        _, results, _ = ClickhouseFunnelTrendsActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelTrendsActors(filter, self.team).get_actors()
         self.assertEqual([person["id"] for person in results], [persons["user_one"].uuid])
         self.assertEqual(
             [person["matched_recordings"][0]["session_id"] for person in results],
             ["s1c"],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_trend_persons_with_drop_off(self):
         persons = journeys_for(
             {
@@ -135,7 +135,7 @@ class TestFunnelTrendsPersons(ClickhouseTestMixin, APIBaseTest):
         )
 
         filter = Filter(data={**filter_data, "drop_off": True})
-        _, results, _ = ClickhouseFunnelTrendsActors(filter, self.team).get_actors()
+        _, results, _ = DatastoreFunnelTrendsActors(filter, self.team).get_actors()
         self.assertEqual([person["id"] for person in results], [persons["user_one"].uuid])
         self.assertEqual(
             [person["matched_recordings"][0].get("session_id") for person in results],

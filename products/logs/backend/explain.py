@@ -28,7 +28,7 @@ from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
 from insights.api.routing import TeamAndOrgViewSetMixin
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 from insights.models import Team
 from insights.rate_limit import (
     LLMAnalyticsSummarizationBurstThrottle,
@@ -159,9 +159,9 @@ def load_prompt_template(template_name: str, context: dict) -> str:
 
 
 def fetch_log_by_uuid(team: Team, uuid: str, timestamp: str) -> dict | None:
-    """Fetch a single log entry from ClickHouse by UUID.
+    """Fetch a single log entry from Datastore by UUID.
 
-    The timestamp parameter is required for efficient lookup - it allows ClickHouse
+    The timestamp parameter is required for efficient lookup - it allows Datastore
     to use the primary key index instead of scanning all data for the team.
     """
     query = parse_select(

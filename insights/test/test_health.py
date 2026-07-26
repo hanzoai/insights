@@ -77,7 +77,7 @@ def test_livez_returns_200_and_doesnt_require_any_dependencies(client: Client):
     with (
         simulate_postgres_error(),
         simulate_kafka_cannot_connect(),
-        simulate_clickhouse_cannot_connect(),
+        simulate_datastore_cannot_connect(),
         simulate_celery_cannot_connect(),
         simulate_cache_cannot_connect(),
     ):
@@ -110,7 +110,7 @@ def test_readyz_accepts_role_events_and_filters_by_relevant_services(client: Cli
 
     assert resp.status_code == 200, resp.content
 
-    with simulate_clickhouse_cannot_connect():
+    with simulate_datastore_cannot_connect():
         resp = get_readyz(client=client, role="events")
 
     assert resp.status_code == 200, resp.content
@@ -138,7 +138,7 @@ def test_readyz_accepts_role_web_and_filters_by_relevant_services(client: Client
 
     assert resp.status_code == 503, resp.content
 
-    with simulate_clickhouse_cannot_connect():
+    with simulate_datastore_cannot_connect():
         resp = get_readyz(client=client, role="web")
 
     assert resp.status_code == 200, resp.content
@@ -170,7 +170,7 @@ def test_readyz_accepts_role_worker_and_filters_by_relevant_services(client: Cli
 
     assert resp.status_code == 503, resp.content
 
-    with simulate_clickhouse_cannot_connect():
+    with simulate_datastore_cannot_connect():
         resp = get_readyz(client=client, role="worker")
 
     assert resp.status_code == 503, resp.content
@@ -208,7 +208,7 @@ def test_readyz_accepts_no_role_and_fails_on_everything(client: Client):
 
     assert resp.status_code == 503, resp.content
 
-    with simulate_clickhouse_cannot_connect():
+    with simulate_datastore_cannot_connect():
         resp = get_readyz(client=client)
 
     assert resp.status_code == 503, resp.content
@@ -236,7 +236,7 @@ def test_readyz_accepts_role_decide_and_filters_by_relevant_services(client: Cli
 
     assert resp.status_code == 200, resp.content
 
-    with simulate_clickhouse_cannot_connect():
+    with simulate_datastore_cannot_connect():
         resp = get_readyz(client=client, role="decide")
 
     assert resp.status_code == 200, resp.content
@@ -332,9 +332,9 @@ def simulate_kafka_cannot_connect():
 
 
 @contextmanager
-def simulate_clickhouse_cannot_connect():
+def simulate_datastore_cannot_connect():
     """
-    Simulates ClickHouse being unreachable by returning a 500 error response
+    Simulates Datastore being unreachable by returning a 500 error response
     """
 
     with patch.object(requests, "get") as requests_mock:

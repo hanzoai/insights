@@ -1,10 +1,10 @@
 # Sync Person Distinct IDs Workflow
 
-Temporal workflow to fix dangling persons in ClickHouse by syncing missing distinct IDs from PostgreSQL.
+Temporal workflow to fix dangling persons in Datastore by syncing missing distinct IDs from PostgreSQL.
 
 ## Problem
 
-Persons can exist in ClickHouse `person` table with `is_deleted = 0` but have no corresponding `person_distinct_id2` records. This can happen due to race conditions or incomplete data migrations.
+Persons can exist in Datastore `person` table with `is_deleted = 0` but have no corresponding `person_distinct_id2` records. This can happen due to race conditions or incomplete data migrations.
 
 ### Orphan Categories
 
@@ -18,10 +18,10 @@ Persons can exist in ClickHouse `person` table with `is_deleted = 0` but have no
 
 This workflow:
 
-1. Finds orphaned persons in ClickHouse (persons without distinct IDs)
+1. Finds orphaned persons in Datastore (persons without distinct IDs)
 2. Looks up their distinct IDs in PostgreSQL
-3. Syncs missing `person_distinct_id2` records to ClickHouse via Kafka
-4. Optionally marks CH-only orphans (no PG data) as deleted in ClickHouse
+3. Syncs missing `person_distinct_id2` records to Datastore via Kafka
+4. Optionally marks CH-only orphans (no PG data) as deleted in Datastore
 
 ## Workflow Inputs
 
@@ -59,7 +59,7 @@ class SyncPersonDistinctIdsWorkflowResult:
 
 | Activity                       | Purpose                                                      | Database    |
 | ------------------------------ | ------------------------------------------------------------ | ----------- |
-| `find_orphaned_persons`        | Query CH for all persons without distinct IDs (single query) | ClickHouse  |
+| `find_orphaned_persons`        | Query CH for all persons without distinct IDs (single query) | Datastore  |
 | `lookup_pg_distinct_ids`       | Find distinct IDs for person UUIDs                           | PostgreSQL  |
 | `sync_distinct_ids_to_ch`      | Write missing distinct IDs via Kafka                         | Kafka -> CH |
 | `mark_ch_only_orphans_deleted` | Set is_deleted=1 for persons without PG data                 | Kafka -> CH |
@@ -118,7 +118,7 @@ python manage.py start_temporal_workflow sync-person-distinct-ids \
 
 ## Key Queries
 
-### Find orphaned persons (ClickHouse)
+### Find orphaned persons (Datastore)
 
 ```sql
 SELECT id AS person_id, team_id, created_at, version
@@ -182,7 +182,7 @@ python manage.py start_temporal_workflow sync-person-distinct-ids \
 ### Verify results
 
 ```sql
--- Check for remaining orphans in ClickHouse
+-- Check for remaining orphans in Datastore
 SELECT id, team_id, is_deleted, version
 FROM person FINAL
 WHERE team_id = 1
@@ -225,5 +225,5 @@ python manage.py setup_orphan_test_data --team-id 1 --cleanup
 6. **Categorization opt-in** - Extra query to distinguish truly orphaned vs CH-only; off by default to avoid overhead
 7. **Heartbeating** - All activities use `Heartbeater` for long operations
 8. **Persons database** - Uses `PERSONS_DB_READER_URL` for PostgreSQL queries (persons tables are in a separate database)
-9. **Per-distinct-ID versions** - Each distinct ID has its own version (not per-person), preserved when syncing to ClickHouse
-10. **Version-aware deletion** - Uses `current_version + 1` when marking persons as deleted to ensure ClickHouse's ReplacingMergeTree picks up the deletion
+9. **Per-distinct-ID versions** - Each distinct ID has its own version (not per-person), preserved when syncing to Datastore
+10. **Version-aware deletion** - Uses `current_version + 1` when marking persons as deleted to ensure Datastore's ReplacingMergeTree picks up the deletion

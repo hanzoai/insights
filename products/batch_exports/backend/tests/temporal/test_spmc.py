@@ -9,7 +9,7 @@ import pytest
 import pyarrow as pa
 
 from insights.batch_exports.service import BackfillDetails
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
 from products.batch_exports.backend.temporal.spmc import (
     InvalidFilterError,
@@ -114,14 +114,14 @@ async def get_all_record_batches_from_queue(queue, produce_task):
     return records
 
 
-async def test_record_batch_producer_uses_extra_query_parameters(clickhouse_client):
+async def test_record_batch_producer_uses_extra_query_parameters(datastore_client):
     """Test RecordBatch Producer uses a InsightsQL value."""
     team_id = random.randint(1, 1000000)
     data_interval_end = dt.datetime.fromisoformat("2023-04-25T14:31:00.000000+00:00")
     data_interval_start = dt.datetime.fromisoformat("2023-04-25T14:30:00.000000+00:00")
 
-    (events, _, _) = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    (events, _, _) = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=team_id,
         start_time=data_interval_start,
         end_time=data_interval_end,

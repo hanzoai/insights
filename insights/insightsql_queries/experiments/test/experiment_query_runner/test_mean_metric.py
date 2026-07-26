@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import cast
 
 from freezegun import freeze_time
-from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_clickhouse_queries
+from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_datastore_queries
 
 from django.test import override_settings
 
@@ -23,7 +23,7 @@ from insights.test.test_journeys import journeys_for
 @override_settings(IN_UNIT_TESTING=True)
 class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_property_sum_metric(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -114,7 +114,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples, 10)
 
     @freeze_time("2020-01-10T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_conversion_window_extends_to_last_exposure(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(
@@ -181,7 +181,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(result.baseline.number_of_samples, 1)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_outlier_handling_for_sum_metric(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -274,7 +274,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples, 10)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_outlier_handling_for_count_metric(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -369,7 +369,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples, 10)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_unique_sessions_math_type(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -462,7 +462,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples, 2)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_property_max_metric(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -541,7 +541,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples, 2)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_property_min_metric(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -620,7 +620,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples, 2)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_property_avg_metric(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -699,7 +699,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples, 2)
 
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_outlier_handling_with_ignore_zeros(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -801,7 +801,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.sum, 4450)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_count_unique_property_values_via_insightsql(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)
@@ -888,7 +888,7 @@ class TestExperimentMeanMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.number_of_samples, 2)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_count_distinct_property_values_via_insightsql(self):
         feature_flag = self.create_feature_flag()
         experiment = self.create_experiment(feature_flag=feature_flag)

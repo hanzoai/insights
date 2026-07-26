@@ -9,8 +9,8 @@ from django.utils import timezone
 from dateutil.parser import isoparse
 from rest_framework import serializers
 
-from insights.clickhouse.client import sync_execute
-from insights.kafka_client.client import ClickhouseProducer
+from insights.datastore.client import sync_execute
+from insights.kafka_client.client import DatastoreProducer
 from insights.kafka_client.topics import KAFKA_EVENTS_JSON
 from insights.models import Group
 from insights.models.element.element import Element, chain_to_elements, elements_to_string
@@ -69,26 +69,26 @@ def create_event(
         "created_at": timestamp.strftime("%Y-%m-%d %H:%M:%S.%f"),
         "person_id": str(person_id) if person_id else "00000000-0000-0000-0000-000000000000",
         "person_properties": json.dumps(person_properties) if person_properties is not None else "",
-        "person_created_at": format_clickhouse_timestamp(person_created_at, ZERO_DATE),
+        "person_created_at": format_datastore_timestamp(person_created_at, ZERO_DATE),
         "group0_properties": json.dumps(group0_properties) if group0_properties is not None else "",
         "group1_properties": json.dumps(group1_properties) if group1_properties is not None else "",
         "group2_properties": json.dumps(group2_properties) if group2_properties is not None else "",
         "group3_properties": json.dumps(group3_properties) if group3_properties is not None else "",
         "group4_properties": json.dumps(group4_properties) if group4_properties is not None else "",
-        "group0_created_at": format_clickhouse_timestamp(group0_created_at, ZERO_DATE),
-        "group1_created_at": format_clickhouse_timestamp(group1_created_at, ZERO_DATE),
-        "group2_created_at": format_clickhouse_timestamp(group2_created_at, ZERO_DATE),
-        "group3_created_at": format_clickhouse_timestamp(group3_created_at, ZERO_DATE),
-        "group4_created_at": format_clickhouse_timestamp(group4_created_at, ZERO_DATE),
+        "group0_created_at": format_datastore_timestamp(group0_created_at, ZERO_DATE),
+        "group1_created_at": format_datastore_timestamp(group1_created_at, ZERO_DATE),
+        "group2_created_at": format_datastore_timestamp(group2_created_at, ZERO_DATE),
+        "group3_created_at": format_datastore_timestamp(group3_created_at, ZERO_DATE),
+        "group4_created_at": format_datastore_timestamp(group4_created_at, ZERO_DATE),
         "person_mode": person_mode,
     }
-    p = ClickhouseProducer()
+    p = DatastoreProducer()
     p.produce(topic=KAFKA_EVENTS_JSON, sql=INSERT_EVENT_SQL(), data=data)
 
     return str(event_uuid)
 
 
-def format_clickhouse_timestamp(
+def format_datastore_timestamp(
     raw_timestamp: Optional[Union[datetime, str]],
     default=None,
 ) -> str:
@@ -130,7 +130,7 @@ def bulk_create_events(
         if timestamp.tzinfo is None:
             team_timezone = event["team"].timezone if event.get("team") else "UTC"
             timestamp = timestamp.replace(tzinfo=ZoneInfo(team_timezone))
-        # Format for ClickHouse
+        # Format for Datastore
         timestamp = timestamp.astimezone(ZoneInfo("UTC")).strftime("%Y-%m-%d %H:%M:%S.%f")
 
         elements_chain = ""
@@ -306,7 +306,7 @@ def parse_properties(properties: str, allow_list: Optional[set[str]] = None) -> 
 
 
 # reference raw sql for
-class ClickhouseEventSerializer(serializers.Serializer):
+class DatastoreEventSerializer(serializers.Serializer):
     id = serializers.SerializerMethodField()
     distinct_id = serializers.SerializerMethodField()
     properties = serializers.SerializerMethodField()

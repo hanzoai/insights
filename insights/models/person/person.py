@@ -181,7 +181,7 @@ class Person(models.Model):
     is_identified = models.BooleanField(default=False)
     uuid = models.UUIDField(db_index=True, default=UUIDT, editable=False)
 
-    # current version of the person, used to sync with ClickHouse and collapse rows correctly
+    # current version of the person, used to sync with Datastore and collapse rows correctly
     version = models.BigIntegerField(null=True, blank=True)
 
     # Timestamp of when the person was last seen (last event timestamp)
@@ -325,7 +325,7 @@ class PersonDistinctId(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE, db_constraint=False)
     distinct_id = models.CharField(max_length=400)
 
-    # current version of the id, used to sync with ClickHouse and collapse rows correctly for new clickhouse table
+    # current version of the id, used to sync with Datastore and collapse rows correctly for new datastore table
     version = models.BigIntegerField(null=True, blank=True)
 
     class Meta:

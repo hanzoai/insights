@@ -164,12 +164,12 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                     let response: any
                     let expandedCountResponse: any = null
 
-                    // Querying groups from /groups/ endpoint may result in query timeouts. Let's query clickhouse instead
+                    // Querying groups from /groups/ endpoint may result in query timeouts. Let's query datastore instead
                     const isGroupNamesFilter = values.listGroupType.startsWith(
                         TaxonomicFilterGroupType.GroupNamesPrefix
                     )
                     if (isGroupNamesFilter && values.group?.groupTypeIndex !== undefined) {
-                        const groupsResponse = await api.groups.listClickhouse({
+                        const groupsResponse = await api.groups.listDatastore({
                             group_type_index: values.group.groupTypeIndex as GroupTypeIndex,
                             search: swappedInQuery || searchQuery || '',
                             limit,

@@ -152,7 +152,7 @@ class TestMaterializedColumnActivityLogging(APIBaseTest):
             UpdateSlotStateInputs(
                 slot_id=str(slot.id),
                 state="ERROR",
-                error_message="ClickHouse mutation failed",
+                error_message="Datastore mutation failed",
             ),
         )
 

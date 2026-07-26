@@ -22,12 +22,12 @@ from insights.insightsql.errors import ParsingError
 from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
 
-from insights.clickhouse.query_tagging import Feature, Product, tag_queries
+from insights.datastore.query_tagging import Feature, Product, tag_queries
 from insights.models import Team
 from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 from insights.settings.base_variables import TEST
 from insights.sync import database_sync_to_async
-from insights.temporal.common.clickhouse import get_client as get_clickhouse_client
+from insights.temporal.common.datastore import get_client as get_datastore_client
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_logger
 
@@ -40,7 +40,7 @@ from products.data_warehouse.backend.s3 import ensure_bucket_exists
 LOGGER = get_logger(__name__)
 
 MB_100_IN_BYTES = 100 * 1000 * 1000
-CLICKHOUSE_MAX_BLOCK_SIZE_ROWS = 50 * 1000
+DATASTORE_MAX_BLOCK_SIZE_ROWS = 50 * 1000
 DELTA_TABLE_RETENTION_HOURS = 24
 
 
@@ -121,7 +121,7 @@ def _combine_batches(batches: list[pa.RecordBatch]) -> pa.RecordBatch:
 
 
 def _transform_date_and_datetimes(batch: pa.RecordBatch, types: list[tuple[str, str]]) -> pa.RecordBatch:
-    """Transform date/datetimes from ClickHouse UInt representations back to proper types."""
+    """Transform date/datetimes from Datastore UInt representations back to proper types."""
     new_columns: list[pa.Array] = []
     new_fields: list[pa.Field] = []
 
@@ -224,7 +224,7 @@ async def get_query_row_count(query: str, team: Team, logger: FilteringBoundLogg
     context.database = await database_sync_to_async(Database.create_for)(team=team, modifiers=context.modifiers)
 
     prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
-        query_node, context=context, dialect="clickhouse", settings=settings, stack=[]
+        query_node, context=context, dialect="datastore", settings=settings, stack=[]
     )
 
     if prepared_insightsql_query is None:
@@ -233,14 +233,14 @@ async def get_query_row_count(query: str, team: Team, logger: FilteringBoundLogg
     printed = await database_sync_to_async(print_prepared_ast)(
         prepared_insightsql_query,
         context=context,
-        dialect="clickhouse",
+        dialect="datastore",
         settings=settings,
         stack=[],
     )
 
     await logger.adebug(f"Running count query: {printed}")
 
-    async with get_clickhouse_client() as client:
+    async with get_datastore_client() as client:
         result = await client.read_query(printed, query_parameters=context.values)
         count = int(result.decode("utf-8").strip())
         return count
@@ -263,7 +263,7 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger)
     context.database = await database_sync_to_async(Database.create_for)(team=team, modifiers=context.modifiers)
 
     prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
-        query_node, context=context, dialect="clickhouse", settings=settings, stack=[]
+        query_node, context=context, dialect="datastore", settings=settings, stack=[]
     )
     if prepared_insightsql_query is None:
         raise EmptyInsightsQLResponseColumnsError()
@@ -271,7 +271,7 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger)
     printed = await database_sync_to_async(print_prepared_ast)(
         prepared_insightsql_query,
         context=context,
-        dialect="clickhouse",
+        dialect="datastore",
         settings=settings,
         stack=[],
     )
@@ -294,7 +294,7 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger)
     )
 
     query_typings: list[tuple[str, str, tuple[str, tuple[ast.Constant, ...]] | None]] = []
-    async with get_clickhouse_client() as client:
+    async with get_datastore_client() as client:
         async with client.apost_query(
             query=table_describe_query, query_parameters=context.values, query_id=str(uuid.uuid4())
         ) as ch_response:
@@ -328,19 +328,19 @@ async def insightsql_table(query: str, team: Team, logger: FilteringBoundLogger)
     settings.preferred_block_size_bytes = MB_100_IN_BYTES
 
     arrow_prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
-        query_node, context=context, dialect="clickhouse", stack=[], settings=settings
+        query_node, context=context, dialect="datastore", stack=[], settings=settings
     )
 
     if arrow_prepared_insightsql_query is None:
         raise EmptyInsightsQLResponseColumnsError()
 
     arrow_printed = await database_sync_to_async(print_prepared_ast)(
-        arrow_prepared_insightsql_query, context=context, dialect="clickhouse", stack=[], settings=settings
+        arrow_prepared_insightsql_query, context=context, dialect="datastore", stack=[], settings=settings
     )
 
-    await logger.adebug(f"Running clickhouse query: {arrow_printed}")
+    await logger.adebug(f"Running datastore query: {arrow_printed}")
 
-    async with get_clickhouse_client(max_block_size=CLICKHOUSE_MAX_BLOCK_SIZE_ROWS) as client:
+    async with get_datastore_client(max_block_size=DATASTORE_MAX_BLOCK_SIZE_ROWS) as client:
         batches = []
         batches_size = 0
         async for batch in client.astream_query_as_arrow(arrow_printed, query_parameters=context.values):

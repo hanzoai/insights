@@ -91,7 +91,7 @@ class InstanceSettingsSerializer(serializers.Serializer):
                 raise serializers.ValidationError("This setting cannot be updated on cloud.")
 
             # TODO: Move to top-level imports once CH is moved out of `ee`
-            from insights.clickhouse.client import sync_execute
+            from insights.datastore.client import sync_execute
             from insights.models.performance.sql import UPDATE_PERFORMANCE_EVENTS_TABLE_TTL_SQL
 
             sync_execute(UPDATE_PERFORMANCE_EVENTS_TABLE_TTL_SQL(), {"weeks": new_value_parsed})

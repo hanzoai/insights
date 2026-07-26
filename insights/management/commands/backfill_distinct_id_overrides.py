@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 import structlog
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.models.team.team import Team
 
 logger = structlog.get_logger(__name__)

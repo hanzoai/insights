@@ -18,7 +18,7 @@ import { v4 } from 'uuid'
 import { waitForExpect } from '~/tests/helpers/expectations'
 import { resetKafka } from '~/tests/helpers/kafka'
 
-import { Clickhouse } from '../../tests/helpers/clickhouse'
+import { Datastore } from '../../tests/helpers/datastore'
 import { createUserTeamAndOrganization, resetTestDatabase } from '../../tests/helpers/sql'
 import { Hub, PersonBatchWritingDbWriteMode, PipelineEvent, ProjectId, Team } from '../types'
 import { closeHub, createHub } from '../utils/db/hub'
@@ -165,22 +165,22 @@ const formatConfigName = (config: PersonUpdateConfig): string => {
 
 describe.each(FLAG_COMBINATIONS)('Person Updates E2E ($#)', (config) => {
     const configName = formatConfigName(config)
-    let clickhouse: Clickhouse
+    let datastore: Datastore
     let hub: Hub
     let ingester: IngestionConsumer
     let team: Team
 
     beforeAll(async () => {
-        clickhouse = Clickhouse.create()
+        datastore = Datastore.create()
         await resetKafka()
         await resetTestDatabase()
-        await clickhouse.resetTestDatabase()
+        await datastore.resetTestDatabase()
     })
 
     afterAll(async () => {
         await resetTestDatabase()
-        await clickhouse.resetTestDatabase()
-        clickhouse.close()
+        await datastore.resetTestDatabase()
+        datastore.close()
     })
 
     beforeEach(async () => {

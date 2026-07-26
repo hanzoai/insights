@@ -255,7 +255,7 @@ PERSON_UUID_FILTER = "person_uuid"
 
 class AnalyticsDBMS(StrEnum):
     POSTGRES = "postgres"
-    CLICKHOUSE = "clickhouse"
+    DATASTORE = "datastore"
 
 
 UNIQUE_USERS = "dau"

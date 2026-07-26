@@ -22,7 +22,7 @@ WITH embedText('Bug in session replay page', 'text-embedding-3-large-3072') as q
 SELECT product, document_type, rendering, content, cosineDistance(embedding, query) as dist FROM document_embeddings WHERE model_name = 'text-embedding-3-large-3072' ORDER BY dist
 ```
 
-Become clickhouse sql that looks like:
+Become datastore sql that looks like:
 ```sql
 SELECT
     document_embeddings.product AS product,
@@ -94,9 +94,9 @@ from typing import Optional
 
 from django.conf import settings
 
-from insights.clickhouse.indexes import index_by_kafka_timestamp
-from insights.clickhouse.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION
-from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
+from insights.datastore.indexes import index_by_kafka_timestamp
+from insights.datastore.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION
+from insights.datastore.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
 
 # Base SQL template for model-specific tables - same as original but without model_name column
 MODEL_SPECIFIC_EMBEDDINGS_TABLE_BASE_SQL = """
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
 
 # SQL for sharded buffer table on data nodes that receives all embeddings from Kafka
 def DOCUMENT_EMBEDDINGS_BUFFER_SHARDED_TABLE_SQL():
-    from insights.clickhouse.table_engines import ReplacingMergeTree, ReplicationScheme
+    from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
 
     engine = ReplacingMergeTree(
         DOCUMENT_EMBEDDINGS_BUFFER_SHARDED_TABLE, ver="inserted_at", replication_scheme=ReplicationScheme.SHARDED
@@ -194,7 +194,7 @@ SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
 
 # SQL for writable distributed buffer table on ingestion nodes (writes to sharded buffer on data nodes)
 def DOCUMENT_EMBEDDINGS_BUFFER_WRITABLE_TABLE_SQL():
-    from insights.clickhouse.table_engines import Distributed
+    from insights.datastore.table_engines import Distributed
 
     engine = Distributed(
         data_table=DOCUMENT_EMBEDDINGS_BUFFER_SHARDED_TABLE,
@@ -261,7 +261,7 @@ FROM {database}.{kafka_table}
         mv_name=KAFKA_TO_BUFFER_MV,
         target_table=DOCUMENT_EMBEDDINGS_BUFFER_WRITABLE_TABLE,
         kafka_table=KAFKA_DOCUMENT_EMBEDDINGS,
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
     )
 
 
@@ -340,7 +340,7 @@ class ModelTableDefinitions:
             mv_name=self.materialized_view_name(),
             target_table=self.writable_table_name(),
             buffer_table=DOCUMENT_EMBEDDINGS_BUFFER_SHARDED_TABLE,
-            database=settings.CLICKHOUSE_DATABASE,
+            database=settings.DATASTORE_DATABASE,
             model_name=self.model_name,
         )
 

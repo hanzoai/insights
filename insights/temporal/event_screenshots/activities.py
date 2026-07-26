@@ -7,10 +7,10 @@ from temporalio import activity
 from insights.models import ExportedAsset, ObjectMediaPreview
 from insights.sync import database_sync_to_async
 from insights.tasks.exporter import export_asset_direct
-from insights.temporal.common.clickhouse import get_client as get_ch_client
+from insights.temporal.common.datastore import get_client as get_ch_client
 from insights.temporal.common.logger import get_write_only_logger
 from insights.temporal.event_screenshots.types import (
-    ClickHouseResponse,
+    DatastoreResponse,
     EventSession,
     EventType,
     LoadEventSessionsResult,
@@ -118,7 +118,7 @@ async def load_event_sessions(event_types: list[EventType]) -> LoadEventSessions
             ) as ch_response:
                 raw_response = await ch_response.content.read()
 
-            response = ClickHouseResponse.model_validate_json(raw_response)
+            response = DatastoreResponse.model_validate_json(raw_response)
             if response.data:
                 event_session = EventSession.model_validate(response.data[0])
                 result.append((event_type, event_session))

@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 use cymbal::{
     frames::{Frame, RawFrame},
     types::{RawErrProps, Stacktrace},
@@ -11,7 +11,7 @@ use serde_json::Value;
 fn serde_passthrough() {
     let raw: &'static str = include_str!("./static/raw_ch_exception_list.json");
     let before: Value = serde_json::from_str(raw).unwrap();
-    let raw: ClickHouseEvent = serde_json::from_str(raw).unwrap();
+    let raw: DatastoreEvent = serde_json::from_str(raw).unwrap();
 
     let before_properties: Value = serde_json::from_str(raw.properties.as_ref().unwrap()).unwrap();
     let properties_parsed: RawErrProps =

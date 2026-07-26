@@ -9,15 +9,15 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseDestroyTablesMixin,
-    ClickhouseTestMixin,
+    DatastoreDestroyTablesMixin,
+    DatastoreTestMixin,
     QueryMatchingTest,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     flush_persons_and_events,
-    run_clickhouse_statement_in_parallel,
-    snapshot_clickhouse_queries,
+    run_datastore_statement_in_parallel,
+    snapshot_datastore_queries,
 )
 from unittest.mock import MagicMock, Mock, patch
 
@@ -33,8 +33,8 @@ from insights.schema import EventsQuery
 from insights.insightsql.query import execute_insightsql_query
 
 from insights.batch_exports.models import BatchExport, BatchExportDestination, BatchExportRun
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.client import sync_execute
+from insights.datastore.query_tagging import tag_queries
 from insights.cloud_utils import TEST_clear_instance_license_cache
 from insights.insightsql_queries.events_query_runner import EventsQueryRunner
 from insights.models import Organization, Plugin, Team
@@ -169,7 +169,7 @@ def _setup_replay_data(team_id: int, include_mobile_replay: bool, include_zero_d
 
 
 @freeze_time("2022-01-10T00:01:00Z")
-class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesMixin, QueryMatchingTest):
+class TestUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreDestroyTablesMixin, QueryMatchingTest):
     def setUp(self) -> None:
         super().setUp()
 
@@ -532,7 +532,7 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
             expectations = [
                 {
                     "deployment_infrastructure": "tests",
-                    "realm": "hosted-clickhouse",
+                    "realm": "hosted-datastore",
                     "period": {
                         "start_inclusive": "2022-01-09T00:00:00+00:00",
                         "end_inclusive": "2022-01-09T23:59:59.999999+00:00",
@@ -540,7 +540,7 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                     "site_url": "http://test.hanzo.ai",
                     "product": "open source",
                     "helm": {},
-                    "clickhouse_version": report["clickhouse_version"],
+                    "datastore_version": report["datastore_version"],
                     "users_who_logged_in": [],
                     "users_who_logged_in_count": 0,
                     "users_who_signed_up": [],
@@ -747,7 +747,7 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                 },
                 {
                     "deployment_infrastructure": "tests",
-                    "realm": "hosted-clickhouse",
+                    "realm": "hosted-datastore",
                     "period": {
                         "start_inclusive": "2022-01-09T00:00:00+00:00",
                         "end_inclusive": "2022-01-09T23:59:59.999999+00:00",
@@ -755,7 +755,7 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                     "site_url": "http://test.hanzo.ai",
                     "product": "open source",
                     "helm": {},
-                    "clickhouse_version": report["clickhouse_version"],
+                    "datastore_version": report["datastore_version"],
                     "users_who_logged_in": [],
                     "users_who_logged_in_count": 0,
                     "users_who_signed_up": [],
@@ -961,7 +961,7 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
 
 
 @freeze_time("2022-01-09T00:01:00Z")
-class TestReplayUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesMixin):
+class TestReplayUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreDestroyTablesMixin):
     def setUp(self) -> None:
         super().setUp()
         materialize("events", "$exception_values")
@@ -1084,7 +1084,7 @@ class TestReplayUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyT
         assert org_reports[str(self.organization.id)].mobile_billable_recording_count_in_period == 2
 
 
-class TestInsightsQLUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesMixin):
+class TestInsightsQLUsageReport(APIBaseTest, DatastoreTestMixin, DatastoreDestroyTablesMixin):
     # @also_test_with_materialized_columns(event_properties=["$lib", "$exception_values"], verify_no_jsonextract=False)
     @pytest.mark.skip(reason="Skipping due to flakiness")
     def test_usage_report_insightsql_queries(self) -> None:
@@ -1173,7 +1173,7 @@ class TestInsightsQLUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDest
 
 
 @freeze_time("2022-01-10T00:01:00Z")
-class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseTestMixin):
+class TestFeatureFlagsUsageReport(DatastoreDestroyTablesMixin, TestCase, DatastoreTestMixin):
     def setUp(self) -> None:
         Team.objects.all().delete()
         return super().setUp()
@@ -1190,7 +1190,7 @@ class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickh
         self.org_2_team_3 = Team.objects.create(pk=5, organization=self.org_2, name="Team 3 org 2")
         materialize("events", "$exception_values")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
     def test_usage_report_decide_requests(self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock) -> None:
@@ -1434,7 +1434,7 @@ class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickh
 
 
 @freeze_time("2022-01-10T00:01:00Z")
-class TestSurveysUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseTestMixin):
+class TestSurveysUsageReport(DatastoreDestroyTablesMixin, TestCase, DatastoreTestMixin):
     def setUp(self) -> None:
         Team.objects.all().delete()
         return super().setUp()
@@ -1570,7 +1570,7 @@ class TestSurveysUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseT
 
 
 @freeze_time("2022-01-10T00:01:00Z")
-class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseTestMixin):
+class TestExternalDataSyncUsageReport(DatastoreDestroyTablesMixin, TestCase, DatastoreTestMixin):
     def setUp(self) -> None:
         Team.objects.all().delete()
         return super().setUp()
@@ -2167,7 +2167,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
 
 
 @freeze_time("2022-01-10T00:01:00Z")
-class TestDWHStorageUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseTestMixin):
+class TestDWHStorageUsageReport(DatastoreDestroyTablesMixin, TestCase, DatastoreTestMixin):
     def setUp(self) -> None:
         Team.objects.all().delete()
         return super().setUp()
@@ -2362,10 +2362,10 @@ class TestDWHStorageUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhou
 
 
 @freeze_time("2022-01-10T00:01:00Z")
-class TestInsightsFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, ClickhouseTestMixin):
+class TestInsightsFunctionUsageReports(DatastoreDestroyTablesMixin, TestCase, DatastoreTestMixin):
     def setUp(self) -> None:
         Team.objects.all().delete()
-        run_clickhouse_statement_in_parallel([TRUNCATE_APP_METRICS2_TABLE_SQL])
+        run_datastore_statement_in_parallel([TRUNCATE_APP_METRICS2_TABLE_SQL])
         return super().setUp()
 
     def _setup_teams(self) -> None:
@@ -2588,7 +2588,7 @@ class TestInsightsFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, C
 
 
 @freeze_time("2022-01-10T10:00:00Z")
-class TestErrorTrackingUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseTestMixin):
+class TestErrorTrackingUsageReport(DatastoreDestroyTablesMixin, TestCase, DatastoreTestMixin):
     def setUp(self) -> None:
         Team.objects.all().delete()
         return super().setUp()
@@ -2677,7 +2677,7 @@ class TestErrorTrackingUsageReport(ClickhouseDestroyTablesMixin, TestCase, Click
 
 
 @freeze_time("2022-01-10T10:00:00Z")
-class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseTestMixin):
+class TestAIEventsUsageReport(DatastoreDestroyTablesMixin, TestCase, DatastoreTestMixin):
     def setUp(self) -> None:
         Team.objects.all().delete()
         return super().setUp()
@@ -3540,7 +3540,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
         self.assertEqual(result[0][1], 240)
 
 
-class TestSendUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest):
+class TestSendUsage(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
 
@@ -3781,7 +3781,7 @@ class TestSendUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest
         mock_client.group_identify.assert_not_called()
 
 
-class TestSendNoUsage(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest):
+class TestSendNoUsage(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
         materialize("events", "$exception_values")
@@ -3863,7 +3863,7 @@ class TestSendUsageNoLicense(APIBaseTest):
 
 
 @freeze_time("2021-10-10T23:01:00Z")
-class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin, APIBaseTest):
+class TestOrganizationFiltering(LicensedTestMixin, DatastoreDestroyTablesMixin, APIBaseTest):
     """Test organization_ids filtering for send_all_org_usage_reports"""
 
     def setUp(self) -> None:
@@ -4058,7 +4058,7 @@ class TestOrganizationFiltering(LicensedTestMixin, ClickhouseDestroyTablesMixin,
         assert properties["total_orgs"] == 3
 
 
-class TestQuerySplitting(ClickhouseDestroyTablesMixin, ClickhouseTestMixin, TestCase):
+class TestQuerySplitting(DatastoreDestroyTablesMixin, DatastoreTestMixin, TestCase):
     def setUp(self) -> None:
         super().setUp()
         materialize("events", "$exception_values")

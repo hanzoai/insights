@@ -1,6 +1,6 @@
 from typing import Optional
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, snapshot_datastore_queries
 
 from insights.schema import (
     DateRange,
@@ -21,8 +21,8 @@ from insights.insightsql_queries.web_analytics.session_attribution_explorer_quer
 from insights.models.utils import uuid7
 
 
-@snapshot_clickhouse_queries
-class TestSessionAttributionQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestSessionAttributionQueryRunner(DatastoreTestMixin, APIBaseTest):
     def _create_session(
         self, url=None, source=None, medium=None, campaign=None, gclid=None, gad_source=None, referring_domain="$direct"
     ):

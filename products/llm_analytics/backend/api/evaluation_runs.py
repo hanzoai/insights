@@ -14,7 +14,7 @@ from temporalio.common import RetryPolicy, WorkflowIDReusePolicy
 
 from insights.api.monitoring import monitor
 from insights.api.routing import TeamAndOrgViewSetMixin
-from insights.clickhouse.client import query_with_columns
+from insights.datastore.client import query_with_columns
 from insights.event_usage import report_user_action
 from insights.models import User
 from insights.permissions import AccessControlPermission
@@ -65,7 +65,7 @@ class EvaluationRunViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
         except Evaluation.DoesNotExist:
             return Response({"error": f"Evaluation {evaluation_id} not found"}, status=404)
 
-        # Fetch event data from ClickHouse efficiently using available index keys
+        # Fetch event data from Datastore efficiently using available index keys
         # The compound index is (team_id, toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid))
         where_clauses = [
             "team_id = %(team_id)s",

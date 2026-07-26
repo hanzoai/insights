@@ -1,7 +1,7 @@
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     FuzzyInt,
     QueryMatchingTest,
     snapshot_postgres_queries_context,
@@ -13,7 +13,7 @@ from rest_framework import status
 from insights.models import Action, Tag, User
 
 
-class TestActionApi(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @patch("insights.api.action.report_user_action")
     def test_create_action(self, patch_capture, *args):
         response = self.client.post(

@@ -70,7 +70,7 @@ function gatherRegExModifiers(
 ): { regex: string; insensitive: boolean; multiline: boolean; dotall: boolean } {
     let insensitive = false
     let multiline = false
-    let dotall = true // defaults to true on clickhouse
+    let dotall = true // defaults to true on datastore
 
     function setModifier(modifier: string, negative: boolean): void {
         switch (modifier) {

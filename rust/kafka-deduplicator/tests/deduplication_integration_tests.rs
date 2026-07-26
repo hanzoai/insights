@@ -429,7 +429,7 @@ async fn test_basic_deduplication() -> Result<()> {
         );
         assert!(duplicate_event.get("version").is_some(), "Missing version");
 
-        // Check new fields added for ClickHouse schema
+        // Check new fields added for Datastore schema
         assert!(
             duplicate_event.get("distinct_id").is_some(),
             "Missing distinct_id"

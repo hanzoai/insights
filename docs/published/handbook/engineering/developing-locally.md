@@ -29,22 +29,22 @@ We also have a growing collection of Rust services that handle performance-criti
 
 These components rely on a few external services:
 
-- ClickHouse – for storing big data (events, persons – analytics queries)
+- Datastore – for storing big data (events, persons – analytics queries)
 - Kafka – for queuing events for ingestion
 - MinIO – for storing files (session recordings, file exports)
 - PostgreSQL – for storing ordinary data (users, projects, saved insights)
 - Redis – for caching and inter-service communication
-- Zookeeper – for coordinating Kafka and ClickHouse clusters
+- Zookeeper – for coordinating Kafka and Datastore clusters
 
 When spinning up an instance of Insights for development, we recommend the following hybrid configuration:
 
-- External services (ClickHouse, Kafka, PostgreSQL, Redis, etc.) run in Docker via `docker compose`
+- External services (Datastore, Kafka, PostgreSQL, Redis, etc.) run in Docker via `docker compose`
 - Insights apps (Django, frontend, plugin-server, Celery) run on the host using `insightscli start` (which uses mprocs, a terminal UI, to manage and display logs from all processes simultaneously)
 
 This approach gives you fast iteration on the code you're developing while keeping infrastructure isolated.
 
 > It is also technically possible to run Insights in Docker completely, but syncing code changes is then much slower, and for development you need Insights dependencies installed on the host anyway (such as formatting or typechecking tools).
-> The other way around – everything on the host, is not practical due to significant complexities involved in instantiating Kafka or ClickHouse from scratch.
+> The other way around – everything on the host, is not practical due to significant complexities involved in instantiating Kafka or Datastore from scratch.
 
 The instructions here assume you're running macOS or the current Ubuntu Linux LTS (24.04).
 
@@ -162,8 +162,8 @@ If you see a port binding error for 5432, you have Postgres running locally. Use
 **GeoLite database missing**
 The feature-flags container needs the GeoLite database in `/share`. If it's missing, run `./bin/download-mmdb` and then `chmod 0755 ./share/GeoLite2-City.mmdb`.
 
-**ClickHouse "get_mempolicy" warning**
-You might see `get_mempolicy: Operation not permitted` in the ClickHouse logs. This is harmless and can be ignored. To verify ClickHouse started properly, run `docker exec -it insights-clickhouse-1 bash` then `clickhouse-client --query "SELECT 1"`.
+**Datastore "get_mempolicy" warning**
+You might see `get_mempolicy: Operation not permitted` in the Datastore logs. This is harmless and can be ignored. To verify Datastore started properly, run `docker exec -it insights-datastore-1 bash` then `datastore-client --query "SELECT 1"`.
 
 **Database migration errors**
 If you see `fe_sendauth: no password supplied`, set `DATABASE_URL=postgres://insights:insights@localhost:5432/insights` and ensure containers are running. On ARM machines, you may also hit `psycopg2` errors – see [this comment](https://github.com/psycopg/psycopg2/issues/1216#issuecomment-820556849) for fixes.
@@ -271,7 +271,7 @@ Or to only test cases with matching function names:
 pytest insights/test/test_example.py -k test_something
 ```
 
-To see debug logs (such as ClickHouse queries), add argument `--log-cli-level=DEBUG`.
+To see debug logs (such as Datastore queries), add argument `--log-cli-level=DEBUG`.
 
 ### End-to-end
 
@@ -344,9 +344,9 @@ With PyCharm's built in support for Django, it's fairly easy to setup debugging 
 
 While developing, there are times you may want to connect to the database to query the local database, make changes, etc. To connect to the database, use a tool like pgAdmin and enter these connection details: _host_:`localhost` _port_:`5432` _database_:`insights`, _username_:`insights`, _pwd_:`insights`.
 
-## Extra: Accessing ClickHouse
+## Extra: Accessing Datastore
 
-To connect to ClickHouse using a tool like DataGrip or PyCharm, use these connection details: _host_:`localhost` _port_:`8123` _database_:`default`, _username_:`app`, _pwd_:`apppass`.
+To connect to Datastore using a tool like DataGrip or PyCharm, use these connection details: _host_:`localhost` _port_:`8123` _database_:`default`, _username_:`app`, _pwd_:`apppass`.
 
 ## Extra: Accessing the Django Admin
 
@@ -453,7 +453,7 @@ If you need to start fresh with a clean database (for example, if your local dat
    insightscli dev:reset
    ```
 
-   This will remove all data stored in Docker volumes, including your PostgreSQL, ClickHouse, and Redis data.
+   This will remove all data stored in Docker volumes, including your PostgreSQL, Datastore, and Redis data.
 
 2. Start Insights again:
 

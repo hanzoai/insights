@@ -4,13 +4,13 @@ from datetime import datetime
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_action,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     create_person_id_override_by_distinct_id,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.case import skip
 
@@ -18,23 +18,23 @@ from django.test import override_settings
 
 from rest_framework.exceptions import ValidationError
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.constants import FILTER_TEST_ACCOUNTS, INSIGHT_FUNNELS
 from insights.models import Action, Element
 from insights.models.cohort import Cohort
 from insights.models.filters import Filter
 from insights.models.instance_setting import get_instance_setting
-from insights.queries.funnels import ClickhouseFunnel, ClickhouseFunnelActors
+from insights.queries.funnels import DatastoreFunnel, DatastoreFunnelActors
 from insights.queries.funnels.test.breakdown_cases import assert_funnel_results_equal, funnel_breakdown_test_factory
 from insights.queries.funnels.test.conversion_time_cases import funnel_conversion_time_test_factory
 from insights.test.test_journeys import journeys_for
 
 
 class TestFunnelBreakdown(
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     funnel_breakdown_test_factory(
-        ClickhouseFunnel,
-        ClickhouseFunnelActors,
+        DatastoreFunnel,
+        DatastoreFunnelActors,
         _create_event,
         _create_action,
         _create_person,
@@ -45,18 +45,18 @@ class TestFunnelBreakdown(
 
 
 class TestFunnelConversionTime(
-    ClickhouseTestMixin,
-    funnel_conversion_time_test_factory(ClickhouseFunnel, ClickhouseFunnelActors, _create_event, _create_person),
+    DatastoreTestMixin,
+    funnel_conversion_time_test_factory(DatastoreFunnel, DatastoreFunnelActors, _create_event, _create_person),
 ):
     maxDiff = None
     pass
 
 
 def funnel_test_factory(Funnel, event_factory, person_factory):
-    class TestGetFunnel(ClickhouseTestMixin, APIBaseTest):
+    class TestGetFunnel(DatastoreTestMixin, APIBaseTest):
         def _get_actor_ids_at_step(self, filter, funnel_step, breakdown_value=None):
             person_filter = filter.shallow_clone({"funnel_step": funnel_step, "funnel_step_breakdown": breakdown_value})
-            _, serialized_result, _ = ClickhouseFunnelActors(person_filter, self.team).get_actors()
+            _, serialized_result, _ = DatastoreFunnelActors(person_filter, self.team).get_actors()
 
             return [val["id"] for val in serialized_result]
 
@@ -205,7 +205,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             self.assertEqual(result[2]["count"], 1)
 
         @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=True)
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_events_with_person_on_events_v2(self):
             # KLUDGE: We need to do this to ensure create_person_id_override_by_distinct_id
             # works correctly. Worth considering other approaches as we generally like to
@@ -611,7 +611,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
 
         @also_test_with_materialized_columns(["test_propX"])
         def test_funnel_multiple_actions(self):
-            # we had an issue on clickhouse where multiple actions with different property filters would incorrectly grab only the last
+            # we had an issue on datastore where multiple actions with different property filters would incorrectly grab only the last
             # properties.
             # This test prevents a regression
             person_factory(distinct_ids=["person1"], team_id=self.team.pk)
@@ -2332,7 +2332,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
                 ids_to_compare,
             )
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_conversion_window_seconds(self):
             ids_to_compare = []
             for i in range(10):
@@ -3049,11 +3049,11 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             }
 
             try:
-                ClickhouseFunnel(Filter(data=filter_with_breakdown), self.team).run()
+                DatastoreFunnel(Filter(data=filter_with_breakdown), self.team).run()
             except KeyError as ke:
                 raise AssertionError(f"Should not have raised a key error: {ke}")
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_with_cohorts_step_filter(self):
             _create_person(
                 distinct_ids=["user_1"],
@@ -3118,7 +3118,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
                 "date_to": "2020-01-14",
             }
 
-            result = ClickhouseFunnel(Filter(data=filters), self.team).run()
+            result = DatastoreFunnel(Filter(data=filters), self.team).run()
 
             self.assertEqual(result[0]["name"], "user signed up")
             self.assertEqual(result[0]["count"], 1)
@@ -3126,7 +3126,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             self.assertEqual(result[1]["name"], "paid")
             self.assertEqual(result[1]["count"], 1)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_with_precalculated_cohort_step_filter(self):
             _create_person(
                 distinct_ids=["user_1"],
@@ -3201,14 +3201,14 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             cohort.calculate_people_ch(pending_version=0)
 
             with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
-                result = ClickhouseFunnel(Filter(data=filters), self.team).run()
+                result = DatastoreFunnel(Filter(data=filters), self.team).run()
                 self.assertEqual(result[0]["name"], "user signed up")
                 self.assertEqual(result[0]["count"], 1)
 
                 self.assertEqual(result[1]["name"], "paid")
                 self.assertEqual(result[1]["count"], 1)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_with_static_cohort_step_filter(self):
             _create_person(
                 distinct_ids=["user_1"],
@@ -3260,7 +3260,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
                 "date_to": "2020-01-14",
             }
 
-            result = ClickhouseFunnel(Filter(data=filters), self.team).run()
+            result = DatastoreFunnel(Filter(data=filters), self.team).run()
 
             self.assertEqual(result[0]["name"], "user signed up")
             self.assertEqual(result[0]["count"], 1)
@@ -3268,7 +3268,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
             self.assertEqual(result[1]["name"], "paid")
             self.assertEqual(result[1]["count"], 1)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         @also_test_with_materialized_columns(["$current_url"], person_properties=["email", "age"])
         def test_funnel_with_property_groups(self):
             filters = {
@@ -3456,7 +3456,7 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
                 [people["stopped_after_pageview3"].uuid],
             )
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_timezones(self):
             self.team.timezone = "US/Pacific"
             self.team.save()
@@ -3701,5 +3701,5 @@ def funnel_test_factory(Funnel, event_factory, person_factory):
     return TestGetFunnel
 
 
-class TestFOSSFunnel(funnel_test_factory(ClickhouseFunnel, _create_event, _create_person)):
+class TestFOSSFunnel(funnel_test_factory(DatastoreFunnel, _create_event, _create_person)):
     maxDiff = None

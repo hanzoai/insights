@@ -6,7 +6,7 @@ from uuid import UUID
 
 import dagster
 
-from insights.clickhouse.cluster import ClickhouseCluster, Query
+from insights.datastore.cluster import DatastoreCluster, Query
 from insights.dags.property_definitions import (
     DetectPropertyTypeExpression,
     PropertyDefinitionsConfig,
@@ -22,7 +22,7 @@ class PropertyTypeTestData:
     expected: list[tuple[str, str | None]]
 
 
-def test_detect_property_type_expression(cluster: ClickhouseCluster) -> None:
+def test_detect_property_type_expression(cluster: DatastoreCluster) -> None:
     cases = {
         UUID(int=i): case
         for i, case in enumerate(
@@ -55,7 +55,7 @@ def test_detect_property_type_expression(cluster: ClickhouseCluster) -> None:
                     '{"a": "true\\n"}',
                     [("a", "String")],  # XXX: inconsistent with existing implementation
                 ),
-                PropertyTypeTestData(  # weird formats clickhouse allows
+                PropertyTypeTestData(  # weird formats datastore allows
                     '{"a": "23:21:04", "b": "September", "c": "2024", "d": "1"}',
                     [("a", "String"), ("b", "String"), ("c", "String"), ("d", "String")],
                 ),
@@ -113,7 +113,7 @@ def test_detect_property_type_expression(cluster: ClickhouseCluster) -> None:
         assert actual == case.expected, f"expected {case.expected} for {case.properties}, got {actual}"
 
 
-def test_ingestion_job(cluster: ClickhouseCluster) -> None:
+def test_ingestion_job(cluster: DatastoreCluster) -> None:
     start_at = datetime(2025, 5, 7)
     duration = timedelta(hours=1)
 

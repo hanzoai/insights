@@ -3,7 +3,7 @@ from django.db import connections
 
 import structlog
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models.cohort.cohort import Cohort
 from insights.models.person import Person
 from insights.person_db_router import PERSONS_DB_FOR_READ
@@ -19,7 +19,7 @@ PROD_US_CUTOFF = "2025-10-01 00:00:00"
 
 class Command(BaseCommand):
     help = (
-        "Sync cohort people records from ClickHouse person_static_cohort table to PostgreSQL insights_cohortpeople table"
+        "Sync cohort people records from Datastore person_static_cohort table to PostgreSQL insights_cohortpeople table"
     )
 
     def add_arguments(self, parser):
@@ -51,7 +51,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Starting cohort people sync for records after {start_date}")
 
         try:
-            # Process ClickHouse data in batches and handle each batch completely
+            # Process Datastore data in batches and handle each batch completely
             total_inserted = 0
             cohorts_with_insertions = set()
             last_timestamp = start_date
@@ -90,24 +90,24 @@ class Command(BaseCommand):
                         "batch_size": batch_size,
                     }
 
-                clickhouse_batch = sync_execute(batch_query, params)
+                datastore_batch = sync_execute(batch_query, params)
                 first_batch = False
 
-                if not clickhouse_batch:
+                if not datastore_batch:
                     break
 
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"Processing ClickHouse batch: {len(clickhouse_batch)} records (last: {last_timestamp})"
+                        f"Processing Datastore batch: {len(datastore_batch)} records (last: {last_timestamp})"
                     )
                 )
 
                 # Extract unique person UUIDs from this batch
-                ch_person_uuids = list({str(record[0]) for record in clickhouse_batch})
+                ch_person_uuids = list({str(record[0]) for record in datastore_batch})
 
                 if not ch_person_uuids:
                     # Update keyset pagination cursor even if no UUIDs found
-                    last_record = clickhouse_batch[-1]
+                    last_record = datastore_batch[-1]
                     last_timestamp = last_record[3]
                     last_person_id = str(last_record[0])
                     last_cohort_id = last_record[1]
@@ -127,7 +127,7 @@ class Command(BaseCommand):
                 if not person_uuid_to_id:
                     self.stdout.write(f"No matching persons found for batch")
                     # Update keyset pagination cursor
-                    last_record = clickhouse_batch[-1]
+                    last_record = datastore_batch[-1]
                     last_timestamp = last_record[3]
                     last_person_id = str(last_record[0])
                     last_cohort_id = last_record[1]
@@ -135,9 +135,9 @@ class Command(BaseCommand):
 
                 self.stdout.write(f"Found {len(person_uuid_to_id)} person ID mappings for batch")
 
-                # Build the cohort data mapping from this ClickHouse batch
+                # Build the cohort data mapping from this Datastore batch
                 cohort_data: dict[str, set[int]] = {}
-                for record in clickhouse_batch:
+                for record in datastore_batch:
                     record_person_uuid = str(record[0])
                     cohort_id = record[1]
                     if record_person_uuid not in cohort_data:
@@ -201,7 +201,7 @@ class Command(BaseCommand):
                     self.stdout.write(f"No new records to insert for batch")
 
                 # Update keyset pagination cursor to last record in batch
-                last_record = clickhouse_batch[-1]
+                last_record = datastore_batch[-1]
                 last_timestamp = last_record[3]
                 last_person_id = str(last_record[0])
                 last_cohort_id = last_record[1]

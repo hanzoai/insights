@@ -70,7 +70,7 @@ class QueryDateRange:
         self._timezone_info = timezone_info or self._team.timezone_info
         self._exact_timerange = exact_timerange
 
-        # Hour intervals have strange behaviour in clickhouse:
+        # Hour intervals have strange behaviour in datastore:
         # From the docs:
         # (*) hour intervals are special: the calculation is always performed relative to 00:00:00 (midnight) of the current day
         # Keep 1 hour intervals the same just in case there's subtle changes (there shouldn't be)
@@ -82,7 +82,7 @@ class QueryDateRange:
         if not isinstance(self._interval, IntervalType):
             raise ValueError(f"Value {repr(interval)} is not an instance of IntervalType")
         if self._interval == IntervalType.WEEK and self._interval_count > 1:
-            # Due to differences in clickhouse between toStartOfWeek and toStartOfInterval(interval X weeks)
+            # Due to differences in datastore between toStartOfWeek and toStartOfInterval(interval X weeks)
             # we can't support multiple week intervals without breaking backwards compatibility
             raise ValueError("IntervalType.WEEK cannot be used with interval_count > 1")
 
@@ -458,7 +458,7 @@ class QueryDateRangeWithIntervals(QueryDateRange):
         trunc_func_args = [source] if source else [ast.Constant(value=self.date_from())]
         if trunc_func == "toStartOfWeek":
             trunc_func_args.append(
-                ast.Constant(value=int((WeekStartDay(self._team.week_start_day or 0)).clickhouse_mode))
+                ast.Constant(value=int((WeekStartDay(self._team.week_start_day or 0)).datastore_mode))
             )
         return ast.Call(name=trunc_func, args=trunc_func_args)
 

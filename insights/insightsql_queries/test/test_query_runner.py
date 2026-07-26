@@ -371,8 +371,8 @@ class TestQueryRunner(BaseTest):
             modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.LEGACY_NULL_AS_STRING),
         )
         response = runner.calculate()
-        assert response.clickhouse is not None
-        assert "events.`mat_$browser" in response.clickhouse
+        assert response.datastore is not None
+        assert "events.`mat_$browser" in response.datastore
 
         runner = InsightsQLQueryRunner(
             query=InsightsQLQuery(query="select properties.$browser from events"),
@@ -380,8 +380,8 @@ class TestQueryRunner(BaseTest):
             modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.DISABLED),
         )
         response = runner.calculate()
-        assert response.clickhouse is not None
-        assert "events.`mat_$browser" not in response.clickhouse
+        assert response.datastore is not None
+        assert "events.`mat_$browser" not in response.datastore
 
     @mock.patch("insights.insightsql_queries.query_runner.get_query_cache_manager")
     def test_schema_change_triggers_recalculation(self, mock_get_cache_manager):

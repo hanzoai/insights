@@ -4,11 +4,11 @@ from zoneinfo import ZoneInfo
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest import TestCase
 
@@ -45,7 +45,7 @@ from products.error_tracking.backend.models import (
 
 
 
-class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestErrorTrackingQueryRunner(DatastoreTestMixin, APIBaseTest):
     distinct_id_one = "user_1"
     distinct_id_two = "user_2"
 
@@ -197,7 +197,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_column_names(self):
         columns = self._calculate()["columns"]
         self.assertEqual(
@@ -262,7 +262,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(date_to, datetime(2022, 1, 11, 12, 11, 0, tzinfo=ZoneInfo(key="UTC")))
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_issue_grouping(self):
         results = self._calculate(issueId=self.issue_id_one, withAggregations=True)["results"]
         # returns a single group with multiple errors
@@ -271,7 +271,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[0]["aggregations"]["occurrences"], 2)
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_search_query(self):
         self.create_events_and_issue(
             issue_id="01936e81-b0ce-7b56-8497-791e505b0d0c",
@@ -318,13 +318,13 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[1]["aggregations"]["users"], 1)
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_empty_search_query(self):
         results = self._calculate(searchQuery="probs not found")["results"]
         self.assertEqual(len(results), 0)
 
     @freeze_time("2022-01-10 12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_search_query_with_multiple_search_items(self):
         self.create_events_and_issue(
             issue_id="01936e81-b0ce-7b56-8497-791e505b0d0c",
@@ -333,7 +333,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
             additional_properties={
                 "$exception_types": "['DatabaseNotFoundX']",
                 "$exception_values": "['this is the same error message']",
-                "$exception_sources": "['insights/clickhouse/client/execute.py']",
+                "$exception_sources": "['insights/datastore/client/execute.py']",
             },
         )
 
@@ -344,13 +344,13 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
             additional_properties={
                 "$exception_types": "['DatabaseNotFoundY']",
                 "$exception_values": "['this is the same error message']",
-                "$exception_sources": "['insights/clickhouse/client/execute.py']",
+                "$exception_sources": "['insights/datastore/client/execute.py']",
             },
         )
         flush_persons_and_events()
 
         results = self._calculate(
-            filterTestAccounts=True, searchQuery="databasenotfoundX clickhouse/client/execute.py", withAggregations=True
+            filterTestAccounts=True, searchQuery="databasenotfoundX datastore/client/execute.py", withAggregations=True
         )["results"]
 
         self.assertEqual(len(results), 1)
@@ -360,7 +360,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[0]["aggregations"]["users"], 1)
 
     @freeze_time("2022-01-10 12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_search_person_properties(self):
         distinct_id = "david@hanzo.ai"
 
@@ -383,7 +383,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[0]["id"], "684bd8ae-498f-4548-bc05-e621b5b5b9aa")
 
     @freeze_time("2020-01-10 12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_only_returns_exception_events(self):
         _create_event(
             distinct_id=self.distinct_id_one,
@@ -397,7 +397,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(results), 3)
 
     @freeze_time("2022-01-10 12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_correctly_counts_session_ids(self):
         _create_event(
             distinct_id=self.distinct_id_one,
@@ -426,14 +426,14 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[0]["aggregations"]["sessions"], 2)
 
     @freeze_time("2022-01-10 12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_correctly_counts_persons(self):
         results = self._calculate(issueId=self.issue_id_one, withAggregations=True)["results"]
         self.assertEqual(results[0]["id"], self.issue_id_one)
         self.assertEqual(results[0]["aggregations"]["users"], 2)
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insightsql_filters(self):
         results = self._calculate(
             filterGroup=PropertyGroupFilter(
@@ -454,7 +454,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(results), 2)
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ordering(self):
         results = self._calculate(orderBy="last_seen")["results"]
         self.assertEqual([r["id"] for r in results], [self.issue_id_three, self.issue_id_two, self.issue_id_one])
@@ -463,7 +463,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual([r["id"] for r in results], [self.issue_id_one, self.issue_id_two, self.issue_id_three])
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_status(self):
         resolved_issue = ErrorTrackingIssue.objects.get(id=self.issue_id_one)
         resolved_issue.status = ErrorTrackingIssue.Status.RESOLVED
@@ -482,7 +482,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual([r["id"] for r in results], [self.issue_id_three, self.issue_id_two, self.issue_id_one])
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_overrides_aggregation(self):
         self.override_fingerprint(self.issue_three_fingerprint, self.issue_id_one)
         results = self._calculate(withAggregations=True, orderBy="occurrences")["results"]
@@ -496,7 +496,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[1]["aggregations"]["occurrences"], 1)
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_user_assignee(self):
         issue_id = "e9ac529f-ac1c-4a96-bd3a-107034368d64"
         self.create_events_and_issue(
@@ -511,7 +511,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual([x["id"] for x in results], [issue_id])
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_role_assignee(self):
         issue_id = "e9ac529f-ac1c-4a96-bd3a-107034368d64"
         self.create_events_and_issue(
@@ -527,7 +527,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual([x["id"] for x in results], [issue_id])
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_issue_filters(self):
         results = self._calculate(
             filterGroup=PropertyGroupFilter(
@@ -547,7 +547,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(results), 1)
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_person_id_filter(self):
         person = _create_person(
             team=self.team,
@@ -574,7 +574,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(results[0]["id"], issue_id)
 
     @freeze_time("2022-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_group_key_filter(self):
         group_a_id = "org:acme"
         group_b_id = "org:widgets"
@@ -620,7 +620,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(results), 0)
 
     @freeze_time("2020-01-10T12:11:00")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_first_seen_filters(self):
         cutoff_time = now() - relativedelta(hours=2)
 
@@ -661,7 +661,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual([r["id"] for r in results], [self.issue_id_one])
 
     @freeze_time("2020-01-12")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_volume_aggregation_simple(self):
         results = self._calculate(
             volumeResolution=3, dateRange=DateRange(date_from="2020-01-10", date_to="2020-01-11"), withAggregations=True
@@ -678,7 +678,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(first_aggregations["volumeRange"], [0, 1, 0])
 
     @freeze_time("2025-05-05")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_volume_aggregation_advanced(self):
         issue_id = "e9ac529f-ac1c-4a96-bd3a-102334368d64"
         issue_fingerprint = "fingerprint"
@@ -719,7 +719,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(first_aggregations["volumeRange"], [60, 60, 0, 0])
 
     @freeze_time("2020-01-12")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sorting_by_revenue(self):
         self.team.revenue_analytics_config.events = [
             RevenueAnalyticsEventItem(
@@ -760,7 +760,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual([r["revenue"] for r in results], [47542.0, 25042.0, 22500.0])
 
     @freeze_time("2020-01-12")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_sorting_by_mrr(self):
         self.team.revenue_analytics_config.events = [
             RevenueAnalyticsEventItem(

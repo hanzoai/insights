@@ -2,7 +2,7 @@ import json
 import base64
 from typing import cast
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person, flush_persons_and_events
 from unittest.mock import MagicMock, patch
 
 from insights.schema import ActorsQuery, PersonPropertyFilter, PropertyOperator
@@ -21,7 +21,7 @@ from insights.insightsql_queries.insights.paginators import InsightsQLCursorPagi
 from insights.models.utils import UUIDT
 
 
-class TestInsightsQLHasMorePaginator(ClickhouseTestMixin, APIBaseTest):
+class TestInsightsQLHasMorePaginator(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
     random_uuid: str
 
@@ -218,7 +218,7 @@ class TestInsightsQLHasMorePaginator(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(mock_execute_insightsql_query.call_args.kwargs["limit_context"], limit_context)
 
 
-class TestInsightsQLCursorPaginator(ClickhouseTestMixin, APIBaseTest):
+class TestInsightsQLCursorPaginator(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def test_cursor_encoding_decoding(self):

@@ -14,8 +14,8 @@ import dagster
 import psycopg2
 from dagster_k8s import k8s_job_executor
 
-from insights.clickhouse.cluster import ClickhouseCluster
-from insights.clickhouse.custom_metrics import MetricsClient
+from insights.datastore.cluster import DatastoreCluster
+from insights.datastore.custom_metrics import MetricsClient
 from insights.dags.common import JobOwners
 from insights.dags.person_property_reconciliation import publish_person_to_kafka
 from insights.kafka_client.client import _KafkaProducer
@@ -431,7 +431,7 @@ def restore_team_chunk(
     config: PersonPropertyRestoreConfig,
     chunk: list[dict],
     persons_database: dagster.ResourceParam[psycopg2.extensions.connection],
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     kafka_producer: dagster.ResourceParam[_KafkaProducer],
 ) -> dict[str, Any]:
     """Restore person properties for all backup entries in a team chunk."""

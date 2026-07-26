@@ -1,7 +1,7 @@
-from insights.queries.funnels.base import ClickhouseFunnelBase
+from insights.queries.funnels.base import DatastoreFunnelBase
 
 
-class ClickhouseFunnelStrict(ClickhouseFunnelBase):
+class DatastoreFunnelStrict(DatastoreFunnelBase):
     QUERY_TYPE = "funnel_strict"
 
     def get_query(self):

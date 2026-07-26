@@ -10,7 +10,7 @@ import botocore.exceptions
 from psycopg import sql
 
 from insights.batch_exports.service import BackfillDetails, BatchExportModel, BatchExportSchema
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 
 from products.batch_exports.backend.temporal.destinations.redshift_batch_export import redshift_default_fields
 from products.batch_exports.backend.temporal.record_batch_model import SessionsRecordBatchModel
@@ -57,9 +57,9 @@ TEST_MODELS: list[BatchExportModel | BatchExportSchema | None] = [
 ]
 
 
-async def assert_clickhouse_records_in_redshift(
+async def assert_datastore_records_in_redshift(
     redshift_connection,
-    clickhouse_client: ClickHouseClient,
+    datastore_client: DatastoreClient,
     schema_name: str,
     table_name: str,
     team_id: int,
@@ -82,16 +82,16 @@ async def assert_clickhouse_records_in_redshift(
     1. Read all records inserted into given Redshift table.
     2. Cast records read from Redshift to a Python list of dicts.
     3. Assert records read from Redshift have the expected column names.
-    4. Read all records that were supposed to be inserted from ClickHouse.
-    5. Cast records returned by ClickHouse to a Python list of dicts.
-    6. Compare each record returned by ClickHouse to each record read from Redshift.
+    4. Read all records that were supposed to be inserted from Datastore.
+    5. Cast records returned by Datastore to a Python list of dicts.
+    6. Compare each record returned by Datastore to each record read from Redshift.
 
     Caveats:
     * Casting records to a Python list of dicts means losing some type precision.
 
     Arguments:
         redshift_connection: A Redshift connection used to read inserted events.
-        clickhouse_client: A ClickHouseClient used to read events that are expected to be inserted.
+        datastore_client: A DatastoreClient used to read events that are expected to be inserted.
         schema_name: Redshift schema name.
         table_name: Redshift table name.
         team_id: The ID of the team that we are testing events for.
@@ -128,7 +128,7 @@ async def assert_clickhouse_records_in_redshift(
                 # Arrays stored in SUPER are dumped almost like the string
                 # representation of as Python sets, but without quotes for the values:
                 # '"{value,value1}"'. We expect these to be Python lists rather than
-                # whatever garbage that is, as reading from ClickHouse returns Python
+                # whatever garbage that is, as reading from Datastore returns Python
                 #  lists. So, we load up the string as JSON, and compare against '"{}"'
                 # to determine if it is empty. If it is, we can just set the value to
                 # empty list. Otherwise, we strip the '"{}"', and iterate through the

@@ -3,7 +3,7 @@ use std::{
     sync::Arc,
 };
 
-use common_types::ClickHouseEvent;
+use common_types::DatastoreEvent;
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -28,7 +28,7 @@ impl ExceptionEventPipeline {
     }
 }
 
-pub type EventPipelineItem = Result<ClickHouseEvent, EventError>;
+pub type EventPipelineItem = Result<DatastoreEvent, EventError>;
 
 #[derive(Error, Debug)]
 pub struct ExceptionEventHandledError {

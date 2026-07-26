@@ -3,7 +3,7 @@ from insights.test.base import _create_event, _create_person, flush_persons_and_
 
 from insights.schema import DateRange, InsightsQLQueryModifiers, SessionTableVersion, WebOverviewQuery
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
 from insights.insightsql_queries.web_analytics.web_overview import WebOverviewQueryRunner
 from insights.models.utils import uuid7

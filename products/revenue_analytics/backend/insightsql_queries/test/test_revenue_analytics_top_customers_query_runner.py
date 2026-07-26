@@ -5,10 +5,10 @@ from pathlib import Path
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import ANY, patch
 
@@ -52,8 +52,8 @@ CUSTOMER_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.top_custo
 CHARGES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.top_customers_query_runner.stripe_charges"
 
 
-@snapshot_clickhouse_queries
-class TestRevenueAnalyticsTopCustomersQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestRevenueAnalyticsTopCustomersQueryRunner(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2025-04-21"
 
     def _create_managed_viewsets(self):

@@ -11,8 +11,8 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.clickhouse.client.connection import Workload
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.connection import Workload
+from insights.datastore.client.execute import sync_execute
 from insights.models.raw_sessions.sessions_v2 import RAW_SESSION_TABLE_BACKFILL_SELECT_SQL
 
 logger = structlog.get_logger(__name__)
@@ -73,7 +73,7 @@ AND and(
 
         if dry_run:
             count_query = f"SELECT count(), uniq(session_id_v7) FROM ({select_query(team_id=self.team_id)})"
-            # nosemgrep: clickhouse-injection-taint - internal select_query builder, team_id not user input
+            # nosemgrep: datastore-injection-taint - internal select_query builder, team_id not user input
             [(events_count, sessions_count)] = sync_execute(count_query, settings=SETTINGS)
             logger.info(f"{events_count} events and {sessions_count} sessions to backfill for")
             logger.info(f"The first select query to run would be:\n{select_query(self.end_date, team_id=self.team_id)}")
@@ -85,7 +85,7 @@ AND and(
             insert_query = f"""INSERT INTO {TARGET_TABLE} {select_query(select_date=date, team_id=self.team_id)}"""
             for retries in range(self.num_retries + 1):
                 try:
-                    # nosemgrep: clickhouse-injection-taint - internal select_query builder, team_id not user input
+                    # nosemgrep: datastore-injection-taint - internal select_query builder, team_id not user input
                     sync_execute(
                         query=insert_query,
                         workload=Workload.OFFLINE if self.use_offline_workload else Workload.DEFAULT,

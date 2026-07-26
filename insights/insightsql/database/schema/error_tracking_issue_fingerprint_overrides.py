@@ -68,7 +68,7 @@ class RawErrorTrackingIssueFingerprintOverridesTable(Table):
         "version": IntegerDatabaseField(name="version", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "error_tracking_issue_fingerprint_overrides"
 
     def to_printed_insightsql(self):
@@ -86,7 +86,7 @@ class ErrorTrackingIssueFingerprintOverridesTable(LazyTable):
     ):
         return select_from_error_tracking_issue_fingerprint_overrides_table(table_to_add.fields_accessed)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "error_tracking_issue_fingerprint_overrides"
 
     def to_printed_insightsql(self):

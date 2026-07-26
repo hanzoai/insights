@@ -1,4 +1,4 @@
-// For stuff like clickhouse formats, etc
+// For stuff like datastore formats, etc
 use chrono::{DateTime, NaiveDateTime, ParseError, Utc};
 
 pub const CH_FORMAT: &str = "%Y-%m-%d %H:%M:%S%.3f";

@@ -81,7 +81,7 @@ export interface AssistantStringOrBooleanValuePropertyFilter {
      */
     operator: AssistantStringOrBooleanValuePropertyFilterOperator
     /**
-     * Only use property values from the plan. If the operator is `regex` or `not_regex`, the value must be a valid ClickHouse regex pattern to match against.
+     * Only use property values from the plan. If the operator is `regex` or `not_regex`, the value must be a valid Datastore regex pattern to match against.
      * Otherwise, the value must be a substring that will be matched against the property value.
      * Use the string values `true` or `false` for boolean properties.
      */
@@ -608,6 +608,6 @@ export interface AssistantRetentionQuery extends AssistantInsightsQueryBase {
 
 export interface AssistantInsightsQLQuery {
     kind: NodeKind.InsightsQLQuery
-    /** SQL SELECT statement to execute. Mostly standard ClickHouse SQL with Insights-specific additions. */
+    /** SQL SELECT statement to execute. Mostly standard Datastore SQL with Insights-specific additions. */
     query: string
 }

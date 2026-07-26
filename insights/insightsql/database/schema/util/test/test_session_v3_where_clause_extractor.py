@@ -1,7 +1,7 @@
 from typing import Any, Optional, Union
 
 import pytest
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.schema import SessionTableVersion
 
@@ -35,7 +35,7 @@ def parse(
     return parsed
 
 
-class TestIsSessionIdStringExpr(ClickhouseTestMixin, APIBaseTest):
+class TestIsSessionIdStringExpr(DatastoreTestMixin, APIBaseTest):
     def test_handles_select_query_alias_type_without_crashing(self):
         # Regression test: is_session_id_string_expr should not crash when
         # the field's table_type is a SelectQueryAliasType (which doesn't have
@@ -66,7 +66,7 @@ class TestIsSessionIdStringExpr(ClickhouseTestMixin, APIBaseTest):
 
 
 @pytest.mark.usefixtures("unittest_snapshot")
-class TestSessionWhereClauseExtractorV3(ClickhouseTestMixin, APIBaseTest):
+class TestSessionWhereClauseExtractorV3(DatastoreTestMixin, APIBaseTest):
     snapshot: Any
 
     @property
@@ -386,7 +386,7 @@ SELECT
         assert expected == actual
 
 
-class TestSessionsV3QueriesInsightsQLToClickhouse(ClickhouseTestMixin, APIBaseTest):
+class TestSessionsV3QueriesInsightsQLToDatastore(DatastoreTestMixin, APIBaseTest):
     def print_query(self, query: str) -> str:
         team = self.team
         modifiers = create_default_modifiers_for_team(team)
@@ -397,10 +397,10 @@ class TestSessionsV3QueriesInsightsQLToClickhouse(ClickhouseTestMixin, APIBaseTe
             enable_select_queries=True,
             modifiers=modifiers,
         )
-        prepared_ast = prepare_ast_for_printing(node=parse(query), context=context, dialect="clickhouse")
+        prepared_ast = prepare_ast_for_printing(node=parse(query), context=context, dialect="datastore")
         if prepared_ast is None:
             return ""
-        pretty = print_prepared_ast(prepared_ast, context=context, dialect="clickhouse", pretty=True)
+        pretty = print_prepared_ast(prepared_ast, context=context, dialect="datastore", pretty=True)
         return pretty
 
     def test_select_with_timestamp(self):

@@ -10,7 +10,7 @@ from django.db import connections, router, transaction
 
 import structlog
 
-from insights.clickhouse.client.execute import sync_execute as ch_execute
+from insights.datastore.client.execute import sync_execute as ch_execute
 from insights.models.person import PersonlessDistinctId
 from insights.models.team.team import Team
 

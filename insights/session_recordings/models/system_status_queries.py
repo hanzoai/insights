@@ -1,7 +1,7 @@
 import dataclasses
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.datastore.client import sync_execute
+from insights.datastore.query_tagging import Product, tag_queries
 
 
 @dataclasses.dataclass(frozen=True)

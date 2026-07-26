@@ -28,7 +28,7 @@ import type { debugCHQueriesLogicType } from './DebugCHQueriesType'
 
 export function openCHQueriesDebugModal(): void {
     LemonDialog.open({
-        title: 'ClickHouse queries recently executed for this user',
+        title: 'Datastore queries recently executed for this user',
         content: <DebugCHQueries />,
         primaryButton: null,
         width: 1600,

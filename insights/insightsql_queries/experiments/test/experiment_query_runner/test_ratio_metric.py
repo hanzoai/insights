@@ -2,7 +2,7 @@ from typing import cast
 
 import pytest
 from freezegun import freeze_time
-from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_clickhouse_queries
+from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_datastore_queries
 
 from django.test import override_settings
 
@@ -26,7 +26,7 @@ from insights.test.test_journeys import journeys_for
 @override_settings(IN_UNIT_TESTING=True)
 class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_basic_ratio_metric(self):
         """Test basic ratio metric functionality with revenue per purchase event"""
         feature_flag = self.create_feature_flag()
@@ -165,7 +165,7 @@ class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
         self.assertIsNotNone(test_variant.numerator_denominator_sum_product)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ratio_metric_different_math_types(self):
         """Test ratio metric with different math types for numerator and denominator"""
         feature_flag = self.create_feature_flag()
@@ -270,7 +270,7 @@ class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.denominator_sum, 2)  # 2 unique sessions
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ratio_metric_with_conversion_window(self):
         """Test ratio metric with conversion window"""
         feature_flag = self.create_feature_flag()
@@ -377,7 +377,7 @@ class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.denominator_sum, 3)
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ratio_metric_zero_denominator(self):
         """Test ratio metric behavior when denominator is zero"""
         feature_flag = self.create_feature_flag()
@@ -478,7 +478,7 @@ class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.denominator_sum, 2)  # 2 special_events
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ratio_metric_same_event_different_properties(self):
         """Test ratio metric using the same event with different math properties"""
         feature_flag = self.create_feature_flag()
@@ -596,7 +596,7 @@ class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(test_variant.denominator_sum, 19)  # 5 + 6 + 8
 
     @freeze_time("2024-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ratio_metric_action_and_event_sources(self):
         """Test ratio metric with action source numerator and event source denominator"""
         feature_flag = self.create_feature_flag()
@@ -720,7 +720,7 @@ class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
         self.assertIsNotNone(control_variant.numerator_denominator_sum_product)
         self.assertIsNotNone(test_variant.numerator_denominator_sum_product)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ratio_metric_with_data_warehouse_sources(self):
         """Test ratio metric with ExperimentDataWarehouseNode for both numerator and denominator"""
         from datetime import datetime
@@ -815,7 +815,7 @@ class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
     # We need to handle aggregations differently there compared to what we do i mean metrics.
     @pytest.mark.skip
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ratio_metric_with_insightsql_math_type(self):
         """Test ratio metric with revenue per distinct user id with insightsql expression"""
         feature_flag = self.create_feature_flag()
@@ -950,7 +950,7 @@ class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
         self.assertIsNotNone(test_variant.numerator_denominator_sum_product)
 
     @freeze_time("2020-01-01T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_ratio_metric_with_parametric_aggregation(self):
         """Test parametric aggregations in ratio metrics.
 
@@ -1038,7 +1038,7 @@ class TestExperimentRatioMetric(ExperimentQueryRunnerBaseTest):
         self.assertEqual(len(result.variant_results), 1)
 
         # Verify the query was executed successfully and produced results
-        # If the query didn't preserve the parameter, it would have failed in ClickHouse
+        # If the query didn't preserve the parameter, it would have failed in Datastore
         # The fact that we got results proves the parametric aggregation worked
         control_variant = result.baseline
         test_variant = result.variant_results[0]

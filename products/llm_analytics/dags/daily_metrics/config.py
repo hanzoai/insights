@@ -14,7 +14,7 @@ from insights.schema import AIEventType
 class LLMADailyMetricsConfig:
     """Configuration for LLMA daily metrics aggregation pipeline."""
 
-    # ClickHouse table name
+    # Datastore table name
     table_name: str = "llma_metrics_daily"
 
     # Start date for daily partitions (when AI events were introduced)
@@ -26,8 +26,8 @@ class LLMADailyMetricsConfig:
     # Backfill policy: process N days per run
     max_partitions_per_run: int = 14
 
-    # ClickHouse query settings
-    clickhouse_max_execution_time: int = 600  # 10 minutes
+    # Datastore query settings
+    datastore_max_execution_time: int = 600  # 10 minutes
 
     # Dagster job timeout (seconds)
     job_timeout: int = 1800  # 30 minutes

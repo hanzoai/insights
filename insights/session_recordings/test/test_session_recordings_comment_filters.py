@@ -1,7 +1,7 @@
 import json
 from datetime import timedelta
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
 from django.utils.timezone import now
 
@@ -10,13 +10,13 @@ from rest_framework import status
 
 from insights.schema import PropertyOperator
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Comment
 from insights.models.utils import uuid7
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 
 
-class TestSessionRecordingsCommentFiltering(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest):
+class TestSessionRecordingsCommentFiltering(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     def setUp(self):
         super().setUp()
 

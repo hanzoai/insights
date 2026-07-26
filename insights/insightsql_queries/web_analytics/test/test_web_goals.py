@@ -3,11 +3,11 @@ from typing import Optional
 from freezegun.api import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from insights.schema import (
@@ -21,15 +21,15 @@ from insights.schema import (
 
 from insights.insightsql.test.utils import pretty_print_in_tests
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.insightsql_queries.web_analytics.web_goals import WebGoalsQueryRunner
 from insights.models import Action, Cohort, Element, Person
 from insights.models.person.sql import PERSON_DISTINCT_ID_OVERRIDES_TABLE
 from insights.models.utils import uuid7
 
 
-@snapshot_clickhouse_queries
-class TestWebGoalsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestWebGoalsQueryRunner(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2025-01-29"
     EVENT_TIMESTAMP = "2024-12-01"
 
@@ -395,7 +395,7 @@ class TestWebGoalsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             cohort.people.add(p1, p2)
 
             # Insert person_distinct_id_overrides that create the scenario for any() function
-            # This creates multiple overrides for the same distinct_id in ClickHouse with the same version
+            # This creates multiple overrides for the same distinct_id in Datastore with the same version
             # This should force the any() function to be used when multiple person_ids exist for the same distinct_id
             # We need to create multiple overrides with the same version to trigger the any() function
             sync_execute(
@@ -504,7 +504,7 @@ class TestWebGoalsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 },
             )
 
-            # Flush events to ClickHouse
+            # Flush events to Datastore
             flush_persons_and_events()
 
         # Run query with properties that trigger the error

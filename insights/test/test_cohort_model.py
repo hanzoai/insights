@@ -5,7 +5,7 @@ from insights.test.base import BaseTest
 
 from parameterized import parameterized
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.models import Cohort, Person, Team
 from insights.models.cohort.sql import GET_COHORTPEOPLE_BY_COHORT_ID
 from insights.models.property_definition import PropertyDefinition, PropertyType
@@ -61,7 +61,7 @@ class TestCohort(BaseTest):
         self.assertEqual(cohort.is_calculating, False)
 
     @pytest.mark.ee
-    def test_calculating_cohort_clickhouse(self):
+    def test_calculating_cohort_datastore(self):
         cohort = Cohort.objects.create(
             team=self.team,
             groups=[{"properties": [{"key": "$some_prop", "value": "something", "type": "person"}]}],

@@ -1,6 +1,6 @@
 """Event emission for clustering results.
 
-This module contains functions for emitting clustering results to ClickHouse:
+This module contains functions for emitting clustering results to Datastore:
 - Build cluster data structures with centroids and distances
 - Emit $ai_trace_clusters event with all clustering metadata
 - Handle noise/outlier cluster from HDBSCAN (cluster_id = -1)
@@ -57,7 +57,7 @@ def emit_cluster_events(
     clustering_params: ClusteringParams | None = None,
     analysis_level: AnalysisLevel = "trace",
 ) -> list[ClusterData]:
-    """Emit $ai_trace_clusters or $ai_generation_clusters event to ClickHouse.
+    """Emit $ai_trace_clusters or $ai_generation_clusters event to Datastore.
 
     Creates a single event containing all clusters with trace/generation IDs, centroids, and LLM-generated labels.
     The UI can fetch metadata for individual traces/generations as needed.

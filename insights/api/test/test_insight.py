@@ -6,13 +6,13 @@ from zoneinfo import ZoneInfo
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     QueryMatchingTest,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
     snapshot_postgres_queries,
 )
 from unittest import mock
@@ -71,7 +71,7 @@ from insights.test.db_context_capturing import capture_db_queries
 
 
 
-class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     maxDiff = None
 
     def setUp(self) -> None:
@@ -2020,7 +2020,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response_json = response.json()
-        # clickhouse funnels don't have a loading system
+        # datastore funnels don't have a loading system
         self.assertEqual(len(response_json["result"]), 2)
         self.assertEqual(response_json["result"][0]["name"], "user signed up")
         self.assertEqual(response_json["result"][0]["count"], 1)
@@ -2035,7 +2035,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             f"/api/projects/{self.team.id}/insights/funnel/?funnel_window_days=14&events={json.dumps([{'id': 'user signed up', 'type': 'events', 'order': 0}, {'id': 'user did things', 'type': 'events', 'order': 1}])}"
         ).json()
 
-        # clickhouse funnels don't have a loading system
+        # datastore funnels don't have a loading system
         self.assertEqual(len(response["result"]), 2)
         self.assertEqual(response["result"][0]["name"], "user signed up")
         self.assertEqual(response["result"][1]["name"], "user did things")
@@ -2753,7 +2753,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         assert activity == expected
 
     @also_test_with_materialized_columns(event_properties=["int_value"], person_properties=["fish"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_trend_insightsql_global_filters(self) -> None:
         _create_person(team=self.team, distinct_ids=["1"], properties={"fish": "there is no fish"})
         with freeze_time("2012-01-14T03:21:34.000Z"):
@@ -2821,7 +2821,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             # )
 
     @also_test_with_materialized_columns(event_properties=["int_value"], person_properties=["fish"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_trend_insightsql_local_filters(self) -> None:
         _create_person(team=self.team, distinct_ids=["1"], properties={"fish": "there is no fish"})
         with freeze_time("2012-01-14T03:21:34.000Z"):
@@ -2862,7 +2862,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertEqual(found_data_points, 10)
 
     @also_test_with_materialized_columns(event_properties=["int_value"], person_properties=["fish"])
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_insight_trend_insightsql_breakdown(self) -> None:
         _create_person(team=self.team, distinct_ids=["1"], properties={"fish": "there is no fish"})
         with freeze_time("2012-01-14T03:21:34.000Z"):
@@ -2889,7 +2889,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertEqual(result[1]["count"], 10)
             self.assertEqual(result[1]["breakdown_value"], "le%ss")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(event_properties=["int_value"], person_properties=["fish"])
     def test_insight_funnels_insightsql_global_filters(self) -> None:
         with freeze_time("2012-01-15T04:01:34.000Z"):
@@ -2941,7 +2941,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertEqual(response_json["result"][1]["count"], 0)
             self.assertEqual(response_json["timezone"], "UTC")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(event_properties=["int_value"], person_properties=["fish"])
     def test_insight_funnels_insightsql_local_filters(self) -> None:
         with freeze_time("2012-01-15T04:01:34.000Z"):
@@ -3013,7 +3013,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertEqual(response_json["result"][1]["count"], 0)
             self.assertEqual(response_json["timezone"], "UTC")
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @also_test_with_materialized_columns(event_properties=["int_value"], person_properties=["fish"])
     def test_insight_funnels_insightsql_breakdown(self) -> None:
         with freeze_time("2012-01-15T04:01:34.000Z"):
@@ -3068,7 +3068,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertEqual(response_json["result"][0][1]["breakdown_value"], ["there is no fish"])
             self.assertEqual(response_json["timezone"], "UTC")
 
-    # @snapshot_clickhouse_queries
+    # @snapshot_datastore_queries
     @also_test_with_materialized_columns(event_properties=["int_value"], person_properties=["fish"])
     def test_insight_funnels_insightsql_breakdown_single(self) -> None:
         with freeze_time("2012-01-15T04:01:34.000Z"):
@@ -3901,10 +3901,10 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(response_data["result"][0][0]["breakdown"], ["Chrome"])
 
 
-class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
+class TestInsightErrorHandling(DatastoreTestMixin, APIBaseTest):
     @parameterized.expand(
         [
-            ("ExposedCHQueryError", "insights.errors.ExposedCHQueryError", "NO_COMMON_TYPE error from ClickHouse"),
+            ("ExposedCHQueryError", "insights.errors.ExposedCHQueryError", "NO_COMMON_TYPE error from Datastore"),
             ("ExposedInsightsQLError", "insights.insightsql.errors.ExposedInsightsQLError", "Invalid InsightsQL syntax"),
             ("ScriptVMException", "common.scriptvm.python.utils.ScriptVMException", "Global variable not found: variables"),
         ]
@@ -3941,7 +3941,7 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
 
     @parameterized.expand(
         [
-            ("ExposedCHQueryError", "ClickHouse trend error"),
+            ("ExposedCHQueryError", "Datastore trend error"),
             ("ExposedInsightsQLError", "InsightsQL trend error"),
             ("ScriptVMException", "Global variable not found: variables"),
         ]
@@ -3974,7 +3974,7 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
 
     @parameterized.expand(
         [
-            ("ExposedCHQueryError", "ClickHouse funnel error"),
+            ("ExposedCHQueryError", "Datastore funnel error"),
             ("ExposedInsightsQLError", "InsightsQL funnel error"),
             ("ScriptVMException", "Global variable not found: variables"),
         ]

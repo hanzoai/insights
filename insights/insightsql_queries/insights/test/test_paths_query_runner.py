@@ -3,7 +3,7 @@ import dataclasses
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     also_test_with_materialized_columns,
@@ -30,7 +30,7 @@ class MockEvent:
     properties: dict
 
 
-class TestPaths(ClickhouseTestMixin, APIBaseTest):
+class TestPaths(DatastoreTestMixin, APIBaseTest):
     @also_test_with_materialized_columns(["$current_url", "$screen_name"], person_properties=["email"])
     def test_current_url_paths_and_logic(self):
         events = []

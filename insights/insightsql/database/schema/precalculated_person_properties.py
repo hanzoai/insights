@@ -23,7 +23,7 @@ class PrecalculatedPersonPropertiesTable(Table):
         "_offset": IntegerDatabaseField(name="_offset", nullable=False),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "precalculated_person_properties"
 
     def to_printed_insightsql(self):

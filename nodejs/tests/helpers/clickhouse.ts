@@ -1,47 +1,47 @@
-import { ClickHouseClient, ExecResult, createClient as createClickhouseClient } from '@clickhouse/client'
+import { DatastoreClient, ExecResult, createClient as createDatastoreClient } from '@datastore/client'
 import { performance } from 'perf_hooks'
 import { Readable } from 'stream'
 
 import { withSpan } from '~/common/tracing/tracing-utils'
 import {
-    ClickHouseEvent,
-    ClickHousePerson,
-    ClickHousePersonDistinctId2,
-    ClickhouseGroup,
+    DatastoreEvent,
+    DatastorePerson,
+    DatastorePersonDistinctId2,
+    DatastoreGroup,
     DeadLetterQueueEvent,
     InternalPerson,
-    RawClickHouseEvent,
+    RawDatastoreEvent,
     RawSessionRecordingEvent,
 } from '~/types'
 import { timeoutGuard } from '~/utils/db/utils'
 import { isTestEnv } from '~/utils/env-utils'
-import { parseRawClickHouseEvent } from '~/utils/event'
+import { parseRawDatastoreEvent } from '~/utils/event'
 import { parseJSON } from '~/utils/json-parse'
 import { fetch } from '~/utils/request'
 
 import { logger } from '../../src/utils/logger'
-import { delay, escapeClickHouseString } from '../../src/utils/utils'
+import { delay, escapeDatastoreString } from '../../src/utils/utils'
 
-export class Clickhouse {
-    private client: ClickHouseClient
+export class Datastore {
+    private client: DatastoreClient
 
-    constructor(client: ClickHouseClient) {
+    constructor(client: DatastoreClient) {
         this.client = client
     }
 
-    static createClient(): ClickHouseClient {
+    static createClient(): DatastoreClient {
         // NOTE: We never query CH in production so we just load these from the env directly
-        const CLICKHOUSE_HOST = process.env.CLICKHOUSE_HOST ?? 'localhost'
-        const CLICKHOUSE_DATABASE = process.env.CLICKHOUSE_DATABASE ?? (isTestEnv() ? 'insights_test' : 'default')
-        const CLICKHOUSE_USER = process.env.CLICKHOUSE_USER ?? 'default'
-        const CLICKHOUSE_PASSWORD = process.env.CLICKHOUSE_PASSWORD ?? null
+        const DATASTORE_HOST = process.env.DATASTORE_HOST ?? 'localhost'
+        const DATASTORE_DATABASE = process.env.DATASTORE_DATABASE ?? (isTestEnv() ? 'insights_test' : 'default')
+        const DATASTORE_USER = process.env.DATASTORE_USER ?? 'default'
+        const DATASTORE_PASSWORD = process.env.DATASTORE_PASSWORD ?? null
 
-        const clickhouse = createClickhouseClient({
+        const datastore = createDatastoreClient({
             // We prefer to run queries on the offline cluster.
-            url: `http://${CLICKHOUSE_HOST}:8123`,
-            username: CLICKHOUSE_USER,
-            password: CLICKHOUSE_PASSWORD || undefined,
-            database: CLICKHOUSE_DATABASE,
+            url: `http://${DATASTORE_HOST}:8123`,
+            username: DATASTORE_USER,
+            password: DATASTORE_PASSWORD || undefined,
+            database: DATASTORE_DATABASE,
             max_open_connections: 50, // Increased from 30 for better concurrency
             // Connection reliability improvements
             request_timeout: 30000, // 30s minutes request timeout
@@ -51,12 +51,12 @@ export class Clickhouse {
             },
         })
 
-        return clickhouse
+        return datastore
     }
 
-    static create(): Clickhouse {
-        const client = Clickhouse.createClient()
-        return new Clickhouse(client)
+    static create(): Datastore {
+        const client = Datastore.createClient()
+        return new Datastore(client)
     }
 
     close(): void {
@@ -95,27 +95,27 @@ export class Clickhouse {
         for (let i = 0; i < maxDelayCount; i++) {
             try {
                 await this.query('SELECT 1')
-                console.log(`ClickHouse healthy after ${Math.round((performance.now() - timer) / 100) / 10}s`)
+                console.log(`Datastore healthy after ${Math.round((performance.now() - timer) / 100) / 10}s`)
                 return
             } catch (error) {
                 console.log(
-                    `ClickHouse not healthy yet. ${
+                    `Datastore not healthy yet. ${
                         Math.round((performance.now() - timer) / 100) / 10
                     }s since start. Error: ${error}`
                 )
                 const res = await fetch('http://localhost:8123/ping').catch((e) => {
-                    console.log('ClickHouse ping failed', e)
+                    console.log('Datastore ping failed', e)
                     return null
                 })
                 if (res) {
-                    console.log('ClickHouse ping', res.status, await res.text())
+                    console.log('Datastore ping', res.status, await res.text())
                 }
 
                 await delay(delayMs)
             }
         }
 
-        throw Error(`ClickHouse failed to become healthy after ${maxDelayCount * delayMs}ms`)
+        throw Error(`Datastore failed to become healthy after ${maxDelayCount * delayMs}ms`)
     }
 
     async delayUntilEventIngested<T extends any[] | number>(
@@ -151,7 +151,7 @@ export class Clickhouse {
                 query,
             })
         } catch (e) {
-            console.error('Clickhouse exec failed', {
+            console.error('Datastore exec failed', {
                 query,
                 error: e,
             })
@@ -160,13 +160,13 @@ export class Clickhouse {
     }
 
     query<T>(query: string): Promise<T[]> {
-        return withSpan('clickhouse', 'query.clickhouse', { tag: 'unknown' }, async () => {
-            const timeout = timeoutGuard('ClickHouse slow query warning after 30 sec', { query })
+        return withSpan('datastore', 'query.datastore', { tag: 'unknown' }, async () => {
+            const timeout = timeoutGuard('Datastore slow query warning after 30 sec', { query })
             try {
                 const queryResult = await this.client.query({
                     query,
                     format: 'JSON',
-                    clickhouse_settings: {
+                    datastore_settings: {
                         output_format_json_quote_64bit_integers: 0,
                         output_format_json_quote_denormals: 0,
                     },
@@ -175,7 +175,7 @@ export class Clickhouse {
                 const jsonData = (await queryResult.json()).data as T[]
                 return jsonData
             } catch (e) {
-                console.error('Clickhouse query failed', {
+                console.error('Datastore query failed', {
                     query,
                     error: e,
                 })
@@ -186,7 +186,7 @@ export class Clickhouse {
         })
     }
 
-    async fetchPersons(teamId?: number): Promise<ClickHousePerson[]> {
+    async fetchPersons(teamId?: number): Promise<DatastorePerson[]> {
         const query = `
             SELECT id, team_id, is_identified, ts as _timestamp, properties, created_at, is_del as is_deleted, _offset
             FROM (
@@ -212,16 +212,16 @@ export class Clickhouse {
         })
     }
 
-    async fetchDistinctIds(person: InternalPerson): Promise<ClickHousePersonDistinctId2[]> {
+    async fetchDistinctIds(person: InternalPerson): Promise<DatastorePersonDistinctId2[]> {
         const query = `
             SELECT *
             FROM person_distinct_id2
             FINAL
-            WHERE person_id='${escapeClickHouseString(person.uuid)}'
+            WHERE person_id='${escapeDatastoreString(person.uuid)}'
               AND team_id='${person.team_id}'
               AND is_deleted=0
             ORDER BY _offset`
-        return await this.query<ClickHousePersonDistinctId2>(query)
+        return await this.query<DatastorePersonDistinctId2>(query)
     }
 
     public async fetchDistinctIdValues(person: InternalPerson): Promise<string[]> {
@@ -229,9 +229,9 @@ export class Clickhouse {
         return personDistinctIds.map((pdi) => pdi.distinct_id)
     }
 
-    public async fetchEvents(): Promise<ClickHouseEvent[]> {
-        const queryResult = await this.query<RawClickHouseEvent>(`SELECT * FROM events ORDER BY timestamp ASC`)
-        return queryResult.map(parseRawClickHouseEvent)
+    public async fetchEvents(): Promise<DatastoreEvent[]> {
+        const queryResult = await this.query<RawDatastoreEvent>(`SELECT * FROM events ORDER BY timestamp ASC`)
+        return queryResult.map(parseRawDatastoreEvent)
     }
 
     public async fetchDeadLetterQueueEvents(): Promise<DeadLetterQueueEvent[]> {
@@ -253,10 +253,10 @@ export class Clickhouse {
         })
     }
 
-    public async fetchClickhouseGroups(): Promise<ClickhouseGroup[]> {
+    public async fetchDatastoreGroups(): Promise<DatastoreGroup[]> {
         const query = `
         SELECT group_type_index, group_key, created_at, team_id, group_properties FROM groups FINAL
         `
-        return await this.query<ClickhouseGroup>(query)
+        return await this.query<DatastoreGroup>(query)
     }
 }

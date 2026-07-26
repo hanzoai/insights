@@ -1,6 +1,6 @@
 from typing import Optional
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from insights.schema import (
     AutocompleteCompletionItemKind,
@@ -27,7 +27,7 @@ from products.data_warehouse.backend.models.table import DataWarehouseTable
 from products.data_warehouse.backend.types import ExternalDataSourceType
 
 
-class TestAutocomplete(ClickhouseTestMixin, APIBaseTest):
+class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
     def _create_properties(self):
         PropertyDefinition.objects.create(
             team=self.team,

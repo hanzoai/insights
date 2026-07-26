@@ -3,7 +3,7 @@
 This module contains the 3 activities that make up the clustering pipeline:
 1. perform_clustering_compute_activity - fetch embeddings, cluster, compute distances
 2. generate_cluster_labels_activity - LLM labeling for clusters
-3. emit_cluster_events_activity - emit results to ClickHouse
+3. emit_cluster_events_activity - emit results to Datastore
 """
 
 import asyncio
@@ -52,7 +52,7 @@ def _perform_clustering_compute(inputs: ClusteringActivityInputs) -> ClusteringC
     """CPU-bound compute: fetch embeddings, optionally reduce dimensions, cluster with HDBSCAN.
 
     Pipeline:
-    1. Fetch embeddings from ClickHouse
+    1. Fetch embeddings from Datastore
     2. UMAP dimensionality reduction (3072 -> 15 dims) - skipped if skip_umap_reduction=True
     3. HDBSCAN clustering (auto-determines k, identifies outliers)
     4. Compute distances and select representatives
@@ -271,7 +271,7 @@ async def perform_clustering_compute_activity(inputs: ClusteringActivityInputs) 
     """Activity 1: CPU-bound compute - fetch embeddings, cluster, compute distances.
 
     This activity handles all the compute-intensive work:
-    - Fetches embeddings from ClickHouse
+    - Fetches embeddings from Datastore
     - Performs clustering (HDBSCAN or k-means)
     - Calculates distances from each trace to all centroids
     - Computes 2D coordinates for visualization
@@ -362,7 +362,7 @@ def _emit_cluster_events(inputs: EmitEventsActivityInputs) -> ClusteringResult:
 
 @activity.defn
 async def emit_cluster_events_activity(inputs: EmitEventsActivityInputs) -> ClusteringResult:
-    """Activity 3: Emit clustering results to ClickHouse.
+    """Activity 3: Emit clustering results to Datastore.
 
     This activity builds the cluster data structures and emits the
     $ai_trace_clusters event containing all clustering metadata.

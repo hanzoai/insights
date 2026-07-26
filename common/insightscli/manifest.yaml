@@ -40,10 +40,10 @@ metadata:
                 Desktop.
         migration:
             name: Database migrations
-            about: Schema updates and data migrations across PostgreSQL, ClickHouse, and
+            about: Schema updates and data migrations across PostgreSQL, Datastore, and
                 async systems.
-        clickhouse:
-            name: ClickHouse
+        datastore:
+            name: Datastore
             about: Analytics database used for metrics, events, and funnel analysis throughout
                 Insights.
         postgresql:
@@ -71,7 +71,7 @@ metadata:
         nodejs:
             name: Node.js
             about: Event ingestion pipeline that processes incoming events, runs CDP workflows,
-                and writes to Kafka (then ClickHouse).
+                and writes to Kafka (then Datastore).
         django:
             name: Django
             about: Python web framework powering Insights's backend API, admin interface,
@@ -100,7 +100,7 @@ core:
         description: Generate demo data for local testing
         services:
             - postgresql
-            - clickhouse
+            - datastore
     dev:sync-flags:
         cmd: python manage.py sync_feature_flags
         description: Sync feature flags from configuration
@@ -117,7 +117,7 @@ core:
         description: Launch Django shell with auto-imported models and utilities
         services:
             - postgresql
-            - clickhouse
+            - datastore
             - django
     dev:reset:
         steps:
@@ -146,7 +146,7 @@ health_checks:
         hidden: true
     check:hosts:
         bin_script: check_hosts
-        description: Verify DNS resolution for required service hostnames (clickhouse,
+        description: Verify DNS resolution for required service hostnames (datastore,
             kafka, etc)
         hidden: true
     check:video-deps:
@@ -170,7 +170,7 @@ start:
             - postgresql
             - redis
             - kafka
-            - clickhouse
+            - datastore
             - temporal
     start:backend:
         bin_script: start-backend
@@ -281,7 +281,7 @@ build:
             temp location)
         services:
             - postgresql
-            - clickhouse
+            - datastore
             - django
     build:schema-mcp:
         cmd: cd services/mcp && npx tsx scripts/generate-tool-schema.ts && pnpm prettier
@@ -372,11 +372,11 @@ docker:
 migrations:
     db:migrate:
         bin_script: migrate
-        description: Apply database migrations (Django and ClickHouse)
+        description: Apply database migrations (Django and Datastore)
         hidden: true
     migrations:run:
         bin_script: migrate
-        description: Run all database migrations (ClickHouse, Postgres, async) in parallel
+        description: Run all database migrations (Datastore, Postgres, async) in parallel
         env:
             DEBUG: '1'
     migrations:check:
@@ -384,7 +384,7 @@ migrations:
         description: Verify all migrations are ready without applying them
         services:
             - postgresql
-            - clickhouse
+            - datastore
 db:
     db:upgrade:
         bin_script: upgrade-postgres
@@ -535,14 +535,14 @@ tools:
         hidden: true
     tool:create-ch-migration:
         cmd: python manage.py create_ch_migration
-        description: Generate new ClickHouse migration scaffold
+        description: Generate new Datastore migration scaffold
     tool:print-iql-stl:
         cmd: python manage.py print_iql_stl_table
         description: Print IQLSQL standard library definitions for reference
         hidden: true
-    clickhouse:logs:init:
-        bin_script: clickhouse-logs-init
-        description: 'TODO: add description for clickhouse-logs-init'
+    datastore:logs:init:
+        bin_script: datastore-logs-init
+        description: 'TODO: add description for datastore-logs-init'
         hidden: true
     create:notebook:node:
         bin_script: create-notebook-node.sh

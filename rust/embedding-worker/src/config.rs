@@ -25,8 +25,8 @@ pub struct Config {
     #[envconfig(default = "document_embedding_results")]
     pub response_topic: String,
 
-    // To clickhouse
-    #[envconfig(default = "clickhouse_document_embeddings")]
+    // To datastore
+    #[envconfig(default = "datastore_document_embeddings")]
     pub output_topic: String,
 
     #[envconfig(nested = true)]

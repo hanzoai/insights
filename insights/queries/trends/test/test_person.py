@@ -3,10 +3,10 @@ from uuid import UUID
 from freezegun.api import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.utils import timezone
@@ -21,8 +21,8 @@ from insights.session_recordings.queries.test.session_replay_sql import produce_
 from insights.test.test_utils import create_group_type_mapping_without_created_at
 
 
-class TestPerson(ClickhouseTestMixin, APIBaseTest):
-    # Note: not using `@snapshot_clickhouse_queries` here because the ordering of the session_ids in the recording
+class TestPerson(DatastoreTestMixin, APIBaseTest):
+    # Note: not using `@snapshot_datastore_queries` here because the ordering of the session_ids in the recording
     # query is not guaranteed, so adding it would lead to a flaky test.
     @freeze_time("2021-01-21T20:00:00.000Z")
     def test_person_query_includes_recording_events(self):
@@ -93,7 +93,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest):
             ],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21T20:00:00.000Z")
     def test_person_query_does_not_include_recording_events_if_flag_not_set(self):
         _create_person(team_id=self.team.pk, distinct_ids=["u1"], properties={"email": "bla"})
@@ -112,7 +112,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual(serialized_actors[0].get("matched_recordings"), [])
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @freeze_time("2021-01-21T20:00:00.000Z")
     def test_group_query_includes_recording_events(self):
         create_group_type_mapping_without_created_at(

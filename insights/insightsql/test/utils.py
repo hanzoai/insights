@@ -39,9 +39,9 @@ def pretty_print_in_tests(query: str | None, team_id: int) -> str:
 
 
 def pretty_print_response_in_tests(response: Any, team_id: int) -> str:
-    clickhouse = response.clickhouse
+    datastore = response.datastore
     insightsql = response.insightsql
-    query = "-- ClickHouse\n" + clickhouse + "\n\n-- InsightsQL\n" + insightsql
+    query = "-- Datastore\n" + datastore + "\n\n-- InsightsQL\n" + insightsql
     return clean_varying_query_parts(pretty_print_in_tests(query, team_id), False)
 
 

@@ -37,7 +37,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--skip-sync",
             action="store_true",
-            help="Skip syncing to ClickHouse (useful for testing)",
+            help="Skip syncing to Datastore (useful for testing)",
         )
 
     def handle(self, *args, **options):
@@ -92,13 +92,13 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f"Successfully created {persons_created} persons for team '{team.name}'"))
 
-        # Sync to ClickHouse
+        # Sync to Datastore
         if not skip_sync:
-            self.stdout.write("Syncing persons to ClickHouse...")
+            self.stdout.write("Syncing persons to Datastore...")
             from django.core.management import call_command
 
-            call_command("sync_persons_to_clickhouse", team_id=team.pk, person=True, live_run=True)
-            self.stdout.write(self.style.SUCCESS("Persons synced to ClickHouse successfully!"))
+            call_command("sync_persons_to_datastore", team_id=team.pk, person=True, live_run=True)
+            self.stdout.write(self.style.SUCCESS("Persons synced to Datastore successfully!"))
 
         if with_events:
             self.stdout.write("Generating events for persons...")

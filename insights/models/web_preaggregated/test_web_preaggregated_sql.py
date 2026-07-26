@@ -2,7 +2,7 @@ import pytest
 from freezegun import freeze_time
 from insights.test.base import _create_event, _create_person
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
 from insights.models.utils import uuid7
 from insights.models.web_preaggregated.sql import (

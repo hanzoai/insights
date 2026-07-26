@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 from unittest.mock import patch
 
 from insights.schema import EventType, SessionsTimelineQuery, TimelineEntry
@@ -9,11 +9,11 @@ from insights.session_recordings.queries.test.session_replay_sql import produce_
 from insights.test.test_journeys import journeys_for
 
 
-class TestSessionsTimelineQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestSessionsTimelineQueryRunner(DatastoreTestMixin, APIBaseTest):
     def _create_runner(self, query: SessionsTimelineQuery) -> SessionsTimelineQueryRunner:
         return SessionsTimelineQueryRunner(team=self.team, query=query)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_formal_sessions_global(self):
         journeys_for(
             team=self.team,
@@ -136,7 +136,7 @@ class TestSessionsTimelineQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ]
         assert response.hasMore is False
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_formal_sessions_for_person(self):
         persons = journeys_for(
             team=self.team,
@@ -240,7 +240,7 @@ class TestSessionsTimelineQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ]
         assert response.hasMore is False
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_formal_and_informal_sessions_global(self):
         journeys_for(
             team=self.team,
@@ -413,7 +413,7 @@ class TestSessionsTimelineQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ]
         assert response.hasMore is False
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_formal_session_with_recording(self):
         journeys_for(
             team=self.team,
@@ -492,7 +492,7 @@ class TestSessionsTimelineQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ]
         assert response.hasMore is False
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     @patch("insights.insightsql_queries.sessions_timeline_query_runner.SessionsTimelineQueryRunner.EVENT_LIMIT", 2)
     def test_event_limit_and_has_more(self):
         journeys_for(
@@ -557,7 +557,7 @@ class TestSessionsTimelineQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ]
         assert response.hasMore is True
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_before_and_after(self):
         journeys_for(
             team=self.team,
@@ -605,7 +605,7 @@ class TestSessionsTimelineQueryRunner(ClickhouseTestMixin, APIBaseTest):
             ),
         ]
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_before_and_after_defaults(self):
         journeys_for(
             team=self.team,

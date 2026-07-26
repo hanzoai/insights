@@ -81,7 +81,7 @@ def join_with_group_n_table(group_index: int):
 class RawGroupsTable(Table):
     fields: dict[str, FieldOrTable] = GROUPS_TABLE_FIELDS
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "groups"
 
     def to_printed_insightsql(self):
@@ -94,7 +94,7 @@ class GroupsTable(LazyTable):
     def lazy_select(self, table_to_add: LazyTableToAdd, context, node):
         return select_from_groups_table(table_to_add.fields_accessed)
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "groups"
 
     def to_printed_insightsql(self):

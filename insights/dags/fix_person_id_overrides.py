@@ -11,7 +11,7 @@ from typing import Optional
 import dagster
 import pydantic
 
-from insights.clickhouse.client import sync_execute
+from insights.datastore.client import sync_execute
 from insights.dags.common import JobOwners
 
 
@@ -176,7 +176,7 @@ def fix_person_id_overrides_op(
         context.log.info(f"Inserted {len(pending_overrides)} overrides")
 
 
-@dagster.job(tags={"owner": JobOwners.TEAM_CLICKHOUSE.value})
+@dagster.job(tags={"owner": JobOwners.TEAM_DATASTORE.value})
 def fix_person_id_overrides_job():
     """Job to insert person_id overrides for specified distinct_ids."""
     fix_person_id_overrides_op()

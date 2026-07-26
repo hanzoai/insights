@@ -1,7 +1,7 @@
 """
-Dagster job to backfill ClickHouse events to customer-specific ducklings.
+Dagster job to backfill Datastore events to customer-specific ducklings.
 
-This job exports events from ClickHouse's `insights.events` table to customer S3 buckets
+This job exports events from Datastore's `insights.events` table to customer S3 buckets
 as Parquet files, then registers those files with their DuckLake catalog.
 
 Unlike the main DuckLake backfill (events_backfill_to_ducklake.py) which targets Insights's
@@ -12,8 +12,8 @@ Architecture:
     DuckLakeCatalog (Django model)
         │ lookup by team_id
         ▼
-    ClickHouse (events table)
-        │ export via s3() - bucket policy allows ClickHouse EC2 role
+    Datastore (events table)
+        │ export via s3() - bucket policy allows Datastore EC2 role
         ▼
     Duckling S3 Bucket (parquet files)
         │ register via ducklake_add_data_files
@@ -21,7 +21,7 @@ Architecture:
     Duckling RDS Catalog (PostgreSQL)
 
 IAM Access:
-    - ClickHouse EC2 role is allowed in duckling bucket policy (direct S3 access)
+    - Datastore EC2 role is allowed in duckling bucket policy (direct S3 access)
     - Dagster IRSA role can assume duckling cross-account roles (for DuckDB registration)
 
 Partition Strategy:
@@ -41,7 +41,7 @@ from django.utils import timezone
 import duckdb
 import structlog
 from clickhouse_driver import Client
-from clickhouse_driver.errors import Error as ClickHouseError
+from clickhouse_driver.errors import Error as DatastoreError
 from dagster import (
     AssetExecutionContext,
     Config,
@@ -58,13 +58,13 @@ from dagster import (
 )
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential, wait_fixed
 
-from insights.clickhouse.client.connection import NodeRole, Workload
-from insights.clickhouse.cluster import ClickhouseCluster, get_cluster
-from insights.clickhouse.query_tagging import tags_context
+from insights.datastore.client.connection import NodeRole, Workload
+from insights.datastore.cluster import DatastoreCluster, get_cluster
+from insights.datastore.query_tagging import tags_context
 from insights.cloud_utils import is_cloud
 from insights.dags.common.common import JobOwners, dagster_tags, settings_with_log_comment
 from insights.dags.events_backfill_to_ducklake import (
-    DEFAULT_CLICKHOUSE_SETTINGS,
+    DEFAULT_DATASTORE_SETTINGS,
     EXPECTED_DUCKLAKE_COLUMNS,
     MAX_RETRY_ATTEMPTS,
 )
@@ -76,7 +76,7 @@ logger = structlog.get_logger(__name__)
 
 # DuckDB memory limit for Dagster pod operations.
 # The Dagster pod has 16Gi total; we cap DuckDB at 4Gi to leave headroom
-# for Python, Dagster framework, and ClickHouse client overhead.
+# for Python, Dagster framework, and Datastore client overhead.
 DUCKDB_MEMORY_LIMIT = "4GB"
 
 
@@ -86,7 +86,7 @@ DUCKDB_MEMORY_LIMIT = "4GB"
     retry=retry_if_exception_type((TimeoutError, OSError)),
     reraise=True,
 )
-def _get_cluster() -> ClickhouseCluster:
+def _get_cluster() -> DatastoreCluster:
     """get_cluster() with retry for transient bootstrap timeouts.
 
     Retries the cluster discovery query only — does not affect subsequent
@@ -103,8 +103,8 @@ def _connect_duckdb() -> duckdb.DuckDBPyConnection:
     return conn
 
 
-# Columns to export from ClickHouse events table for duckling backfill.
-# ClickHouse exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
+# Columns to export from Datastore events table for duckling backfill.
+# Datastore exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
 # DuckLake table uses TIMESTAMPTZ to match this format.
 EVENTS_COLUMNS = """
     toString(uuid) as uuid,
@@ -147,10 +147,10 @@ PERSONS_CONCURRENCY_TAG = {
 
 # Persons columns for export - joined with person_distinct_id2 to include distinct_ids
 # This creates one row per distinct_id, with the person's properties denormalized
-# ClickHouse exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
+# Datastore exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
 # DuckLake table uses TIMESTAMPTZ to match this format.
 # Note: _timestamp is DateTime (not DateTime64), so we convert it to DateTime64 for consistency.
-# Note: is_identified is Int8 in ClickHouse, cast to Bool for proper BOOLEAN type in Parquet.
+# Note: is_identified is Int8 in Datastore, cast to Bool for proper BOOLEAN type in Parquet.
 PERSONS_COLUMNS = """
     pd.team_id AS team_id,
     pd.distinct_id AS distinct_id,
@@ -182,7 +182,7 @@ duckling_events_partitions_def = DynamicPartitionsDefinition(name="duckling_even
 duckling_persons_partitions_def = DynamicPartitionsDefinition(name="duckling_persons_backfill")
 
 # SQL for creating the events table in DuckLake if it doesn't exist
-# Uses TIMESTAMPTZ because ClickHouse exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
+# Uses TIMESTAMPTZ because Datastore exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
 EVENTS_TABLE_DDL = """
 CREATE TABLE IF NOT EXISTS {catalog}.insights.events (
     uuid VARCHAR,
@@ -214,8 +214,8 @@ CREATE TABLE IF NOT EXISTS {catalog}.insights.events (
 """
 
 # SQL for creating the persons table in DuckLake if it doesn't exist
-# Uses TIMESTAMPTZ because ClickHouse exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
-# Note: person_version uses UBIGINT to match ClickHouse's UInt64 type.
+# Uses TIMESTAMPTZ because Datastore exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
+# Note: person_version uses UBIGINT to match Datastore's UInt64 type.
 PERSONS_TABLE_DDL = """
 CREATE TABLE IF NOT EXISTS {catalog}.insights.persons (
     team_id BIGINT,
@@ -235,7 +235,7 @@ CREATE TABLE IF NOT EXISTS {catalog}.insights.persons (
 class DucklingBackfillConfig(Config):
     """Config for duckling events backfill job."""
 
-    clickhouse_settings: dict[str, Any] | None = None
+    datastore_settings: dict[str, Any] | None = None
     skip_ducklake_registration: bool = False
     skip_schema_validation: bool = False
     cleanup_existing_partition_data: bool = True  # Delete existing DuckLake data for partition before registering
@@ -324,17 +324,17 @@ def is_full_export_partition(key: str) -> bool:
     return key.isdigit()
 
 
-def get_s3_url_for_clickhouse(bucket: str, region: str, path_without_scheme: str) -> str:
-    """Build S3 URL in the format ClickHouse expects for cross-account access.
+def get_s3_url_for_datastore(bucket: str, region: str, path_without_scheme: str) -> str:
+    """Build S3 URL in the format Datastore expects for cross-account access.
 
-    ClickHouse uses the EC2 instance role for authentication. The duckling bucket
-    policy explicitly allows the ClickHouse EC2 role, so no credentials needed.
+    Datastore uses the EC2 instance role for authentication. The duckling bucket
+    policy explicitly allows the Datastore EC2 role, so no credentials needed.
     """
     return f"https://{bucket}.s3.{region}.amazonaws.com/{path_without_scheme}"
 
 
 def get_earliest_event_date_for_team(team_id: int) -> datetime | None:
-    """Query ClickHouse to find the earliest event date for a team.
+    """Query Datastore to find the earliest event date for a team.
 
     This is used by the full backfill sensor to determine the historical range
     of data to backfill.
@@ -347,7 +347,7 @@ def get_earliest_event_date_for_team(team_id: int) -> datetime | None:
 
     def query_earliest(client: Client) -> datetime | None:
         # Filter timestamp >= '1970-01-01' to avoid toDate() overflow on pre-epoch timestamps.
-        # ClickHouse's Date type is UInt16 (days since 1970-01-01), so negative timestamps
+        # Datastore's Date type is UInt16 (days since 1970-01-01), so negative timestamps
         # overflow to the max date (2149-06-06), breaking the backfill sensor logic.
         result = client.execute(
             """
@@ -359,7 +359,7 @@ def get_earliest_event_date_for_team(team_id: int) -> datetime | None:
             {"team_id": team_id},
         )
         if result and result[0][0]:
-            # ClickHouse returns a date object, convert to datetime
+            # Datastore returns a date object, convert to datetime
             date_val = result[0][0]
             if isinstance(date_val, datetime):
                 return date_val
@@ -374,7 +374,7 @@ def get_earliest_event_date_for_team(team_id: int) -> datetime | None:
 
 
 def get_earliest_person_date_for_team(team_id: int) -> datetime | None:
-    """Query ClickHouse to find the earliest person modification date for a team.
+    """Query Datastore to find the earliest person modification date for a team.
 
     Uses _timestamp (Kafka ingestion time) since persons don't have a natural
     event timestamp like events do.
@@ -387,7 +387,7 @@ def get_earliest_person_date_for_team(team_id: int) -> datetime | None:
 
     def query_earliest(client: Client) -> datetime | None:
         # Filter _timestamp >= '1970-01-01' to avoid toDate() overflow on pre-epoch timestamps.
-        # ClickHouse's Date type is UInt16 (days since 1970-01-01), so negative timestamps
+        # Datastore's Date type is UInt16 (days since 1970-01-01), so negative timestamps
         # overflow to the max date (2149-06-06), breaking the backfill sensor logic.
         result = client.execute(
             """
@@ -820,7 +820,7 @@ def validate_duckling_persons_schema(
 @retry(
     stop=stop_after_attempt(MAX_RETRY_ATTEMPTS),
     wait=wait_exponential(multiplier=1, min=4, max=60),
-    retry=retry_if_exception_type((ClickHouseError, OSError, TimeoutError)),
+    retry=retry_if_exception_type((DatastoreError, OSError, TimeoutError)),
     reraise=True,
 )
 def _execute_export_with_retry(
@@ -1048,8 +1048,8 @@ def export_events_to_duckling_s3(
 ) -> str | None:
     """Export events for a team/date to the duckling's S3 bucket.
 
-    ClickHouse uses its EC2 instance role for S3 access. The duckling bucket policy
-    explicitly allows the ClickHouse EC2 role, so no explicit credentials are needed.
+    Datastore uses its EC2 instance role for S3 access. The duckling bucket policy
+    explicitly allows the Datastore EC2 role, so no explicit credentials are needed.
 
     Returns:
         S3 path that was written, or None if dry_run.
@@ -1064,16 +1064,16 @@ def export_events_to_duckling_s3(
         f"{BACKFILL_EVENTS_S3_PREFIX}/team_id={team_id}/year={year}/month={month}/day={day}/{run_id}.parquet"
     )
 
-    # ClickHouse needs HTTPS URL format for cross-account S3 access
-    s3_url = get_s3_url_for_clickhouse(catalog.bucket, catalog.bucket_region, path_without_scheme)
+    # Datastore needs HTTPS URL format for cross-account S3 access
+    s3_url = get_s3_url_for_datastore(catalog.bucket, catalog.bucket_region, path_without_scheme)
 
     # S3 path with scheme for DuckLake registration
     s3_path = f"s3://{catalog.bucket}/{path_without_scheme}"
 
     where_clause = f"team_id = {team_id} AND toDate(timestamp) = '{date_str}'"
 
-    # ClickHouse uses its EC2 instance role - no credentials needed
-    # The duckling bucket policy allows the ClickHouse EC2 role
+    # Datastore uses its EC2 instance role - no credentials needed
+    # The duckling bucket policy allows the Datastore EC2 role
     export_sql = f"""
     INSERT INTO FUNCTION s3(
         '{s3_url}',
@@ -1220,7 +1220,7 @@ def export_persons_to_duckling_s3(
     path_without_scheme = (
         f"{BACKFILL_PERSONS_S3_PREFIX}/team_id={team_id}/year={year}/month={month}/day={day}/{run_id}.parquet"
     )
-    s3_url = get_s3_url_for_clickhouse(catalog.bucket, catalog.bucket_region, path_without_scheme)
+    s3_url = get_s3_url_for_datastore(catalog.bucket, catalog.bucket_region, path_without_scheme)
     s3_path = f"s3://{catalog.bucket}/{path_without_scheme}"
 
     # Join person with person_distinct_id2 to get distinct_ids
@@ -1287,7 +1287,7 @@ def export_persons_full_to_duckling_s3(
         S3 path that was written, or None if dry_run.
     """
     path_without_scheme = f"{BACKFILL_PERSONS_S3_PREFIX}/team_id={team_id}/full/{run_id}.parquet"
-    s3_url = get_s3_url_for_clickhouse(catalog.bucket, catalog.bucket_region, path_without_scheme)
+    s3_url = get_s3_url_for_datastore(catalog.bucket, catalog.bucket_region, path_without_scheme)
     s3_path = f"s3://{catalog.bucket}/{path_without_scheme}"
 
     # Join person with person_distinct_id2 to get distinct_ids
@@ -1417,7 +1417,7 @@ def register_persons_file_with_duckling(
     tags={"owner": JobOwners.TEAM_DATA_STACK.value, **EVENTS_CONCURRENCY_TAG},
 )
 def duckling_events_backfill(context: AssetExecutionContext, config: DucklingBackfillConfig) -> None:
-    """Backfill events from ClickHouse to a customer's duckling.
+    """Backfill events from Datastore to a customer's duckling.
 
     Supports both daily (YYYY-MM-DD) and monthly (YYYY-MM) partition keys.
     For monthly partitions, processes all days in the month.
@@ -1429,7 +1429,7 @@ def duckling_events_backfill(context: AssetExecutionContext, config: DucklingBac
     4. Validates the duckling's schema compatibility (optional)
     5. For each date in the partition:
        a. Deletes existing DuckLake data for this partition (idempotent re-processing)
-       b. Exports events to the duckling's S3 bucket (ClickHouse EC2 role has bucket access)
+       b. Exports events to the duckling's S3 bucket (Datastore EC2 role has bucket access)
        c. Registers the Parquet file with the duckling's DuckLake catalog (via cross-account role)
     """
     team_id, dates = parse_partition_key_dates(context.partition_key)
@@ -1465,12 +1465,12 @@ def duckling_events_backfill(context: AssetExecutionContext, config: DucklingBac
         context.log.info("Validating duckling schema compatibility...")
         validate_duckling_schema(context, catalog)
 
-    # Prepare ClickHouse settings
-    merged_settings = DEFAULT_CLICKHOUSE_SETTINGS.copy()
+    # Prepare Datastore settings
+    merged_settings = DEFAULT_DATASTORE_SETTINGS.copy()
     merged_settings.update(settings_with_log_comment(context))
-    if config.clickhouse_settings:
-        merged_settings.update(config.clickhouse_settings)
-        context.log.info(f"Using custom ClickHouse settings: {config.clickhouse_settings}")
+    if config.datastore_settings:
+        merged_settings.update(config.datastore_settings)
+        context.log.info(f"Using custom Datastore settings: {config.datastore_settings}")
 
     cluster = _get_cluster()
     tags = dagster_tags(context)
@@ -1545,7 +1545,7 @@ def duckling_events_backfill(context: AssetExecutionContext, config: DucklingBac
     tags={"owner": JobOwners.TEAM_DATA_STACK.value, **PERSONS_CONCURRENCY_TAG},
 )
 def duckling_persons_backfill(context: AssetExecutionContext, config: DucklingBackfillConfig) -> None:
-    """Backfill persons from ClickHouse to a customer's duckling.
+    """Backfill persons from Datastore to a customer's duckling.
 
     Supports two partition formats with different export strategies:
     - Full export: partition key is just team_id (e.g., "12345")
@@ -1602,11 +1602,11 @@ def duckling_persons_backfill(context: AssetExecutionContext, config: DucklingBa
         context.log.info("Validating duckling persons schema compatibility...")
         validate_duckling_persons_schema(context, catalog)
 
-    merged_settings = DEFAULT_CLICKHOUSE_SETTINGS.copy()
+    merged_settings = DEFAULT_DATASTORE_SETTINGS.copy()
     merged_settings.update(settings_with_log_comment(context))
-    if config.clickhouse_settings:
-        merged_settings.update(config.clickhouse_settings)
-        context.log.info(f"Using custom ClickHouse settings: {config.clickhouse_settings}")
+    if config.datastore_settings:
+        merged_settings.update(config.datastore_settings)
+        context.log.info(f"Using custom Datastore settings: {config.datastore_settings}")
 
     cluster = _get_cluster()
     tags = dagster_tags(context)
@@ -1916,7 +1916,7 @@ def duckling_events_full_backfill_sensor(context: SensorEvaluationContext) -> Se
             earliest_month = cached_earliest
             current_month = resume_month if resume_month else earliest_month
         else:
-            # Query ClickHouse for earliest date (only once per team)
+            # Query Datastore for earliest date (only once per team)
             earliest_dt = get_earliest_event_date_for_team(team_id)
             if earliest_dt is None:
                 context.log.info(f"No events found for team_id={team_id}, skipping")
@@ -2100,7 +2100,7 @@ def duckling_persons_full_backfill_sensor(context: SensorEvaluationContext) -> S
 
     Creates a single partition per team for efficient full export. Uses a single
     FINAL query to export all persons for the team in one go, rather than
-    chunking by date which is expensive on ClickHouse.
+    chunking by date which is expensive on Datastore.
 
     Partition format: "{team_id}" (e.g., "12345")
 

@@ -310,7 +310,7 @@ async def create_ducklake_compaction_schedule(client: Client):
 async def create_delete_recording_metadata_schedule(client: Client):
     """Create or update the schedule for the delete recording metadata workflow.
 
-    This schedule runs daily at midnight UTC to delete queued recording metadata from ClickHouse.
+    This schedule runs daily at midnight UTC to delete queued recording metadata from Datastore.
     """
     delete_recording_metadata_schedule = Schedule(
         action=ScheduleActionStartWorkflow(

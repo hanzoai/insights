@@ -4,13 +4,13 @@ from datetime import datetime
 from string import ascii_lowercase
 from typing import Any, Literal, Optional, Union
 
-from insights.test.base import APIBaseTest, also_test_with_materialized_columns, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, also_test_with_materialized_columns, snapshot_datastore_queries
 
 from insights.constants import INSIGHT_FUNNELS
 from insights.models.cohort import Cohort
 from insights.models.filters import Filter
 from insights.queries.breakdown_props import ALL_USERS_COHORT_ID
-from insights.queries.funnels.funnel_unordered import ClickhouseFunnelUnordered
+from insights.queries.funnels.funnel_unordered import DatastoreFunnelUnordered
 from insights.test.test_journeys import journeys_for
 
 
@@ -52,7 +52,7 @@ def funnel_breakdown_test_factory(Funnel, FunnelPerson, _create_event, _create_a
                             "action_id": None,
                             "name": f"Completed {order + 1} step{'s' if order > 0 else ''}",
                         }
-                        if Funnel == ClickhouseFunnelUnordered
+                        if Funnel == DatastoreFunnelUnordered
                         else {}
                     ),
                 }
@@ -2415,7 +2415,7 @@ def funnel_breakdown_test_factory(Funnel, FunnelPerson, _create_event, _create_a
                 [people["person4"].uuid],
             )
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_step_multiple_breakdown_snapshot(self):
             # No person querying here, so snapshots are more legible
 
@@ -2488,7 +2488,7 @@ def funnel_breakdown_test_factory(Funnel, FunnelPerson, _create_event, _create_a
 
             self.assertEqual(len(result), 5)
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_breakdown_correct_breakdown_props_are_chosen(self):
             # No person querying here, so snapshots are more legible
 
@@ -2566,7 +2566,7 @@ def funnel_breakdown_test_factory(Funnel, FunnelPerson, _create_event, _create_a
                 [["Mac"], ["Chrome"], ["Safari"], [""]],
             )
 
-        @snapshot_clickhouse_queries
+        @snapshot_datastore_queries
         def test_funnel_breakdown_correct_breakdown_props_are_chosen_for_step(self):
             # No person querying here, so snapshots are more legible
 

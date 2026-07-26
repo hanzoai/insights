@@ -14,7 +14,7 @@ from insights.insightsql.parser import parse_select
 from insights.insightsql.property import property_to_expr
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.query_tagging import Product, tags_context
+from insights.datastore.query_tagging import Product, tags_context
 from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
 from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 

@@ -5,7 +5,7 @@ from uuid import UUID
 
 import pytest
 from freezegun import freeze_time
-from insights.test.base import BaseTest, ClickhouseTestMixin, _create_event, _create_person, snapshot_clickhouse_queries
+from insights.test.base import BaseTest, DatastoreTestMixin, _create_event, _create_person, snapshot_datastore_queries
 
 from insights.schema import (
     DateRange,
@@ -196,7 +196,7 @@ def _create_ai_embedding_event(
     )
 
 
-class TestTracesQueryRunner(ClickhouseTestMixin, BaseTest):
+class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
     def setUp(self):
         super().setUp()
         self._create_properties()
@@ -232,7 +232,7 @@ class TestTracesQueryRunner(ClickhouseTestMixin, BaseTest):
             self.assertEqual(event_dict[key], value, f"Field {key} does not match")
 
     @freeze_time("2025-01-16T00:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_field_mapping(self):
         _create_person(distinct_ids=["person1"], team=self.team)
         _create_person(distinct_ids=["person2"], team=self.team)
@@ -308,7 +308,7 @@ class TestTracesQueryRunner(ClickhouseTestMixin, BaseTest):
     # test_trace_id_filter removed - TracesQuery no longer supports traceId parameter
 
     @freeze_time("2025-01-16T00:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_pagination(self):
         _create_person(distinct_ids=["person1"], team=self.team)
         _create_person(distinct_ids=["person2"], team=self.team)
@@ -568,7 +568,7 @@ class TestTracesQueryRunner(ClickhouseTestMixin, BaseTest):
         self.assertEqual(len(response.results[0].events), 1)
         self.assertEqual(response.results[0].events[0].properties["$ai_model_parameters"], {"temperature": 0.5})
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_properties_filter_with_multiple_events_in_group(self):
         _create_person(distinct_ids=["person1"], team=self.team)
         _create_ai_generation_event(
@@ -613,7 +613,7 @@ class TestTracesQueryRunner(ClickhouseTestMixin, BaseTest):
         ).calculate()
         self.assertEqual(len(response.results), 0)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_trace_property_filter_for_event_group(self):
         _create_person(distinct_ids=["person1"], team=self.team)
         _create_ai_generation_event(
@@ -822,7 +822,7 @@ class TestTracesQueryRunner(ClickhouseTestMixin, BaseTest):
         self.assertEqual(response.results[0].inputTokens, 2)
 
     def test_removes_duplicate_events(self):
-        """ClickHouse might sometimes return unmerged (duplicate) events."""
+        """Datastore might sometimes return unmerged (duplicate) events."""
         trace_id = str(uuid.uuid4())
         event_id = str(uuid.uuid4())
 
@@ -1454,7 +1454,7 @@ class TestTracesQueryRunner(ClickhouseTestMixin, BaseTest):
         self.assertEqual(len(response.results), 0)
 
     @freeze_time("2025-01-16T00:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_group_key_filter(self):
         """Test that groupKey and groupTypeIndex parameters filter traces by group."""
         _create_person(distinct_ids=["user1"], team=self.team)

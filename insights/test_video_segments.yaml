@@ -6584,7 +6584,7 @@ segments:
           title: Deep editing & duplication of “VLwNNjJq” funnel (multiple errors)
           start_time: 03:15
           end_time: 03:45
-          description: Repeated ClickHouse cancellations & timeouts stalled deep edits;
+          description: Repeated Datastore cancellations & timeouts stalled deep edits;
               saved but with friction
           success: false
           failure_detected: true
@@ -8123,7 +8123,7 @@ segments:
           title: Deep editing & duplication of “VLwNNjJq” funnel (multiple errors)
           start_time: 03:21
           end_time: 03:51
-          description: Repeated ClickHouse cancellations & timeouts stalled deep edits;
+          description: Repeated Datastore cancellations & timeouts stalled deep edits;
               saved but with friction
           success: false
           failure_detected: false
@@ -9715,7 +9715,7 @@ segments:
           title: Deep editing & duplication of “VLwNNjJq” funnel (multiple errors)
           start_time: 03:15
           end_time: 03:45
-          description: Repeated ClickHouse cancellations & timeouts stalled deep edits;
+          description: Repeated Datastore cancellations & timeouts stalled deep edits;
               saved but with friction
           success: false
           failure_detected: true
@@ -11295,7 +11295,7 @@ segments:
           title: Deep editing & duplication of “VLwNNjJq” funnel (multiple errors)
           start_time: 03:15
           end_time: 03:45
-          description: Repeated ClickHouse cancellations & timeouts stalled deep edits;
+          description: Repeated Datastore cancellations & timeouts stalled deep edits;
               saved but with friction
           success: false
           failure_detected: true
@@ -32491,7 +32491,7 @@ segments:
           title: Initial insight exploration (Trends → Funnels)
           start_time: 00:33
           end_time: 01:03
-          description: Overcame initial ClickHouse failures to load first insight data
+          description: Overcame initial Datastore failures to load first insight data
           success: true
           failure_detected: true
           confusion_detected: false
@@ -35503,7 +35503,7 @@ segments:
       session_start_time: '2025-12-09T16:02:30.471000+00:00'
       session_duration: 4787
       segment:
-          title: Repeated ClickHouse capacity failures on same insight
+          title: Repeated Datastore capacity failures on same insight
           start_time: '53:11'
           end_time: '53:41'
           description: Repeated capacity errors dominated; only sporadic success
@@ -49963,7 +49963,7 @@ segments:
           title: First SQL query attempt with ANY()
           start_time: 01:20
           end_time: 01:50
-          description: Initial ANY() query immediately blocked by ClickHouse error; user
+          description: Initial ANY() query immediately blocked by Datastore error; user
               forced to revise
           success: false
           failure_detected: true
@@ -59721,7 +59721,7 @@ segments:
           title: Tried AI insight – database error
           start_time: 00:57
           end_time: 01:27
-          description: Insight creation blocked by ClickHouse error; user forced to abandon
+          description: Insight creation blocked by Datastore error; user forced to abandon
               AI insight flow
           success: false
           failure_detected: true
@@ -59792,7 +59792,7 @@ segments:
           title: Work in SQL editor with AI – repeated query errors
           start_time: '15:03'
           end_time: '15:33'
-          description: AI-driven SQL in editor repeatedly failed with ClickHouse errors;
+          description: AI-driven SQL in editor repeatedly failed with Datastore errors;
               no successful result
           success: false
           failure_detected: true
@@ -62114,7 +62114,7 @@ segments:
           title: Wide product exploration (LLM, Web, Replay, Heatmaps)
           start_time: '10:42'
           end_time: '11:12'
-          description: Explores multiple analytics areas despite non-blocking ClickHouse
+          description: Explores multiple analytics areas despite non-blocking Datastore
               errors.
           success: true
           failure_detected: true
@@ -62468,7 +62468,7 @@ segments:
           title: Wide product exploration (LLM, Web, Replay, Heatmaps)
           start_time: '20:27'
           end_time: '20:57'
-          description: Explores multiple analytics areas despite non-blocking ClickHouse
+          description: Explores multiple analytics areas despite non-blocking Datastore
               errors.
           success: true
           failure_detected: false
@@ -63712,7 +63712,7 @@ segments:
           title: Wide product exploration (LLM, Web, Replay, Heatmaps)
           start_time: '10:42'
           end_time: '11:12'
-          description: Explores multiple analytics areas despite non-blocking ClickHouse
+          description: Explores multiple analytics areas despite non-blocking Datastore
               errors.
           success: true
           failure_detected: true
@@ -64195,7 +64195,7 @@ segments:
           title: Wide product exploration (LLM, Web, Replay, Heatmaps)
           start_time: '20:27'
           end_time: '20:57'
-          description: Explores multiple analytics areas despite non-blocking ClickHouse
+          description: Explores multiple analytics areas despite non-blocking Datastore
               errors.
           success: true
           failure_detected: false
@@ -64464,7 +64464,7 @@ segments:
           title: Wide product exploration (LLM, Web, Replay, Heatmaps)
           start_time: '10:42'
           end_time: '11:12'
-          description: Explores multiple analytics areas despite non-blocking ClickHouse
+          description: Explores multiple analytics areas despite non-blocking Datastore
               errors.
           success: true
           failure_detected: true
@@ -68446,7 +68446,7 @@ segments:
           title: Wide product exploration (LLM, Web, Replay, Heatmaps)
           start_time: '10:42'
           end_time: '11:12'
-          description: Explores multiple analytics areas despite non-blocking ClickHouse
+          description: Explores multiple analytics areas despite non-blocking Datastore
               errors.
           success: true
           failure_detected: true
@@ -70000,10 +70000,10 @@ segments:
       session_start_time: '2025-12-01T06:30:18.970000+00:00'
       session_duration: 49353
       segment:
-          title: Further edits with repeated ClickHouse time-outs
+          title: Further edits with repeated Datastore time-outs
           start_time: '45:54'
           end_time: '46:24'
-          description: Persistent ClickHouse time-outs hampered further analysis and ended
+          description: Persistent Datastore time-outs hampered further analysis and ended
               session.
           success: false
           failure_detected: true
@@ -76347,7 +76347,7 @@ segments:
           title: Deep-dive into first Session-summary and inspector
           start_time: 00:00
           end_time: 00:30
-          description: User reviews a session summary; ClickHouse and billing errors surface
+          description: User reviews a session summary; Datastore and billing errors surface
               but work continues
           success: true
           failure_detected: true

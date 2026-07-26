@@ -11,9 +11,9 @@ import pandas as pd
 import dagster
 from dagster import BackfillPolicy, DailyPartitionsDefinition
 
-from insights.clickhouse import query_tagging
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.cluster import ClickhouseCluster
+from insights.datastore import query_tagging
+from insights.datastore.client import sync_execute
+from insights.datastore.cluster import DatastoreCluster
 from insights.dags.common import JobOwners, dagster_tags
 
 from products.llm_analytics.dags.daily_metrics.config import config
@@ -25,9 +25,9 @@ partition_def = DailyPartitionsDefinition(start_date=config.partition_start_date
 # Backfill policy: process N days per run
 backfill_policy_def = BackfillPolicy.multi_run(max_partitions_per_run=config.max_partitions_per_run)
 
-# ClickHouse settings for aggregation queries
-LLMA_CLICKHOUSE_SETTINGS = {
-    "max_execution_time": str(config.clickhouse_max_execution_time),
+# Datastore settings for aggregation queries
+LLMA_DATASTORE_SETTINGS = {
+    "max_execution_time": str(config.datastore_max_execution_time),
 }
 
 
@@ -41,7 +41,7 @@ LLMA_CLICKHOUSE_SETTINGS = {
 )
 def llma_metrics_daily(
     context: dagster.AssetExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> None:
     """
     Daily aggregation of LLMA metrics.
@@ -62,11 +62,11 @@ def llma_metrics_daily(
 
     try:
         delete_query = get_delete_query(metric_date)
-        sync_execute(delete_query, settings=LLMA_CLICKHOUSE_SETTINGS)
+        sync_execute(delete_query, settings=LLMA_DATASTORE_SETTINGS)
 
         insert_query = get_insert_query(metric_date)
         context.log.info(f"Metrics query: \n{insert_query}")
-        sync_execute(insert_query, settings=LLMA_CLICKHOUSE_SETTINGS)
+        sync_execute(insert_query, settings=LLMA_DATASTORE_SETTINGS)
 
         # Query and log the metrics that were just aggregated
         metrics_query = f"""

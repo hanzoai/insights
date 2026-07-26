@@ -333,7 +333,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                     // Otherwise just convert the iql to a json object
                     _ => vm.iql_to_json(&args[0])?,
                 };
-                // JSONExtract must be provided a return type as the final argument (as per the clickhouse implementation). We
+                // JSONExtract must be provided a return type as the final argument (as per the datastore implementation). We
                 // ignore this return type, and treat any arguments between the first and last as path components
                 let path = if args.len() > 2 {
                     &args[1..args.len() - 1]
@@ -356,7 +356,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                     ));
                 }
 
-                // Coerce the haystack to a string (to align with TS/Python and ClickHouse behavior)
+                // Coerce the haystack to a string (to align with TS/Python and Datastore behavior)
                 let haystack_str = to_string(&vm.heap, &args[0], 0)?.to_lowercase();
 
                 // The second argument must be an array of needles; otherwise, treat as no match (0)
@@ -370,7 +370,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                     // Coerce each needle to a string, regardless of its underlying literal type
                     let needle_str = to_string(&vm.heap, needle_value, 0)?.to_lowercase();
                     if haystack_str.contains(&needle_str) {
-                        // Return 1 (numeric) to match ClickHouse-style predicate semantics
+                        // Return 1 (numeric) to match Datastore-style predicate semantics
                         return Ok(HogLiteral::Number(1i64.into()).into());
                     }
                 }

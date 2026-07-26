@@ -1,4 +1,4 @@
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from django.utils.timezone import now
 
@@ -9,7 +9,7 @@ from insights.session_recordings.queries.session_replay_events import SessionRep
 from insights.session_recordings.queries.test.session_replay_sql import produce_replay_summary
 
 
-class SessionReplayEventsQueries(ClickhouseTestMixin, APIBaseTest):
+class SessionReplayEventsQueries(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         self.base_time = (now() - relativedelta(days=1)).replace(microsecond=0)

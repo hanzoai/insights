@@ -76,14 +76,14 @@ Events flow through several systems before they're queryable:
                                   ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                 │
-│   Kafka (clickhouse_events_json, person topics)                                 │
+│   Kafka (datastore_events_json, person topics)                                 │
 │                                                                                 │
 └─────────────────────────────────┬───────────────────────────────────────────────┘
                                   │
                                   ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                 │
-│   ClickHouse                                                                    │
+│   Datastore                                                                    │
 │   - events table (with person_id column)                                        │
 │   - person table                                                                │
 │   - person_distinct_id2 table (distinct_id → person mapping)                    │
@@ -95,7 +95,7 @@ Events flow through several systems before they're queryable:
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                 │
 │   InsightsQL / Query Engine                                                          │
-│   - Translates queries to ClickHouse SQL                                        │
+│   - Translates queries to Datastore SQL                                        │
 │   - Handles person joins based on PoE (Persons on Events) mode                  │
 │   - Applies person_distinct_id_overrides when needed                            │
 │                                                                                 │
@@ -152,7 +152,7 @@ This triggers a **merge**: all events from both the anonymous distinct ID and th
 
 #### Why do we need this?
 
-When a user identifies themselves, there's a problem: historical events in ClickHouse still have the old `person_id`. If we do nothing, queries for that user would miss all their anonymous events.
+When a user identifies themselves, there's a problem: historical events in Datastore still have the old `person_id`. If we do nothing, queries for that user would miss all their anonymous events.
 
 The naive solution is to JOIN the events table with a mapping table (`person_distinct_id2`) that knows which distinct_ids belong to which person. But `person_distinct_id2` contains **every** distinct_id mapping for **every** user - this table can have hundreds of millions of rows. Joining the events table (which can have billions of rows) with this massive mapping table on every query is prohibitively slow.
 
@@ -169,7 +169,7 @@ Instead, we use a two-part strategy, which involves
 1. When a distinct_id's person mapping changes (during merge) with `version > 0`, a row is inserted into `person_distinct_id_overrides`
 2. A scheduled job (`insights/dags/person_overrides.py`) periodically:
    - Creates a snapshot of pending overrides
-   - Uses a ClickHouse dictionary to efficiently look up the new person_id
+   - Uses a Datastore dictionary to efficiently look up the new person_id
    - Runs an `ALTER TABLE ... UPDATE` mutation to rewrite person_ids in the events table
    - Deletes the processed overrides
 3. Until squashing completes, queries LEFT JOIN to `person_distinct_id_overrides` to get the correct person_id
@@ -314,7 +314,7 @@ async mergeDistinctIds(
 
 **When are overrides created?**
 
-An override is needed when events exist in ClickHouse with a person_id that's now incorrect (because of a merge). The `version` field in `insights_persondistinctid` controls this:
+An override is needed when events exist in Datastore with a person_id that's now incorrect (because of a merge). The `version` field in `insights_persondistinctid` controls this:
 
 - `version = 0`: No override - this distinct_id's events already have the correct person_id (e.g. the first `$identify` for a user, due to the deterministic UUID v5)
 - `version >= 1`: Override created - events exist with an old person_id that needs rewriting
@@ -328,7 +328,7 @@ An override is needed when events exist in ClickHouse with a person_id that's no
 - `team_id`: Which team this person belongs to
 - `properties`: JSONB of person properties
 - `is_identified`: Whether `$identify` was called
-- `version`: Incremented on updates (for ClickHouse consistency)
+- `version`: Incremented on updates (for Datastore consistency)
 
 **`insights_persondistinctid`**: Maps distinct_ids to persons
 
@@ -351,7 +351,7 @@ After person processing, updates are produced to Kafka:
 - `KAFKA_PERSON`: Person creates/updates/deletes
 - `KAFKA_PERSON_DISTINCT_ID`: Distinct ID mapping changes
 
-### 6. ClickHouse tables
+### 6. Datastore tables
 
 **`events`**: The main events table
 
@@ -374,7 +374,7 @@ After person processing, updates are produced to Kafka:
 
 ### 7. InsightsQL / Query engine
 
-InsightsQL is Insights's query language - a dialect of SQL that provides useful abstractions over raw ClickHouse queries. It serves two main purposes (and many others):
+InsightsQL is Insights's query language - a dialect of SQL that provides useful abstractions over raw Datastore queries. It serves two main purposes (and many others):
 
 1. **Abstractions**: InsightsQL handles complexity like person overrides, property access, and table relationships so you don't have to write complex JOINs manually
 2. **Multi-tenancy**: InsightsQL automatically adds `team_id` filters to all queries, ensuring customers can only access their own data - this lets us safely expose SQL access to users
@@ -448,7 +448,7 @@ If this setting is overridden, you can access PoE properties regardless of the P
 ### Check if override exists
 
 ```sql
--- Run against ClickHouse
+-- Run against Datastore
 SELECT * FROM person_distinct_id_overrides
 WHERE team_id = X AND distinct_id = 'anon-123'
 ```
@@ -456,7 +456,7 @@ WHERE team_id = X AND distinct_id = 'anon-123'
 ### Check person mappings
 
 ```sql
--- Run against ClickHouse
+-- Run against Datastore
 SELECT * FROM person_distinct_id2
 WHERE team_id = X AND distinct_id IN ('anon-123', 'user@example.com')
 ```
@@ -508,7 +508,7 @@ WHERE team_id = X AND distinct_id = 'anon-123'
 | --------------------------------- | ------------------------------------------------------------- |
 | `insights/models/person/person.py` | Django models: Person, PersonDistinctId, PersonlessDistinctId |
 
-### ClickHouse schema (Python)
+### Datastore schema (Python)
 
 | File                           | Purpose                                                                    |
 | ------------------------------ | -------------------------------------------------------------------------- |

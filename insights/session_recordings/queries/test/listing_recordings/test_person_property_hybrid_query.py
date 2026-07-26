@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 from unittest.mock import patch
 
 from django.test import override_settings
@@ -9,8 +9,8 @@ from dateutil.relativedelta import relativedelta
 
 from insights.schema import PersonPropertyFilter, PropertyOperator, RecordingsQuery
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
+from insights.datastore.client import sync_execute
+from insights.datastore.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
 from insights.models import Person
 from insights.session_recordings.queries.sub_queries.events_subquery import ReplayFiltersEventsSubQuery
 from insights.session_recordings.queries.test.listing_recordings.test_utils import (
@@ -23,7 +23,7 @@ from insights.session_recordings.sql.session_replay_event_sql import TRUNCATE_SE
 
 @freeze_time("2021-01-01T13:46:23")
 @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=True)
-class TestPersonPropertyHybridQuery(ClickhouseTestMixin, APIBaseTest):
+class TestPersonPropertyHybridQuery(DatastoreTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         sync_execute(TRUNCATE_SESSION_REPLAY_EVENTS_TABLE_SQL())

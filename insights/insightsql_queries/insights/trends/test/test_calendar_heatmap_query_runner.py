@@ -1,7 +1,7 @@
 from typing import Optional
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, _create_person
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person
 
 from insights.schema import ActionConversionGoal, CalendarHeatmapQuery, CustomEventConversionGoal, DateRange, EventsNode
 
@@ -10,7 +10,7 @@ from insights.models import Action
 from insights.models.utils import uuid7
 
 
-class TestCalendarHeatmapQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestCalendarHeatmapQueryRunner(DatastoreTestMixin, APIBaseTest):
     def _create_events(self, data, event="$pageview"):
         for id, timestamps in data:
             with freeze_time(timestamps[0][0]):

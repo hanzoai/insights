@@ -146,7 +146,7 @@ def handle_plan(necessary_migrations: Sequence[AsyncMigration]):
 def handle_complete_noop_migrations():
     """
     Some migrations are no-ops to apply, i.e. they would not have any effect on
-    schema or data within ClickHouse, thus, assuming their dependencies are
+    schema or data within Datastore, thus, assuming their dependencies are
     already complete, we can complete them also.
     """
     for migration_name, definition in sorted(ALL_ASYNC_MIGRATIONS.items()):

@@ -2,7 +2,7 @@ from insights.insightsql import ast
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client.connection import Workload
 from insights.models import Team
 
 

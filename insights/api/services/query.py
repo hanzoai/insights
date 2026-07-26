@@ -26,7 +26,7 @@ from insights.insightsql.database.database import Database
 from insights.insightsql.metadata import get_insightsql_metadata
 from insights.insightsql.modifiers import create_default_modifiers_for_team
 
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.cloud_utils import is_cloud
 from insights.exceptions_capture import capture_exception
 from insights.insightsql_queries.query_runner import CacheMissResponse, ExecutionMode, QueryResponse, get_query_runner

@@ -2,7 +2,7 @@ import os
 import json
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, DatastoreTestMixin
 
 from rest_framework import status
 
@@ -20,8 +20,8 @@ from insights.schema import (
 
 from insights.insightsql.query import InsightsQLQueryExecutor
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import Workload
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import Workload
 
 from products.logs.backend.logs_query_runner import LogsQueryRunner
 
@@ -70,9 +70,9 @@ class TestAttributeFilters(APIBaseTest):
             filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
-        executor.generate_clickhouse_sql()
-        assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_insightsql()
+        executor.generate_datastore_sql()
+        assert executor.datastore_prepared_ast is not None
+        query_str = executor.datastore_prepared_ast.to_insightsql()
 
         # Verify that log attribute filters are included in the query
         self.assertIn("service.name", query_str)
@@ -124,9 +124,9 @@ class TestAttributeFilters(APIBaseTest):
             filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
-        executor.generate_clickhouse_sql()
-        assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_insightsql()
+        executor.generate_datastore_sql()
+        assert executor.datastore_prepared_ast is not None
+        query_str = executor.datastore_prepared_ast.to_insightsql()
 
         # Verify resource attribute filtering logic is applied
         self.assertIn("k8s.container.name", query_str)
@@ -171,9 +171,9 @@ class TestAttributeFilters(APIBaseTest):
             filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
-        executor.generate_clickhouse_sql()
-        assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_insightsql()
+        executor.generate_datastore_sql()
+        assert executor.datastore_prepared_ast is not None
+        query_str = executor.datastore_prepared_ast.to_insightsql()
 
         # Verify negative filtering uses NOT IN subquery pattern
         self.assertIn("k8s.container.name", query_str)
@@ -232,9 +232,9 @@ class TestAttributeFilters(APIBaseTest):
             filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
-        executor.generate_clickhouse_sql()
-        assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_insightsql()
+        executor.generate_datastore_sql()
+        assert executor.datastore_prepared_ast is not None
+        query_str = executor.datastore_prepared_ast.to_insightsql()
 
         # All filter types should be present
         self.assertIn("http.status_code__float", query_str)
@@ -289,9 +289,9 @@ class TestAttributeFilters(APIBaseTest):
             filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
-        executor.generate_clickhouse_sql()
-        assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_insightsql()
+        executor.generate_datastore_sql()
+        assert executor.datastore_prepared_ast is not None
+        query_str = executor.datastore_prepared_ast.to_insightsql()
 
         # All filter types should be present
         self.assertIn("service.name", query_str)
@@ -330,9 +330,9 @@ class TestAttributeFilters(APIBaseTest):
             filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
-        executor.generate_clickhouse_sql()
-        assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_insightsql()
+        executor.generate_datastore_sql()
+        assert executor.datastore_prepared_ast is not None
+        query_str = executor.datastore_prepared_ast.to_insightsql()
 
         # Verify resource_fingerprint equality filter is present
         self.assertIn("resource_fingerprint", query_str)
@@ -364,9 +364,9 @@ class TestAttributeFilters(APIBaseTest):
             filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
-        executor.generate_clickhouse_sql()
-        assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_insightsql()
+        executor.generate_datastore_sql()
+        assert executor.datastore_prepared_ast is not None
+        query_str = executor.datastore_prepared_ast.to_insightsql()
 
         self.assertIn("body", query_str)
         self.assertIn("timeout error", query_str)
@@ -397,14 +397,14 @@ class TestAttributeFilters(APIBaseTest):
             filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
-        executor.generate_clickhouse_sql()
-        assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_insightsql()
+        executor.generate_datastore_sql()
+        assert executor.datastore_prepared_ast is not None
+        query_str = executor.datastore_prepared_ast.to_insightsql()
 
         self.assertNotIn("ilike(body", query_str.lower())
 
 
-class TestLogsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestLogsQueryRunner(DatastoreTestMixin, APIBaseTest):
     CLASS_DATA_LEVEL_SETUP = True
 
     @classmethod

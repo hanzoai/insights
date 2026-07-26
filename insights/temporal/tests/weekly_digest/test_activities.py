@@ -459,7 +459,7 @@ async def test_generate_filter_lookup(mock_redis, common_input, digest):
 
 @pytest.mark.asyncio
 async def test_generate_recording_lookup(mock_redis, common_input, digest):
-    """Test generating recording lookup with mock Redis and ClickHouse."""
+    """Test generating recording lookup with mock Redis and Datastore."""
     batch = (0, 1)
     input_data = GenerateDigestDataBatchInput(batch=batch, digest=digest, common=common_input)
 

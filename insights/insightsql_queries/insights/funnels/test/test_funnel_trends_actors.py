@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from insights.constants import INSIGHT_FUNNELS, FunnelVizType
 from insights.insightsql_queries.insights.funnels.test.test_funnel_persons import get_actors_legacy_filters
@@ -25,8 +25,8 @@ filters = {
 
 
 @freeze_time("2021-05-01")
-class TestFunnelTrendsActors(ClickhouseTestMixin, APIBaseTest):
-    @snapshot_clickhouse_queries
+class TestFunnelTrendsActors(DatastoreTestMixin, APIBaseTest):
+    @snapshot_datastore_queries
     def test_funnel_trend_persons_returns_recordings(self):
         persons = journeys_for(
             {
@@ -75,7 +75,7 @@ class TestFunnelTrendsActors(ClickhouseTestMixin, APIBaseTest):
             ["s1b"],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_trend_persons_with_no_to_step(self):
         persons = journeys_for(
             {
@@ -125,7 +125,7 @@ class TestFunnelTrendsActors(ClickhouseTestMixin, APIBaseTest):
             ["s1c"],
         )
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_funnel_trend_persons_with_drop_off(self):
         persons = journeys_for(
             {

@@ -23,9 +23,9 @@ from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_and_print_ast
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
-from insights.clickhouse.query_tagging import tags_context
+from insights.datastore.client import sync_execute
+from insights.datastore.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
+from insights.datastore.query_tagging import tags_context
 from insights.models.team import Team
 from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 from insights.utils import relative_date_parse_with_delta_mapping
@@ -42,11 +42,11 @@ from products.analytics_platform.backend.models import PreaggregationJob
 
 logger = structlog.get_logger(__name__)
 
-# Default TTL for lazy computed data (how long before ClickHouse deletes it)
+# Default TTL for lazy computed data (how long before Datastore deletes it)
 DEFAULT_TTL_SECONDS = 7 * 24 * 60 * 60  # 7 days
 
-# ClickHouse data outlives the PG job by this amount. This prevents races where we fetch a job in PG, use it, but while
-# waiting for something else, it expires and is deleted in clickhouse.
+# Datastore data outlives the PG job by this amount. This prevents races where we fetch a job in PG, use it, but while
+# waiting for something else, it expires and is deleted in datastore.
 EXPIRY_BUFFER_SECONDS = 1 * 60 * 60  # 1 hour
 
 # Waiting configuration for pending jobs
@@ -173,10 +173,10 @@ def split_ranges_by_ttl(
     return result
 
 
-# ClickHouse error codes that should NOT be retried.
+# Datastore error codes that should NOT be retried.
 # These are errors where retrying will never help - the query itself is broken,
 # or the user needs to change something about their request.
-NON_RETRYABLE_CLICKHOUSE_ERROR_CODES = {
+NON_RETRYABLE_DATASTORE_ERROR_CODES = {
     62,  # SYNTAX_ERROR
     43,  # ILLEGAL_TYPE_OF_ARGUMENT
     53,  # TYPE_MISMATCH
@@ -219,7 +219,7 @@ def is_non_retryable_error(error: Exception) -> bool:
     """
     current: BaseException | None = error
     while current is not None:
-        if isinstance(current, ServerException) and current.code in NON_RETRYABLE_CLICKHOUSE_ERROR_CODES:
+        if isinstance(current, ServerException) and current.code in NON_RETRYABLE_DATASTORE_ERROR_CODES:
             return True
         current = current.__cause__
     return False
@@ -241,7 +241,7 @@ _DATE_EXPIRES_AT_TABLES: set[LazyComputationTable] = {
 
 
 def _get_ch_expires_at(job: "PreaggregationJob", table: LazyComputationTable) -> datetime:
-    """Compute the ClickHouse expires_at for a job, accounting for the table's column type."""
+    """Compute the Datastore expires_at for a job, accounting for the table's column type."""
     assert job.expires_at is not None
     extra_days = 1 if table in _DATE_EXPIRES_AT_TABLES else 0
     return job.expires_at + timedelta(seconds=EXPIRY_BUFFER_SECONDS, days=extra_days)
@@ -322,7 +322,7 @@ def find_existing_jobs(
     Find all existing lazy computation jobs for the given team and query hash
     that overlap with the requested time range.
 
-    Excludes expired jobs. ClickHouse data outlives the PG job by
+    Excludes expired jobs. Datastore data outlives the PG job by
     EXPIRY_BUFFER_SECONDS, so queries in flight when a job expires still
     find data.
     """
@@ -521,12 +521,12 @@ def build_lazy_computation_insert_sql(
     else:
         query.where = date_range_filter
 
-    # Print the SELECT query to ClickHouse SQL
+    # Print the SELECT query to Datastore SQL
     context = InsightsQLContext(team_id=team.id, team=team, enable_select_queries=True, limit_top_select=False)
     select_sql, _ = prepare_and_print_ast(
         query,
         context=context,
-        dialect="clickhouse",
+        dialect="datastore",
     )
 
     sql = f"""INSERT INTO {DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE()} (
@@ -547,7 +547,7 @@ def run_lazy_computation_insert(
     job: PreaggregationJob,
     query_info: QueryInfo,
 ) -> None:
-    """Run the INSERT query to populate lazy-computed results in ClickHouse."""
+    """Run the INSERT query to populate lazy-computed results in Datastore."""
     ch_expires_at = _get_ch_expires_at(job, LazyComputationTable.PREAGGREGATION_RESULTS)
 
     insert_sql, values = build_lazy_computation_insert_sql(
@@ -580,7 +580,7 @@ class LazyComputationExecutor:
     unique index that prevents multiple PENDING jobs for the same range.
 
     Uses Redis pubsub for instant job completion notifications (no PG polling).
-    Stale detection checks ClickHouse query liveness via poll_query_performance heartbeats.
+    Stale detection checks Datastore query liveness via poll_query_performance heartbeats.
 
     Settings can be configured at initialization:
     - wait_timeout_seconds: Max time to wait for pending jobs (default 180s)
@@ -1024,7 +1024,7 @@ def _build_manual_insert_sql(
     select_sql, _ = prepare_and_print_ast(
         query,
         context=context,
-        dialect="clickhouse",
+        dialect="datastore",
     )
 
     # Build column list from the query's SELECT expressions

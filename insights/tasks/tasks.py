@@ -15,15 +15,15 @@ from structlog import get_logger
 
 from insights.insightsql.constants import LimitContext
 
-from insights.clickhouse.client.limit import ConcurrencyLimitExceeded, limit_concurrency
-from insights.clickhouse.query_tagging import Product, get_query_tags, tag_queries
+from insights.datastore.client.limit import ConcurrencyLimitExceeded, limit_concurrency
+from insights.datastore.query_tagging import Product, get_query_tags, tag_queries
 from insights.cloud_utils import is_cloud
 from insights.errors import CHQueryErrorTooManySimultaneousQueries
 from insights.exceptions_capture import capture_exception
 from insights.metrics import pushed_metrics_registry
 from insights.ph_client import get_regional_ph_client
 from insights.redis import get_client
-from insights.settings import CLICKHOUSE_CLUSTER
+from insights.settings import DATASTORE_CLUSTER
 from insights.tasks.utils import CeleryQueue, PushGatewayTask
 
 logger = get_logger(__name__)
@@ -36,7 +36,7 @@ FEATURE_FLAG_LAST_CALLED_AT_SYNC_LOCK_CONTENTION_COUNTER = Counter(
 
 FEATURE_FLAG_LAST_CALLED_AT_SYNC_LIMIT_HIT_COUNTER = Counter(
     "insights_feature_flag_last_called_at_sync_limit_reached_total",
-    "Times the ClickHouse query result limit was reached during feature flag last_called_at sync",
+    "Times the Datastore query result limit was reached during feature flag last_called_at sync",
 )
 
 
@@ -112,7 +112,7 @@ def process_query_task(
     Kick off query
     Once complete save results to redis
     """
-    from insights.clickhouse.client import execute_process_query
+    from insights.datastore.client import execute_process_query
 
     existing_query_tags = get_query_tags()
     all_query_tags = {**query_tags, **existing_query_tags.model_dump(exclude_unset=True)}
@@ -228,7 +228,7 @@ def pg_row_count() -> None:
                     pass
 
 
-CLICKHOUSE_TABLES = [
+DATASTORE_TABLES = [
     "sharded_events",
     "person",
     "person_distinct_id2",
@@ -243,7 +243,7 @@ HEARTBEAT_EVENT_TO_INGESTION_LAG_METRIC = {"$heartbeat": "ingestion_api"}
 def ingestion_lag() -> None:
     from statshog.defaults.django import statsd
 
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
     from insights.models.team.team import Team
 
     query = """
@@ -297,7 +297,7 @@ def replay_count_metrics() -> None:
     try:
         logger.info("[replay_count_metrics] running task")
 
-        from insights.clickhouse.client import sync_execute
+        from insights.datastore.client import sync_execute
 
         # ultimately I want to observe values by team id, but at the moment that would be lots of series, let's reduce the value first
         query = """
@@ -357,19 +357,19 @@ KNOWN_CELERY_TASK_IDENTIFIERS = {
 
 
 @shared_task(ignore_result=True)
-def clickhouse_row_count() -> None:
+def datastore_row_count() -> None:
     from statshog.defaults.django import statsd
 
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 
-    with pushed_metrics_registry("celery_clickhouse_row_count") as registry:
+    with pushed_metrics_registry("celery_datastore_row_count") as registry:
         row_count_gauge = Gauge(
-            "insights_celery_clickhouse_table_row_count",
-            "Number of rows per ClickHouse table.",
+            "insights_celery_datastore_table_row_count",
+            "Number of rows per Datastore table.",
             labelnames=["table_name"],
             registry=registry,
         )
-        for table in CLICKHOUSE_TABLES:
+        for table in DATASTORE_TABLES:
             try:
                 QUERY = """SELECT sum(rows) rows from system.parts
                        WHERE table = '{table}' and active;"""
@@ -377,7 +377,7 @@ def clickhouse_row_count() -> None:
                 rows = sync_execute(query)[0][0]
                 row_count_gauge.labels(table_name=table).set(rows)
                 statsd.gauge(
-                    f"insights_celery_clickhouse_table_row_count",
+                    f"insights_celery_datastore_table_row_count",
                     rows,
                     tags={"table": table},
                 )
@@ -386,15 +386,15 @@ def clickhouse_row_count() -> None:
 
 
 @shared_task(ignore_result=True)
-def clickhouse_errors_count() -> None:
+def datastore_errors_count() -> None:
     """
-    This task is used to track the recency of errors in ClickHouse.
+    This task is used to track the recency of errors in Datastore.
     We can use this to alert on errors that are consistently being generated recently
     999 - KEEPER_EXCEPTION
     225 - NO_ZOOKEEPER
     242 - TABLE_IS_READ_ONLY
     """
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 
     QUERY = """
         select
@@ -408,13 +408,13 @@ def clickhouse_errors_count() -> None:
         order by minutes_ago
     """
     params = {
-        "cluster": CLICKHOUSE_CLUSTER,
+        "cluster": DATASTORE_CLUSTER,
     }
     rows = sync_execute(QUERY, params)
-    with pushed_metrics_registry("celery_clickhouse_errors") as registry:
+    with pushed_metrics_registry("celery_datastore_errors") as registry:
         errors_gauge = Gauge(
-            "insights_celery_clickhouse_errors",
-            "Age of the latest error per ClickHouse errors table.",
+            "insights_celery_datastore_errors",
+            "Age of the latest error per Datastore errors table.",
             registry=registry,
             labelnames=["replica", "shard", "name"],
         )
@@ -424,10 +424,10 @@ def clickhouse_errors_count() -> None:
 
 
 @shared_task(ignore_result=True)
-def clickhouse_part_count() -> None:
+def datastore_part_count() -> None:
     from statshog.defaults.django import statsd
 
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 
     QUERY = """
         SELECT table, count(1) freq
@@ -438,27 +438,27 @@ def clickhouse_part_count() -> None:
     """
     rows = sync_execute(QUERY)
 
-    with pushed_metrics_registry("celery_clickhouse_part_count") as registry:
+    with pushed_metrics_registry("celery_datastore_part_count") as registry:
         parts_count_gauge = Gauge(
-            "insights_celery_clickhouse_table_parts_count",
-            "Number of parts per ClickHouse table.",
+            "insights_celery_datastore_table_parts_count",
+            "Number of parts per Datastore table.",
             labelnames=["table"],
             registry=registry,
         )
         for table, parts in rows:
             parts_count_gauge.labels(table=table).set(parts)
             statsd.gauge(
-                f"insights_celery_clickhouse_table_parts_count",
+                f"insights_celery_datastore_table_parts_count",
                 parts,
                 tags={"table": table},
             )
 
 
 @shared_task(ignore_result=True)
-def clickhouse_mutation_count() -> None:
+def datastore_mutation_count() -> None:
     from statshog.defaults.django import statsd
 
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
 
     QUERY = """
         SELECT
@@ -471,24 +471,24 @@ def clickhouse_mutation_count() -> None:
     """
     rows = sync_execute(QUERY)
 
-    with pushed_metrics_registry("celery_clickhouse_mutation_count") as registry:
+    with pushed_metrics_registry("celery_datastore_mutation_count") as registry:
         mutations_count_gauge = Gauge(
-            "insights_celery_clickhouse_table_mutations_count",
-            "Number of mutations per ClickHouse table.",
+            "insights_celery_datastore_table_mutations_count",
+            "Number of mutations per Datastore table.",
             labelnames=["table"],
             registry=registry,
         )
     for table, muts in rows:
         mutations_count_gauge.labels(table=table).set(muts)
         statsd.gauge(
-            f"insights_celery_clickhouse_table_mutations_count",
+            f"insights_celery_datastore_table_mutations_count",
             muts,
             tags={"table": table},
         )
 
 
 @shared_task(ignore_result=True)
-def clickhouse_clear_removed_data() -> None:
+def datastore_clear_removed_data() -> None:
     from insights.models.async_deletion.delete_cohorts import AsyncCohortDeletion
 
     cohort_runner = AsyncCohortDeletion()
@@ -507,7 +507,7 @@ def clickhouse_clear_removed_data() -> None:
 
 
 @shared_task(ignore_result=True)
-def clear_clickhouse_deleted_person() -> None:
+def clear_datastore_deleted_person() -> None:
     from insights.models.async_deletion.delete_person import remove_deleted_person_data
 
     remove_deleted_person_data()
@@ -769,7 +769,7 @@ def recompute_materialized_columns_enabled() -> bool:
 
 
 @shared_task(ignore_result=True)
-def clickhouse_materialize_columns() -> None:
+def datastore_materialize_columns() -> None:
     pass
 
 
@@ -781,7 +781,7 @@ def send_org_usage_reports() -> None:
 
 
 @shared_task(ignore_result=True, retries=3)
-def clickhouse_send_license_usage() -> None:
+def datastore_send_license_usage() -> None:
     pass
 
 
@@ -904,7 +904,7 @@ def background_delete_model_task(
 
 def _delete_teams_and_data(team_ids: list[int], user_id: int, project_id: int | None = None) -> None:
     """
-    Shared logic for deleting teams and all associated data (Postgres, batch exports, ClickHouse).
+    Shared logic for deleting teams and all associated data (Postgres, batch exports, Datastore).
     """
     from insights.models.async_deletion import AsyncDeletion, DeletionType
     from insights.models.project import Project
@@ -924,7 +924,7 @@ def _delete_teams_and_data(team_ids: list[int], user_id: int, project_id: int | 
     else:
         Team.objects.filter(id__in=team_ids).delete()
 
-    logger.info("Queueing ClickHouse deletion", team_ids=team_ids)
+    logger.info("Queueing Datastore deletion", team_ids=team_ids)
     user = User.objects.filter(id=user_id).first()
     AsyncDeletion.objects.bulk_create(
         [
@@ -1070,12 +1070,12 @@ def delete_organization_data_and_notify_task(
 )
 def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
     """
-    Sync last_called_at timestamps from ClickHouse $feature_flag_called events to PostgreSQL.
+    Sync last_called_at timestamps from Datastore $feature_flag_called events to PostgreSQL.
 
     This task:
     1. Uses Redis locking to prevent concurrent executions
     2. Gets the last sync timestamp from Redis checkpoint
-    3. Queries ClickHouse for flag usage since last sync
+    3. Queries Datastore for flag usage since last sync
     4. Bulk updates PostgreSQL with latest timestamps
     5. Updates the sync checkpoint in Redis
 
@@ -1087,14 +1087,14 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
 
     Configuration (via settings.feature_flags):
     - FEATURE_FLAG_LAST_CALLED_AT_SYNC_BATCH_SIZE: Bulk update batch size (default: 1000)
-    - FEATURE_FLAG_LAST_CALLED_AT_SYNC_CLICKHOUSE_LIMIT: Max ClickHouse results (default: 100000)
+    - FEATURE_FLAG_LAST_CALLED_AT_SYNC_DATASTORE_LIMIT: Max Datastore results (default: 100000)
     - FEATURE_FLAG_LAST_CALLED_AT_SYNC_LOOKBACK_DAYS: Fallback lookback period (default: 1)
     """
     from datetime import datetime, timedelta
 
     from django.core.cache import cache
 
-    from insights.clickhouse.client import sync_execute
+    from insights.datastore.client import sync_execute
     from insights.models.feature_flag.feature_flag import FeatureFlag
 
     FEATURE_FLAG_LAST_CALLED_SYNC_KEY = "insights:feature_flag_last_called_sync:last_timestamp"
@@ -1122,9 +1122,9 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
         "Number of events processed in last sync",
         registry=self.metrics_registry,
     )
-    clickhouse_results_gauge = Gauge(
-        "insights_feature_flag_last_called_at_sync_clickhouse_results",
-        "Number of results returned from ClickHouse query",
+    datastore_results_gauge = Gauge(
+        "insights_feature_flag_last_called_at_sync_datastore_results",
+        "Number of results returned from Datastore query",
         registry=self.metrics_registry,
     )
     checkpoint_lag_gauge = Gauge(
@@ -1163,7 +1163,7 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
             current_sync_timestamp=current_sync_timestamp.isoformat(),
         )
 
-        # Query ClickHouse for flag usage since last sync
+        # Query Datastore for flag usage since last sync
         # Limit for insurance against large datasets and memory issues during a surge
         result = sync_execute(
             """
@@ -1184,7 +1184,7 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
             {
                 "last_sync_timestamp": last_sync_timestamp,
                 "current_sync_timestamp": current_sync_timestamp,
-                "limit": settings.FEATURE_FLAG_LAST_CALLED_AT_SYNC_CLICKHOUSE_LIMIT,
+                "limit": settings.FEATURE_FLAG_LAST_CALLED_AT_SYNC_DATASTORE_LIMIT,
             },
         )
 
@@ -1195,7 +1195,7 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
             # Emit metrics for no-results case
             updated_count_gauge.set(0)
             events_processed_gauge.set(0)
-            clickhouse_results_gauge.set(0)
+            datastore_results_gauge.set(0)
             checkpoint_lag_gauge.set(0.0)  # No lag when checkpoint is set to current time
 
             logger.info(
@@ -1209,12 +1209,12 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
 
         # Get latest timestamp for checkpoint, fallback to current if all None
         checkpoint_timestamp = max((row[2] for row in result if row[2]), default=current_sync_timestamp)
-        # Ensure timestamp is timezone-aware (ClickHouse returns naive datetimes)
+        # Ensure timestamp is timezone-aware (Datastore returns naive datetimes)
         checkpoint_timestamp = (
             checkpoint_timestamp if checkpoint_timestamp.tzinfo else timezone.make_aware(checkpoint_timestamp)
         )
 
-        # Build lookup map of (team_id, key) -> timestamp from ClickHouse results
+        # Build lookup map of (team_id, key) -> timestamp from Datastore results
         flag_updates = {(row[0], row[1]): row[2] for row in result}
 
         # Batch fetch all relevant flags in a single query
@@ -1226,7 +1226,7 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
         for flag in flags:
             new_timestamp = flag_updates.get((flag.team_id, flag.key))
             if new_timestamp:
-                # Ensure timestamp from ClickHouse is timezone-aware before comparison
+                # Ensure timestamp from Datastore is timezone-aware before comparison
                 new_timestamp = new_timestamp if new_timestamp.tzinfo else timezone.make_aware(new_timestamp)
                 if flag.last_called_at is None or flag.last_called_at < new_timestamp:
                     flag.last_called_at = new_timestamp
@@ -1258,24 +1258,24 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
 
         duration = (timezone.now() - start_time).total_seconds()
         processed_events = sum(row[3] for row in result)
-        clickhouse_results = len(result)
+        datastore_results = len(result)
 
         # Emit metrics for successful completion
         checkpoint_lag_seconds = (timezone.now() - checkpoint_timestamp).total_seconds()
         updated_count_gauge.set(updated_count)
         events_processed_gauge.set(processed_events)
-        clickhouse_results_gauge.set(clickhouse_results)
+        datastore_results_gauge.set(datastore_results)
         checkpoint_lag_gauge.set(checkpoint_lag_seconds)
 
-        # Track if we hit the ClickHouse result limit
-        if clickhouse_results >= settings.FEATURE_FLAG_LAST_CALLED_AT_SYNC_CLICKHOUSE_LIMIT:
+        # Track if we hit the Datastore result limit
+        if datastore_results >= settings.FEATURE_FLAG_LAST_CALLED_AT_SYNC_DATASTORE_LIMIT:
             FEATURE_FLAG_LAST_CALLED_AT_SYNC_LIMIT_HIT_COUNTER.inc()
 
         logger.info(
             "Feature flag sync completed",
             updated_count=updated_count,
             processed_events=processed_events,
-            clickhouse_results=clickhouse_results,
+            datastore_results=datastore_results,
             duration_seconds=duration,
         )
 
@@ -1286,7 +1286,7 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
                 duration_seconds=duration,
                 updated_count=updated_count,
                 processed_events=sum(row[3] for row in result),
-                recommendation="Consider reducing FEATURE_FLAG_LAST_CALLED_AT_SYNC_CLICKHOUSE_LIMIT or optimizing query",
+                recommendation="Consider reducing FEATURE_FLAG_LAST_CALLED_AT_SYNC_DATASTORE_LIMIT or optimizing query",
             )
 
     except Exception as e:

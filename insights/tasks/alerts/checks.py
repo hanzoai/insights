@@ -14,7 +14,7 @@ from dateutil.relativedelta import relativedelta
 
 from insights.schema import AlertCalculationInterval, AlertState, TrendsQuery
 
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.query_tagging import tag_queries
 from insights.errors import CHQueryErrorTooManySimultaneousQueries
 from insights.exceptions_capture import capture_exception
 from insights.models import AlertConfiguration, User

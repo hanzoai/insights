@@ -1,12 +1,12 @@
 rules:
     # Rule 1: Taint tracking for direct user input -> sync_execute f-string
-    - id: clickhouse-sql-injection
+    - id: datastore-sql-injection
       mode: taint
       languages: [python]
       severity: ERROR
       message: |
-          User-controlled data interpolated into ClickHouse SQL query.
-          Use escape_clickhouse_identifier() for identifiers or parameterized queries for values.
+          User-controlled data interpolated into Datastore SQL query.
+          Use escape_datastore_identifier() for identifiers or parameterized queries for values.
       pattern-sources:
           - pattern-either:
                 - pattern: data.get(...)
@@ -30,8 +30,8 @@ rules:
           - pattern: async_execute(f"...", ...)
           - pattern: execute_on_connection(f"...", ...)
       pattern-sanitizers:
-          - pattern: escape_clickhouse_identifier(...)
-          - pattern: escape_clickhouse_string(...)
+          - pattern: escape_datastore_identifier(...)
+          - pattern: escape_datastore_string(...)
       metadata:
           category: security
           subcategory:
@@ -48,13 +48,13 @@ rules:
     # Rule 2: Taint tracking for function parameters -> sync_execute f-string
     # Catches indirect user input via function parameters (like Finding 1)
     # NOTE: Files with Python 3.12+ `type` statements may not parse correctly in semgrep < 1.50
-    - id: clickhouse-fstring-param-audit
+    - id: datastore-fstring-param-audit
       mode: taint
       languages: [python]
       severity: WARNING
       message: |
           Function parameter used in f-string SQL query.
-          If this parameter can receive user input, use escape_clickhouse_identifier()
+          If this parameter can receive user input, use escape_datastore_identifier()
           for identifiers or parameterized queries for values.
       pattern-sources:
           - patterns:
@@ -72,8 +72,8 @@ rules:
           - pattern: async_execute(f"...", ...)
           - pattern: execute_on_connection(f"...", ...)
       pattern-sanitizers:
-          - pattern: escape_clickhouse_identifier(...)
-          - pattern: escape_clickhouse_string(...)
+          - pattern: escape_datastore_identifier(...)
+          - pattern: escape_datastore_string(...)
       metadata:
           category: security
           subcategory:

@@ -1,9 +1,9 @@
 import pytest
-from insights.test.base import run_clickhouse_statement_in_parallel
+from insights.test.base import run_datastore_statement_in_parallel
 
 from clickhouse_driver.errors import ServerException
 
 
-def test_run_clickhouse_statement_in_parallel_propagates_errors():
+def test_run_datastore_statement_in_parallel_propagates_errors():
     with pytest.raises(ServerException):
-        run_clickhouse_statement_in_parallel(["SELECT invalid syntax!!!"])
+        run_datastore_statement_in_parallel(["SELECT invalid syntax!!!"])

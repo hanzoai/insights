@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 
 from insights.schema import (
     CachedEventsQueryResponse,
@@ -21,7 +21,7 @@ from insights.insightsql_queries.events_query_runner import EventsQueryRunner
 from insights.insightsql_queries.query_runner import get_query_runner
 
 
-class TestSessionBatchEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestSessionBatchEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
     @pytest.fixture(autouse=True)
     def setup_session_ids(self):
         """Setup proper UUID session IDs for tests."""

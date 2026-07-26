@@ -7,7 +7,7 @@ import { RaceConditionError } from '../../../utils/utils'
 
 import { BatchWritingGroupStore } from './batch-writing-group-store'
 import { groupCacheOperationsCounter } from './metrics'
-import { ClickhouseGroupRepository } from './repositories/clickhouse-group-repository'
+import { DatastoreGroupRepository } from './repositories/datastore-group-repository'
 import { GroupRepository } from './repositories/group-repository.interface'
 
 // Mock the module before importing
@@ -23,7 +23,7 @@ import { captureIngestionWarning } from '../utils'
 describe('BatchWritingGroupStore', () => {
     let groupRepository: GroupRepository
     let groupStore: BatchWritingGroupStore
-    let clickhouseGroupRepository: ClickhouseGroupRepository
+    let datastoreGroupRepository: DatastoreGroupRepository
     let teamId: TeamId
     let projectId: ProjectId
     let group: Group
@@ -102,13 +102,13 @@ describe('BatchWritingGroupStore', () => {
         // Reset the counter before each test
         groupCacheOperationsCounter.reset()
 
-        clickhouseGroupRepository = {
+        datastoreGroupRepository = {
             upsertGroup: jest.fn().mockResolvedValue(undefined),
-        } as unknown as ClickhouseGroupRepository
+        } as unknown as DatastoreGroupRepository
         groupStore = new BatchWritingGroupStore({
             kafkaProducer: {} as unknown as KafkaProducerWrapper,
             groupRepository,
-            clickhouseGroupRepository,
+            datastoreGroupRepository,
         })
     })
 
@@ -240,14 +240,14 @@ describe('BatchWritingGroupStore', () => {
 
         expect(groupRepository.updateGroupOptimistically).toHaveBeenCalledTimes(0)
         expect(groupRepository.updateGroup).toHaveBeenCalledTimes(0)
-        expect(clickhouseGroupRepository.upsertGroup).toHaveBeenCalledTimes(0)
+        expect(datastoreGroupRepository.upsertGroup).toHaveBeenCalledTimes(0)
 
         await groupStore.flush()
 
         expect(groupRepository.updateGroupOptimistically).toHaveBeenCalledTimes(5)
         expect(groupRepository.inTransaction).toHaveBeenCalledTimes(1)
         expect((groupRepository as any).lastTransactionMock.updateGroup).toHaveBeenCalledTimes(1)
-        expect(clickhouseGroupRepository.upsertGroup).toHaveBeenCalledTimes(1)
+        expect(datastoreGroupRepository.upsertGroup).toHaveBeenCalledTimes(1)
     })
 
     it('should share cache between distinct ids', async () => {
@@ -285,8 +285,8 @@ describe('BatchWritingGroupStore', () => {
     })
 
     it('should capture warning and stop retrying if message size too large', async () => {
-        // we need to mock the clickhouse repository upsertGroup method
-        clickhouseGroupRepository.upsertGroup = jest
+        // we need to mock the datastore repository upsertGroup method
+        datastoreGroupRepository.upsertGroup = jest
             .fn()
             .mockRejectedValue(new MessageSizeTooLarge('test', new Error('test')))
 

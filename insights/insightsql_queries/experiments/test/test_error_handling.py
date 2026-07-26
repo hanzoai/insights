@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 from rest_framework.exceptions import ErrorDetail, ValidationError
 
-from insights.exceptions import ClickHouseQueryMemoryLimitExceeded
+from insights.exceptions import DatastoreQueryMemoryLimitExceeded
 from insights.insightsql_queries.experiments.error_handling import (
     ERROR_TYPE_TO_CODE,
     experiment_error_handler,
@@ -17,8 +17,8 @@ from insights.insightsql_queries.experiments.error_handling import (
 
 class TestExperimentErrorHandling(BaseTest):
     def test_get_user_friendly_message_for_memory_limit_exceeded(self):
-        """Test that ClickHouseQueryMemoryLimitExceeded gets a user-friendly message."""
-        error = ClickHouseQueryMemoryLimitExceeded()
+        """Test that DatastoreQueryMemoryLimitExceeded gets a user-friendly message."""
+        error = DatastoreQueryMemoryLimitExceeded()
         message = get_user_friendly_message(error)
 
         self.assertIsNotNone(message)
@@ -36,11 +36,11 @@ class TestExperimentErrorHandling(BaseTest):
 
     @patch("insights.insightsql_queries.experiments.error_handling.capture_exception")
     def test_decorator_converts_memory_limit_exception(self, mock_capture):
-        """Test that the decorator converts ClickHouseQueryMemoryLimitExceeded to ValidationError."""
+        """Test that the decorator converts DatastoreQueryMemoryLimitExceeded to ValidationError."""
 
         @experiment_error_handler
         def failing_method(self):
-            raise ClickHouseQueryMemoryLimitExceeded()
+            raise DatastoreQueryMemoryLimitExceeded()
 
         mock_self = Mock()
         mock_self.experiment_id = None  # Ensure this is None so the fallback to experiment.id is used
@@ -71,7 +71,7 @@ class TestExperimentErrorHandling(BaseTest):
         # Verify exception was captured with correct properties
         mock_capture.assert_called_once()
         call_args = mock_capture.call_args
-        self.assertIsInstance(call_args[0][0], ClickHouseQueryMemoryLimitExceeded)
+        self.assertIsInstance(call_args[0][0], DatastoreQueryMemoryLimitExceeded)
         self.assertEqual(call_args[1]["additional_properties"]["experiment_id"], 123)
         self.assertEqual(call_args[1]["additional_properties"]["query_runner"], "Mock")
 
@@ -81,7 +81,7 @@ class TestExperimentErrorHandling(BaseTest):
 
         @experiment_error_handler
         def failing_method(self):
-            raise ClickHouseQueryMemoryLimitExceeded()
+            raise DatastoreQueryMemoryLimitExceeded()
 
         class ExperimentExposuresQueryRunner:
             def __init__(self):
@@ -105,7 +105,7 @@ class TestExperimentErrorHandling(BaseTest):
 
         @experiment_error_handler
         def failing_method(self):
-            raise ClickHouseQueryMemoryLimitExceeded()
+            raise DatastoreQueryMemoryLimitExceeded()
 
         mock_self = Mock()
         mock_self.experiment = Mock(id=123)
@@ -113,13 +113,13 @@ class TestExperimentErrorHandling(BaseTest):
         mock_self.user_facing = False
 
         # Should re-raise the original exception
-        with self.assertRaises(ClickHouseQueryMemoryLimitExceeded):
+        with self.assertRaises(DatastoreQueryMemoryLimitExceeded):
             failing_method(mock_self)
 
         # Should still capture for internal tracking
         mock_capture.assert_called_once()
 
     def test_error_type_to_code_mapping(self):
-        """Test that ClickHouseQueryMemoryLimitExceeded has a code mapping."""
-        self.assertIn(ClickHouseQueryMemoryLimitExceeded, ERROR_TYPE_TO_CODE)
-        self.assertEqual(ERROR_TYPE_TO_CODE[ClickHouseQueryMemoryLimitExceeded], "memory_limit_exceeded")
+        """Test that DatastoreQueryMemoryLimitExceeded has a code mapping."""
+        self.assertIn(DatastoreQueryMemoryLimitExceeded, ERROR_TYPE_TO_CODE)
+        self.assertEqual(ERROR_TYPE_TO_CODE[DatastoreQueryMemoryLimitExceeded], "memory_limit_exceeded")

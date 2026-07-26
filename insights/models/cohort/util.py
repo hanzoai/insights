@@ -19,16 +19,16 @@ from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.printer import prepare_and_print_ast
 from insights.insightsql.resolver_utils import extract_select_queries
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import ClickHouseUser, Workload
-from insights.clickhouse.query_tagging import Feature, tag_queries, tags_context
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import DatastoreUser, Workload
+from insights.datastore.query_tagging import Feature, tag_queries, tags_context
 from insights.constants import PropertyOperatorType
 from insights.exceptions import (
-    ClickHouseAtCapacity,
-    ClickHouseEstimatedQueryExecutionTimeTooLong,
-    ClickHouseQueryMemoryLimitExceeded,
-    ClickHouseQuerySizeExceeded,
-    ClickHouseQueryTimeOut,
+    DatastoreAtCapacity,
+    DatastoreEstimatedQueryExecutionTimeTooLong,
+    DatastoreQueryMemoryLimitExceeded,
+    DatastoreQuerySizeExceeded,
+    DatastoreQueryTimeOut,
 )
 from insights.models import Action, Filter, Team
 from insights.models.action.util import format_action_filter
@@ -56,7 +56,7 @@ from insights.queries.util import PersonPropertiesMode
 TEMP_PRECALCULATED_MARKER = parser.parse("2021-06-07T15:00:00+00:00")
 
 # Cohort query timeout settings
-COHORT_QUERY_TIMEOUT_SECONDS = 1200  # Max execution time for ClickHouse cohort calculation queries
+COHORT_QUERY_TIMEOUT_SECONDS = 1200  # Max execution time for Datastore cohort calculation queries
 
 
 class CohortErrorCode(StrEnum):
@@ -96,9 +96,9 @@ def get_friendly_error_message(error_code: str | None) -> str | None:
     return ERROR_CODE_MESSAGES.get(error_code, ERROR_CODE_MESSAGES[CohortErrorCode.UNKNOWN])
 
 
-# ClickHouse ServerException.code_name -> CohortErrorCode
+# Datastore ServerException.code_name -> CohortErrorCode
 # Keys are lowercase; code_name is normalized via .lower() before lookup
-_CLICKHOUSE_ERROR_MAPPING: dict[str, CohortErrorCode] = {
+_DATASTORE_ERROR_MAPPING: dict[str, CohortErrorCode] = {
     "cannot_compile_regexp": CohortErrorCode.INVALID_REGEX,
     "memory_limit_exceeded": CohortErrorCode.MEMORY_LIMIT,
     "timeout_exceeded": CohortErrorCode.TIMEOUT,
@@ -109,22 +109,22 @@ _CLICKHOUSE_ERROR_MAPPING: dict[str, CohortErrorCode] = {
 def parse_error_code(e: Exception) -> CohortErrorCode:
     """Translate exceptions into CohortErrorCode for CohortCalculationHistory.error_code field."""
     match e:
-        case ClickHouseAtCapacity():
+        case DatastoreAtCapacity():
             return CohortErrorCode.CAPACITY
         case SocketTimeoutError():
             return CohortErrorCode.INTERRUPTED
-        case ClickHouseQueryTimeOut() | ClickHouseEstimatedQueryExecutionTimeTooLong():
+        case DatastoreQueryTimeOut() | DatastoreEstimatedQueryExecutionTimeTooLong():
             return CohortErrorCode.TIMEOUT
-        case ClickHouseQueryMemoryLimitExceeded():
+        case DatastoreQueryMemoryLimitExceeded():
             return CohortErrorCode.MEMORY_LIMIT
-        case ClickHouseQuerySizeExceeded():
+        case DatastoreQuerySizeExceeded():
             return CohortErrorCode.QUERY_SIZE
         case PydanticValidationError() | ValidationError():
             return CohortErrorCode.VALIDATION_ERROR
 
     code_name = getattr(e, "code_name", "").lower()
-    if code_name in _CLICKHOUSE_ERROR_MAPPING:
-        return _CLICKHOUSE_ERROR_MAPPING[code_name]
+    if code_name in _DATASTORE_ERROR_MAPPING:
+        return _DATASTORE_ERROR_MAPPING[code_name]
 
     return CohortErrorCode.UNKNOWN
 
@@ -195,14 +195,14 @@ def run_cohort_query(
 
     finally:
         # Reset query tags to avoid affecting other queries
-        from insights.clickhouse.query_tagging import reset_query_tags
+        from insights.datastore.query_tagging import reset_query_tags
 
         reset_query_tags()
 
 
-def get_clickhouse_query_stats(tag_matcher: str, cohort_id: int, start_time: datetime, team_id: int) -> Optional[dict]:
+def get_datastore_query_stats(tag_matcher: str, cohort_id: int, start_time: datetime, team_id: int) -> Optional[dict]:
     """
-    Retrieve query statistics from ClickHouse query_log_archive using query tags.
+    Retrieve query statistics from Datastore query_log_archive using query tags.
     Similar to approach in ee/benchmarks/helpers.py but adapted for cohort calculations.
     """
     if not tag_matcher:
@@ -237,7 +237,7 @@ def get_clickhouse_query_stats(tag_matcher: str, cohort_id: int, start_time: dat
             },
             settings={"max_execution_time": 10},
             workload=Workload.OFFLINE,
-            ch_user=ClickHouseUser.COHORTS,
+            ch_user=DatastoreUser.COHORTS,
         )
 
         if result and len(result) > 0:
@@ -260,7 +260,7 @@ def get_clickhouse_query_stats(tag_matcher: str, cohort_id: int, start_time: dat
             }
 
     except Exception as e:
-        logger.exception("Failed to retrieve ClickHouse query stats", tag_matcher=tag_matcher, error=str(e))
+        logger.exception("Failed to retrieve Datastore query stats", tag_matcher=tag_matcher, error=str(e))
 
     return None
 
@@ -356,7 +356,7 @@ def print_cohort_insightsql_query(cohort: Cohort, insightsql_context: InsightsQL
     # If we're using distinct_id, wrap the query to resolve to person_id
     if uses_distinct_id:
         # Print the inner query without settings - we'll add them to the wrapper
-        base_query = prepare_and_print_ast(query, context=insightsql_context, dialect="clickhouse")[0]
+        base_query = prepare_and_print_ast(query, context=insightsql_context, dialect="datastore")[0]
 
         # Format settings as key=value pairs
         settings_pairs = {k: str(v) for k, v in settings.model_dump().items() if v is not None}
@@ -378,7 +378,7 @@ def print_cohort_insightsql_query(cohort: Cohort, insightsql_context: InsightsQL
 
         return f"{wrapped_query}{settings_clause}"
 
-    return prepare_and_print_ast(query, context=insightsql_context, dialect="clickhouse", settings=settings)[0]
+    return prepare_and_print_ast(query, context=insightsql_context, dialect="datastore", settings=settings)[0]
 
 
 def format_static_cohort_query(cohort: Cohort, index: int, prepend: str) -> tuple[str, dict[str, Any]]:
@@ -558,7 +558,7 @@ def insert_static_cohort(person_uuids: list[Optional[uuid.UUID]], cohort_id: int
 
 
 def remove_person_from_static_cohort(person_uuid: uuid.UUID, cohort_id: int, *, team_id: int):
-    """Remove a person from a static cohort in ClickHouse.
+    """Remove a person from a static cohort in Datastore.
 
     Uses DELETE FROM with mutations_sync=0 and lightweight_deletes_sync=0 to avoid replica
     synchronization issues when some replicas are inactive. In tests, uses synchronous mutations
@@ -659,11 +659,11 @@ def _recalculate_cohortpeople_for_team_insightsql(
         from insights.insightsql_queries.insightsql_cohort_query import InsightsQLCohortQuery
 
         cohort_query, insightsql_context = (
-            InsightsQLCohortQuery(cohort=cohort, team=team).get_query_executor().generate_clickhouse_sql()
+            InsightsQLCohortQuery(cohort=cohort, team=team).get_query_executor().generate_datastore_sql()
         )
         cohort_params = insightsql_context.values
 
-        # Hacky: Clickhouse doesn't like there being a top level "SETTINGS" clause in a SelectSet statement when that SelectSet
+        # Hacky: Datastore doesn't like there being a top level "SETTINGS" clause in a SelectSet statement when that SelectSet
         # statement is used in a subquery. We remove it here.
         cohort_query = cohort_query[: cohort_query.rfind("SETTINGS")]
 
@@ -698,7 +698,7 @@ def _recalculate_cohortpeople_for_team_insightsql(
                 "max_bytes_ratio_before_external_sort": 0.5,
             },
             workload=Workload.OFFLINE,
-            ch_user=ClickHouseUser.COHORTS,
+            ch_user=DatastoreUser.COHORTS,
             team_id=team.id,
         )
 
@@ -731,7 +731,7 @@ def get_cohort_size(cohort: Cohort, override_version: Optional[int] = None, *, t
             "team_id": team_id,
         },
         workload=Workload.OFFLINE,
-        ch_user=ClickHouseUser.COHORTS,
+        ch_user=DatastoreUser.COHORTS,
     )
 
     if count_result and len(count_result) and len(count_result[0]):

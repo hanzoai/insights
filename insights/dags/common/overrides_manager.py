@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 from clickhouse_driver import Client
 
 from insights import settings
-from insights.clickhouse.cluster import AlterTableMutationRunner, LightweightDeleteMutationRunner
+from insights.datastore.cluster import AlterTableMutationRunner, LightweightDeleteMutationRunner
 
 if TYPE_CHECKING:
     pass
@@ -24,7 +24,7 @@ class OverridesSnapshotTable(ABC):
 
     @property
     def qualified_name(self):
-        return f"{settings.CLICKHOUSE_DATABASE}.{self.name}"
+        return f"{settings.DATASTORE_DATABASE}.{self.name}"
 
     @abstractmethod
     def create(self, client: Client) -> None:
@@ -33,7 +33,7 @@ class OverridesSnapshotTable(ABC):
     def exists(self, client: Client) -> bool:
         results = client.execute(
             f"SELECT count() FROM system.tables WHERE database = %(database)s AND name = %(name)s",
-            {"database": settings.CLICKHOUSE_DATABASE, "name": self.name},
+            {"database": settings.DATASTORE_DATABASE, "name": self.name},
         )
         [[count]] = results
         return count > 0
@@ -52,7 +52,7 @@ class OverridesSnapshotTable(ABC):
         # probably doesn't hurt to be careful
         [[queue_size]] = client.execute(
             "SELECT queue_size FROM system.replicas WHERE database = %(database)s AND table = %(table)s",
-            {"database": settings.CLICKHOUSE_DATABASE, "table": self.name},
+            {"database": settings.DATASTORE_DATABASE, "table": self.name},
         )
         assert queue_size == 0
 
@@ -70,7 +70,7 @@ class OverridesSnapshotDictionary(ABC, Generic[TOverridesSnapshotTable]):
 
     @property
     def qualified_name(self):
-        return f"{settings.CLICKHOUSE_DATABASE}.{self.name}"
+        return f"{settings.DATASTORE_DATABASE}.{self.name}"
 
     @abstractmethod
     def create(self, client: Client, shards: int, max_execution_time: int, max_memory_usage: int) -> None:
@@ -79,7 +79,7 @@ class OverridesSnapshotDictionary(ABC, Generic[TOverridesSnapshotTable]):
     def exists(self, client: Client) -> bool:
         results = client.execute(
             "SELECT count() FROM system.dictionaries WHERE database = %(database)s AND name = %(name)s",
-            {"database": settings.CLICKHOUSE_DATABASE, "name": self.name},
+            {"database": settings.DATASTORE_DATABASE, "name": self.name},
         )
         [[count]] = results
         return count > 0
@@ -90,7 +90,7 @@ class OverridesSnapshotDictionary(ABC, Generic[TOverridesSnapshotTable]):
     def __is_loaded(self, client: Client) -> bool:
         results = client.execute(
             "SELECT status, last_exception FROM system.dictionaries WHERE database = %(database)s AND name = %(name)s",
-            {"database": settings.CLICKHOUSE_DATABASE, "name": self.name},
+            {"database": settings.DATASTORE_DATABASE, "name": self.name},
         )
         if not results:
             raise Exception("dictionary does not exist")

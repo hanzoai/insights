@@ -11,22 +11,22 @@ import aiohttp.client_exceptions
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
 from insights.models.raw_sessions.sessions_v2 import RAW_SESSION_TABLE_BACKFILL_SELECT_SQL
-from insights.temporal.common.clickhouse import ClickHouseClient, ClickHouseError
+from insights.temporal.common.datastore import DatastoreClient, DatastoreError
 from insights.temporal.tests.utils.datetimes import date_range
 
 
 @retry(
     retry=retry_if_exception_type(
-        (aiohttp.client_exceptions.ClientOSError, aiohttp.client_exceptions.ServerDisconnectedError, ClickHouseError)
+        (aiohttp.client_exceptions.ClientOSError, aiohttp.client_exceptions.ServerDisconnectedError, DatastoreError)
     ),
     # on attempts expired, raise the exception encountered in our code, not tenacity's retry error
     reraise=True,
     wait=wait_random_exponential(multiplier=0.2, max=3),
     stop=stop_after_attempt(5),
 )
-async def execute_query(clickhouse_client: ClickHouseClient, query: str, *data):
+async def execute_query(datastore_client: DatastoreClient, query: str, *data):
     """Try to prevent flakiness in CI by retrying the query if it fails."""
-    return await clickhouse_client.execute_query(query, *data)
+    return await datastore_client.execute_query(query, *data)
 
 
 class EventValues(typing.TypedDict):
@@ -117,12 +117,12 @@ def generate_test_events(
     return events
 
 
-async def truncate_table(client: ClickHouseClient, table: str):
+async def truncate_table(client: DatastoreClient, table: str):
     await execute_query(client, f"TRUNCATE TABLE IF EXISTS `{table}`")
 
 
-async def insert_event_values_in_clickhouse(
-    client: ClickHouseClient, events: list[EventValues], table: str = "sharded_events", insert_sessions: bool = False
+async def insert_event_values_in_datastore(
+    client: DatastoreClient, events: list[EventValues], table: str = "sharded_events", insert_sessions: bool = False
 ):
     """Execute an insert query to insert provided EventValues into sharded_events."""
     await execute_query(
@@ -166,7 +166,7 @@ async def insert_event_values_in_clickhouse(
     )
 
 
-async def insert_sessions_in_clickhouse(client: ClickHouseClient, table: str = "sharded_events"):
+async def insert_sessions_in_datastore(client: DatastoreClient, table: str = "sharded_events"):
     generate_sessions_query = RAW_SESSION_TABLE_BACKFILL_SELECT_SQL()
     if table == "events_recent":
         generate_sessions_query = generate_sessions_query.replace("insights_test.events", "insights_test.events_recent")
@@ -183,8 +183,8 @@ async def insert_sessions_in_clickhouse(client: ClickHouseClient, table: str = "
     )
 
 
-async def generate_test_events_in_clickhouse(
-    client: ClickHouseClient,
+async def generate_test_events_in_datastore(
+    client: DatastoreClient,
     team_id: int,
     start_time: dt.datetime,
     end_time: dt.datetime,
@@ -207,7 +207,7 @@ async def generate_test_events_in_clickhouse(
     multiple events with different characteristics.
 
     Args:
-        client: A ClickHouseClient to insert events in ClickHouse.
+        client: A DatastoreClient to insert events in Datastore.
         team_id: The ID of the team assigned to the generated events.
         start_time: The start of the date range for datetime event fields (like inserted_at).
             This should match the start of the batch export.
@@ -249,7 +249,7 @@ async def generate_test_events_in_clickhouse(
         if duplicate is True:
             duplicate_events = events_to_insert
 
-        await insert_event_values_in_clickhouse(
+        await insert_event_values_in_datastore(
             client=client,
             events=events_to_insert + duplicate_events,
             table=table,
@@ -258,7 +258,7 @@ async def generate_test_events_in_clickhouse(
         events.extend(events_to_insert)
 
     if insert_sessions:
-        await insert_sessions_in_clickhouse(client=client, table=table)
+        await insert_sessions_in_datastore(client=client, table=table)
 
     # Events outside original date range
     delta = end_time - start_time
@@ -289,7 +289,7 @@ async def generate_test_events_in_clickhouse(
         distinct_ids=distinct_ids,
     )
 
-    await insert_event_values_in_clickhouse(
+    await insert_event_values_in_datastore(
         client=client, events=events_outside_range + events_from_other_team, table=table
     )
 

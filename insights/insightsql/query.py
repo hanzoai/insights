@@ -29,9 +29,9 @@ from insights.insightsql.transforms.preaggregated_table_transformation import do
 from insights.insightsql.variables import replace_variables
 from insights.insightsql.visitor import clone_expr
 
-from insights.clickhouse.client import sync_execute
-from insights.clickhouse.client.connection import Workload
-from insights.clickhouse.query_tagging import tag_queries
+from insights.datastore.client import sync_execute
+from insights.datastore.client.connection import Workload
+from insights.datastore.query_tagging import tag_queries
 from insights.errors import ExposedCHQueryError
 from insights.models.team import Team
 from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
@@ -56,8 +56,8 @@ class InsightsQLQueryExecutor:
     pretty: Optional[bool] = True
     context: InsightsQLContext = dataclasses.field(default_factory=lambda: InsightsQLQueryExecutor.__uninitialized_context)
     insightsql_context: Optional[InsightsQLContext] = None
-    clickhouse_prepared_ast: Optional[ast.AST] = None
-    clickhouse_sql: Optional[str] = None
+    datastore_prepared_ast: Optional[ast.AST] = None
+    datastore_sql: Optional[str] = None
 
     __uninitialized_context: ClassVar[InsightsQLContext] = InsightsQLContext()
 
@@ -191,8 +191,8 @@ class InsightsQLQueryExecutor:
                         )
                     )
 
-    @tracer.start_as_current_span("InsightsQLQueryExecutor._generate_clickhouse_sql")
-    def _generate_clickhouse_sql(self):
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._generate_datastore_sql")
+    def _generate_datastore_sql(self):
         settings = self.settings or InsightsQLGlobalSettings()
         if self.limit_context in (
             LimitContext.EXPORT,
@@ -206,11 +206,11 @@ class InsightsQLQueryExecutor:
 
         if self.query_modifiers.formatCsvAllowDoubleQuotes is not None:
             settings.format_csv_allow_double_quotes = self.query_modifiers.formatCsvAllowDoubleQuotes
-        if self.query_modifiers.forceClickhouseDataSkippingIndexes:
-            settings.force_data_skipping_indices = self.query_modifiers.forceClickhouseDataSkippingIndexes
+        if self.query_modifiers.forceDatastoreDataSkippingIndexes:
+            settings.force_data_skipping_indices = self.query_modifiers.forceDatastoreDataSkippingIndexes
 
         try:
-            self.clickhouse_context = dataclasses.replace(
+            self.datastore_context = dataclasses.replace(
                 self.context,
                 team_id=self.team.pk,
                 team=self.team,
@@ -223,35 +223,35 @@ class InsightsQLQueryExecutor:
                 database=self.insightsql_context.database if self.insightsql_context else None,
             )
             with self.timings.measure("prepare_ast_for_printing"):
-                self.clickhouse_prepared_ast = prepare_ast_for_printing(
+                self.datastore_prepared_ast = prepare_ast_for_printing(
                     node=self.select_query,
-                    context=self.clickhouse_context,
-                    dialect="clickhouse",
+                    context=self.datastore_context,
+                    dialect="datastore",
                     settings=settings,
                 )
 
             # Apply log-specific byte limits for user InsightsQL queries to prevent expensive full scans.
             # Internal runners (LogsQueryRunner, etc.) use different query_types and set their own limits.
-            if self.clickhouse_context.workload == Workload.LOGS and self.query_type == "InsightsQLQuery":
+            if self.datastore_context.workload == Workload.LOGS and self.query_type == "InsightsQLQuery":
                 if settings.max_bytes_to_read is None:
                     settings.max_bytes_to_read = INSIGHTSQL_MAX_BYTES_TO_READ_FOR_LOGS_USER_QUERIES
                 if settings.read_overflow_mode is None:
                     settings.read_overflow_mode = "throw"
 
             with self.timings.measure("print_prepared_ast"):
-                if self.clickhouse_prepared_ast is None:
-                    self.clickhouse_sql = ""
+                if self.datastore_prepared_ast is None:
+                    self.datastore_sql = ""
                 else:
-                    self.clickhouse_sql = print_prepared_ast(
-                        node=self.clickhouse_prepared_ast,
-                        context=self.clickhouse_context,
-                        dialect="clickhouse",
+                    self.datastore_sql = print_prepared_ast(
+                        node=self.datastore_prepared_ast,
+                        context=self.datastore_context,
+                        dialect="datastore",
                         settings=settings,
                         pretty=self.pretty if self.pretty is not None else True,
                     )
         except Exception as e:
             if self.debug:
-                self.clickhouse_sql = ""
+                self.datastore_sql = ""
                 if isinstance(e, ExposedCHQueryError | ExposedInsightsQLError):
                     self.error = str(e)
                 else:
@@ -259,16 +259,16 @@ class InsightsQLQueryExecutor:
             else:
                 raise
 
-    @tracer.start_as_current_span("InsightsQLQueryExecutor._execute_clickhouse_query")
-    def _execute_clickhouse_query(self):
-        assert self.clickhouse_sql
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._execute_datastore_query")
+    def _execute_datastore_query(self):
+        assert self.datastore_sql
         timings_dict = self.timings.to_dict()
-        with self.timings.measure("clickhouse_execute"):
+        with self.timings.measure("datastore_execute"):
             tag_queries(
                 team_id=self.team.pk,
                 query_type=self.query_type,
-                has_joins="JOIN" in self.clickhouse_sql,
-                has_json_operations="JSONExtract" in self.clickhouse_sql or "JSONHas" in self.clickhouse_sql,
+                has_joins="JOIN" in self.datastore_sql,
+                has_json_operations="JSONExtract" in self.datastore_sql or "JSONHas" in self.datastore_sql,
                 timings=timings_dict,
                 modifiers=(
                     {k: v for k, v in self.modifiers.model_dump().items() if v is not None} if self.modifiers else {}
@@ -277,13 +277,13 @@ class InsightsQLQueryExecutor:
 
             # Use workload detected during AST resolution, falling back to explicitly set workload
             workload = self.workload
-            if workload == Workload.DEFAULT and self.clickhouse_context.workload is not None:
-                workload = self.clickhouse_context.workload
+            if workload == Workload.DEFAULT and self.datastore_context.workload is not None:
+                workload = self.datastore_context.workload
 
             try:
                 self.results, self.types = sync_execute(
-                    self.clickhouse_sql,
-                    self.clickhouse_context.values,
+                    self.datastore_sql,
+                    self.datastore_context.values,
                     with_column_types=True,
                     workload=workload,
                     team_id=self.team.pk,
@@ -301,10 +301,10 @@ class InsightsQLQueryExecutor:
 
         if self.debug and self.error is None:  # If the query errored, explain will fail as well.
             with self.timings.measure("explain"):
-                # nosemgrep: clickhouse-injection-taint - InsightsQL-compiled SQL, values in context
+                # nosemgrep: datastore-injection-taint - InsightsQL-compiled SQL, values in context
                 explain_results = sync_execute(
-                    f"EXPLAIN {self.clickhouse_sql}",
-                    self.clickhouse_context.values,
+                    f"EXPLAIN {self.datastore_sql}",
+                    self.datastore_context.values,
                     with_column_types=True,
                     workload=workload,
                     team_id=self.team.pk,
@@ -318,34 +318,34 @@ class InsightsQLQueryExecutor:
                     InsightsQLMetadata(language=InsightsLanguage.INSIGHTS_QL, query=self.insightsql, debug=True),
                     self.team,
                     self.select_query,
-                    self.clickhouse_prepared_ast,
-                    self.clickhouse_sql,
+                    self.datastore_prepared_ast,
+                    self.datastore_sql,
                 )
 
-    @tracer.start_as_current_span("InsightsQLQueryExecutor.generate_clickhouse_sql")
-    def generate_clickhouse_sql(self) -> tuple[str, InsightsQLContext]:
+    @tracer.start_as_current_span("InsightsQLQueryExecutor.generate_datastore_sql")
+    def generate_datastore_sql(self) -> tuple[str, InsightsQLContext]:
         self._parse_query()
         self._process_variables()
         self._process_placeholders()
         self._apply_limit()
         with self.timings.measure("_generate_insightsql"):
             self._generate_insightsql()
-        with self.timings.measure("_generate_clickhouse_sql"):
-            self._generate_clickhouse_sql()
-        assert self.clickhouse_sql
-        return self.clickhouse_sql, self.clickhouse_context
+        with self.timings.measure("_generate_datastore_sql"):
+            self._generate_datastore_sql()
+        assert self.datastore_sql
+        return self.datastore_sql, self.datastore_context
 
     @tracer.start_as_current_span("InsightsQLQueryExecutor.execute")
     def execute(self) -> InsightsQLQueryResponse:
-        self.generate_clickhouse_sql()
+        self.generate_datastore_sql()
 
-        if self.clickhouse_sql is not None:
-            self._execute_clickhouse_query()
+        if self.datastore_sql is not None:
+            self._execute_datastore_query()
 
         return InsightsQLQueryResponse(
             query=self.query,
             insightsql=self.insightsql,
-            clickhouse=self.clickhouse_sql,
+            datastore=self.datastore_sql,
             error=self.error,
             timings=self.timings.to_list(),
             results=self.results,

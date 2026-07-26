@@ -1,17 +1,17 @@
 from django.conf import settings
 
-from insights.clickhouse.base_sql import COPY_ROWS_BETWEEN_TEAMS_BASE_SQL
-from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from insights.clickhouse.indexes import index_by_kafka_timestamp
-from insights.clickhouse.kafka_engine import (
+from insights.datastore.base_sql import COPY_ROWS_BETWEEN_TEAMS_BASE_SQL
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.indexes import index_by_kafka_timestamp
+from insights.datastore.kafka_engine import (
     CONSUMER_GROUP_EVENTS_JSON,
     KAFKA_COLUMNS,
     STORAGE_POLICY,
     kafka_engine,
     trim_quotes_expr,
 )
-from insights.clickhouse.property_groups import property_groups
-from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
+from insights.datastore.property_groups import property_groups
+from insights.datastore.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
 from insights.kafka_client.topics import KAFKA_EVENTS_JSON
 
 
@@ -201,12 +201,12 @@ ALTER TABLE {table_name} ON CLUSTER {cluster}
 ADD INDEX `minmax_inserted_at` COALESCE(`inserted_at`, `_timestamp`)
 TYPE minmax
 GRANULARITY 1
-""".format(table_name=EVENTS_DATA_TABLE(), cluster=settings.CLICKHOUSE_CLUSTER)
+""".format(table_name=EVENTS_DATA_TABLE(), cluster=settings.DATASTORE_CLUSTER)
 
 EVENTS_TABLE_MATERIALIZE_INSERTED_AT_INDEX_SQL = """
 ALTER TABLE {table_name} ON CLUSTER {cluster}
 MATERIALIZE INDEX `minmax_inserted_at`
-""".format(table_name=EVENTS_DATA_TABLE(), cluster=settings.CLICKHOUSE_CLUSTER)
+""".format(table_name=EVENTS_DATA_TABLE(), cluster=settings.DATASTORE_CLUSTER)
 
 # we add the settings to prevent poison pills from stopping ingestion
 # kafka_skip_broken_messages is an int, not a boolean, so we explicitly set
@@ -273,8 +273,8 @@ FROM {database}.kafka_events_json
 """.format(
         target_table=WRITABLE_EVENTS_DATA_TABLE(),
         dynamically_materialized_columns=MV_DYNAMICALLY_MATERIALIZED_COLUMNS(),
-        cluster=settings.CLICKHOUSE_CLUSTER,
-        database=settings.CLICKHOUSE_DATABASE,
+        cluster=settings.DATASTORE_CLUSTER,
+        database=settings.DATASTORE_DATABASE,
     )
 )
 
@@ -312,7 +312,7 @@ def EVENTS_RECENT_TABLE_SQL(on_cluster=False):
         engine=Distributed(
             data_table=SHARDED_EVENTS_RECENT_DATA_TABLE(),
             sharding_key="sipHash64(distinct_id)",
-            cluster=settings.CLICKHOUSE_PRIMARY_REPLICA_CLUSTER,
+            cluster=settings.DATASTORE_PRIMARY_REPLICA_CLUSTER,
         ),
         extra_fields=KAFKA_COLUMNS + INSERTED_AT_COLUMN,
         dynamically_materialized_columns="",
@@ -328,7 +328,7 @@ def DISTRIBUTED_EVENTS_RECENT_TABLE_SQL(on_cluster=False):
         engine=Distributed(
             data_table=SHARDED_EVENTS_RECENT_DATA_TABLE(),
             sharding_key="sipHash64(distinct_id)",
-            cluster=settings.CLICKHOUSE_PRIMARY_REPLICA_CLUSTER,
+            cluster=settings.DATASTORE_PRIMARY_REPLICA_CLUSTER,
         ),
         extra_fields=KAFKA_COLUMNS + INSERTED_AT_COLUMN,
         dynamically_materialized_columns="",
@@ -344,7 +344,7 @@ def WRITABLE_EVENTS_RECENT_TABLE_SQL(on_cluster=False):
         engine=Distributed(
             data_table=SHARDED_EVENTS_RECENT_DATA_TABLE(),
             sharding_key="sipHash64(distinct_id)",
-            cluster=settings.CLICKHOUSE_WRITABLE_CLUSTER,
+            cluster=settings.DATASTORE_WRITABLE_CLUSTER,
         ),
         extra_fields=KAFKA_COLUMNS,
         dynamically_materialized_columns="",
@@ -408,12 +408,12 @@ _offset
 FROM {database}.{source_table}
 """.format(
         source_table=EVENTS_DATA_TABLE(),
-        database=settings.CLICKHOUSE_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         target_table=WRITABLE_EVENTS_RECENT_TABLE(),
     )
 
 
-# Distributed engine tables are only created if CLICKHOUSE_REPLICATED
+# Distributed engine tables are only created if DATASTORE_REPLICATED
 
 
 # This table is responsible for writing to sharded_events based on a sharding key.

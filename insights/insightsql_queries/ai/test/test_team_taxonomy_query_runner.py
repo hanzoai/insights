@@ -3,11 +3,11 @@ from datetime import timedelta
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
     flush_persons_and_events,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 
 from django.test import override_settings
@@ -19,8 +19,8 @@ from insights.insightsql_queries.ai.team_taxonomy_query_runner import TeamTaxono
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestTeamTaxonomyQueryRunner(ClickhouseTestMixin, APIBaseTest):
-    @snapshot_clickhouse_queries
+class TestTeamTaxonomyQueryRunner(DatastoreTestMixin, APIBaseTest):
+    @snapshot_datastore_queries
     def test_taxonomy_query_runner(self):
         _create_person(
             distinct_ids=["person1"],

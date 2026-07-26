@@ -25,7 +25,7 @@ from insights.batch_exports.service import (
 )
 from insights.models import BatchExport, BatchExportDestination, BatchExportRun
 from insights.models.integration import DatabricksIntegration
-from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.datastore import DatastoreClient
 
 from products.batch_exports.backend.temporal.destinations.bigquery_batch_export import (
     BigQueryClient,
@@ -125,8 +125,8 @@ class BatchExportsDebugger:
     5. We are done with the setup, and the next steps will depend on your
        specific debugging needs: Check the batch export latest run with
        `get_latest_run`, load the data for the run in the staging S3 bucket with
-       `load_run_s3_data`, compare that with the data you get from ClickHouse
-       using `load_run_clickhouse_data`, or load statistics for both datasets.
+       `load_run_s3_data`, compare that with the data you get from Datastore
+       using `load_run_datastore_data`, or load statistics for both datasets.
 
     Attributes:
         team_id: The ID of the team we are debugging.
@@ -156,13 +156,13 @@ class BatchExportsDebugger:
             region=settings.BATCH_EXPORT_OBJECT_STORAGE_REGION,
             endpoint_override=endpoint_url,
         )
-        self.clickhouse_client = ClickHouseClient(
-            url=settings.CLICKHOUSE_OFFLINE_HTTP_URL,
-            user=settings.CLICKHOUSE_USER,
-            password=settings.CLICKHOUSE_PASSWORD,
-            database=settings.CLICKHOUSE_DATABASE,
-            max_execution_time=settings.CLICKHOUSE_MAX_EXECUTION_TIME,
-            max_memory_usage=settings.CLICKHOUSE_MAX_MEMORY_USAGE,
+        self.datastore_client = DatastoreClient(
+            url=settings.DATASTORE_OFFLINE_HTTP_URL,
+            user=settings.DATASTORE_USER,
+            password=settings.DATASTORE_PASSWORD,
+            database=settings.DATASTORE_DATABASE,
+            max_execution_time=settings.DATASTORE_MAX_EXECUTION_TIME,
+            max_memory_usage=settings.DATASTORE_MAX_MEMORY_USAGE,
             cancel_http_readonly_queries_on_client_close=1,
             output_format_arrow_string_as_string="true",
         )
@@ -386,7 +386,7 @@ class BatchExportsDebugger:
 
         return column_stats
 
-    def iter_run_record_batches_from_clickhouse(
+    def iter_run_record_batches_from_datastore(
         self,
         batch_export_run: BatchExportRun,
     ) -> collections.abc.Generator[pa.RecordBatch, None, None]:
@@ -475,23 +475,23 @@ class BatchExportsDebugger:
 
         parameters = {**parameters, **extra_query_parameters}
 
-        yield from self.clickhouse_client.stream_query_as_arrow(query, query_parameters=parameters)
+        yield from self.datastore_client.stream_query_as_arrow(query, query_parameters=parameters)
 
-    def load_run_clickhouse_data(
+    def load_run_datastore_data(
         self,
         batch_export_run: BatchExportRun,
     ) -> pa.Table:
-        """Load data in ClickHouse for a given batch export run."""
-        return pa.Table.from_batches(self.iter_run_record_batches_from_clickhouse(batch_export_run))
+        """Load data in Datastore for a given batch export run."""
+        return pa.Table.from_batches(self.iter_run_record_batches_from_datastore(batch_export_run))
 
-    def load_run_clickhouse_statistics(
+    def load_run_datastore_statistics(
         self,
         batch_export_run: BatchExportRun,
         column_name: str,
     ) -> ColumnDebugStatistics | None:
-        """Compute debug statistics for column using clickhouse data."""
+        """Compute debug statistics for column using datastore data."""
         column_stats: ColumnDebugStatistics | None = None
-        for record_batch in self.iter_run_record_batches_from_clickhouse(batch_export_run):
+        for record_batch in self.iter_run_record_batches_from_datastore(batch_export_run):
             if column_stats is None:
                 column_stats = ColumnDebugStatistics.from_record_batch(record_batch, column_name=column_name)
             else:

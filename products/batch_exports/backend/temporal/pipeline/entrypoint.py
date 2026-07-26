@@ -76,8 +76,8 @@ async def execute_batch_export_using_internal_stage(
     to abstract executing the main insert activity of each batch export.
 
     It works in a similar way to the old version of the batch export insert activity, but instead of
-    reading data from ClickHouse and exporting it to the destination in batches, we break this down into 2 steps:
-        1. Exporting the batch export data directly into our own internal S3 staging area using ClickHouse
+    reading data from Datastore and exporting it to the destination in batches, we break this down into 2 steps:
+        1. Exporting the batch export data directly into our own internal S3 staging area using Datastore
         2. Reading the data from the internal S3 staging area and exporting it to the destination using the
             producer/consumer pattern
 

@@ -10,7 +10,7 @@ import unittest.mock
 from google.cloud import bigquery
 
 from insights.batch_exports.service import BatchExportModel, BatchExportSchema
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
 from products.batch_exports.backend.temporal.destinations.bigquery_batch_export import (
     BigQueryInsertInputs,
@@ -25,11 +25,11 @@ from products.batch_exports.backend.tests.temporal.destinations.bigquery.utils i
     SKIP_IF_MISSING_GOOGLE_APPLICATION_CREDENTIALS,
     TEST_MODELS,
     TEST_TIME,
-    assert_clickhouse_records_in_bigquery,
+    assert_datastore_records_in_bigquery,
 )
 from products.batch_exports.backend.tests.temporal.utils.persons import (
-    generate_test_person_distinct_id2_in_clickhouse,
-    generate_test_persons_in_clickhouse,
+    generate_test_person_distinct_id2_in_datastore,
+    generate_test_persons_in_datastore,
 )
 
 pytestmark = [
@@ -54,7 +54,7 @@ EXPECTED_PERSONS_BATCH_EXPORT_FIELDS = [
 async def _run_activity(
     activity_environment,
     bigquery_client,
-    clickhouse_client,
+    datastore_client,
     bigquery_config,
     team,
     data_interval_start,
@@ -109,9 +109,9 @@ async def _run_activity(
     insert_inputs.stage_folder = stage_folder
     result = await activity_environment.run(insert_into_bigquery_activity_from_stage, insert_inputs)
 
-    await assert_clickhouse_records_in_bigquery(
+    await assert_datastore_records_in_bigquery(
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         table_id=table_id,
         dataset_id=dataset_id,
         team_id=team.pk,
@@ -166,7 +166,7 @@ async def _run_activity(
     indirect=True,
 )
 async def test_insert_into_bigquery_activity_inserts_data_into_bigquery_table(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     bigquery_client,
     bigquery_config,
@@ -209,7 +209,7 @@ async def test_insert_into_bigquery_activity_inserts_data_into_bigquery_table(
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=f"test_insert_activity_table_{ateam.pk}",
         dataset_id=bigquery_dataset.dataset_id,
@@ -231,7 +231,7 @@ async def test_insert_into_bigquery_activity_inserts_data_into_bigquery_table(
     ],
 )
 async def test_insert_into_bigquery_activity_from_stage_inserts_sessions_data_into_bigquery_table(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     bigquery_client,
     bigquery_config,
@@ -263,7 +263,7 @@ async def test_insert_into_bigquery_activity_from_stage_inserts_sessions_data_in
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=f"test_insert_activity_table_{ateam.pk}",
         dataset_id=bigquery_dataset.dataset_id,
@@ -320,7 +320,7 @@ async def test_insert_into_bigquery_activity_from_stage_inserts_sessions_data_in
     indirect=True,
 )
 async def test_insert_into_bigquery_activity_from_stage_inserts_data_into_bigquery_table_with_property_filters(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     bigquery_client,
     bigquery_config,
@@ -359,7 +359,7 @@ async def test_insert_into_bigquery_activity_from_stage_inserts_data_into_bigque
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=f"test_insert_activity_table_{ateam.pk}",
         dataset_id=bigquery_dataset.dataset_id,
@@ -378,7 +378,7 @@ async def test_insert_into_bigquery_activity_from_stage_inserts_data_into_bigque
 @pytest.mark.parametrize("use_json_type", [True], indirect=True)
 @pytest.mark.parametrize("model", TEST_MODELS)
 async def test_insert_into_bigquery_activity_from_stage_inserts_data_into_bigquery_table_without_query_permissions(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     bigquery_client,
     bigquery_config,
@@ -415,7 +415,7 @@ async def test_insert_into_bigquery_activity_from_stage_inserts_data_into_bigque
         await _run_activity(
             activity_environment,
             bigquery_client=bigquery_client,
-            clickhouse_client=clickhouse_client,
+            datastore_client=datastore_client,
             team=ateam,
             table_id=f"test_insert_activity_table_{ateam.pk}",
             dataset_id=bigquery_dataset.dataset_id,
@@ -434,7 +434,7 @@ async def test_insert_into_bigquery_activity_from_stage_inserts_data_into_bigque
 
 
 async def test_insert_into_bigquery_activity_from_stage_merges_persons_data_in_follow_up_runs(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     bigquery_client,
     bigquery_config,
@@ -457,7 +457,7 @@ async def test_insert_into_bigquery_activity_from_stage_merges_persons_data_in_f
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=table_id,
         dataset_id=bigquery_dataset.dataset_id,
@@ -472,8 +472,8 @@ async def test_insert_into_bigquery_activity_from_stage_merges_persons_data_in_f
 
     for old_person in persons_to_export_created[: len(persons_to_export_created) // 2]:
         new_person_id = uuid.uuid4()
-        new_person, _ = await generate_test_persons_in_clickhouse(
-            client=clickhouse_client,
+        new_person, _ = await generate_test_persons_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -482,8 +482,8 @@ async def test_insert_into_bigquery_activity_from_stage_merges_persons_data_in_f
             properties={"utm_medium": "referral", "$initial_os": "Linux", "new_property": "Something"},
         )
 
-        await generate_test_person_distinct_id2_in_clickhouse(
-            clickhouse_client,
+        await generate_test_person_distinct_id2_in_datastore(
+            datastore_client,
             ateam.pk,
             person_id=uuid.UUID(new_person[0]["id"]),
             distinct_id=old_person["distinct_id"],
@@ -494,7 +494,7 @@ async def test_insert_into_bigquery_activity_from_stage_merges_persons_data_in_f
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=table_id,
         dataset_id=bigquery_dataset.dataset_id,
@@ -507,7 +507,7 @@ async def test_insert_into_bigquery_activity_from_stage_merges_persons_data_in_f
 
 
 async def test_insert_into_bigquery_activity_from_stage_merges_sessions_data_in_follow_up_runs(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     bigquery_client,
     bigquery_config,
@@ -530,7 +530,7 @@ async def test_insert_into_bigquery_activity_from_stage_merges_sessions_data_in_
     result = await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=table_id,
         dataset_id=bigquery_dataset.dataset_id,
@@ -551,8 +551,8 @@ async def test_insert_into_bigquery_activity_from_stage_merges_sessions_data_in_
         data_interval_start + dt.timedelta(hours=1),
         data_interval_end + dt.timedelta(hours=1),
     )
-    new_events, _, _ = await generate_test_events_in_clickhouse(
-        client=clickhouse_client,
+    new_events, _, _ = await generate_test_events_in_datastore(
+        client=datastore_client,
         team_id=ateam.pk,
         start_time=new_data_interval_start,
         end_time=new_data_interval_end,
@@ -570,7 +570,7 @@ async def test_insert_into_bigquery_activity_from_stage_merges_sessions_data_in_
     result = await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=table_id,
         dataset_id=bigquery_dataset.dataset_id,
@@ -604,7 +604,7 @@ def drop_column_from_bigquery_table(
 
 
 async def test_insert_into_bigquery_activity_from_stage_handles_person_new_columns(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     bigquery_client,
     bigquery_config,
@@ -631,7 +631,7 @@ async def test_insert_into_bigquery_activity_from_stage_handles_person_new_colum
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=table_id,
         dataset_id=bigquery_dataset.dataset_id,
@@ -653,8 +653,8 @@ async def test_insert_into_bigquery_activity_from_stage_handles_person_new_colum
 
     for old_person in persons_to_export_created[: len(persons_to_export_created) // 2]:
         new_person_id = uuid.uuid4()
-        new_person, _ = await generate_test_persons_in_clickhouse(
-            client=clickhouse_client,
+        new_person, _ = await generate_test_persons_in_datastore(
+            client=datastore_client,
             team_id=ateam.pk,
             start_time=data_interval_start,
             end_time=data_interval_end,
@@ -663,8 +663,8 @@ async def test_insert_into_bigquery_activity_from_stage_handles_person_new_colum
             properties={"utm_medium": "referral", "$initial_os": "Linux", "new_property": "Something"},
         )
 
-        await generate_test_person_distinct_id2_in_clickhouse(
-            clickhouse_client,
+        await generate_test_person_distinct_id2_in_datastore(
+            datastore_client,
             ateam.pk,
             person_id=uuid.UUID(new_person[0]["id"]),
             distinct_id=old_person["distinct_id"],
@@ -677,7 +677,7 @@ async def test_insert_into_bigquery_activity_from_stage_handles_person_new_colum
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=table_id,
         dataset_id=bigquery_dataset.dataset_id,
@@ -691,7 +691,7 @@ async def test_insert_into_bigquery_activity_from_stage_handles_person_new_colum
 
 
 async def test_insert_into_bigquery_activity_from_stage_handles_datetime_to_int(
-    clickhouse_client,
+    datastore_client,
     activity_environment,
     bigquery_client,
     bigquery_config,
@@ -704,13 +704,13 @@ async def test_insert_into_bigquery_activity_from_stage_handles_datetime_to_int(
     """Test that the `insert_into_bigquery_activity_from_stage` handles columns in the
     destination having INT64 type for DateTime64 columns.
 
-    ClickHouse exports DateTime columns as uint32. Not to be confused with DateTime64
+    Datastore exports DateTime columns as uint32. Not to be confused with DateTime64
     columns which are exported as Arrow's native timestamp type.
 
     This can lead to fields in destination tables corresponding to DateTime types being
     created as BigQuery's INT64, as that's how we resolve Arrow's uint32.
 
-    If the ClickHouse type ever changes from DateTime to DateTime64, for example, if the
+    If the Datastore type ever changes from DateTime to DateTime64, for example, if the
     query is updated, we want to ensure we can continue exporting to an INT64 field,
     even if the field is now DateTime64.
 
@@ -723,7 +723,7 @@ async def test_insert_into_bigquery_activity_from_stage_handles_datetime_to_int(
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=table_id,
         dataset_id=bigquery_dataset.dataset_id,
@@ -752,7 +752,7 @@ async def test_insert_into_bigquery_activity_from_stage_handles_datetime_to_int(
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
-        clickhouse_client=clickhouse_client,
+        datastore_client=datastore_client,
         team=ateam,
         table_id=table_id,
         dataset_id=bigquery_dataset.dataset_id,

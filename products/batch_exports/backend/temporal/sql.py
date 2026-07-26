@@ -6,17 +6,17 @@ from insights.insightsql.parser import parse_expr
 
 
 def get_s3_function_call(s3_folder: str, s3_key: str | None, s3_secret: str | None, num_partitions: int) -> str:
-    """Generate the s3() function call for ClickHouse INSERT queries.
+    """Generate the s3() function call for Datastore INSERT queries.
 
-    When using keyless S3 auth (IAM roles), we omit credentials and ClickHouse uses the
+    When using keyless S3 auth (IAM roles), we omit credentials and Datastore uses the
     default credential provider chain. Otherwise, we pass the access key and secret.
 
-    Note: We use %% for the modulo operator because the ClickHouse client uses % for
+    Note: We use %% for the modulo operator because the Datastore client uses % for
     parameter substitution, so %% produces a literal % in the final query.
     """
     s3_url = f"{s3_folder}/export_{{{{_partition_id}}}}.arrow"
     if s3_key is not None and s3_secret is not None:
-        # Escape single quotes by doubling them (ClickHouse SQL escaping)
+        # Escape single quotes by doubling them (Datastore SQL escaping)
         escaped_key = s3_key.replace("'", "''")
         escaped_secret = s3_secret.replace("'", "''")
         s3_call = f"s3('{s3_url}', '{escaped_key}', '{escaped_secret}', 'ArrowStream')"

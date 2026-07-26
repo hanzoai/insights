@@ -3,10 +3,10 @@ from django.db import models
 from django.db.models.expressions import F
 from django.db.models.functions import Coalesce
 
-from insights.clickhouse.table_engines import ReplacingMergeTree, ReplicationScheme
+from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
 from insights.models.team import Team
 from insights.models.utils import UniqueConstraintByExpression, UUIDTModel
-from insights.settings.data_stores import CLICKHOUSE_DATABASE
+from insights.settings.data_stores import DATASTORE_DATABASE
 
 
 class PropertyType(models.TextChoices):
@@ -131,11 +131,11 @@ class PropertyDefinition(UUIDTModel):
         return None
 
 
-# ClickHouse Table DDL
+# Datastore Table DDL
 
 PROPERTY_DEFINITIONS_TABLE_SQL = (
     lambda: f"""
-CREATE TABLE IF NOT EXISTS `{CLICKHOUSE_DATABASE}`.`property_definitions`
+CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.`property_definitions`
 (
     -- Team and project relationships
     team_id UInt32,
@@ -163,4 +163,4 @@ SETTINGS index_granularity = 8192
 """
 )
 
-DROP_PROPERTY_DEFINITIONS_TABLE_SQL = lambda: f"DROP TABLE IF EXISTS `{CLICKHOUSE_DATABASE}`.`property_definitions`"
+DROP_PROPERTY_DEFINITIONS_TABLE_SQL = lambda: f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`property_definitions`"

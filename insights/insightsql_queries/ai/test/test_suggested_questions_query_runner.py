@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 from unittest.mock import patch
 
 from django.test import override_settings
@@ -12,8 +12,8 @@ from insights.insightsql_queries.ai.suggested_questions_query_runner import Sugg
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestSuggestedQuestionsQueryRunner(ClickhouseTestMixin, APIBaseTest):
-    @snapshot_clickhouse_queries
+class TestSuggestedQuestionsQueryRunner(DatastoreTestMixin, APIBaseTest):
+    @snapshot_datastore_queries
     @patch(
         "insights.insightsql_queries.ai.suggested_questions_query_runner.hit_openai",
         return_value=("Lorem ipsum. QUESTIONS:\nHow? 78\n\nWhy? 91", 21, 37),

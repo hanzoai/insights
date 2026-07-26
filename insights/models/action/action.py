@@ -65,7 +65,7 @@ class Action(FileSystemSyncMixin, ModelActivityMixin, RootTeamMixin, models.Mode
         blank=True, null=True, help_text="The version of the embedding model used to embed the action"
     )
 
-    # DEPRECATED: these were used before ClickHouse was our database
+    # DEPRECATED: these were used before Datastore was our database
     is_calculating = models.BooleanField(default=False)
     last_calculated_at = models.DateTimeField(default=timezone.now, blank=True)
 

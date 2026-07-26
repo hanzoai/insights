@@ -5,11 +5,11 @@ from typing import Optional
 from clickhouse_driver.errors import ServerException
 
 from insights.exceptions import (
-    ClickHouseAtCapacity,
-    ClickHouseEstimatedQueryExecutionTimeTooLong,
-    ClickHouseQueryMemoryLimitExceeded,
-    ClickHouseQuerySizeExceeded,
-    ClickHouseQueryTimeOut,
+    DatastoreAtCapacity,
+    DatastoreEstimatedQueryExecutionTimeTooLong,
+    DatastoreQueryMemoryLimitExceeded,
+    DatastoreQuerySizeExceeded,
+    DatastoreQueryTimeOut,
 )
 
 
@@ -41,7 +41,7 @@ class ErrorCodeMeta:
     name: str
     user_safe: bool | str = False
     """Whether this error code is safe to show to the user and couldn't be caught at InsightsQL level.
-    If a string is set, it will be used as the error message instead of the ClickHouse one.
+    If a string is set, it will be used as the error message instead of the Datastore one.
     """
 
     @property
@@ -49,43 +49,43 @@ class ErrorCodeMeta:
         return self.name.replace("_", " ").title().replace(" ", "")
 
 
-def clickhouse_error_type(e: Exception) -> str:
-    "Provide a ClickHouse error type for observability"
+def datastore_error_type(e: Exception) -> str:
+    "Provide a Datastore error type for observability"
     if not isinstance(e, ServerException):
         return type(e).__name__
-    return f"CHQueryError{look_up_clickhouse_error_code_meta(e).label}"
+    return f"CHQueryError{look_up_datastore_error_code_meta(e).label}"
 
 
-def wrap_clickhouse_query_error(err: Exception) -> Exception:
-    "Beautifies clickhouse client errors, using custom error classes for every code"
+def wrap_datastore_query_error(err: Exception) -> Exception:
+    "Beautifies datastore client errors, using custom error classes for every code"
     if not isinstance(err, ServerException):
         return err
 
-    meta = look_up_clickhouse_error_code_meta(err)
+    meta = look_up_datastore_error_code_meta(err)
     name = meta.name
 
     # Naming convention:
-    # - Exceptions starting with ClickHouse inherit from APIException and are not sent to error reporting.
+    # - Exceptions starting with Datastore inherit from APIException and are not sent to error reporting.
     # - Exceptions starting with CH inherit from InternalCHQueryError or ExposedCHQueryError.
     #   These ultimately extend clickhouse_driver.errors.ServerException and are sent to error reporting.
 
     # infrastructure errors - custom messages to hide internals
     if name in ("TOO_MANY_SIMULTANEOUS_QUERIES", "CANNOT_SCHEDULE_TASK"):
-        return ClickHouseAtCapacity()
+        return DatastoreAtCapacity()
     elif name == "TIMEOUT_EXCEEDED":
-        return ClickHouseQueryTimeOut()
+        return DatastoreQueryTimeOut()
     elif name == "MEMORY_LIMIT_EXCEEDED":
-        return ClickHouseQueryMemoryLimitExceeded()
+        return DatastoreQueryMemoryLimitExceeded()
     elif (
         name == "SYNTAX_ERROR" and "query size exceeded" in err.message
     ):  # Handle syntax error when "max query size exceeded" in the message
-        return ClickHouseQuerySizeExceeded()
+        return DatastoreQuerySizeExceeded()
     elif name == "TOO_SLOW":
         # Return a 512 error for queries which would time out
         detail = "Estimated query execution time is too long"
         if match := re.search(r"Estimated query execution time \(.* seconds\) is too long.", err.message):
             detail = match.group(0)
-        return ClickHouseEstimatedQueryExecutionTimeTooLong(
+        return DatastoreEstimatedQueryExecutionTimeTooLong(
             detail=f"{detail} Try reducing its scope by changing the time range."
         )
     elif name == "S3_ERROR":
@@ -127,11 +127,11 @@ def wrap_clickhouse_query_error(err: Exception) -> Exception:
         return type(name, (processed_error_class,), {})(message, code=err.code, code_name=meta.name.lower())
 
 
-def look_up_clickhouse_error_code_meta(error: ServerException) -> ErrorCodeMeta:
+def look_up_datastore_error_code_meta(error: ServerException) -> ErrorCodeMeta:
     code = getattr(error, "code", None)
-    if code is None or code not in CLICKHOUSE_ERROR_CODE_LOOKUP:
-        return CLICKHOUSE_UNKNOWN_EXCEPTION
-    return CLICKHOUSE_ERROR_CODE_LOOKUP[code]
+    if code is None or code not in DATASTORE_ERROR_CODE_LOOKUP:
+        return DATASTORE_UNKNOWN_EXCEPTION
+    return DATASTORE_ERROR_CODE_LOOKUP[code]
 
 
 # Specific error classes we need
@@ -200,7 +200,7 @@ class CHQueryErrorInvalidJoinOnExpression(InternalCHQueryError):
 #
 # From https://github.com/hanzoai/datastore/blob/v25.8.12.129-lts/src/Common/ErrorCodes.cpp#L17-L650
 #
-# Please keep this list up to date at each ClickHouse upgrade.
+# Please keep this list up to date at each Datastore upgrade.
 #
 # You can fetch and print an updated list of error codes with something like:
 #
@@ -209,7 +209,7 @@ class CHQueryErrorInvalidJoinOnExpression(InternalCHQueryError):
 # import requests
 #
 # TAG = "v25.8.12.129-lts"
-# URL = f"https://raw.githubusercontent.com/ClickHouse/ClickHouse/refs/tags/{TAG}/src/Common/ErrorCodes.cpp"
+# URL = f"https://raw.githubusercontent.com/Datastore/Datastore/refs/tags/{TAG}/src/Common/ErrorCodes.cpp"
 #
 # resp = requests.get(URL, timeout=30)
 # resp.raise_for_status()
@@ -232,8 +232,8 @@ class CHQueryErrorInvalidJoinOnExpression(InternalCHQueryError):
 # ```
 #
 # Remember to add back the `user_safe` args though!
-CLICKHOUSE_UNKNOWN_EXCEPTION = ErrorCodeMeta("UNKNOWN_EXCEPTION")
-CLICKHOUSE_ERROR_CODE_LOOKUP: dict[int, ErrorCodeMeta] = {
+DATASTORE_UNKNOWN_EXCEPTION = ErrorCodeMeta("UNKNOWN_EXCEPTION")
+DATASTORE_ERROR_CODE_LOOKUP: dict[int, ErrorCodeMeta] = {
     0: ErrorCodeMeta("OK"),
     1: ErrorCodeMeta("UNSUPPORTED_METHOD"),
     2: ErrorCodeMeta("UNSUPPORTED_PARAMETER"),
@@ -868,7 +868,7 @@ CLICKHOUSE_ERROR_CODE_LOOKUP: dict[int, ErrorCodeMeta] = {
     999: ErrorCodeMeta("KEEPER_EXCEPTION"),
     1000: ErrorCodeMeta("POCO_EXCEPTION"),
     1001: ErrorCodeMeta("STD_EXCEPTION"),
-    1002: CLICKHOUSE_UNKNOWN_EXCEPTION,
+    1002: DATASTORE_UNKNOWN_EXCEPTION,
     1003: ErrorCodeMeta("SSH_EXCEPTION"),
     1004: ErrorCodeMeta("STARTUP_SCRIPTS_ERROR"),
 }

@@ -5,15 +5,15 @@ from datetime import datetime
 
 import pytest
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 
 # ============================================================================
-# ClickHouse Helper Functions
+# Datastore Helper Functions
 # ============================================================================
 
 
 def insert_person_to_ch(team_id: int, person_uuid: str, version: int = 0, is_deleted: int = 0) -> None:
-    """Insert a person directly into ClickHouse person table."""
+    """Insert a person directly into Datastore person table."""
     sync_execute(
         """
         INSERT INTO person (id, team_id, properties, is_deleted, is_identified, version, _timestamp, _offset)
@@ -29,7 +29,7 @@ def insert_person_to_ch(team_id: int, person_uuid: str, version: int = 0, is_del
 
 
 def insert_persons_to_ch_batch(team_id: int, person_uuids: list[str], version: int = 0, is_deleted: int = 0) -> None:
-    """Insert multiple persons directly into ClickHouse person table in a single batch."""
+    """Insert multiple persons directly into Datastore person table in a single batch."""
     if not person_uuids:
         return
     now = datetime.now()
@@ -41,7 +41,7 @@ def insert_persons_to_ch_batch(team_id: int, person_uuids: list[str], version: i
 
 
 def insert_distinct_id_to_ch(team_id: int, person_uuid: str, distinct_id: str, version: int = 0) -> None:
-    """Insert a distinct ID directly into ClickHouse person_distinct_id2 table."""
+    """Insert a distinct ID directly into Datastore person_distinct_id2 table."""
     sync_execute(
         """
         INSERT INTO person_distinct_id2 (team_id, distinct_id, person_id, is_deleted, version, _timestamp, _offset, _partition)
@@ -57,7 +57,7 @@ def insert_distinct_id_to_ch(team_id: int, person_uuid: str, distinct_id: str, v
 
 
 def get_ch_person(team_id: int, person_uuid: str) -> dict | None:
-    """Get a person from ClickHouse."""
+    """Get a person from Datastore."""
     result = sync_execute(
         """
         SELECT id, team_id, is_deleted, version
@@ -72,7 +72,7 @@ def get_ch_person(team_id: int, person_uuid: str) -> dict | None:
 
 
 def get_ch_distinct_id(team_id: int, distinct_id: str) -> dict | None:
-    """Get a distinct ID from ClickHouse."""
+    """Get a distinct ID from Datastore."""
     result = sync_execute(
         """
         SELECT person_id, distinct_id, version, is_deleted
@@ -92,7 +92,7 @@ def get_ch_distinct_id(team_id: int, distinct_id: str) -> dict | None:
 
 
 def cleanup_ch_test_data(team_id: int, person_uuids: list[str], distinct_ids: list[str]) -> None:
-    """Mark test persons as deleted in ClickHouse using batch inserts."""
+    """Mark test persons as deleted in Datastore using batch inserts."""
     now = datetime.now()
     null_uuid = "00000000-0000-0000-0000-000000000000"
 
@@ -111,7 +111,7 @@ def cleanup_ch_test_data(team_id: int, person_uuids: list[str], distinct_ids: li
 
 
 def get_orphaned_person_count(team_id: int) -> int:
-    """Count orphaned persons in ClickHouse for a team."""
+    """Count orphaned persons in Datastore for a team."""
     result = sync_execute(
         """
         SELECT count() FROM person FINAL

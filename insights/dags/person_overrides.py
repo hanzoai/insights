@@ -8,7 +8,7 @@ import pydantic
 from clickhouse_driver import Client
 
 from insights import settings
-from insights.clickhouse.cluster import ClickhouseCluster, MutationWaiter
+from insights.datastore.cluster import DatastoreCluster, MutationWaiter
 from insights.dags.common import JobOwners
 from insights.dags.common.overrides_manager import OverridesSnapshotDictionary, OverridesSnapshotTable
 from insights.models.event.sql import EVENTS_DATA_TABLE
@@ -27,7 +27,7 @@ class PersonOverridesSnapshotTable(OverridesSnapshotTable):
         client.execute(
             f"""
             CREATE TABLE IF NOT EXISTS {self.qualified_name} (team_id Int64, distinct_id String, person_id UUID, version Int64)
-            ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/noshard/{self.qualified_name}', '{{replica}}-{{shard}}', version)
+            ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/noshard/{self.qualified_name}', '{{replica}}-{{shard}}', version)
             ORDER BY (team_id, distinct_id)
             """
         )
@@ -45,7 +45,7 @@ class PersonOverridesSnapshotTable(OverridesSnapshotTable):
             f"""
             INSERT INTO {self.qualified_name} (team_id, distinct_id, person_id, version)
             SELECT team_id, distinct_id, argMax(person_id, version), max(version)
-            FROM {settings.CLICKHOUSE_DATABASE}.{PERSON_DISTINCT_ID_OVERRIDES_TABLE}
+            FROM {settings.DATASTORE_DATABASE}.{PERSON_DISTINCT_ID_OVERRIDES_TABLE}
             WHERE _timestamp < %(timestamp)s
             GROUP BY team_id, distinct_id
             {limit_clause}
@@ -71,16 +71,16 @@ class PersonOverridesSnapshotDictionary(OverridesSnapshotDictionary):
                 version Int64
             )
             PRIMARY KEY team_id, distinct_id
-            SOURCE(CLICKHOUSE(DB %(database)s TABLE %(table)s USER %(user)s PASSWORD %(password)s))
+            SOURCE(DATASTORE(DB %(database)s TABLE %(table)s USER %(user)s PASSWORD %(password)s))
             LAYOUT(COMPLEX_KEY_HASHED(SHARDS {shards}))
             LIFETIME(0)
             SETTINGS(max_execution_time={max_execution_time}, max_memory_usage={max_memory_usage})
             """,
             {
-                "database": settings.CLICKHOUSE_DATABASE,
+                "database": settings.DATASTORE_DATABASE,
                 "table": self.source.name,
-                "user": settings.CLICKHOUSE_USER,
-                "password": settings.CLICKHOUSE_PASSWORD,
+                "user": settings.DATASTORE_USER,
+                "password": settings.DATASTORE_PASSWORD,
             },
         )
 
@@ -119,7 +119,7 @@ class PersonOverridesSnapshotDictionary(OverridesSnapshotDictionary):
 @dagster.op
 def create_snapshot_table(
     context: dagster.OpExecutionContext,
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
 ) -> PersonOverridesSnapshotTable:
     """Create the snapshot table on all hosts in the cluster."""
     table = PersonOverridesSnapshotTable(id=uuid.UUID(context.run.run_id))
@@ -134,7 +134,7 @@ class PopulateSnapshotTableConfig(dagster.Config):
 
     timestamp: str = pydantic.Field(
         description="The upper bound (non-inclusive) timestamp used when selecting person overrides to be squashed. The "
-        "value can be provided in any format that is can be parsed by ClickHouse. This value should be far enough in "
+        "value can be provided in any format that is can be parsed by Datastore. This value should be far enough in "
         "the past that there is no reasonable likelihood that events or overrides prior to this time have not yet been "
         "written to the database and replicated to all hosts in the cluster.",
         default=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime("%Y-%m-%d %H:%M:%S"),
@@ -148,7 +148,7 @@ class PopulateSnapshotTableConfig(dagster.Config):
 
 @dagster.op
 def populate_snapshot_table(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     table: PersonOverridesSnapshotTable,
     config: PopulateSnapshotTableConfig,
 ) -> PersonOverridesSnapshotTable:
@@ -159,7 +159,7 @@ def populate_snapshot_table(
 
 @dagster.op
 def wait_for_snapshot_table_replication(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     table: PersonOverridesSnapshotTable,
 ) -> PersonOverridesSnapshotTable:
     """Wait for the snapshot table data to be replicated to all hosts in the cluster."""
@@ -174,7 +174,7 @@ class SnapshotDictionaryConfig(dagster.Config):
     shards: int = pydantic.Field(
         default=16,
         description="The number of shards to be used when building the dictionary. Using larger values can speed up the "
-        "creation process. See the ClickHouse documentation for more information.",
+        "creation process. See the Datastore documentation for more information.",
     )
     max_execution_time: int = pydantic.Field(
         default=0,
@@ -189,7 +189,7 @@ class SnapshotDictionaryConfig(dagster.Config):
 
 @dagster.op
 def create_snapshot_dictionary(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     config: SnapshotDictionaryConfig,
     table: PersonOverridesSnapshotTable,
 ) -> PersonOverridesSnapshotDictionary:
@@ -225,7 +225,7 @@ def get_existing_dictionary_for_run_id(
 
 @dagster.op
 def load_and_verify_snapshot_dictionary(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     dictionary: PersonOverridesSnapshotDictionary,
 ) -> PersonOverridesSnapshotDictionary:
     """Load the dictionary data on all hosts in the cluster, and ensure all hosts have identical data."""
@@ -242,7 +242,7 @@ def load_and_verify_snapshot_dictionary(
 
 @dagster.op
 def run_person_id_update_mutations(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     dictionary: PersonOverridesSnapshotDictionary,
 ) -> PersonOverridesSnapshotDictionary:
     dictionary.update_mutation_runner.run_on_shards(cluster)
@@ -251,7 +251,7 @@ def run_person_id_update_mutations(
 
 @dagster.op
 def start_overrides_delete_mutations(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     dictionary: PersonOverridesSnapshotDictionary,
 ) -> tuple[PersonOverridesSnapshotDictionary, MutationWaiter]:
     """Start the mutation to remove overrides contained within the snapshot from the overrides table."""
@@ -261,7 +261,7 @@ def start_overrides_delete_mutations(
 
 @dagster.op
 def wait_for_overrides_delete_mutations(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     inputs: tuple[PersonOverridesSnapshotDictionary, MutationWaiter],
 ) -> PersonOverridesSnapshotDictionary:
     """Wait for all hosts to complete the mutation to remove overrides contained within the snapshot from the overrides table."""
@@ -275,7 +275,7 @@ def wait_for_overrides_delete_mutations(
 
 @dagster.op
 def drop_snapshot_dictionary(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     dictionary: PersonOverridesSnapshotDictionary,
 ) -> PersonOverridesSnapshotTable:
     """Drop the snapshot dictionary on all hosts."""
@@ -285,7 +285,7 @@ def drop_snapshot_dictionary(
 
 @dagster.op
 def drop_snapshot_table(
-    cluster: dagster.ResourceParam[ClickhouseCluster],
+    cluster: dagster.ResourceParam[DatastoreCluster],
     table: PersonOverridesSnapshotTable,
 ) -> None:
     """Drop the snapshot table on all hosts."""
@@ -299,7 +299,7 @@ def cleanup_snapshot_resources(dictionary: PersonOverridesSnapshotDictionary) ->
 # Job Definition
 
 
-@dagster.job(tags={"owner": JobOwners.TEAM_CLICKHOUSE.value})
+@dagster.job(tags={"owner": JobOwners.TEAM_DATASTORE.value})
 def squash_person_overrides():
     prepared_snapshot_table = wait_for_snapshot_table_replication(populate_snapshot_table(create_snapshot_table()))
     prepared_dictionary = load_and_verify_snapshot_dictionary(create_snapshot_dictionary(prepared_snapshot_table))
@@ -310,7 +310,7 @@ def squash_person_overrides():
     cleanup_snapshot_resources(dictionary_after_override_delete_mutations)
 
 
-@dagster.job(tags={"owner": JobOwners.TEAM_CLICKHOUSE.value})
+@dagster.job(tags={"owner": JobOwners.TEAM_DATASTORE.value})
 def cleanup_orphaned_person_overrides_snapshot():
     """
     Cleans up overrides snapshot resources after an irrecoverable job failure. This should only be run manually when the

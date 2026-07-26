@@ -76,7 +76,7 @@ ifNull(val, alternative) # ifNull('string', false) == 'string'
 
 ### Null handling
 
-In InsightsQL equality comparisons, `null` is treated as any other variable. Its presence will not make functions automatically return `null`, as is the ClickHouse default.
+In InsightsQL equality comparisons, `null` is treated as any other variable. Its presence will not make functions automatically return `null`, as is the Datastore default.
 
 ```sql
 1 == null # false

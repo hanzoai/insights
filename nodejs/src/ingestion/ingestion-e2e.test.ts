@@ -5,11 +5,11 @@ import { v4 } from 'uuid'
 import { waitForExpect } from '~/tests/helpers/expectations'
 import { resetKafka } from '~/tests/helpers/kafka'
 
-import { Clickhouse } from '../../tests/helpers/clickhouse'
+import { Datastore } from '../../tests/helpers/datastore'
 import { createUserTeamAndOrganization, fetchPostgresPersons, resetTestDatabase } from '../../tests/helpers/sql'
-import { Hub, InternalPerson, PipelineEvent, PluginsServerConfig, ProjectId, RawClickHouseEvent, Team } from '../types'
+import { Hub, InternalPerson, PipelineEvent, PluginsServerConfig, ProjectId, RawDatastoreEvent, Team } from '../types'
 import { closeHub, createHub } from '../utils/db/hub'
-import { parseRawClickHouseEvent } from '../utils/event'
+import { parseRawDatastoreEvent } from '../utils/event'
 import { parseJSON } from '../utils/json-parse'
 import { UUIDT } from '../utils/utils'
 import { fetchDistinctIds } from '../worker/ingestion/persons/repositories/test-helpers'
@@ -232,20 +232,20 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
     'Event Pipeline E2E tests (prefetch=$PERSONS_PREFETCH_ENABLED)',
     (prefetchConfig) => {
         const testWithTeamIngester = createTestWithTeamIngester(prefetchConfig)
-        let clickhouse: Clickhouse
+        let datastore: Datastore
         beforeAll(async () => {
-            console.log('Creating Clickhouse client')
-            clickhouse = Clickhouse.create()
+            console.log('Creating Datastore client')
+            datastore = Datastore.create()
             await resetKafka()
             await resetTestDatabase()
-            await clickhouse.resetTestDatabase()
+            await datastore.resetTestDatabase()
             process.env.SITE_URL = 'https://example.com'
         })
 
         afterAll(async () => {
             await resetTestDatabase()
-            await clickhouse.resetTestDatabase()
-            clickhouse.close()
+            await datastore.resetTestDatabase()
+            datastore.close()
         })
 
         testWithTeamIngester('should handle $$client_ingestion_warning events', {}, async (ingester, hub, team) => {
@@ -1535,7 +1535,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         )
 
         const fetchPersons = async (hub: Hub, teamId: number) => {
-            const persons = await clickhouse.fetchPersons(teamId)
+            const persons = await datastore.fetchPersons(teamId)
             return persons.map((person) => ({
                 ...person,
                 properties: parseJSON(person.properties),
@@ -1543,18 +1543,18 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         }
 
         const fetchEvents = async (hub: Hub, teamId: number) => {
-            // Force ClickHouse to merge parts to ensure FINAL consistency with retry logic
-            await retryClickHouseOperation(
-                () => clickhouse.exec(`OPTIMIZE TABLE person_distinct_id_overrides FINAL`),
+            // Force Datastore to merge parts to ensure FINAL consistency with retry logic
+            await retryDatastoreOperation(
+                () => datastore.exec(`OPTIMIZE TABLE person_distinct_id_overrides FINAL`),
                 'OPTIMIZE TABLE person_distinct_id_overrides FINAL',
                 3, // max retries
                 false // non-fatal operation
             )
 
             // Query events with retry logic for connection stability
-            const queryResult = (await retryClickHouseOperation(
+            const queryResult = (await retryDatastoreOperation(
                 () =>
-                    clickhouse.query(`
+                    datastore.query(`
                 SELECT *,
                        if(notEmpty(overrides.person_id), overrides.person_id, e.person_id) as person_id
                 FROM events e
@@ -1574,13 +1574,13 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
                 'fetchEvents query',
                 3, // max retries
                 true // fatal operation
-            )) as unknown as RawClickHouseEvent[]
+            )) as unknown as RawDatastoreEvent[]
 
-            return queryResult.map(parseRawClickHouseEvent)
+            return queryResult.map(parseRawDatastoreEvent)
         }
 
-        // Utility function for retrying ClickHouse operations with exponential backoff
-        const retryClickHouseOperation = async <T>(
+        // Utility function for retrying Datastore operations with exponential backoff
+        const retryDatastoreOperation = async <T>(
             operation: () => Promise<T>,
             operationName: string,
             maxRetries: number = 3,
@@ -1602,7 +1602,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
                     if (isSocketError && attempt < maxRetries) {
                         const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000) // Exponential backoff, max 10s
                         console.warn(
-                            `[DEBUG] ClickHouse ${operationName} failed (attempt ${attempt}/${maxRetries}), retrying in ${backoffMs}ms:`,
+                            `[DEBUG] Datastore ${operationName} failed (attempt ${attempt}/${maxRetries}), retrying in ${backoffMs}ms:`,
                             error?.message
                         )
                         await new Promise((resolve) => setTimeout(resolve, backoffMs))
@@ -1610,7 +1610,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
                     }
 
                     console.warn(
-                        `[DEBUG] ClickHouse ${operationName} failed (attempt ${attempt}/${maxRetries}):`,
+                        `[DEBUG] Datastore ${operationName} failed (attempt ${attempt}/${maxRetries}):`,
                         error?.message
                     )
                     break
@@ -1621,7 +1621,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
                 throw lastError
             } else if (lastError) {
                 console.warn(
-                    `[DEBUG] ClickHouse ${operationName} failed after all retries (non-fatal):`,
+                    `[DEBUG] Datastore ${operationName} failed after all retries (non-fatal):`,
                     lastError?.message
                 )
                 return null
@@ -1631,9 +1631,9 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         }
 
         const fetchIngestionWarnings = async (hub: Hub, teamId: number) => {
-            const queryResult = (await retryClickHouseOperation(
+            const queryResult = (await retryDatastoreOperation(
                 () =>
-                    clickhouse.query(`
+                    datastore.query(`
                 SELECT *
                 FROM ingestion_warnings
                 WHERE team_id = ${teamId}
@@ -1729,8 +1729,8 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //     await waitForExpect(async () => {
         //         const persons = await fetchPostgresPersons(hub.postgres, team.id)
         //         expect(persons.length).toBe(1)
-        //         const personsClickhouse = await fetchPersons(hub, team.id)
-        //         expect(personsClickhouse.length).toBe(1)
+        //         const personsDatastore = await fetchPersons(hub, team.id)
+        //         expect(personsDatastore.length).toBe(1)
         //         expect(persons[0].properties).toMatchObject(
         //             expect.objectContaining({
         //                 name: 'User 1',
@@ -1740,7 +1740,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //                 test_name: testName,
         //             })
         //         )
-        //         expect(personsClickhouse[0].properties).toMatchObject(
+        //         expect(personsDatastore[0].properties).toMatchObject(
         //             expect.objectContaining({
         //                 name: 'User 1',
         //                 new_name: 'User 1 - Updated',
@@ -1845,8 +1845,8 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //     await waitForExpect(async () => {
         //         const persons = await fetchPostgresPersons(hub.postgres, team.id)
         //         expect(persons.length).toBe(1)
-        //         const personsClickhouse = await fetchPersons(hub, team.id)
-        //         expect(personsClickhouse.length).toBe(1)
+        //         const personsDatastore = await fetchPersons(hub, team.id)
+        //         expect(personsDatastore.length).toBe(1)
         //         expect(persons[0].properties).toMatchObject(
         //             expect.objectContaining({
         //                 name: 'User 1',
@@ -1856,7 +1856,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //                 test_name: testName,
         //             })
         //         )
-        //         expect(personsClickhouse[0].properties).toMatchObject(
+        //         expect(personsDatastore[0].properties).toMatchObject(
         //             expect.objectContaining({
         //                 name: 'User 1',
         //                 new_name: 'User 1 - Updated',
@@ -1962,8 +1962,8 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //     await waitForExpect(async () => {
         //         const persons = await fetchPostgresPersons(hub.postgres, team.id)
         //         expect(persons.length).toBe(1)
-        //         const personsClickhouse = await fetchPersons(hub, team.id)
-        //         expect(personsClickhouse.length).toBe(1)
+        //         const personsDatastore = await fetchPersons(hub, team.id)
+        //         expect(personsDatastore.length).toBe(1)
         //         expect(persons[0].properties).toMatchObject(
         //             expect.objectContaining({
         //                 name: 'User 1',
@@ -1973,7 +1973,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //                 test_name: testName,
         //             })
         //         )
-        //         expect(personsClickhouse[0].properties).toMatchObject(
+        //         expect(personsDatastore[0].properties).toMatchObject(
         //             expect.objectContaining({
         //                 name: 'User 1',
         //                 new_name: 'User 1 - Updated',
@@ -2086,8 +2086,8 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
                 await waitForExpect(async () => {
                     const persons = await fetchPostgresPersons(hub.postgres, team.id)
                     expect(persons.length).toBe(2)
-                    const personsClickhouse = await fetchPersons(hub, team.id)
-                    expect(personsClickhouse.length).toBe(2)
+                    const personsDatastore = await fetchPersons(hub, team.id)
+                    expect(personsDatastore.length).toBe(2)
                     expect(persons.map((person) => person.properties)).toEqual(
                         expect.arrayContaining([
                             expect.objectContaining({
@@ -2106,7 +2106,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
                             }),
                         ])
                     )
-                    expect(personsClickhouse.map((person) => person.properties)).toEqual(
+                    expect(personsDatastore.map((person) => person.properties)).toEqual(
                         expect.arrayContaining([
                             expect.objectContaining({
                                 name: 'User 1',
@@ -2172,15 +2172,15 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
                 await waitForExpect(async () => {
                     const persons = await fetchPostgresPersons(hub.postgres, team.id)
                     expect(persons.length).toBe(1)
-                    const personsClickhouse = await fetchPersons(hub, team.id)
-                    expect(personsClickhouse.length).toBe(1)
+                    const personsDatastore = await fetchPersons(hub, team.id)
+                    expect(personsDatastore.length).toBe(1)
                     expect(persons[0].properties).toMatchObject(
                         expect.objectContaining({
                             name: 'User 1',
                             property_to_unset: 'value',
                         })
                     )
-                    expect(personsClickhouse[0].properties).toMatchObject(
+                    expect(personsDatastore[0].properties).toMatchObject(
                         expect.objectContaining({
                             name: 'User 1',
                             property_to_unset: 'value',
@@ -2203,20 +2203,20 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
                 await waitForExpect(async () => {
                     const persons = await fetchPostgresPersons(hub.postgres, team.id)
                     expect(persons.length).toBe(1)
-                    const personsClickhouse = await fetchPersons(hub, team.id)
-                    expect(personsClickhouse.length).toBe(1)
+                    const personsDatastore = await fetchPersons(hub, team.id)
+                    expect(personsDatastore.length).toBe(1)
                     expect(persons[0].properties).toMatchObject(
                         expect.objectContaining({
                             name: 'User 1',
                         })
                     )
                     expect(persons[0].properties).not.toHaveProperty('property_to_unset')
-                    expect(personsClickhouse[0].properties).toMatchObject(
+                    expect(personsDatastore[0].properties).toMatchObject(
                         expect.objectContaining({
                             name: 'User 1',
                         })
                     )
-                    expect(personsClickhouse[0].properties).not.toHaveProperty('property_to_unset')
+                    expect(personsDatastore[0].properties).not.toHaveProperty('property_to_unset')
                 })
             }
         )
@@ -2248,20 +2248,20 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
             await waitForExpect(async () => {
                 const persons = await fetchPostgresPersons(hub.postgres, team.id)
                 expect(persons.length).toBe(1)
-                const personsClickhouse = await fetchPersons(hub, team.id)
-                expect(personsClickhouse.length).toBe(1)
+                const personsDatastore = await fetchPersons(hub, team.id)
+                expect(personsDatastore.length).toBe(1)
                 expect(persons[0].properties).toMatchObject(
                     expect.objectContaining({
                         name: 'User 1',
                     })
                 )
                 expect(persons[0].properties).not.toHaveProperty('property_to_unset')
-                expect(personsClickhouse[0].properties).toMatchObject(
+                expect(personsDatastore[0].properties).toMatchObject(
                     expect.objectContaining({
                         name: 'User 1',
                     })
                 )
-                expect(personsClickhouse[0].properties).not.toHaveProperty('property_to_unset')
+                expect(personsDatastore[0].properties).not.toHaveProperty('property_to_unset')
             })
         })
 

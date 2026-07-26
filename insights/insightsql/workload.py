@@ -3,7 +3,7 @@ from insights.insightsql.database.models import FunctionCallTable
 from insights.insightsql.errors import QueryError
 from insights.insightsql.visitor import TraversingVisitor
 
-from insights.clickhouse.workload import Workload
+from insights.datastore.workload import Workload
 
 
 class WorkloadCollector(TraversingVisitor):

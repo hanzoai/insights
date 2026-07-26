@@ -54,10 +54,10 @@ def within_the_last_day(start_time: datetime | None) -> bool:
 
 def load_blocks(recording: SessionRecording) -> RecordingBlockListing | None:
     """
-    When API clients are requesting v2 recordings, there is a dependency on querying ClickHouse for the metadata
+    When API clients are requesting v2 recordings, there is a dependency on querying Datastore for the metadata
     We can have a cache of differing length depending on the age of the recording.
     So that when a client ignores cache headers, or if they are paging through all blocks,
-    then we don't hit ClickHouse too often.
+    then we don't hit Datastore too often.
     """
     cache_key = listing_cache_key(recording)
     if cache_key is not None:
@@ -79,7 +79,7 @@ def load_blocks(recording: SessionRecording) -> RecordingBlockListing | None:
         # we can cache it for a long time.
         # If not, we might still be receiving blocks, so we cache it for a short time.
         # Blob ingestion flushes frequently, so we want not too short a cache.
-        # But without a cache we read from clickhouse too often
+        # But without a cache we read from datastore too often
         timeout = FIVE_SECONDS if within_the_last_day(recording.start_time) else ONE_DAY_IN_SECONDS
         logger.info(
             "caching recording blocks",

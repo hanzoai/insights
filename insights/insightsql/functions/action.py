@@ -1,7 +1,7 @@
 from insights.insightsql import ast
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.errors import QueryError
-from insights.insightsql.escape_sql import escape_clickhouse_string
+from insights.insightsql.escape_sql import escape_datastore_string
 
 
 def matches_action(node: ast.Expr, args: list[ast.Expr], context: InsightsQLContext, events_alias: str) -> ast.Expr:
@@ -21,8 +21,8 @@ def matches_action(node: ast.Expr, args: list[ast.Expr], context: InsightsQLCont
             context.add_notice(
                 start=arg.start,
                 end=arg.end,
-                message=f"Action #{actions[0].pk} can also be specified as {escape_clickhouse_string(actions[0].name)}",
-                fix=escape_clickhouse_string(actions[0].name),
+                message=f"Action #{actions[0].pk} can also be specified as {escape_datastore_string(actions[0].name)}",
+                fix=escape_datastore_string(actions[0].name),
             )
             return action_to_expr(actions[0], events_alias=events_alias)
         raise QueryError(f"Could not find cohort with ID {arg.value}", node=arg)

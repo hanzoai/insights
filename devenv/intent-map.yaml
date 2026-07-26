@@ -15,7 +15,7 @@ version: '1.0'
 # - Processes are NOT listed here - they declare their capability in mprocs.yaml
 capabilities:
     core_infra:
-        description: 'Essential infrastructure (docker, postgres, clickhouse)'
+        description: 'Essential infrastructure (docker, postgres, datastore)'
         docker_profiles: []
 
     event_ingestion:
@@ -219,7 +219,7 @@ intents:
         capabilities: [mcp_server]
 
     dagster:
-        description: 'Dagster for clickhouse maintenance, system workflows'
+        description: 'Dagster for datastore maintenance, system workflows'
         capabilities: [dagster_pipelines]
 
 # Always-required processes regardless of intent
@@ -231,7 +231,7 @@ always_required:
     - docker-compose
     # Migrations (DBs created by postgres init scripts, run for everyone)
     - migrate-postgres
-    - migrate-clickhouse
+    - migrate-datastore
     - migrate-persons-db
     - migrate-behavioral-cohorts
     # Core services

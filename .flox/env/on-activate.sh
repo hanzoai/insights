@@ -164,10 +164,10 @@ fi
 run_step "Node packages" pnpm install
 
 # ── Step 3: /etc/hosts ──────────────────────────────────────────────
-if grep -q "127.0.0.1 kafka clickhouse clickhouse-coordinator objectstorage" /etc/hosts; then
+if grep -q "127.0.0.1 kafka datastore datastore-coordinator objectstorage" /etc/hosts; then
   done_step "System hosts"
 else
-  echo "127.0.0.1 kafka clickhouse clickhouse-coordinator objectstorage" | sudo tee -a /etc/hosts 1>/dev/null
+  echo "127.0.0.1 kafka datastore datastore-coordinator objectstorage" | sudo tee -a /etc/hosts 1>/dev/null
   done_step "System hosts (updated)"
 fi
 

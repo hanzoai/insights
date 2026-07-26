@@ -1,9 +1,9 @@
 import { dayjs } from 'lib/dayjs'
 
-import { toAbsoluteClickhouseTimestamp } from './logsViewerLogic'
+import { toAbsoluteDatastoreTimestamp } from './logsViewerLogic'
 
 describe('logsViewerLogic', () => {
-    describe('toAbsoluteClickhouseTimestamp', () => {
+    describe('toAbsoluteDatastoreTimestamp', () => {
         it.each([
             {
                 description: 'converts UTC timestamp correctly',
@@ -26,12 +26,12 @@ describe('logsViewerLogic', () => {
                 expected: '2024-01-15 10:30:45.123',
             },
         ])('$description', ({ input, expected }) => {
-            expect(toAbsoluteClickhouseTimestamp(input)).toBe(expected)
+            expect(toAbsoluteDatastoreTimestamp(input)).toBe(expected)
         })
 
         it('formats timestamp without ISO format', () => {
             const timestamp = dayjs.tz('2024-06-20 14:00:00.000', 'UTC')
-            const result = toAbsoluteClickhouseTimestamp(timestamp)
+            const result = toAbsoluteDatastoreTimestamp(timestamp)
 
             expect(result).not.toContain('T')
             expect(result).not.toContain('Z')

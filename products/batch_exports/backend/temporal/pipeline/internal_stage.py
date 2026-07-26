@@ -15,8 +15,8 @@ from aiobotocore.config import AioConfig
 from aiobotocore.httpsession import AIOHTTPSession as BaseAIOHTTPSession
 from temporalio import activity
 
-from insights.clickhouse import query_tagging
-from insights.clickhouse.query_tagging import Product
+from insights.datastore import query_tagging
+from insights.datastore.query_tagging import Product
 
 from products.batch_exports.backend.temporal.utils import make_retryable_with_exponential_backoff
 
@@ -27,13 +27,13 @@ from structlog.contextvars import bind_contextvars
 
 from insights.batch_exports.service import BackfillDetails, BatchExportField, BatchExportModel, BatchExportSchema
 from insights.sync import database_sync_to_async
-from insights.temporal.common.clickhouse import (
-    ClickHouseCheckQueryStatusError,
-    ClickHouseClient,
-    ClickHouseClientTimeoutError,
-    ClickHouseError,
-    ClickHouseQueryNotFound,
-    ClickHouseQueryStatus,
+from insights.temporal.common.datastore import (
+    DatastoreCheckQueryStatusError,
+    DatastoreClient,
+    DatastoreClientTimeoutError,
+    DatastoreError,
+    DatastoreQueryNotFound,
+    DatastoreQueryStatus,
     get_client,
 )
 from insights.temporal.common.heartbeat import Heartbeater
@@ -317,8 +317,8 @@ async def _get_query(
         filters_str, extra_query_parameters = "", extra_query_parameters
 
     is_backfill = backfill_details is not None
-    # The number of partitions controls how many files ClickHouse writes to concurrently.
-    num_partitions = num_partitions or settings.BATCH_EXPORT_CLICKHOUSE_S3_PARTITIONS
+    # The number of partitions controls how many files Datastore writes to concurrently.
+    num_partitions = num_partitions or settings.BATCH_EXPORT_DATASTORE_S3_PARTITIONS
     assert num_partitions is not None  # to satisfy mypy
 
     aws_access_key_id, aws_secret_access_key = _get_s3_credentials()
@@ -434,15 +434,15 @@ def get_s3_staging_folder(
     """Get the S3 staging folder for a given batch export and attempt number."""
     base_s3_staging_folder = get_base_s3_staging_folder(batch_export_id, data_interval_start, data_interval_end)
     folder = f"{base_s3_staging_folder}/attempt_{attempt_number}"
-    url = _get_clickhouse_s3_staging_folder_url(folder)
+    url = _get_datastore_s3_staging_folder_url(folder)
     return S3StagingFolder(folder=folder, url=url)
 
 
-def _get_clickhouse_s3_staging_folder_url(folder: str) -> str:
+def _get_datastore_s3_staging_folder_url(folder: str) -> str:
     """Get the URL for the S3 staging folder of a given batch export and attempt number.
 
-    This is passed to the ClickHouse query as the `s3_folder` parameter.
-    When running the stack locally, ClickHouse and MinIO are both running in Docker so we use the hostname of the
+    This is passed to the Datastore query as the `s3_folder` parameter.
+    When running the stack locally, Datastore and MinIO are both running in Docker so we use the hostname of the
     container.
     """
     bucket = settings.BATCH_EXPORT_INTERNAL_STAGING_BUCKET
@@ -470,10 +470,10 @@ async def _write_batch_export_record_batches_to_internal_stage(
     """Write record batches to our own internal S3 staging area."""
     logger = LOGGER.bind()
 
-    clickhouse_url = None
+    datastore_url = None
     # 5 min batch exports should query a single node, which is known to have zero replication lag
     if is_5_min_batch_export(full_range=full_range):
-        clickhouse_url = settings.CLICKHOUSE_OFFLINE_5MIN_CLUSTER_HOST
+        datastore_url = settings.DATASTORE_OFFLINE_5MIN_CLUSTER_HOST
 
     # Data can sometimes take a while to settle, so for 5 min batch exports we wait several seconds just to be safe.
     # For all other batch exports we wait for 1 minute since we're querying the events_recent table using a
@@ -486,11 +486,11 @@ async def _write_batch_export_record_batches_to_internal_stage(
     await wait_for_delta_past_data_interval_end(end_at, delta)
 
     done_ranges: list[tuple[dt.datetime, dt.datetime]] = []
-    async with get_client(team_id=team_id, clickhouse_url=clickhouse_url) as client:
+    async with get_client(team_id=team_id, datastore_url=datastore_url) as client:
         if not await client.is_alive():
-            raise ConnectionError("Cannot establish connection to ClickHouse")
+            raise ConnectionError("Cannot establish connection to Datastore")
 
-        # TODO - in future we might want to catch any ClickHouse memory usage errors and break down the interval into
+        # TODO - in future we might want to catch any Datastore memory usage errors and break down the interval into
         # sub-intervals to reduce memory usage
         for interval_start, interval_end in generate_query_ranges(full_range, done_ranges):
             if interval_start is not None:
@@ -505,7 +505,7 @@ async def _write_batch_export_record_batches_to_internal_stage(
                     s3_folder=s3_staging_folder_url,
                     s3_key=aws_access_key_id,
                     s3_secret=aws_secret_access_key,
-                    num_partitions=num_partitions or settings.BATCH_EXPORT_CLICKHOUSE_S3_PARTITIONS,
+                    num_partitions=num_partitions or settings.BATCH_EXPORT_DATASTORE_S3_PARTITIONS,
                 )
             else:
                 query = query_or_model
@@ -531,14 +531,14 @@ async def _write_batch_export_record_batches_to_internal_stage(
 
             try:
                 await _execute_query(client, query, query_parameters)
-            except ClickHouseError:
+            except DatastoreError:
                 logger.exception(
-                    "ClickHouse error occurred while writing record batches to internal S3 staging bucket",
+                    "Datastore error occurred while writing record batches to internal S3 staging bucket",
                 )
                 raise
 
 
-async def _execute_query(client: ClickHouseClient, query: str, query_parameters: dict[str, typing.Any]) -> None:
+async def _execute_query(client: DatastoreClient, query: str, query_parameters: dict[str, typing.Any]) -> None:
     """Execute the batch exports query and wait for it to complete.
 
     If the query takes longer than 300 seconds, we time out and wait for the query to complete by checking the query log
@@ -551,7 +551,7 @@ async def _execute_query(client: ClickHouseClient, query: str, query_parameters:
     logger.info("Executing insert into internal stage query")
     try:
         await client.execute_query(query, query_parameters=query_parameters, query_id=str(query_id), timeout=300)
-    except ClickHouseClientTimeoutError:
+    except DatastoreClientTimeoutError:
         logger.warning(
             "Timed-out waiting for insert into S3. Will attempt to check query status and wait for completion",
             timeout=300,
@@ -562,32 +562,32 @@ async def _execute_query(client: ClickHouseClient, query: str, query_parameters:
     logger.info("Query completed successfully", query_duration_seconds=execution_time)
 
 
-async def _wait_for_query_completion(client: ClickHouseClient, query_id: str) -> None:
+async def _wait_for_query_completion(client: DatastoreClient, query_id: str) -> None:
     """Wait for the query to complete by checking the query log and process list.
 
     If checking for the query status fails for some reason, we attempt to cancel the original query and raise an error.
 
     Raises:
-        ClickHouseQueryNotFound: If the query is not found in the query log or process list after a number of retries.
-        ClickHouseCheckQueryStatusError: If an error occurs while checking the query status after a number of retries.
-        ClickHouseError: If the query were are trying to check has failed.
+        DatastoreQueryNotFound: If the query is not found in the query log or process list after a number of retries.
+        DatastoreCheckQueryStatusError: If an error occurs while checking the query status after a number of retries.
+        DatastoreError: If the query were are trying to check has failed.
     """
     logger = LOGGER.bind(query_id=query_id)
     num_attempts = 5
-    # Sometimes this check can fail, especially when ClickHouse is under heavy load, so we retry a few times
+    # Sometimes this check can fail, especially when Datastore is under heavy load, so we retry a few times
     check_query = make_retryable_with_exponential_backoff(
         client.acheck_query,
         max_attempts=num_attempts,
         max_retry_delay=1,
-        retryable_exceptions=(ClickHouseQueryNotFound, ClickHouseCheckQueryStatusError),
+        retryable_exceptions=(DatastoreQueryNotFound, DatastoreCheckQueryStatusError),
     )
 
     try:
         status = await check_query(query_id, raise_on_error=True)
-        while status == ClickHouseQueryStatus.RUNNING:
+        while status == DatastoreQueryStatus.RUNNING:
             await asyncio.sleep(10)
             status = await check_query(query_id, raise_on_error=True)
-    except (ClickHouseQueryNotFound, ClickHouseCheckQueryStatusError):
+    except (DatastoreQueryNotFound, DatastoreCheckQueryStatusError):
         logger.exception("Wait for query failed", num_attempts=num_attempts)
         try:
             await client.acancel_query(query_id)

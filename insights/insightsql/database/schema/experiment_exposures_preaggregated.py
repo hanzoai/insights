@@ -10,7 +10,7 @@ from insights.insightsql.database.models import (
     Table,
 )
 
-from insights.clickhouse.preaggregation.experiment_exposures_sql import DISTRIBUTED_EXPERIMENT_EXPOSURES_TABLE
+from insights.datastore.preaggregation.experiment_exposures_sql import DISTRIBUTED_EXPERIMENT_EXPOSURES_TABLE
 
 
 class ExperimentExposuresPreaggregatedTable(Table):
@@ -30,7 +30,7 @@ class ExperimentExposuresPreaggregatedTable(Table):
         "breakdown_value": StringArrayDatabaseField(name="breakdown_value"),
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return DISTRIBUTED_EXPERIMENT_EXPOSURES_TABLE()
 
     def to_printed_insightsql(self):

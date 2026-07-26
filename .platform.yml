@@ -3,8 +3,8 @@
 # The Django web/worker image (ghcr.io/hanzoai/insights) is RETIRED and no
 # longer built or deployed. LLM observability + product/LLM analytics are
 # served the ONE way by the Hanzo Cloud binary: /v1/evals (native, org-scoped,
-# ClickHouse + Base/SQLite) and /v1/analytics (web/LLM/commerce lenses over the
-# ClickHouse warehouse). See LLM.md § "Status: RETIRED".
+# Datastore + Base/SQLite) and /v1/analytics (web/LLM/commerce lenses over the
+# Datastore warehouse). See LLM.md § "Status: RETIRED".
 #
 # The event-ingest sidecars still built from this repo (Rust capture, Node
 # plugin) have their own build stanzas / workflows and are unaffected. They

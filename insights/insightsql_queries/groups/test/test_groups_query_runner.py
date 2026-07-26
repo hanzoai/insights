@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import Optional
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
 
 from django.test import override_settings
 from django.utils import timezone
@@ -18,7 +18,7 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 
 
 @override_settings(IN_UNIT_TESTING=True)
-class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
+class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
     def create_standard_test_groups(self):
         create_group_type_mapping_without_created_at(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
@@ -54,7 +54,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             )
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_query_runner(self):
         self.create_standard_test_groups()
 
@@ -73,7 +73,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[2][0], "org2.inc")
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_query_runner_with_offset(self):
         self.create_standard_test_groups()
         query = GroupsQuery(
@@ -90,7 +90,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[0][0], "org2.inc")
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_query_runner_with_property_columns(self):
         self.create_standard_test_groups()
         query = GroupsQuery(
@@ -111,7 +111,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[2][2], 300)
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_search(self):
         self.create_standard_test_groups()
         query = GroupsQuery(
@@ -129,7 +129,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[0][0], "org2.inc")
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_search_ranking(self):
         GroupTypeMapping.objects.create(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
@@ -174,7 +174,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[4][1], "contains")
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_search_ranking_with_key_fallback(self):
         """Test search ranking when groups don't have name property and fall back to key"""
         GroupTypeMapping.objects.create(
@@ -210,7 +210,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[2][1], "legacy_api", "Contains match ranked last")
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_search_ordering_with_user_orderby(self):
         """Test that similarity ordering comes after user-specified orderBy, not after default created_at DESC"""
         GroupTypeMapping.objects.create(
@@ -249,7 +249,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[2][2], "100")
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_query_runner_with_order_by(self):
         self.create_standard_test_groups()
 
@@ -307,7 +307,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[2][0], "org0.inc")
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_query_runner_with_string_property(self):
         self.create_standard_test_groups()
 
@@ -334,7 +334,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[0][0], "org0.inc")
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_query_runner_with_numeric_property(self):
         self.create_standard_test_groups()
 
@@ -362,7 +362,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[1][2], 300)
 
     @freeze_time("2025-01-01")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_groups_query_runner_normalize_multiple_groups(self):
         create_group_type_mapping_without_created_at(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
@@ -383,10 +383,10 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             group_key="org0",
             properties={"name": "org0.inc", "arr": 100},
         )
-        # Saving in Postgres won't update ClickHouse
+        # Saving in Postgres won't update Datastore
         group.group_properties["arr"] = 200
         group.save()
-        # ... so we need to update ClickHouse too.
+        # ... so we need to update Datastore too.
         raw_create_group_ch(
             team_id=self.team.pk,
             group_type_index=0,
@@ -418,7 +418,7 @@ class TestGroupsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(result.results[0][0], "org0.inc")
         self.assertEqual(result.results[0][2], 200)
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_select_property_name_with_whitespaces(self):
         create_group(
             team_id=self.team.pk,

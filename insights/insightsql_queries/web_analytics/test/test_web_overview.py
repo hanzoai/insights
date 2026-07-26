@@ -5,10 +5,10 @@ from zoneinfo import ZoneInfo
 from freezegun import freeze_time
 from insights.test.base import (
     APIBaseTest,
-    ClickhouseTestMixin,
+    DatastoreTestMixin,
     _create_event,
     _create_person,
-    snapshot_clickhouse_queries,
+    snapshot_datastore_queries,
 )
 from unittest.mock import MagicMock, patch
 
@@ -32,7 +32,7 @@ from insights.insightsql.constants import LimitContext
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.printer import prepare_and_print_ast
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.web_analytics.web_overview import WebOverviewQueryRunner
 from insights.insightsql_queries.web_analytics.web_overview_pre_aggregated import WebOverviewPreAggregatedQueryBuilder
 from insights.models import Action, Cohort, Element
@@ -40,8 +40,8 @@ from insights.models.utils import uuid7
 from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 
 
-@snapshot_clickhouse_queries
-class TestWebOverviewQueryRunner(ClickhouseTestMixin, APIBaseTest):
+@snapshot_datastore_queries
+class TestWebOverviewQueryRunner(DatastoreTestMixin, APIBaseTest):
     QUERY_TIMESTAMP = "2025-01-29"
 
     def _create_events(self, data, event="$pageview"):
@@ -795,7 +795,7 @@ class TestWebOverviewQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert pre_agg_builder.can_use_preaggregated_tables()
 
     @freeze_time("2023-12-15T12:00:00Z")
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_web_overview_with_channel_type_filter_execution(self):
         query = WebOverviewQuery(
             dateRange=DateRange(date_from="2023-11-01", date_to="2023-11-30"),
@@ -825,14 +825,14 @@ class TestWebOverviewQueryRunner(ClickhouseTestMixin, APIBaseTest):
             enable_select_queries=True,
             modifiers=InsightsQLQueryModifiers(convertToProjectTimezone=True),
         )
-        sql_with_tz, _ = prepare_and_print_ast(insightsql_query, context=context_with_tz, dialect="clickhouse")
+        sql_with_tz, _ = prepare_and_print_ast(insightsql_query, context=context_with_tz, dialect="datastore")
 
         context_utc = InsightsQLContext(
             team_id=self.team.pk,
             enable_select_queries=True,
             modifiers=InsightsQLQueryModifiers(convertToProjectTimezone=False),
         )
-        sql_utc, _ = prepare_and_print_ast(insightsql_query, context=context_utc, dialect="clickhouse")
+        sql_utc, _ = prepare_and_print_ast(insightsql_query, context=context_utc, dialect="datastore")
 
         assert "web_pre_aggregated_bounces.period_bucket, toDateTime64(" in sql_utc
         assert "toTimeZone(web_pre_aggregated_bounces.period_bucket," not in sql_utc
@@ -840,7 +840,7 @@ class TestWebOverviewQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert "toTimeZone(web_pre_aggregated_bounces.period_bucket," in sql_with_tz
         # Simplified approach - just check timezone conversion exists
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_preaggregated_query_sql_snapshot_with_timezone(self):
         self.team.timezone = "America/New_York"
         self.team.save()
@@ -860,7 +860,7 @@ class TestWebOverviewQueryRunner(ClickhouseTestMixin, APIBaseTest):
             modifiers=InsightsQLQueryModifiers(convertToProjectTimezone=False),
         )
 
-        sql_utc, _ = prepare_and_print_ast(insightsql_query, context=context_utc, dialect="clickhouse")
+        sql_utc, _ = prepare_and_print_ast(insightsql_query, context=context_utc, dialect="datastore")
 
         assert "web_pre_aggregated_bounces.period_bucket, toDateTime64(" in sql_utc
         assert "toTimeZone(web_pre_aggregated_bounces.period_bucket, " not in sql_utc
@@ -904,7 +904,7 @@ class TestWebOverviewQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert date_with_tz.date() == date_utc.date()  # Same calendar date
         assert date_with_tz != date_utc  # Different absolute times
 
-    @snapshot_clickhouse_queries
+    @snapshot_datastore_queries
     def test_convertToProjectTimezone_date_range_sql_snapshot(self):
         self.team.timezone = "America/Los_Angeles"
         self.team.save()

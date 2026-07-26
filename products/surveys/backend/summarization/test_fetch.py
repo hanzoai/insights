@@ -4,13 +4,13 @@ import uuid
 from datetime import datetime, timedelta
 
 from freezegun import freeze_time
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 
 from .fetch import fetch_responses
 
 
 @freeze_time("2025-01-15 12:00:00")
-class TestFetchResponses(ClickhouseTestMixin, APIBaseTest):
+class TestFetchResponses(DatastoreTestMixin, APIBaseTest):
     def test_deduplicates_responses_by_submission_id(self):
         """Multiple survey sent events with the same submission ID should return only one response."""
         survey_id = str(uuid.uuid4())

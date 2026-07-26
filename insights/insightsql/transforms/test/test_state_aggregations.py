@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 
 import pytest
-from insights.test.base import APIBaseTest, BaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, BaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 
 from insights.insightsql import ast
 from insights.insightsql.context import InsightsQLContext
@@ -15,7 +15,7 @@ from insights.insightsql.transforms.state_aggregations import (
     wrap_state_query_in_merge_query,
 )
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 
 
 class TestStateTransforms(BaseTest):
@@ -25,7 +25,7 @@ class TestStateTransforms(BaseTest):
         query, _ = prepare_and_print_ast(
             expr,
             InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
         return pretty_print_in_tests(query, self.team.pk)
 
@@ -863,9 +863,9 @@ class TestStateTransforms(BaseTest):
         assert printed == self.snapshot
 
 
-class TestStateTransformsIntegration(ClickhouseTestMixin, APIBaseTest):
+class TestStateTransformsIntegration(DatastoreTestMixin, APIBaseTest):
     """
-    Integration tests for state transformations with ClickHouse execution.
+    Integration tests for state transformations with Datastore execution.
     It is a simple way to make sure we're getting the same results from the original and transformed queries.
     """
 
@@ -877,7 +877,7 @@ class TestStateTransformsIntegration(ClickhouseTestMixin, APIBaseTest):
         query, _ = prepare_and_print_ast(
             expr,
             InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
-            "clickhouse",
+            "datastore",
         )
         return pretty_print_in_tests(query, self.team.pk)
 
@@ -914,14 +914,14 @@ class TestStateTransformsIntegration(ClickhouseTestMixin, APIBaseTest):
 
     def execute_original_and_merge_queries(self, original_query_ast):
         context_original = InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True)
-        original_sql, _ = prepare_and_print_ast(original_query_ast, context=context_original, dialect="clickhouse")
+        original_sql, _ = prepare_and_print_ast(original_query_ast, context=context_original, dialect="datastore")
         original_result = sync_execute(original_sql, context_original.values)
 
         state_query_ast = transform_query_to_state_aggregations(original_query_ast)
         wrapper_query_ast = wrap_state_query_in_merge_query(state_query_ast)
 
         context_transformed = InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True)
-        transformed_sql, _ = prepare_and_print_ast(wrapper_query_ast, context=context_transformed, dialect="clickhouse")
+        transformed_sql, _ = prepare_and_print_ast(wrapper_query_ast, context=context_transformed, dialect="datastore")
         transformed_result = sync_execute(transformed_sql, context_transformed.values)
 
         return original_result, transformed_result
@@ -1106,11 +1106,11 @@ class TestStateTransformsIntegration(ClickhouseTestMixin, APIBaseTest):
 
         # Execute both and compare
         context_original = InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True)
-        original_sql, _ = prepare_and_print_ast(original_union_ast, context=context_original, dialect="clickhouse")
+        original_sql, _ = prepare_and_print_ast(original_union_ast, context=context_original, dialect="datastore")
         original_result = sync_execute(original_sql, context_original.values)
 
         context_transformed = InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True)
-        transformed_sql, _ = prepare_and_print_ast(final_query_ast, context=context_transformed, dialect="clickhouse")
+        transformed_sql, _ = prepare_and_print_ast(final_query_ast, context=context_transformed, dialect="datastore")
         transformed_result = sync_execute(transformed_sql, context_transformed.values)
 
         # Results should be equivalent (order might differ, so we sort)

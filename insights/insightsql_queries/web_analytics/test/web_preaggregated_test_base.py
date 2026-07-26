@@ -1,11 +1,11 @@
 import uuid
 from abc import ABC, abstractmethod
 
-from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_person, cleanup_materialized_columns
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_person, cleanup_materialized_columns
 
 
 
-class WebAnalyticsPreAggregatedTestBase(ClickhouseTestMixin, APIBaseTest, ABC):
+class WebAnalyticsPreAggregatedTestBase(DatastoreTestMixin, APIBaseTest, ABC):
     """Abstract base class for testing web analytics pre-aggregated queries"""
 
     STANDARD_EVENT_PROPERTIES = {

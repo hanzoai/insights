@@ -209,7 +209,7 @@ def s3_default_fields() -> list[BatchExportField]:
 
 @workflow.defn(name="s3-export", failure_exception_types=[workflow.NondeterminismError])
 class S3BatchExportWorkflow(InsightsWorkflow):
-    """A Temporal Workflow to export ClickHouse data into S3.
+    """A Temporal Workflow to export Datastore data into S3.
 
     This Workflow is intended to be executed both manually and by a Temporal Schedule.
     When ran by a schedule, `data_interval_end` should be set to `None` so that we will fetch the
@@ -296,7 +296,7 @@ async def insert_into_s3_activity_from_stage(inputs: S3InsertInputs) -> BatchExp
     """Activity to batch export data to a customer's S3.
 
     This is a new version of the `insert_into_s3_activity` activity that reads data from our internal S3 stage
-    instead of ClickHouse.
+    instead of Datastore.
 
     It will upload multiple files if the max_file_size_mb is set, otherwise it will upload a single file. File uploads
     are done using multipart upload.
@@ -304,7 +304,7 @@ async def insert_into_s3_activity_from_stage(inputs: S3InsertInputs) -> BatchExp
     We could maybe optimize this by simply copying the data from the internal S3 stage to the customer's S3 bucket,
     however, we've tried to keep the activity that writes the data to the internal S3 stage as generic as possible, as
     it will be used by other destinations, not just S3. Our S3 batch exports also support customising the max S3 file
-    size, different file formats, compression, etc, which ClickHouse's S3 functions may not support.
+    size, different file formats, compression, etc, which Datastore's S3 functions may not support.
     """
     bind_contextvars(
         team_id=inputs.team_id,
@@ -330,7 +330,7 @@ async def insert_into_s3_activity_from_stage(inputs: S3InsertInputs) -> BatchExp
     async with Heartbeater():
         # NOTE: we don't support resuming from heartbeats for this activity for 2 reasons:
         # - resuming from old heartbeats doesn't play nicely with S3 multipart uploads
-        # - we don't order the events in the query to ClickHouse
+        # - we don't order the events in the query to Datastore
 
         queue = RecordBatchQueue(max_size_bytes=settings.BATCH_EXPORT_S3_RECORD_BATCH_QUEUE_MAX_SIZE_BYTES)
         producer = ProducerFromInternalStage()

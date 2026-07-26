@@ -90,7 +90,7 @@ class WebPreAggregatedStatsTable(Table):
         **WEB_STATS_SPECIFIC_FIELDS,
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "web_pre_aggregated_stats"
 
     def to_printed_insightsql(self):
@@ -105,7 +105,7 @@ class WebPreAggregatedBouncesTable(Table):
         **WEB_BOUNCES_SPECIFIC_FIELDS,
     }
 
-    def to_printed_clickhouse(self, context):
+    def to_printed_datastore(self, context):
         return "web_pre_aggregated_bounces"
 
     def to_printed_insightsql(self):

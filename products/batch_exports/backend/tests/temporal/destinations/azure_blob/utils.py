@@ -137,7 +137,7 @@ def extract_model_configuration(
     return "custom", batch_export_model["fields"], None, batch_export_model["values"]
 
 
-async def assert_clickhouse_records_in_azure_blob(
+async def assert_datastore_records_in_azure_blob(
     container: ContainerClient,
     key_prefix: str,
     team_id: int,

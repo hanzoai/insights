@@ -12,7 +12,7 @@ from insights.queries.util import alias_poe_mode_for_legacy
 
 class GroupsJoinQuery:
     """
-    Query class responsible for joining with `groups` clickhouse table based on filters
+    Query class responsible for joining with `groups` datastore table based on filters
     """
 
     _filter: Union[Filter, PathFilter, RetentionFilter, StickinessFilter]

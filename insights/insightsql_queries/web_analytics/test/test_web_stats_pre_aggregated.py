@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_clickhouse_queries
+from insights.test.base import _create_event, _create_person, flush_persons_and_events, snapshot_datastore_queries
 
 from insights.schema import (
     DateRange,
@@ -10,7 +10,7 @@ from insights.schema import (
     WebStatsTableQuery,
 )
 
-from insights.clickhouse.client.execute import sync_execute
+from insights.datastore.client.execute import sync_execute
 from insights.insightsql_queries.web_analytics.stats_table import WebStatsTableQueryRunner
 from insights.insightsql_queries.web_analytics.stats_table_pre_aggregated import (
     WEB_ANALYTICS_STATS_TABLE_PRE_AGGREGATED_SUPPORTED_BREAKDOWNS,
@@ -21,7 +21,7 @@ from insights.models.utils import uuid7
 from insights.models.web_preaggregated.sql import WEB_BOUNCES_INSERT_SQL, WEB_STATS_INSERT_SQL
 
 
-@snapshot_clickhouse_queries
+@snapshot_datastore_queries
 class TestWebStatsPreAggregated(WebAnalyticsPreAggregatedTestBase):
     def _setup_test_data(self):
         with freeze_time("2024-01-01T09:00:00Z"):

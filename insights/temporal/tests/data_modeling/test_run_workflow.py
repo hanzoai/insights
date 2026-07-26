@@ -50,7 +50,7 @@ from insights.temporal.data_modeling.run_workflow import (
     start_run_activity,
 )
 from insights.temporal.ducklake.types import DuckLakeCopyModelInput
-from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse, truncate_table
+from insights.temporal.tests.utils.events import generate_test_events_in_datastore, truncate_table
 
 from products.data_warehouse.backend.models.data_modeling_job import DataModelingJob
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
@@ -245,15 +245,15 @@ def mock_to_object_store_rs_credentials(class_self):
 
 
 @pytest_asyncio.fixture
-async def truncate_events_table(clickhouse_client):
-    await truncate_table(clickhouse_client, "sharded_events")
+async def truncate_events_table(datastore_client):
+    await truncate_table(datastore_client, "sharded_events")
 
 
 @pytest_asyncio.fixture
-async def pageview_events(clickhouse_client, ateam, truncate_events_table):
+async def pageview_events(datastore_client, ateam, truncate_events_table):
     start_time, end_time = dt.datetime.now(dt.UTC) - dt.timedelta(days=1), dt.datetime.now(dt.UTC)
-    events, _, events_from_other_team = await generate_test_events_in_clickhouse(
-        clickhouse_client,
+    events, _, events_from_other_team = await generate_test_events_in_datastore(
+        datastore_client,
         ateam.pk,
         start_time,
         end_time,
@@ -1726,7 +1726,7 @@ async def test_insightsql_table_applies_custom_modifier_to_sessions_query(ateam)
     logger = unittest.mock.AsyncMock()
     query = "SELECT $is_bounce FROM sessions LIMIT 1"
     with unittest.mock.patch(
-        "insights.temporal.common.clickhouse.ClickHouseClient.astream_query_as_arrow",
+        "insights.temporal.common.datastore.DatastoreClient.astream_query_as_arrow",
         mock_astream_query,
     ):
         try:

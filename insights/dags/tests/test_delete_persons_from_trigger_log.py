@@ -152,7 +152,7 @@ def create_mock_database_resource(rowcount_values=None, fetchall_results=None):
 
 
 def create_mock_cluster_resource():
-    """Create a mock ClickhouseCluster resource."""
+    """Create a mock DatastoreCluster resource."""
     return MagicMock()
 
 

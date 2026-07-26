@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytest
-from insights.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, DatastoreTestMixin
 
 from insights.schema import (
     BaseMathType,
@@ -24,7 +24,7 @@ from .conversion_goals_aggregator import ConversionGoalsAggregator
 from .marketing_analytics_config import MarketingAnalyticsConfig
 
 
-class TestConversionGoalsAggregator(ClickhouseTestMixin, BaseTest):
+class TestConversionGoalsAggregator(DatastoreTestMixin, BaseTest):
     def setUp(self):
         super().setUp()
         self.config = MarketingAnalyticsConfig.from_team(self.team)
