@@ -308,60 +308,53 @@
     --color-insights-brand-yellow-saturation: 0%;
     --color-insights-brand-yellow-lightness: 80%;
 
-    // Product + insight icon colors (monochrome).
-    //
-    // These feed `iconColor` in products.tsx / defaultTree.tsx / every product
-    // manifest, and are consumed as `color: var(--product-icon-color-{light,dark})`.
-    // Resolving them to `currentColor` makes every product icon inherit the
-    // surrounding text colour, which is monochrome and correct in both themes
-    // without a second ramp to keep in sync. It matches the built-in fallback in
-    // `getIconColor()`, so coloured and uncoloured icons now render identically.
-    --color-product-data-pipeline-light: currentColor;
-    --color-product-product-analytics-light: currentColor;
-    --color-product-workflows-light: currentColor;
-    --color-product-web-analytics-light: currentColor;
-    --color-product-web-analytics-dark: currentColor;
-    --color-product-embedded-analytics-light: currentColor;
-    --color-product-embedded-analytics-dark: currentColor;
-    --color-product-session-replay-light: currentColor;
-    --color-product-session-replay-dark: currentColor;
-    --color-product-heatmaps-light: currentColor;
-    --color-product-heatmaps-dark: currentColor;
-    --color-product-logs-light: currentColor;
-    --color-product-marketing-analytics-light: currentColor;
-    --color-product-live-debugger-light: currentColor;
-    --color-product-feature-flags-light: currentColor;
-    --color-product-experiments-light: currentColor;
-    --color-product-error-tracking-light: currentColor;
-    --color-product-error-tracking-dark: currentColor;
-    --color-product-surveys-light: currentColor;
-    --color-product-data-warehouse-light: currentColor;
-    --color-product-llm-analytics-light: currentColor;
-    --color-product-llm-clusters-light: currentColor;
-    --color-product-llm-datasets-light: currentColor;
-    --color-product-llm-evaluations-light: currentColor;
-    --color-product-llm-prompts-light: currentColor;
-    --color-product-links-light: currentColor;
-    --color-product-revenue-analytics-light: currentColor;
-    --color-product-revenue-analytics-dark: currentColor;
-    --color-product-user-interviews-light: currentColor;
-    --color-product-dashboards-light: currentColor;
-    --color-product-early-access-features-light: currentColor;
-    --color-product-early-access-features-dark: currentColor;
-    --color-product-support-light: currentColor;
-    --color-product-support-dark: currentColor;
+    // Product specific colors
+    --color-product-data-pipeline-light: rgb(46 162 211);
+    --color-product-product-analytics-light: rgb(47 128 250);
+    --color-product-workflows-light: rgb(47 128 250);
+    --color-product-web-analytics-light: rgb(52 175 102);
+    --color-product-web-analytics-dark: rgb(54 196 111); // original color
+    --color-product-embedded-analytics-light: rgb(243 153 109);
+    --color-product-embedded-analytics-dark: rgb(250 158 120);
+    --color-product-session-replay-light: rgb(235 162 18);
+    --color-product-session-replay-dark: rgb(247 165 1);
+    --color-product-heatmaps-light: rgb(220 152 16);
+    --color-product-heatmaps-dark: rgb(247 165 1);
+    --color-product-logs-light: rgb(214 37 123);
+    --color-product-marketing-analytics-light: rgb(214 37 123);
+    --color-product-live-debugger-light: rgb(76 14 200);
+    --color-product-feature-flags-light: rgb(48 171 198);
+    --color-product-experiments-light: rgb(182 42 217);
+    --color-product-error-tracking-light: rgb(211 148 24);
+    --color-product-error-tracking-dark: rgb(247 165 1);
+    --color-product-surveys-light: rgb(243 84 84);
+    --color-product-data-warehouse-light: rgb(133 103 255);
+    --color-product-llm-analytics-light: rgb(182 42 217);
+    --color-product-llm-clusters-light: rgb(147 51 234);
+    --color-product-llm-datasets-light: rgb(124 58 237);
+    --color-product-llm-evaluations-light: rgb(167 139 250);
+    --color-product-llm-prompts-light: rgb(196 181 253);
+    --color-product-links-light: rgb(143 7 255);
+    --color-product-revenue-analytics-light: rgb(52 175 102);
+    --color-product-revenue-analytics-dark: rgb(54 196 111);
+    --color-product-user-interviews-light: rgb(0 140 255);
+    --color-product-dashboards-light: rgb(255 139 7);
+    --color-product-early-access-features-light: rgb(39 171 151);
+    --color-product-early-access-features-dark: rgb(53 213 189);
+    --color-product-support-light: rgb(243 84 84);
+    --color-product-support-dark: rgb(247 165 1);
 
     // Insight colors
-    --color-insight-funnel-light: currentColor;
-    --color-insight-trends-light: currentColor;
-    --color-insight-user-paths-light: currentColor;
-    --color-user-paths-dark: currentColor;
-    --color-insight-retention-light: currentColor;
-    --color-insight-stickiness-light: currentColor;
-    --color-insight-lifecycle-light: currentColor;
-    --color-insight-calendar-heatmap-light: currentColor;
-    --color-insight-calendar-heatmap-dark: currentColor;
-    --color-insight-sql-light: currentColor;
+    --color-insight-funnel-light: rgb(47 128 250);
+    --color-insight-trends-light: rgb(247 165 1);
+    --color-insight-user-paths-light: rgb(30 179 152);
+    --color-user-paths-dark: rgb(41 219 187);
+    --color-insight-retention-light: rgb(243 84 84);
+    --color-insight-stickiness-light: rgb(247 165 1);
+    --color-insight-lifecycle-light: rgb(48 171 198);
+    --color-insight-calendar-heatmap-light: rgb(12 39 146);
+    --color-insight-calendar-heatmap-dark: rgb(61 91 215);
+    --color-insight-sql-light: rgb(245 78 0);
 
     // Generic brand color assignments
     // Change these to change the brand colors
@@ -575,7 +568,10 @@
 
     // Shadows
     // //////////////////////////////////////////////////////////
-    --shadow-elevation-3000: 0 3px 0 var(--border-3000-light);
+    // FLAT. `0 3px 0 <border>` is a hard offset shadow with no blur — it reads
+    // as a raised, embossed 3D slab, which is the upstream look, not ours. Our
+    // controls are flat surfaces separated by a hairline border and radius.
+    --shadow-elevation-3000: none;
 
     // Non-color vars
     //
@@ -827,8 +823,9 @@
     --danger-3000-frame-bg-light: #33380;
     --danger-3000-button-border-light: #333;
     --danger-3000-button-border-hover-light: #333;
-    --shadow-elevation-3000-light: 0 3px 0 var(--border-3000-light);
-    --shadow-elevation-3000-dark: 0 3px 0 var(--border-3000-dark);
+    // Flat in both themes — see --shadow-elevation-3000 above.
+    --shadow-elevation-3000-light: none;
+    --shadow-elevation-3000-dark: none;
     --text-3000-dark: #fff;
     --color-text-secondary-3000-dark: rgb(255 255 255 / 70%);
     --muted-3000-dark: rgb(255 255 255 / 50%);
@@ -840,17 +837,24 @@
     --primary-alt-highlight-light: #e5e5e5;
     --secondary-3000-dark: #1f1f1f;
     --secondary-3000-hover-dark: #5d5d5d;
-    --color-accent-3000-dark: #242424;
-    --color-bg-3000-dark: #1f1f1f;
+    --color-accent-3000-dark: #0d0d0d;
+    // True black ground, per the brand register — panels layer up from it
+    // (#0d0d0d raised, #171717 controls) rather than the app sitting on grey.
+    --color-bg-3000-dark: #000;
     --border-3000-dark: #373737;
     --border-bold-3000-dark: #3f4046;
     --glass-bg-3000-dark: #24262a99;
     --glass-border-3000-dark: var(--border-3000-dark);
     --link-3000-dark: #ffffff;
-    --primary-3000-frame-bg-dark: #555;
-    --primary-3000-button-bg-dark: var(--color-accent);
-    --primary-3000-button-border-dark: #888888;
-    --primary-3000-button-border-hover-dark: #aaaaaa;
+    // The primary action is WHITE — the one high-contrast surface in a black UI.
+    // It was `var(--color-accent)`, a 20%-lightness grey, under a label that
+    // resolves to --text-3000-light (near-black): dark-on-dark, which is why the
+    // Save button read as a muddy slab. White ground + the dark label is the
+    // intended pairing. The accent stays reserved for links/active/focus.
+    --primary-3000-frame-bg-dark: #ffffff;
+    --primary-3000-button-bg-dark: #ffffff;
+    --primary-3000-button-border-dark: #ffffff;
+    --primary-3000-button-border-hover-dark: #e0e0e0;
     --primary-alt-highlight-dark: #232429;
     --secondary-3000-frame-bg-dark: #323232;
     --secondary-3000-button-bg-dark: #1f1f1f;
@@ -972,7 +976,9 @@
 
     // Backgrounds (dark mode)
     // //////////////////////////////////////////////////////////
-    --color-bg-primary: var(--color-neutral-cool-950);
+    // #000, not the 8%-lightness neutral — the app ground is true black and
+    // every surface above it layers up. Same value as --color-bg-3000-dark.
+    --color-bg-primary: #000;
     --color-bg-surface-primary: var(--color-neutral-cool-850);
     --color-bg-surface-secondary: var(--color-neutral-cool-900);
     --color-bg-surface-tertiary: var(--color-neutral-cool-950);
