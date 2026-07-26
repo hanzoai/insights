@@ -3,7 +3,6 @@ import { useActions, useValues } from 'kea'
 
 import {
     IconBook,
-    IconConfetti,
     IconCopy,
     IconDatabase,
     IconEllipsis,
@@ -199,21 +198,6 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                 />
 
                                 {user?.is_staff && <></>}
-                                {!isCloud && (
-                                    <Menu.Item
-                                        render={(props) => (
-                                            <Link
-                                                {...props}
-                                                to={urls.moveToInsightsCloud()}
-                                                buttonProps={{ menuItem: true }}
-                                                data-attr="help-menu-upgrade-to-cloud-button"
-                                            >
-                                                <IconConfetti />
-                                                Try Insights Cloud
-                                            </Link>
-                                        )}
-                                    />
-                                )}
 
                                 {user?.is_staff && (
                                     <Menu.SubmenuRoot>

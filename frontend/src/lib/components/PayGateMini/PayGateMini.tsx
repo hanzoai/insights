@@ -212,13 +212,13 @@ function PayGateContent({
 const renderUsageLimitMessage = (
     featureAvailableOnOrg: BillingFeatureType | null | undefined,
     featureInfoOnNextPlan: BillingFeatureType | undefined,
-    gateVariant: 'add-card' | 'contact-sales' | 'move-to-cloud' | null,
+    gateVariant: 'add-card' | 'contact-sales' | null,
     featureInfo: BillingFeatureType,
     productWithFeature: BillingProductV2AddonType | BillingProductV2Type,
     isAddonProduct?: boolean,
     handleCtaClick?: () => void
 ): JSX.Element => {
-    if (featureAvailableOnOrg?.limit && gateVariant !== 'move-to-cloud') {
+    if (featureAvailableOnOrg?.limit) {
         return (
             <div>
                 <p>
@@ -272,13 +272,11 @@ const renderUsageLimitMessage = (
 }
 
 const renderGateVariantMessage = (
-    gateVariant: 'add-card' | 'contact-sales' | 'move-to-cloud' | null,
+    gateVariant: 'add-card' | 'contact-sales' | null,
     productWithFeature: BillingProductV2AddonType | BillingProductV2Type,
     isAddonProduct?: boolean
 ): JSX.Element => {
-    if (gateVariant === 'move-to-cloud') {
-        return <>This feature is only available on Insights Cloud.</>
-    } else if (isAddonProduct) {
+    if (isAddonProduct) {
         return (
             <>
                 Subscribe to the <b>{productWithFeature?.name}</b> addon to use this feature.
