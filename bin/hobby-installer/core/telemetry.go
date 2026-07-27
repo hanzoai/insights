@@ -1,17 +1,17 @@
 package core
 
 import (
-	"github.com/hanzoai/insights-go"
+	insights "github.com/hanzoai/insights-go"
 )
 
 const insightsAPIKey = "sTMFPsFhdP1Ssg"
 const endpoint = "https://us.i.insights.hanzo.ai"
 
-var client insights_go.Client
+var client insights.Client
 
 func init() {
 	var err error
-	client, err = insights_go.NewWithConfig(insightsAPIKey, insights_go.Config{
+	client, err = insights.NewWithConfig(insightsAPIKey, insights.Config{
 		Endpoint: endpoint,
 	})
 	if err != nil {
@@ -32,10 +32,10 @@ func sendEvent(domain, eventName string) {
 		return
 	}
 
-	_ = client.Enqueue(insights_go.Capture{
+	_ = client.Enqueue(insights.Capture{
 		DistinctId: domain,
 		Event:      eventName,
-		Properties: insights_go.NewProperties().Set("domain", domain),
+		Properties: insights.NewProperties().Set("domain", domain),
 	})
 }
 
