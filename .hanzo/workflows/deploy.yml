@@ -1,14 +1,31 @@
 # insights — the ONE build, on Hanzo's own forge.
 #
 #   git.hanzo.ai push → act_runner (in-cluster git-runner, privileged dind)
-#   → docker build → ghcr.io/hanzoai/insights:<sha> → operator App CR
+#   → docker build → ghcr.io/hanzoai/insights:<semver> → operator App CR
 #
 # GitHub Actions is disabled account-wide, so `.github/workflows/*` cannot
 # build. This is the real pipeline. No GitHub builders.
 #
-# The image is tagged by COMMIT SHA only. A semver tag that gets re-pushed means
-# two digests behind one name, and with imagePullPolicy: IfNotPresent the node
-# keeps whichever it cached first. A SHA cannot move.
+# SEMVER, NEVER SHA. Images are named x.y.z and every build cuts the NEXT patch.
+#
+# The old sha-only scheme was chosen to dodge a real failure: a semver tag that
+# gets RE-PUSHED leaves two digests behind one name, and with
+# imagePullPolicy: IfNotPresent a node keeps whichever it cached first. That
+# hazard is real but it is caused by MUTATING a tag, not by semver. Immutability
+# is what fixes it, and this pipeline enforces immutability directly — it refuses
+# to push a tag that already exists (see the guard below) rather than avoiding
+# readable names. A sha cannot move, but it also cannot be read, ordered, or
+# rolled back to by a human.
+#
+# The commit is not lost by dropping it from the tag: it rides the image as
+# org.opencontainers.image.revision, so `docker inspect` still answers "which
+# commit is this" exactly.
+#
+# THE NEXT PATCH COMES FROM THE REGISTRY, NOT FROM `git tag`. Those two disagree
+# here — git's newest tag is v1.52.1 while 1.52.3 is already published — so
+# deriving from git would re-emit a LIVE tag and cause the exact two-digests
+# collision this scheme exists to prevent. What is published is the only
+# authority on what has been used.
 name: deploy
 
 on:
@@ -38,6 +55,49 @@ jobs:
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
 
+      # The next patch is derived from what is PUBLISHED, then proven unused before
+      # anything is pushed. Both halves matter: the first stops us colliding with a
+      # tag git does not know about, the second stops us overwriting one at all.
+      - name: Next patch semver
+        id: ver
+        env:
+          GHCR_USER: ${{ secrets.GHCR_USER }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(curl -fsSL -u "$GHCR_USER:$GHCR_TOKEN" \
+            "https://ghcr.io/token?scope=repository:hanzoai/insights:pull&service=ghcr.io" | jq -r .token)
+
+          LAST=$(curl -fsSL -H "Authorization: Bearer $TOKEN" \
+            "https://ghcr.io/v2/hanzoai/insights/tags/list?n=10000" \
+            | jq -r '.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' \
+            | sort -V | tail -1)
+
+          # Fail loudly rather than guessing. A silent fallback to some default
+          # would eventually re-emit a live tag, which is the one outcome this
+          # whole step exists to prevent.
+          if [ -z "${LAST:-}" ]; then
+            echo "::error::could not read published semver tags from GHCR — refusing to guess the next patch"
+            exit 1
+          fi
+
+          IFS=. read -r MAJ MIN PAT <<<"$LAST"
+          NEXT="$MAJ.$MIN.$((PAT + 1))"
+
+          # Immutability guard. 404 is the ONLY acceptable answer: anything else
+          # means the tag is taken (200) or we cannot tell (network/auth), and
+          # pushing on either would risk a second digest behind an existing name.
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
+            -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json' \
+            "https://ghcr.io/v2/hanzoai/insights/manifests/$NEXT")
+          if [ "$CODE" != "404" ]; then
+            echo "::error::refusing to push $NEXT — manifest probe returned $CODE, expected 404 (tag taken, or existence unverifiable)"
+            exit 1
+          fi
+
+          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "last published $LAST -> building $NEXT"
+
       # docker, not buildctl: the runner image (catthehacker/ubuntu:act-24.04)
       # ships a docker client against the privileged dind sidecar and carries no
       # buildctl-daemonless.sh, so the previous step could not have run even with
@@ -45,7 +105,14 @@ jobs:
       - name: Build + push
         run: |
           set -euo pipefail
-          IMAGE="ghcr.io/hanzoai/insights:${GITHUB_SHA}"
-          docker build -f Dockerfile -t "$IMAGE" .
+          VERSION="${{ steps.ver.outputs.version }}"
+          IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
+          # The commit rides the image, so dropping it from the tag loses nothing:
+          # `docker inspect` still answers which source built this.
+          docker build -f Dockerfile \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --label "org.opencontainers.image.version=${VERSION}" \
+            --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
+            -t "$IMAGE" .
           docker push "$IMAGE"
-          echo "built $IMAGE"
+          echo "built $IMAGE (revision ${GITHUB_SHA})"
