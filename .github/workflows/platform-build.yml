@@ -22,7 +22,7 @@ on:
         description: "arcd pool label, e.g. hanzoai-linux-amd64"
         required: true
       image:
-        description: "Fully-resolved image ref, e.g. ghcr.io/hanzoai/zip:<sha>"
+        description: "Fully-resolved image ref, e.g. ghcr.io/hanzoai/<app>:<sha>"
         required: true
       dockerfile:
         description: Path to the Dockerfile
