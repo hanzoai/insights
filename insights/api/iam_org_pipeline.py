@@ -4,7 +4,7 @@ Hanzo IAM Organization Pipeline for Insights Social Auth.
 This pipeline function runs during OIDC/SSO login and ensures the user
 is assigned to the correct Insights Organization based on their IAM org claim.
 
-IAM (Casdoor/hanzo.id) provides the `owner` claim in userinfo which contains
+IAM (hanzo.id) provides the `owner` claim in userinfo which contains
 the organization slug (e.g., "hanzo", "lux", "zoo").
 
 Security invariants (RED H2/M2/M3/M7):
@@ -35,7 +35,7 @@ logger = structlog.get_logger(__name__)
 
 
 def _normalize_slug(org_slug: str) -> str:
-    """The tenant key. Casdoor emits lowercase org names; LowercaseSlugField
+    """The tenant key. IAM emits lowercase org names; LowercaseSlugField
     lowercases on save, so we normalize identically here for lookup parity."""
     return org_slug.strip().lower()
 
@@ -43,12 +43,12 @@ def _normalize_slug(org_slug: str) -> str:
 def _extract_iam_org_slug(response: dict, kwargs: dict) -> Optional[str]:
     """Extract the IAM organization slug from the OIDC response.
 
-    Casdoor puts the org in the `owner` field. We also check common
+    IAM puts the org in the `owner` field. We also check common
     alternatives for other OIDC providers.
     """
     org = response.get("owner") or response.get("org") or response.get("organization")
 
-    # Skip the Casdoor built-in / platform-admin orgs -- they are not tenants.
+    # Skip the IAM built-in / platform-admin orgs -- they are not tenants.
     if org and org.lower() in ("built-in", "admin"):
         return None
 
