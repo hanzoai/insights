@@ -125,14 +125,14 @@ class Command(BaseCommand):
         """
         legacy = ", ".join(f"'{name}'" for name in LEGACY_PACKAGE_NAMES)
         adopted = database.raw(
-            f"""INSERT INTO {DATASTORE_DATABASE}.infi_clickhouse_orm_migrations
+            f"""INSERT INTO {DATASTORE_DATABASE}.migrations
                     (package_name, module_name, applied)
                 SELECT '{MIGRATIONS_PACKAGE_NAME}', module_name, applied
-                FROM {DATASTORE_DATABASE}.infi_clickhouse_orm_migrations
+                FROM {DATASTORE_DATABASE}.migrations
                 WHERE package_name IN ({legacy})
                   AND module_name NOT IN (
                     SELECT module_name
-                    FROM {DATASTORE_DATABASE}.infi_clickhouse_orm_migrations
+                    FROM {DATASTORE_DATABASE}.migrations
                     WHERE package_name = '{MIGRATIONS_PACKAGE_NAME}')"""
         )
         if adopted:

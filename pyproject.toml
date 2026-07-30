@@ -279,7 +279,7 @@ sentiment = [
 required-version = "~=0.10.2"
 
 [tool.uv.sources]
-datastore-orm = { git = "https://github.com/hanzoai/infi.clickhouse_orm", rev = "1f0e0070a7a99a43875ff2176ef8968da974fd0e" }
+datastore-orm = { git = "https://github.com/hanzoai/datastore-orm", rev = "d8b51a8ef6c9062de94ebbbd110340e8b6444092" }
 datastore-driver = { git = "https://github.com/hanzo-ds/driver", rev = "119df3f" }
 datastore-connect = { git = "https://github.com/hanzo-ds/connect", rev = "ccbd4b5" }
 datastore-pool = { git = "https://github.com/hanzo-ds/pool", rev = "7260d56" }
