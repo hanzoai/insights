@@ -51,16 +51,18 @@ export class StreamProducerWrapper {
             'linger.ms': 20,
             log_level: 4, // WARN as the default
             'batch.size': 8 * 1024 * 1024,
-            // Produce limit = fetch limit. The consumer fetches up to 10MB
-            // (fetch.message.max.bytes in consumer.ts) but librdkafka's produce
-            // default is 1MB, so any message between the two is consumable and
-            // not re-producible — a structural poison pill. One landed on
-            // events_plugin_ingestion and crash-looped the plugin server 74+
-            // times: consume, re-produce, local MSG_SIZE_TOO_LARGE ("Broker:
-            // Message size too large" — raised client-side, before any broker),
-            // unhandled rejection, shutdown, restart, same message. The two
-            // limits are one decision and must move together.
-            'message.max.bytes': 10 * 1024 * 1024,
+            // Anything the consumer can receive, the producer can re-send.
+            //
+            // No finite cap here can be right: fetch limits count COMPRESSED
+            // bytes while message.max.bytes checks the UNCOMPRESSED message,
+            // so a snappy message that fit a 10MB fetch can be arbitrarily
+            // larger raw — the two limits are not comparable. The poison
+            // message that crash-looped production 74+ times proved it by
+            // surviving a 10MB and then a 64MB produce cap ("Broker: Message
+            // size too large" is raised CLIENT-side, before any broker). This
+            // is librdkafka's maximum; process memory already bounds what can
+            // be held, and the broker enforces its own limits if it has any.
+            'message.max.bytes': 1_000_000_000,
             'queue.buffering.max.messages': 100_000,
             'compression.codec': 'snappy',
             'enable.idempotence': true,
