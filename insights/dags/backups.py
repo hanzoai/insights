@@ -68,7 +68,7 @@ NON_SHARDED_TABLES = [
     "events_dead_letter_queue",
     "exchange_rate",
     "groups",
-    "infi_clickhouse_orm_migrations",
+    "migrations",
     "log_entries",
     "metrics_time_to_see_data",
     "person",
