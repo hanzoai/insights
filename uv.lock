@@ -1417,7 +1417,7 @@ dependencies = [
 [[package]]
 name = "datastore-orm"
 version = "2.1.0.post20"
-source = { git = "https://github.com/hanzoai/infi.clickhouse_orm?rev=1f0e0070a7a99a43875ff2176ef8968da974fd0e#1f0e0070a7a99a43875ff2176ef8968da974fd0e" }
+source = { git = "https://github.com/hanzoai/datastore-orm?rev=7d6b25e39d3f2fa1d76810c1c5a7c5f80c27f042#7d6b25e39d3f2fa1d76810c1c5a7c5f80c27f042" }
 dependencies = [
     { name = "iso8601" },
     { name = "pytz" },
@@ -3253,7 +3253,7 @@ requires-dist = [
     { name = "databricks-sql-connector", specifier = "~=4.1.3" },
     { name = "datastore-connect", git = "https://github.com/hanzo-ds/connect?rev=ccbd4b5" },
     { name = "datastore-driver", git = "https://github.com/hanzo-ds/driver?rev=119df3f" },
-    { name = "datastore-orm", git = "https://github.com/hanzoai/infi.clickhouse_orm?rev=1f0e0070a7a99a43875ff2176ef8968da974fd0e" },
+    { name = "datastore-orm", git = "https://github.com/hanzoai/datastore-orm?rev=7d6b25e39d3f2fa1d76810c1c5a7c5f80c27f042" },
     { name = "datastore-pool", git = "https://github.com/hanzo-ds/pool?rev=7260d56" },
     { name = "defusedxml", specifier = ">=0.7.1" },
     { name = "deltalake", extras = ["pyarrow"], specifier = "==1.4.0" },
