@@ -279,7 +279,7 @@ sentiment = [
 required-version = "~=0.10.2"
 
 [tool.uv.sources]
-datastore-orm = { git = "https://github.com/hanzoai/datastore-orm", rev = "d8b51a8ef6c9062de94ebbbd110340e8b6444092" }
+datastore-orm = { git = "https://github.com/hanzoai/datastore-orm", rev = "7d6b25e39d3f2fa1d76810c1c5a7c5f80c27f042" }
 datastore-driver = { git = "https://github.com/hanzo-ds/driver", rev = "119df3f" }
 datastore-connect = { git = "https://github.com/hanzo-ds/connect", rev = "ccbd4b5" }
 datastore-pool = { git = "https://github.com/hanzo-ds/pool", rev = "7260d56" }
