@@ -214,9 +214,17 @@ export class StreamConsumer {
             'group.id': this.config.groupId,
             'session.timeout.ms': 30_000,
             'max.poll.interval.ms': 300_000,
-            'max.partition.fetch.bytes': 1_048_576,
+            // 100MB, matching fetch.message.max.bytes below — NOT the old 1MB.
+            // A record larger than this cap is permanently unfetchable against
+            // a broker with no KIP-74 always-return-one-message guarantee
+            // (cloud's embedded stream honors the partition cap literally):
+            // librdkafka raises MSG_SIZE_TOO_LARGE on consume, the rejection is
+            // unhandled, the process restarts and meets the same record — the
+            // crash loop that held insights-plugin down through 74+ restarts.
+            // The two fetch caps are one decision and must move together.
+            'max.partition.fetch.bytes': 104_857_600,
             'fetch.error.backoff.ms': 100,
-            'fetch.message.max.bytes': 10_485_760,
+            'fetch.message.max.bytes': 104_857_600,
             'fetch.wait.max.ms': 50,
             'queued.min.messages': 100000,
             'queued.max.messages.kbytes': 102400, // 1048576 is the default, we go smaller to reduce mem usage.
