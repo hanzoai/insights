@@ -463,7 +463,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
     const hasColumns = columns.length > 1
 
     return (
-        <div className="OutputPane flex flex-col w-full flex-1 bg-white dark:bg-black">
+        <div className="OutputPane flex flex-col w-full flex-1 bg-surface-primary">
             <div className="flex flex-row justify-between align-center w-full min-h-[50px] overflow-y-auto">
                 <div className="flex min-h-[50px] gap-2 ml-4">
                     {[
