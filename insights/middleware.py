@@ -54,11 +54,24 @@ ALWAYS_ALLOWED_ENDPOINTS = [
     "i",
 ]
 
+# HOST-ONLY. Omitting `domain` scopes the cookie to whatever host served the
+# response, which is the only rule that is correct everywhere: insights.hanzo.ai
+# in production, localhost in development, and a customer's own hostname on a
+# self-hosted install.
+#
+# It read "insights.com" — a domain we do not own and never served from. A
+# browser drops any Set-Cookie whose Domain is not a suffix of the request host,
+# so on every one of those hosts these cookies were silently discarded and the
+# project selection they carry has never survived a page load. It failed quietly
+# because a rejected cookie is not an error, just an absence.
+#
+# A parent domain would be the alternative, and it is the wrong trade here: it
+# would hand every sibling subdomain a cookie only this app has any use for.
 default_cookie_options = {
     "max_age": 365 * 24 * 60 * 60,  # one year
     "expires": None,
     "path": "/",
-    "domain": "insights.com",
+    "domain": None,
     "secure": True,
     "samesite": "Strict",
 }
@@ -491,8 +504,9 @@ class InsightsTokenCookieMiddleware(SessionMiddleware):
         if settings.TEST:
             pass
         elif is_dev_mode():
-            # for local development
-            default_cookie_options["domain"] = None
+            # http://localhost cannot carry a Secure cookie. The domain needs no
+            # override any more: it is host-only everywhere, which already means
+            # localhost here.
             default_cookie_options["secure"] = False
         elif not is_cloud():
             # skip adding cookies for self-hosted instance
