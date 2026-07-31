@@ -13,6 +13,7 @@ import { urls } from 'scenes/urls'
 
 import { sidePanelHealthLogic } from '~/layout/navigation-3000/sidepanel/panels/sidePanelHealthLogic'
 import { sidePanelSdkDoctorLogic } from '~/layout/navigation-3000/sidepanel/panels/sidePanelSdkDoctorLogic'
+import { STATUS_PAGE_URL } from '~/layout/navigation-3000/sidepanel/panels/sidePanelStatusIncidentIoLogic'
 
 import { RenderKeybind } from '../AppShortcuts/AppShortcutMenu'
 import { keyBinds } from '../AppShortcuts/shortcuts'
@@ -76,7 +77,7 @@ const LegacyHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.Ele
                         targetBlankIcon
                         target="_blank"
                         buttonProps={{ menuItem: true }}
-                        to="https://insightsstatus.com"
+                        to={STATUS_PAGE_URL}
                         tooltip={insightsStatusTooltip}
                         tooltipPlacement="right"
                         tooltipCloseDelayMs={0}
@@ -185,7 +186,7 @@ const UnifiedHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.El
                         targetBlankIcon
                         target="_blank"
                         buttonProps={{ menuItem: true }}
-                        to="https://insightsstatus.com"
+                        to={STATUS_PAGE_URL}
                         tooltip={insightsStatusTooltip}
                         tooltipPlacement="right"
                         tooltipCloseDelayMs={0}
