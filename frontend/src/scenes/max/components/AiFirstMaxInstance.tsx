@@ -128,7 +128,11 @@ function ChatArea({ threadVisible, conversation, onStartNewConversation }: ChatA
             {/* Input - always in flow, mt-auto pushes to bottom when messages exist */}
             <div
                 className={`w-full max-w-3xl mx-auto px-4 transition-all duration-300 ease-out z-50 ${
-                    hasMessages ? 'sticky bottom-0 bg-primary py-2 max-w-none' : 'pb-4'
+                    // Sticky mask: paint it with the canvas it sits on, not the app ground.
+                    // Matches the sibling SidebarQuestionInput, which already does this.
+                    hasMessages
+                        ? 'sticky bottom-0 bg-[var(--scene-layout-background,var(--color-bg-primary))] py-2 max-w-none'
+                        : 'pb-4'
                 }`}
             >
                 {!conversation?.has_unsupported_content && (
