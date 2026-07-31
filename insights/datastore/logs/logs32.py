@@ -14,7 +14,7 @@ STORAGE_POLICY = lambda: "tiered" if settings.DATASTORE_LOGS_ENABLE_STORAGE_POLI
 
 def LOGS32_TABLE_SQL():
     return f"""
-CREATE TABLE IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
+CREATE TABLE IF NOT EXISTS {settings.DATASTORE_DATABASE}.{TABLE_NAME}
 (
     `time_bucket` DateTime MATERIALIZED toStartOfDay(timestamp) CODEC(DoubleDelta, ZSTD(1)),
     `original_expiry_timestamp` DateTime64(6) CODEC(DoubleDelta, ZSTD(1)),
@@ -100,14 +100,14 @@ CREATE TABLE IF NOT EXISTS {database}.logs AS {database}.{table_name} ENGINE = {
             data_table=f"{TABLE_NAME}",
             cluster=settings.DATASTORE_LOGS_CLUSTER,
         ),
-        database=settings.DATASTORE_LOGS_CLUSTER_DATABASE,
+        database=settings.DATASTORE_DATABASE,
         table_name=TABLE_NAME,
     )
 
 
 def LOG_ATTRIBUTES_MV():
     return f"""
-CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}_to_log_attributes TO {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{LOG_ATTRIBUTES_TABLE_NAME}
+CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_DATABASE}.{TABLE_NAME}_to_log_attributes TO {settings.DATASTORE_DATABASE}.{LOG_ATTRIBUTES_TABLE_NAME}
 (
     `team_id` Int32,
     `time_bucket` DateTime64(0),
@@ -143,7 +143,7 @@ FROM
         attribute.1 AS attribute_key,
         attribute.2 AS attribute_value,
         sumSimpleState(1) AS attribute_count
-    FROM {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
+    FROM {settings.DATASTORE_DATABASE}.{TABLE_NAME}
     GROUP BY
         team_id,
         time_bucket,
@@ -157,7 +157,7 @@ FROM
 
 def LOG_RESOURCE_ATTRIBUTES_MV():
     return f"""
-CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}_to_resource_attributes TO {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{LOG_ATTRIBUTES_TABLE_NAME}
+CREATE MATERIALIZED VIEW IF NOT EXISTS {settings.DATASTORE_DATABASE}.{TABLE_NAME}_to_resource_attributes TO {settings.DATASTORE_DATABASE}.{LOG_ATTRIBUTES_TABLE_NAME}
 (
     `team_id` Int32,
     `time_bucket` DateTime64(0),
@@ -192,7 +192,7 @@ FROM
         attribute.1 AS attribute_key,
         attribute.2 AS attribute_value,
         sumSimpleState(1) AS attribute_count
-    FROM {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
+    FROM {settings.DATASTORE_DATABASE}.{TABLE_NAME}
     GROUP BY
         team_id,
         time_bucket,
