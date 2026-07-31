@@ -981,7 +981,13 @@
     --color-bg-primary: #000;
     --color-bg-surface-primary: var(--color-neutral-cool-850);
     --color-bg-surface-secondary: var(--color-neutral-cool-900);
-    --color-bg-surface-tertiary: var(--color-neutral-cool-950);
+    // TRUE BLACK, not the 8% neutral. tertiary is the CHROME layer -- the left nav
+    // and the shell behind the tab strip both carry bg-surface-tertiary -- and chrome
+    // sits AT the ground, not above it. At 8% it read as a grey slab framing the app,
+    // which inverted the ladder the comment above already states: ground is black and
+    // every surface layers UP from it. Content (surface-primary, 15%) is the raised
+    // one and stays lighter, which is the contrast that makes it read as a panel.
+    --color-bg-surface-tertiary: #000;
     --color-bg-surface-tooltip: var(--color-neutral-100);
     --color-bg-surface-tooltip-inverse: var(--color-neutral-950);
     --color-bg-surface-popover: var(--color-neutral-cool-850);
