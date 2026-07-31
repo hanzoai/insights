@@ -9,7 +9,7 @@ STORAGE_POLICY = lambda: "hot" if settings.DATASTORE_LOGS_ENABLE_STORAGE_POLICY 
 
 def LOG_ATTRIBUTES_TABLE_SQL():
     return f"""
-CREATE TABLE IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
+CREATE TABLE IF NOT EXISTS {settings.DATASTORE_DATABASE}.{TABLE_NAME}
 (
     `team_id` Int32 CODEC(DoubleDelta, ZSTD(1)),
     `time_bucket` DateTime64(0) CODEC(DoubleDelta, ZSTD(1)),
