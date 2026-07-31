@@ -52,7 +52,13 @@
     // a visible lip. Our controls are flat — a hairline border and a radius,
     // nothing pretending to stick out of the screen. Zeroing it here also
     // re-centres the label, since the vertical padding is computed from it.
-    --lemon-button-chrome-depth: 0;
+    // The unit is load-bearing. This value is only ever consumed inside calc()
+    // against lengths — `calc(<depth> - 1px)` for the ::after inset and
+    // `calc(<pad> - <depth> * 0.5)` for the padding. A unitless 0 makes both
+    // calcs invalid, so the whole `inset` and `padding` shorthand is dropped:
+    // the ::after fill collapses to 2px (primary buttons lose their fill and
+    // render as dark-text-on-dark ghosts) and labels lose their side padding.
+    --lemon-button-chrome-depth: 0px;
     --lemon-button-padding-vertical: 0.25rem;
     --lemon-button-padding-horizontal: 0.75rem;
     --lemon-button-side-action-width: 2rem;
