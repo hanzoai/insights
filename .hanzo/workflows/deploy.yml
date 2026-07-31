@@ -116,3 +116,78 @@ jobs:
             -t "$IMAGE" .
           docker push "$IMAGE"
           echo "built $IMAGE (revision ${GITHUB_SHA})"
+
+      # THE DEPLOY. Everything above this PUBLISHES an image; this is the step
+      # that makes production run it.
+      #
+      # Without it a release stops one move short of shipping: cd.hanzo.ai does
+      # not watch the registry, it watches hanzoai/universe, so an image nothing
+      # points at is just bytes in ghcr. That gap is not hypothetical — insights
+      # served 1.52.25 for ten hours while .26, .27 and .28 sat built and
+      # unreferenced, which meant a fix for a script loading off an UNREGISTERED
+      # third-party domain was merged, built, and still not running.
+      #
+      # This reverses a deliberate old decision. Several deploy workflows say CI
+      # should end at "the tag exists and resolves" because choosing what runs
+      # ought to be a reviewed change. The safety that was buying is now bought
+      # by pin.sh instead, which refuses a non-semver version, an image the
+      # registry cannot serve, a version older than the current pin, and any
+      # repository other than the one the values file already declares. Those are
+      # checks that hold every time, which a review of a one-line version bump
+      # does not.
+      - name: Ship it
+        env:
+          KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+          KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+          KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://kms.hanzo.ai' }}
+          KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
+          KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+          # pin.sh probes the registry before it moves anything; these let it
+          # read a private manifest instead of falling back to anonymous.
+          GHCR_USER: ${{ secrets.GHCR_USER }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.ver.outputs.version }}"
+
+          # Secrets come from KMS, never from a file or a repo variable.
+          KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
+            -H 'Content-Type: application/json' \
+            -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+            | jq -r '.accessToken // empty')
+          [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+
+          PIN_TOKEN=$(curl -fsS \
+            "${KMS_ENDPOINT}/v1/kms/orgs/${KMS_ORG}/secrets/deploy/UNIVERSE_PIN_TOKEN?env=${KMS_SECRET_ENV}" \
+            -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.secret.value // empty')
+          [ -n "$PIN_TOKEN" ] || { echo "::error::UNIVERSE_PIN_TOKEN missing in KMS at ${KMS_ORG}/deploy (env ${KMS_SECRET_ENV})"; exit 1; }
+          echo "::add-mask::${PIN_TOKEN}"
+
+          # Shallow: universe is ~600MB of history and this needs one file from
+          # the tip.
+          git clone --quiet --depth 1 \
+            "https://x-access-token:${PIN_TOKEN}@git.hanzo.ai/hanzo/universe" /tmp/universe
+
+          # Another service can land its own pin between our clone and our push.
+          # That is a normal race on a shared tree, not a failure — but a shallow
+          # clone has no common history to rebase onto, so RE-APPLY rather than
+          # merge: reset to the new tip and pin again. Pinning is idempotent and
+          # derives everything from the file it finds, so the retry also re-checks
+          # the monotonic guard against whatever just landed. Nothing to resolve,
+          # and no merge commits in the deploy history.
+          for attempt in 1 2 3 4 5; do
+            # Both halves of this service are one release and move together. A web
+            # pinned ahead of its worker is two versions of the same code sharing
+            # a database — a migration hazard, not a partial rollout.
+            /tmp/universe/charts/app/pin.sh insights-web    "$VERSION"
+            /tmp/universe/charts/app/pin.sh insights-worker "$VERSION"
+
+            if git -C /tmp/universe push --quiet origin HEAD:main 2>/dev/null; then
+              echo "pinned insights-web + insights-worker to ${VERSION}"; exit 0
+            fi
+
+            echo "universe moved under us (attempt ${attempt}/5) — re-applying on the new tip"
+            git -C /tmp/universe fetch --quiet --depth 1 origin main
+            git -C /tmp/universe reset --hard --quiet FETCH_HEAD
+          done
+          echo "::error::could not push the pin after 5 attempts"; exit 1
