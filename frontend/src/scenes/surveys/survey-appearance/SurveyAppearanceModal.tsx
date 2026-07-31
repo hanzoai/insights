@@ -4,10 +4,10 @@ import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 import { useState } from 'react'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonModal, LemonSelect, LemonSwitch, LemonTabs } from '@hanzo/lemon-ui'
+import { Button, Divider, Modal, Select, Switch, Tabs } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { defaultSurveyAppearance } from 'scenes/surveys/constants'
 import {
     SurveyColorsAppearance,
@@ -39,7 +39,7 @@ function SurveyPreview({
     const currentDimensions = screenDimensions[activeScreenSize]
     return (
         <div className="flex flex-[1.5] flex-col items-center justify-start rounded overflow-hidden gap-2">
-            <LemonTabs
+            <Tabs
                 activeKey={activeScreenSize}
                 onChange={(key) => setActiveScreenSize(key as PreviewScreenSize)}
                 tabs={[
@@ -51,12 +51,12 @@ function SurveyPreview({
             />
             <div className="flex flex-col md:flex-row gap-2 md:items-center md:justify-between min-w-full">
                 {setSelectedPageIndex && (
-                    <LemonField.Pure
+                    <Field.Pure
                         label="Current question"
                         className="gap-1 max-w-full md:max-w-sm"
                         htmlFor="survey-preview-question-select"
                     >
-                        <LemonSelect
+                        <Select
                             onChange={(pageIndex) => setSelectedPageIndex(pageIndex)}
                             className="whitespace-nowrap max-w-fit"
                             value={selectedPageIndex || 0}
@@ -76,9 +76,9 @@ function SurveyPreview({
                                     : []),
                             ]}
                         />
-                    </LemonField.Pure>
+                    </Field.Pure>
                 )}
-                <LemonSwitch
+                <Switch
                     checked={surveyPreviewBackground === 'light'}
                     onChange={(checked) => setSurveyPreviewBackground(checked ? 'light' : 'dark')}
                     label={surveyPreviewBackground === 'light' ? 'Light background' : 'Dark background'}
@@ -125,7 +125,7 @@ function SurveyPreview({
 export function SurveyAppearanceModelTrigger(): JSX.Element {
     const { setIsAppearanceModalOpen } = useActions(surveysLogic)
     return (
-        <LemonButton
+        <Button
             type="secondary"
             fullWidth
             icon={<IconGear />}
@@ -134,7 +134,7 @@ export function SurveyAppearanceModelTrigger(): JSX.Element {
             }}
         >
             Full-screen survey editor
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -160,7 +160,7 @@ export function SurveyAppearanceModal({
 
     return (
         <>
-            <LemonButton
+            <Button
                 type="secondary"
                 fullWidth
                 icon={<IconGear />}
@@ -169,10 +169,10 @@ export function SurveyAppearanceModal({
                 }}
             >
                 Full-screen survey editor
-            </LemonButton>
-            <LemonModal isOpen={isAppearanceModalOpen} onClose={onClose} fullScreen simple>
-                <LemonModal.Header>Customize Survey Appearance</LemonModal.Header>
-                <LemonModal.Content className="flex flex-col md:flex-row flex-1 h-full gap-4 overflow-hidden">
+            </Button>
+            <Modal isOpen={isAppearanceModalOpen} onClose={onClose} fullScreen simple>
+                <Modal.Header>Customize Survey Appearance</Modal.Header>
+                <Modal.Content className="flex flex-col md:flex-row flex-1 h-full gap-4 overflow-hidden">
                     <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-1">
                         {!surveysStylingAvailable && (
                             <PayGateMini feature={AvailableFeature.SURVEYS_STYLING} className="mb-4">
@@ -185,7 +185,7 @@ export function SurveyAppearanceModal({
                             validationErrors={validationErrors}
                             surveyType={survey.type}
                         />
-                        <LemonDivider />
+                        <Divider />
                         <SurveyColorsAppearance
                             appearance={survey.appearance || defaultSurveyAppearance}
                             onAppearanceChange={onAppearanceChange}
@@ -199,13 +199,13 @@ export function SurveyAppearanceModal({
                         selectedPageIndex={selectedPageIndex}
                         setSelectedPageIndex={setSelectedPageIndex}
                     />
-                </LemonModal.Content>
-                <LemonModal.Footer>
-                    <LemonButton type="secondary" onClick={onClose}>
+                </Modal.Content>
+                <Modal.Footer>
+                    <Button type="secondary" onClick={onClose}>
                         Close
-                    </LemonButton>
-                </LemonModal.Footer>
-            </LemonModal>
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }

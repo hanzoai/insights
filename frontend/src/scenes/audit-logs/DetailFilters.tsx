@@ -3,13 +3,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInput,
-    LemonInputSelect,
-    LemonSearchableSelect,
-    LemonSelect,
+    Button,
+    Input,
+    InputSelect,
+    SearchableSelect,
+    Select,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { midEllipsis } from 'lib/utils'
 
@@ -190,7 +190,7 @@ const DetailFilterRow = ({ filter }: DetailFilterRowProps): JSX.Element => {
         <div className="flex gap-2 items-center">
             {filter.isCustom ? (
                 <div className="min-w-60">
-                    <LemonInput
+                    <Input
                         value={localFieldPath}
                         onChange={handleCustomFieldPathChange}
                         placeholder="Enter custom field path"
@@ -200,7 +200,7 @@ const DetailFilterRow = ({ filter }: DetailFilterRowProps): JSX.Element => {
                     {fieldPathError && <div className="text-xs text-danger mt-1">{fieldPathError}</div>}
                 </div>
             ) : (
-                <LemonSelect
+                <Select
                     value={filter.fieldPath}
                     onChange={handleFieldChange}
                     options={fieldOptionsForRow}
@@ -210,7 +210,7 @@ const DetailFilterRow = ({ filter }: DetailFilterRowProps): JSX.Element => {
                 />
             )}
 
-            <LemonSelect
+            <Select
                 value={filter.operation}
                 onChange={handleOperationChange}
                 options={[
@@ -223,7 +223,7 @@ const DetailFilterRow = ({ filter }: DetailFilterRowProps): JSX.Element => {
             />
 
             {filter.operation === 'in' ? (
-                <LemonInputSelect
+                <InputSelect
                     mode="multiple"
                     value={localValue as string[]}
                     onChange={handleValueChange}
@@ -233,7 +233,7 @@ const DetailFilterRow = ({ filter }: DetailFilterRowProps): JSX.Element => {
                     className="min-w-60"
                 />
             ) : (
-                <LemonInput
+                <Input
                     value={localValue as string}
                     onChange={handleValueChange}
                     placeholder="Enter value"
@@ -242,7 +242,7 @@ const DetailFilterRow = ({ filter }: DetailFilterRowProps): JSX.Element => {
                 />
             )}
 
-            <LemonButton
+            <Button
                 icon={<IconTrash />}
                 size="small"
                 type="tertiary"
@@ -365,7 +365,7 @@ export const DetailFilters = (): JSX.Element => {
                 ))}
             </div>
 
-            <LemonSearchableSelect
+            <SearchableSelect
                 value={undefined}
                 onChange={(value) => {
                     if (value === '__add_custom__') {

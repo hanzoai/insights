@@ -1,17 +1,17 @@
 import { BindLogic, actions, connect, kea, key, path, props, reducers, selectors, useActions, useValues } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonDivider, Link } from '@hanzo/lemon-ui'
+import { Divider, Link } from '@hanzo/elements'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tab, Tabs } from 'lib/elements/Tabs'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { DataPipelinesNewSceneKind } from 'scenes/data-pipelines/DataPipelinesNewScene'
@@ -332,18 +332,18 @@ function InsightsFunctionHeader(): JSX.Element {
                                     overlay={
                                         <>
                                             {!isLegacyPlugin && (
-                                                <LemonButton fullWidth onClick={() => duplicate()}>
+                                                <Button fullWidth onClick={() => duplicate()}>
                                                     Duplicate
-                                                </LemonButton>
+                                                </Button>
                                             )}
-                                            <LemonDivider />
-                                            <LemonButton status="danger" fullWidth onClick={() => deleteInsightsFunction()}>
+                                            <Divider />
+                                            <Button status="danger" fullWidth onClick={() => deleteInsightsFunction()}>
                                                 Delete
-                                            </LemonButton>
+                                            </Button>
                                         </>
                                     }
                                 />
-                                <LemonDivider vertical />
+                                <Divider vertical />
                             </>
                         )}
                         <InsightsFunctionConfigurationClearChangesButton />
@@ -373,7 +373,7 @@ export function InsightsFunctionScene(): JSX.Element {
     if (loading && !loaded) {
         return (
             <div className="flex flex-col gap-4">
-                <LemonSkeleton className="w-full h-12" />
+                <Skeleton className="w-full h-12" />
                 <InsightsFunctionSkeleton />
             </div>
         )
@@ -387,7 +387,7 @@ export function InsightsFunctionScene(): JSX.Element {
         return <NotFound object="Custom function" />
     }
 
-    const tabs: (LemonTab<InsightsFunctionSceneTab> | null)[] = [
+    const tabs: (Tab<InsightsFunctionSceneTab> | null)[] = [
         {
             label: 'Configuration',
             key: 'configuration',
@@ -436,7 +436,7 @@ export function InsightsFunctionScene(): JSX.Element {
             <BindLogic logic={insightsFunctionConfigurationLogic} props={logicProps}>
                 <InsightsFunctionHeader />
                 {teamHasCohortFilters && (
-                    <LemonBanner type="warning" className="mb-4">
+                    <Banner type="warning" className="mb-4">
                         <strong>Warning:</strong> This function has "Filter out internal and test users" enabled, but
                         your team's test account filters include cohorts. Cohorts cannot be used in real-time filters
                         and may cause this function to fail. Please update your{' '}
@@ -444,12 +444,12 @@ export function InsightsFunctionScene(): JSX.Element {
                             test account filters
                         </Link>{' '}
                         to use inline expressions instead of cohorts.
-                    </LemonBanner>
+                    </Banner>
                 )}
                 {templateId ? (
                     <InsightsFunctionConfiguration templateId={templateId} subTemplateId={subTemplateId} />
                 ) : (
-                    <LemonTabs activeKey={currentTab} tabs={tabs} onChange={setCurrentTab} sceneInset={true} />
+                    <Tabs activeKey={currentTab} tabs={tabs} onChange={setCurrentTab} sceneInset={true} />
                 )}
             </BindLogic>
         </SceneContent>

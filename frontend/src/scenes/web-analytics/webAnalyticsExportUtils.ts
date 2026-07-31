@@ -1,6 +1,6 @@
 import Papa from 'papaparse'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
@@ -57,7 +57,7 @@ export function exportTableData(tableData: string[][], format: ExporterFormat): 
             }
         }
     } catch {
-        lemonToast.error('Copy failed!')
+        toast.error('Copy failed!')
     }
 }
 

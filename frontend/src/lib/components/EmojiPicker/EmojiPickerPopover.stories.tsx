@@ -4,7 +4,7 @@ import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopove
 
 type Story = StoryObj<typeof EmojiPickerPopover>
 const meta: Meta<typeof EmojiPickerPopover> = {
-    title: 'Lemon UI/Emoji Picker Popover',
+    title: 'Elements/Emoji Picker Popover',
     component: EmojiPickerPopover,
     tags: ['autodocs'],
     parameters: {

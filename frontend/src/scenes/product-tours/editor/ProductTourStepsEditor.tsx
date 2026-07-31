@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconChevronDown, IconCursorClick, IconEye, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Menu, Modal } from '@hanzo/elements'
 
 import { PositionSelector } from 'scenes/surveys/survey-appearance/SurveyAppearancePositionSelector'
 
@@ -111,7 +111,7 @@ export function ProductTourStepsEditor({ tourId }: ProductTourStepsEditorProps):
                 <div className={`flex flex-col w-[220px] min-w-[220px] ${cardClasses}`}>
                     <div className={cardHeaderClasses}>
                         <span className="text-xs font-semibold uppercase tracking-wide text-muted">Steps</span>
-                        <LemonMenu
+                        <Menu
                             items={[
                                 {
                                     icon: getStepIcon('modal'),
@@ -126,8 +126,8 @@ export function ProductTourStepsEditor({ tourId }: ProductTourStepsEditorProps):
                             ]}
                             placement="bottom-end"
                         >
-                            <LemonButton size="xsmall" icon={<IconPlus />} tooltip="Add step" />
-                        </LemonMenu>
+                            <Button size="xsmall" icon={<IconPlus />} tooltip="Add step" />
+                        </Menu>
                     </div>
 
                     <div className="flex flex-1 flex-col gap-1 p-2 overflow-y-auto">
@@ -181,7 +181,7 @@ export function ProductTourStepsEditor({ tourId }: ProductTourStepsEditorProps):
                                 </div>
                                 {!isAnnouncementMode && (
                                     <div className="flex items-center gap-1">
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             icon={<IconChevronDown className="rotate-180" />}
                                             onClick={() => moveStep(selectedStepIndex, 'up')}
@@ -190,7 +190,7 @@ export function ProductTourStepsEditor({ tourId }: ProductTourStepsEditorProps):
                                             }
                                             tooltip="Move up"
                                         />
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             icon={<IconChevronDown />}
                                             onClick={() => moveStep(selectedStepIndex, 'down')}
@@ -201,13 +201,13 @@ export function ProductTourStepsEditor({ tourId }: ProductTourStepsEditorProps):
                                             }
                                             tooltip="Move down"
                                         />
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             icon={<IconEye />}
                                             onClick={() => setShowPreviewModal(true)}
                                             tooltip="Preview step"
                                         />
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             status="danger"
                                             icon={<IconTrash />}
@@ -284,18 +284,18 @@ export function ProductTourStepsEditor({ tourId }: ProductTourStepsEditorProps):
             </div>
 
             {/* Delete confirmation modal */}
-            <LemonModal
+            <Modal
                 isOpen={stepToDelete !== null}
                 onClose={() => setStepToDelete(null)}
                 title="Delete step"
                 footer={
                     <>
-                        <LemonButton type="secondary" onClick={() => setStepToDelete(null)}>
+                        <Button type="secondary" onClick={() => setStepToDelete(null)}>
                             Cancel
-                        </LemonButton>
-                        <LemonButton type="primary" status="danger" onClick={confirmDeleteStep}>
+                        </Button>
+                        <Button type="primary" status="danger" onClick={confirmDeleteStep}>
                             Delete
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
@@ -304,10 +304,10 @@ export function ProductTourStepsEditor({ tourId }: ProductTourStepsEditorProps):
                     <strong>{stepToDelete !== null ? getStepTitle(steps[stepToDelete], stepToDelete) : ''}</strong>?
                 </p>
                 <p className="text-muted mt-2">This action cannot be undone.</p>
-            </LemonModal>
+            </Modal>
 
             {/* Preview modal */}
-            <LemonModal
+            <Modal
                 isOpen={showPreviewModal}
                 onClose={() => setShowPreviewModal(false)}
                 title={`Preview: ${getStepTitle(selectedStep, selectedStepIndex)}`}
@@ -323,7 +323,7 @@ export function ProductTourStepsEditor({ tourId }: ProductTourStepsEditorProps):
                         />
                     )}
                 </div>
-            </LemonModal>
+            </Modal>
         </div>
     )
 }

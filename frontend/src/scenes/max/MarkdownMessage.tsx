@@ -1,7 +1,7 @@
 import { marked } from 'marked'
 import { memo, useMemo } from 'react'
 
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 
 function parseMarkdownIntoBlocks(markdown: string): string[] {
     // Convert single newlines to markdown line breaks (two spaces + newline)
@@ -25,10 +25,10 @@ export const MarkdownMessage = memo(function MarkdownMessage({
 }): JSX.Element {
     const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content])
     return (
-        <LemonMarkdown.Container className={className}>
+        <Markdown.Container className={className}>
             {blocks.map((block, index) => (
-                <LemonMarkdown.Renderer key={`${id}-block_${index}`}>{block}</LemonMarkdown.Renderer>
+                <Markdown.Renderer key={`${id}-block_${index}`}>{block}</Markdown.Renderer>
             ))}
-        </LemonMarkdown.Container>
+        </Markdown.Container>
     )
 })

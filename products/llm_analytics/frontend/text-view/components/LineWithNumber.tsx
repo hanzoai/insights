@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { LemonMenu, LemonMenuItems } from '@hanzo/lemon-ui'
+import { Menu, MenuItems } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -96,7 +96,7 @@ export function LineWithNumber({
 
     const paddedLineNumber = padding > 0 ? lineNumber.toString().padStart(padding, '0') : lineNumber.toString()
 
-    const menuItems: LemonMenuItems = [
+    const menuItems: MenuItems = [
         {
             label: 'Copy link',
             onClick: handleCopyPermalink,
@@ -130,11 +130,11 @@ export function LineWithNumber({
 
     return (
         <span ref={lineRef}>
-            <LemonMenu items={menuItems} placement="bottom-start">
+            <Menu items={menuItems} placement="bottom-start">
                 <button type="button" className="text-muted hover:text-link cursor-pointer">
                     L{paddedLineNumber}:
                 </button>
-            </LemonMenu>
+            </Menu>
             {content}
             {showConsentPopover && (
                 <AIConsentPopoverWrapper

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { cn } from 'lib/utils/css-classes'
 
@@ -33,7 +33,7 @@ export function CollapsibleExceptionHeader({
         <div className="pb-1">
             <div className="flex gap-2 items-center">
                 {loading ? (
-                    <LemonSkeleton className="w-[25%] h-2" />
+                    <Skeleton className="w-[25%] h-2" />
                 ) : (
                     <>
                         {runtime && <RuntimeIcon runtime={runtime} className="ml-1" />}
@@ -48,7 +48,7 @@ export function CollapsibleExceptionHeader({
                         'line-clamp-1': truncate,
                     })}
                 >
-                    {loading ? <LemonSkeleton className="w-[50%] h-2" /> : value}
+                    {loading ? <Skeleton className="w-[50%] h-2" /> : value}
                 </div>
             )}
         </div>

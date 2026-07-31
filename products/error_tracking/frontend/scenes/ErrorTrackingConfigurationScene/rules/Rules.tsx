@@ -6,10 +6,10 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { PropsWithChildren, useEffect } from 'react'
 
 import { IconPencil, IconTrash } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonCard, LemonDialog, LemonSelect, Spinner, lemonToast } from '@hanzo/lemon-ui'
+import { Banner, Button, Card, Dialog, Select, Spinner, toast } from '@hanzo/elements'
 
 import { PropertyFilters, PropertyFiltersProps } from 'lib/components/PropertyFilters/PropertyFilters'
-import { SortableDragIcon } from 'lib/lemon-ui/icons'
+import { SortableDragIcon } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 
 import { sidePanelLogic } from '~/layout/navigation-3000/sidepanel/sidePanelLogic'
@@ -112,9 +112,9 @@ const SortableRule = ({
                     {...listeners}
                 />
             )}
-            <LemonCard hoverEffect={false} className="flex flex-col flex-1 p-0 w-full">
+            <Card hoverEffect={false} className="flex flex-col flex-1 p-0 w-full">
                 {children}
-            </LemonCard>
+            </Card>
         </div>
     )
 }
@@ -125,23 +125,23 @@ const ReorderRules = (): JSX.Element | null => {
 
     return isReorderingRules ? (
         <>
-            <LemonButton type="secondary" size="small" onClick={cancelReorderingRules}>
+            <Button type="secondary" size="small" onClick={cancelReorderingRules}>
                 Cancel
-            </LemonButton>
-            <LemonButton type="primary" size="small" onClick={finishReorderingRules} loading={rulesLoading}>
+            </Button>
+            <Button type="primary" size="small" onClick={finishReorderingRules} loading={rulesLoading}>
                 Finish reordering
-            </LemonButton>
+            </Button>
         </>
     ) : (
         <div>
-            <LemonButton
+            <Button
                 size="small"
                 type="secondary"
                 onClick={startReorderingRules}
                 disabledReason={localRules.length > 0 ? 'Finish editing all rules before reordering' : undefined}
             >
                 Reorder
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -153,7 +153,7 @@ const DisabledBanner = ({ rule }: { rule: ErrorTrackingRule }): JSX.Element => {
 
     return (
         <>
-            <LemonBanner
+            <Banner
                 className="mx-2 mt-2"
                 type="warning"
                 action={{
@@ -163,11 +163,11 @@ const DisabledBanner = ({ rule }: { rule: ErrorTrackingRule }): JSX.Element => {
             >
                 This rule has been disabled due to an error. Editing the rule will re-enable it. If you need help, reach
                 out to support.
-            </LemonBanner>
+            </Banner>
             {message && (
-                <LemonBanner className="mx-2 mt-1" type="error">
+                <Banner className="mx-2 mt-1" type="error">
                     Error during evaluation: {message}
-                </LemonBanner>
+                </Banner>
             )}
         </>
     )
@@ -179,9 +179,9 @@ export const AddRule = ({ disabledReason }: { disabledReason: string | undefined
 
     return !hasNewRule && !isReorderingRules ? (
         <div>
-            <LemonButton type="primary" size="small" onClick={addRule} disabledReason={disabledReason}>
+            <Button type="primary" size="small" onClick={addRule} disabledReason={disabledReason}>
                 Add rule
-            </LemonButton>
+            </Button>
         </div>
     ) : null
 }
@@ -203,12 +203,12 @@ function Actions<T extends ErrorTrackingRule>({
             {isReorderingRules ? null : editing ? (
                 <>
                     {rule.id === 'new' ? null : (
-                        <LemonButton
+                        <Button
                             size="small"
                             icon={<IconTrash />}
                             status="danger"
                             onClick={() =>
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: 'Delete rule',
                                     description:
                                         'Are you sure you want to delete this rule? This action cannot be undone',
@@ -224,26 +224,26 @@ function Actions<T extends ErrorTrackingRule>({
                             }
                         />
                     )}
-                    <LemonButton size="small" onClick={() => unsetRuleEditable(rule.id)}>
+                    <Button size="small" onClick={() => unsetRuleEditable(rule.id)}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         size="small"
                         type="primary"
                         onClick={() => {
                             let invalidReason = validate?.(rule) ?? validateFilters(rule)
                             if (invalidReason) {
-                                lemonToast.error(invalidReason)
+                                toast.error(invalidReason)
                                 return
                             }
                             saveRule(rule.id)
                         }}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </>
             ) : (
-                <LemonButton size="small" icon={<IconPencil />} onClick={() => setRuleEditable(rule.id)} />
+                <Button size="small" icon={<IconPencil />} onClick={() => setRuleEditable(rule.id)} />
             )}
         </div>
     )
@@ -290,9 +290,9 @@ const Assignee = ({ rule, editing }: { rule: ErrorTrackingAssignmentRule; editin
     return editing ? (
         <AssigneeSelect assignee={rule.assignee} onChange={(assignee) => updateLocalRule({ ...rule, assignee })}>
             {(displayAssignee) => (
-                <LemonButton fullWidth type="secondary" size="small">
+                <Button fullWidth type="secondary" size="small">
                     <AssigneeLabelDisplay assignee={displayAssignee} placeholder="Choose user" />
-                </LemonButton>
+                </Button>
             )}
         </AssigneeSelect>
     ) : (
@@ -313,7 +313,7 @@ const Operator = ({ rule, editing }: { rule: ErrorTrackingRule; editing: boolean
     const operator = rule.filters.type
 
     return editing ? (
-        <LemonSelect
+        <Select
             size="small"
             value={operator}
             onChange={(type) => updateLocalRule({ ...rule, filters: { ...rule.filters, type } })}

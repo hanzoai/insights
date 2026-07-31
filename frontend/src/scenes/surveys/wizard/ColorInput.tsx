@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-import { LemonInput, Popover } from '@hanzo/lemon-ui'
+import { Input, Popover } from '@hanzo/elements'
 
-import { LemonColorList } from 'lib/lemon-ui/LemonColor'
+import { ColorList } from 'lib/elements/Color'
 import { cn } from 'lib/utils/css-classes'
 
 interface ColorInputProps {
@@ -75,7 +75,7 @@ export function ColorInput({ value = '', onChange, disabled, colorList }: ColorI
                     onClickOutside={() => setIsOpen(false)}
                     overlay={
                         <div className="p-2">
-                            <LemonColorList
+                            <ColorList
                                 colors={colorList ?? SURVEY_PRESET_COLORS}
                                 selectedColor={value}
                                 onSelectColor={(color) => {
@@ -95,7 +95,7 @@ export function ColorInput({ value = '', onChange, disabled, colorList }: ColorI
                         <ColorGlyph color={value} />
                     </button>
                 </Popover>
-                <LemonInput
+                <Input
                     value={value}
                     onChange={onChange}
                     placeholder="#000000 or var(--color)"

@@ -3,10 +3,10 @@ import { useState } from 'react'
 
 import { IconChevronDown, IconPeople } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { ProfileBubbles } from 'lib/lemon-ui/ProfilePicture'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { Button } from 'lib/elements/Button'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { ProfileBubbles } from 'lib/elements/ProfilePicture'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { userLogic } from 'scenes/userLogic'
 
 import { SessionRecordingType } from '~/types'
@@ -17,7 +17,7 @@ function OtherWatchersLoading(): JSX.Element {
     return (
         <div className="flex flex-row deprecated-space-x-2 items-center justify-center px-2 py-1">
             <IconPeople />
-            <LemonSkeleton.Row repeat={1} className="h-5" />
+            <Skeleton.Row repeat={1} className="h-5" />
         </div>
     )
 }
@@ -57,7 +57,7 @@ function OtherWatchersDisplay({
                 <span>
                     {count} other {varyingText} watched this recording.
                 </span>
-                <LemonButton
+                <Button
                     size="small"
                     icon={<IconChevronDown className={isExpanded ? 'rotate-180' : ''} />}
                     onClick={toggleExpanded}

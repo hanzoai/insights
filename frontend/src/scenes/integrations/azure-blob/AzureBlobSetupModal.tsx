@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { AzureBlobSetupModalLogicProps, azureBlobSetupModalLogic } from './azureBlobSetupModalLogic'
 
@@ -12,28 +12,28 @@ export const AzureBlobSetupModal = (props: AzureBlobSetupModalLogicProps): JSX.E
     const { submitAzureBlobIntegration } = useActions(azureBlobSetupModalLogic(props))
 
     return (
-        <LemonModal
+        <Modal
             isOpen={props.isOpen}
             title="Configure Azure Blob Storage"
             description="Enter your Azure Storage connection string to connect Insights to your Azure Blob Storage account."
             onClose={props.onComplete}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={() => props.onComplete()}>
+                    <Button type="secondary" onClick={() => props.onComplete()}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         loading={isAzureBlobIntegrationSubmitting}
                         onClick={submitAzureBlobIntegration}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <Form logic={azureBlobSetupModalLogic} formKey="azureBlobIntegration">
-                <LemonField
+                <Field
                     name="connectionString"
                     label="Connection string"
                     info={
@@ -43,13 +43,13 @@ export const AzureBlobSetupModal = (props: AzureBlobSetupModalLogicProps): JSX.E
                         </>
                     }
                 >
-                    <LemonInput
+                    <Input
                         type="password"
                         placeholder="DefaultEndpointsProtocol=https;AccountName=..."
                         className="ph-ignore-input"
                     />
-                </LemonField>
+                </Field>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

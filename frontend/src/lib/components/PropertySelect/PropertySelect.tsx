@@ -6,12 +6,12 @@ import clsx from 'clsx'
 import { useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonSnack } from 'lib/lemon-ui/LemonSnack/LemonSnack'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Snack } from 'lib/elements/Snack/Snack'
+import { Popover } from 'lib/elements/Popover/Popover'
 
 export interface PropertySelectProps {
     addText: string
@@ -44,7 +44,7 @@ const SortableProperty = ({
                 transition,
             }}
         >
-            <LemonSnack onClose={() => onRemove(name)}>{name}</LemonSnack>
+            <Snack onClose={() => onRemove(name)}>{name}</Snack>
         </span>
     )
 }
@@ -123,7 +123,7 @@ export const PropertySelect = ({
                         />
                     }
                 >
-                    <LemonButton
+                    <Button
                         onClick={() => setOpen(!open)}
                         type="secondary"
                         size="small"
@@ -131,7 +131,7 @@ export const PropertySelect = ({
                         sideIcon={null}
                     >
                         {addText}
-                    </LemonButton>
+                    </Button>
                 </Popover>
             </div>
         </div>

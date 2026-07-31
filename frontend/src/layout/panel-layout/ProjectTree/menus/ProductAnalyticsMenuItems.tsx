@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { Link } from 'lib/lemon-ui/Link/Link'
+import { Link } from 'lib/elements/Link/Link'
 import { DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from 'lib/ui/DropdownMenu/DropdownMenu'
 
 import { projectTreeDataLogic } from '~/layout/panel-layout/ProjectTree/projectTreeDataLogic'

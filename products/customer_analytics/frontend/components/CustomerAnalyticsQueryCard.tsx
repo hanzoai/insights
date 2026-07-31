@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner, LemonCard } from '@hanzo/lemon-ui'
+import { Banner, Card } from '@hanzo/elements'
 
 import { CardMeta } from 'lib/components/Cards/CardMeta'
 import { InsightMetaContent } from 'lib/components/Cards/InsightCard/InsightMeta'
@@ -76,13 +76,13 @@ export function CustomerAnalyticsQueryCard({ insight, tabId }: CustomerAnalytics
             .filter((event): event is EventSelectorProps => event !== undefined)
 
         return (
-            <LemonCard hoverEffect={false} className="h-[400px] p-0">
+            <Card hoverEffect={false} className="h-[400px] p-0">
                 <CardMeta
                     topHeading={<TopHeading query={insight.query} />}
                     content={<InsightMetaContent title={insight.name} description={insight.description} />}
                 />
 
-                <LemonBanner type="warning" square>
+                <Banner type="warning" square>
                     <div className="flex flex-row items-center gap-2">This insight requires configuration</div>
                     <div className="flex flex-col items-start gap-2 mt-2 max-w-160">
                         {eventsToConfigure.map((event) => (
@@ -98,8 +98,8 @@ export function CustomerAnalyticsQueryCard({ insight, tabId }: CustomerAnalytics
                             </ConfigureWithAIButton>
                         ))}
                     </div>
-                </LemonBanner>
-            </LemonCard>
+                </Banner>
+            </Card>
         )
     }
 

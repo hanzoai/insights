@@ -2,7 +2,7 @@ import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea
 import { forms } from 'kea-forms'
 import { urlToAction } from 'kea-router'
 
-import '@hanzo/lemon-ui'
+import '@hanzo/elements'
 
 import api from 'lib/api'
 import { Dayjs, dayjs } from 'lib/dayjs'

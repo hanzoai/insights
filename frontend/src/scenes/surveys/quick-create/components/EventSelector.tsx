@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonLabel } from '@hanzo/lemon-ui'
+import { Button, Label } from '@hanzo/elements'
 
 import { AddEventButton } from 'scenes/surveys/AddEventButton'
 import { quickSurveyFormLogic } from 'scenes/surveys/quick-create/quickSurveyFormLogic'
@@ -12,7 +12,7 @@ export function EventSelector(): JSX.Element {
 
     return (
         <div>
-            <LemonLabel className="mb-2">Trigger on events (optional)</LemonLabel>
+            <Label className="mb-2">Trigger on events (optional)</Label>
             {selectedEvents.length > 0 && (
                 <div className="space-y-2 mb-2">
                     {selectedEvents.map((eventName) => (
@@ -21,7 +21,7 @@ export function EventSelector(): JSX.Element {
                             className="flex items-center justify-between p-2 border rounded bg-bg-light"
                         >
                             <span className="text-sm font-medium">{eventName}</span>
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 icon={<IconX />}
                                 onClick={() =>

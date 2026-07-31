@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 import { HTMLElementsDisplay } from 'lib/components/HTMLElementsDisplay/HTMLElementsDisplay'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
 
 import { ElementType } from '~/types'
 
@@ -22,15 +22,15 @@ export const SelectorEditingModal = ({
     const [chosenSelector, setChosenSelector] = useState<string | null>(null)
 
     return (
-        <LemonModal
+        <Modal
             forceAbovePopovers={true}
             description="Click on elements and their attributes to build a selector"
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={() => setIsOpen(false)}>
+                    <Button type="secondary" onClick={() => setIsOpen(false)}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={(e) => {
                             e.stopPropagation()
@@ -39,7 +39,7 @@ export const SelectorEditingModal = ({
                         }}
                     >
                         Apply
-                    </LemonButton>
+                    </Button>
                 </>
             }
             onClose={() => setIsOpen(false)}
@@ -54,6 +54,6 @@ export const SelectorEditingModal = ({
                 onChange={setChosenSelector}
                 startingSelector={startingSelector ?? undefined}
             />
-        </LemonModal>
+        </Modal>
     )
 }

@@ -5,7 +5,7 @@ import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { DashboardCompatibleScenes } from 'lib/components/SceneDashboardChoice/sceneDashboardChoiceModalLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { getAppContext } from 'lib/utils/getAppContext'
 
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
@@ -93,11 +93,11 @@ export const userLogic = kea<userLogicType>([
                     }
                     try {
                         const response = await api.update<UserType>('api/users/cancel_email_change_request/', {})
-                        lemonToast.success('The email change request was cancelled successfully.')
+                        toast.success('The email change request was cancelled successfully.')
                         return response
                     } catch (error: any) {
                         console.error(error)
-                        lemonToast.error(
+                        toast.error(
                             'Failed to cancel email change request. Please try again later or contact support.'
                         )
                         return values.user
@@ -127,14 +127,14 @@ export const userLogic = kea<userLogicType>([
                     try {
                         await api.create('admin/impersonation/upgrade/', { reason })
                         actions.loadUser()
-                        lemonToast.success('Upgraded to read-write impersonation')
+                        toast.success('Upgraded to read-write impersonation')
 
                         // optimistically update user to read-write rather than
                         // waiting for `loadUser` to complete
                         return values.user ? { ...values.user, is_impersonated_read_only: false } : null
                     } catch (error: any) {
                         console.error(error)
-                        lemonToast.error('Failed to upgrade impersonation')
+                        toast.error('Failed to upgrade impersonation')
                         return values.user
                     }
                 },
@@ -214,24 +214,24 @@ export const userLogic = kea<userLogicType>([
             }
         },
         updateUserSuccess: () => {
-            lemonToast.dismiss('updateUser')
-            lemonToast.success('Preferences saved', {
+            toast.dismiss('updateUser')
+            toast.success('Preferences saved', {
                 toastId: 'updateUser',
             })
         },
         updateUserFailure: () => {
-            lemonToast.error(`Error saving preferences`, {
+            toast.error(`Error saving preferences`, {
                 toastId: 'updateUser',
             })
         },
         deleteUserSuccess: () => {
             actions.logout()
-            lemonToast.success('Account deleted', {
+            toast.success('Account deleted', {
                 toastId: 'deleteUser',
             })
         },
         deleteUserFailure: () => {
-            lemonToast.error('Error deleting account', {
+            toast.error('Error deleting account', {
                 toastId: 'deleteUser',
             })
         },

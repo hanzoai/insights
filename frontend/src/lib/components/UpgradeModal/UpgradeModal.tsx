@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 
@@ -23,7 +23,7 @@ export function UpgradeModal(): JSX.Element {
 
     if (shouldShowPlatformAddonMessage) {
         return (
-            <LemonModal onClose={hideUpgradeModal} isOpen={!!upgradeModalFeatureKey}>
+            <Modal onClose={hideUpgradeModal} isOpen={!!upgradeModalFeatureKey}>
                 <div className="max-w-2xl mt-8">
                     <div className="PayGateMini rounded flex flex-col items-center p-4 text-center bg-primary border border-primary">
                         <div className="mb-3 max-w-72">
@@ -34,22 +34,22 @@ export function UpgradeModal(): JSX.Element {
                             <b>{projectLimit} projects</b>, you need to subscribe to the Boost, Scale, or Enterprise
                             plan.
                         </p>
-                        <LemonButton
+                        <Button
                             type="primary"
                             center
                             to="/organization/billing?products=platform_and_support"
                             onClick={hideUpgradeModal}
                         >
                             Upgrade now
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
-            </LemonModal>
+            </Modal>
         )
     }
 
     return (
-        <LemonModal onClose={hideUpgradeModal} isOpen={!!upgradeModalFeatureKey}>
+        <Modal onClose={hideUpgradeModal} isOpen={!!upgradeModalFeatureKey}>
             <div className="max-w-2xl">
                 <PayGateMini
                     feature={upgradeModalFeatureKey}
@@ -64,6 +64,6 @@ export function UpgradeModal(): JSX.Element {
                     </div>
                 </PayGateMini>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

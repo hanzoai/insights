@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useState } from 'react'
 
 import { IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonSwitch, LemonTag } from '@hanzo/lemon-ui'
+import { Switch, Tag } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { dayjs } from 'lib/dayjs'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCalendarSelectInput } from 'lib/lemon-ui/LemonCalendar/LemonCalendarSelect'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Button } from 'lib/elements/Button'
+import { CalendarSelectInput } from 'lib/elements/Calendar/CalendarSelect'
+import { Input } from 'lib/elements/Input'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { humanFriendlyNumber, inStorybook, inStorybookTestRunner } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -31,7 +31,7 @@ type ColumnProps<T extends string | number> = {
 
 function GoalNameColumn({ mode, value, onChange }: ColumnProps<string>): JSX.Element {
     if (mode === 'edit') {
-        return <LemonInput value={value} onChange={onChange} placeholder="Goal name" size="small" autoFocus />
+        return <Input value={value} onChange={onChange} placeholder="Goal name" size="small" autoFocus />
     }
 
     return <span>{value}</span>
@@ -40,7 +40,7 @@ function GoalNameColumn({ mode, value, onChange }: ColumnProps<string>): JSX.Ele
 function DueDateColumn({ mode, value, onChange }: ColumnProps<string>): JSX.Element {
     if (mode === 'edit') {
         return (
-            <LemonCalendarSelectInput
+            <CalendarSelectInput
                 value={value ? dayjs(value) : null}
                 onChange={(date) => onChange(date?.format('YYYY-MM-DD') || '')}
                 placeholder="Select date"
@@ -64,7 +64,7 @@ function GoalAmountColumn({
 
     if (mode === 'edit') {
         return (
-            <LemonInput
+            <Input
                 type="number"
                 value={value}
                 onChange={(newValue) => onChange(newValue ?? 0)}
@@ -108,19 +108,19 @@ function ActionsColumn({
                     resourceType={AccessControlResourceType.RevenueAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="small"
                         onClick={onSave}
                         disabledReason={!canSave ? 'All fields are required' : undefined}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
 
-                <LemonButton type="secondary" size="small" onClick={onCancel}>
+                <Button type="secondary" size="small" onClick={onCancel}>
                     Cancel
-                </LemonButton>
+                </Button>
             </div>
         )
     }
@@ -131,21 +131,21 @@ function ActionsColumn({
                 resourceType={AccessControlResourceType.RevenueAnalytics}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     onClick={onEdit}
                     disabledReason={!canEdit ? 'Finish editing current goal first' : undefined}
                 >
                     Edit
-                </LemonButton>
+                </Button>
             </AccessControlAction>
 
             <AccessControlAction
                 resourceType={AccessControlResourceType.RevenueAnalytics}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     icon={<IconTrash />}
@@ -239,7 +239,7 @@ export function GoalsConfiguration(): JSX.Element {
         [editingIndex, goals.length, isAdding]
     )
 
-    const columns: LemonTableColumns<RevenueAnalyticsGoal> = [
+    const columns: TableColumns<RevenueAnalyticsGoal> = [
         {
             key: 'badge',
             title: '',
@@ -251,16 +251,16 @@ export function GoalsConfiguration(): JSX.Element {
                 }
 
                 if (dayjs(goal.due_date).isBefore(dayjs())) {
-                    return <LemonTag type="danger">Past</LemonTag>
+                    return <Tag type="danger">Past</Tag>
                 }
 
                 // There might be more than one current since they might be for same day
                 // but one for MRR and another one for gross, so compare against the date
                 if (goal.due_date === firstGoalInFutureDate) {
-                    return <LemonTag type="success">Current</LemonTag>
+                    return <Tag type="success">Current</Tag>
                 }
 
-                return <LemonTag type="default">Future</LemonTag>
+                return <Tag type="default">Future</Tag>
             },
         },
         {
@@ -326,7 +326,7 @@ export function GoalsConfiguration(): JSX.Element {
                 return (
                     <span className="flex gap-2">
                         <span className="text-sm">MRR</span>
-                        <LemonSwitch
+                        <Switch
                             checked={checked}
                             onChange={(checked) =>
                                 setTemporaryGoal({ ...temporaryGoal, mrr_or_gross: checked ? 'gross' : 'mrr' })
@@ -378,7 +378,7 @@ export function GoalsConfiguration(): JSX.Element {
                     resourceType={AccessControlResourceType.RevenueAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="primary"
                         icon={<IconPlus />}
                         size="small"
@@ -393,11 +393,11 @@ export function GoalsConfiguration(): JSX.Element {
                         data-attr="revenue-analytics-add-goal-button"
                     >
                         Add Goal
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
 
-            <LemonTable<RevenueAnalyticsGoal>
+            <Table<RevenueAnalyticsGoal>
                 columns={columns}
                 dataSource={dataSource}
                 loading={revenueAnalyticsConfig === null}

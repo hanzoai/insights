@@ -1,4 +1,4 @@
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 /**
  * This button does not have any logic attached to it, as that's added using a survey from Insights.
@@ -6,8 +6,8 @@ import { LemonButton } from '@hanzo/lemon-ui'
  */
 export function SurveyFeedbackButton(): JSX.Element {
     return (
-        <LemonButton size="small" id="surveys-page-feedback-button" tooltip="Have any questions or feedback?">
+        <Button size="small" id="surveys-page-feedback-button" tooltip="Have any questions or feedback?">
             Feedback
-        </LemonButton>
+        </Button>
     )
 }

@@ -3,7 +3,7 @@ import { Form } from 'kea-forms'
 import { createRef } from 'react'
 
 import { IconImage } from '@hanzo/icons'
-import { LemonSkeleton, LemonTag } from '@hanzo/lemon-ui'
+import { Skeleton, Tag } from '@hanzo/elements'
 
 import { PropertyStatusControl } from 'lib/components/DefinitionPopover/DefinitionPopoverContents'
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
@@ -12,13 +12,13 @@ import { NotFound } from 'lib/components/NotFound'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonFileInput } from 'lib/lemon-ui/LemonFileInput/LemonFileInput'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { FileInput } from 'lib/elements/FileInput/FileInput'
+import { Label } from 'lib/elements/Label/Label'
+import { Select } from 'lib/elements/Select'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
+import { toast } from 'lib/elements/Toast/Toast'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { definitionEditLogic } from 'scenes/data-management/definition/definitionEditLogic'
@@ -63,7 +63,7 @@ export function DefinitionEdit(props: DefinitionLogicProps): JSX.Element {
             reportMediaPreviewUploaded('definition_edit')
         },
         onError: (detail) => {
-            lemonToast.error(`Error uploading image: ${detail}`)
+            toast.error(`Error uploading image: ${detail}`)
         },
     })
 
@@ -98,7 +98,7 @@ export function DefinitionEdit(props: DefinitionLogicProps): JSX.Element {
                     }
                     actions={
                         <>
-                            <LemonButton
+                            <Button
                                 data-attr="save-definition"
                                 type="primary"
                                 size="small"
@@ -108,8 +108,8 @@ export function DefinitionEdit(props: DefinitionLogicProps): JSX.Element {
                                 disabledReason={definitionLoading ? 'Loading...' : undefined}
                             >
                                 Save
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 data-attr="cancel-definition"
                                 type="secondary"
                                 size="small"
@@ -121,26 +121,26 @@ export function DefinitionEdit(props: DefinitionLogicProps): JSX.Element {
                                 disabledReason={definitionLoading ? 'Loading...' : undefined}
                             >
                                 Cancel
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                 />
 
                 {definitionLoading ? (
                     <div className="deprecated-space-y-4">
-                        <LemonSkeleton className="h-10 w-1/3" />
-                        <LemonSkeleton className="h-6 w-1/2" />
-                        <LemonSkeleton className="h-30 w-1/2" />
+                        <Skeleton className="h-10 w-1/3" />
+                        <Skeleton className="h-6 w-1/2" />
+                        <Skeleton className="h-30 w-1/2" />
                     </div>
                 ) : (
                     <div className="deprecated-space-y-4">
                         <div className="flex flex-wrap items-center gap-2 text-secondary">
                             <div>{isProperty ? 'Property' : 'Event'} name:</div>
-                            <LemonTag className="font-mono">{editDefinition.name}</LemonTag>
+                            <Tag className="font-mono">{editDefinition.name}</Tag>
                         </div>
                         {'tags' in editDefinition && (
                             <div className="ph-ignore-input">
-                                <LemonField name="tags" label="Tags" data-attr="definition-tags">
+                                <Field name="tags" label="Tags" data-attr="definition-tags">
                                     {({ value, onChange }) => (
                                         <ObjectTags
                                             className="definition-tags"
@@ -151,26 +151,26 @@ export function DefinitionEdit(props: DefinitionLogicProps): JSX.Element {
                                             tagsAvailable={tags}
                                         />
                                     )}
-                                </LemonField>
+                                </Field>
                             </div>
                         )}
 
                         <div className="ph-ignore-input">
-                            <LemonField name="description" label="Description" data-attr="definition-description">
-                                <LemonTextArea value={editDefinition.description} />
-                            </LemonField>
+                            <Field name="description" label="Description" data-attr="definition-description">
+                                <TextArea value={editDefinition.description} />
+                            </Field>
                         </div>
 
                         {/* Allow uploading media previews only for custom events; not that useful for properties or autocapture events */}
                         <FlaggedFeature flag={FEATURE_FLAGS.EVENT_MEDIA_PREVIEWS}>
                             {objectStorageAvailable && !isProperty && !isCoreFilter(editDefinition.name) && (
                                 <div className="ph-ignore-input">
-                                    <LemonField
+                                    <Field
                                         name="media_preview"
                                         label={
-                                            <LemonLabel info="Previews show where a client side event is triggered. Upload a screenshot or design.">
+                                            <Label info="Previews show where a client side event is triggered. Upload a screenshot or design.">
                                                 Media preview
-                                            </LemonLabel>
+                                            </Label>
                                         }
                                     >
                                         <div>
@@ -186,7 +186,7 @@ export function DefinitionEdit(props: DefinitionLogicProps): JSX.Element {
                                                     }
                                                 }}
                                             >
-                                                <LemonFileInput
+                                                <FileInput
                                                     accept="image/*"
                                                     multiple={false}
                                                     onChange={setFilesToUpload}
@@ -219,16 +219,16 @@ export function DefinitionEdit(props: DefinitionLogicProps): JSX.Element {
                                                 />
                                             )}
                                         </div>
-                                    </LemonField>
+                                    </Field>
                                 </div>
                             )}
                         </FlaggedFeature>
 
                         {(allowVerification || showHiddenOption) && (
                             <div className="ph-ignore-input">
-                                <LemonField name="verified" label="Status" data-attr="definition-status">
+                                <Field name="verified" label="Status" data-attr="definition-status">
                                     {({ value: verified, onChange }) => (
-                                        <LemonField name="hidden">
+                                        <Field name="hidden">
                                             {({ value: hidden, onChange: onHiddenChange }) => (
                                                 <PropertyStatusControl
                                                     isProperty={isProperty}
@@ -242,17 +242,17 @@ export function DefinitionEdit(props: DefinitionLogicProps): JSX.Element {
                                                     }}
                                                 />
                                             )}
-                                        </LemonField>
+                                        </Field>
                                     )}
-                                </LemonField>
+                                </Field>
                             </div>
                         )}
 
                         {isProperty && (
                             <div className="ph-ignore-input">
-                                <LemonField name="property_type" label="Property Type" data-attr="property-type">
+                                <Field name="property_type" label="Property Type" data-attr="property-type">
                                     {({ value, onChange }) => (
-                                        <LemonSelect
+                                        <Select
                                             onChange={(val) => onChange(val)}
                                             value={value as 'DateTime' | 'String' | 'Numeric' | 'Boolean'}
                                             options={[
@@ -263,7 +263,7 @@ export function DefinitionEdit(props: DefinitionLogicProps): JSX.Element {
                                             ]}
                                         />
                                     )}
-                                </LemonField>
+                                </Field>
                             </div>
                         )}
                     </div>

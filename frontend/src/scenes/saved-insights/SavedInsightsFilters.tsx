@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconFlag, IconStar } from '@hanzo/icons'
-import { LemonDropdown, ProfilePicture } from '@hanzo/lemon-ui'
+import { Dropdown, ProfilePicture } from '@hanzo/elements'
 
 import { TagSelect } from 'lib/components/TagSelect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input/Input'
+import { Select } from 'lib/elements/Select'
+import { Switch } from 'lib/elements/Switch'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { fullName } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 import { membersLogic } from 'scenes/organization/membersLogic'
@@ -57,7 +57,7 @@ export function SavedInsightsFilters({
 
     return (
         <div className={cn('flex justify-between gap-2 items-center flex-wrap')}>
-            <LemonInput
+            <Input
                 type="search"
                 placeholder="Search for insights"
                 onChange={(value) => setFilters({ search: value })}
@@ -68,7 +68,7 @@ export function SavedInsightsFilters({
             {quickFilters.length > 0 && (
                 <div className="flex gap-2 items-center flex-wrap ml-auto">
                     {quickFilterSet.has('insightType') && (
-                        <LemonSelect
+                        <Select
                             dropdownMatchSelectWidth={false}
                             size="small"
                             active={hasInsightTypeSelection}
@@ -90,19 +90,19 @@ export function SavedInsightsFilters({
                             }}
                         >
                             {(selectedTags) => (
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="secondary"
                                     active={selectedTags.length > 0}
                                     status={borderless && selectedTags.length === 0 ? 'alt' : 'default'}
                                 >
                                     {selectedTags.length > 0 ? `Tags (${selectedTags.length})` : 'Tags'}
-                                </LemonButton>
+                                </Button>
                             )}
                         </TagSelect>
                     )}
                     {quickFilterSet.has('createdBy') && (
-                        <LemonDropdown
+                        <Dropdown
                             closeOnClickInside={false}
                             matchWidth={false}
                             placement="bottom-end"
@@ -115,7 +115,7 @@ export function SavedInsightsFilters({
                             }}
                             overlay={
                                 <div className="max-w-100 deprecated-space-y-2">
-                                    <LemonInput
+                                    <Input
                                         type="search"
                                         placeholder="Search"
                                         autoFocus
@@ -126,7 +126,7 @@ export function SavedInsightsFilters({
                                     <ul className="deprecated-space-y-px">
                                         {filteredMembers.map((member) => (
                                             <li key={member.user.uuid}>
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     role="menuitem"
                                                     size="small"
@@ -150,7 +150,7 @@ export function SavedInsightsFilters({
                                                             {meFirstMembers[0] === member && `(you)`}
                                                         </span>
                                                     </span>
-                                                </LemonButton>
+                                                </Button>
                                             </li>
                                         ))}
                                         {membersLoading ? (
@@ -166,7 +166,7 @@ export function SavedInsightsFilters({
                                             <>
                                                 <div className="my-1 border-t" />
                                                 <li>
-                                                    <LemonButton
+                                                    <Button
                                                         fullWidth
                                                         role="menuitem"
                                                         size="small"
@@ -174,7 +174,7 @@ export function SavedInsightsFilters({
                                                         type="tertiary"
                                                     >
                                                         Clear selection
-                                                    </LemonButton>
+                                                    </Button>
                                                 </li>
                                             </>
                                         )}
@@ -182,7 +182,7 @@ export function SavedInsightsFilters({
                                 </div>
                             }
                         >
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="secondary"
                                 status={borderless && !hasCreatedBySelection ? 'alt' : 'default'}
@@ -193,11 +193,11 @@ export function SavedInsightsFilters({
                                     : hasCreatedBySelection
                                       ? `Created by (${(createdBy as number[]).length})`
                                       : 'Created by'}
-                            </LemonButton>
-                        </LemonDropdown>
+                            </Button>
+                        </Dropdown>
                     )}
                     {quickFilterSet.has('favorites') && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             status={borderless && !favorited ? 'alt' : 'default'}
                             active={favorited || false}
@@ -206,7 +206,7 @@ export function SavedInsightsFilters({
                             icon={<IconStar />}
                         >
                             Favorites
-                        </LemonButton>
+                        </Button>
                     )}
                     {quickFilterSet.has('featureFlags') && (
                         <FeatureFlagInsightsToggle
@@ -242,14 +242,14 @@ const FeatureFlagInsightsToggle = ({
             }
             placement="top"
         >
-            <LemonButton
+            <Button
                 icon={<IconFlag />}
                 onClick={() => onToggle(!hideFeatureFlagInsights)}
                 type="tertiary"
                 size="small"
             >
-                Hide feature flag insights: <LemonSwitch checked={hideFeatureFlagInsights || false} className="ml-1" />
-            </LemonButton>
+                Hide feature flag insights: <Switch checked={hideFeatureFlagInsights || false} className="ml-1" />
+            </Button>
         </Tooltip>
     )
 }

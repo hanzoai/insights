@@ -3,7 +3,7 @@ import { combineUrl } from 'kea-router'
 import { useState } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonBanner, LemonCheckbox, Link } from '@hanzo/lemon-ui'
+import { Banner, Checkbox, Link } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { domainFor, proxyLogic } from 'scenes/settings/environment/proxyLogic'
@@ -50,7 +50,7 @@ export function CSPReportingSettings(): JSX.Element {
                 event.
             </p>
             <div className="flex flex-col gap-2">
-                <LemonBanner type="info" hideIcon={true}>
+                <Banner type="info" hideIcon={true}>
                     <div className="flex flex-row items-center gap-x-2">
                         <IconInfo />
                         <div>
@@ -59,24 +59,24 @@ export function CSPReportingSettings(): JSX.Element {
                             <Link to="https://hanzo.ai/docs/csp-tracking">See our docs for some examples.</Link>
                         </div>
                     </div>
-                </LemonBanner>
+                </Banner>
                 <div>
-                    <LemonCheckbox
+                    <Checkbox
                         label="version: the version for the current CSP. This helps you track impact of changes to your CSP."
                         checked={includeVersion}
                         onChange={setIncludeVersion}
                     />
-                    <LemonCheckbox
+                    <Checkbox
                         label="session_id: the Insights UUIDv7 session id. Helps you link CSP violations to session replay."
                         checked={includeSessionId}
                         onChange={setIncludeSessionId}
                     />
-                    <LemonCheckbox
+                    <Checkbox
                         label="distinct_id: the distinct id for the current user. So you can track which users are being affected"
                         checked={includeDistinctId}
                         onChange={setIncludeDistinctId}
                     />
-                    <LemonCheckbox
+                    <Checkbox
                         label="sample_rate: the sample rate for the current CSP. Lets you control the volume of reports you ingest."
                         checked={includeSampleRate}
                         onChange={setIncludeSampleRate}

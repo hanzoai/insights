@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconInfo, IconLineGraph } from '@hanzo/icons'
-import { LemonSegmentedButton, Tooltip } from '@hanzo/lemon-ui'
+import { SegmentedButton, Tooltip } from '@hanzo/elements'
 
-import { IconTableChart } from 'lib/lemon-ui/icons'
+import { IconTableChart } from 'lib/elements/icons'
 import { humanFriendlyNumber } from 'lib/utils'
 import { getCurrencySymbol } from 'lib/utils/geography/currency'
 import { teamLogic } from 'scenes/teamLogic'
@@ -74,7 +74,7 @@ export const TopCustomersTile = (): JSX.Element => {
                     </Tooltip>
                 </h3>
 
-                <LemonSegmentedButton
+                <SegmentedButton
                     value={topCustomersDisplayMode}
                     onChange={setTopCustomersDisplayMode}
                     options={[

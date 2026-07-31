@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Banner, Skeleton } from '@hanzo/elements'
 
 import { isUUIDLike } from 'lib/utils'
 import { personsSceneLogic } from 'scenes/persons/personsSceneLogic'
@@ -64,7 +64,7 @@ export function PersonDisplayNameNudgeBanner({ uniqueKey }: PersonDisplayNameNud
     }, [response, dataLoading, isRefresh, setIsBannerLoading, setShowDisplayNameNudge])
 
     if (isBannerLoading) {
-        return <LemonSkeleton className="h-14 my-2" />
+        return <Skeleton className="h-14 my-2" />
     }
 
     if (dataLoading || !showDisplayNameNudge) {
@@ -72,7 +72,7 @@ export function PersonDisplayNameNudgeBanner({ uniqueKey }: PersonDisplayNameNud
     }
 
     return (
-        <LemonBanner
+        <Banner
             type="info"
             className="my-2"
             dismissKey="person-display-name-uuid-nudge"
@@ -84,6 +84,6 @@ export function PersonDisplayNameNudgeBanner({ uniqueKey }: PersonDisplayNameNud
         >
             Your persons are showing IDs instead of names. Configure display name properties to show meaningful names
             like email or username.
-        </LemonBanner>
+        </Banner>
     )
 }

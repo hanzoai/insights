@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { getSeriesBackgroundColor } from 'lib/colors'
 import { InsightLabel } from 'lib/components/InsightLabel'
 import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
+import { Checkbox } from 'lib/elements/Checkbox'
 import { formatAggregationAxisValue } from 'scenes/insights/aggregationAxisFormat'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { formatBreakdownLabel, getTrendResultCustomizationKey } from 'scenes/insights/utils'
@@ -73,7 +73,7 @@ export function InsightLegendRow({ item }: InsightLegendRowProps): JSX.Element {
     return (
         <div key={item.id} className="InsightLegendMenu-item p-2 flex flex-row" ref={rowRef} {...highlightStyle}>
             <div className="grow">
-                <LemonCheckbox
+                <Checkbox
                     className="text-xs mr-4"
                     color={mainColor}
                     checked={!isHidden}

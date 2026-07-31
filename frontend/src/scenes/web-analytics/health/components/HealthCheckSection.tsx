@@ -1,5 +1,5 @@
 import { IconChevronDown, IconGear, IconGraph, IconPulse } from '@hanzo/icons'
-import { LemonCollapse, LemonTag } from '@hanzo/lemon-ui'
+import { Collapse, Tag } from '@hanzo/elements'
 
 import { HealthCheck, HealthCheckCategory } from '../healthCheckTypes'
 import { HealthCheckItem } from './HealthCheckItem'
@@ -45,7 +45,7 @@ export function HealthCheckSection({
     }
 
     return (
-        <LemonCollapse
+        <Collapse
             defaultActiveKey={defaultOpen ? category : undefined}
             onChange={handleChange}
             panels={[
@@ -61,9 +61,9 @@ export function HealthCheckSection({
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <LemonTag type={hasIssues ? 'warning' : 'success'} size="small">
+                                <Tag type={hasIssues ? 'warning' : 'success'} size="small">
                                     {passedCount}/{totalCount} passed
-                                </LemonTag>
+                                </Tag>
                                 <IconChevronDown className="w-4 h-4 text-muted transition-transform ui-open:rotate-180" />
                             </div>
                         </div>

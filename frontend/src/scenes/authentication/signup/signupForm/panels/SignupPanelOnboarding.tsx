@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Link } from '@hanzo/elements'
 
 import SignupReferralSource from 'lib/components/SignupReferralSource'
 import SignupRoleSelect from 'lib/components/SignupRoleSelect'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { signupLogic } from '../signupLogic'
@@ -25,27 +25,27 @@ export function SignupPanelOnboarding(): JSX.Element | null {
                 className="deprecated-space-y-4"
                 enableFormOnSubmit
             >
-                <LemonField name="name" label="Your name">
-                    <LemonInput
+                <Field name="name" label="Your name">
+                    <Input
                         className="ph-ignore-input"
                         data-attr="signup-name"
                         placeholder="Jane Doe"
                         disabled={isSignupPanelOnboardingSubmitting}
                     />
-                </LemonField>
-                <LemonField name="organization_name" label="Organization name">
-                    <LemonInput
+                </Field>
+                <Field name="organization_name" label="Organization name">
+                    <Input
                         className="ph-ignore-input"
                         data-attr="signup-organization-name"
                         placeholder="Acme Inc"
                         disabled={isSignupPanelOnboardingSubmitting}
                     />
-                </LemonField>
+                </Field>
                 <SignupRoleSelect />
                 <SignupReferralSource disabled={isSignupPanelOnboardingSubmitting} />
                 <div className="divider" />
 
-                <LemonButton
+                <Button
                     fullWidth
                     type="primary"
                     center
@@ -62,7 +62,7 @@ export function SignupPanelOnboarding(): JSX.Element | null {
                         : !isSignupPanelOnboardingSubmitting
                           ? 'Enter the demo environment'
                           : 'Preparing demo data…'}
-                </LemonButton>
+                </Button>
             </Form>
 
             <div className="text-center text-secondary">

@@ -3,20 +3,20 @@ import { combineUrl, router } from 'kea-router'
 
 import { IconCopy, IconPencil, IconPlus, IconSearch, IconTrash } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonInput,
-    LemonSwitch,
-    LemonTab,
-    LemonTable,
-    LemonTabs,
-    LemonTag,
+    Banner,
+    Button,
+    Input,
+    Switch,
+    Tab,
+    Table,
+    Tabs,
+    Tag,
     Link,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
-import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { TableColumns } from 'lib/elements/Table'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -74,7 +74,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
         return <EvaluationTemplatesEmptyState />
     }
 
-    const columns: LemonTableColumns<EvaluationConfig> = [
+    const columns: TableColumns<EvaluationConfig> = [
         {
             title: 'Name',
             key: 'name',
@@ -97,7 +97,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
                         resourceType={AccessControlResourceType.LlmAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonSwitch
+                        <Switch
                             checked={evaluation.enabled}
                             onChange={() => toggleEvaluationEnabled(evaluation.id)}
                             size="small"
@@ -128,11 +128,11 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
             render: (_, evaluation) => (
                 <div className="flex flex-wrap gap-1">
                     {evaluation.conditions.map((condition) => (
-                        <LemonTag key={condition.id} type="option">
+                        <Tag key={condition.id} type="option">
                             {parseFloat(condition.rollout_percentage.toFixed(2))}%
                             {condition.properties.length > 0 &&
                                 ` when ${condition.properties.length} condition${condition.properties.length !== 1 ? 's' : ''}`}
-                        </LemonTag>
+                        </Tag>
                     ))}
                     {evaluation.conditions.length === 0 && <span className="text-muted text-sm">No triggers</span>}
                 </div>
@@ -175,7 +175,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
                         resourceType={AccessControlResourceType.LlmAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             type="secondary"
                             icon={<IconPencil />}
@@ -186,7 +186,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
                         resourceType={AccessControlResourceType.LlmAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             type="secondary"
                             icon={<IconCopy />}
@@ -197,7 +197,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
                         resourceType={AccessControlResourceType.LlmAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             type="secondary"
                             status="danger"
@@ -221,7 +221,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
             <TrialUsageMeter showSettingsLink={false} />
 
             {unhealthyProviderKeysUsedByEvaluations.length > 0 && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     <div className="space-y-2">
                         <p>Some evaluations are using API keys that need attention.</p>
                         <ul className="list-disc pl-5 space-y-1">
@@ -235,12 +235,12 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
                         </ul>
                         <Link to={settingsUrl}>Go to settings to fix API keys.</Link>
                     </div>
-                </LemonBanner>
+                </Banner>
             )}
 
-            <LemonBanner type="info" dismissKey="evals-billing-notice">
+            <Banner type="info" dismissKey="evals-billing-notice">
                 Each evaluation run counts as an LLM analytics event.
-            </LemonBanner>
+            </Banner>
 
             <div className="flex justify-between items-center">
                 <div>
@@ -253,7 +253,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
                     resourceType={AccessControlResourceType.LlmAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="primary"
                         icon={<IconPlus />}
                         to={combineUrl(urls.llmAnalyticsEvaluationTemplates(), searchParams).url}
@@ -261,7 +261,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
                         tooltip="Create evaluation"
                     >
                         Create evaluation
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
 
@@ -270,7 +270,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
             <EvaluationMetrics />
 
             <div className="flex items-center gap-2">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search evaluations..."
                     value={evaluationsFilter}
@@ -281,7 +281,7 @@ function LLMAnalyticsEvaluationsContent({ tabId }: { tabId?: string }): JSX.Elem
                 />
             </div>
 
-            <LemonTable
+            <Table
                 columns={columns}
                 dataSource={filteredEvaluationsWithMetrics}
                 loading={evaluationsLoading}
@@ -302,7 +302,7 @@ export function LLMAnalyticsEvaluationsScene({ tabId }: { tabId?: string }): JSX
 
     useAttachedLogic(metricsLogic, evaluationsLogic)
 
-    const tabs: LemonTab<string>[] = [
+    const tabs: Tab<string>[] = [
         {
             key: 'evaluations',
             label: 'Evaluations',
@@ -330,17 +330,17 @@ export function LLMAnalyticsEvaluationsScene({ tabId }: { tabId?: string }): JSX
                             type: 'llm_evaluations',
                         }}
                         actions={
-                            <LemonButton
+                            <Button
                                 to="https://hanzo.ai/docs/llm-analytics/evaluations"
                                 type="secondary"
                                 targetBlank
                                 size="small"
                             >
                                 Documentation
-                            </LemonButton>
+                            </Button>
                         }
                     />
-                    <LemonTabs activeKey="evaluations" data-attr="evaluations-tabs" tabs={tabs} sceneInset />
+                    <Tabs activeKey="evaluations" data-attr="evaluations-tabs" tabs={tabs} sceneInset />
                 </SceneContent>
             </BindLogic>
         </BindLogic>

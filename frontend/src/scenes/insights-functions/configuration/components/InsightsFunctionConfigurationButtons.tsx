@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { insightsFunctionConfigurationLogic } from '../insightsFunctionConfigurationLogic'
 
@@ -16,7 +16,7 @@ export function InsightsFunctionConfigurationSaveButton(): JSX.Element {
     } = useValues(insightsFunctionConfigurationLogic)
     const { submitConfiguration } = useActions(insightsFunctionConfigurationLogic)
     return (
-        <LemonButton
+        <Button
             type="primary"
             htmlType="submit"
             onClick={submitConfiguration}
@@ -30,7 +30,7 @@ export function InsightsFunctionConfigurationSaveButton(): JSX.Element {
                 : willChangeEnabledOnSave
                   ? ` & ${configuration.enabled ? 'enable' : 'disable'}`
                   : ''}
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -43,7 +43,7 @@ export function InsightsFunctionConfigurationClearChangesButton(): JSX.Element |
     }
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             htmlType="reset"
             onClick={() => resetForm()}
@@ -53,6 +53,6 @@ export function InsightsFunctionConfigurationClearChangesButton(): JSX.Element |
             size="small"
         >
             Clear changes
-        </LemonButton>
+        </Button>
     )
 }

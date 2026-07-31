@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { CSSTransition } from 'react-transition-group'
 
 import { IconInfo, IconX } from '@hanzo/icons'
-import { LemonBanner, LemonButton, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Button, Link, Tooltip } from '@hanzo/elements'
 
 import { NON_BREAKDOWN_DISPLAY_TYPES } from 'lib/constants'
 import { pluralize } from 'lib/utils'
@@ -427,11 +427,11 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
         <CSSTransition in={showing} timeout={250} classNames="anim-" mountOnEnter unmountOnExit>
             <div className="EditorFiltersWrapper">
                 {shouldShowSessionAnalysisWarning ? (
-                    <LemonBanner type="info" className="mb-4">
+                    <Banner type="info" className="mb-4">
                         When using sessions and session properties, events without session IDs will be excluded from the
                         set of results.{' '}
                         <Link to="https://hanzo.ai/docs/user-guides/sessions">Learn more about sessions.</Link>
-                    </LemonBanner>
+                    </Banner>
                 ) : null}
 
                 <div>
@@ -528,7 +528,7 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                                     })()}
                                 </div>
 
-                                <LemonButton
+                                <Button
                                     status="danger"
                                     onClick={() => {
                                         onRejectSuggestedInsight()
@@ -538,7 +538,7 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                                     icon={<IconX />}
                                 >
                                     Reject changes
-                                </LemonButton>
+                                </Button>
                             </div>
                         </div>
                     )}

@@ -12,7 +12,7 @@ import {
     IconRewindPlay,
     IconWarning,
 } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { Thread } from 'scenes/max/Thread'
 import { SidebarQuestionInput } from 'scenes/max/components/SidebarQuestionInput'
@@ -173,10 +173,10 @@ function ProductRecommendations({
 
             {selectedProducts.length > 0 && (
                 <div className="mt-4">
-                    <LemonButton type="primary" size="large" onClick={onContinue}>
+                    <Button type="primary" size="large" onClick={onContinue}>
                         Continue to setup ({selectedProducts.length} selected)
                         <IconArrowRight className="ml-2" />
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </div>

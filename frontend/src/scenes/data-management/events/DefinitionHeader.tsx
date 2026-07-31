@@ -4,10 +4,10 @@ import { IconBadge, IconBolt, IconCursor, IconEye, IconLeave, IconList, IconLogo
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { LinkProps } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconEyeHidden, IconSelectAll } from 'lib/lemon-ui/icons'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { LinkProps } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconEyeHidden, IconSelectAll } from 'lib/elements/icons'
 
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'
 import { CORE_FILTER_DEFINITIONS_BY_GROUP } from '~/taxonomy/taxonomy'
@@ -171,7 +171,7 @@ export function DefinitionHeader({
         definition.description || getCoreFilterDefinition(definition.name, taxonomicGroupType)?.description
 
     return (
-        <LemonTableLink
+        <TableLink
             to={to}
             description={description}
             title={

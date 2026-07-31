@@ -4,12 +4,12 @@ import { lazyLoaders, loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 import insights from '@hanzo/insights'
 
-import { LemonDialog } from '@hanzo/lemon-ui'
+import { Dialog } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { CyclotronJobInputsValidation } from 'lib/components/CyclotronJob/CyclotronJobInputsValidation'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { publicWebhooksHostOrigin } from 'lib/utils/apiHost'
 import { LiquidRenderer } from 'lib/utils/liquid'
 import { sanitizeInputs } from 'scenes/insights-functions/configuration/insightsFunctionConfigurationLogic'
@@ -415,7 +415,7 @@ export const workflowLogic = kea<workflowLogicType>([
         saveWorkflowPartial: async ({ workflow }) => {
             const merged = { ...values.workflow, ...workflow }
             if (merged.status === 'active' && values.workflowHasActionErrors) {
-                lemonToast.error('Fix all errors before enabling')
+                toast.error('Fix all errors before enabling')
                 return
             }
             actions.saveWorkflow(merged)
@@ -425,7 +425,7 @@ export const workflowLogic = kea<workflowLogicType>([
         },
         saveWorkflowSuccess: async ({ originalWorkflow }) => {
             const tasksToMarkAsCompleted: SetupTaskId[] = []
-            lemonToast.success('Workflow saved')
+            toast.success('Workflow saved')
             if (props.id === 'new' && originalWorkflow.id) {
                 router.actions.replace(
                     urls.workflow(
@@ -475,7 +475,7 @@ export const workflowLogic = kea<workflowLogicType>([
                 return
             }
 
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Discard changes',
                 description: 'Are you sure?',
                 primaryButton: {
@@ -540,19 +540,19 @@ export const workflowLogic = kea<workflowLogicType>([
             delete (newWorkflow as any).updated_at
 
             const createdWorkflow = await api.insightsFlows.createInsightsFlow(newWorkflow)
-            lemonToast.success('Workflow duplicated')
+            toast.success('Workflow duplicated')
             router.actions.push(urls.workflow(createdWorkflow.id, 'workflow'))
         },
         triggerManualWorkflow: async ({ variables }) => {
             if (!values.workflow.id || values.workflow.id === 'new') {
-                lemonToast.error('You need to save the workflow before triggering it manually.')
+                toast.error('You need to save the workflow before triggering it manually.')
                 return
             }
 
             const webhookUrl = publicWebhooksHostOrigin() + '/public/webhooks/' + values.workflow.id
 
             const isScheduleTrigger = 'scheduled_at' in (values.workflow.trigger || {})
-            lemonToast.info(isScheduleTrigger ? 'Scheduling workflow...' : 'Triggering workflow...')
+            toast.info(isScheduleTrigger ? 'Scheduling workflow...' : 'Triggering workflow...')
 
             try {
                 await fetch(webhookUrl, {
@@ -567,25 +567,25 @@ export const workflowLogic = kea<workflowLogicType>([
                     credentials: 'omit',
                 })
 
-                lemonToast.success(`Workflow ${isScheduleTrigger ? 'scheduled' : 'triggered'}`, {
+                toast.success(`Workflow ${isScheduleTrigger ? 'scheduled' : 'triggered'}`, {
                     button: {
                         label: 'View logs',
                         action: () => router.actions.push(urls.workflow(values.workflow.id!, 'logs')),
                     },
                 })
             } catch (e) {
-                lemonToast.error('Error triggering workflow: ' + (e as Error).message)
+                toast.error('Error triggering workflow: ' + (e as Error).message)
                 return
             }
         },
         triggerBatchWorkflow: async ({ variables, filters, scheduledAt }) => {
             if (!values.workflow.id || values.workflow.id === 'new') {
-                lemonToast.error('You need to save the workflow before triggering it manually.')
+                toast.error('You need to save the workflow before triggering it manually.')
                 return
             }
 
             const isScheduleTrigger = 'scheduled_at' in (values.workflow.trigger || {})
-            lemonToast.info(isScheduleTrigger ? 'Scheduling batch workflow...' : 'Triggering batch workflow...')
+            toast.info(isScheduleTrigger ? 'Scheduling batch workflow...' : 'Triggering batch workflow...')
 
             try {
                 await api.insightsFlows.createInsightsFlowBatchJob(values.workflow.id, {
@@ -593,14 +593,14 @@ export const workflowLogic = kea<workflowLogicType>([
                     filters,
                     scheduled_at: scheduledAt,
                 })
-                lemonToast.success(`Batch workflow ${scheduledAt ? 'scheduled' : 'triggered'}`, {
+                toast.success(`Batch workflow ${scheduledAt ? 'scheduled' : 'triggered'}`, {
                     button: {
                         label: 'View logs',
                         action: () => router.actions.push(urls.workflow(values.workflow.id!, 'logs')),
                     },
                 })
             } catch (e) {
-                lemonToast.error('Error creating batch workflow job: ' + (e as Error).message)
+                toast.error('Error creating batch workflow job: ' + (e as Error).message)
                 return
             }
         },

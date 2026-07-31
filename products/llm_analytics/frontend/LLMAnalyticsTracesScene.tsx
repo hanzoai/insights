@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { objectsEqual } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -155,7 +155,7 @@ const TraceNameColumn: QueryContextColumnComponent = ({ record }) => {
                     {row.traceName || '–'}
                 </Link>
             </strong>
-            {row.isSupportTrace && <LemonTag type="muted">Support</LemonTag>}
+            {row.isSupportTrace && <Tag type="muted">Support</Tag>}
         </div>
     )
 }
@@ -194,7 +194,7 @@ CostColumn.displayName = 'CostColumn'
 const ErrorsColumn: QueryContextColumnComponent = ({ record }) => {
     const row = record as LLMTrace
     if (typeof row.errorCount === 'number' && row.errorCount > 0) {
-        return <LemonTag type="danger">{row.errorCount}</LemonTag>
+        return <Tag type="danger">{row.errorCount}</Tag>
     }
     return <>–</>
 }
@@ -217,9 +217,9 @@ const OutputMessageColumn: QueryContextColumnComponent = ({ record }) => {
         : false
     if (errorEventFound) {
         return (
-            <LemonTag type="danger" className="font-mono max-w-50 truncate">
+            <Tag type="danger" className="font-mono max-w-50 truncate">
                 {errorEventFound.properties?.$ai_error || 'Unknown error'}
-            </LemonTag>
+            </Tag>
         )
     }
     const outputNormalized = normalizeMessages(row.outputState?.messages, 'assistant')

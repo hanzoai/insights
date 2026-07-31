@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonInputSelect, LemonInputSelectOption } from '@hanzo/lemon-ui'
+import { InputSelect, InputSelectOption } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
@@ -11,7 +11,7 @@ import { linkedInAdsIntegrationLogic } from './linkedInAdsIntegrationLogic'
 
 const getLinkedInAdsAccountOptions = (
     linkedInAdsAccounts?: LinkedInAdsAccountType[] | null
-): LemonInputSelectOption[] | null => {
+): InputSelectOption[] | null => {
     return linkedInAdsAccounts
         ? linkedInAdsAccounts.map((account) => ({
               key: account.id.toString(),
@@ -27,7 +27,7 @@ const getLinkedInAdsAccountOptions = (
 
 const getLinkedInAdsConversionRuleOptions = (
     linkedInAdsConversionRules?: LinkedInAdsConversionRuleType[] | null
-): LemonInputSelectOption[] | null => {
+): InputSelectOption[] | null => {
     return linkedInAdsConversionRules
         ? linkedInAdsConversionRules.map(({ id, name }) => ({
               key: id.toString(),
@@ -74,7 +74,7 @@ export function LinkedInAdsConversionRulePicker({
 
     return (
         <>
-            <LemonInputSelect
+            <InputSelect
                 onChange={(val) => onChange?.(val[0] ?? null)}
                 value={value ? [value] : []}
                 onFocus={() =>
@@ -128,7 +128,7 @@ export function LinkedInAdsAccountIdPicker({
 
     return (
         <>
-            <LemonInputSelect
+            <InputSelect
                 onChange={(val) => onChange?.(val[0] ?? null)}
                 value={value ? [value] : []}
                 onFocus={() => !linkedInAdsAccounts && !linkedInAdsAccountsLoading && loadLinkedInAdsAccounts()}

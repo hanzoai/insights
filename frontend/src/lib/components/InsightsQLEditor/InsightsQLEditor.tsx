@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
 
 import { AnyDataNode } from '~/queries/schema/schema-general'
@@ -66,7 +66,7 @@ export function InsightsQLEditor({
                             : "Enter SQL Expression, such as:\n- properties.$current_url\n- person.properties.email\n- toInt(properties.`Long Field Name`) * 10\n- concat(event, ' ', distinct_id)")}
                 </pre>
             </div>
-            <LemonButton
+            <Button
                 className="mt-2"
                 fullWidth
                 type="primary"
@@ -75,7 +75,7 @@ export function InsightsQLEditor({
                 center
             >
                 {submitText ?? 'Update SQL expression'}
-            </LemonButton>
+            </Button>
             <div className="flex mt-1 gap-1">
                 <div className={`w-full text-right select-none ${CLICK_OUTSIDE_BLOCK_CLASS}`}>
                     <Link to="https://hanzo.ai/docs/sql" target="_blank">

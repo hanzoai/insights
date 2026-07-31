@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconArrowRight } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
-import { LemonCalendarSelect } from 'lib/lemon-ui/LemonCalendar/LemonCalendarSelect'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { CalendarSelect } from 'lib/elements/Calendar/CalendarSelect'
+import { Popover } from 'lib/elements/Popover'
 import { Label } from 'lib/ui/Label/Label'
 
 import { experimentLogic } from '../experimentLogic'
@@ -29,7 +29,7 @@ const DateButton = ({ date, type, onChange }: DateButtonProps): JSX.Element => {
                 onClickOutside={() => setIsOpen(false)}
                 visible={isOpen}
                 overlay={
-                    <LemonCalendarSelect
+                    <CalendarSelect
                         value={date ? dayjs(date) : null}
                         onChange={(value) => {
                             onChange(value.toISOString())
@@ -41,7 +41,7 @@ const DateButton = ({ date, type, onChange }: DateButtonProps): JSX.Element => {
                     />
                 }
             >
-                <LemonButton
+                <Button
                     type="secondary"
                     size="xsmall"
                     onClick={() => setIsOpen(true)}
@@ -67,7 +67,7 @@ const DateButton = ({ date, type, onChange }: DateButtonProps): JSX.Element => {
                     ) : (
                         'No date'
                     )}
-                </LemonButton>
+                </Button>
             </Popover>
         </div>
     )

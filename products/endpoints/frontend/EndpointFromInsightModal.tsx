@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea'
-import { Link } from 'lib/lemon-ui/Link'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
+import { Modal } from 'lib/elements/Modal'
+import { Table } from 'lib/elements/Table'
+import { TextArea } from 'lib/elements/TextArea'
+import { Link } from 'lib/elements/Link'
 import { urls } from 'scenes/urls'
 
 import { InsightsQLQuery, InsightQueryNode } from '~/queries/schema/schema-general'
@@ -56,12 +56,12 @@ export function EndpointFromInsightModal({
     }
 
     return (
-        <LemonModal isOpen={createFromInsightModalOpen} onClose={handleClose} width={600}>
-            <LemonModal.Header>
+        <Modal isOpen={createFromInsightModalOpen} onClose={handleClose} width={600}>
+            <Modal.Header>
                 <h3>{duplicateEndpoint ? 'Duplicate insight-based endpoint' : 'Create endpoint from insight'}</h3>
-            </LemonModal.Header>
+            </Modal.Header>
 
-            <LemonModal.Content>
+            <Modal.Content>
                 <div className="space-y-4">
                     {duplicateEndpoint && (
                         <div className="text-sm text-secondary">
@@ -71,7 +71,7 @@ export function EndpointFromInsightModal({
                     {endpointsFromThisInsight.length > 0 && (
                         <div>
                             <div className="text-muted mb-2">Endpoints already created from this insight:</div>
-                            <LemonTable
+                            <Table
                                 dataSource={endpointsFromThisInsight}
                                 columns={[
                                     {
@@ -96,39 +96,39 @@ export function EndpointFromInsightModal({
                         </div>
                     )}
 
-                    <LemonField.Pure label="Name">
-                        <LemonInput
+                    <Field.Pure label="Name">
+                        <Input
                             value={endpointName || ''}
                             onChange={setEndpointName}
                             placeholder="Enter endpoint name"
                             autoFocus
                         />
-                    </LemonField.Pure>
+                    </Field.Pure>
 
-                    <LemonField.Pure label="Description">
-                        <LemonTextArea
+                    <Field.Pure label="Description">
+                        <TextArea
                             value={endpointDescription || ''}
                             onChange={setEndpointDescription}
                             placeholder="Enter endpoint description (optional)"
                             rows={3}
                         />
-                    </LemonField.Pure>
+                    </Field.Pure>
                 </div>
-            </LemonModal.Content>
+            </Modal.Content>
 
-            <LemonModal.Footer>
+            <Modal.Footer>
                 <div className="flex-1" />
-                <LemonButton type="secondary" onClick={handleClose}>
+                <Button type="secondary" onClick={handleClose}>
                     Cancel
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="primary"
                     onClick={handleSubmit}
                     disabledReason={!endpointName?.trim() ? 'Endpoint name is required' : undefined}
                 >
                     Create endpoint
-                </LemonButton>
-            </LemonModal.Footer>
-        </LemonModal>
+                </Button>
+            </Modal.Footer>
+        </Modal>
     )
 }

@@ -6,11 +6,11 @@ import type { editor as importedEditor } from 'monaco-editor'
 import { useEffect, useRef, useState } from 'react'
 
 import { IconMagicWand } from '@hanzo/icons'
-import { LemonInput, Link } from '@hanzo/lemon-ui'
+import { Input, Link } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { CodeEditorLogicProps, codeEditorLogic } from 'lib/monaco/codeEditorLogic'
 import { dataWarehouseSettingsSceneLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsSceneLogic'
@@ -99,7 +99,7 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                 )}
             >
                 <div className="flex gap-2">
-                    <LemonInput
+                    <Input
                         className="grow"
                         prefix={<IconMagicWand />}
                         value={prompt}
@@ -113,7 +113,7 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                         disabled={!aiAvailable}
                         maxLength={400}
                     />
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => draftFromPrompt()}
                         disabledReason={
@@ -127,9 +127,9 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                         loading={promptLoading}
                     >
                         Think
-                    </LemonButton>
+                    </Button>
                 </div>
-                {promptError ? <LemonBanner type="warning">{promptError}</LemonBanner> : null}
+                {promptError ? <Banner type="warning">{promptError}</Banner> : null}
                 <div className="relative flex-1 overflow-hidden flex-col">
                     {/* eslint-disable-next-line react/forbid-dom-props */}
                     <div ref={editorRef} className="resize-y overflow-hidden" style={{ height: EDITOR_HEIGHT }}>
@@ -175,7 +175,7 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                     ) : (
                         <>
                             <div className="flex-1">
-                                <LemonButton
+                                <Button
                                     onClick={() => saveQuery()}
                                     type="primary"
                                     disabledReason={
@@ -190,10 +190,10 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                                     data-attr="insightsql-query-editor-save"
                                 >
                                     {!props.setQuery ? 'No permission to update' : 'Update and run'}
-                                </LemonButton>
+                                </Button>
                             </div>
                             {editingView ? (
-                                <LemonButton
+                                <Button
                                     className="ml-2"
                                     onClick={onUpdateView}
                                     type="primary"
@@ -202,9 +202,9 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                                     data-attr="insightsql-query-editor-update-view"
                                 >
                                     Update view
-                                </LemonButton>
+                                </Button>
                             ) : (
-                                <LemonButton
+                                <Button
                                     className="ml-2"
                                     onClick={saveAsView}
                                     type="primary"
@@ -220,7 +220,7 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                                     }
                                 >
                                     Save as view
-                                </LemonButton>
+                                </Button>
                             )}
                         </>
                     )}

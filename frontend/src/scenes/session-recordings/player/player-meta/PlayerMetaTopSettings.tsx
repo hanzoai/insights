@@ -3,10 +3,10 @@ import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
 import { IconRabbit, IconSearch, IconTortoise } from '@hanzo/icons'
-import { LemonButton, LemonDialog, Link } from '@hanzo/lemon-ui'
+import { Button, Dialog, Link } from '@hanzo/elements'
 
 import { SESSION_RECORDINGS_TTL_WARNING_THRESHOLD_DAYS } from 'lib/constants'
-import { IconHeatmap } from 'lib/lemon-ui/icons'
+import { IconHeatmap } from 'lib/elements/icons'
 import { humanFriendlyDuration } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 import { SettingsBar, SettingsButton, SettingsMenu } from 'scenes/session-recordings/components/PanelSettings'
@@ -82,13 +82,13 @@ function TTLWarning(): JSX.Element | null {
 
     return (
         <div className="font-medium">
-            <LemonButton
+            <Button
                 status="danger"
                 size="xsmall"
                 className={cn('rounded-[0px]')}
                 data-attr="recording-ttl-dialog"
                 onClick={() => {
-                    LemonDialog.open({
+                    Dialog.open({
                         title: 'Recording about to expire',
                         description: (
                             <span>
@@ -121,7 +121,7 @@ function TTLWarning(): JSX.Element | null {
                 noPadding
             >
                 This recording will expire in {sessionPlayerMetaData.recording_ttl} days
-            </LemonButton>
+            </Button>
         </div>
     )
 }

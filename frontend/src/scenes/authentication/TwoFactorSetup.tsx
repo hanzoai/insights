@@ -3,11 +3,11 @@ import './Setup2FA.scss'
 import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Banner } from 'lib/elements/Banner'
+import { Field } from 'lib/elements/Field'
 
 import { twoFactorLogic } from './twoFactorLogic'
 
@@ -47,9 +47,9 @@ export function TwoFactorSetup({ onSuccess }: { onSuccess: () => void }): JSX.El
                         </div>
                     )}
                 </div>
-                {generalError && <LemonBanner type="error">{generalError.detail}</LemonBanner>}
-                <LemonField name="token" label="Authenticator token">
-                    <LemonInput
+                {generalError && <Banner type="error">{generalError.detail}</Banner>}
+                <Field name="token" label="Authenticator token">
+                    <Input
                         className="ph-ignore-input"
                         autoFocus
                         data-attr="token"
@@ -57,10 +57,10 @@ export function TwoFactorSetup({ onSuccess }: { onSuccess: () => void }): JSX.El
                         inputMode="numeric"
                         autoComplete="one-time-code"
                     />
-                </LemonField>
-                <LemonButton htmlType="submit" data-attr="2fa-setup" fullWidth type="primary" center loading={false}>
+                </Field>
+                <Button htmlType="submit" data-attr="2fa-setup" fullWidth type="primary" center loading={false}>
                     Submit
-                </LemonButton>
+                </Button>
             </Form>
         </>
     )

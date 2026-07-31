@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import { useState } from 'react'
 
 import { IconCursorClick, IconMegaphone } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonLabel, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Label, Modal } from '@hanzo/elements'
 
 type TourType = 'tour' | 'announcement' | 'banner' | undefined
 
@@ -69,7 +69,7 @@ export function NewProductTourModal({
     }
 
     return (
-        <LemonModal title="What would you like to create?" isOpen={isOpen} onClose={handleClose} width={800}>
+        <Modal title="What would you like to create?" isOpen={isOpen} onClose={handleClose} width={800}>
             <div className="flex flex-col gap-4">
                 <div className="flex gap-3 mt-2">
                     <TourTypeButton
@@ -98,8 +98,8 @@ export function NewProductTourModal({
                 {tourType && (
                     <>
                         <div className="flex flex-col gap-1">
-                            <LemonLabel>Name</LemonLabel>
-                            <LemonInput
+                            <Label>Name</Label>
+                            <Input
                                 placeholder={`Enter a name for your ${tourType}`}
                                 value={tourName}
                                 onChange={(val) => {
@@ -123,14 +123,14 @@ export function NewProductTourModal({
                         </div>
 
                         <div className="flex justify-end">
-                            <LemonButton type="primary" onClick={handleCreate} disabledReason={tourNameError}>
+                            <Button type="primary" onClick={handleCreate} disabledReason={tourNameError}>
                                 Create
-                            </LemonButton>
+                            </Button>
                         </div>
                     </>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 

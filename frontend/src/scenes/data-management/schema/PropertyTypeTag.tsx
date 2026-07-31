@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconWarning } from '@hanzo/icons'
-import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Tooltip } from '@hanzo/elements'
 
 import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { PropertyDefinitionType } from '~/types'
@@ -41,7 +41,7 @@ export function PropertyTypeTag({ propertyName, schemaPropertyType }: PropertyTy
 
     return (
         <div className="flex items-center gap-1">
-            <LemonTag type="muted">{schemaPropertyType}</LemonTag>
+            <Tag type="muted">{schemaPropertyType}</Tag>
             {hasTypeMismatch && (
                 <Tooltip title={getTooltipMessage()}>
                     <IconWarning className="text-warning text-base" />

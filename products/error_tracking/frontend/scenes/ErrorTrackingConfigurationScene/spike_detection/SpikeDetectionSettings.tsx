@@ -1,12 +1,12 @@
 import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
+import { Skeleton } from 'lib/elements/Skeleton'
 
 import { spikeDetectionConfigLogic } from './spikeDetectionConfigLogic'
 
@@ -16,54 +16,54 @@ export function SpikeDetectionSettings(): JSX.Element {
     if (configLoading) {
         return (
             <div className="space-y-4">
-                <LemonSkeleton className="w-full h-10" />
-                <LemonSkeleton className="w-full h-10" />
-                <LemonSkeleton className="w-full h-10" />
+                <Skeleton className="w-full h-10" />
+                <Skeleton className="w-full h-10" />
+                <Skeleton className="w-full h-10" />
             </div>
         )
     }
 
     return (
         <Form logic={spikeDetectionConfigLogic} formKey="configForm" enableFormOnSubmit className="space-y-4">
-            <LemonBanner type="info" action={{ children: 'Send feedback', id: 'spike-detection-feedback-button' }}>
+            <Banner type="info" action={{ children: 'Send feedback', id: 'spike-detection-feedback-button' }}>
                 <p>
                     Spike detection is in alpha. We may make changes to the defaults or replace these settings as we
                     iterate. We'd love your feedback!
                 </p>
-            </LemonBanner>
+            </Banner>
 
             <p className="text-muted-foreground">
                 Configure spike detection settings for error tracking alerts. When an issue receives significantly more
                 exceptions than its baseline, a spike alert will be triggered.
             </p>
 
-            <LemonField name="snooze_duration_minutes" label="Snooze duration (minutes)">
-                <LemonInput
+            <Field name="snooze_duration_minutes" label="Snooze duration (minutes)">
+                <Input
                     type="number"
                     min={1}
                     placeholder="10"
                     fullWidth
                     data-attr="spike-detection-snooze-duration"
                 />
-            </LemonField>
+            </Field>
 
             <p className="text-xs text-muted-foreground -mt-2">
                 After a spike alert fires for an issue, you won't receive another alert for the same issue until this
                 duration has passed.
             </p>
 
-            <LemonField name="multiplier" label="Multiplier">
-                <LemonInput type="number" min={1} placeholder="10" fullWidth data-attr="spike-detection-multiplier" />
-            </LemonField>
+            <Field name="multiplier" label="Multiplier">
+                <Input type="number" min={1} placeholder="10" fullWidth data-attr="spike-detection-multiplier" />
+            </Field>
 
             <p className="text-xs text-muted-foreground -mt-2">
                 The number of times the current exception count must exceed the baseline to trigger a spike alert. For
                 example, a multiplier of 10 means you need 10x more exceptions than normal.
             </p>
 
-            <LemonField name="threshold" label="Minimum threshold">
-                <LemonInput type="number" min={1} placeholder="500" fullWidth data-attr="spike-detection-threshold" />
-            </LemonField>
+            <Field name="threshold" label="Minimum threshold">
+                <Input type="number" min={1} placeholder="500" fullWidth data-attr="spike-detection-threshold" />
+            </Field>
 
             <p className="text-xs text-muted-foreground -mt-2">
                 The minimum number of exceptions in a time window required before a spike alert can fire. This prevents
@@ -71,14 +71,14 @@ export function SpikeDetectionSettings(): JSX.Element {
             </p>
 
             <div className="flex justify-end">
-                <LemonButton
+                <Button
                     type="primary"
                     htmlType="submit"
                     disabledReason={!configFormChanged ? 'No changes to save' : undefined}
                     loading={isConfigFormSubmitting}
                 >
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </Form>
     )

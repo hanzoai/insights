@@ -6,15 +6,15 @@ import { useValues } from 'kea'
 import { useRef, useState } from 'react'
 
 import { IconCollapse, IconExpand } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonTabs } from '@hanzo/lemon-ui'
+import { Button, Divider, Tabs } from '@hanzo/elements'
 
 import { ActivityLogLogicProps, activityLogLogic } from 'lib/components/ActivityLog/activityLogLogic'
 import { ActivityChange, HumanizedActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { PaginationControl, usePagination } from 'lib/lemon-ui/PaginationControl'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { PaginationControl, usePagination } from 'lib/elements/PaginationControl'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { billingLogic } from 'scenes/billing/billingLogic'
@@ -53,10 +53,10 @@ const Empty = ({ scope }: { scope: string | string[] }): JSX.Element => {
 export const SkeletonLog = (): JSX.Element => {
     return (
         <div className="ActivityLogRow items-start">
-            <LemonSkeleton.Circle />
+            <Skeleton.Circle />
             <div className="details deprecated-space-y-4 mt-2">
-                <LemonSkeleton className="w-1/2 h-4" />
-                <LemonSkeleton />
+                <Skeleton className="w-1/2 h-4" />
+                <Skeleton />
             </div>
         </div>
     )
@@ -154,7 +154,7 @@ export const ActivityLogRow = ({ logItem }: { logItem: HumanizedActivityLogItem 
                         <TZLabel time={logItem.created_at} />
                     </div>
                 </div>
-                <LemonButton
+                <Button
                     noPadding={true}
                     icon={isExpanded ? <IconCollapse /> : <IconExpand />}
                     onClick={() => setIsExpanded(!isExpanded)}
@@ -163,7 +163,7 @@ export const ActivityLogRow = ({ logItem }: { logItem: HumanizedActivityLogItem 
             </div>
             {isExpanded && (
                 <div className="px-1 py-0.5">
-                    <LemonTabs
+                    <Tabs
                         activeKey={activeTab}
                         onChange={(key) => setActiveTab(key as ActivityLogTabs)}
                         tabs={[
@@ -241,7 +241,7 @@ export const ActivityLog = ({ scope, id, caption, startingPage = 1 }: ActivityLo
                                     <ActivityLogRow key={index} logItem={logItem} />
                                 ))}
                             </div>
-                            <LemonDivider />
+                            <Divider />
                             <PaginationControl {...paginationState} nouns={['activity', 'activities']} />
                         </>
                     )}

@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import React, { useCallback, useState } from 'react'
 
 import { IconActivity, IconClockRewind, IconPlay, IconPlayFilled } from '@hanzo/icons'
-import { LemonButton, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Spinner, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { sceneLogic } from 'scenes/sceneLogic'
@@ -134,7 +134,7 @@ function NodeLabelAndAction({
             </Tooltip>
             {showAction && (
                 <Tooltip title={isActionRunning ? null : 'Run this node'}>
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         type="secondary"
                         onClick={action}

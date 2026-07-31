@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconCloud } from '@hanzo/icons'
-import { LemonBadgeProps, Tooltip } from '@hanzo/lemon-ui'
+import { BadgeProps, Tooltip } from '@hanzo/elements'
 
-import { IconWithBadge } from 'lib/lemon-ui/icons'
+import { IconWithBadge } from 'lib/elements/icons'
 
 import { sidePanelLogic } from '../sidePanelLogic'
 import { STATUS_PAGE_URL, sidePanelStatusIncidentIoLogic } from './sidePanelStatusIncidentIoLogic'
 
-export const SidePanelStatusIcon = (props: { className?: string; size?: LemonBadgeProps['size'] }): JSX.Element => {
+export const SidePanelStatusIcon = (props: { className?: string; size?: BadgeProps['size'] }): JSX.Element => {
     const { status, statusDescription } = useValues(sidePanelStatusIncidentIoLogic)
 
     return (

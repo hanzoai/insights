@@ -2,7 +2,7 @@ import { actions, afterMount, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import type { AnyPropertyFilter } from '~/types'
 
@@ -68,7 +68,7 @@ export const clusteringConfigLogic = kea<clusteringConfigLogicType>([
 
     listeners(() => ({
         saveEventFiltersSuccess: () => {
-            lemonToast.success('Clustering filters saved')
+            toast.success('Clustering filters saved')
         },
     })),
 

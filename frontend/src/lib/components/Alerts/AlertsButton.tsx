@@ -2,16 +2,16 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconBell } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps } from '@hanzo/lemon-ui'
+import { Button, ButtonProps } from '@hanzo/elements'
 
-import { IconWithCount } from 'lib/lemon-ui/icons'
+import { IconWithCount } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { InsightLogicProps, QueryBasedInsightModel } from '~/types'
 
 import { areAlertsSupportedForInsight, insightAlertsLogic } from './insightAlertsLogic'
 
-export type AlertsButtonProps = LemonButtonProps & {
+export type AlertsButtonProps = ButtonProps & {
     insight: Partial<QueryBasedInsightModel>
     insightLogicProps: InsightLogicProps
     text: string
@@ -23,7 +23,7 @@ export function AlertsButton({ insight, insightLogicProps, text, ...props }: Ale
     const { alerts } = useValues(logic)
 
     return (
-        <LemonButton
+        <Button
             data-attr="manage-alerts-button"
             onClick={() => push(urls.insightAlerts(insight.short_id!))}
             disabledReason={
@@ -39,6 +39,6 @@ export function AlertsButton({ insight, insightLogicProps, text, ...props }: Ale
             }
         >
             {text}
-        </LemonButton>
+        </Button>
     )
 }

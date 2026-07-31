@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { ReactNode } from 'react'
 
 import { IconFilter } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 interface OverviewItemBase {
     icon?: ReactNode

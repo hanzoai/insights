@@ -3,10 +3,10 @@ import { router } from 'kea-router'
 import { useState } from 'react'
 
 import { IconBookmark, IconFilter, IconPlusSmall, IconShare, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonModal, LemonTable, LemonTableColumn, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Input, Modal, Table, TableColumn, toast } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { DataTableNode } from '~/queries/schema/schema-general'
 
@@ -36,14 +36,14 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
             createSavedFilter(saveFilterName.trim())
             setIsSaveModalOpen(false)
             setSaveFilterName('')
-            lemonToast.success(`Saved filter "${saveFilterName.trim()}"`)
+            toast.success(`Saved filter "${saveFilterName.trim()}"`)
         }
     }
 
     const handleUpdateFilter = (): void => {
         if (appliedSavedFilter) {
             updateSavedFilter(appliedSavedFilter.id, { query })
-            lemonToast.success(`Updated filter "${appliedSavedFilter.name}"`)
+            toast.success(`Updated filter "${appliedSavedFilter.name}"`)
         }
     }
 
@@ -57,16 +57,16 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
         const url = `${baseUrl}?${params.toString()}${window.location.hash}`
 
         navigator.clipboard.writeText(url).then(() => {
-            lemonToast.success('Filter link copied to clipboard!')
+            toast.success('Filter link copied to clipboard!')
         })
     }
 
-    const columns: LemonTableColumn<DataTableSavedFilter, keyof DataTableSavedFilter | undefined>[] = [
+    const columns: TableColumn<DataTableSavedFilter, keyof DataTableSavedFilter | undefined>[] = [
         {
             title: 'Name',
             dataIndex: 'name',
             render: (_, filter) => (
-                <LemonButton
+                <Button
                     type="tertiary"
                     size="small"
                     onClick={() => applySavedFilter(filter)}
@@ -77,7 +77,7 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
                         {appliedSavedFilter?.id === filter.id && <IconBookmark className="text-primary" />}
                         <span className={appliedSavedFilter?.id === filter.id ? 'font-bold' : ''}>{filter.name}</span>
                     </div>
-                </LemonButton>
+                </Button>
             ),
         },
         {
@@ -92,7 +92,7 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
             render: (_, filter) => (
                 <div className="flex gap-2 justify-end">
                     <Tooltip title="Apply filter">
-                        <LemonButton
+                        <Button
                             type="tertiary"
                             size="small"
                             icon={<IconFilter />}
@@ -100,7 +100,7 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
                         />
                     </Tooltip>
                     <Tooltip title="Share filter">
-                        <LemonButton
+                        <Button
                             type="tertiary"
                             size="small"
                             icon={<IconShare />}
@@ -108,7 +108,7 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
                         />
                     </Tooltip>
                     <Tooltip title="Delete filter">
-                        <LemonButton
+                        <Button
                             type="tertiary"
                             status="danger"
                             size="small"
@@ -118,7 +118,7 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
                                 if (appliedSavedFilter?.id === filter.id) {
                                     setAppliedSavedFilter(null)
                                 }
-                                lemonToast.success(`Deleted filter "${filter.name}"`)
+                                toast.success(`Deleted filter "${filter.name}"`)
                             }}
                         />
                     </Tooltip>
@@ -136,33 +136,33 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
                         <div className="flex gap-2">
                             {appliedSavedFilter && hasUnsavedFilterChanges && (
                                 <>
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         onClick={handleUpdateFilter}
                                         tooltip="Update the current saved filter with your changes"
                                     >
                                         Update "{appliedSavedFilter.name}"
-                                    </LemonButton>
-                                    <LemonButton
+                                    </Button>
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         icon={<IconPlusSmall />}
                                         onClick={() => setIsSaveModalOpen(true)}
                                     >
                                         Save as new
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             )}
                             {(!appliedSavedFilter || !hasUnsavedFilterChanges) && (
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     size="small"
                                     icon={<IconPlusSmall />}
                                     onClick={() => setIsSaveModalOpen(true)}
                                 >
                                     Save current filters
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -176,12 +176,12 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
                             </p>
                         </div>
                     ) : (
-                        <LemonTable dataSource={savedFilters} columns={columns} size="small" />
+                        <Table dataSource={savedFilters} columns={columns} size="small" />
                     )}
                 </div>
             </div>
 
-            <LemonModal
+            <Modal
                 title="Save filters"
                 isOpen={isSaveModalOpen}
                 onClose={() => {
@@ -190,7 +190,7 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
                 }}
                 footer={
                     <>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={() => {
                                 setIsSaveModalOpen(false)
@@ -198,20 +198,20 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
                             }}
                         >
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             onClick={handleSaveFilter}
                             disabledReason={!saveFilterName.trim() ? 'Please enter a name' : undefined}
                         >
                             Save filter
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
                 <div className="space-y-4">
                     <p className="text-muted">Give your filter combination a name to easily access it later</p>
-                    <LemonInput
+                    <Input
                         value={saveFilterName}
                         onChange={setSaveFilterName}
                         placeholder="e.g., Last 7 days completed events"
@@ -219,7 +219,7 @@ export function DataTableSavedFilters({ uniqueKey, query, setQuery }: DataTableS
                         onPressEnter={handleSaveFilter}
                     />
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }

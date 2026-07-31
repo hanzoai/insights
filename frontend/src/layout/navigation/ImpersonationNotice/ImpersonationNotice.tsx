@@ -4,12 +4,12 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
 import { IconCollapse, IconEllipsis, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonMenu, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Menu, Tooltip } from '@hanzo/elements'
 
 import { DraggableWithSnapZones, DraggableWithSnapZonesRef } from 'lib/components/DraggableWithSnapZones'
 import { dayjs } from 'lib/dayjs'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { IconDragHandle } from 'lib/lemon-ui/icons'
+import { IconDragHandle } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 import { userLogic } from 'scenes/userLogic'
 
@@ -111,7 +111,7 @@ export function ImpersonationNotice(): JSX.Element | null {
                                     {isReadOnly ? 'Read-only impersonation' : 'Read-write impersonation'}
                                 </span>
                                 {isReadOnly && (
-                                    <LemonMenu
+                                    <Menu
                                         items={[
                                             {
                                                 label: 'Upgrade to read-write',
@@ -119,10 +119,10 @@ export function ImpersonationNotice(): JSX.Element | null {
                                             },
                                         ]}
                                     >
-                                        <LemonButton size="xsmall" icon={<IconEllipsis />} />
-                                    </LemonMenu>
+                                        <Button size="xsmall" icon={<IconEllipsis />} />
+                                    </Menu>
                                 )}
-                                <LemonButton size="xsmall" icon={<IconCollapse />} onClick={handleMinimize} />
+                                <Button size="xsmall" icon={<IconCollapse />} onClick={handleMinimize} />
                             </div>
                             <div className="ImpersonationNotice__content">
                                 <p className="ImpersonationNotice__message">
@@ -147,17 +147,17 @@ export function ImpersonationNotice(): JSX.Element | null {
                                     )}
                                 </p>
                                 <div className="flex gap-2 justify-end">
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         onClick={() => loadUser()}
                                         loading={userLoading}
                                     >
                                         Refresh
-                                    </LemonButton>
-                                    <LemonButton type="secondary" status="danger" size="small" onClick={() => logout()}>
+                                    </Button>
+                                    <Button type="secondary" status="danger" size="small" onClick={() => logout()}>
                                         Log out
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             </div>
                         </div>

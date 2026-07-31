@@ -4,10 +4,10 @@ import { useMemo } from 'react'
 import React from 'react'
 
 import { IconAtSign, IconDashboard, IconGraph, IconPageChart } from '@hanzo/icons'
-import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Tooltip } from '@hanzo/elements'
 
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
-import { IconAction, IconEvent } from 'lib/lemon-ui/icons'
+import { IconAction, IconEvent } from 'lib/elements/icons'
 
 import { ModeSelector } from './components/ModeSelector'
 import { maxContextLogic } from './maxContextLogic'
@@ -213,7 +213,7 @@ export function ContextTags({ size = 'default' }: { size?: 'small' | 'default' }
                     }
                     tags.push(
                         <Tooltip key={`${type}-${item.id}`} title={name}>
-                            <LemonTag
+                            <Tag
                                 key={`${type}-${item.id}`}
                                 icon={<IconComponent className="flex-shrink-0" />}
                                 onClose={() => removeAction(item.id)}
@@ -225,7 +225,7 @@ export function ContextTags({ size = 'default' }: { size?: 'small' | 'default' }
                                 )}
                             >
                                 <span className="truncate min-w-0 flex-1">{name}</span>
-                            </LemonTag>
+                            </Tag>
                         </Tooltip>
                     )
                 })
@@ -277,7 +277,7 @@ export function ContextToolInfoTags({ size = 'default' }: { size?: 'small' | 'de
 
     return (
         <Tooltip title={tooltipContent}>
-            <LemonTag
+            <Tag
                 icon={toolContextItems[0].icon}
                 className={clsx(
                     'flex items-center cursor-default border-dashed text-secondary',
@@ -288,7 +288,7 @@ export function ContextToolInfoTags({ size = 'default' }: { size?: 'small' | 'de
                     {toolContextItems[0].text}
                     {toolContextItems.length > 1 && <span className="ml-1">+{toolContextItems.length - 1}</span>}
                 </span>
-            </LemonTag>
+            </Tag>
         </Tooltip>
     )
 }

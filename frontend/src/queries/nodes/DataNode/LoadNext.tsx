@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { DataNode } from '~/queries/schema/schema-general'
@@ -63,9 +63,9 @@ export function LoadNext({ query }: LoadNextProps): JSX.Element {
 
     return (
         <div className="m-2 flex items-center">
-            <LemonButton onClick={loadNextData} loading={nextDataLoading} fullWidth center disabled={!canLoadNextData}>
+            <Button onClick={loadNextData} loading={nextDataLoading} fullWidth center disabled={!canLoadNextData}>
                 {text}
-            </LemonButton>
+            </Button>
         </div>
     )
 }

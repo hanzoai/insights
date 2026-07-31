@@ -4,7 +4,7 @@ import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
 import { IconMessage } from '@hanzo/icons'
-import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tooltip } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -119,9 +119,9 @@ export function SurveyOpportunityButton({
     }
 
     const askUsersButton = (
-        <LemonButton size="xsmall" type="primary" icon={<IconMessage />} onClick={handleClick}>
+        <Button size="xsmall" type="primary" icon={<IconMessage />} onClick={handleClick}>
             {showLabel && 'Ask users why'}
-        </LemonButton>
+        </Button>
     )
 
     return (

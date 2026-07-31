@@ -2,11 +2,11 @@ import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect, useRef } from 'react'
 
-import { LemonBanner, LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Banner, Button, Input } from '@hanzo/elements'
 
 import { SocialLoginButtons } from 'lib/components/SocialLoginButton/SocialLoginButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Link } from 'lib/lemon-ui/Link'
+import { Field } from 'lib/elements/Field'
+import { Link } from 'lib/elements/Link'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import RegionSelect from 'scenes/authentication/RegionSelect'
 
@@ -25,9 +25,9 @@ export function SignupPanelEmail(): JSX.Element | null {
         <div className="deprecated-space-y-4 Signup__panel__email">
             <RegionSelect />
             {passkeyError && (
-                <LemonBanner type="error" className="mb-4">
+                <Banner type="error" className="mb-4">
                     {passkeyError}
-                </LemonBanner>
+                </Banner>
             )}
             {!preflight?.demo && socialAuthAvailable && (
                 <>
@@ -36,12 +36,12 @@ export function SignupPanelEmail(): JSX.Element | null {
                 </>
             )}
             <Form logic={signupLogic} formKey="signupPanelEmail" className="deprecated-space-y-4" enableFormOnSubmit>
-                <LemonField
+                <Field
                     name="email"
                     label="Email"
                     help={emailCaseNotice && <span className="text-warning">{emailCaseNotice}</span>}
                 >
-                    <LemonInput
+                    <Input
                         className="ph-ignore-input"
                         autoFocus
                         data-attr="signup-email"
@@ -49,9 +49,9 @@ export function SignupPanelEmail(): JSX.Element | null {
                         type="email"
                         inputRef={emailInputRef}
                     />
-                </LemonField>
-                {error && <LemonBanner type="error">{error}</LemonBanner>}
-                <LemonButton
+                </Field>
+                {error && <Banner type="error">{error}</Banner>}
+                <Button
                     fullWidth
                     type="primary"
                     status="alt"
@@ -62,7 +62,7 @@ export function SignupPanelEmail(): JSX.Element | null {
                     size="large"
                 >
                     Continue
-                </LemonButton>
+                </Button>
             </Form>
             {!preflight?.demo && (preflight?.cloud || preflight?.initiated) && (
                 <div className="text-center mt-4">

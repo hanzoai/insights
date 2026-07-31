@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { PaginatedResponse } from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -157,11 +157,11 @@ export const batchExportRunsLogic = kea<batchExportRunsLogicType>([
         },
         retryRun: async ({ run }) => {
             await api.batchExports.retryRun(props.id, run.id)
-            lemonToast.success('Retry has been scheduled.')
+            toast.success('Retry has been scheduled.')
         },
         cancelRun: async ({ run }) => {
             await api.batchExports.cancelRun(props.id, run.id)
-            lemonToast.success('Run has been cancelled.')
+            toast.success('Run has been cancelled.')
         },
         submitBackfillFormSuccess: () => {
             actions.loadRuns()

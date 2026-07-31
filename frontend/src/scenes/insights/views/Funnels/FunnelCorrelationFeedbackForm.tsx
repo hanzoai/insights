@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
 import { IconComment, IconX } from '@hanzo/icons'
-import { LemonButton, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, TextArea } from '@hanzo/elements'
 
 import { funnelCorrelationFeedbackLogic } from 'scenes/funnels/funnelCorrelationFeedbackLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -43,7 +43,7 @@ export const FunnelCorrelationFeedbackForm = (): JSX.Element | null => {
                             [1, '👎'],
                         ] as const
                     ).map((content, index) => (
-                        <LemonButton
+                        <Button
                             key={index}
                             active={correlationFeedbackRating === content[0]}
                             onClick={() => {
@@ -56,15 +56,15 @@ export const FunnelCorrelationFeedbackForm = (): JSX.Element | null => {
                             }}
                         >
                             {content[1]}
-                        </LemonButton>
+                        </Button>
                     ))}
-                    <LemonButton icon={<IconX />} onClick={hideCorrelationAnalysisFeedback} />
+                    <Button icon={<IconX />} onClick={hideCorrelationAnalysisFeedback} />
                 </div>
             </div>
             {correlationDetailedFeedbackVisible ? (
                 <>
                     <form onSubmit={sendCorrelationAnalysisFeedback} className="deprecated-space-y-2">
-                        <LemonTextArea
+                        <TextArea
                             onBlur={(e) => setCorrelationDetailedFeedback(e.target.value)}
                             placeholder="Optional. Help us by sharing details around your experience..."
                             ref={detailedFeedbackRef}
@@ -74,13 +74,13 @@ export const FunnelCorrelationFeedbackForm = (): JSX.Element | null => {
                             }}
                         />
                         <div className="flex justify-end">
-                            <LemonButton
+                            <Button
                                 data-attr="correlation-analysis-share-feedback"
                                 type="primary"
                                 htmlType="submit"
                             >
                                 Share feedback
-                            </LemonButton>
+                            </Button>
                         </div>
                     </form>
                 </>

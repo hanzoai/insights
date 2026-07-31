@@ -3,10 +3,10 @@ import { useActions, useValues } from 'kea'
 import { ReactNode, useEffect } from 'react'
 
 import { IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, Link, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Link, Spinner, Tooltip } from '@hanzo/elements'
 
 import { Dayjs, dayjs } from 'lib/dayjs'
-import { IconPlayCircle } from 'lib/lemon-ui/icons'
+import { IconPlayCircle } from 'lib/elements/icons'
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { sessionPlayerModalLogic } from 'scenes/session-recordings/player/modal/sessionPlayerModalLogic'
 import { UnwatchedIndicator } from 'scenes/session-recordings/playlist/SessionRecordingPreview'
@@ -56,7 +56,7 @@ export default function ViewRecordingButton({
     iconOnly = false,
     noPadding = false,
     ...props
-}: Pick<LemonButtonProps, 'size' | 'type' | 'data-attr' | 'fullWidth' | 'className' | 'loading'> &
+}: Pick<ButtonProps, 'size' | 'type' | 'data-attr' | 'fullWidth' | 'className' | 'loading'> &
     ViewRecordingProps & {
         checkIfViewed?: boolean
         label?: ReactNode
@@ -145,7 +145,7 @@ export default function ViewRecordingButton({
 
     if (iconOnly) {
         return (
-            <LemonButton
+            <Button
                 disabledReason={disabledReason}
                 onClick={onClick}
                 icon={sideIcon}
@@ -158,12 +158,12 @@ export default function ViewRecordingButton({
     }
 
     return (
-        <LemonButton disabledReason={disabledReason} onClick={onClick} sideIcon={sideIcon} {...props}>
+        <Button disabledReason={disabledReason} onClick={onClick} sideIcon={sideIcon} {...props}>
             <div className="flex items-center gap-2 whitespace-nowrap">
                 <span>{label ? label : 'View recording'}</span>
                 {maybeUnwatchedIndicator}
             </div>
-        </LemonButton>
+        </Button>
     )
 }
 

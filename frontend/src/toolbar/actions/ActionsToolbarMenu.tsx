@@ -3,11 +3,11 @@ import { useActions, useValues } from 'kea'
 import { IconPlus } from '@hanzo/icons'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { ActionsEditingToolbarMenu } from '~/toolbar/actions/ActionsEditingToolbarMenu'
@@ -32,7 +32,7 @@ const ActionsListToolbarMenu = (): JSX.Element => {
     return (
         <ToolbarMenu>
             <ToolbarMenu.Header>
-                <LemonInput
+                <Input
                     autoFocus={true}
                     fullWidth={true}
                     placeholder="Search"
@@ -57,9 +57,9 @@ const ActionsListToolbarMenu = (): JSX.Element => {
                     <Link to={joinWithUiHost(uiHost, urls.actions())} target="_blank" className="text-primary">
                         View &amp; edit all actions <IconOpenInNew />
                     </Link>
-                    <LemonButton type="primary" size="small" onClick={() => newAction()} icon={<IconPlus />}>
+                    <Button type="primary" size="small" onClick={() => newAction()} icon={<IconPlus />}>
                         New action
-                    </LemonButton>
+                    </Button>
                 </div>
             </ToolbarMenu.Footer>
         </ToolbarMenu>

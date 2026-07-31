@@ -3,9 +3,9 @@ import { useActions, useValues } from 'kea'
 import { IconDatabaseBolt } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
+import { Button } from 'lib/elements/Button'
+import { Label } from 'lib/elements/Label/Label'
+import { Select } from 'lib/elements/Select'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { DebugSceneQuery } from 'scenes/debug/DebugSceneQuery'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -28,45 +28,45 @@ export function DebugScene(): JSX.Element {
                 resourceType={{ type: 'debug', forceIcon: <IconDatabaseBolt /> }}
                 actions={
                     <>
-                        <LemonButton
+                        <Button
                             size="small"
                             active={!!query2}
                             onClick={() => (query2 ? setQuery2('') : setQuery2(query1))}
                         >
                             Split
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             size="small"
                             active={query1 === stringifiedExamples.InsightsQLRaw}
                             onClick={() => setQuery1(stringifiedExamples.InsightsQLRaw)}
                         >
                             SQL Debug
-                        </LemonButton>
+                        </Button>
                         {featureFlags[FEATURE_FLAGS.SCRIPT] ? (
-                            <LemonButton
+                            <Button
                                 size="small"
                                 active={query1 === stringifiedExamples.FibonacciScript}
                                 onClick={() => setQuery1(stringifiedExamples.FibonacciScript)}
                             >
                                 Script
-                            </LemonButton>
+                            </Button>
                         ) : null}
-                        <LemonButton
+                        <Button
                             size="small"
                             active={query1 === stringifiedExamples.InsightsQLTable}
                             onClick={() => setQuery1(stringifiedExamples.InsightsQLTable)}
                         >
                             SQL Table
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             size="small"
                             active={query1 === stringifiedExamples.Events}
                             onClick={() => setQuery1(stringifiedExamples.Events)}
                         >
                             Any Query
-                        </LemonButton>
-                        <LemonLabel>
-                            <LemonSelect
+                        </Button>
+                        <Label>
+                            <Select
                                 size="small"
                                 placeholder="More sample queries"
                                 options={Object.entries(stringifiedExamples)
@@ -80,7 +80,7 @@ export function DebugScene(): JSX.Element {
                                     }
                                 }}
                             />
-                        </LemonLabel>
+                        </Label>
                     </>
                 }
             />

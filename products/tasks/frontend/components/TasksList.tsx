@@ -2,16 +2,16 @@ import { useActions, useValues } from 'kea'
 
 import { IconPlus } from '@hanzo/icons'
 import {
-    LemonBadge,
-    LemonButton,
-    LemonInput,
-    LemonSelect,
-    type LemonSelectOption,
+    Badge,
+    Button,
+    Input,
+    Select,
+    type SelectOption,
     ProfilePicture,
     Spinner,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { LemonTable, LemonTableColumn } from 'lib/lemon-ui/LemonTable'
+import { Table, TableColumn } from 'lib/elements/Table'
 
 import { TASK_STATUS_CONFIG } from '../lib/task-status'
 import { taskTrackerSceneLogic } from '../logics/taskTrackerSceneLogic'
@@ -28,7 +28,7 @@ export function TasksList(): JSX.Element {
         useActions(taskTrackerSceneLogic)
     const { openTask } = useActions(tasksLogic)
 
-    const columns: LemonTableColumn<Task, keyof Task | undefined>[] = [
+    const columns: TableColumn<Task, keyof Task | undefined>[] = [
         {
             title: 'Task',
             key: 'title',
@@ -95,7 +95,7 @@ export function TasksList(): JSX.Element {
         },
     ]
 
-    const statusOptions: LemonSelectOption<TaskRunStatus | 'all'>[] = [
+    const statusOptions: SelectOption<TaskRunStatus | 'all'>[] = [
         'all',
         TaskRunStatus.NOT_STARTED,
         TaskRunStatus.QUEUED,
@@ -109,7 +109,7 @@ export function TasksList(): JSX.Element {
             value: key as TaskRunStatus | 'all',
             label: (
                 <div className="flex items-center gap-2">
-                    <LemonBadge status={config.status} size="small" />
+                    <Badge status={config.status} size="small" />
                     <span>{config.label}</span>
                 </div>
             ),
@@ -120,7 +120,7 @@ export function TasksList(): JSX.Element {
         <div>
             <div className="flex items-center justify-between mb-4 gap-2">
                 <div className="flex items-center gap-2 flex-1">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search tasks..."
                         value={searchQuery}
@@ -128,7 +128,7 @@ export function TasksList(): JSX.Element {
                         className="flex-1 max-w-sm"
                     />
                     {repositories.length > 0 && (
-                        <LemonSelect
+                        <Select
                             value={repository}
                             onChange={setRepository}
                             options={[
@@ -138,12 +138,12 @@ export function TasksList(): JSX.Element {
                             className="min-w-48"
                         />
                     )}
-                    <LemonSelect value={status} onChange={setStatus} options={statusOptions} className="min-w-32" />
+                    <Select value={status} onChange={setStatus} options={statusOptions} className="min-w-32" />
                     <UserFilter />
                 </div>
-                <LemonButton type="primary" icon={<IconPlus />} onClick={openCreateModal}>
+                <Button type="primary" icon={<IconPlus />} onClick={openCreateModal}>
                     New task
-                </LemonButton>
+                </Button>
             </div>
 
             {tasksLoading ? (
@@ -151,7 +151,7 @@ export function TasksList(): JSX.Element {
                     <Spinner />
                 </div>
             ) : (
-                <LemonTable
+                <Table
                     dataSource={filteredTasks}
                     columns={columns}
                     rowKey="id"

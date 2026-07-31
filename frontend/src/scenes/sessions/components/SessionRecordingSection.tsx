@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconCollapse, IconExpand, IconVideoCamera } from '@hanzo/icons'
-import { LemonButton, LemonCard, Spinner } from '@hanzo/lemon-ui'
+import { Button, Card, Spinner } from '@hanzo/elements'
 
 import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'
 import { SessionRecordingPlayerMode } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
@@ -15,12 +15,12 @@ export function SessionRecordingSection(): JSX.Element | null {
 
     return (
         <div id="session-recording-section">
-            <LemonCard className="overflow-hidden p-0" hoverEffect={false}>
+            <Card className="overflow-hidden p-0" hoverEffect={false}>
                 <div
                     className="flex items-center gap-2 bg-surface-primary p-3 cursor-pointer hover:bg-surface-secondary"
                     onClick={() => setIsExpanded(!isExpanded)}
                 >
-                    <LemonButton
+                    <Button
                         icon={isExpanded ? <IconCollapse /> : <IconExpand />}
                         size="small"
                         onClick={(e) => {
@@ -58,7 +58,7 @@ export function SessionRecordingSection(): JSX.Element | null {
                         )}
                     </div>
                 )}
-            </LemonCard>
+            </Card>
         </div>
     )
 }

@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { IconHeatmap } from 'lib/lemon-ui/icons'
+import { IconHeatmap } from 'lib/elements/icons'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { urls } from 'scenes/urls'
 
@@ -41,7 +41,7 @@ export const HeatmapButton = ({ breakdownBy, value }: HeatmapButtonProps): JSX.E
     // When there's no domain filter selected, display a disabled button with a tooltip
     if (!webAnalyticsSelectedDomain || webAnalyticsSelectedDomain === 'all') {
         return (
-            <LemonButton
+            <Button
                 disabledReason="Select a domain to view heatmaps"
                 icon={<IconHeatmap />}
                 type="tertiary"
@@ -60,7 +60,7 @@ export const HeatmapButton = ({ breakdownBy, value }: HeatmapButtonProps): JSX.E
     const url = `${domain}/${path}`
 
     return (
-        <LemonButton
+        <Button
             to={urls.heatmapNew(`pageURL=${url}&dataURL=${url}`)}
             icon={<IconHeatmap />}
             type="tertiary"

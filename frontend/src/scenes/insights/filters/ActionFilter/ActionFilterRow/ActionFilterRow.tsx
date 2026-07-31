@@ -17,15 +17,15 @@ import {
     IconWarning,
 } from '@hanzo/icons'
 import {
-    LemonBadge,
-    LemonCheckbox,
-    LemonDivider,
-    LemonMenu,
-    LemonSelect,
-    LemonSelectOption,
-    LemonSelectOptions,
+    Badge,
+    Checkbox,
+    Divider,
+    Menu,
+    Select,
+    SelectOption,
+    SelectOptions,
     Link,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
@@ -45,10 +45,10 @@ import {
     TaxonomicStringPopover,
 } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
-import { LemonDropdown } from 'lib/lemon-ui/LemonDropdown'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconWithCount, SortableDragIcon } from 'lib/lemon-ui/icons'
+import { Button, ButtonProps } from 'lib/elements/Button'
+import { Dropdown } from 'lib/elements/Dropdown'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconWithCount, SortableDragIcon } from 'lib/elements/icons'
 import { capitalizeFirstLetter, getEventNamesForAction } from 'lib/utils'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
@@ -492,7 +492,7 @@ export function ActionFilterRow({
 
     const propertyFiltersButton = (
         <IconWithCount key="property-filter" count={filter.properties?.length || 0} showZero={false}>
-            <LemonButton
+            <Button
                 icon={propertyFiltersVisible ? <IconFilter /> : <IconFilter />} // TODO: Get new IconFilterStriked icon
                 title="Show filters"
                 data-attr={`show-prop-filter-${index}`}
@@ -524,7 +524,7 @@ export function ActionFilterRow({
     const enablePopup = mathAvailability === MathAvailability.FunnelsOnly || isTrendsContext
 
     const renameRowButton = (
-        <LemonButton
+        <Button
             key="rename"
             icon={<IconPencil />}
             title="Rename graph series"
@@ -538,11 +538,11 @@ export function ActionFilterRow({
             fullWidth={enablePopup}
         >
             {enablePopup ? 'Rename' : undefined}
-        </LemonButton>
+        </Button>
     )
 
     const duplicateRowButton = (
-        <LemonButton
+        <Button
             key="duplicate"
             icon={<IconCopy />}
             title="Duplicate graph series"
@@ -555,11 +555,11 @@ export function ActionFilterRow({
             fullWidth={enablePopup}
         >
             {enablePopup ? 'Duplicate' : undefined}
-        </LemonButton>
+        </Button>
     )
 
     const combineInlineButton = (
-        <LemonButton
+        <Button
             key="combine-inline"
             icon={<IconGroupIntersect />}
             title="Count multiple events as a single event"
@@ -588,7 +588,7 @@ export function ActionFilterRow({
     )
 
     const deleteButton = (
-        <LemonButton
+        <Button
             key="delete"
             icon={<IconTrash />}
             title="Delete graph series"
@@ -601,7 +601,7 @@ export function ActionFilterRow({
             fullWidth={enablePopup}
         >
             {enablePopup ? 'Delete' : undefined}
-        </LemonButton>
+        </Button>
     )
 
     const rowStartElements = [
@@ -742,7 +742,7 @@ export function ActionFilterRow({
                                         {mathDefinitions[math || BaseMathType.TotalCount]?.category ===
                                             MathCategory.InsightsQLExpression && (
                                             <div className="flex-auto overflow-hidden">
-                                                <LemonDropdown
+                                                <Dropdown
                                                     visible={isInsightsQLDropdownVisible}
                                                     closeOnClickInside={false}
                                                     onClickOutside={() => setIsInsightsQLDropdownVisible(false)}
@@ -759,7 +759,7 @@ export function ActionFilterRow({
                                                         </div>
                                                     }
                                                 >
-                                                    <LemonButton
+                                                    <Button
                                                         fullWidth
                                                         type="secondary"
                                                         data-attr={`math-insightsql-select-${index}`}
@@ -768,8 +768,8 @@ export function ActionFilterRow({
                                                         }
                                                     >
                                                         <code>{mathInsightsQL}</code>
-                                                    </LemonButton>
-                                                </LemonDropdown>
+                                                    </Button>
+                                                </Dropdown>
                                             </div>
                                         )}
                                     </>
@@ -783,7 +783,7 @@ export function ActionFilterRow({
                                         {!hideFilter && propertyFiltersButton}
                                         {canCombine && combineInlineButton}
                                         <div className="relative">
-                                            <LemonMenu
+                                            <Menu
                                                 placement={isTrendsContext ? 'bottom-end' : 'bottom-start'}
                                                 visible={isMenuVisible}
                                                 closeOnClickInside={false}
@@ -811,7 +811,7 @@ export function ActionFilterRow({
                                                                               }
                                                                               query={query || {}}
                                                                           />
-                                                                          <LemonDivider />
+                                                                          <Divider />
                                                                       </>
                                                                   ),
                                                               },
@@ -825,7 +825,7 @@ export function ActionFilterRow({
                                                                       <>
                                                                           <Tooltip title="Optional steps show conversion rates from the last mandatory step, but are not necessary to move to the next step in the funnel">
                                                                               <div className="px-2 py-1">
-                                                                                  <LemonCheckbox
+                                                                                  <Checkbox
                                                                                       checked={
                                                                                           !!filter.optionalInFunnel
                                                                                       }
@@ -840,7 +840,7 @@ export function ActionFilterRow({
                                                                                   />
                                                                               </div>
                                                                           </Tooltip>
-                                                                          <LemonDivider />
+                                                                          <Divider />
                                                                       </>
                                                                   ),
                                                               },
@@ -869,15 +869,15 @@ export function ActionFilterRow({
                                                         : []),
                                                 ]}
                                             >
-                                                <LemonButton
+                                                <Button
                                                     size="medium"
                                                     aria-label="Show more actions"
                                                     data-attr={`more-button-${index}`}
                                                     icon={<IconEllipsis />}
                                                     noPadding
                                                 />
-                                            </LemonMenu>
-                                            <LemonBadge
+                                            </Menu>
+                                            <Badge
                                                 position="top-right"
                                                 size="small"
                                                 visible={isFunnelContext && (math != null || isStepOptional(index + 1))}
@@ -954,7 +954,7 @@ export interface MathSelectorProps {
     onMathSelect: (index: number, value: any) => any
     trendsDisplayCategory: ChartDisplayCategory | null
     style?: React.CSSProperties
-    size?: LemonButtonProps['size']
+    size?: ButtonProps['size']
     /** Only allow these math types in the selector */
     allowedMathTypes?: readonly string[]
     query?: Record<string, any>
@@ -991,7 +991,7 @@ function useMathSelectorOptions({
     allowedMathTypes,
     query,
     mathGroupTypeIndex,
-}: MathSelectorProps): LemonSelectOptions<string> {
+}: MathSelectorProps): SelectOptions<string> {
     const isStickiness = query && isInsightVizNode(query) && isStickinessQuery(query.source)
     const isCalendarHeatmap =
         query &&
@@ -1053,7 +1053,7 @@ function useMathSelectorOptions({
     }
     const isGroupsEnabled = !needsUpgradeForGroups && !canStartUsingGroups
 
-    const options: LemonSelectOption<string>[] = Object.entries(definitions)
+    const options: SelectOption<string>[] = Object.entries(definitions)
         .filter(([key]) => {
             const mathTypeKey = key as MathType
             if (isStickiness) {
@@ -1125,7 +1125,7 @@ function useMathSelectorOptions({
                 labelInMenu: (
                     <div className="flex items-center gap-2">
                         <span>Count per user</span>
-                        <LemonSelect
+                        <Select
                             value={countPerActorMathTypeShown}
                             onSelect={(value) => {
                                 setCountPerActorMathTypeShown(value as CountPerActorMathType)
@@ -1160,7 +1160,7 @@ function useMathSelectorOptions({
                 labelInMenu: (
                     <div className="flex items-center gap-2">
                         <span>Property value</span>
-                        <LemonSelect
+                        <Select
                             value={propertyMathTypeShown}
                             onSelect={(value) => {
                                 setPropertyMathTypeShown(value as PropertyMathType)
@@ -1225,7 +1225,7 @@ function useMathSelectorOptions({
                 labelInMenu: (
                     <div className="flex items-center gap-2">
                         <span>Unique</span>
-                        <LemonSelect
+                        <Select
                             value={uniqueActorsShown}
                             onClick={(e) => e.stopPropagation()}
                             size="small"
@@ -1251,8 +1251,8 @@ function useMathSelectorOptions({
             period: 'month' | 'week',
             days: '30' | '7',
             optionIndex: number
-        ): LemonSelectOption<string> => {
-            const baseOption = options[optionIndex] as LemonSelectOption<string>
+        ): SelectOption<string> => {
+            const baseOption = options[optionIndex] as SelectOption<string>
             const isUsers = activeActorShown === 'users'
             const actor = isUsers ? 'users' : aggregationLabel(mathGroupTypeIndex).plural
             const capitalizedActor = capitalizeFirstLetter(actor)
@@ -1291,7 +1291,7 @@ function useMathSelectorOptions({
                 labelInMenu: (
                     <div className="flex items-center gap-2">
                         <span>{capitalizeFirstLetter(period)}ly active</span>
-                        <LemonSelect
+                        <Select
                             value={activeActorShown}
                             onClick={(e) => e.stopPropagation()}
                             size="small"
@@ -1373,7 +1373,7 @@ export function MathSelector(props: MathSelectorProps): JSX.Element {
     const mathType = apiValueToMathType(math, mathGroupTypeIndex)
 
     return (
-        <LemonSelect
+        <Select
             value={mathType}
             options={options}
             onChange={(value) => onMathSelect(index, value)}

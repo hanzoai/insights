@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tabs } from 'lib/elements/Tabs'
 
 import { personsManagementSceneLogic } from './personsManagementSceneLogic'
 
@@ -9,7 +9,7 @@ export interface PersonsManagementSceneTabsProps {
 }
 
 export function PersonsManagementSceneTabs({ tabKey }: PersonsManagementSceneTabsProps): JSX.Element {
-    const { lemonTabs } = useValues(personsManagementSceneLogic)
+    const { tabs } = useValues(personsManagementSceneLogic)
 
-    return <LemonTabs activeKey={tabKey} tabs={lemonTabs} sceneInset className="[&>ul]:mb-2" />
+    return <Tabs activeKey={tabKey} tabs={tabs} sceneInset className="[&>ul]:mb-2" />
 }

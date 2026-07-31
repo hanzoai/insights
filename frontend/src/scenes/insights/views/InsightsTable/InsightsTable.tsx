@@ -4,8 +4,8 @@ import { useActions, useValues } from 'kea'
 import { compare as compareFn } from 'natural-orderby'
 import { useCallback, useMemo, useState } from 'react'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTable, LemonTableColumn } from 'lib/lemon-ui/LemonTable'
+import { Button } from 'lib/elements/Button'
+import { Table, TableColumn } from 'lib/elements/Table'
 import { COUNTRY_CODE_TO_LONG_NAME } from 'lib/utils/geography/country'
 import { formatAggregationAxisValue } from 'scenes/insights/aggregationAxisFormat'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -119,7 +119,7 @@ export function InsightsTable({
                 display
             ))
     // Build up columns to include. Order matters.
-    const columns: LemonTableColumn<IndexedTrendResult, keyof IndexedTrendResult | undefined>[] = []
+    const columns: TableColumn<IndexedTrendResult, keyof IndexedTrendResult | undefined>[] = []
 
     // When there's only one series definition and a single breakdown, the "Series" column would
     // redundantly show the same event name on every row. Instead, merge the breakdown
@@ -342,7 +342,7 @@ export function InsightsTable({
         [trendsFilter]
     )
 
-    const valueColumns: LemonTableColumn<IndexedTrendResult, any>[] = useMemo(() => {
+    const valueColumns: TableColumn<IndexedTrendResult, any>[] = useMemo(() => {
         // Don't show value columns for non-time-series displays like WorldMap and Heatmap
         if (display === ChartDisplayType.WorldMap || display === ChartDisplayType.CalendarHeatmap) {
             return []
@@ -417,13 +417,13 @@ export function InsightsTable({
     if (hiddenColumns > 0) {
         columns.push({
             title: (
-                <LemonButton
+                <Button
                     type="secondary"
                     size="xsmall"
                     onClick={() => setMaxVisibleColumns((prev) => prev + MAX_VALUE_COLUMNS)}
                 >
                     +{Math.min(hiddenColumns, MAX_VALUE_COLUMNS).toLocaleString()} columns
-                </LemonButton>
+                </Button>
             ),
             render: () => null,
             key: 'load-more-columns',
@@ -431,7 +431,7 @@ export function InsightsTable({
     }
 
     return (
-        <LemonTable
+        <Table
             id={isInDashboardContext ? insight.short_id : undefined}
             dataSource={
                 isLegend || isMainInsightView

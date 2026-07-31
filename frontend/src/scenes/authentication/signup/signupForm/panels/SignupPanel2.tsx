@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Link } from '@hanzo/elements'
 
 import SignupReferralSource from 'lib/components/SignupReferralSource'
 import SignupRoleSelect from 'lib/components/SignupRoleSelect'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { signupLogic } from '../signupLogic'
@@ -20,27 +20,27 @@ export function SignupPanel2(): JSX.Element | null {
     return (
         <div className="deprecated-space-y-4 Signup__panel__2">
             <Form logic={signupLogic} formKey="signupPanel2" className="deprecated-space-y-4" enableFormOnSubmit>
-                <LemonField name="name" label="Your name">
-                    <LemonInput
+                <Field name="name" label="Your name">
+                    <Input
                         className="ph-ignore-input"
                         data-attr="signup-name"
                         placeholder="Jane Doe"
                         disabled={isSignupPanel2Submitting}
                     />
-                </LemonField>
-                <LemonField name="organization_name" label="Organization name">
-                    <LemonInput
+                </Field>
+                <Field name="organization_name" label="Organization name">
+                    <Input
                         className="ph-ignore-input"
                         data-attr="signup-organization-name"
                         placeholder="Acme Inc"
                         disabled={isSignupPanel2Submitting}
                     />
-                </LemonField>
+                </Field>
                 <SignupRoleSelect />
                 <SignupReferralSource disabled={isSignupPanel2Submitting} />
                 <div className="divider" />
 
-                <LemonButton
+                <Button
                     fullWidth
                     type="primary"
                     center
@@ -57,7 +57,7 @@ export function SignupPanel2(): JSX.Element | null {
                         : !isSignupPanel2Submitting
                           ? 'Enter the demo environment'
                           : 'Preparing demo data…'}
-                </LemonButton>
+                </Button>
             </Form>
 
             <div className="text-center text-secondary">

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu'
+import { MenuOverlay } from 'lib/elements/Menu'
 
 import { NativeMarketingSource } from '~/queries/schema/schema-general'
 
@@ -72,7 +72,7 @@ function SourceCellActions({ value }: { value: unknown }): JSX.Element | null {
                 : undefined,
     })
 
-    return menuItems ? <LemonMenuOverlay items={menuItems} /> : null
+    return menuItems ? <MenuOverlay items={menuItems} /> : null
 }
 
 function CampaignCellActions({ value }: { value: unknown }): JSX.Element | null {
@@ -109,5 +109,5 @@ function CampaignCellActions({ value }: { value: unknown }): JSX.Element | null 
         },
     })
 
-    return menuItems ? <LemonMenuOverlay items={menuItems} /> : null
+    return menuItems ? <MenuOverlay items={menuItems} /> : null
 }

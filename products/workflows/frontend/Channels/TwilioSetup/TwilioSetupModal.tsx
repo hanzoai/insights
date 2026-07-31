@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { IconTwilio } from 'lib/lemon-ui/icons'
+import { Field } from 'lib/elements/Field'
+import { IconTwilio } from 'lib/elements/icons'
 
 import { TwilioSetupModalLogicProps, twilioSetupModalLogic } from './twilioSetupModalLogic'
 
@@ -13,7 +13,7 @@ export const TwilioSetupModal = (props: TwilioSetupModalLogicProps): JSX.Element
     const { submitTwilioIntegration } = useActions(twilioSetupModalLogic(props))
 
     return (
-        <LemonModal
+        <Modal
             title={
                 <div className="flex items-center gap-2">
                     <IconTwilio />
@@ -24,24 +24,24 @@ export const TwilioSetupModal = (props: TwilioSetupModalLogicProps): JSX.Element
         >
             <Form logic={twilioSetupModalLogic} formKey="twilioIntegration">
                 <div className="gap-4 flex flex-col">
-                    <LemonField name="accountSid" label="Account SID">
-                        <LemonInput type="text" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
-                    </LemonField>
-                    <LemonField name="authToken" label="Auth token">
-                        <LemonInput type="password" />
-                    </LemonField>
+                    <Field name="accountSid" label="Account SID">
+                        <Input type="text" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+                    </Field>
+                    <Field name="authToken" label="Auth token">
+                        <Input type="password" />
+                    </Field>
                     <div className="flex justify-end">
-                        <LemonButton
+                        <Button
                             type="primary"
                             htmlType="submit"
                             loading={isTwilioIntegrationSubmitting}
                             onClick={submitTwilioIntegration}
                         >
                             Connect
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

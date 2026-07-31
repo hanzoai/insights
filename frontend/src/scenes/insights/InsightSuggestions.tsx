@@ -3,8 +3,8 @@ import { useState } from 'react'
 
 import { IconChevronRight, IconExternal, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { urls } from 'scenes/urls'
 
 import { Query } from '~/queries/Query/Query'
@@ -64,7 +64,7 @@ function InsightSuggestionRow({
                                     ? 'Thanks for your feedback!'
                                     : 'Was this suggestion helpful?'}
                             </span>
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconThumbsUp />}
                                 onClick={() => reportSuggestionFeedback(index, suggestion.title, true)}
@@ -72,7 +72,7 @@ function InsightSuggestionRow({
                                 disabled={feedbackGiven !== undefined}
                                 active={feedbackGiven === true}
                             />
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconThumbsDown />}
                                 onClick={() => reportSuggestionFeedback(index, suggestion.title, false)}
@@ -81,14 +81,14 @@ function InsightSuggestionRow({
                                 active={feedbackGiven === false}
                             />
                         </div>
-                        <LemonButton
+                        <Button
                             type="primary"
                             icon={<IconExternal />}
                             to={urls.insightNew({ query: suggestion.targetQuery })}
                             targetBlank
                         >
                             Open in new tab
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             )}

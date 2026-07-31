@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
 
 import { QuickFilterForm } from './QuickFilterForm'
 import { QuickFiltersModalContent } from './QuickFiltersModalContent'
@@ -12,8 +12,8 @@ export function QuickFiltersModal({ context }: QuickFiltersLogicProps): JSX.Elem
     const { closeModal } = useActions(quickFiltersModalLogic({ context }))
 
     return (
-        <LemonModal title={modalTitle} isOpen={isModalOpen} onClose={closeModal} width={800}>
+        <Modal title={modalTitle} isOpen={isModalOpen} onClose={closeModal} width={800}>
             {view === 'list' ? <QuickFiltersModalContent context={context} /> : <QuickFilterForm context={context} />}
-        </LemonModal>
+        </Modal>
     )
 }

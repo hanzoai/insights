@@ -1,7 +1,7 @@
 import { IconChevronRight, IconTrash } from '@hanzo/icons'
 
-import { LemonMenuItem, LemonMenuItems } from 'lib/lemon-ui/LemonMenu'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { MenuItem, MenuItems } from 'lib/elements/Menu'
+import { IconLink } from 'lib/elements/icons'
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 
 import { NativeMarketingSource } from '~/queries/schema/schema-general'
@@ -26,7 +26,7 @@ function createMapToItems(
     integrations: NativeMarketingSource[],
     utmValue: string,
     onOpenSettings?: (integration: NativeMarketingSource, utmValue: string) => void
-): LemonMenuItem[] {
+): MenuItem[] {
     return integrations.map((integration) => ({
         label: `Map to ${integration}`,
         icon: <DataWarehouseSourceIcon type={integration} size="xsmall" disableTooltip />,
@@ -35,7 +35,7 @@ function createMapToItems(
 }
 
 /** Create menu item for removing a source mapping */
-function createRemoveSourceItem(integration: NativeMarketingSource, onRemove?: () => void): LemonMenuItem {
+function createRemoveSourceItem(integration: NativeMarketingSource, onRemove?: () => void): MenuItem {
     return {
         label: `Remove mapping from ${integration}`,
         icon: <IconTrash />,
@@ -48,7 +48,7 @@ function createRemoveSourceItem(integration: NativeMarketingSource, onRemove?: (
 function createRemoveCampaignItems(
     mappings: CampaignMappingInfo[],
     onRemove?: (integration: NativeMarketingSource, campaignName: string) => void
-): LemonMenuItem[] {
+): MenuItem[] {
     return mappings.map((mapping) => ({
         label: `Remove from ${mapping.integration}: ${mapping.campaignName}`,
         icon: <IconTrash />,
@@ -72,7 +72,7 @@ export function buildSourceMappingMenuItems({
     availableIntegrations,
     onOpenIntegrationSettings,
     onRemoveMapping,
-}: SourceMenuBuilderParams): LemonMenuItems | null {
+}: SourceMenuBuilderParams): MenuItems | null {
     const title = formatLabel(utmSource, MENU_TITLE_MAX_LENGTH)
 
     if (mappingStatus.type === MappingTypes.Default) {
@@ -91,7 +91,7 @@ export function buildSourceMappingMenuItems({
         ]
     }
 
-    const submenuItems: LemonMenuItem[] = []
+    const submenuItems: MenuItem[] = []
 
     if (mappingStatus.type === MappingTypes.Unmapped) {
         submenuItems.push(...createMapToItems(availableIntegrations, utmSource, onOpenIntegrationSettings))
@@ -137,7 +137,7 @@ export function buildCampaignMappingMenuItems({
     availableIntegrations,
     onOpenIntegrationSettings,
     onRemoveMapping,
-}: CampaignMenuBuilderParams): LemonMenuItems | null {
+}: CampaignMenuBuilderParams): MenuItems | null {
     const title = formatLabel(utmCampaign, MENU_TITLE_MAX_LENGTH)
 
     if (globalMapping && existingMappings.length === 0) {
@@ -156,7 +156,7 @@ export function buildCampaignMappingMenuItems({
         ]
     }
 
-    const submenuItems: LemonMenuItem[] = [
+    const submenuItems: MenuItem[] = [
         ...createMapToItems(availableIntegrations, utmCampaign, onOpenIntegrationSettings),
         ...createRemoveCampaignItems(existingMappings, onRemoveMapping),
     ]
@@ -207,8 +207,8 @@ export function buildRowMappingMenuItems({
     onOpenCampaignSettings,
     onRemoveSourceMapping,
     onRemoveCampaignMapping,
-}: RowMenuBuilderParams): LemonMenuItems | null {
-    const mappingItems: LemonMenuItem[] = []
+}: RowMenuBuilderParams): MenuItems | null {
+    const mappingItems: MenuItem[] = []
 
     // Build source item
     if (sourceValue) {
@@ -221,7 +221,7 @@ export function buildRowMappingMenuItems({
                 disabledReason: DEFAULT_MATCHING_DISABLED_REASON,
             })
         } else {
-            const sourceSubmenuItems: LemonMenuItem[] = []
+            const sourceSubmenuItems: MenuItem[] = []
 
             if (sourceMappingStatus.type === MappingTypes.Unmapped) {
                 sourceSubmenuItems.push(
@@ -255,7 +255,7 @@ export function buildRowMappingMenuItems({
                 disabledReason: `Already mapped to ${globalCampaignMapping.integration}: ${globalCampaignMapping.campaignName}`,
             })
         } else {
-            const campaignSubmenuItems: LemonMenuItem[] = [
+            const campaignSubmenuItems: MenuItem[] = [
                 ...createMapToItems(availableCampaignIntegrations, campaignValue, onOpenCampaignSettings),
                 ...createRemoveCampaignItems(existingCampaignMappings, onRemoveCampaignMapping),
             ]

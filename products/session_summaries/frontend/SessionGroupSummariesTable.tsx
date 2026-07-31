@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 
 import { IconEllipsis, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Input, Tag } from '@hanzo/elements'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonMenu } from 'lib/lemon-ui/LemonMenu'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { atColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { Link } from 'lib/lemon-ui/Link'
+import { Menu } from 'lib/elements/Menu'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { atColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { Link } from 'lib/elements/Link'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
 import { urls } from 'scenes/urls'
@@ -23,7 +23,7 @@ export const scene: SceneExport = {
     component: SessionGroupSummariesTable,
 }
 
-function titleColumn(): LemonTableColumn<SessionGroupSummaryListItemType, 'title'> {
+function titleColumn(): TableColumn<SessionGroupSummaryListItemType, 'title'> {
     return {
         title: 'Title',
         dataIndex: 'title',
@@ -39,7 +39,7 @@ function titleColumn(): LemonTableColumn<SessionGroupSummaryListItemType, 'title
     }
 }
 
-function sessionCountColumn(): LemonTableColumn<SessionGroupSummaryListItemType, 'session_count'> {
+function sessionCountColumn(): TableColumn<SessionGroupSummaryListItemType, 'session_count'> {
     return {
         title: 'Sessions',
         dataIndex: 'session_count',
@@ -57,27 +57,27 @@ export function SessionGroupSummariesTable(): JSX.Element {
         sessionGroupSummariesTableLogic
     )
     useOnMountEffect(loadSessionGroupSummaries)
-    const columns: LemonTableColumns<SessionGroupSummaryListItemType> = [
-        titleColumn() as LemonTableColumn<
+    const columns: TableColumns<SessionGroupSummaryListItemType> = [
+        titleColumn() as TableColumn<
             SessionGroupSummaryListItemType,
             keyof SessionGroupSummaryListItemType | undefined
         >,
-        sessionCountColumn() as LemonTableColumn<
+        sessionCountColumn() as TableColumn<
             SessionGroupSummaryListItemType,
             keyof SessionGroupSummaryListItemType | undefined
         >,
-        createdByColumn<SessionGroupSummaryListItemType>() as LemonTableColumn<
+        createdByColumn<SessionGroupSummaryListItemType>() as TableColumn<
             SessionGroupSummaryListItemType,
             keyof SessionGroupSummaryListItemType | undefined
         >,
-        atColumn<SessionGroupSummaryListItemType>('created_at', 'Created') as LemonTableColumn<
+        atColumn<SessionGroupSummaryListItemType>('created_at', 'Created') as TableColumn<
             SessionGroupSummaryListItemType,
             keyof SessionGroupSummaryListItemType | undefined
         >,
         {
             render: function Render(_, summary) {
                 return (
-                    <LemonMenu
+                    <Menu
                         items={[
                             {
                                 label: 'Delete',
@@ -89,8 +89,8 @@ export function SessionGroupSummariesTable(): JSX.Element {
                             },
                         ]}
                     >
-                        <LemonButton aria-label="more" icon={<IconEllipsis />} size="small" />
-                    </LemonMenu>
+                        <Button aria-label="more" icon={<IconEllipsis />} size="small" />
+                    </Menu>
                 )
             },
         },
@@ -104,11 +104,11 @@ export function SessionGroupSummariesTable(): JSX.Element {
                 resourceType={{
                     type: config.iconType || 'notebook',
                 }}
-                actions={<LemonTag type="warning">BETA</LemonTag>}
+                actions={<Tag type="warning">BETA</Tag>}
             />
             <div className="deprecated-space-y-4">
                 <div className="flex justify-between gap-2 flex-wrap">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search for summaries"
                         onChange={(s) => {
@@ -127,7 +127,7 @@ export function SessionGroupSummariesTable(): JSX.Element {
                         </div>
                     </div>
                 </div>
-                <LemonTable
+                <Table
                     data-attr="session-group-summaries-table"
                     pagination={pagination}
                     dataSource={sessionGroupSummaries}

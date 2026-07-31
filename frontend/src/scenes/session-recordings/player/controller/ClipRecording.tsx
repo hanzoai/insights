@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { LemonButton, LemonSegmentedButton, LemonTag } from '@hanzo/lemon-ui'
+import { Button, SegmentedButton, Tag } from '@hanzo/elements'
 
-import { LemonSegmentedSelect } from 'lib/lemon-ui/LemonSegmentedSelect'
-import { IconRecordingClip } from 'lib/lemon-ui/icons'
+import { SegmentedSelect } from 'lib/elements/SegmentedSelect'
+import { IconRecordingClip } from 'lib/elements/icons'
 import { colonDelimitedDuration } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
@@ -76,7 +76,7 @@ export function ClipOverlay(): JSX.Element | null {
             </div>
             <div className="space-y-1">
                 <label className="block text-sm font-medium text-default">Format</label>
-                <LemonSegmentedButton
+                <SegmentedButton
                     fullWidth
                     size="xsmall"
                     value={format}
@@ -100,7 +100,7 @@ export function ClipOverlay(): JSX.Element | null {
 
             <div className="space-y-1">
                 <label className="block text-sm font-medium text-default">Duration (seconds)</label>
-                <LemonSegmentedSelect
+                <SegmentedSelect
                     fullWidth
                     size="xsmall"
                     options={[
@@ -113,7 +113,7 @@ export function ClipOverlay(): JSX.Element | null {
                 />
             </div>
 
-            <LemonButton
+            <Button
                 onClick={() => {
                     getClip(format, duration, filename)
                     setShowingClipParams(false)
@@ -126,7 +126,7 @@ export function ClipOverlay(): JSX.Element | null {
                 data-attr="replay-clip-create"
             >
                 Create clip
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -145,16 +145,16 @@ function ClipRecording_({ current, className }: { current: string; className?: s
                 <span>
                     Create clip around {current} <KeyboardShortcut x />
                 </span>
-                <LemonTag type="warning" size="small">
+                <Tag type="warning" size="small">
                     BETA
-                </LemonTag>
+                </Tag>
             </div>
         ),
         [current]
     )
 
     return (
-        <LemonButton
+        <Button
             size="xsmall"
             active={showingClipParams}
             onClick={(e) => {

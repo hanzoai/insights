@@ -5,8 +5,8 @@ import React from 'react'
 
 import { Resizeable } from 'lib/components/Cards/CardMeta'
 import { ResizeHandle1D, ResizeHandle2D } from 'lib/components/Cards/handles'
-import { More, MoreProps } from 'lib/lemon-ui/LemonButton/More'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { More, MoreProps } from 'lib/elements/Button/More'
+import { Markdown } from 'lib/elements/Markdown'
 
 import { DashboardPlacement, DashboardTile, QueryBasedInsightModel } from '~/types'
 
@@ -25,7 +25,7 @@ interface TextCardBodyProps extends Pick<React.HTMLAttributes<HTMLDivElement>, '
 export function TextContent({ text, closeDetails, className }: TextCardBodyProps): JSX.Element {
     return (
         <div className={clsx('w-full', className)} onClick={() => closeDetails?.()}>
-            <LemonMarkdown className="overflow-auto">{text}</LemonMarkdown>
+            <Markdown className="overflow-auto">{text}</Markdown>
         </div>
     )
 }

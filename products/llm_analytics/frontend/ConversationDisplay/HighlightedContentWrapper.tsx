@@ -174,7 +174,7 @@ export function HighlightedContentWrapper({
 
         // Apply highlights after child component renders
         // Use provided delay or default based on content type
-        const defaultDelay = container.querySelector('.LemonMarkdown') ? 100 : 50
+        const defaultDelay = container.querySelector('.Markdown') ? 100 : 50
         const timeoutId = setTimeout(applyHighlights, delay ?? defaultDelay)
         return () => {
             clearTimeout(timeoutId)

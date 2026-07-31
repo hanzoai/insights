@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonBanner, LemonButton, LemonLabel, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Label, Modal, Link } from '@hanzo/elements'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Table } from 'lib/elements/Table'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { ExperimentMetric, NodeKind } from '~/queries/schema/schema-general'
@@ -84,7 +84,7 @@ export function SharedMetricModal({
     ).sort()
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isModalOpen}
             onClose={closeModal}
             maxWidth={800}
@@ -93,7 +93,7 @@ export function SharedMetricModal({
                 <div className="flex justify-between w-full">
                     <div>
                         {isEditMode && (
-                            <LemonButton
+                            <Button
                                 status="danger"
                                 onClick={() => {
                                     const metric = compatibleSharedMetrics.find((m) => m.id === sharedMetricId)
@@ -106,17 +106,17 @@ export function SharedMetricModal({
                                 type="secondary"
                             >
                                 Remove from experiment
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                     <div className="flex gap-2">
-                        <LemonButton onClick={closeModal} type="secondary">
+                        <Button onClick={closeModal} type="secondary">
                             Cancel
-                        </LemonButton>
+                        </Button>
                         {/* Changing the existing metric is a pain because saved metrics are stored separately */}
                         {/* Only allow deletion for now */}
                         {isCreateMode && (
-                            <LemonButton
+                            <Button
                                 onClick={() => {
                                     const metrics = selectedMetricIds
                                         .map((metricId) => compatibleSharedMetrics.find((m) => m.id === metricId))
@@ -129,7 +129,7 @@ export function SharedMetricModal({
                                 disabledReason={addSharedMetricDisabledReason()}
                             >
                                 {selectedMetricIds.length < 2 ? 'Add metric' : 'Add metrics'}
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -140,15 +140,15 @@ export function SharedMetricModal({
                     {availableSharedMetrics.length > 0 ? (
                         <>
                             {experiment.saved_metrics.length > 0 && (
-                                <LemonBanner type="info">
+                                <Banner type="info">
                                     {`Hiding ${experiment.saved_metrics.length} shared ${
                                         experiment.saved_metrics.length > 1 ? 'metrics' : 'metric'
                                     } already in use with this experiment.`}
-                                </LemonBanner>
+                                </Banner>
                             )}
                             <div className="flex flex-wrap gap-2">
-                                <LemonLabel>Quick select:</LemonLabel>
-                                <LemonButton
+                                <Label>Quick select:</Label>
+                                <Button
                                     size="xsmall"
                                     type="secondary"
                                     onClick={() => {
@@ -158,9 +158,9 @@ export function SharedMetricModal({
                                     }}
                                 >
                                     All
-                                </LemonButton>
+                                </Button>
                                 {selectedMetricIds.length > 0 && (
-                                    <LemonButton
+                                    <Button
                                         size="xsmall"
                                         type="secondary"
                                         onClick={() => {
@@ -168,10 +168,10 @@ export function SharedMetricModal({
                                         }}
                                     >
                                         Clear
-                                    </LemonButton>
+                                    </Button>
                                 )}
                                 {availableTags.map((tag: string, index: number) => (
-                                    <LemonButton
+                                    <Button
                                         key={index}
                                         size="xsmall"
                                         type="secondary"
@@ -184,10 +184,10 @@ export function SharedMetricModal({
                                         }}
                                     >
                                         {tag}
-                                    </LemonButton>
+                                    </Button>
                                 ))}
                             </div>
-                            <LemonTable
+                            <Table
                                 dataSource={availableSharedMetrics}
                                 columns={[
                                     {
@@ -250,7 +250,7 @@ export function SharedMetricModal({
                             />
                         </>
                     ) : (
-                        <LemonBanner className="w-full" type="info">
+                        <Banner className="w-full" type="info">
                             <div className="mb-2">
                                 {compatibleSharedMetrics.length > 0
                                     ? 'All of your shared metrics are already in this experiment.'
@@ -259,7 +259,7 @@ export function SharedMetricModal({
                             <Link to={urls.experimentsSharedMetric('new')} target="_blank">
                                 New shared metric
                             </Link>
-                        </LemonBanner>
+                        </Banner>
                     )}
                 </div>
             )}
@@ -269,6 +269,6 @@ export function SharedMetricModal({
                     const metric = compatibleSharedMetrics.find((m) => m.id === sharedMetricId)
                     return metric ? <MetricSummary metric={metric} /> : null
                 })()}
-        </LemonModal>
+        </Modal>
     )
 }

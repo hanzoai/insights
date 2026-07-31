@@ -5,18 +5,18 @@ import { useEffect, useRef, useState } from 'react'
 
 import { IconCodeInsert, IconCopy, IconGear, IconTrash, IconX } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonDivider,
-    LemonInput,
-    LemonSegmentedButton,
-    LemonSelect,
-    LemonSwitch,
+    Button,
+    Divider,
+    Input,
+    SegmentedButton,
+    Select,
+    Switch,
     Popover,
-    lemonToast,
-} from '@hanzo/lemon-ui'
+    toast,
+} from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 
@@ -137,7 +137,7 @@ export const VariableInput = ({
         <div className="min-w-80">
             <div className={`flex gap-1 p-1 ${isNull ? 'opacity-50 pointer-events-none' : ''}`}>
                 {variable.type === 'String' && (
-                    <LemonInput
+                    <Input
                         inputRef={inputRef}
                         placeholder="Value..."
                         className="flex flex-1"
@@ -150,7 +150,7 @@ export const VariableInput = ({
                     />
                 )}
                 {variable.type === 'Number' && (
-                    <LemonInput
+                    <Input
                         type="number"
                         inputRef={inputRef}
                         placeholder="Value..."
@@ -164,7 +164,7 @@ export const VariableInput = ({
                     />
                 )}
                 {variable.type === 'Boolean' && (
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         className="grow"
                         value={localInputValue}
                         onChange={(value) => setLocalInputValue(value)}
@@ -181,7 +181,7 @@ export const VariableInput = ({
                     />
                 )}
                 {variable.type === 'List' && (
-                    <LemonSelect
+                    <Select
                         className="grow"
                         value={localInputValue}
                         onChange={(value) => setLocalInputValue(String(value))}
@@ -198,7 +198,7 @@ export const VariableInput = ({
                     />
                 )}
                 {variable.type !== 'Date' && (
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => {
                             onChange(
@@ -210,12 +210,12 @@ export const VariableInput = ({
                         }}
                     >
                         {showEditingUI ? 'Save' : 'Update'}
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
             {showEditingUI ? (
                 <>
-                    <LemonDivider className="m1" />
+                    <Divider className="m1" />
 
                     <div className="flex p-1">
                         <code
@@ -236,7 +236,7 @@ export const VariableInput = ({
                         >
                             {variableAsInsightsQL}
                         </code>
-                        <LemonSwitch
+                        <Switch
                             size="xsmall"
                             label="Set to null"
                             checked={isNull}
@@ -246,14 +246,14 @@ export const VariableInput = ({
                             }}
                             bordered
                         />
-                        <LemonButton
+                        <Button
                             icon={<IconCopy />}
                             size="xsmall"
                             onClick={() => void copyToClipboard(variableAsInsightsQL, 'variable SQL')}
                             tooltip="Copy SQL"
                         />
                         {onInsertAtCursor && (
-                            <LemonButton
+                            <Button
                                 icon={<IconCodeInsert />}
                                 size="xsmall"
                                 onClick={() => {
@@ -264,7 +264,7 @@ export const VariableInput = ({
                             />
                         )}
                         {onRemove && (
-                            <LemonButton
+                            <Button
                                 onClick={() => onRemove(variable.id)}
                                 icon={<IconTrash />}
                                 size="xsmall"
@@ -272,7 +272,7 @@ export const VariableInput = ({
                             />
                         )}
                         {variableSettingsOnClick && (
-                            <LemonButton
+                            <Button
                                 onClick={variableSettingsOnClick}
                                 icon={<IconGear />}
                                 size="xsmall"
@@ -283,9 +283,9 @@ export const VariableInput = ({
                 </>
             ) : (
                 <>
-                    <LemonDivider className="m1" />
+                    <Divider className="m1" />
                     <div className="flex p-1">
-                        <LemonSwitch
+                        <Switch
                             size="xsmall"
                             label="Set to null"
                             checked={isNull}
@@ -341,14 +341,14 @@ export const VariableComponent = ({
     // Don't show the popover overlay for list variables not in edit mode
     if (!showEditingUI && variable.type === 'List') {
         return (
-            <LemonField.Pure label={variable.name} className="gap-0" info={tooltip}>
-                <LemonSelect
+            <Field.Pure label={variable.name} className="gap-0" info={tooltip}>
+                <Select
                     disabledReason={variableOverridesAreSet && 'Discard dashboard variables to change'}
                     value={variable.value ?? variable.default_value}
                     onChange={(value) => onChange(variable.id, value, variable.isNull ?? false)}
                     options={variable.values.map((n) => ({ label: n, value: n }))}
                 />
-            </LemonField.Pure>
+            </Field.Pure>
         )
     }
 
@@ -377,9 +377,9 @@ export const VariableComponent = ({
             className="DataVizVariable_Popover"
         >
             <div>
-                <LemonField.Pure label={variable.name} className="gap-0">
+                <Field.Pure label={variable.name} className="gap-0">
                     <div className="flex gap-x-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             className="min-w-32 DataVizVariable_Button"
                             onClick={() => setPopoverOpen(!isPopoverOpen)}
@@ -391,13 +391,13 @@ export const VariableComponent = ({
                                 : (variable.value?.toString() || variable.default_value?.toString() || '') === ''
                                   ? emptyState
                                   : (variable.value?.toString() ?? variable.default_value?.toString())}
-                        </LemonButton>
+                        </Button>
                         {showEditingUI && (
-                            <LemonButton
+                            <Button
                                 icon={<IconCopy />}
                                 onClick={() => {
                                     navigator.clipboard.writeText(variableAsInsightsQL)
-                                    lemonToast.success(
+                                    toast.success(
                                         <span>
                                             <code className="text-sm">{variableAsInsightsQL}</code> copied to clipboard. Use
                                             it anywhere in InsightsQL.
@@ -411,11 +411,11 @@ export const VariableComponent = ({
                             />
                         )}
                         {showEditingUI && onInsertAtCursor && (
-                            <LemonButton
+                            <Button
                                 icon={<IconCodeInsert />}
                                 onClick={() => {
                                     onInsertAtCursor(variableAsInsightsQL)
-                                    lemonToast.success(
+                                    toast.success(
                                         <span>
                                             <code className="text-sm">{variableAsInsightsQL}</code> inserted into query.
                                         </span>
@@ -428,7 +428,7 @@ export const VariableComponent = ({
                             />
                         )}
                         {onRemove && showEditingUI && (
-                            <LemonButton
+                            <Button
                                 icon={<IconX className="h-4 w-4" />}
                                 onClick={() => {
                                     onRemove(variable.id)
@@ -441,7 +441,7 @@ export const VariableComponent = ({
                             />
                         )}
                     </div>
-                </LemonField.Pure>
+                </Field.Pure>
             </div>
         </Popover>
     )

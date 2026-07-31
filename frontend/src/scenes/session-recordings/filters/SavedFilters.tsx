@@ -3,18 +3,18 @@ import { combineUrl } from 'kea-router'
 
 import { IconShare, IconTrash } from '@hanzo/icons'
 import {
-    LemonBadge,
-    LemonButton,
-    LemonInput,
-    LemonTable,
-    LemonTableColumn,
-    LemonTableColumns,
+    Badge,
+    Button,
+    Input,
+    Table,
+    TableColumn,
+    TableColumns,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { TZLabel } from 'lib/components/TZLabel'
-import { IconArrowUp } from 'lib/lemon-ui/icons'
+import { IconArrowUp } from 'lib/elements/icons'
 import { isObject } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { urls } from 'scenes/urls'
@@ -36,7 +36,7 @@ export function isPlaylistRecordingsCounts(x: unknown): x is PlaylistRecordingsC
     return isObject(x) && ('collection' in x || 'saved_filters' in x)
 }
 
-export function countColumn(): LemonTableColumn<SessionRecordingPlaylistType, 'recordings_counts'> {
+export function countColumn(): TableColumn<SessionRecordingPlaylistType, 'recordings_counts'> {
     return {
         dataIndex: 'recordings_counts',
         title: 'Count',
@@ -91,7 +91,7 @@ export function countColumn(): LemonTableColumn<SessionRecordingPlaylistType, 'r
                     <Tooltip title={tooltip}>
                         {hasResults ? (
                             <span className="flex items-center deprecated-space-x-1">
-                                <LemonBadge.Number
+                                <Badge.Number
                                     status={unwatchedSavedFiltersCount ? 'primary' : 'muted'}
                                     className="text-xs cursor-pointer"
                                     count={totalSavedFiltersCount}
@@ -106,7 +106,7 @@ export function countColumn(): LemonTableColumn<SessionRecordingPlaylistType, 'r
                             </span>
                         ) : (
                             <span>
-                                <LemonBadge status="muted" content="?" className="cursor-pointer" />
+                                <Badge status="muted" content="?" className="cursor-pointer" />
                             </span>
                         )}
                     </Tooltip>
@@ -137,7 +137,7 @@ export function SavedFilters({
         return <SavedFiltersEmptyState />
     }
 
-    const nameColumn = (): LemonTableColumn<SessionRecordingPlaylistType, 'name'> => {
+    const nameColumn = (): TableColumn<SessionRecordingPlaylistType, 'name'> => {
         return {
             title: 'Name',
             dataIndex: 'name',
@@ -165,15 +165,15 @@ export function SavedFilters({
         }
     }
 
-    const columns: LemonTableColumns<SessionRecordingPlaylistType> = [
-        countColumn() as LemonTableColumn<SessionRecordingPlaylistType, keyof SessionRecordingPlaylistType | undefined>,
-        nameColumn() as LemonTableColumn<SessionRecordingPlaylistType, keyof SessionRecordingPlaylistType | undefined>,
+    const columns: TableColumns<SessionRecordingPlaylistType> = [
+        countColumn() as TableColumn<SessionRecordingPlaylistType, keyof SessionRecordingPlaylistType | undefined>,
+        nameColumn() as TableColumn<SessionRecordingPlaylistType, keyof SessionRecordingPlaylistType | undefined>,
         {
             title: 'Share',
             width: 40,
             render: function Render(_, playlist) {
                 return (
-                    <LemonButton
+                    <Button
                         onClick={() => {
                             const combinedURL = urls.absolute(
                                 combineUrl(urls.replay(ReplayTabs.Home), { savedFilterId: playlist.short_id }).url
@@ -197,7 +197,7 @@ export function SavedFilters({
                         resourceType={AccessControlResourceType.SessionRecording}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton
+                        <Button
                             status="danger"
                             onClick={() => {
                                 deletePlaylist(playlist)
@@ -218,7 +218,7 @@ export function SavedFilters({
 
     return (
         <>
-            <LemonInput
+            <Input
                 fullWidth
                 className="mb-2"
                 type="search"
@@ -227,7 +227,7 @@ export function SavedFilters({
                 value={filters.search || ''}
                 stopPropagation={true}
             />
-            <LemonTable
+            <Table
                 dataSource={savedFilters.results}
                 columns={columns}
                 pagination={paginationSavedFilters}

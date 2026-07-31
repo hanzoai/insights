@@ -1,15 +1,15 @@
 import { IconCopy } from '@hanzo/icons'
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 export async function copyToClipboard(value: string, description: string = 'text'): Promise<boolean> {
     if (!navigator.clipboard) {
-        lemonToast.warning('Oops! Clipboard capabilities are only available over HTTPS or on localhost')
+        toast.warning('Oops! Clipboard capabilities are only available over HTTPS or on localhost')
         return false
     }
 
     try {
         await navigator.clipboard.writeText(value)
-        lemonToast.info(`Copied ${description} to clipboard`, {
+        toast.info(`Copied ${description} to clipboard`, {
             icon: <IconCopy />,
         })
         return true
@@ -22,12 +22,12 @@ export async function copyToClipboard(value: string, description: string = 'text
             textArea.select()
             document.execCommand('copy')
             document.body.removeChild(textArea)
-            lemonToast.info(`Copied ${description} to clipboard`, {
+            toast.info(`Copied ${description} to clipboard`, {
                 icon: <IconCopy />,
             })
             return true
         } catch (err) {
-            lemonToast.error(`Could not copy ${description} to clipboard: ${err}`)
+            toast.error(`Could not copy ${description} to clipboard: ${err}`)
             return false
         }
     }

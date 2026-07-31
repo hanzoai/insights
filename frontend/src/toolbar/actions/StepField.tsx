@@ -1,10 +1,10 @@
 import clsx from 'clsx'
 import { Field } from 'kea-forms'
 
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { LemonSegmentedButton } from 'lib/lemon-ui/LemonSegmentedButton'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Input } from 'lib/elements/Input/Input'
+import { SegmentedButton } from 'lib/elements/SegmentedButton'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
 import { cssEscape } from 'lib/utils/cssEscape'
 
 import { SelectorCount } from '~/toolbar/actions/SelectorCount'
@@ -50,7 +50,7 @@ export function StepField({ step, item, label, caption }: StepFieldProps): JSX.E
                     {item === 'href' && step?.href && <SelectorCount selector={hrefSelector(step)} />}
                     {item === 'selector' && step?.selector && <SelectorCount selector={step.selector} />}
                     <Field name={`${item}_selected`} noStyle>
-                        {({ onChange, value }) => <LemonCheckbox label={label} onChange={onChange} checked={value} />}
+                        {({ onChange, value }) => <Checkbox label={label} onChange={onChange} checked={value} />}
                     </Field>
                     {caption && <div className="action-field-caption">{caption}</div>}
                 </div>
@@ -63,7 +63,7 @@ export function StepField({ step, item, label, caption }: StepFieldProps): JSX.E
                             }
 
                             return (
-                                <LemonSegmentedButton
+                                <SegmentedButton
                                     fullWidth
                                     className={clsx('mb-1', !selected && 'opacity-50')}
                                     size="small"
@@ -82,14 +82,14 @@ export function StepField({ step, item, label, caption }: StepFieldProps): JSX.E
                 <Field name={item}>
                     {({ value, onChange }) => {
                         return item === 'selector' ? (
-                            <LemonTextArea
+                            <TextArea
                                 className={clsx(!selected && 'opacity-50')}
                                 onChange={onChange}
                                 value={value ?? ''}
                                 stopPropagation={true}
                             />
                         ) : (
-                            <LemonInput
+                            <Input
                                 className={clsx(!selected && 'opacity-50')}
                                 onChange={onChange}
                                 value={value ?? ''}

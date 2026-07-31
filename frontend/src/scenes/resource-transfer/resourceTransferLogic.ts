@@ -2,7 +2,7 @@ import { actions, connect, kea, key, listeners, path, props, reducers, selectors
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -219,11 +219,11 @@ export const resourceTransferLogic = kea<resourceTransferLogicType>([
                 (t: TeamBasicType) => t.id === values.destinationTeamId
             )
             const destName = destTeam?.name || 'the selected project'
-            lemonToast.success(`Copied to ${destName}`)
+            toast.success(`Copied to ${destName}`)
             window.history.back()
         },
         submitTransferFailure: ({ error }) => {
-            lemonToast.error(`Failed to copy resource: ${error}`)
+            toast.error(`Failed to copy resource: ${error}`)
         },
     })),
 ])

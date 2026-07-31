@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 import { useMemo } from 'react'
 
 import { IconEllipsis } from '@hanzo/icons'
-import { LemonButton, LemonMenu, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Menu, toast } from '@hanzo/elements'
 
 import { uuid } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -44,7 +44,7 @@ export function NotebookCanvas(): JSX.Element {
                 }}
                 actions={
                     <>
-                        <LemonMenu
+                        <Menu
                             items={[
                                 {
                                     label: 'Clear canvas',
@@ -71,15 +71,15 @@ export function NotebookCanvas(): JSX.Element {
                                                 setLocalContent(data, true)
                                             })
                                             .catch((e) => {
-                                                lemonToast.error(e.message)
+                                                toast.error(e.message)
                                             })
                                     },
                                 },
                             ]}
                         >
-                            <LemonButton icon={<IconEllipsis />} size="small" />
-                        </LemonMenu>
-                        <LemonButton
+                            <Button icon={<IconEllipsis />} size="small" />
+                        </Menu>
+                        <Button
                             type="secondary"
                             onClick={() => {
                                 void copyToClipboard(window.location.href, 'Canvas URL')
@@ -87,10 +87,10 @@ export function NotebookCanvas(): JSX.Element {
                             size="small"
                         >
                             Share
-                        </LemonButton>
-                        <LemonButton type="primary" onClick={duplicateNotebook} size="small">
+                        </Button>
+                        <Button type="primary" onClick={duplicateNotebook} size="small">
                             Save as Notebook
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             />

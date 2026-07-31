@@ -1,4 +1,4 @@
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 import {
     PerformanceCardDescriptions,
     PerformanceCardRow,
@@ -19,7 +19,7 @@ export function NavigationItem({ item, expanded, navigationURL }: NavigationItem
             <div className="flex gap-2 items-start px-2 py-1 text-xs">
                 <PerformanceEventLabel label="navigated to " expanded={expanded} name={navigationURL} />
             </div>
-            <LemonDivider className="my-0" />
+            <Divider className="my-0" />
             <PerformanceCardRow item={item} />
             <PerformanceCardDescriptions item={item} expanded={expanded} />
         </>

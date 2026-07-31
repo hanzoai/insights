@@ -30,7 +30,7 @@ import {
     IconVideoCamera,
     IconWarning,
 } from '@hanzo/icons'
-import { LemonSelectOptions } from '@hanzo/lemon-ui'
+import { SelectOptions } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
@@ -41,14 +41,14 @@ import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { IconAction, IconTableChart } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Divider } from 'lib/elements/Divider'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { Tabs } from 'lib/elements/Tabs'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { IconAction, IconTableChart } from 'lib/elements/icons'
 import { isNonEmptyObject } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 import { deleteInsightWithUndo } from 'lib/utils/deleteWithUndo'
@@ -610,7 +610,7 @@ export const INSIGHT_TYPES_METADATA: Record<InsightType, InsightTypeMetadata> = 
     },
 }
 
-export const INSIGHT_TYPE_OPTIONS: LemonSelectOptions<string> = [
+export const INSIGHT_TYPE_OPTIONS: SelectOptions<string> = [
     { value: 'All types', label: 'All types' },
     ...Object.entries(INSIGHT_TYPES_METADATA).map(([value, meta]) => ({
         value,
@@ -659,7 +659,7 @@ export function NewInsightButton({ dataAttr }: NewInsightButtonProps): JSX.Eleme
                 scope={Scene.SavedInsights}
                 priority={100}
             >
-                <LemonButton
+                <Button
                     type="primary"
                     to={useInsightOptionsPage ? urls.insightOptions() : urls.insightNew()}
                     sideAction={{
@@ -677,7 +677,7 @@ export function NewInsightButton({ dataAttr }: NewInsightButtonProps): JSX.Eleme
                     tooltip="New insight"
                 >
                     New
-                </LemonButton>
+                </Button>
             </AppShortcut>
         </AccessControlAction>
     )
@@ -694,7 +694,7 @@ export function SavedInsights(): JSX.Element {
 
     const { tab } = filters
 
-    const columns: LemonTableColumns<QueryBasedInsightModel> = [
+    const columns: TableColumns<QueryBasedInsightModel> = [
         {
             key: 'id',
             width: 32,
@@ -709,7 +709,7 @@ export function SavedInsights(): JSX.Element {
             render: function renderName(name: string, insight) {
                 return (
                     <div className="flex items-center gap-1">
-                        <LemonTableLink
+                        <TableLink
                             to={urls.insightView(insight.short_id)}
                             title={name || <i>{summarizeInsight(insight.query)}</i>}
                             description={insight.description}
@@ -719,7 +719,7 @@ export function SavedInsights(): JSX.Element {
                             minAccessLevel={AccessControlLevel.Editor}
                             userAccessLevel={insight.user_access_level}
                         >
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 onClick={() => updateFavoritedInsight(insight, !insight.favorited)}
                                 icon={
@@ -805,20 +805,20 @@ export function SavedInsights(): JSX.Element {
                     <More
                         overlay={
                             <>
-                                <LemonButton to={urls.insightView(insight.short_id)} fullWidth>
+                                <Button to={urls.insightView(insight.short_id)} fullWidth>
                                     View
-                                </LemonButton>
+                                </Button>
 
-                                <LemonDivider />
+                                <Divider />
 
                                 <AccessControlAction
                                     resourceType={AccessControlResourceType.Insight}
                                     minAccessLevel={AccessControlLevel.Editor}
                                     userAccessLevel={insight.user_access_level}
                                 >
-                                    <LemonButton to={urls.insightEdit(insight.short_id)} fullWidth>
+                                    <Button to={urls.insightEdit(insight.short_id)} fullWidth>
                                         Edit
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
 
                                 <AccessControlAction
@@ -826,31 +826,31 @@ export function SavedInsights(): JSX.Element {
                                     minAccessLevel={AccessControlLevel.Editor}
                                     userAccessLevel={insight.user_access_level}
                                 >
-                                    <LemonButton
+                                    <Button
                                         onClick={() => renameInsight(insight)}
                                         data-attr={`insight-item-${insight.short_id}-dropdown-rename`}
                                         fullWidth
                                     >
                                         Rename
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
 
-                                <LemonButton
+                                <Button
                                     onClick={() => duplicateInsight(insight)}
                                     data-attr="duplicate-insight-from-list-view"
                                     fullWidth
                                 >
                                     Duplicate
-                                </LemonButton>
+                                </Button>
 
-                                <LemonDivider />
+                                <Divider />
 
                                 <AccessControlAction
                                     resourceType={AccessControlResourceType.Insight}
                                     minAccessLevel={AccessControlLevel.Editor}
                                     userAccessLevel={insight.user_access_level}
                                 >
-                                    <LemonButton
+                                    <Button
                                         status="danger"
                                         onClick={() =>
                                             void deleteInsightWithUndo({
@@ -863,7 +863,7 @@ export function SavedInsights(): JSX.Element {
                                         fullWidth
                                     >
                                         Delete insight
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             </>
                         }
@@ -884,7 +884,7 @@ export function SavedInsights(): JSX.Element {
                 }}
                 actions={<NewInsightButton dataAttr="saved-insights-create-new-insight" />}
             />
-            <LemonTabs
+            <Tabs
                 activeKey={tab}
                 onChange={(tab) => setSavedInsightsFilters({ tab })}
                 tabs={[
@@ -907,7 +907,7 @@ export function SavedInsights(): JSX.Element {
                     <SavedInsightsFilters filters={filters} setFilters={setSavedInsightsFilters} />
 
                     <ReloadInsight />
-                    <LemonTable
+                    <Table
                         loading={insightsLoading}
                         columns={columns}
                         dataSource={insights.results}

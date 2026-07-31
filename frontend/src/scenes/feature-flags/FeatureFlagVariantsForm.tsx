@@ -1,13 +1,13 @@
 import 'kea'
 
 import { IconBalance, IconMessage, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Divider, Input } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Lettermark, LettermarkColor } from 'lib/lemon-ui/Lettermark'
-import { Link } from 'lib/lemon-ui/Link'
+import { Field } from 'lib/elements/Field'
+import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
+import { Link } from 'lib/elements/Link'
 import { alphabet } from 'lib/utils'
 import { JSONEditorInput } from 'scenes/feature-flags/JSONEditorInput'
 import { getSurveyForFeatureFlagVariant } from 'scenes/surveys/utils'
@@ -120,7 +120,7 @@ export function FeatureFlagVariantsForm({
                     <div>Rollout</div>
                     {onViewRecordings && <div className="col-span-2" />}
                 </div>
-                <LemonDivider className="my-3" />
+                <Divider className="my-3" />
                 {variants.map((variant: MultivariateFlagVariant, index: number) => (
                     <div key={index}>
                         <div className="grid grid-cols-10 gap-4">
@@ -166,19 +166,19 @@ export function FeatureFlagVariantsForm({
                                         />
                                     )}
                                     {onGetFeedback && (
-                                        <LemonButton
+                                        <Button
                                             size="xsmall"
                                             icon={<IconMessage />}
                                             type="secondary"
                                             onClick={() => onGetFeedback(variant.key)}
                                         >
                                             {getSurveyButtonText(variant.key)}
-                                        </LemonButton>
+                                        </Button>
                                     )}
                                 </div>
                             )}
                         </div>
-                        {index !== variants.length - 1 && <LemonDivider className="my-3" />}
+                        {index !== variants.length - 1 && <Divider className="my-3" />}
                     </div>
                 ))}
             </div>
@@ -202,9 +202,9 @@ export function FeatureFlagVariantsForm({
                 <div className="col-span-3 flex justify-between items-center gap-1">
                     <span>Rollout</span>
                     {onDistributeEqually && (
-                        <LemonButton onClick={onDistributeEqually} tooltip="Normalize variant rollout percentages">
+                        <Button onClick={onDistributeEqually} tooltip="Normalize variant rollout percentages">
                             <IconBalance />
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
             </div>
@@ -214,8 +214,8 @@ export function FeatureFlagVariantsForm({
                         <Lettermark name={alphabet[index]} color={LettermarkColor.Gray} />
                     </div>
                     <div className="col-span-4">
-                        <LemonField.Pure error={variantErrors[index]?.key}>
-                            <LemonInput
+                        <Field.Pure error={variantErrors[index]?.key}>
+                            <Input
                                 data-attr="feature-flag-variant-key"
                                 data-key-index={index.toString()}
                                 className="ph-ignore-input"
@@ -232,10 +232,10 @@ export function FeatureFlagVariantsForm({
                                 value={variant.key}
                                 onChange={(value) => onVariantChange?.(index, 'key', value)}
                             />
-                        </LemonField.Pure>
+                        </Field.Pure>
                     </div>
                     <div className="col-span-6">
-                        <LemonInput
+                        <Input
                             data-attr="feature-flag-variant-name"
                             className="ph-ignore-input"
                             placeholder="Description"
@@ -254,7 +254,7 @@ export function FeatureFlagVariantsForm({
                     </div>
                     <div className="col-span-3">
                         <div>
-                            <LemonInput
+                            <Input
                                 type="number"
                                 min={0}
                                 max={100}
@@ -292,7 +292,7 @@ export function FeatureFlagVariantsForm({
                     </div>
                     <div className="flex justify-center items-start mt-1.5">
                         {variants.length > 1 && onRemoveVariant && (
-                            <LemonButton
+                            <Button
                                 icon={<IconTrash />}
                                 data-attr={`delete-prop-filter-${index}`}
                                 noPadding
@@ -314,7 +314,7 @@ export function FeatureFlagVariantsForm({
                 </p>
             )}
             {onAddVariant && (
-                <LemonButton
+                <Button
                     type="secondary"
                     onClick={() => {
                         const newIndex = variants.length
@@ -327,7 +327,7 @@ export function FeatureFlagVariantsForm({
                     center
                 >
                     Add variant
-                </LemonButton>
+                </Button>
             )}
         </div>
     )

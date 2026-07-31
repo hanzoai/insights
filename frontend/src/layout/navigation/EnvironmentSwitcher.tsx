@@ -6,11 +6,11 @@ import { router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
 import { IconCheck, IconCornerDownRight, IconGear, IconPlusSmall } from '@hanzo/icons'
-import { LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
+import { Tag, Link, Spinner } from '@hanzo/elements'
 
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
-import { UploadedLogo } from 'lib/lemon-ui/UploadedLogo'
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { UploadedLogo } from 'lib/elements/UploadedLogo'
+import { IconBlank } from 'lib/elements/icons'
 import { ButtonGroupPrimitive, ButtonPrimitive, ButtonPrimitiveProps } from 'lib/ui/Button/ButtonPrimitives'
 import { Combobox } from 'lib/ui/Combobox/Combobox'
 import { Label } from 'lib/ui/Label/Label'
@@ -322,9 +322,9 @@ function convertTeamToMenuItem(
                         >
                             <IconBlank />
                             <IconCornerDownRight className="text-tertiary" />
-                            <LemonTag size="small" className="border-text-3000 uppercase">
+                            <Tag size="small" className="border-text-3000 uppercase">
                                 {team.name}
-                            </LemonTag>
+                            </Tag>
                         </Link>
                     </Combobox.Item>
 

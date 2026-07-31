@@ -2,7 +2,7 @@ import isEqual from 'lodash.isequal'
 import { ReactNode } from 'react'
 
 import { IconWarning } from '@hanzo/icons'
-import { LemonButtonProps } from '@hanzo/lemon-ui'
+import { ButtonProps } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { DataColorTheme, DataColorToken } from 'lib/colors'
@@ -793,7 +793,7 @@ export function getInsightIconTypeFromQuery(query: any): FileSystemIconType {
 export const getOverrideWarningPropsForButton = (
     filtersOverride: DashboardFilter | null | undefined,
     variablesOverride: Record<string, InsightsQLVariable> | null | undefined
-): Pick<LemonButtonProps, 'icon' | 'tooltip'> => {
+): Pick<ButtonProps, 'icon' | 'tooltip'> => {
     const filterOverridesExist =
         isObject(filtersOverride) &&
         Object.values(filtersOverride).some((value) => value !== null && (!Array.isArray(value) || value.length > 0))

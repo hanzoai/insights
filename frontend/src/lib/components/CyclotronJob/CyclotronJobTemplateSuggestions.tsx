@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconCode, IconExternal } from '@hanzo/icons'
-import { LemonButton, LemonDropdown, LemonInput, LemonSelect, Link } from '@hanzo/lemon-ui'
+import { Button, Dropdown, Input, Select, Link } from '@hanzo/elements'
 
 import {
     CyclotronJobTemplateOption,
@@ -24,12 +24,12 @@ function CyclotronJobTemplateSuggestionsItem({
     onSelect: (option: CyclotronJobTemplateOption) => void
 }): JSX.Element {
     return (
-        <LemonButton fullWidth role="menuitem" size="small" onClick={() => onSelect(option)}>
+        <Button fullWidth role="menuitem" size="small" onClick={() => onSelect(option)}>
             <div className="flex-col flex-1">
                 <code className="text-sm font-semibold font-monospace">{option.example}</code>
                 <div className="text-xs text-secondary">{option.description}</div>
             </div>
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -51,7 +51,7 @@ export function CyclotronJobTemplateSuggestions({
         <div className="flex overflow-hidden flex-col flex-1 gap-1 max-w-100">
             <div className="flex flex-col gap-1 p-2 flex-0">
                 <div className="flex gap-1">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search templating options"
                         autoFocus
@@ -61,7 +61,7 @@ export function CyclotronJobTemplateSuggestions({
                     />
 
                     {setTemplatingEngine ? (
-                        <LemonSelect
+                        <Select
                             value={templating}
                             onChange={setTemplatingEngine}
                             options={[
@@ -88,14 +88,14 @@ export function CyclotronJobTemplateSuggestions({
 
                 {templating === 'liquid' ? (
                     <li>
-                        <LemonButton
+                        <Button
                             size="small"
                             sideIcon={<IconExternal />}
                             to="https://liquidjs.com/filters/overview.html"
                             targetBlank
                         >
                             Liquid documentation
-                        </LemonButton>
+                        </Button>
                     </li>
                 ) : null}
             </ul>
@@ -115,7 +115,7 @@ export function CyclotronJobTemplateSuggestionsButton({
     }
 
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             visible={showPopover}
             matchWidth={false}
@@ -124,11 +124,11 @@ export function CyclotronJobTemplateSuggestionsButton({
             overlay={<CyclotronJobTemplateSuggestions {...props} onOptionSelect={_onOptionSelect} />}
             overflowHidden
         >
-            <LemonButton
+            <Button
                 size="small"
                 icon={<IconCode />}
                 tooltip="Supports templating - click to see available options"
             />
-        </LemonDropdown>
+        </Dropdown>
     )
 }

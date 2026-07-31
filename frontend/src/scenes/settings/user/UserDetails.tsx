@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input/Input'
 import { userLogic } from 'scenes/userLogic'
 
 export function UserDetails(): JSX.Element {
@@ -20,49 +20,49 @@ export function UserDetails(): JSX.Element {
                 maxWidth: '28rem',
             }}
         >
-            <LemonField name="first_name" label="First name">
-                <LemonInput
+            <Field name="first_name" label="First name">
+                <Input
                     className="ph-ignore-input"
                     data-attr="settings-update-first-name"
                     placeholder="Jane"
                     disabled={userLoading}
                 />
-            </LemonField>
+            </Field>
 
-            <LemonField name="last_name" label="Last name">
-                <LemonInput
+            <Field name="last_name" label="Last name">
+                <Input
                     className="ph-ignore-input"
                     data-attr="settings-update-last-name"
                     placeholder="Doe"
                     disabled={userLoading}
                 />
-            </LemonField>
+            </Field>
 
-            <LemonField name="email" label="Email">
-                <LemonInput
+            <Field name="email" label="Email">
+                <Input
                     className="ph-ignore-input"
                     data-attr="settings-update-email"
                     placeholder="email@yourcompany.com"
                     disabled={userLoading}
                 />
-            </LemonField>
+            </Field>
             {user?.pending_email && (
                 <div className="flex flex-row gap-2">
                     <div className="text-danger text-xs font-medium mt-1.25">
                         Pending verification for {user.pending_email}
                     </div>
-                    <LemonButton
+                    <Button
                         type="tertiary"
                         size="xsmall"
                         data-attr="cancel-email-change-request-button"
                         onClick={cancelEmailChangeRequest}
                     >
                         Cancel change
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
 
-            <LemonButton
+            <Button
                 type="primary"
                 htmlType="submit"
                 loading={isUserDetailsSubmitting}
@@ -70,7 +70,7 @@ export function UserDetails(): JSX.Element {
                 data-attr="user-details-submit-bottom"
             >
                 Save name and email
-            </LemonButton>
+            </Button>
         </Form>
     )
 }

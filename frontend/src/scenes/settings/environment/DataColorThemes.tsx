@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconBadge } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonLabel, LemonSelect, LemonTable, Link } from '@hanzo/lemon-ui'
+import { Button, Dialog, Label, Select, Table, Link } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { AvailableFeature } from '~/types'
@@ -35,7 +35,7 @@ export function DataColorThemes(): JSX.Element {
                     </Link>
                     .
                 </p>
-                <LemonTable
+                <Table
                     loading={themesLoading}
                     dataSource={themes}
                     columns={[
@@ -44,7 +44,7 @@ export function DataColorThemes(): JSX.Element {
                             dataIndex: 'name',
                             key: 'name',
                             render: (name, theme) => (
-                                <LemonTableLink onClick={() => selectTheme(theme.id)} title={name as string} />
+                                <TableLink onClick={() => selectTheme(theme.id)} title={name as string} />
                             ),
                         },
                         {
@@ -55,16 +55,16 @@ export function DataColorThemes(): JSX.Element {
                         },
                     ]}
                 />
-                <LemonButton type="secondary" onClick={() => selectTheme('new')}>
+                <Button type="secondary" onClick={() => selectTheme('new')}>
                     Add theme
-                </LemonButton>
+                </Button>
 
-                <LemonLabel id="default_theme">Default theme</LemonLabel>
-                <LemonSelect
+                <Label id="default_theme">Default theme</Label>
+                <Select
                     value={defaultTheme?.id || null}
                     onChange={(value) => {
                         const theme = themes.find((theme) => theme.id === value)
-                        LemonDialog.open({
+                        Dialog.open({
                             title: `Change the default data theme to "${theme!.name}"?`,
                             description: 'This changes the default colors used when visualizing data in insights.',
                             primaryButton: {

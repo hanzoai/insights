@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 
 import { IconClock, IconPlayFilled } from '@hanzo/icons'
 import { IconChevronDown } from '@hanzo/icons'
-import { LemonButton, LemonInput, Popover } from '@hanzo/lemon-ui'
+import { Button, Input, Popover } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { humanFriendlyNumber } from 'lib/utils'
 
 import { CyclotronJobInputSchemaType } from '~/types'
@@ -64,9 +64,9 @@ const TriggerPopover = ({
                         const hasDefault = variable.default !== undefined && variable.default !== ''
 
                         return (
-                            <LemonField.Pure key={variable.key} label={variable.label || variable.key}>
+                            <Field.Pure key={variable.key} label={variable.label || variable.key}>
                                 {variable.type === 'number' ? (
-                                    <LemonInput
+                                    <Input
                                         type="number"
                                         value={displayValue === '' ? undefined : Number(displayValue)}
                                         placeholder={
@@ -77,7 +77,7 @@ const TriggerPopover = ({
                                         }}
                                     />
                                 ) : (
-                                    <LemonInput
+                                    <Input
                                         type="text"
                                         value={displayValue}
                                         placeholder={
@@ -88,7 +88,7 @@ const TriggerPopover = ({
                                         }}
                                     />
                                 )}
-                            </LemonField.Pure>
+                            </Field.Pure>
                         )
                     })}
                 </div>
@@ -99,7 +99,7 @@ const TriggerPopover = ({
         <div className="flex flex-col gap-4 p-3 min-w-80 max-w-96">
             {variablesSection}
             <div className="flex justify-end border-t pt-3">
-                <LemonButton
+                <Button
                     type="primary"
                     status="alt"
                     loading={blastRadiusLoading}
@@ -123,7 +123,7 @@ const TriggerPopover = ({
                     sideIcon={isScheduleTrigger ? <IconClock /> : <IconPlayFilled />}
                 >
                     {getButtonText()}
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )
@@ -138,7 +138,7 @@ export const InsightsFlowManualTriggerButton = (props: WorkflowLogicProps = {}):
     const isScheduleTrigger = workflow?.trigger?.type === 'schedule'
 
     const triggerButton = (
-        <LemonButton
+        <Button
             type="primary"
             size="small"
             disabledReason={
@@ -153,7 +153,7 @@ export const InsightsFlowManualTriggerButton = (props: WorkflowLogicProps = {}):
             onClick={() => setPopoverVisible(!popoverVisible)}
         >
             {isScheduleTrigger ? 'Schedule' : 'Trigger'}
-        </LemonButton>
+        </Button>
     )
 
     return (

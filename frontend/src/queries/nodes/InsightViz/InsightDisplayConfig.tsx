@@ -4,8 +4,8 @@ import { ReactNode } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonInput, Tooltip } from '@hanzo/lemon-ui'
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Button, Input, Tooltip } from '@hanzo/elements'
+import { Switch } from '@hanzo/elements'
 
 import { ChartFilter } from 'lib/components/ChartFilter'
 import { CompareFilter } from 'lib/components/CompareFilter/CompareFilter'
@@ -13,7 +13,7 @@ import { IntervalFilter } from 'lib/components/IntervalFilter'
 import { SmoothingFilter } from 'lib/components/SmoothingFilter/SmoothingFilter'
 import { UnitPicker } from 'lib/components/UnitPicker/UnitPicker'
 import { NON_TIME_SERIES_DISPLAY_TYPES } from 'lib/constants'
-import { LemonMenu, LemonMenuItems } from 'lib/lemon-ui/LemonMenu'
+import { Menu, MenuItems } from 'lib/elements/Menu'
 import { DEFAULT_DECIMAL_PLACES } from 'lib/utils'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { LifecycleStackingFilter } from 'scenes/insights/EditorFilters/LifecycleStackingFilter'
@@ -101,7 +101,7 @@ export function InsightDisplayConfig(): JSX.Element {
         trendsDataLogic(insightProps)
     )
 
-    const advancedOptions: LemonMenuItems = [
+    const advancedOptions: MenuItems = [
         ...((isTrends && display !== ChartDisplayType.CalendarHeatmap) ||
         isRetention ||
         isTrendsFunnel ||
@@ -163,7 +163,7 @@ export function InsightDisplayConfig(): JSX.Element {
                       items: [
                           {
                               label: () => (
-                                  <LemonSwitch
+                                  <Switch
                                       label="Show confidence intervals"
                                       className="pb-2"
                                       fullWidth
@@ -197,7 +197,7 @@ export function InsightDisplayConfig(): JSX.Element {
                               : []),
                           {
                               label: () => (
-                                  <LemonSwitch
+                                  <Switch
                                       label="Show moving average"
                                       className="pb-2"
                                       fullWidth
@@ -313,12 +313,12 @@ export function InsightDisplayConfig(): JSX.Element {
             </div>
             <div className="flex items-center gap-x-2 flex-wrap">
                 {advancedOptions.length > 0 && (
-                    <LemonMenu
+                    <Menu
                         items={advancedOptions}
                         closeOnClickInside={false}
                         placement={isTrendsFunnel ? 'bottom-end' : undefined}
                     >
-                        <LemonButton size="small" disabledReason={editingDisabledReason}>
+                        <Button size="small" disabledReason={editingDisabledReason}>
                             <span className="font-medium whitespace-nowrap">
                                 Options
                                 {advancedOptionsCount ? (
@@ -327,8 +327,8 @@ export function InsightDisplayConfig(): JSX.Element {
                                     </span>
                                 ) : null}
                             </span>
-                        </LemonButton>
-                    </LemonMenu>
+                        </Button>
+                    </Menu>
                 )}
                 {supportsDisplay && (
                     <ConfigFilter>
@@ -371,7 +371,7 @@ function DecimalPrecisionInput(): JSX.Element {
     }, 500)
 
     return (
-        <LemonInput
+        <Input
             type="number"
             size="small"
             step={1}

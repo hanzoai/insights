@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -14,7 +14,7 @@ export function HeatmapsWarnings(): JSX.Element | null {
     const { openSettingsPanel } = useActions(sidePanelSettingsLogic)
 
     return !heatmapsEnabled ? (
-        <LemonBanner
+        <Banner
             type="warning"
             action={{
                 type: 'secondary',
@@ -25,6 +25,6 @@ export function HeatmapsWarnings(): JSX.Element | null {
             dismissKey="heatmaps-might-be-disabled-warning"
         >
             You aren't collecting heatmaps data. Enable heatmaps in your project.
-        </LemonBanner>
+        </Banner>
     ) : null
 }

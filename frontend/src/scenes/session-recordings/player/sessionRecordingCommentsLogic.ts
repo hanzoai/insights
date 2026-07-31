@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { playerCommentModel } from 'scenes/session-recordings/player/commenting/playerCommentModel'
 import { RecordingComment } from 'scenes/session-recordings/player/inspector/playerInspectorLogic'
 
@@ -73,12 +73,12 @@ export const sessionRecordingCommentsLogic = kea<sessionRecordingCommentsLogicTy
         },
 
         deleteCommentSuccess: () => {
-            lemonToast.success('Comment deleted')
+            toast.success('Comment deleted')
         },
 
         deleteCommentFailure: (e) => {
             insights.captureException(e, { action: 'session recording comments logic delete comment' })
-            lemonToast.error('Could not delete comment, refresh and try again')
+            toast.error('Could not delete comment, refresh and try again')
         },
 
         [playerCommentModel.actionTypes.commentEdited]: ({ recordingId }) => {

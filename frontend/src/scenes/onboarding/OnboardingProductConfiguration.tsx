@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import React, { useEffect, useRef } from 'react'
 
-import { LemonDivider, LemonSelect, LemonSwitch } from '@hanzo/lemon-ui'
+import { Divider, Select, Switch } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
@@ -83,7 +83,7 @@ export const OnboardingProductConfiguration: OnboardingStepComponentType<Onboard
                 <h2 className="pt-2">Options</h2>
                 {combinedList.map((item, idx) => (
                     <React.Fragment key={idx}>
-                        <LemonDivider className="my-4" />
+                        <Divider className="my-4" />
                         <div className="grid grid-cols-3 gap-4">
                             <div className="col-span-2">
                                 <label className="text-base font-semibold">{item.title}</label>
@@ -91,14 +91,14 @@ export const OnboardingProductConfiguration: OnboardingStepComponentType<Onboard
                             </div>
                             <div className="flex justify-end">
                                 {item.type === 'toggle' ? (
-                                    <LemonSwitch
+                                    <Switch
                                         onChange={item.onChange}
                                         className="justify-end"
                                         fullWidth={true}
                                         checked={(item.value as boolean) || false}
                                     />
                                 ) : item.type === 'plugin' ? (
-                                    <LemonSwitch
+                                    <Switch
                                         onChange={item.onChange}
                                         className="justify-end"
                                         fullWidth={true}
@@ -106,7 +106,7 @@ export const OnboardingProductConfiguration: OnboardingStepComponentType<Onboard
                                     />
                                 ) : (
                                     <div className="flex gap-x-4 justify-end items-center mb-1">
-                                        <LemonSelect
+                                        <Select
                                             dropdownMatchSelectWidth={false}
                                             onChange={item.onChange}
                                             options={item.selectOptions || []}

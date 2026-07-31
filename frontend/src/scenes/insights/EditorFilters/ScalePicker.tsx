@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { SegmentedButton } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 
@@ -12,7 +12,7 @@ export function ScalePicker(): JSX.Element | null {
     const { updateInsightFilter } = useActions(insightVizDataLogic(insightProps))
 
     return (
-        <LemonSegmentedButton
+        <SegmentedButton
             className="pb-2 px-2"
             onChange={(value) => updateInsightFilter({ yAxisScaleType: value as 'linear' | 'log10' })}
             value={yAxisScaleType || 'linear'}

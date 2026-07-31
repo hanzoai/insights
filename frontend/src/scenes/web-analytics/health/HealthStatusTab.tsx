@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Banner, Button, Skeleton } from '@hanzo/elements'
 
 import { HealthCheckSection } from './components/HealthCheckSection'
 import { HealthCheck } from './healthCheckTypes'
@@ -69,8 +69,8 @@ function OverallHealthBanner({
     if (status === 'loading') {
         return (
             <div className="p-4 rounded border border-primary/10 bg-surface-primary">
-                <LemonSkeleton className="w-64 h-6 mb-2" />
-                <LemonSkeleton className="w-48 h-4" />
+                <Skeleton className="w-64 h-6 mb-2" />
+                <Skeleton className="w-48 h-4" />
             </div>
         )
     }
@@ -78,7 +78,7 @@ function OverallHealthBanner({
     const bannerType = status === 'success' ? 'success' : status === 'error' ? 'error' : 'warning'
 
     return (
-        <LemonBanner type={bannerType}>
+        <Banner type={bannerType}>
             <div className="flex items-center justify-between w-full">
                 <div>
                     <div className="font-semibold">{summary}</div>
@@ -86,10 +86,10 @@ function OverallHealthBanner({
                         {passedCount} of {totalCount} checks passed
                     </div>
                 </div>
-                <LemonButton type="secondary" size="small" icon={<IconRefresh />} onClick={onRefresh} loading={loading}>
+                <Button type="secondary" size="small" icon={<IconRefresh />} onClick={onRefresh} loading={loading}>
                     Refresh
-                </LemonButton>
+                </Button>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

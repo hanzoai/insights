@@ -2,20 +2,20 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { LemonInput } from '~/lib/lemon-ui/LemonInput'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from '~/lib/lemon-ui/LemonTable'
-import { createdAtColumn } from '~/lib/lemon-ui/LemonTable/columnUtils'
+import { Input } from '~/lib/elements/Input'
+import { Table, TableColumn, TableColumns } from '~/lib/elements/Table'
+import { createdAtColumn } from '~/lib/elements/Table/columnUtils'
 import { ProductKey } from '~/queries/schema/schema-general'
 import { AccessControlLevel, AccessControlResourceType, LLMPrompt } from '~/types'
 
@@ -34,7 +34,7 @@ export function LLMPromptsScene(): JSX.Element {
     const { searchParams } = useValues(router)
     const promptUrl = (name: string): string => combineUrl(urls.llmAnalyticsPrompt(name), searchParams).url
 
-    const columns: LemonTableColumns<LLMPrompt> = [
+    const columns: TableColumns<LLMPrompt> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -73,7 +73,7 @@ export function LLMPromptsScene(): JSX.Element {
                 )
             },
         },
-        createdAtColumn<LLMPrompt>() as LemonTableColumn<LLMPrompt, keyof LLMPrompt | undefined>,
+        createdAtColumn<LLMPrompt>() as TableColumn<LLMPrompt, keyof LLMPrompt | undefined>,
         {
             width: 0,
             render: function renderMore(_, prompt) {
@@ -81,22 +81,22 @@ export function LLMPromptsScene(): JSX.Element {
                     <More
                         overlay={
                             <>
-                                <LemonButton to={promptUrl(prompt.name)} data-attr="prompt-dropdown-view" fullWidth>
+                                <Button to={promptUrl(prompt.name)} data-attr="prompt-dropdown-view" fullWidth>
                                     View
-                                </LemonButton>
+                                </Button>
 
                                 <AccessControlAction
                                     resourceType={AccessControlResourceType.LlmAnalytics}
                                     minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    <LemonButton
+                                    <Button
                                         status="danger"
                                         onClick={() => openDeletePromptDialog(() => deletePrompt(prompt.id))}
                                         data-attr="prompt-dropdown-delete"
                                         fullWidth
                                     >
                                         Delete
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             </>
                         }
@@ -117,21 +117,21 @@ export function LLMPromptsScene(): JSX.Element {
                         resourceType={AccessControlResourceType.LlmAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton
+                        <Button
                             type="primary"
                             to={promptUrl('new')}
                             icon={<IconPlusSmall />}
                             data-attr="new-prompt-button"
                         >
                             New prompt
-                        </LemonButton>
+                        </Button>
                     </AccessControlAction>
                 }
             />
 
             <div className="space-y-4">
                 <div className="flex gap-x-4 gap-y-2 items-center flex-wrap">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search prompts..."
                         value={filters.search}
@@ -142,7 +142,7 @@ export function LLMPromptsScene(): JSX.Element {
                     <div className="text-muted-alt">{promptCountLabel}</div>
                 </div>
 
-                <LemonTable
+                <Table
                     loading={promptsLoading}
                     columns={columns}
                     dataSource={prompts.results}

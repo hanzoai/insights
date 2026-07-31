@@ -2,11 +2,11 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect } from 'react'
 
-import { LemonDivider, LemonTag, Link, lemonToast } from '@hanzo/lemon-ui'
+import { Divider, Tag, Link, toast } from '@hanzo/elements'
 
 import { FlagSelector } from 'lib/components/FlagSelector'
 import { NotFound } from 'lib/components/NotFound'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -37,7 +37,7 @@ export function SurveyComponent({ id }: SurveyLogicProps): JSX.Element {
         return () => {
             editingSurvey(false)
             setSelectedPageIndex(0)
-            lemonToast.dismiss(LOADING_SURVEY_RESULTS_TOAST_ID)
+            toast.dismiss(LOADING_SURVEY_RESULTS_TOAST_ID)
         }
     }, [editingSurvey, setSelectedPageIndex])
 
@@ -46,7 +46,7 @@ export function SurveyComponent({ id }: SurveyLogicProps): JSX.Element {
     }
 
     if (!id) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
@@ -69,9 +69,9 @@ export function SurveyForm({ id }: { id: string }): JSX.Element {
             enableFormOnSubmit
         >
             <SurveyEdit id={id} />
-            <LemonDivider />
+            <Divider />
             <SurveyDisplaySummary id={id} survey={survey} targetingFlagFilters={targetingFlagFilters} />
-            <LemonDivider />
+            <Divider />
         </Form>
     )
 }
@@ -110,7 +110,7 @@ export function SurveyDisplaySummary({
                             )}
                             :
                         </span>{' '}
-                        <LemonTag>{survey.conditions.url}</LemonTag>
+                        <Tag>{survey.conditions.url}</Tag>
                     </div>
                 </div>
             )}
@@ -124,14 +124,14 @@ export function SurveyDisplaySummary({
                         :
                     </span>{' '}
                     {survey.conditions.deviceTypes.map((type) => (
-                        <LemonTag key={type}>{type}</LemonTag>
+                        <Tag key={type}>{type}</Tag>
                     ))}
                 </div>
             )}
             {survey.conditions?.selector && (
                 <div className="flex flex-col font-medium gap-1">
                     <div className="flex-row">
-                        <span>Selector matches:</span> <LemonTag>{survey.conditions.selector}</LemonTag>
+                        <span>Selector matches:</span> <Tag>{survey.conditions.selector}</Tag>
                     </div>
                 </div>
             )}
@@ -143,7 +143,7 @@ export function SurveyDisplaySummary({
                             <>
                                 <Link to={urls.featureFlag(survey.linked_flag?.id)}>{survey.linked_flag?.key}</Link>
                                 {survey.conditions?.linkedFlagVariant && (
-                                    <LemonTag>variant: {survey.conditions.linkedFlagVariant}</LemonTag>
+                                    <Tag>variant: {survey.conditions.linkedFlagVariant}</Tag>
                                 )}
                             </>
                         ) : null
@@ -151,7 +151,7 @@ export function SurveyDisplaySummary({
                         <>
                             <FlagSelector value={survey.linked_flag_id || 0} readOnly={true} onChange={() => {}} />
                             {survey.conditions?.linkedFlagVariant && (
-                                <LemonTag>variant: {survey.conditions.linkedFlagVariant}</LemonTag>
+                                <Tag>variant: {survey.conditions.linkedFlagVariant}</Tag>
                             )}
                         </>
                     )}
@@ -161,10 +161,10 @@ export function SurveyDisplaySummary({
                 <div className="flex flex-col font-medium gap-1">
                     <div className="flex-row">
                         <span>Wait period after seeing survey:</span>{' '}
-                        <LemonTag>
+                        <Tag>
                             {survey.conditions.seenSurveyWaitPeriodInDays}{' '}
                             {survey.conditions.seenSurveyWaitPeriodInDays === 1 ? 'day' : 'days'}
-                        </LemonTag>
+                        </Tag>
                     </div>
                 </div>
             )}
@@ -189,7 +189,7 @@ export function SurveyDisplaySummary({
                             ):
                         </span>{' '}
                         {survey.conditions?.events?.values.map((event) => (
-                            <LemonTag key={event.name}>{event.name}</LemonTag>
+                            <Tag key={event.name}>{event.name}</Tag>
                         ))}
                     </div>
                 </div>
@@ -199,7 +199,7 @@ export function SurveyDisplaySummary({
                     <div className="flex-row">
                         <span>When the user sends the following actions:</span>{' '}
                         {survey.conditions?.actions?.values.map((action) => (
-                            <LemonTag key={action.name}>{action.name}</LemonTag>
+                            <Tag key={action.name}>{action.name}</Tag>
                         ))}
                     </div>
                 </div>
@@ -208,10 +208,10 @@ export function SurveyDisplaySummary({
                 <div className="flex flex-col font-medium gap-1">
                     <div className="flex-row">
                         <span>Delay before showing:</span>{' '}
-                        <LemonTag>
+                        <Tag>
                             {survey.appearance.surveyPopupDelaySeconds}{' '}
                             {survey.appearance.surveyPopupDelaySeconds === 1 ? 'second' : 'seconds'}
-                        </LemonTag>
+                        </Tag>
                     </div>
                 </div>
             )}
@@ -220,7 +220,7 @@ export function SurveyDisplaySummary({
                     <div className="flex-row">
                         <span>Cancel survey if user sends:</span>
                         {survey.conditions?.cancelEvents?.values?.map((event) => (
-                            <LemonTag key={event.name}>{event.name}</LemonTag>
+                            <Tag key={event.name}>{event.name}</Tag>
                         ))}
                     </div>
                 </div>

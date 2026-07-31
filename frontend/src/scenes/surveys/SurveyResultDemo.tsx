@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconGraph, IconInfo } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonTable } from '@hanzo/lemon-ui'
+import { Banner, Button, Table } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
@@ -148,13 +148,13 @@ function DemoDataTable(): JSX.Element {
 
     return (
         <div className="survey-table-results">
-            <LemonBanner type="info" className="mb-4">
+            <Banner type="info" className="mb-4">
                 <div className="flex items-center gap-2">
                     <IconInfo className="text-muted" />
                     <span>This table shows example data structure. Launch your survey to see real responses here.</span>
                 </div>
-            </LemonBanner>
-            <LemonTable dataSource={tableData} columns={columns} rowKey="id" size="small" />
+            </Banner>
+            <Table dataSource={tableData} columns={columns} rowKey="id" size="small" />
         </div>
     )
 }
@@ -162,7 +162,7 @@ function DemoDataTable(): JSX.Element {
 export function SurveyResultDemo(): JSX.Element {
     return (
         <div className="deprecated-space-y-4">
-            <LemonBanner type="info">
+            <Banner type="info">
                 <div className="flex items-center gap-2">
                     <IconInfo className="text-muted" />
                     <div>
@@ -170,13 +170,13 @@ export function SurveyResultDemo(): JSX.Element {
                         Launch your survey to start collecting real responses.
                     </div>
                 </div>
-            </LemonBanner>
+            </Banner>
 
             <DemoStatsSummary />
 
             <SurveyResponsesByQuestionV2Demo />
 
-            <LemonButton
+            <Button
                 type="primary"
                 data-attr="survey-results-explore-demo"
                 icon={<IconGraph />}
@@ -185,7 +185,7 @@ export function SurveyResultDemo(): JSX.Element {
                 disabledReason="Demo mode - launch survey to explore real results"
             >
                 Explore results
-            </LemonButton>
+            </Button>
 
             <DemoDataTable />
         </div>

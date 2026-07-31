@@ -5,7 +5,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef } from 'react'
 
 import insights from '@hanzo/insights'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { BuilderMascot2 } from 'lib/components/mascots'
 import { FloatingContainerContext } from 'lib/hooks/useFloatingContainerContext'
@@ -266,9 +266,9 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
                                     This recording hasn't been fully ingested yet. It should be ready to watch in a few
                                     minutes.
                                 </p>
-                                <LemonButton type="secondary" onClick={loadSnapshots}>
+                                <Button type="secondary" onClick={loadSnapshots}>
                                     Reload
-                                </LemonButton>
+                                </Button>
                             </div>
                         ) : (
                             <div className="flex w-full h-full">

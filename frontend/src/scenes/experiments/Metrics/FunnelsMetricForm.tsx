@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonLabel } from '@hanzo/lemon-ui'
-import { LemonInput } from '@hanzo/lemon-ui'
+import { Label } from '@hanzo/elements'
+import { Input } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
 import { EXPERIMENT_DEFAULT_DURATION } from 'lib/constants'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 import { getInsightsQLValue } from 'scenes/insights/filters/AggregationSelect'
@@ -54,8 +54,8 @@ export function FunnelsMetricForm({ isSecondary = false }: { isSecondary?: boole
     return (
         <>
             <div className="mb-4">
-                <LemonLabel>Name (optional)</LemonLabel>
-                <LemonInput
+                <Label>Name (optional)</Label>
+                <Input
                     value={currentMetric.name}
                     onChange={(newName) => {
                         if (!currentMetric.uuid) {
@@ -189,10 +189,10 @@ export function FunnelsMetricForm({ isSecondary = false }: { isSecondary?: boole
                 />
             </div>
             {isExperimentRunning && (
-                <LemonBanner type="info" className="mt-3 mb-3">
+                <Banner type="info" className="mt-3 mb-3">
                     Preview insights are generated based on {EXPERIMENT_DEFAULT_DURATION} days of data. This can cause a
                     mismatch between the preview and the actual results.
-                </LemonBanner>
+                </Banner>
             )}
             <div className="mt-4">
                 <Query

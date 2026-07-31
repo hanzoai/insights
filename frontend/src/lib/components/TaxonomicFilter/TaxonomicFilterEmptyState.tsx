@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 import type React from 'react'
 
 import { IconOpenSidebar, IconPlus } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { teamLogic } from 'scenes/teamLogic'
@@ -38,7 +38,7 @@ const EmptyState = ({ title, description, action, docsUrl, icon: Icon, groupType
                 <h2 className="text-lg font-semibold">{title}</h2>
                 <p className="mt-2 text-sm text-secondary">{description}</p>
                 <div className="flex gap-4 justify-center items-center mt-4">
-                    <LemonButton
+                    <Button
                         type="primary"
                         icon={<IconPlus />}
                         onClick={() => {
@@ -53,8 +53,8 @@ const EmptyState = ({ title, description, action, docsUrl, icon: Icon, groupType
                         data-attr={`taxonomic-filter-empty-state-${groupType}-new-button`}
                     >
                         {action.text}
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="tertiary"
                         sideIcon={<IconOpenSidebar className="w-4 h-4" />}
                         to={`${docsUrl}?utm_medium=in-product&utm_campaign=taxonomic-filter-empty-state-docs-link`}
@@ -62,7 +62,7 @@ const EmptyState = ({ title, description, action, docsUrl, icon: Icon, groupType
                         targetBlank
                     >
                         Learn more
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </div>

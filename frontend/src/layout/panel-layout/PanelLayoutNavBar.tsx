@@ -21,7 +21,7 @@ import {
     IconSparkles,
     IconToolbar,
 } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { AccountMenu } from 'lib/components/Account/AccountMenu'
 import { NewAccountMenu } from 'lib/components/Account/NewAccountMenu'
@@ -38,7 +38,7 @@ import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { AI_AVAILABLE, FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonGroupPrimitive, ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {

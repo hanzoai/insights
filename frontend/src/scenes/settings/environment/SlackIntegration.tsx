@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
@@ -72,9 +72,9 @@ export function SlackIntegration(): JSX.Element {
                     ) : user?.is_staff ? (
                         !showSlackInstructions ? (
                             <>
-                                <LemonButton type="secondary" onClick={() => setShowSlackInstructions(true)}>
+                                <Button type="secondary" onClick={() => setShowSlackInstructions(true)}>
                                     Show Instructions
-                                </LemonButton>
+                                </Button>
                             </>
                         ) : (
                             <>

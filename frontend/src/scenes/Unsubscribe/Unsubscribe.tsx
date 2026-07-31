@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
+import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { unsubscribeLogic } from './unsubscribeLogic'

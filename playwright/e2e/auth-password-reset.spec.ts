@@ -33,7 +33,7 @@ test.describe('Password Reset', () => {
     test('Shows validation error if passwords do not match', async ({ page }) => {
         await page.goto('/reset/e2e_test_user/e2e_test_token')
         await page.fill('[data-attr="password"]', VALID_PASSWORD)
-        await expect(page.locator('.LemonProgress__track')).toBeVisible()
+        await expect(page.locator('.Progress__track')).toBeVisible()
         await page.fill('[data-attr="password-confirm"]', '1234567A')
         await page.click('button[type=submit]')
         await expect(page.getByText('Passwords do not match')).toBeVisible()

@@ -1,5 +1,5 @@
 import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
-import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Tooltip } from '@hanzo/elements'
 
 import { ExternalDataSchemaStatus } from '~/types'
 
@@ -12,7 +12,7 @@ export const StatusIcon = ({ status, message }: { status: SourceStatus; message:
         <Tooltip title={message}>
             <div className="flex justify-center">
                 {icon && <span className="text-lg">{icon}</span>}
-                {tagType && <LemonTag type={tagType}>{status}</LemonTag>}
+                {tagType && <Tag type={tagType}>{status}</Tag>}
             </div>
         </Tooltip>
     )

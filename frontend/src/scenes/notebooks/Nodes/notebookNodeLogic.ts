@@ -14,7 +14,7 @@ import {
 } from 'kea'
 import insights from '@hanzo/insights'
 
-import { LemonMenuItems } from '@hanzo/lemon-ui'
+import { MenuItems } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { JSONContent, RichContentNode } from 'lib/components/RichContentEditor/types'
@@ -892,7 +892,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
         setExpanded: (expanded: boolean) => ({ expanded }),
         setResizeable: (resizeable: boolean) => ({ resizeable }),
         setActions: (actions: (NotebookNodeAction | undefined)[]) => ({ actions }),
-        setMenuItems: (menuItems: LemonMenuItems | null) => ({ menuItems }),
+        setMenuItems: (menuItems: MenuItems | null) => ({ menuItems }),
         insertAfter: (content: JSONContent) => ({ content }),
         insertAfterLastNodeOfType: (nodeType: string, content: JSONContent) => ({ content, nodeType }),
         updateAttributes: (attributes: Partial<NotebookNodeAttributes<any>>) => ({ attributes }),
@@ -992,7 +992,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             },
         ],
         customMenuItems: [
-            null as LemonMenuItems | null,
+            null as MenuItems | null,
             {
                 setMenuItems: (_, { menuItems }) => menuItems,
             },

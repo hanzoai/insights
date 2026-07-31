@@ -1,4 +1,4 @@
-import { LemonCollapse, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Collapse, Tag, Link } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { stripMarkdown } from 'lib/utils/stripMarkdown'
@@ -16,7 +16,7 @@ export function PreviousTicketsPanel({
     previousTicketsLoading,
 }: PreviousTicketsPanelProps): JSX.Element {
     return (
-        <LemonCollapse
+        <Collapse
             className="bg-surface-primary"
             panels={[
                 {
@@ -47,7 +47,7 @@ export function PreviousTicketsPanel({
                                                 <span className="font-mono text-xs text-muted-alt">
                                                     #{ticket.ticket_number}
                                                 </span>
-                                                <LemonTag
+                                                <Tag
                                                     type={
                                                         ticket.status === 'resolved'
                                                             ? 'success'
@@ -57,7 +57,7 @@ export function PreviousTicketsPanel({
                                                     }
                                                 >
                                                     {ticket.status === 'on_hold' ? 'On hold' : ticket.status}
-                                                </LemonTag>
+                                                </Tag>
                                             </div>
                                             {ticket.last_message_text && (
                                                 <div className="text-xs text-muted truncate mb-1">

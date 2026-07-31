@@ -1,13 +1,13 @@
 import { BindLogic, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { TitledSnack } from 'lib/components/TitledSnack'
 import { dayjs } from 'lib/dayjs'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { Link } from 'lib/lemon-ui/Link'
+import { Divider } from 'lib/elements/Divider'
+import { Switch } from 'lib/elements/Switch'
+import { Link } from 'lib/elements/Link'
 
 import { CollapsibleExceptionList } from './ExceptionList/CollapsibleExceptionList'
 import { errorPropertiesLogic } from './errorPropertiesLogic'
@@ -77,23 +77,23 @@ export function ErrorDisplayContent(): JSX.Element {
                     {appInfo && <TitledSnack title="app" value={appInfo} />}
                     <TitledSnack title="os" value={concatValues(exceptionAttributes, 'os', 'osVersion') ?? 'unknown'} />
                 </div>
-                <LemonSwitch
+                <Switch
                     checked={showAllFrames}
                     label="Show entire stack trace"
                     onChange={() => setShowAllFrames(!showAllFrames)}
                 />
             </div>
 
-            {ingestionErrors || hasStacktrace ? <LemonDivider dashed={true} /> : null}
+            {ingestionErrors || hasStacktrace ? <Divider dashed={true} /> : null}
             {ingestionErrors && (
                 <>
-                    <LemonBanner type="error">
+                    <Banner type="error">
                         <ul>
                             {ingestionErrors.map((e, i) => (
                                 <li key={i}>{e}</li>
                             ))}
                         </ul>
-                    </LemonBanner>
+                    </Banner>
                 </>
             )}
             <CollapsibleExceptionList showAllFrames={showAllFrames} setShowAllFrames={setShowAllFrames} />

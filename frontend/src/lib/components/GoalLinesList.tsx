@@ -1,11 +1,11 @@
 import { IconGear, IconTrash } from '@hanzo/icons'
-import { LemonColorGlyph, LemonColorPicker, LemonLabel, LemonMenu, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { ColorGlyph, ColorPicker, Label, Menu, SegmentedButton } from '@hanzo/elements'
 
 import { getSeriesColorPalette } from 'lib/colors'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Switch } from 'lib/elements/Switch'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { GoalLine } from '~/queries/schema/schema-general'
 
@@ -26,24 +26,24 @@ export function GoalLinesList({ goalLines, updateGoalLine, removeGoalLine }: Goa
             {goalLines.map(({ label, value = 0, displayLabel = true, position, borderColor }, goalLineIndex) => {
                 return (
                     <div className="flex flex-1 gap-1 items-center mb-1.5" key={`${goalLineIndex}`}>
-                        <LemonColorPicker
+                        <ColorPicker
                             colors={seriesColor}
                             selectedColor={borderColor || undefined}
                             onSelectColor={(color) => updateGoalLine(goalLineIndex, 'borderColor', color)}
                             showCustomColor
                             customButton={
                                 <div className="cursor-pointer">
-                                    <LemonColorGlyph color={borderColor} size="small" />
+                                    <ColorGlyph color={borderColor} size="small" />
                                 </div>
                             }
                         />
-                        <LemonInput
+                        <Input
                             placeholder="Label"
                             className="grow mx-0.5"
                             value={label}
                             onChange={(value) => updateGoalLine(goalLineIndex, 'label', value)}
                         />
-                        <LemonInput
+                        <Input
                             type="number"
                             step="any"
                             placeholder="Value"
@@ -57,7 +57,7 @@ export function GoalLinesList({ goalLines, updateGoalLine, removeGoalLine }: Goa
                                 )
                             }
                         />
-                        <LemonMenu
+                        <Menu
                             items={[
                                 {
                                     title: 'Label settings',
@@ -65,7 +65,7 @@ export function GoalLinesList({ goalLines, updateGoalLine, removeGoalLine }: Goa
                                         {
                                             key: 'display-label',
                                             label: () => (
-                                                <LemonSwitch
+                                                <Switch
                                                     label="Show label"
                                                     className="pb-2"
                                                     fullWidth
@@ -85,7 +85,7 @@ export function GoalLinesList({ goalLines, updateGoalLine, removeGoalLine }: Goa
                                                     : 'Enable the label to change its position first.'
 
                                                 const label = (
-                                                    <LemonLabel
+                                                    <Label
                                                         className={`font-medium mr-1 ${displayLabel ? 'cursor-pointer' : 'cursor-not-allowed opacity-65'}`}
                                                         onClick={() =>
                                                             displayLabel
@@ -98,7 +98,7 @@ export function GoalLinesList({ goalLines, updateGoalLine, removeGoalLine }: Goa
                                                         }
                                                     >
                                                         Label position
-                                                    </LemonLabel>
+                                                    </Label>
                                                 )
 
                                                 return (
@@ -110,7 +110,7 @@ export function GoalLinesList({ goalLines, updateGoalLine, removeGoalLine }: Goa
                                                         ) : (
                                                             label
                                                         )}
-                                                        <LemonSegmentedButton
+                                                        <SegmentedButton
                                                             value={position ?? 'end'}
                                                             onChange={(value) =>
                                                                 updateGoalLine(
@@ -137,9 +137,9 @@ export function GoalLinesList({ goalLines, updateGoalLine, removeGoalLine }: Goa
                             placement="bottom-end"
                             closeOnClickInside={false}
                         >
-                            <LemonButton icon={<IconGear />} title="Goal line settings" noPadding size="small" />
-                        </LemonMenu>
-                        <LemonButton
+                            <Button icon={<IconGear />} title="Goal line settings" noPadding size="small" />
+                        </Menu>
+                        <Button
                             key="delete"
                             icon={<IconTrash />}
                             status="danger"

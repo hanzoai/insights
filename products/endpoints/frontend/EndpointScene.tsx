@@ -2,11 +2,11 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
 import { IconPause, IconPlay, IconTrash } from '@hanzo/icons'
-import { LemonBanner, LemonDialog, LemonDivider } from '@hanzo/lemon-ui'
+import { Banner, Dialog, Divider } from '@hanzo/elements'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
-import 'lib/lemon-ui/LemonModal/LemonModal'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import 'lib/elements/Modal/Modal'
+import { Tab, Tabs } from 'lib/elements/Tabs'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -45,7 +45,7 @@ export function EndpointScene({ tabId }: EndpointProps = {}): JSX.Element {
     const { deleteEndpoint, confirmToggleActive } = useActions(endpointLogic({ tabId }))
     const { searchParams } = useValues(router)
 
-    const tabs: LemonTab<EndpointTab>[] = [
+    const tabs: Tab<EndpointTab>[] = [
         {
             key: EndpointTab.QUERY,
             label: 'Query',
@@ -101,7 +101,7 @@ export function EndpointScene({ tabId }: EndpointProps = {}): JSX.Element {
             return
         }
 
-        LemonDialog.open({
+        Dialog.open({
             title: 'Delete endpoint?',
             content: (
                 <div className="text-sm text-secondary">
@@ -138,10 +138,10 @@ export function EndpointScene({ tabId }: EndpointProps = {}): JSX.Element {
             <SceneContent className="Endpoint">
                 <EndpointSceneHeader tabId={tabId} />
                 {endpoint && !endpoint.is_active && (
-                    <LemonBanner type="error">
+                    <Banner type="error">
                         This endpoint is deactivated and cannot be accessed via the API. <br />
                         This applies to all versions, even if they're active - endpoint status overrules version status.
-                    </LemonBanner>
+                    </Banner>
                 )}
                 {viewingVersion && endpoint && (
                     <VersionBanner
@@ -151,7 +151,7 @@ export function EndpointScene({ tabId }: EndpointProps = {}): JSX.Element {
                     />
                 )}
                 {!endpointLoading && <EndpointOverview tabId={tabId} />}
-                <LemonTabs activeKey={activeTab} tabs={tabs} />
+                <Tabs activeKey={activeTab} tabs={tabs} />
             </SceneContent>
             {endpoint && (
                 <ScenePanel>
@@ -160,7 +160,7 @@ export function EndpointScene({ tabId }: EndpointProps = {}): JSX.Element {
                             {endpoint.is_active ? <IconPause /> : <IconPlay />}
                             {endpoint.is_active ? 'Deactivate endpoint' : 'Activate endpoint'}
                         </ButtonPrimitive>
-                        <LemonDivider />
+                        <Divider />
                         <ButtonPrimitive menuItem onClick={handleDelete} className="text-danger">
                             <IconTrash />
                             Delete endpoint

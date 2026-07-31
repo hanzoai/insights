@@ -3,8 +3,8 @@ import React from 'react'
 import { IconAI, IconWarning } from '@hanzo/icons'
 
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { getCurrentTeamId } from 'lib/utils/getAppContext'
 import { createActionFromEvent } from 'scenes/activity/explore/createActionFromEvent'
@@ -21,7 +21,7 @@ export function eventRowActionsContent(event: EventType): JSX.Element {
     return (
         <>
             {getCurrentTeamId() && (
-                <LemonButton
+                <Button
                     onClick={() =>
                         void createActionFromEvent(
                             getCurrentTeamId(),
@@ -35,7 +35,7 @@ export function eventRowActionsContent(event: EventType): JSX.Element {
                     data-attr="events-table-create-action"
                 >
                     Create action from event
-                </LemonButton>
+                </Button>
             )}
             {event.event === SurveyEventName.SENT && event.uuid && event.properties.$survey_id ? (
                 <ArchiveSurveyButton surveyId={event.properties.$survey_id} responseUuid={event.uuid} />
@@ -51,7 +51,7 @@ export function eventRowActionsContent(event: EventType): JSX.Element {
                 data-attr="events-table-view-recordings"
             />
             {event.event === '$exception' && '$exception_issue_id' in event.properties ? (
-                <LemonButton
+                <Button
                     fullWidth
                     sideIcon={<IconWarning />}
                     data-attr="events-table-issue-link"
@@ -61,11 +61,11 @@ export function eventRowActionsContent(event: EventType): JSX.Element {
                     )}
                 >
                     Visit issue
-                </LemonButton>
+                </Button>
             ) : null}
             {(event.event === '$ai_trace' || event.event === SurveyEventName.SENT) &&
             '$ai_trace_id' in event.properties ? (
-                <LemonButton
+                <Button
                     fullWidth
                     sideIcon={<IconAI />}
                     data-attr="events-table-trace-link"
@@ -75,12 +75,12 @@ export function eventRowActionsContent(event: EventType): JSX.Element {
                     )}
                 >
                     View LLM Trace
-                </LemonButton>
+                </Button>
             ) : null}
             {insightUrl && (
-                <LemonButton to={insightUrl} fullWidth data-attr="events-table-usage" targetBlank>
+                <Button to={insightUrl} fullWidth data-attr="events-table-usage" targetBlank>
                     Try out in Insights
-                </LemonButton>
+                </Button>
             )}
         </>
     )
@@ -91,7 +91,7 @@ export const EventCopyLinkButton = React.forwardRef<
     { event: Pick<EventType, 'uuid' | 'timestamp'> }
 >(function EventCopyLinkButton({ event }, ref) {
     return (
-        <LemonButton
+        <Button
             ref={ref}
             fullWidth
             sideIcon={<IconLink />}
@@ -104,6 +104,6 @@ export const EventCopyLinkButton = React.forwardRef<
             }
         >
             Copy link to event
-        </LemonButton>
+        </Button>
     )
 })

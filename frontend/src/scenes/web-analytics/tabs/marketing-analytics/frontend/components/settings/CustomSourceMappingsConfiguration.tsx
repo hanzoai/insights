@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Input, Tag } from '@hanzo/elements'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
@@ -138,17 +138,17 @@ export function CustomSourceMappingsConfiguration({
                                     <td className="p-2 align-top">
                                         <div className="flex flex-wrap gap-1 items-center">
                                             {defaults.map((source) => (
-                                                <LemonTag
+                                                <Tag
                                                     key={source}
                                                     size="small"
                                                     type="muted"
                                                     className="border border-border-bold px-2 py-1"
                                                 >
                                                     {source}
-                                                </LemonTag>
+                                                </Tag>
                                             ))}
                                             {(custom as string[]).map((source) => (
-                                                <LemonTag
+                                                <Tag
                                                     key={source}
                                                     size="small"
                                                     type="primary"
@@ -156,17 +156,17 @@ export function CustomSourceMappingsConfiguration({
                                                     onClose={() => removeMapping(integration, source)}
                                                 >
                                                     {source}
-                                                </LemonTag>
+                                                </Tag>
                                             ))}
                                             <div className="flex gap-1 items-center">
-                                                <LemonInput
+                                                <Input
                                                     value={inputValue}
                                                     onChange={(value) => setInputValue(integration, value)}
                                                     placeholder="Add custom sources"
                                                     size="small"
                                                     className="w-40"
                                                 />
-                                                <LemonButton
+                                                <Button
                                                     type="primary"
                                                     size="small"
                                                     icon={<IconPlusSmall />}

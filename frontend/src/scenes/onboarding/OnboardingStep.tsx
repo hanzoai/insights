@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import React from 'react'
 
 import { IconArrowRight, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -113,20 +113,20 @@ export const OnboardingStep = ({
                 {children}
                 <div className="mt-8 flex justify-end gap-x-2">
                     {showHelpButton && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={() => openSupportForm({ kind: 'support', target_area: 'onboarding' })}
                         >
                             Need help?
-                        </LemonButton>
+                        </Button>
                     )}
                     {showSkip && (
-                        <LemonButton type="secondary" onClick={skip} data-attr="onboarding-skip-button">
+                        <Button type="secondary" onClick={skip} data-attr="onboarding-skip-button">
                             Skip {!hasNextStep ? 'and finish' : 'for now'}
-                        </LemonButton>
+                        </Button>
                     )}
                     {showContinue && (
-                        <LemonButton
+                        <Button
                             type="primary"
                             status="alt"
                             data-attr="onboarding-continue"
@@ -135,7 +135,7 @@ export const OnboardingStep = ({
                             disabledReason={continueDisabledReason}
                         >
                             {continueText ? continueText : !hasNextStep ? 'Finish' : 'Next'}
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
             </div>

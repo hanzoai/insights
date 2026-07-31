@@ -1,4 +1,4 @@
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
+import { Select } from 'lib/elements/Select'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { ExperimentFunnelMetric, ExperimentMetric } from '~/queries/schema/schema-general'
@@ -45,7 +45,7 @@ export function ExperimentMetricFunnelOrderSelector({
 
     return (
         <SceneSection title="Step order" titleHelper={<StepOrderInfo />} className="max-w-prose">
-            <LemonSelect
+            <Select
                 data-attr="experiment-funnel-order-selector"
                 value={metric.funnel_order_type || StepOrderValue.ORDERED}
                 onChange={handleFunnelOrderTypeChange}

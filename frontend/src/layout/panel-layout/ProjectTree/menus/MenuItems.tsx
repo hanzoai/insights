@@ -5,7 +5,7 @@ import { IconChevronRight } from '@hanzo/icons'
 
 import { linkToLogic } from 'lib/components/FileSystem/LinkTo/linkToLogic'
 import { moveToLogic } from 'lib/components/FileSystem/MoveTo/moveToLogic'
-import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { TreeDataItem } from 'lib/elements/Tree/Tree'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     ContextMenuGroup,

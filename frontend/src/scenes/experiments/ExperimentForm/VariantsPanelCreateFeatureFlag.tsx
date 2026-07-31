@@ -4,14 +4,14 @@ import { IconBalance, IconInfo, IconPencil, IconPlus, IconTrash } from '@hanzo/i
 
 import { getSeriesColor } from 'lib/colors'
 import { MAX_EXPERIMENT_VARIANTS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
-import { Lettermark, LettermarkColor } from 'lib/lemon-ui/Lettermark'
-import { Link } from 'lib/lemon-ui/Link/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
+import { Slider } from 'lib/elements/Slider'
+import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
+import { Link } from 'lib/elements/Link/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { alphabet, formatPercentage } from 'lib/utils'
 
 import type { Experiment, MultivariateFlagVariant } from '~/types'
@@ -54,7 +54,7 @@ const RolloutPercentageControl = ({
                         <IconInfo className="text-secondary text-base" />
                     </Tooltip>
                 </div>
-                <LemonInput
+                <Input
                     type="number"
                     min={0}
                     max={100}
@@ -67,7 +67,7 @@ const RolloutPercentageControl = ({
                 />
             </div>
             <div className={disabled ? 'pointer-events-none opacity-50' : ''}>
-                <LemonSlider value={rolloutPercentage} onChange={onChange} min={0} max={100} step={1} />
+                <Slider value={rolloutPercentage} onChange={onChange} min={0} max={100} step={1} />
             </div>
         </div>
     )
@@ -300,7 +300,7 @@ export const VariantsPanelCreateFeatureFlag = ({
         <div className="flex flex-col gap-4">
             <div className="flex gap-4">
                 <div className="flex-1">
-                    <LemonField.Pure label="Variants">
+                    <Field.Pure label="Variants">
                         <div className="border border-primary rounded p-4">
                             <table className="w-full">
                                 <thead>
@@ -312,19 +312,19 @@ export const VariantsPanelCreateFeatureFlag = ({
                                                 <span>Split</span>
                                                 {!disabled && (
                                                     <>
-                                                        <LemonButton
+                                                        <Button
                                                             onClick={() => setIsCustomSplit(!isCustomSplit)}
                                                             tooltip="Customize split"
                                                         >
                                                             <IconPencil />
-                                                        </LemonButton>
-                                                        <LemonButton
+                                                        </Button>
+                                                        <Button
                                                             onClick={() => distributeVariantsEqually()}
                                                             tooltip="Distribute split evenly"
                                                             className={isEvenlyDistributed(variants) ? 'invisible' : ''}
                                                         >
                                                             <IconBalance />
-                                                        </LemonButton>
+                                                        </Button>
                                                     </>
                                                 )}
                                             </div>
@@ -345,7 +345,7 @@ export const VariantsPanelCreateFeatureFlag = ({
                                                 </div>
                                             </td>
                                             <td className="py-2 pr-2">
-                                                <LemonInput
+                                                <Input
                                                     value={variant.key}
                                                     disabledReason={
                                                         disabled
@@ -370,7 +370,7 @@ export const VariantsPanelCreateFeatureFlag = ({
                                             <td className="py-2">
                                                 <div className="flex items-center gap-1">
                                                     {isCustomSplit && !disabled ? (
-                                                        <LemonInput
+                                                        <Input
                                                             type="number"
                                                             min={0}
                                                             max={100}
@@ -395,7 +395,7 @@ export const VariantsPanelCreateFeatureFlag = ({
                                                         </div>
                                                     )}
                                                     {!disabled && variants.length > 2 && index > 0 && (
-                                                        <LemonButton
+                                                        <Button
                                                             icon={<IconTrash />}
                                                             data-attr={`delete-prop-filter-${index}`}
                                                             noPadding
@@ -421,16 +421,16 @@ export const VariantsPanelCreateFeatureFlag = ({
                                 <p className="text-danger mt-2">Variant keys must be unique.</p>
                             )}
                             {!disabled && variants.length < MAX_EXPERIMENT_VARIANTS && (
-                                <LemonButton type="secondary" onClick={addVariant} icon={<IconPlus />} className="mt-2">
+                                <Button type="secondary" onClick={addVariant} icon={<IconPlus />} className="mt-2">
                                     Add variant
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
-                    </LemonField.Pure>
+                    </Field.Pure>
                 </div>
 
                 <div className="flex-1">
-                    <LemonField.Pure label="Rollout">
+                    <Field.Pure label="Rollout">
                         <div className="border border-primary rounded p-4 flex flex-col gap-5">
                             <RolloutPercentageControl
                                 rolloutPercentage={rolloutPercentage}
@@ -443,12 +443,12 @@ export const VariantsPanelCreateFeatureFlag = ({
                                 areVariantRolloutsValid={areVariantRolloutsValid}
                             />
                         </div>
-                    </LemonField.Pure>
+                    </Field.Pure>
                 </div>
             </div>
 
             <div>
-                <LemonCheckbox
+                <Checkbox
                     label="Persist flag across authentication steps"
                     onChange={(checked) => {
                         onChange({

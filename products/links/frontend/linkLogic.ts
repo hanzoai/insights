@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { teamLogic } from 'scenes/teamLogic'
@@ -130,7 +130,7 @@ export const linkLogic = kea<linkLogicType>([
     }),
     listeners(({ actions, values }) => ({
         saveLinkSuccess: ({ link }) => {
-            lemonToast.success('Link saved')
+            toast.success('Link saved')
             actions.loadLinks()
             link.id && router.actions.replace(urls.link(link.id))
             actions.editLink(false)
@@ -138,12 +138,12 @@ export const linkLogic = kea<linkLogicType>([
         deleteLink: async ({ linkId }) => {
             try {
                 await api.links.delete(linkId)
-                lemonToast.info('Link deleted. Existing `$linkclick` events will be kept for future analysis')
+                toast.info('Link deleted. Existing `$linkclick` events will be kept for future analysis')
                 actions.loadLinksSuccess(values.links.filter((link) => link.id !== linkId))
                 deleteFromTree('link', linkId)
                 router.actions.push(urls.links())
             } catch (e) {
-                lemonToast.error(`Error deleting Link: ${e}`)
+                toast.error(`Error deleting Link: ${e}`)
             }
         },
     })),

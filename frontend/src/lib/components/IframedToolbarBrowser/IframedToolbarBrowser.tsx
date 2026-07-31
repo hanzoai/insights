@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
-import { LemonBanner, Spinner } from '@hanzo/lemon-ui'
+import { Banner, Spinner } from '@hanzo/elements'
 
 import { ToolbarUserIntent } from '~/types'
 
@@ -14,10 +14,10 @@ function IframeErrorOverlay({ userIntent }: { userIntent?: string }): JSX.Elemen
     const { iframeBanner } = useValues(logic)
     return iframeBanner ? (
         <div className="absolute flex flex-col w-full h-full bg-blend-overlay items-start py-4 px-8 pointer-events-none">
-            <LemonBanner className="w-full" type={iframeBanner.level}>
+            <Banner className="w-full" type={iframeBanner.level}>
                 {iframeBanner.message}. Your site might not allow being embedded in an iframe. You can click "Open in
                 toolbar" above to visit your site and {UserIntentVerb[userIntent as ToolbarUserIntent]} there.
-            </LemonBanner>
+            </Banner>
         </div>
     ) : null
 }

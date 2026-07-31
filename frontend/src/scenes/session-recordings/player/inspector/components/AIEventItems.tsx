@@ -2,7 +2,7 @@ import { IconPerson } from '@hanzo/icons'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { IconExclamation, IconRobot } from 'lib/lemon-ui/icons'
+import { IconExclamation, IconRobot } from 'lib/elements/icons'
 import { isObject } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 

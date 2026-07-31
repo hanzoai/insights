@@ -1,6 +1,6 @@
 import { BindLogic, useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { BatchExportBackfills } from 'scenes/data-pipelines/batch-exports/BatchExportBackfills'
 import {
@@ -17,10 +17,10 @@ export function InsightsFunctionBackfills({ id }: BatchExportBackfillsLogicProps
         return (
             <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                    <LemonSkeleton className="w-20 h-8" fade />
-                    <LemonSkeleton className="w-32 h-10" fade />
+                    <Skeleton className="w-20 h-8" fade />
+                    <Skeleton className="w-32 h-10" fade />
                 </div>
-                <LemonSkeleton className="w-full h-96" fade />
+                <Skeleton className="w-full h-96" fade />
             </div>
         )
     }
@@ -39,10 +39,10 @@ function BackfillsWithLoadingCheck({ batchExportId }: { batchExportId: string })
         return (
             <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                    <LemonSkeleton className="w-20 h-8" fade />
-                    <LemonSkeleton className="w-32 h-10" fade />
+                    <Skeleton className="w-20 h-8" fade />
+                    <Skeleton className="w-32 h-10" fade />
                 </div>
-                <LemonSkeleton className="w-full h-96" fade />
+                <Skeleton className="w-full h-96" fade />
             </div>
         )
     }

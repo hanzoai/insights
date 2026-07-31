@@ -2,7 +2,7 @@ import { actions, connect, kea, key, listeners, path, props } from 'kea'
 import { forms } from 'kea-forms'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { trendsDataLogic } from 'scenes/trends/trendsDataLogic'
 
 import {
@@ -157,7 +157,7 @@ export const alertFormLogic = kea<alertFormLogicType>([
                         const updatedAlert: AlertType = await api.alerts.create(payload)
 
                         await flushPendingNotifications(updatedAlert.id)
-                        lemonToast.success(`Alert created.`)
+                        toast.success(`Alert created.`)
                         upsertToParent(updatedAlert)
                         props.onEditSuccess(updatedAlert.id)
 
@@ -167,14 +167,14 @@ export const alertFormLogic = kea<alertFormLogicType>([
                     const updatedAlert: AlertType = await api.alerts.update(alert.id, payload)
 
                     await flushPendingNotifications(updatedAlert.id)
-                    lemonToast.success(`Alert saved.`)
+                    toast.success(`Alert saved.`)
                     upsertToParent(updatedAlert)
                     props.onEditSuccess(updatedAlert.id)
 
                     return updatedAlert
                 } catch (error: any) {
                     const field = error.data?.attr?.replace(/_/g, ' ')
-                    lemonToast.error(`Error saving alert: ${field}: ${error.detail}`)
+                    toast.error(`Error saving alert: ${field}: ${error.detail}`)
                     throw error
                 }
             },
@@ -198,7 +198,7 @@ export const alertFormLogic = kea<alertFormLogicType>([
                     throw new Error("Cannot delete alert that doesn't exist")
                 }
                 await api.alerts.delete(values.alertForm.id)
-                lemonToast.success('Alert deleted.')
+                toast.success('Alert deleted.')
                 const parent = getParentLogic()
                 if (parent) {
                     parent.actions.removeAlert(values.alertForm.id)

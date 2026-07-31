@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, key, path, props, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 
@@ -91,7 +91,7 @@ export const optOutListLogic = kea<optOutListLogicType>([
                 try {
                     return await api.messaging.getMessageOptOuts(props.category?.key, 1)
                 } catch {
-                    lemonToast.error('Failed to load opt-out persons')
+                    toast.error('Failed to load opt-out persons')
                     return { count: 0, next: null, previous: null, results: [] }
                 }
             },
@@ -101,7 +101,7 @@ export const optOutListLogic = kea<optOutListLogicType>([
                     const result = await api.messaging.getMessageOptOuts(props.category?.key, nextPage)
                     return result
                 } catch {
-                    lemonToast.error('Failed to load next page')
+                    toast.error('Failed to load next page')
                     return values.optOutPersons
                 }
             },
@@ -111,7 +111,7 @@ export const optOutListLogic = kea<optOutListLogicType>([
                     const result = await api.messaging.getMessageOptOuts(props.category?.key, prevPage)
                     return result
                 } catch {
-                    lemonToast.error('Failed to load previous page')
+                    toast.error('Failed to load previous page')
                     return values.optOutPersons
                 }
             },

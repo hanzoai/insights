@@ -2,13 +2,13 @@ import { useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tabs } from 'lib/elements/Tabs'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -56,7 +56,7 @@ export function DataWarehouseScene(): JSX.Element {
                             interaction="click"
                             scope={Scene.DataWarehouse}
                         >
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 to={urls.dataWarehouseSourceNew()}
                                 icon={<IconPlusSmall />}
@@ -65,12 +65,12 @@ export function DataWarehouseScene(): JSX.Element {
                                 data-attr="new-source-button"
                             >
                                 New source
-                            </LemonButton>
+                            </Button>
                         </AppShortcut>
                     </div>
                 }
             />
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 sceneInset
                 tabs={[

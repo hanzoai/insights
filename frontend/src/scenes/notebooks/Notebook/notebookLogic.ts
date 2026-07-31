@@ -4,7 +4,7 @@ import { router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { EditorRange, JSONContent } from 'lib/components/RichContentEditor/types'
@@ -425,7 +425,7 @@ export const notebookLogic = kea<notebookLogicType>([
                         short_id: response.short_id,
                     })
 
-                    lemonToast.success(
+                    toast.success(
                         duplicationSource ? `Notebook created from ${duplicationSource}!` : 'Notebook duplicated!'
                     )
 
@@ -680,7 +680,7 @@ export const notebookLogic = kea<notebookLogicType>([
             } else {
                 actions.insertAfterLastNode(content)
             }
-            lemonToast.success('Insight added to notebook')
+            toast.success('Insight added to notebook')
         },
         setLocalContent: async ({ updateEditor, jsonContent, skipCapture }, breakpoint) => {
             if (

@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
 import { IconArrowLeft, IconTrash } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonTab, LemonTabs, Tooltip } from '@hanzo/lemon-ui'
+import { Badge, Button, Tab, Tabs, Tooltip } from '@hanzo/elements'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 
@@ -25,7 +25,7 @@ export function InsightsFlowEditorPanel(): JSX.Element | null {
 
     const variablesCount = workflow?.variables?.length || 0
 
-    const tabs: LemonTab<InsightsFlowEditorMode>[] = INSIGHTS_FLOW_EDITOR_MODES.map((mode) => ({
+    const tabs: Tab<InsightsFlowEditorMode>[] = INSIGHTS_FLOW_EDITOR_MODES.map((mode) => ({
         label: (
             <>
                 {capitalizeFirstLetter(mode)}
@@ -62,7 +62,7 @@ export function InsightsFlowEditorPanel(): JSX.Element | null {
                             !selectedNode ? 'w-2 opacity-0' : 'w-10 opacity-100'
                         )}
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             icon={<IconArrowLeft />}
                             onClick={() => setSelectedNodeId(null)}
@@ -71,7 +71,7 @@ export function InsightsFlowEditorPanel(): JSX.Element | null {
                     </div>
 
                     <div className="flex-1">
-                        <LemonTabs
+                        <Tabs
                             activeKey={mode}
                             onChange={(key) => setMode(key)}
                             tabs={tabs}
@@ -88,12 +88,12 @@ export function InsightsFlowEditorPanel(): JSX.Element | null {
                             {validationResult?.valid === false && (
                                 <Tooltip title="Some fields need attention">
                                     <div>
-                                        <LemonBadge status="warning" size="small" content="!" />
+                                        <Badge status="warning" size="small" content="!" />
                                     </div>
                                 </Tooltip>
                             )}
                             {selectedNode.deletable && (
-                                <LemonButton
+                                <Button
                                     size="small"
                                     status="danger"
                                     icon={<IconTrash />}

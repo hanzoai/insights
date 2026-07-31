@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
 import api, { ApiError } from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import { DomainConnectProviderName } from '~/queries/schema/schema-general'
 
@@ -93,9 +93,9 @@ export const domainConnectLogic = kea<domainConnectLogicType>([
                 window.open(url, '_blank', 'noopener,noreferrer')
             } catch (e) {
                 if (e instanceof ApiError) {
-                    lemonToast.error(`Failed to generate Domain Connect URL: ${e.detail || 'Please try again.'}`)
+                    toast.error(`Failed to generate Domain Connect URL: ${e.detail || 'Please try again.'}`)
                 } else {
-                    lemonToast.error('Failed to generate Domain Connect URL. Please configure DNS manually.')
+                    toast.error('Failed to generate Domain Connect URL. Please configure DNS manually.')
                 }
             }
         },
@@ -108,7 +108,7 @@ export const domainConnectLogic = kea<domainConnectLogicType>([
         // Handle return from Domain Connect redirect
         const searchParams = new URLSearchParams(window.location.search)
         if (searchParams.get('domain_connect') === props.context) {
-            lemonToast.success('DNS records have been submitted. It may take a few minutes for changes to propagate.')
+            toast.success('DNS records have been submitted. It may take a few minutes for changes to propagate.')
 
             // Remove key to avoid showing the banner again if the user returns to the page before DNS changes have propagated. The user can always trigger the banner again by adding ?domain_connect=email or ?domain_connect=proxy to the URL.
             const url = new URL(window.location.href)

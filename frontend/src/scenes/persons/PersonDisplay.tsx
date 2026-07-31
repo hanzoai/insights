@@ -6,9 +6,9 @@ import React, { useMemo, useState } from 'react'
 
 import { IconCopy } from '@hanzo/icons'
 
-import { Link } from 'lib/lemon-ui/Link'
-import { Popover } from 'lib/lemon-ui/Popover'
-import { ProfilePicture, ProfilePictureProps } from 'lib/lemon-ui/ProfilePicture'
+import { Link } from 'lib/elements/Link'
+import { Popover } from 'lib/elements/Popover'
+import { ProfilePicture, ProfilePictureProps } from 'lib/elements/ProfilePicture'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { useNotebookNode } from 'scenes/notebooks/Nodes/NotebookNodeContext'
 

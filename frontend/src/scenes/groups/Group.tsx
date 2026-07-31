@@ -6,11 +6,11 @@ import { NotFound } from 'lib/components/NotFound'
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { isEventFilter } from 'lib/components/UniversalFilters/utils'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner, SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
+import { Banner } from 'lib/elements/Banner'
+import { Tabs } from 'lib/elements/Tabs'
+import { toast } from 'lib/elements/Toast'
+import { Link } from 'lib/elements/Link'
+import { Spinner, SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { GroupLogicProps, groupLogic } from 'scenes/groups/groupLogic'
@@ -101,7 +101,7 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
             />
             <GroupCaption groupData={groupData} groupTypeName={groupTypeName} />
             <SceneDivider />
-            <LemonTabs
+            <Tabs
                 sceneInset
                 activeKey={activeTab}
                 onChange={(tab) => router.actions.push(urls.group(String(groupTypeIndex), groupKey, true, tab))}
@@ -169,12 +169,12 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                             <>
                                 {!currentTeam?.session_recording_opt_in ? (
                                     <div className="mb-4">
-                                        <LemonBanner type="info">
+                                        <Banner type="info">
                                             Session recordings are currently disabled for this project. To use this
                                             feature, please go to your{' '}
                                             <Link to={`${urls.settings('project')}#recordings`}>project settings</Link>{' '}
                                             and enable it.
-                                        </LemonBanner>
+                                        </Banner>
                                     </div>
                                 ) : (
                                     <div className="SessionRecordingPlaylistHeightWrapper">
@@ -222,7 +222,7 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                                                     )
                                                 })
                                                 if (!stillHasGroupFilter) {
-                                                    lemonToast.warning(
+                                                    toast.warning(
                                                         'Group filter removed. Please add it back to see recordings for this group.'
                                                     )
                                                 }
@@ -263,10 +263,10 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                                 scope={ActivityScope.GROUP}
                                 id={`${groupTypeIndex}-${groupKey}`}
                                 caption={
-                                    <LemonBanner type="info">
+                                    <Banner type="info">
                                         This page only shows changes made by users in the Insights site. Automatic
                                         changes from the API aren't shown here.
-                                    </LemonBanner>
+                                    </Banner>
                                 }
                             />
                         ),

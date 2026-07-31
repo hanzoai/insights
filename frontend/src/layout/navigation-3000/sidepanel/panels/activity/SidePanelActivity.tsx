@@ -3,7 +3,7 @@ import { combineUrl, router } from 'kea-router'
 import { useRef } from 'react'
 
 import { IconBell, IconList, IconNotification } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonSkeleton, LemonTabs, Link, Spinner } from '@hanzo/lemon-ui'
+import { Button, Menu, Skeleton, Tabs, Link, Spinner } from '@hanzo/elements'
 
 import { ActivityLogRow } from 'lib/components/ActivityLog/ActivityLog'
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
@@ -12,8 +12,8 @@ import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonMenuItems } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { IconWithCount } from 'lib/lemon-ui/icons'
+import { MenuItems } from 'lib/elements/Menu/Menu'
+import { IconWithCount } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { INSIGHTS_FUNCTION_SUB_TEMPLATES } from 'scenes/insights-functions/sub-templates/sub-templates'
@@ -121,7 +121,7 @@ export const SidePanelActivity = (): JSX.Element => {
             >
                 <div className="flex flex-col flex-1 overflow-hidden">
                     <div className="mx-2 shrink-0">
-                        <LemonTabs
+                        <Tabs
                             activeKey={activeTab as SidePanelActivityTab}
                             onChange={(key) => setActiveTab(key)}
                             tabs={[
@@ -150,9 +150,9 @@ export const SidePanelActivity = (): JSX.Element => {
                         <div className="px-2 pb-2 deprecated-space-y-2 shrink-0">
                             <div className="flex items-center justify-between gap-2">
                                 {hasUnread ? (
-                                    <LemonButton type="secondary" onClick={() => markAllAsRead()}>
+                                    <Button type="secondary" onClick={() => markAllAsRead()}>
                                         Mark all as read
-                                    </LemonButton>
+                                    </Button>
                                 ) : null}
                             </div>
                         </div>
@@ -168,7 +168,7 @@ export const SidePanelActivity = (): JSX.Element => {
                                     </strong>
                                 </span>
                                 {featureFlags[FEATURE_FLAGS.CDP_ACTIVITY_LOG_NOTIFICATIONS] && (
-                                    <LemonMenu
+                                    <Menu
                                         placement="bottom-start"
                                         items={
                                             [
@@ -241,13 +241,13 @@ export const SidePanelActivity = (): JSX.Element => {
                                                         },
                                                     ],
                                                 },
-                                            ] as LemonMenuItems
+                                            ] as MenuItems
                                         }
                                     >
-                                        <LemonButton size="small" type="secondary" tooltip="Subscribe">
+                                        <Button size="small" type="secondary" tooltip="Subscribe">
                                             <IconBell />
-                                        </LemonButton>
-                                    </LemonMenu>
+                                        </Button>
+                                    </Menu>
                                 )}
                             </div>
                             <MemberSelect
@@ -267,7 +267,7 @@ export const SidePanelActivity = (): JSX.Element => {
                             {activeTab === SidePanelActivityTab.Unread ? (
                                 <>
                                     {importantChangesLoading && !hasNotifications ? (
-                                        <LemonSkeleton className="h-12 my-2" repeat={10} fade />
+                                        <Skeleton className="h-12 my-2" repeat={10} fade />
                                     ) : hasNotifications ? (
                                         notifications.map((logItem, index) => (
                                             <ActivityLogRow logItem={logItem} key={index} />
@@ -282,7 +282,7 @@ export const SidePanelActivity = (): JSX.Element => {
                                 hasAnyContext ? (
                                     <>
                                         {allActivityResponseLoading ? (
-                                            <LemonSkeleton className="h-12 my-2" repeat={10} fade />
+                                            <Skeleton className="h-12 my-2" repeat={10} fade />
                                         ) : allActivity.length ? (
                                             <>
                                                 {allActivity.map((logItem, index) => (
@@ -295,14 +295,14 @@ export const SidePanelActivity = (): JSX.Element => {
                                                             <Spinner textColored /> Loading older activity
                                                         </>
                                                     ) : allActivityHasNext ? (
-                                                        <LemonButton
+                                                        <Button
                                                             type="secondary"
                                                             fullWidth
                                                             center
                                                             onClick={() => maybeLoadOlderActivity()}
                                                         >
                                                             Load more
-                                                        </LemonButton>
+                                                        </Button>
                                                     ) : (
                                                         'No more results'
                                                     )}
@@ -321,7 +321,7 @@ export const SidePanelActivity = (): JSX.Element => {
                                             <div className="flex flex-col items-center gap-2 p-6 text-center border border-dashed rounded">
                                                 <span>No activity yet</span>
                                                 {activeFilters?.user ? (
-                                                    <LemonButton
+                                                    <Button
                                                         size="small"
                                                         type="secondary"
                                                         onClick={() =>
@@ -332,10 +332,10 @@ export const SidePanelActivity = (): JSX.Element => {
                                                         }
                                                     >
                                                         Clear user filter
-                                                    </LemonButton>
+                                                    </Button>
                                                 ) : null}
                                                 <div className="flex flex-col items-center justify-center text-xs text-muted-alt">
-                                                    <LemonButton
+                                                    <Button
                                                         size="small"
                                                         type="secondary"
                                                         to={urls.advancedActivityLogs()}
@@ -343,7 +343,7 @@ export const SidePanelActivity = (): JSX.Element => {
                                                         onClick={() => closeSidePanel()}
                                                     >
                                                         Browse all activity logs
-                                                    </LemonButton>
+                                                    </Button>
                                                 </div>
                                             </div>
                                         )}
@@ -363,7 +363,7 @@ export const SidePanelActivity = (): JSX.Element => {
                                             <span>or</span>
                                             <div className="border-t flex-1" />
                                         </div>
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             type="secondary"
                                             to={urls.advancedActivityLogs()}
@@ -371,7 +371,7 @@ export const SidePanelActivity = (): JSX.Element => {
                                             onClick={() => closeSidePanel()}
                                         >
                                             Browse all activity logs
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 )
                             ) : activeTab === SidePanelActivityTab.Metalytics ? (

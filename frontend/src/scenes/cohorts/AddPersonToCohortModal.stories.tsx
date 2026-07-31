@@ -1,6 +1,6 @@
 import { Meta, StoryFn } from '@storybook/react'
 
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { useStorybookMocks } from '~/mocks/browser'
 import { NodeKind } from '~/queries/schema/schema-general'
@@ -53,28 +53,28 @@ function ModalShell({
 }): JSX.Element {
     return (
         <div className="bg-default p-4">
-            <LemonModal
+            <Modal
                 isOpen={false}
                 onClose={noop}
                 title="Add users to cohort"
                 inline
                 footer={
                     <div className="flex items-center justify-end gap-2">
-                        <LemonButton type="secondary" data-attr="cohort-add-users-modal-cancel">
+                        <Button type="secondary" data-attr="cohort-add-users-modal-cancel">
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             disabledReason={saveDisabledReason}
                             data-attr="cohort-add-users-modal-save"
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </div>
                 }
             >
                 {children}
-            </LemonModal>
+            </Modal>
         </div>
     )
 }

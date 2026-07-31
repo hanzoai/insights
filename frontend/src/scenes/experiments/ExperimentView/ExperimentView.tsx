@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonTabs, LemonTag } from '@hanzo/lemon-ui'
+import { Tabs, Tag } from '@hanzo/elements'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { WebExperimentImplementationDetails } from 'scenes/experiments/WebExperimentImplementationDetails'
@@ -261,7 +261,7 @@ export function ExperimentView({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId
                 <>
                     {usesNewQueryRunner ? <Info tabId={tabId} /> : <LegacyExperimentInfo />}
                     {usesNewQueryRunner ? <ExperimentHeader /> : <LegacyExperimentHeader />}
-                    <LemonTabs
+                    <Tabs
                         activeKey={activeTabKey}
                         onChange={(key) => setActiveTabKey(key)}
                         sceneInset
@@ -297,9 +297,9 @@ export function ExperimentView({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId
                                           label: (
                                               <div className="flex flex-row">
                                                   <div>User feedback</div>
-                                                  <LemonTag className="ml-2 float-right uppercase" type="primary">
+                                                  <Tag className="ml-2 float-right uppercase" type="primary">
                                                       New
-                                                  </LemonTag>
+                                                  </Tag>
                                               </div>
                                           ),
                                           content: <ExperimentFeedbackTab experiment={experiment} />,

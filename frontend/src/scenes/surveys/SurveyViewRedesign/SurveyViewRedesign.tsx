@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconArchive, IconCode, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonDivider } from '@hanzo/lemon-ui'
+import { Button, Dialog, Divider } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { SceneDuplicate } from 'lib/components/Scenes/SceneDuplicate'
 import { SceneFile } from 'lib/components/Scenes/SceneFile'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tabs } from 'lib/elements/Tabs'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -67,7 +67,7 @@ export function SurveyViewRedesign(): JSX.Element {
     const isDraft = status === ProgressStatus.Draft
 
     if (surveyLoading) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
@@ -132,7 +132,7 @@ export function SurveyViewRedesign(): JSX.Element {
                 <ScenePanelDivider />
 
                 {/* Survey-specific panels as sub-tabs */}
-                <LemonTabs
+                <Tabs
                     size="small"
                     activeKey={panelTabKey}
                     onChange={(key) => setPanelTabKey(key)}
@@ -182,7 +182,7 @@ export function SurveyViewRedesign(): JSX.Element {
                             minAccessLevel={AccessControlLevel.Editor}
                             userAccessLevel={survey.user_access_level}
                         >
-                            <LemonButton
+                            <Button
                                 data-attr="edit-survey"
                                 onClick={
                                     guidedEditorEnabled && survey.type === SurveyType.Popover
@@ -198,7 +198,7 @@ export function SurveyViewRedesign(): JSX.Element {
                                 size="small"
                             >
                                 Edit
-                            </LemonButton>
+                            </Button>
                         </AccessControlAction>
                         <SurveyStatusAction />
                     </>
@@ -207,7 +207,7 @@ export function SurveyViewRedesign(): JSX.Element {
 
             {/* Main content */}
             <div className="-m-4 flex-1 min-h-0">
-                <LemonTabs
+                <Tabs
                     activeKey={tabKey}
                     onChange={(key) => setTabKey(key)}
                     barClassName="pl-4 [&::before]:!bg-transparent border-b"
@@ -269,11 +269,11 @@ function SurveyStatusAction(): JSX.Element | null {
                 minAccessLevel={AccessControlLevel.Editor}
                 userAccessLevel={survey.user_access_level}
             >
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     onClick={() => {
-                        LemonDialog.open({
+                        Dialog.open({
                             title: 'Resume this survey?',
                             content: (
                                 <div className="text-sm text-secondary">
@@ -295,7 +295,7 @@ function SurveyStatusAction(): JSX.Element | null {
                     }}
                 >
                     Resume
-                </LemonButton>
+                </Button>
             </AccessControlAction>
         )
     }
@@ -306,13 +306,13 @@ function SurveyStatusAction(): JSX.Element | null {
             minAccessLevel={AccessControlLevel.Editor}
             userAccessLevel={survey.user_access_level}
         >
-            <LemonButton
+            <Button
                 data-attr="stop-survey"
                 type="secondary"
                 status="danger"
                 size="small"
                 onClick={() => {
-                    LemonDialog.open({
+                    Dialog.open({
                         title: 'Stop this survey?',
                         content: (
                             <div className="text-sm text-secondary">
@@ -334,7 +334,7 @@ function SurveyStatusAction(): JSX.Element | null {
                 }}
             >
                 Stop
-            </LemonButton>
+            </Button>
         </AccessControlAction>
     )
 }
@@ -368,19 +368,19 @@ function SurveySummaryContent({ onViewResponses }: { onViewResponses: () => void
                     return (
                         <div key={question.id} className="flex flex-col gap-2">
                             <SurveyQuestionVisualization question={question} questionIndex={i} />
-                            <LemonDivider />
+                            <Divider />
                         </div>
                     )
                 })}
             </div>
-            <LemonButton
+            <Button
                 type="tertiary"
                 data-attr="survey-results-view-responses"
                 onClick={onViewResponses}
                 size="small"
             >
                 Looking for all responses?
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -392,7 +392,7 @@ function SurveyResponsesContent(): JSX.Element {
         <div className="px-4 pb-4 space-y-4">
             <SurveyResultsFiltersBar />
             {surveyLoading ? (
-                <LemonSkeleton />
+                <Skeleton />
             ) : (
                 <div className="survey-table-results">
                     <Query

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconLock } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps } from '@hanzo/lemon-ui'
+import { Button, ButtonProps } from '@hanzo/elements'
 
 import { paymentEntryLogic } from 'scenes/billing/paymentEntryLogic'
 
@@ -15,14 +15,14 @@ type UsePayGateButtonReturn = Pick<
     payGateMiniLogicType['values'],
     'ctaLabel' | 'gateVariant' | 'productWithFeature'
 > & {
-    clickHandlerProps: Pick<LemonButtonProps, 'onClick' | 'to'>
+    clickHandlerProps: Pick<ButtonProps, 'onClick' | 'to'>
 }
 
 function usePayGateButton({
     feature,
     currentUsage,
     onClick,
-}: PayGateMiniLogicProps & Pick<LemonButtonProps, 'onClick'>): UsePayGateButtonReturn {
+}: PayGateMiniLogicProps & Pick<ButtonProps, 'onClick'>): UsePayGateButtonReturn {
     const { productWithFeature, ctaLink, ctaLabel, gateVariant, isPaymentEntryFlow } = useValues(
         payGateMiniLogic({ feature, currentUsage })
     )
@@ -50,14 +50,14 @@ function usePayGateButton({
     }
 }
 
-type PayGateButtonProps = PayGateMiniLogicProps & Partial<LemonButtonProps>
+type PayGateButtonProps = PayGateMiniLogicProps & Partial<ButtonProps>
 export const PayGateButton = ({ feature, currentUsage, ...buttonProps }: PayGateButtonProps): JSX.Element | null => {
     const { clickHandlerProps, ctaLabel } = usePayGateButton({ feature, currentUsage, onClick: buttonProps.onClick })
 
     return (
-        <LemonButton type="primary" center {...buttonProps} {...clickHandlerProps}>
+        <Button type="primary" center {...buttonProps} {...clickHandlerProps}>
             {ctaLabel}
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -91,7 +91,7 @@ export const PayGateIcon = ({
     }
 
     return (
-        <LemonButton
+        <Button
             type="primary"
             center
             icon={icon ?? <IconLock />}

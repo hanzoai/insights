@@ -1,4 +1,4 @@
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 interface ScrollToFormErrorOptions {
     /**
@@ -43,7 +43,7 @@ export function scrollToFormError(options: ScrollToFormErrorOptions = {}): void 
         if (errorElement) {
             errorElement.scrollIntoView({ block: 'center', behavior: 'smooth' })
         } else if (fallbackErrorMessage) {
-            lemonToast.error(fallbackErrorMessage)
+            toast.error(fallbackErrorMessage)
         }
     })
 }

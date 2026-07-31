@@ -31,6 +31,6 @@ If you write a selector that is too loose and matches multiple elements, Playwri
 
 ```text
 Error: locator.click: Error: strict mode violation: locator('text=Set a billing limit') resolved to 2 elements:
-1) <span class="LemonButton__content">Set a billing limit</span> aka getByTestId('billing-limit-input-wrapper-product_analytics').getByRole('button', { name: 'Set a billing limit' })
-2) <span class="LemonButton__content">Set a billing limit</span> aka getByTestId('billing-limit-input-wrapper-session_replay').getByRole('button', { name: 'Set a billing limit' })
+1) <span class="Button__content">Set a billing limit</span> aka getByTestId('billing-limit-input-wrapper-product_analytics').getByRole('button', { name: 'Set a billing limit' })
+2) <span class="Button__content">Set a billing limit</span> aka getByTestId('billing-limit-input-wrapper-session_replay').getByRole('button', { name: 'Set a billing limit' })
 ```

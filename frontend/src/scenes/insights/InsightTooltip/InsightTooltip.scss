@@ -28,11 +28,11 @@
         box-shadow: none;
     }
 
-    .LemonRow {
+    .Row {
         font-size: 0.8125rem;
     }
 
-    .LemonTable {
+    .Table {
         font-size: 0.75rem;
         border: none;
         border-bottom-right-radius: 0;
@@ -51,17 +51,17 @@
             overflow-wrap: anywhere;
         }
 
-        .LemonTable__content > table > thead {
+        .Table__content > table > thead {
             letter-spacing: 0;
 
             .datum-column {
-                .LemonTable__header-content {
+                .Table__header-content {
                     white-space: nowrap;
                 }
             }
         }
 
-        .LemonTable__content > table {
+        .Table__content > table {
             .datum-label-column {
                 display: flex;
                 align-items: center;

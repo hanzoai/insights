@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
 import { IconCheck, IconMinus, IconRefresh, IconWarning, IconX } from '@hanzo/icons'
-import { LemonButton, LemonTable, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Table, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { TableColumns } from 'lib/elements/Table'
 import { urls } from 'scenes/urls'
 
 import { sanitizeTraceUrlSearchParams } from '../../utils'
@@ -19,7 +19,7 @@ export function EvaluationRunsTable(): JSX.Element {
     const traceSearchParams = sanitizeTraceUrlSearchParams(searchParams, { removeSearch: true })
     const { refreshEvaluationRuns } = useActions(llmEvaluationLogic)
 
-    const columns: LemonTableColumns<EvaluationRun> = [
+    const columns: TableColumns<EvaluationRun> = [
         {
             title: 'Timestamp',
             key: 'timestamp',
@@ -51,31 +51,31 @@ export function EvaluationRunsTable(): JSX.Element {
             render: (_, run) => {
                 if (run.status === 'failed') {
                     return (
-                        <LemonTag type="danger" icon={<IconWarning />}>
+                        <Tag type="danger" icon={<IconWarning />}>
                             Error
-                        </LemonTag>
+                        </Tag>
                     )
                 }
                 if (run.status === 'running') {
-                    return <LemonTag type="primary">Running...</LemonTag>
+                    return <Tag type="primary">Running...</Tag>
                 }
                 if (run.result === null) {
                     return (
-                        <LemonTag type="muted" icon={<IconMinus />}>
+                        <Tag type="muted" icon={<IconMinus />}>
                             N/A
-                        </LemonTag>
+                        </Tag>
                     )
                 }
                 return (
                     <div className="flex items-center gap-2">
                         {run.result ? (
-                            <LemonTag type="success" icon={<IconCheck />}>
+                            <Tag type="success" icon={<IconCheck />}>
                                 True
-                            </LemonTag>
+                            </Tag>
                         ) : (
-                            <LemonTag type="danger" icon={<IconX />}>
+                            <Tag type="danger" icon={<IconX />}>
                                 False
-                            </LemonTag>
+                            </Tag>
                         )}
                     </div>
                 )
@@ -110,7 +110,7 @@ export function EvaluationRunsTable(): JSX.Element {
                     running: { type: 'primary' as const, text: 'Running' },
                 }
                 const status = statusMap[run.status]
-                return <LemonTag type={status.type}>{status.text}</LemonTag>
+                return <Tag type={status.type}>{status.text}</Tag>
             },
         },
     ]
@@ -119,7 +119,7 @@ export function EvaluationRunsTable(): JSX.Element {
         <div className="space-y-4">
             <div className="flex justify-between items-center">
                 <EvaluationSummaryControls />
-                <LemonButton
+                <Button
                     type="secondary"
                     icon={<IconRefresh />}
                     onClick={refreshEvaluationRuns}
@@ -128,12 +128,12 @@ export function EvaluationRunsTable(): JSX.Element {
                     data-attr="llma-evaluation-refresh-runs"
                 >
                     Refresh
-                </LemonButton>
+                </Button>
             </div>
 
             <EvaluationSummaryPanel runsLookup={runsLookup} />
 
-            <LemonTable
+            <Table
                 columns={columns}
                 dataSource={filteredEvaluationRuns}
                 loading={evaluationRunsLoading}

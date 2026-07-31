@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, key, listeners, path, props, reducer
 import { forms } from 'kea-forms'
 import { editor } from 'monaco-editor'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { tryJsonParse } from 'lib/utils'
@@ -309,7 +309,7 @@ export const insightsFunctionTestLogic = kea<insightsFunctionTestLogicType>([
                             ? `Please fix the following errors:\n${errorMessages.join('\n')}`
                             : 'Please fix the configuration errors before testing.'
 
-                    lemonToast.error(message, {
+                    toast.error(message, {
                         toastId: 'customfunction-validation-error',
                     })
 
@@ -346,10 +346,10 @@ export const insightsFunctionTestLogic = kea<insightsFunctionTestLogicType>([
                     actions.setTestResult(res)
                 } catch (e: any) {
                     if (e?.data?.configuration?.filters?.non_field_errors) {
-                        lemonToast.error(`Testing failed: ${e.data.configuration.filters.non_field_errors}`)
+                        toast.error(`Testing failed: ${e.data.configuration.filters.non_field_errors}`)
                         return
                     }
-                    lemonToast.error(`An unexpected server error occurred while testing the function: ${e}`)
+                    toast.error(`An unexpected server error occurred while testing the function: ${e}`)
                 }
             },
         },

@@ -14,7 +14,7 @@ import {
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { Dayjs, dayjs } from 'lib/dayjs'
@@ -321,7 +321,7 @@ export const logsViewerLogic = kea<logsViewerLogicType>([
 
                     actions.clearHiddenLogs()
                     const results = await loadGroupedLogs(values.logEntryParams).catch((e) => {
-                        lemonToast.error('Error loading logs ' + e.message)
+                        toast.error('Error loading logs ' + e.message)
                         throw e
                     })
                     await breakpoint(10)

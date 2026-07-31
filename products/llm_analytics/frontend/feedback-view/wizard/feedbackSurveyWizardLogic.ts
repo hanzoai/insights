@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -226,10 +226,10 @@ export const feedbackSurveyWizardLogic = kea<feedbackSurveyWizardLogicType>([
             actions.setSurveyName(generateUniqueSurveyName(existingNames))
         },
         createSurveySuccess: () => {
-            lemonToast.success('Survey created!')
+            toast.success('Survey created!')
         },
         createSurveyFailure: () => {
-            lemonToast.error('Failed to create survey')
+            toast.error('Failed to create survey')
         },
         viewSurvey: () => {
             if (values.activeSurvey?.id) {

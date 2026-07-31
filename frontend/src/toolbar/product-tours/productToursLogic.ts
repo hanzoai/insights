@@ -5,7 +5,7 @@ import { subscriptions } from 'kea-subscriptions'
 import isEqual from 'lodash.isequal'
 import { findElement } from '@hanzo/insights/dist/element-inference'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { uuid } from 'lib/utils'
 import { ProductTourEvent } from 'scenes/product-tours/constants'
 import { DEFAULT_APPEARANCE } from 'scenes/product-tours/constants'
@@ -605,7 +605,7 @@ export const productToursLogic = kea<productToursLogicType>([
                 const response = await toolbarFetch(url, method, payload)
                 if (!response.ok) {
                     const error = await response.json()
-                    lemonToast.error(error.detail || 'Failed to save tour')
+                    toast.error(error.detail || 'Failed to save tour')
                     return
                 }
                 const savedTour = await response.json()
@@ -613,7 +613,7 @@ export const productToursLogic = kea<productToursLogicType>([
                 if (launchedFromMainApp) {
                     window.close()
                 } else {
-                    lemonToast.success(isUpdate ? 'Tour saved' : 'Tour created', {
+                    toast.success(isUpdate ? 'Tour saved' : 'Tour created', {
                         button: {
                             label: 'Open in Insights',
                             action: () => window.open(editUrl, '_blank'),
@@ -623,7 +623,7 @@ export const productToursLogic = kea<productToursLogicType>([
                     actions.selectTour(null)
                 }
             } catch (e: any) {
-                lemonToast.error(e.detail || 'Failed to save tour')
+                toast.error(e.detail || 'Failed to save tour')
             }
         },
         draftAutoSave: async (_, breakpoint) => {
@@ -637,12 +637,12 @@ export const productToursLogic = kea<productToursLogicType>([
         previewTour: () => {
             const { tourForm, insights, selectedTourId, tours } = values
             if (insights?.version && !hasMinProductToursVersion(insights.version)) {
-                lemonToast.error(`Requires insights-js ${PRODUCT_TOURS_MIN_JS_VERSION}+`)
+                toast.error(`Requires insights-js ${PRODUCT_TOURS_MIN_JS_VERSION}+`)
                 return
             }
 
             if (!tourForm || !insights?.productTours) {
-                lemonToast.error('Unable to preview tour')
+                toast.error('Unable to preview tour')
                 return
             }
 
@@ -650,7 +650,7 @@ export const productToursLogic = kea<productToursLogicType>([
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const productTours = insights.productTours as any
             if (typeof productTours.previewTour !== 'function') {
-                lemonToast.error('Preview requires an updated version of insights-js')
+                toast.error('Preview requires an updated version of insights-js')
                 return
             }
 
@@ -658,7 +658,7 @@ export const productToursLogic = kea<productToursLogicType>([
             const firstElementStep = tourForm.steps.find((step) => hasElementTarget(step))
             if (firstElementStep && !getStepElement(firstElementStep)) {
                 // eslint-disable-next-line no-alert
-                lemonToast.error(
+                toast.error(
                     "Can't preview tour: the first step targets an element not found on this page.\n\nNavigate to a page where this element exists, or update the selector."
                 )
                 return
@@ -731,11 +731,11 @@ export const productToursLogic = kea<productToursLogicType>([
         deleteTour: async ({ id }) => {
             const response = await toolbarFetch(`/api/projects/@current/product_tours/${id}/`, 'DELETE')
             if (response.ok) {
-                lemonToast.success('Tour deleted')
+                toast.success('Tour deleted')
                 actions.loadTours()
                 actions.selectTour(null)
             } else {
-                lemonToast.error('Failed to delete tour')
+                toast.error('Failed to delete tour')
             }
         },
         showButtonProductTours: () => {

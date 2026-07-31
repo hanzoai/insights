@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCopy, IconX } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonModal, LemonTabs } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Modal, Tabs } from '@hanzo/elements'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { PropertyFilterType, PropertyOperator } from '~/types'
@@ -77,7 +77,7 @@ export function LogDetailsModal({ timezone }: LogDetailsModalProps): JSX.Element
         : selectedLog.originalLog
 
     return (
-        <LemonModal
+        <Modal
             title="Log details"
             isOpen={isLogDetailsOpen}
             onClose={closeLogDetails}
@@ -87,11 +87,11 @@ export function LogDetailsModal({ timezone }: LogDetailsModalProps): JSX.Element
             hideCloseButton
         >
             <div className="flex flex-col h-full">
-                <LemonModal.Header className="flex flex-col gap-2">
+                <Modal.Header className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                         <h3>Log details</h3>
                         <div className="flex items-center gap-1">
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 icon={<IconCopy />}
                                 onClick={() => void copyToClipboard(selectedLog.body, 'log message')}
@@ -99,7 +99,7 @@ export function LogDetailsModal({ timezone }: LogDetailsModalProps): JSX.Element
                                 aria-label="Copy log message"
                                 data-attr="logs-viewer-copy-message"
                             />
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 icon={<IconLink />}
                                 onClick={() => copyLinkToLog(selectedLog.uuid)}
@@ -107,7 +107,7 @@ export function LogDetailsModal({ timezone }: LogDetailsModalProps): JSX.Element
                                 aria-label="Copy link to log"
                                 data-attr="logs-viewer-copy-link"
                             />
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 icon={<IconX />}
                                 onClick={closeLogDetails}
@@ -148,9 +148,9 @@ export function LogDetailsModal({ timezone }: LogDetailsModalProps): JSX.Element
                             />
                         )}
                     </div>
-                </LemonModal.Header>
-                <LemonModal.Content>
-                    <LemonTabs
+                </Modal.Header>
+                <Modal.Content>
+                    <Tabs
                         activeKey={activeTab}
                         onChange={(key) => setActiveTab(key as LogDetailsTab)}
                         tabs={[
@@ -165,7 +165,7 @@ export function LogDetailsModal({ timezone }: LogDetailsModalProps): JSX.Element
                                 content: (
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center">
-                                            <LemonCheckbox
+                                            <Checkbox
                                                 checked={jsonParseAllFields}
                                                 onChange={setJsonParseAllFields}
                                                 label="JSON parse all fields"
@@ -207,8 +207,8 @@ export function LogDetailsModal({ timezone }: LogDetailsModalProps): JSX.Element
                             },
                         ]}
                     />
-                </LemonModal.Content>
+                </Modal.Content>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

@@ -9,10 +9,10 @@ import {
     IconPin,
     IconPinFilled,
 } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
 
@@ -58,7 +58,7 @@ export function LogRowFAB({
             onClick={(e) => e.stopPropagation()}
         >
             <FABGroup>
-                <LemonButton
+                <Button
                     size="xsmall"
                     noPadding
                     icon={<IconExpand45 />}
@@ -70,7 +70,7 @@ export function LogRowFAB({
                     className="text-muted"
                     data-attr="logs-viewer-view-details"
                 />
-                <LemonButton
+                <Button
                     size="xsmall"
                     noPadding
                     icon={<IconBrackets />}
@@ -84,7 +84,7 @@ export function LogRowFAB({
                     className={cn(isPrettified ? 'text-brand-blue' : 'text-muted')}
                     disabledReason={log.parsedBody === null ? 'Log body is not valid JSON' : undefined}
                 />
-                <LemonButton
+                <Button
                     size="xsmall"
                     noPadding
                     icon={pinned ? <IconPinFilled /> : <IconPin />}
@@ -96,7 +96,7 @@ export function LogRowFAB({
                     aria-label={pinned ? 'Unpin log' : 'Pin log'}
                     className={cn(pinned ? 'text-warning' : 'text-muted')}
                 />
-                <LemonButton
+                <Button
                     size="xsmall"
                     noPadding
                     icon={<IconCopy />}
@@ -109,7 +109,7 @@ export function LogRowFAB({
                     className="text-muted"
                     data-attr="logs-viewer-copy-message"
                 />
-                <LemonButton
+                <Button
                     size="xsmall"
                     noPadding
                     icon={<IconLink />}
@@ -138,7 +138,7 @@ export function LogRowFAB({
 
             {showScrollButtons && (
                 <FABGroup>
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         noPadding
                         icon={<IconChevronLeft />}
@@ -151,7 +151,7 @@ export function LogRowFAB({
                         onMouseLeave={stopScrolling}
                         className="text-muted"
                     />
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         noPadding
                         icon={<IconChevronRight />}

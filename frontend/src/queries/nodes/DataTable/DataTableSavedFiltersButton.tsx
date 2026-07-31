@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconBookmark } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { DataTableNode } from '~/queries/schema/schema-general'
 
@@ -23,7 +23,7 @@ export function DataTableSavedFiltersButton({
     const { setShowSavedFilters } = useActions(logic)
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             size="small"
             icon={<IconBookmark />}
@@ -31,6 +31,6 @@ export function DataTableSavedFiltersButton({
             active={showSavedFilters}
         >
             Saved filters
-        </LemonButton>
+        </Button>
     )
 }

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconArrowLeft, IconArrowRight, IconCheck, IconDocument } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSwitch, LemonTabs, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input, Switch, Tabs, TextArea } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { dayjs } from 'lib/dayjs'
@@ -102,9 +102,9 @@ function IntroStep({ appearance }: { appearance: SurveyAppearance }): JSX.Elemen
             />
 
             <div className="flex justify-end">
-                <LemonButton type="primary" onClick={() => setStep('configure')} sideIcon={<IconArrowRight />}>
+                <Button type="primary" onClick={() => setStep('configure')} sideIcon={<IconArrowRight />}>
                     Create new survey
-                </LemonButton>
+                </Button>
             </div>
 
             {eligibleSurveys.length > 0 && (
@@ -158,7 +158,7 @@ function ConfigureStep(): JSX.Element {
                 <div className="space-y-4">
                     <div>
                         <label className="text-sm font-medium mb-1.5 block">Survey name</label>
-                        <LemonInput
+                        <Input
                             value={surveyName}
                             onChange={setSurveyName}
                             placeholder="LLM feedback"
@@ -171,7 +171,7 @@ function ConfigureStep(): JSX.Element {
 
                     <div className="border border-border rounded-md overflow-hidden">
                         <div className="p-3 bg-bg-light">
-                            <LemonSwitch
+                            <Switch
                                 checked={followUpEnabled}
                                 onChange={setFollowUpEnabled}
                                 label="Ask follow-up on thumbs down"
@@ -182,7 +182,7 @@ function ConfigureStep(): JSX.Element {
                             <div className="p-3 border-t border-border space-y-4">
                                 <div>
                                     <label className="text-sm font-medium mb-1.5 block">Follow-up question</label>
-                                    <LemonTextArea
+                                    <TextArea
                                         value={followUpQuestion}
                                         onChange={setFollowUpQuestion}
                                         placeholder="What went wrong?"
@@ -222,7 +222,7 @@ function ConfigureStep(): JSX.Element {
                                             />
                                         </div>
                                     </div>
-                                    <LemonCheckbox
+                                    <Checkbox
                                         label="Hide Insights branding"
                                         checked={appearance.whiteLabel}
                                         onChange={(checked) => updateAppearance({ whiteLabel: checked })}
@@ -249,15 +249,15 @@ function ConfigureStep(): JSX.Element {
 
             <div className="flex flex-col gap-2 items-end">
                 <div className="flex justify-between w-full">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={() => setStep('intro')}
                         icon={<IconArrowLeft />}
                         disabled={createdSurveyLoading}
                     >
                         Back
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={createSurvey}
                         sideIcon={<IconArrowRight />}
@@ -266,7 +266,7 @@ function ConfigureStep(): JSX.Element {
                         disabledReason={disabledReason}
                     >
                         Create & continue
-                    </LemonButton>
+                    </Button>
                 </div>
                 {surveysNeedEnabling && (
                     <p className="text-muted text-xs">This will also enable surveys for this project.</p>
@@ -292,26 +292,26 @@ function ImplementStep(): JSX.Element {
             <div>
                 <h3 className="text-lg font-semibold mb-3">Implement in your app</h3>
                 <div className="flex gap-2">
-                    <LemonButton
+                    <Button
                         type="primary"
                         to="https://hanzo.ai/docs/llm-analytics/collect-user-feedback"
                         targetBlank
                         disableClientSideRouting
                     >
                         Read the docs
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="secondary"
                         to="https://github.com/hanzoai/insights/blob/e332d656667b8906410e93591a0f16633079efbd/frontend/src/scenes/surveys/components/question-visualizations/OpenQuestionSummaryV2.tsx#L112"
                         targetBlank
                         sideIcon={<IconArrowRight />}
                     >
                         See a real implementation in our codebase
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
 
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 onChange={setActiveTab}
                 tabs={[
@@ -345,9 +345,9 @@ function ImplementStep(): JSX.Element {
             />
 
             <div className="flex justify-end">
-                <LemonButton type="primary" onClick={viewSurvey}>
+                <Button type="primary" onClick={viewSurvey}>
                     View survey
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

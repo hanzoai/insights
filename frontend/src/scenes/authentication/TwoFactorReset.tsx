@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton, LemonDivider } from '@hanzo/lemon-ui'
+import { Banner, Button, Divider } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -65,9 +65,9 @@ export function TwoFactorReset(): JSX.Element {
                 <div className="space-y-4">
                     <h2>Login required</h2>
                     <p>Please log in with your email and password first to reset your two-factor authentication.</p>
-                    <LemonButton fullWidth type="primary" center data-attr="login-to-reset" to={loginRedirectUrl}>
+                    <Button fullWidth type="primary" center data-attr="login-to-reset" to={loginRedirectUrl}>
                         Log in to continue
-                    </LemonButton>
+                    </Button>
                 </div>
             </BridgePage>
         )
@@ -93,9 +93,9 @@ export function TwoFactorReset(): JSX.Element {
                         2FA.
                     </p>
                     <p>We recommend setting up 2FA again after logging in to keep your account secure.</p>
-                    <LemonButton fullWidth type="primary" center data-attr="back-to-login" to={urls.login()}>
+                    <Button fullWidth type="primary" center data-attr="back-to-login" to={urls.login()}>
                         Log in
-                    </LemonButton>
+                    </Button>
                 </div>
             </BridgePage>
         )
@@ -119,13 +119,13 @@ export function TwoFactorReset(): JSX.Element {
                 {invalidLink ? (
                     <>
                         <h2>Unable to reset 2FA</h2>
-                        <LemonBanner type="error">
+                        <Banner type="error">
                             {validatedResetToken?.error ||
                                 'This reset link is invalid or has expired. Please contact your administrator to request a new link.'}
-                        </LemonBanner>
-                        <LemonButton fullWidth type="primary" center data-attr="back-to-login" to={urls.login()}>
+                        </Banner>
+                        <Button fullWidth type="primary" center data-attr="back-to-login" to={urls.login()}>
                             Back to login
-                        </LemonButton>
+                        </Button>
                     </>
                 ) : (
                     <>
@@ -137,17 +137,17 @@ export function TwoFactorReset(): JSX.Element {
                             <li>Disable passkey-based 2FA (your passkeys will still work for login)</li>
                         </ul>
 
-                        <LemonDivider className="my-4" />
+                        <Divider className="my-4" />
 
                         <p className="text-sm text-muted">After resetting, you will need to log in again.</p>
 
                         {resetError && (
-                            <LemonBanner type="error" className="mt-4">
+                            <Banner type="error" className="mt-4">
                                 {resetError}
-                            </LemonBanner>
+                            </Banner>
                         )}
 
-                        <LemonButton
+                        <Button
                             fullWidth
                             type="primary"
                             status="danger"
@@ -157,11 +157,11 @@ export function TwoFactorReset(): JSX.Element {
                             onClick={() => confirmReset(validatedResetToken.token!)}
                         >
                             Confirm and reset 2FA
-                        </LemonButton>
+                        </Button>
 
-                        <LemonButton fullWidth type="secondary" center data-attr="cancel-2fa-reset" to={urls.login()}>
+                        <Button fullWidth type="secondary" center data-attr="cancel-2fa-reset" to={urls.login()}>
                             Cancel
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
             </div>

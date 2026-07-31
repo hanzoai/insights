@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonInput, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
+import { Button, Input, Table, TableColumns } from '@hanzo/elements'
 
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { ActorsQuery } from '~/queries/schema/schema-general'
@@ -20,14 +20,14 @@ export function SaveToCohortModalContent({ closeModal, query }: SaveToCohortModa
     const { cohorts, cohortsLoading, pagination, cohortFilters } = useValues(saveToCohortModalContentLogic)
     const { setCohortFilters, saveQueryToCohort } = useActions(saveToCohortModalContentLogic)
 
-    const columns: LemonTableColumns<CohortType> = [
+    const columns: TableColumns<CohortType> = [
         {
             title: 'Name',
             dataIndex: 'name',
             sorter: (a, b) => (a.name || '').localeCompare(b.name || ''),
             render: function Render(name, { id, description }) {
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={urls.cohort(id)}
                         target="_blank"
                         title={
@@ -48,7 +48,7 @@ export function SaveToCohortModalContent({ closeModal, query }: SaveToCohortModa
             title: null,
             render: function RenderActions(_, cohort) {
                 return (
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         type="primary"
                         onClick={() => {
@@ -57,14 +57,14 @@ export function SaveToCohortModalContent({ closeModal, query }: SaveToCohortModa
                         }}
                     >
                         Select
-                    </LemonButton>
+                    </Button>
                 )
             },
         },
     ]
     return (
         <div className="text-muted mb-2 w-160">
-            <LemonInput
+            <Input
                 className="w-48 mb-2"
                 type="search"
                 placeholder="Search for cohorts"
@@ -73,7 +73,7 @@ export function SaveToCohortModalContent({ closeModal, query }: SaveToCohortModa
                 }}
                 value={cohortFilters.search}
             />
-            <LemonTable
+            <Table
                 columns={columns}
                 loading={cohortsLoading}
                 rowKey="id"

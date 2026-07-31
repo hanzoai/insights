@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Switch, Tag, Link } from '@hanzo/elements'
 
 import { getTagProps } from 'scenes/max/components/MaxChangelog'
 import { ChangelogEntry, maxChangelogLogic } from 'scenes/max/maxChangelogLogic'
@@ -27,7 +27,7 @@ export function MaxChangelogSettings(): JSX.Element {
 
     return (
         <div className="space-y-4">
-            <LemonSwitch
+            <Switch
                 checked={!isDismissed}
                 onChange={handleToggle}
                 label="Show 'What's new' button in Insights AI"
@@ -40,7 +40,7 @@ export function MaxChangelogSettings(): JSX.Element {
                     {entries.map((entry: ChangelogEntry, index: number) => (
                         <div key={index} className="flex gap-3 p-3 rounded-lg border bg-bg-light">
                             <div className="w-16 shrink-0 pt-0.5">
-                                {entry.tag && <LemonTag size="small" {...getTagProps(entry.tag)} />}
+                                {entry.tag && <Tag size="small" {...getTagProps(entry.tag)} />}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <span className="font-medium text-sm">{entry.title}</span>

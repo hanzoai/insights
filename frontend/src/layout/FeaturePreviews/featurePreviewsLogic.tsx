@@ -4,7 +4,7 @@ import { EarlyAccessFeature, insights } from '@hanzo/insights'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { FeatureFlagKey } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { teamLogic } from 'scenes/teamLogic'
@@ -82,7 +82,7 @@ export const featurePreviewsLogic = kea<featurePreviewsLogicType>([
     listeners(({ values, actions }) => ({
         updateEarlyAccessFeatureEnrollment: ({ flagKey, enabled, stage }) => {
             if (window.IMPERSONATED_SESSION) {
-                lemonToast.error('Cannot update early access feature enrollment while impersonating a user')
+                toast.error('Cannot update early access feature enrollment while impersonating a user')
             } else {
                 insights.updateEarlyAccessFeatureEnrollment(flagKey, enabled, stage)
 

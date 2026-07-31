@@ -1,10 +1,10 @@
 import { useActions } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { IconErrorOutline } from 'lib/lemon-ui/icons'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { parseErrorMessage } from '~/queries/query'
@@ -47,7 +47,7 @@ export const MetricErrorState = ({ error, query, onRetry, height = 200 }: Metric
 
             <div className="flex gap-1.5 mt-1">
                 {onRetry && (
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="xsmall"
                         onClick={onRetry}
@@ -56,7 +56,7 @@ export const MetricErrorState = ({ error, query, onRetry, height = 200 }: Metric
                                 ? {
                                       dropdown: {
                                           overlay: (
-                                              <LemonMenuOverlay
+                                              <MenuOverlay
                                                   items={[
                                                       {
                                                           label: 'Open in query debugger',
@@ -72,10 +72,10 @@ export const MetricErrorState = ({ error, query, onRetry, height = 200 }: Metric
                         }
                     >
                         Try again
-                    </LemonButton>
+                    </Button>
                 )}
 
-                <LemonButton
+                <Button
                     type="secondary"
                     size="xsmall"
                     onClick={() =>
@@ -86,7 +86,7 @@ export const MetricErrorState = ({ error, query, onRetry, height = 200 }: Metric
                     }
                 >
                     Report issue
-                </LemonButton>
+                </Button>
             </div>
 
             {error.queryId && (

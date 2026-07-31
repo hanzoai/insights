@@ -4,9 +4,9 @@ import Suggestion from '@tiptap/suggestion'
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react'
 
 import { IconCode, IconImage, IconList, IconMinus, IconQuote, IconVideoCamera } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Popover } from 'lib/elements/Popover'
 
 import { IconHeading, IconListNumbers } from './icons'
 
@@ -179,7 +179,7 @@ const SlashCommands = forwardRef<SlashCommandsRef, SlashCommandsProps>(function 
     return (
         <div className="py-1 max-h-80 overflow-y-auto">
             {filteredCommands.map((item, index) => (
-                <LemonButton
+                <Button
                     key={item.title}
                     fullWidth
                     active={index === selectedIndex}
@@ -191,7 +191,7 @@ const SlashCommands = forwardRef<SlashCommandsRef, SlashCommandsProps>(function 
                         <span className="font-medium">{item.title}</span>
                         <span className="text-xs text-muted">{item.description}</span>
                     </div>
-                </LemonButton>
+                </Button>
             ))}
         </div>
     )

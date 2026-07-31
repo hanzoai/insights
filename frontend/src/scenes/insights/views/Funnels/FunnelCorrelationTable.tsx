@@ -4,14 +4,14 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconArchive, IconTrending } from '@hanzo/icons'
-import { LemonCheckbox, LemonTable } from '@hanzo/lemon-ui'
+import { Checkbox, Table } from '@hanzo/elements'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { VisibilitySensor } from 'lib/components/VisibilitySensor/VisibilitySensor'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { IconSelectEvents, IconTrendingDown } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { IconSelectEvents, IconTrendingDown } from 'lib/elements/icons'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { ValueInspectorButton } from 'scenes/funnels/ValueInspectorButton'
 import { funnelCorrelationLogic } from 'scenes/funnels/funnelCorrelationLogic'
@@ -154,7 +154,7 @@ export function FunnelCorrelationTable(): JSX.Element | null {
         return (
             <div className="p-4">
                 <h4 className="pl-4">Correlated properties</h4>
-                <LemonTable
+                <Table
                     id={`event-correlation__${eventName}`}
                     dataSource={eventWithPropertyCorrelationsValues[eventName]}
                     rowKey={(record: FunnelCorrelation) => 'nested' + record.event.event}
@@ -219,14 +219,14 @@ export function FunnelCorrelationTable(): JSX.Element | null {
                             CORRELATION
                         </p>
                         <div className="flex">
-                            <LemonCheckbox
+                            <Checkbox
                                 checked={correlationTypes.includes(FunnelCorrelationType.Success)}
                                 onChange={() => onClickCorrelationType(FunnelCorrelationType.Success)}
                                 label="Success"
                                 size="small"
                                 bordered
                             />
-                            <LemonCheckbox
+                            <Checkbox
                                 checked={correlationTypes.includes(FunnelCorrelationType.Failure)}
                                 onChange={() => onClickCorrelationType(FunnelCorrelationType.Failure)}
                                 label="Drop-off"
@@ -238,7 +238,7 @@ export function FunnelCorrelationTable(): JSX.Element | null {
                 </span>
                 <CorrelationMatrix />
 
-                <LemonTable
+                <Table
                     id="event-correlation"
                     embedded
                     columns={[
@@ -291,13 +291,13 @@ export function FunnelCorrelationTable(): JSX.Element | null {
                                                 Learn more about correlation analysis.
                                             </Link>
                                         </p>
-                                        <LemonButton
+                                        <Button
                                             onClick={() => loadEventCorrelations({})}
                                             type="secondary"
                                             className="mx-auto !mt-2"
                                         >
                                             Load results
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 )}
                             </div>

@@ -3,14 +3,14 @@ import { useState } from 'react'
 
 import { IconBrackets, IconChevronRight, IconExternal, IconGear } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInput,
-    LemonMenu,
-    LemonMenuItem,
-    LemonMenuItems,
-    LemonMenuSection,
-    LemonTag,
-} from '@hanzo/lemon-ui'
+    Button,
+    Input,
+    Menu,
+    MenuItem,
+    MenuItems,
+    MenuSection,
+    Tag,
+} from '@hanzo/elements'
 
 import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -55,7 +55,7 @@ const buildVariableMenuLabel = (
                 <span className="text-xxs text-muted-alt">{variable.code_name}</span>
             </span>
             <span className="flex items-center gap-2">
-                <LemonTag type="default">{variable.type}</LemonTag>
+                <Tag type="default">{variable.type}</Tag>
                 {settingsButton}
             </span>
         </span>
@@ -69,13 +69,13 @@ const buildVariableMenuItems = (
     openExistingVariableModal: (variable: Variable) => void,
     closeMenu: () => void,
     options?: { showSettingsButton?: boolean; insertOnClick?: boolean }
-): LemonMenuItem[] => {
-    return variables.map((variable): LemonMenuItem => {
+): MenuItem[] => {
+    return variables.map((variable): MenuItem => {
         const variableAsInsightsQL = `{variables.${variable.code_name}}`
         const showSettingsButton = options?.showSettingsButton ?? false
         const insertOnClick = options?.insertOnClick ?? false
 
-        const menuItem: LemonMenuItem = {
+        const menuItem: MenuItem = {
             key: variable.id,
             custom: true,
             label: buildVariableMenuLabel(variable, showSettingsButton, openExistingVariableModal, closeMenu),
@@ -134,7 +134,7 @@ const buildVariableMenuItems = (
                     },
                 },
             ].filter((a) => a),
-        } as LemonMenuItem
+        } as MenuItem
     })
 }
 
@@ -181,11 +181,11 @@ export function QueryVariablesMenu({ disabledReason }: QueryVariablesMenuProps):
         { showSettingsButton: true, insertOnClick: true }
     )
 
-    const searchItem: LemonMenuItem = {
+    const searchItem: MenuItem = {
         custom: true,
         label: () => (
             <div className="pb-1">
-                <LemonInput
+                <Input
                     data-attr="insight-variable-search"
                     type="search"
                     fullWidth
@@ -199,7 +199,7 @@ export function QueryVariablesMenu({ disabledReason }: QueryVariablesMenuProps):
         ),
     }
 
-    const variableSections: LemonMenuSection[] = []
+    const variableSections: MenuSection[] = []
 
     if (!variablesLoading) {
         variableSections.push({
@@ -226,14 +226,14 @@ export function QueryVariablesMenu({ disabledReason }: QueryVariablesMenuProps):
         }
     }
 
-    const manageVariablesMenuItem: LemonMenuItem = {
+    const manageVariablesMenuItem: MenuItem = {
         label: 'Manage SQL variables',
         to: urls.variables(),
         targetBlank: true,
         sideIcon: <IconExternal />,
     }
 
-    const newVariableMenuItem: LemonMenuItem = {
+    const newVariableMenuItem: MenuItem = {
         label: 'New variable',
         items: [
             {
@@ -259,7 +259,7 @@ export function QueryVariablesMenu({ disabledReason }: QueryVariablesMenuProps):
         ],
     }
 
-    const menuItems: LemonMenuItems = variablesLoading
+    const menuItems: MenuItems = variablesLoading
         ? [
               {
                   label: 'Loading...',
@@ -285,8 +285,8 @@ export function QueryVariablesMenu({ disabledReason }: QueryVariablesMenuProps):
 
     return (
         <>
-            <LemonMenu items={menuItems} visible={isMenuOpen} onVisibilityChange={setIsMenuOpen}>
-                <LemonButton
+            <Menu items={menuItems} visible={isMenuOpen} onVisibilityChange={setIsMenuOpen}>
+                <Button
                     type="tertiary"
                     size="xsmall"
                     icon={<IconBrackets />}
@@ -294,8 +294,8 @@ export function QueryVariablesMenu({ disabledReason }: QueryVariablesMenuProps):
                     data-attr="sql-editor-variables-button"
                 >
                     Variables
-                </LemonButton>
-            </LemonMenu>
+                </Button>
+            </Menu>
             <NewVariableModal />
         </>
     )

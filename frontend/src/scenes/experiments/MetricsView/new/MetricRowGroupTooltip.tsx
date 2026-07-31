@@ -1,4 +1,4 @@
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Tag } from 'lib/elements/Tag'
 import { humanFriendlyNumber } from 'lib/utils'
 import { VariantTag } from 'scenes/experiments/ExperimentView/components'
 
@@ -28,9 +28,9 @@ export const renderTooltipContent = (variantResult: ExperimentVariantResult, met
             <div className="flex justify-between items-center">
                 <VariantTag variantKey={variantResult.key} />
                 {variantResult.key !== 'control' && (
-                    <LemonTag type={!significant ? 'muted' : winning ? 'success' : 'danger'} size="medium">
+                    <Tag type={!significant ? 'muted' : winning ? 'success' : 'danger'} size="medium">
                         {!significant ? 'Not significant' : winning ? 'Won' : 'Lost'}
-                    </LemonTag>
+                    </Tag>
                 )}
             </div>
 

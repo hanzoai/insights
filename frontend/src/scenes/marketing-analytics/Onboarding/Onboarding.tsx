@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconArrowRight } from '@hanzo/icons'
-import { LemonButton, LemonCard, Link } from '@hanzo/lemon-ui'
+import { Button, Card, Link } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { FilmCameraMascot } from 'lib/components/mascots'
@@ -93,9 +93,9 @@ function WelcomeStep({ onContinue }: { onContinue: () => void }): JSX.Element {
             description="Track your marketing campaigns performance across all your ad platforms. Connect your data sources to see spend, conversions, and ROI in one place."
             action={onContinue}
             actionElementOverride={
-                <LemonButton type="primary" onClick={onContinue} sideIcon={<IconArrowRight />}>
+                <Button type="primary" onClick={onContinue} sideIcon={<IconArrowRight />}>
                     Get started
-                </LemonButton>
+                </Button>
             }
             isEmpty={true}
             docsURL="https://hanzo.ai/docs/web-analytics/marketing-analytics"
@@ -109,7 +109,7 @@ function ConversionGoalsStep({ onContinue, onSkip }: { onContinue: () => void; o
     const hasConversionGoals = conversion_goals.length > 0
 
     return (
-        <LemonCard hoverEffect={false}>
+        <Card hoverEffect={false}>
             <div className="space-y-4">
                 <div>
                     <h3 className="text-lg font-semibold mb-1">Configure conversion goals</h3>
@@ -122,18 +122,18 @@ function ConversionGoalsStep({ onContinue, onSkip }: { onContinue: () => void; o
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-primary">
                     {!hasConversionGoals && (
-                        <LemonButton type="secondary" onClick={onSkip}>
+                        <Button type="secondary" onClick={onSkip}>
                             I'll configure later
-                        </LemonButton>
+                        </Button>
                     )}
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={onContinue}
                         sideIcon={<IconArrowRight />}
                         disabledReason={!hasConversionGoals ? 'Add at least one conversion goal' : undefined}
                     >
                         Continue
-                    </LemonButton>
+                    </Button>
                 </div>
 
                 <div className="text-center">
@@ -143,6 +143,6 @@ function ConversionGoalsStep({ onContinue, onSkip }: { onContinue: () => void; o
                     </p>
                 </div>
             </div>
-        </LemonCard>
+        </Card>
     )
 }

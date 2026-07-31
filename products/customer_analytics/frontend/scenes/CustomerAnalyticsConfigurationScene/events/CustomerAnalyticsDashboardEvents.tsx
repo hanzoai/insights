@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonLabel, Link } from '@hanzo/lemon-ui'
+import { Button, Label, Link } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -43,7 +43,7 @@ function EventSelector({ filters, setFilters, title, caption, prompt }: EventSel
         <div className={`py-2 ${highlight}`}>
             <div className="ml-1">
                 <div className="flex items-center gap-2">
-                    <LemonLabel>{title}</LemonLabel>
+                    <Label>{title}</Label>
                     {shouldShowAIButton && <ConfigureWithAIButton event={title} prompt={prompt} />}
                 </div>
                 <p className="text-xs text-muted-alt">{caption}</p>
@@ -69,7 +69,7 @@ function EventSelector({ filters, setFilters, title, caption, prompt }: EventSel
                 </div>
             ) : (
                 <div className="flex">
-                    <LemonButton
+                    <Button
                         type="tertiary"
                         icon={<IconPlusSmall />}
                         onClick={() => {
@@ -86,7 +86,7 @@ function EventSelector({ filters, setFilters, title, caption, prompt }: EventSel
                         }}
                     >
                         Select event or action
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </div>
@@ -150,17 +150,17 @@ export function CustomerAnalyticsDashboardEvents(): JSX.Element {
             </div>
 
             <div className="flex flex-row gap-2 pt-4">
-                <LemonButton type="secondary" onClick={handleClear} disabledReason={hasChanges ? null : 'No changes'}>
+                <Button type="secondary" onClick={handleClear} disabledReason={hasChanges ? null : 'No changes'}>
                     Clear changes
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     data-attr="save-customer-analytics-dashboard-events"
                     type="primary"
                     onClick={handleSave}
                     disabledReason={hasChanges ? null : 'No changes'}
                 >
                     Save events
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

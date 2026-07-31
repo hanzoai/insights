@@ -11,8 +11,8 @@ import api from 'lib/api'
 import { AuthorizedUrlListType, authorizedUrlListLogic } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { FEATURE_FLAGS, RETENTION_FIRST_OCCURRENCE_MATCHING_FILTERS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Link } from 'lib/lemon-ui/Link/Link'
+import { Button } from 'lib/elements/Button'
+import { Link } from 'lib/elements/Link/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareUrlToAction } from 'lib/logic/scenes/tabAwareUrlToAction'
@@ -1443,7 +1443,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                                     control: (
                                         <div className="flex flex-row deprecated-space-x-2 font-medium">
                                             <span>Customize channel types</span>
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconGear />}
                                                 type="tertiary"
                                                 status="alt"

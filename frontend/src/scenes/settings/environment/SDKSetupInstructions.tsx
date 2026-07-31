@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { LemonButton, LemonModal, LemonSelect, LemonSelectOptions, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Modal, Select, SelectOptions, Skeleton } from '@hanzo/elements'
 import {
     APIInstallation,
     AndroidInstallation,
@@ -40,7 +40,7 @@ import {
 import type { StepDefinition } from '@hanzo/shared-onboarding/steps'
 
 import { JSSnippet } from 'lib/components/JSSnippet'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { OnboardingDocsContentWrapper } from 'scenes/onboarding/OnboardingDocsContentWrapper'
 import SetupWizardBanner from 'scenes/onboarding/sdks/sdk-install-instructions/components/SetupWizardBanner'
 import { teamLogic } from 'scenes/teamLogic'
@@ -252,7 +252,7 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
     },
 }
 
-const SDK_SELECT_OPTIONS: LemonSelectOptions<string> = [
+const SDK_SELECT_OPTIONS: SelectOptions<string> = [
     {
         title: 'Popular',
         options: [
@@ -320,8 +320,8 @@ export function SDKSetupInstructions(): JSX.Element {
     if (currentTeamLoading && !currentTeam) {
         return (
             <div className="space-y-4">
-                <LemonSkeleton className="w-1/2 h-4" />
-                <LemonSkeleton repeat={3} />
+                <Skeleton className="w-1/2 h-4" />
+                <Skeleton repeat={3} />
             </div>
         )
     }
@@ -335,7 +335,7 @@ export function SDKSetupInstructions(): JSX.Element {
 
     return (
         <div className="space-y-4 max-w-200">
-            <LemonSelect
+            <Select
                 value={selectedSDK}
                 onChange={(value) => {
                     setSelectedSDK(value)
@@ -352,14 +352,14 @@ export function SDKSetupInstructions(): JSX.Element {
                 </OnboardingDocsContentWrapper>
             )}
             <div className="flex items-center gap-2">
-                <LemonButton type="secondary" size="small" onClick={() => setShowFullSetup(true)}>
+                <Button type="secondary" size="small" onClick={() => setShowFullSetup(true)}>
                     View full setup instructions
-                </LemonButton>
+                </Button>
                 <Link to={docsLink} target="_blank" className="text-sm">
                     {name} docs
                 </Link>
             </div>
-            <LemonModal
+            <Modal
                 isOpen={showFullSetup}
                 onClose={() => setShowFullSetup(false)}
                 title={`${name} setup`}
@@ -374,7 +374,7 @@ export function SDKSetupInstructions(): JSX.Element {
                         View full {name} documentation
                     </Link>
                 </div>
-            </LemonModal>
+            </Modal>
         </div>
     )
 }

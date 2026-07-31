@@ -1,11 +1,11 @@
 import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
 
 import { urls } from '../urls'
 
@@ -14,14 +14,14 @@ export function FreeHistoricalSyncsBanner({ hideGetStarted }: { hideGetStarted?:
 
     return (
         <>
-            <LemonBanner type="info" className="min-h-[auto] my-2">
+            <Banner type="info" className="min-h-[auto] my-2">
                 <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2">
                         <span className="text-sm">
                             Sync all your historical data from any new source for free during the first 7 days
                         </span>
 
-                        <LemonButton
+                        <Button
                             type="primary"
                             size="xsmall"
                             onClick={() => {
@@ -30,12 +30,12 @@ export function FreeHistoricalSyncsBanner({ hideGetStarted }: { hideGetStarted?:
                             }}
                         >
                             Learn more
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
-            </LemonBanner>
+            </Banner>
 
-            <LemonModal
+            <Modal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
                 title="Free rows for the first 7-days on new sources"
@@ -52,7 +52,7 @@ export function FreeHistoricalSyncsBanner({ hideGetStarted }: { hideGetStarted?:
                             View documentation
                         </Link>
                         {!hideGetStarted && (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 to={urls.dataWarehouseSourceNew()}
                                 onClick={() => {
@@ -61,7 +61,7 @@ export function FreeHistoricalSyncsBanner({ hideGetStarted }: { hideGetStarted?:
                                 }}
                             >
                                 Add new source
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 }
@@ -100,7 +100,7 @@ export function FreeHistoricalSyncsBanner({ hideGetStarted }: { hideGetStarted?:
                         After the first 7-day period, standard data warehouse pricing will apply.
                     </p>
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }

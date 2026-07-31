@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonInput, LemonSwitch } from '@hanzo/lemon-ui'
+import { Input, Switch } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
+import { Label } from 'lib/elements/Label/Label'
 import { pathsDataLogic } from 'scenes/paths/pathsDataLogic'
 
 import { AvailableFeature, EditorFilterProps, PathEdgeParameters } from '~/types'
@@ -37,7 +37,7 @@ export function PathsAdvanced({ insightProps, ...rest }: EditorFilterProps): JSX
         <div className="flex flex-col gap-4">
             {/* Show full URLs toggle - outside paywall */}
             <div>
-                <LemonSwitch
+                <Switch
                     checked={showFullUrls || false}
                     onChange={(checked) => updateInsightFilter({ showFullUrls: checked })}
                     label="Show full URLs"
@@ -51,10 +51,10 @@ export function PathsAdvanced({ insightProps, ...rest }: EditorFilterProps): JSX
 
             <PayGateMini feature={AvailableFeature.PATHS_ADVANCED}>
                 <div className="flex flex-col gap-2">
-                    <LemonLabel info="Determines the maximum number of path nodes that can be generated. If necessary certain items will be grouped.">
+                    <Label info="Determines the maximum number of path nodes that can be generated. If necessary certain items will be grouped.">
                         Maximum number of paths
-                    </LemonLabel>
-                    <LemonInput
+                    </Label>
+                    <Input
                         type="number"
                         min={0}
                         max={1000}
@@ -69,16 +69,16 @@ export function PathsAdvanced({ insightProps, ...rest }: EditorFilterProps): JSX
                         onPressEnter={updateEdgeParameters}
                     />
 
-                    <LemonLabel
+                    <Label
                         info="Determines the minimum and maximum number of persons in each path. Helps adjust the density of the visualization."
                         className="mt-2"
                     >
                         Number of people on each path
-                    </LemonLabel>
+                    </Label>
                 </div>
                 <div className="flex items-baseline">
                     <span className="mr-2">Between</span>
-                    <LemonInput
+                    <Input
                         type="number"
                         min={0}
                         max={100000}
@@ -94,7 +94,7 @@ export function PathsAdvanced({ insightProps, ...rest }: EditorFilterProps): JSX
                         onPressEnter={updateEdgeParameters}
                     />
                     <span className="mx-2">and</span>
-                    <LemonInput
+                    <Input
                         type="number"
                         onChange={(value): void => {
                             setLocalEdgeParameters((state) => ({
@@ -113,7 +113,7 @@ export function PathsAdvanced({ insightProps, ...rest }: EditorFilterProps): JSX
                 </div>
 
                 <div className="mt-2">
-                    <LemonSwitch
+                    <Switch
                         checked={showFullUrls || false}
                         onChange={(checked) => updateInsightFilter({ showFullUrls: checked })}
                         label="Show full URLs"
@@ -127,7 +127,7 @@ export function PathsAdvanced({ insightProps, ...rest }: EditorFilterProps): JSX
 
                 <div>
                     <div className="flex items-center my-2">
-                        <LemonLabel
+                        <Label
                             info={
                                 <>
                                     Cleaning rules are an advanced feature that uses regex to normalize URLS for paths
@@ -137,7 +137,7 @@ export function PathsAdvanced({ insightProps, ...rest }: EditorFilterProps): JSX
                             }
                         >
                             Path Cleaning Rules
-                        </LemonLabel>
+                        </Label>
                     </div>
                     <PathCleaningFilter insightProps={insightProps} {...rest} />
                 </div>

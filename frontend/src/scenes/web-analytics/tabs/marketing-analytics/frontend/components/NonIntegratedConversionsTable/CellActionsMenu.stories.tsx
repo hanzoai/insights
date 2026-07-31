@@ -1,6 +1,6 @@
 import { Meta, StoryFn } from '@storybook/react'
 
-import { LemonMenuItem, LemonMenuItems, LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu'
+import { MenuItem, MenuItems, MenuOverlay } from 'lib/elements/Menu'
 
 import { mswDecorator } from '~/mocks/browser'
 import { VALID_NATIVE_MARKETING_SOURCES } from '~/queries/schema/schema-general'
@@ -54,9 +54,9 @@ const MARKETING_SOURCE_ICONS: Record<string, { name: string; iconPath: string; f
     },
 }
 
-const meta: Meta<typeof LemonMenuOverlay> = {
+const meta: Meta<typeof MenuOverlay> = {
     title: 'Scenes-App/Marketing Analytics/Cell Actions',
-    component: LemonMenuOverlay,
+    component: MenuOverlay,
     decorators: [
         mswDecorator({
             get: {
@@ -88,15 +88,15 @@ The menus are hierarchical with submenus for mapping options.
 export default meta
 
 // Extract all submenu items from nested menu structure
-function extractAllSubmenus(items: LemonMenuItems): { label: string; items: LemonMenuItems }[] {
-    const submenus: { label: string; items: LemonMenuItems }[] = []
+function extractAllSubmenus(items: MenuItems): { label: string; items: MenuItems }[] {
+    const submenus: { label: string; items: MenuItems }[] = []
     for (const item of items) {
         if (item && 'items' in item && item.items) {
-            const sectionItems = item.items as LemonMenuItem[]
+            const sectionItems = item.items as MenuItem[]
             for (const sectionItem of sectionItems) {
                 if (sectionItem && 'items' in sectionItem && sectionItem.items) {
                     const label = typeof sectionItem.label === 'string' ? sectionItem.label : 'Submenu'
-                    submenus.push({ label, items: sectionItem.items as LemonMenuItems })
+                    submenus.push({ label, items: sectionItem.items as MenuItems })
                 }
             }
         }
@@ -106,7 +106,7 @@ function extractAllSubmenus(items: LemonMenuItems): { label: string; items: Lemo
 
 // Wrapper to display menu items with submenus expanded side-by-side
 interface MenuDisplayProps {
-    items: LemonMenuItems | null
+    items: MenuItems | null
     title?: string
 }
 
@@ -124,7 +124,7 @@ function MenuDisplay({ items, title }: MenuDisplayProps): JSX.Element {
                 <div className="flex flex-col gap-1">
                     <div className="text-xs text-muted">Main Menu</div>
                     <div className="rounded border p-2 bg-surface-primary w-fit min-w-[200px]">
-                        <LemonMenuOverlay items={items} />
+                        <MenuOverlay items={items} />
                     </div>
                 </div>
                 {submenus.map((submenu, index) => (
@@ -133,7 +133,7 @@ function MenuDisplay({ items, title }: MenuDisplayProps): JSX.Element {
                         <div className="flex flex-col gap-1">
                             <div className="text-xs text-muted">{submenu.label}</div>
                             <div className="rounded border p-2 bg-surface-primary w-fit min-w-[200px]">
-                                <LemonMenuOverlay items={submenu.items} />
+                                <MenuOverlay items={submenu.items} />
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -37,7 +37,7 @@ export function FunnelStepOrderPicker(): JSX.Element {
     const { funnelOrderType } = (insightFilter || {}) as FunnelsFilter
 
     return (
-        <LemonSelect
+        <Select
             id="funnel-step-order-filter"
             data-attr="funnel-step-order-filter"
             value={funnelOrderType || StepOrderValue.ORDERED}

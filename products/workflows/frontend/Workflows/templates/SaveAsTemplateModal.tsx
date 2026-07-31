@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput, LemonInputSelect, LemonModal, LemonSelect, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, Input, InputSelect, Modal, Select, TextArea } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { userLogic } from 'scenes/userLogic'
 
 import { TemplateJsonModal } from './TemplateJsonModal'
@@ -24,48 +24,48 @@ export function SaveAsTemplateModal(props: WorkflowTemplateLogicProps = {}): JSX
     return (
         <>
             <TemplateJsonModal {...props} />
-            <LemonModal
+            <Modal
                 onClose={hideSaveAsTemplateModal}
                 isOpen={saveAsTemplateModalVisible}
                 title={isEditMode ? 'Update template' : 'Save as template'}
                 footer={
                     <>
-                        <LemonButton type="secondary" onClick={hideSaveAsTemplateModal}>
+                        <Button type="secondary" onClick={hideSaveAsTemplateModal}>
                             Cancel
-                        </LemonButton>
+                        </Button>
                         {showSeeJsonButton ? (
-                            <LemonButton type="primary" onClick={showTemplateJsonModal}>
+                            <Button type="primary" onClick={showTemplateJsonModal}>
                                 See JSON
-                            </LemonButton>
+                            </Button>
                         ) : (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 onClick={submitTemplateForm}
                                 loading={isTemplateFormSubmitting}
                                 disabledReason={!templateForm.name ? 'Name is required' : undefined}
                             >
                                 {isEditMode ? 'Update template' : 'Save template'}
-                            </LemonButton>
+                            </Button>
                         )}
                     </>
                 }
             >
                 <Form logic={workflowTemplateLogic} props={props} formKey="templateForm">
                     <div className="space-y-4">
-                        <LemonField name="name" label="Name">
-                            <LemonInput placeholder="Template name" autoFocus />
-                        </LemonField>
+                        <Field name="name" label="Name">
+                            <Input placeholder="Template name" autoFocus />
+                        </Field>
 
-                        <LemonField name="description" label="Description (optional)">
-                            <LemonTextArea placeholder="Template description" rows={3} />
-                        </LemonField>
+                        <Field name="description" label="Description (optional)">
+                            <TextArea placeholder="Template description" rows={3} />
+                        </Field>
 
-                        <LemonField name="image_url" label="Image URL (optional)">
-                            <LemonInput placeholder="https://example.com/image.png" />
-                        </LemonField>
+                        <Field name="image_url" label="Image URL (optional)">
+                            <Input placeholder="https://example.com/image.png" />
+                        </Field>
 
-                        <LemonField name="tags" label="Tags (optional)">
-                            <LemonInputSelect
+                        <Field name="tags" label="Tags (optional)">
+                            <InputSelect
                                 mode="multiple"
                                 value={templateForm.tags}
                                 onChange={(tags) => {
@@ -79,11 +79,11 @@ export function SaveAsTemplateModal(props: WorkflowTemplateLogicProps = {}): JSX
                                 allowCustomValues={true}
                                 placeholder="Select or type tags"
                             />
-                        </LemonField>
+                        </Field>
 
                         {!(isEditMode && isGlobalTemplate) && (
-                            <LemonField name="scope" label="Scope">
-                                <LemonSelect
+                            <Field name="scope" label="Scope">
+                                <Select
                                     value={templateForm.scope}
                                     options={[
                                         { value: 'team', label: 'This project only' },
@@ -98,11 +98,11 @@ export function SaveAsTemplateModal(props: WorkflowTemplateLogicProps = {}): JSX
                                             : []),
                                     ]}
                                 />
-                            </LemonField>
+                            </Field>
                         )}
                     </div>
                 </Form>
-            </LemonModal>
+            </Modal>
         </>
     )
 }

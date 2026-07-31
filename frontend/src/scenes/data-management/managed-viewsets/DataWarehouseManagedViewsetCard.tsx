@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPiggyBank } from '@hanzo/icons'
-import { LemonSwitch, Link } from '@hanzo/lemon-ui'
+import { Switch, Link } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { teamLogic } from 'scenes/teamLogic'
@@ -78,7 +78,7 @@ export function DataWarehouseManagedViewsetCard({
                 <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
                     {({ disabledReason }) => (
                         <div className="flex flex-col gap-2 flex-start items-start">
-                            <LemonSwitch
+                            <Switch
                                 checked={isEnabled}
                                 onChange={(enabled) => toggleViewset(kind, enabled)}
                                 disabledReason={

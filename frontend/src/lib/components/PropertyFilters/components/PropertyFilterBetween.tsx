@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
+import { Input } from 'lib/elements/Input/Input'
 
 import { PropertyFilterValue } from '~/types'
 
@@ -29,7 +29,7 @@ export function PropertyFilterBetween({ logicKey, value, onSet, size }: Property
 
     return (
         <div className="flex items-center gap-2">
-            <LemonInput
+            <Input
                 type="number"
                 value={localMin ?? undefined}
                 data-attr="prop-val-min"
@@ -39,7 +39,7 @@ export function PropertyFilterBetween({ logicKey, value, onSet, size }: Property
                 size={size}
             />
             <span className="font-medium">and</span>
-            <LemonInput
+            <Input
                 type="number"
                 value={localMax ?? undefined}
                 data-attr="prop-val-max"

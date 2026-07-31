@@ -164,7 +164,7 @@ import { AccessControlResourceType, AccessControlLevel } from '~/types'
     resourceType={AccessControlResourceType.YourResource}
     minAccessLevel={AccessControlLevel.Editor}
 >
-    <LemonButton>My button</LemonButton>
+    <Button>My button</Button>
 </AccessControlAction>
 
 // If your resource includes their own access level
@@ -174,7 +174,7 @@ import { AccessControlResourceType, AccessControlLevel } from '~/types'
     minAccessLevel={AccessControlLevel.Editor}
     userAccessLevel={yourResource.user_access_level}
 >
-    <LemonButton>My button</LemonButton>
+    <Button>My button</Button>
 </AccessControlAction>
 
 // Not recommended, but you can use a function that receives `{ disabled, disabledReason }` as parameters instead
@@ -193,7 +193,7 @@ import { AccessControlResourceType, AccessControlLevel } from '~/types'
 Use resource-level permissions for create operations:
 
 ```tsx
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { getAppContext } from 'lib/utils/getAppContext'
 
@@ -207,9 +207,9 @@ function YourResourceList() {
         resourceType={AccessControlResourceType.YourResource}
         minAccessLevel={AccessControlLevel.Editor}
       >
-        <LemonButton type="primary" onClick={() => router.actions.push('/your-resources/new')}>
+        <Button type="primary" onClick={() => router.actions.push('/your-resources/new')}>
           New Resource
-        </LemonButton>
+        </Button>
       </AccessControlAction>
 
       {/* Manual permission check if needed */}
@@ -217,9 +217,9 @@ function YourResourceList() {
         const userLevel = getAppContext()?.resource_access_control?.[AccessControlResourceType.YourResource]
         const canCreate = userLevel && ['editor', 'manager'].includes(userLevel)
         return canCreate ? (
-          <LemonButton type="primary" onClick={() => router.actions.push('/your-resources/new')}>
+          <Button type="primary" onClick={() => router.actions.push('/your-resources/new')}>
             New Resource
-          </LemonButton>
+          </Button>
         ) : null
       })()}
     </div>
@@ -243,13 +243,13 @@ function YourResourceCard({ yourResource }: { yourResource: YourResourceType }) 
         minAccessLevel={AccessControlLevel.Editor}
         userAccessLevel={yourResource.user_access_level}
       >
-        <LemonButton onClick={() => openEditModal(yourResource)}>Edit</LemonButton>
+        <Button onClick={() => openEditModal(yourResource)}>Edit</Button>
       </AccessControlAction>
 
       {/* Manual permission check if needed */}
       {(() => {
         const canEdit = ['editor', 'manager'].includes(yourResource.user_access_level || 'none')
-        return canEdit ? <LemonButton onClick={() => openEditModal(yourResource)}>Edit</LemonButton> : null
+        return canEdit ? <Button onClick={() => openEditModal(yourResource)}>Edit</Button> : null
       })()}
     </div>
   )
@@ -266,9 +266,9 @@ Typically requires `editor` level access:
   minAccessLevel={AccessControlLevel.Editor}
   userAccessLevel={yourResource.user_access_level}
 >
-  <LemonButton status="danger" onClick={() => deleteYourResource(yourResource)}>
+  <Button status="danger" onClick={() => deleteYourResource(yourResource)}>
     Delete
-  </LemonButton>
+  </Button>
 </AccessControlAction>
 ```
 

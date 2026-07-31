@@ -5,7 +5,7 @@ import { forms } from 'kea-forms'
 import { router, urlToAction } from 'kea-router'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { ValidatedPasswordResult, validatePassword } from 'lib/components/PasswordStrength'
@@ -508,7 +508,7 @@ export const signupLogic = kea<signupLogicType>([
                     }${urls.signup()}?maintenanceRedirect=true`
                 }
                 if (maintenanceRedirect && isRegionOverrideValid) {
-                    lemonToast.info(
+                    toast.info(
                         `You've been redirected to signup on our ${regionOverrideFlag.toUpperCase()} instance while we perform maintenance on our other instance.`
                     )
                 }

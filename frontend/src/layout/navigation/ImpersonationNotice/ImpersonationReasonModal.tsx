@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
 export interface ImpersonationReasonModalProps {
     isOpen: boolean
@@ -35,23 +35,23 @@ export function ImpersonationReasonModal({
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={handleClose}
             title={title}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={handleClose}>
+                    <Button type="secondary" onClick={handleClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={handleConfirm}
                         loading={loading}
                         disabledReason={!loading && !reason.trim() ? 'Please provide a reason' : undefined}
                     >
                         {confirmText}
-                    </LemonButton>
+                    </Button>
                 </>
             }
             width={500}
@@ -60,7 +60,7 @@ export function ImpersonationReasonModal({
                 {description && <p className="text-sm text-secondary">{description}</p>}
                 <div>
                     <label className="block mb-1 font-semibold">Reason</label>
-                    <LemonInput
+                    <Input
                         value={reason}
                         onChange={setReason}
                         placeholder="e.g., Customer support request #12345"
@@ -69,6 +69,6 @@ export function ImpersonationReasonModal({
                 </div>
                 {children}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

@@ -1,6 +1,6 @@
 import { Layouts } from 'react-grid-layout'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { ApiMethodOptions, getJSONOrNull } from 'lib/api'
 import { currentSessionId } from 'lib/internalMetrics'
@@ -193,7 +193,7 @@ export async function getInsightWithRetry(
                         }
 
                         // If something went wrong with async, show an error.
-                        lemonToast.error(
+                        toast.error(
                             `Insight "${
                                 insight.name || insight.derived_name
                             }" failed to load due to high load. Please try again later.`,
@@ -205,7 +205,7 @@ export async function getInsightWithRetry(
                             throw e // Re-throw cancellation errors
                         }
                         // if polling throws, show an error.
-                        lemonToast.error(
+                        toast.error(
                             `Insight "${
                                 insight.name || insight.derived_name
                             }" failed to load due to high load. Please try again later.`,

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { DEFAULT_STEP_LIMIT } from 'scenes/paths/pathsDataLogic'
@@ -31,7 +31,7 @@ export function PathStepPicker(): JSX.Element {
     }))
 
     return (
-        <LemonSelect
+        <Select
             size="small"
             value={stepLimit || DEFAULT_STEP_LIMIT}
             onChange={(count) => updateInsightFilter({ stepLimit: count })}

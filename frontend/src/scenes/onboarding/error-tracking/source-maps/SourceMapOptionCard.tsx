@@ -1,4 +1,4 @@
-import { LemonCard } from '@hanzo/lemon-ui'
+import { Card } from '@hanzo/elements'
 
 export interface SourceMapOptionCardProps {
     title: string
@@ -20,13 +20,13 @@ export function SourceMapOptionCard({
     const isSelected = selectedOption === optionKey
 
     return (
-        <LemonCard
+        <Card
             className={`p-4 cursor-pointer border-2 ${isSelected ? 'border-[var(--primary-3000-frame-bg-light)]' : 'border-transparent'}`}
             onClick={onSelect}
         >
             <h4 className="font-semibold mb-2">{title}</h4>
             <p className={`text-sm text-muted ${children ? 'mb-2' : 'mb-0'}`}>{description}</p>
             {isSelected && children}
-        </LemonCard>
+        </Card>
     )
 }

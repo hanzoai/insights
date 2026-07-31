@@ -1,7 +1,7 @@
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { beforeUnload } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { Dayjs, dayjs } from 'lib/dayjs'
@@ -208,7 +208,7 @@ export const insightsFunctionLogsLogic = kea<insightsFunctionLogsLogicType>([
     }),
     listeners(({ actions, props, values }) => ({
         retryInvocations: async ({ groupedLogEntries }) => {
-            await lemonToast.promise(
+            await toast.promise(
                 (async () => {
                     for (const groupedLogEntry of groupedLogEntries) {
                         actions.retryInvocationStarted(groupedLogEntry)

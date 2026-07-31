@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconGraph } from '@hanzo/icons'
-import { LemonButton, LemonDropdown, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Dropdown, Input } from '@hanzo/elements'
 
 import { BIN_COUNT_AUTO } from 'lib/constants'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
@@ -59,7 +59,7 @@ export function FunnelBinsPicker(): JSX.Element {
     const overlay = (
         <div className="deprecated-space-y-px" onClick={(e) => e.stopPropagation()}>
             {preferredOptions.map((bin) => (
-                <LemonButton
+                <Button
                     fullWidth
                     key={bin.value}
                     active={bin.value === selectedValue}
@@ -69,9 +69,9 @@ export function FunnelBinsPicker(): JSX.Element {
                     }}
                 >
                     {bin.label}
-                </LemonButton>
+                </Button>
             ))}
-            <LemonInput
+            <Input
                 type="number"
                 className="funnel-bins-custom-picker"
                 min={MIN}
@@ -90,7 +90,7 @@ export function FunnelBinsPicker(): JSX.Element {
 
     return (
         <>
-            <LemonDropdown
+            <Dropdown
                 data-attr="funnel-bin-filter"
                 matchWidth
                 visible={visible}
@@ -100,7 +100,7 @@ export function FunnelBinsPicker(): JSX.Element {
                 className="w-32"
                 placement="bottom-end"
             >
-                <LemonButton
+                <Button
                     size="small"
                     type="secondary"
                     icon={<IconGraph />}
@@ -108,8 +108,8 @@ export function FunnelBinsPicker(): JSX.Element {
                     disabledReason={editingDisabledReason}
                 >
                     {selectedOption?.label}
-                </LemonButton>
-            </LemonDropdown>
+                </Button>
+            </Dropdown>
         </>
     )
 }

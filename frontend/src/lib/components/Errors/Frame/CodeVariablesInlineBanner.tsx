@@ -1,18 +1,18 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'
-import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
-import { Link } from 'lib/lemon-ui/Link'
+import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
+import { Link } from 'lib/elements/Link'
 
 const SUPPORTED_RUNTIMES = ['python']
 
 export function CodeVariablesInlineBanner(): JSX.Element | null {
     const { exceptionAttributes } = useValues(errorPropertiesLogic)
 
-    const dismissLogic = lemonBannerLogic({
+    const dismissLogic = bannerLogic({
         dismissKey: `code-variables-inline-banner-${exceptionAttributes?.runtime}`,
     })
     const { isDismissed } = useValues(dismissLogic)
@@ -37,7 +37,7 @@ export function CodeVariablesInlineBanner(): JSX.Element | null {
                         Learn how to enable them
                     </Link>
                 </div>
-                <LemonButton
+                <Button
                     size="xsmall"
                     icon={<IconX />}
                     onClick={dismiss}

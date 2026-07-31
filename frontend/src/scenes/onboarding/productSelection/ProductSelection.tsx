@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 
 import * as Icons from '@hanzo/icons'
 import { IconArrowRight, IconChevronDown, IconSparkles } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonCard, LemonLabel, LemonSelect, LemonTextArea, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Card, Label, Select, TextArea, Link } from '@hanzo/elements'
 
 import { Logomark } from 'lib/brand/Logomark'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -41,10 +41,10 @@ function BrowsingHistoryBanner(): JSX.Element | null {
     }
 
     return (
-        <LemonBanner type="info" className="mb-6">
+        <Banner type="info" className="mb-6">
             Based on the documentation you browsed on our website ({browsingHistoryLabels.slice(0, 3).join(', ')}),
             we've tailored recommendations to your interests.
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -78,7 +78,7 @@ function ChoosePathStep(): JSX.Element {
             {aiRecommendationsEnabled && (
                 <>
                     <div className="mb-8">
-                        <LemonTextArea
+                        <TextArea
                             placeholder="e.g., I want to understand why users drop off during checkout and run experiments to improve conversion..."
                             value={aiDescription}
                             onChange={(value) => setAiDescription(value)}
@@ -99,7 +99,7 @@ function ChoosePathStep(): JSX.Element {
                                     </>
                                 )}
                             </p>
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 onClick={() => submitAiRecommendation()}
                                 loading={aiRecommendationLoading}
@@ -110,15 +110,15 @@ function ChoosePathStep(): JSX.Element {
                                 data-attr="ai-recommend-products"
                             >
                                 Get recommendations
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
 
                     {/* Error banner */}
                     {aiRecommendationError && (
-                        <LemonBanner type="error" className="mb-4">
+                        <Banner type="error" className="mb-4">
                             Failed to get recommendations. Please try again or pick a goal below.
-                        </LemonBanner>
+                        </Banner>
                     )}
 
                     {/* Divider */}
@@ -133,7 +133,7 @@ function ChoosePathStep(): JSX.Element {
             {/* Use cases grid - 2 rows x 3 columns */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {useCases.map((useCase: UseCaseDefinition) => (
-                    <LemonCard
+                    <Card
                         key={useCase.key}
                         className={clsx(
                             'p-4',
@@ -155,11 +155,11 @@ function ChoosePathStep(): JSX.Element {
                                 <p className="text-muted text-sm mb-0">{useCase.description}</p>
                             </div>
                         </div>
-                    </LemonCard>
+                    </Card>
                 ))}
 
                 {/* Pick myself option */}
-                <LemonCard
+                <Card
                     className={clsx(
                         'p-4',
                         aiRecommendationLoading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
@@ -177,7 +177,7 @@ function ChoosePathStep(): JSX.Element {
                             <p className="text-muted text-sm mb-0">I know exactly which products I need</p>
                         </div>
                     </div>
-                </LemonCard>
+                </Card>
             </div>
         </div>
     )
@@ -195,7 +195,7 @@ function ProductCard({
     const product = availableOnboardingProducts[productKey]
 
     return (
-        <LemonCard
+        <Card
             data-attr={`${productKey}-onboarding-card`}
             className="cursor-pointer hover:transform-none p-4"
             onClick={onToggle}
@@ -214,7 +214,7 @@ function ProductCard({
                     <p className="text-muted text-xs mb-0">{product.description}</p>
                 </div>
             </div>
-        </LemonCard>
+        </Card>
     )
 }
 
@@ -253,9 +253,9 @@ function ProductSelectionStep(): JSX.Element {
 
             {/* AI reasoning banner */}
             {recommendationSource === 'ai' && aiRecommendation?.reasoning && (
-                <LemonBanner type="ai" className="mb-6">
+                <Banner type="ai" className="mb-6">
                     {aiRecommendation.reasoning}
-                </LemonBanner>
+                </Banner>
             )}
 
             {/* Browsing history banner */}
@@ -302,8 +302,8 @@ function ProductSelectionStep(): JSX.Element {
             <div className="flex flex-col items-center gap-4 mt-8">
                 {selectedProducts.length > 1 ? (
                     <div className="flex gap-2 items-center justify-center">
-                        <LemonLabel>Start with</LemonLabel>
-                        <LemonSelect
+                        <Label>Start with</Label>
+                        <Select
                             value={firstProductOnboarding}
                             options={selectedProducts.filter(isAvailableOnboardingProductKey).map((productKey) => ({
                                 label: availableOnboardingProducts[productKey].name,
@@ -313,7 +313,7 @@ function ProductSelectionStep(): JSX.Element {
                             placeholder="Select a product"
                             className="bg-surface-primary"
                         />
-                        <LemonButton
+                        <Button
                             sideIcon={<IconArrowRight />}
                             onClick={handleStartOnboarding}
                             type="primary"
@@ -321,10 +321,10 @@ function ProductSelectionStep(): JSX.Element {
                             data-attr="onboarding-continue"
                         >
                             Go
-                        </LemonButton>
+                        </Button>
                     </div>
                 ) : (
-                    <LemonButton
+                    <Button
                         type="primary"
                         status="alt"
                         onClick={handleStartOnboarding}
@@ -333,7 +333,7 @@ function ProductSelectionStep(): JSX.Element {
                         disabledReason={!canContinue ? 'Select at least one product to continue' : undefined}
                     >
                         Get started
-                    </LemonButton>
+                    </Button>
                 )}
                 <button
                     className="text-muted hover:text-default text-sm cursor-pointer"

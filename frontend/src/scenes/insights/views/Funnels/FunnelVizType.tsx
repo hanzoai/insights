@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { IconClock, IconFilter, IconTrending } from '@hanzo/icons'
 
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
+import { Select } from 'lib/elements/Select'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 
 import { FunnelsFilter } from '~/queries/schema/schema-general'
@@ -76,7 +76,7 @@ export function FunnelVizType({ insightProps }: Pick<EditorFilterProps, 'insight
     ]
 
     return (
-        <LemonSelect
+        <Select
             size="small"
             value={funnelVizType || VizType.Steps}
             onChange={(value) => {

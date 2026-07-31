@@ -3,7 +3,7 @@ import { subscriptions } from 'kea-subscriptions'
 import insights from '@hanzo/insights'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
@@ -140,7 +140,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
                 }
             } catch (e) {
                 console.error('Failed to load tickets:', e)
-                lemonToast.error('Failed to load tickets. Please try again.')
+                toast.error('Failed to load tickets. Please try again.')
             } finally {
                 actions.setTicketsLoading(false)
             }
@@ -202,7 +202,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
                 actions.setHasMoreMessages(false)
             } catch (e) {
                 console.error('Failed to load messages:', e)
-                lemonToast.error('Failed to load messages. Please try again.')
+                toast.error('Failed to load messages. Please try again.')
             } finally {
                 actions.setMessagesLoading(false)
             }
@@ -233,12 +233,12 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
                     }
                     actions.loadTickets()
                     actions.loadMessages(response.ticket_id)
-                    lemonToast.success('Message sent!')
+                    toast.success('Message sent!')
                     onSuccess()
                 }
             } catch (e) {
                 console.error('Failed to send message:', e)
-                lemonToast.error('Failed to send message. Please try again.')
+                toast.error('Failed to send message. Please try again.')
             } finally {
                 actions.setMessageSending(false)
             }
@@ -287,7 +287,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
                 if (result?.status === 'success') {
                     const count = result.migrated_ticket_ids?.length ?? 0
                     if (count > 0) {
-                        lemonToast.success(
+                        toast.success(
                             `Restored ${count} ticket${count === 1 ? '' : 's'} from your previous session.`
                         )
                     }

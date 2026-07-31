@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { ToolbarMenu } from '~/toolbar/bar/ToolbarMenu'
@@ -31,7 +31,7 @@ const ExperimentsListToolbarMenu = (): JSX.Element => {
         <ToolbarMenu>
             {allExperiments.length > 10 && (
                 <ToolbarMenu.Header className="px-3 mt-2">
-                    <LemonInput
+                    <Input
                         autoFocus={true}
                         fullWidth={true}
                         placeholder="Search"
@@ -45,7 +45,7 @@ const ExperimentsListToolbarMenu = (): JSX.Element => {
                 <div className="px-1 deprecated-space-y-px py-2">
                     {isWebExperimentsDisabled && (
                         <div className="pb-2">
-                            <LemonBanner type="warning">
+                            <Banner type="warning">
                                 Web experiments are disabled in your Insights web snippet configuration. To run
                                 experiments, add <code>disable_web_experiments: false</code> to your configuration.{' '}
                                 <Link
@@ -55,7 +55,7 @@ const ExperimentsListToolbarMenu = (): JSX.Element => {
                                 >
                                     Learn more
                                 </Link>
-                            </LemonBanner>
+                            </Banner>
                         </div>
                     )}
                     {allExperiments.length === 0 && allExperimentsLoading ? (
@@ -72,9 +72,9 @@ const ExperimentsListToolbarMenu = (): JSX.Element => {
                     <Link to={joinWithUiHost(uiHost, urls.experiments())} target="_blank">
                         View &amp; edit all experiments <IconOpenInNew />
                     </Link>
-                    <LemonButton type="primary" size="small" onClick={() => newExperiment()} icon={<IconPlus />}>
+                    <Button type="primary" size="small" onClick={() => newExperiment()} icon={<IconPlus />}>
                         New experiment
-                    </LemonButton>
+                    </Button>
                 </div>
             </ToolbarMenu.Footer>
         </ToolbarMenu>

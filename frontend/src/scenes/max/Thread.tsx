@@ -23,14 +23,14 @@ import {
     IconX,
 } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonButtonPropsBase,
-    LemonCheckbox,
-    LemonDialog,
-    LemonInput,
-    LemonSkeleton,
+    Button,
+    ButtonPropsBase,
+    Checkbox,
+    Dialog,
+    Input,
+    Skeleton,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import {
     InsightBreakdownSummary,
@@ -645,7 +645,7 @@ function MessageGroupSkeleton({
 }): JSX.Element {
     return (
         <MessageContainer className={clsx('items-center', className)} groupType={groupType}>
-            <LemonSkeleton className="h-10 w-3/5 rounded-lg border" />
+            <Skeleton className="h-10 w-3/5 rounded-lg border" />
         </MessageContainer>
     )
 }
@@ -729,7 +729,7 @@ function AssistantMessageForm({ form, linksOnly }: AssistantMessageFormProps): J
         // Also makes it clear the form is subservient to the message. *Harmony*
         <div className="flex flex-wrap gap-1.5 ml-1 mt-1">
             {options.map((option) => (
-                <LemonButton
+                <Button
                     key={option.value}
                     onClick={!option.href ? () => askMax(option.value) : undefined}
                     to={option.href}
@@ -737,12 +737,12 @@ function AssistantMessageForm({ form, linksOnly }: AssistantMessageFormProps): J
                     targetBlank={!!option.href}
                     type={
                         option.variant && ['primary', 'secondary', 'tertiary'].includes(option.variant)
-                            ? (option.variant as LemonButtonPropsBase['type'])
+                            ? (option.variant as ButtonPropsBase['type'])
                             : 'secondary'
                     }
                 >
                     {option.value}
-                </LemonButton>
+                </Button>
             ))}
         </div>
     )
@@ -809,7 +809,7 @@ function PlanningAnswer({ toolCall, isLastPlanningMessage = true }: PlanningAnsw
                         return (
                             <div key={index} className="flex items-start gap-2 animate-fade-in">
                                 <span className="flex-shrink-0">
-                                    <LemonCheckbox checked={isCompleted} disabled size="xsmall" />
+                                    <Checkbox checked={isCompleted} disabled size="xsmall" />
                                 </span>
                                 <span
                                     className={clsx(
@@ -1017,7 +1017,7 @@ function AssistantActionComponent({
                             </div>
                         ))}
                     <div className="ml-3 border-l-2 border-border-secondary pl-3.5 flex flex-col gap-1">
-                        <LemonButton
+                        <Button
                             size="xxsmall"
                             type="tertiary"
                             onClick={(e) => {
@@ -1037,7 +1037,7 @@ function AssistantActionComponent({
                                     <IconChevronRight />
                                 </span>
                             </span>
-                        </LemonButton>
+                        </Button>
                         {showToolCallJson && (
                             <CodeSnippet language={Language.JSON} className="text-xs">
                                 {JSON.stringify(toolCall.args, null, 2)}
@@ -1045,7 +1045,7 @@ function AssistantActionComponent({
                         )}
                         {result && result.content && (
                             <React.Fragment>
-                                <LemonButton
+                                <Button
                                     size="xxsmall"
                                     type="tertiary"
                                     onClick={(e) => {
@@ -1068,7 +1068,7 @@ function AssistantActionComponent({
                                             <IconChevronRight />
                                         </span>
                                     </span>
-                                </LemonButton>
+                                </Button>
                                 {showResultJson && (
                                     <div className="border rounded p-2 bg-surface-primary">
                                         <MarkdownMessage
@@ -1188,7 +1188,7 @@ const Visualization = React.memo(function Visualization({
             {!isCollapsed && <Query query={query} readOnly embedded />}
             <div className={clsx('flex items-center justify-between', !isCollapsed && 'mt-2')}>
                 <div className="flex items-center gap-1.5">
-                    <LemonButton
+                    <Button
                         sideIcon={isSummaryShown ? <IconCollapse /> : <IconExpand />}
                         onClick={() => setIsSummaryShown(!isSummaryShown)}
                         size="xsmall"
@@ -1198,11 +1198,11 @@ const Visualization = React.memo(function Visualization({
                         <h5 className="m-0 leading-none">
                             <TopHeading query={query} />
                         </h5>
-                    </LemonButton>
+                    </Button>
                 </div>
                 <div className="flex items-center gap-1.5">
                     {editingChildren}
-                    <LemonButton
+                    <Button
                         icon={isCollapsed ? <IconEye /> : <IconHide />}
                         onClick={() => setIsCollapsed(!isCollapsed)}
                         size="xsmall"
@@ -1246,7 +1246,7 @@ export function MultiVisualizationAnswer({ message, className }: MultiVisualizat
     }, [visualizations])
 
     const openModal = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Insights',
             content: <MultiVisualizationModal insights={insights} />,
             primaryButton: null,
@@ -1300,7 +1300,7 @@ export function MultiVisualizationAnswer({ message, className }: MultiVisualizat
                         </h2>
 
                         {visualizations.length > 1 && (
-                            <LemonButton
+                            <Button
                                 icon={<IconExpand />}
                                 size="xsmall"
                                 type="tertiary"
@@ -1308,7 +1308,7 @@ export function MultiVisualizationAnswer({ message, className }: MultiVisualizat
                                 tooltip="View all insights in detail"
                             >
                                 Expand
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
 
@@ -1373,7 +1373,7 @@ function RetriableFailureActions(): JSX.Element {
     const { retryLastMessage } = useActions(maxThreadLogic)
 
     return (
-        <LemonButton
+        <Button
             icon={<IconRefresh />}
             type="tertiary"
             size="xsmall"
@@ -1382,7 +1382,7 @@ function RetriableFailureActions(): JSX.Element {
             className="ml-1"
         >
             Try again
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -1433,7 +1433,7 @@ function SuccessActions({
         <>
             <div className="flex items-center ml-1">
                 {content && (
-                    <LemonButton
+                    <Button
                         icon={<IconCopy />}
                         type="tertiary"
                         size="xsmall"
@@ -1442,7 +1442,7 @@ function SuccessActions({
                     />
                 )}
                 {!hideRatingAndRetry && rating !== 'bad' && (
-                    <LemonButton
+                    <Button
                         icon={rating === 'good' ? <IconThumbsUpFilled /> : <IconThumbsUp />}
                         type="tertiary"
                         size="xsmall"
@@ -1451,7 +1451,7 @@ function SuccessActions({
                     />
                 )}
                 {!hideRatingAndRetry && rating !== 'good' && (
-                    <LemonButton
+                    <Button
                         icon={rating === 'bad' ? <IconThumbsDownFilled /> : <IconThumbsDown />}
                         type="tertiary"
                         size="xsmall"
@@ -1460,7 +1460,7 @@ function SuccessActions({
                     />
                 )}
                 {!hideRatingAndRetry && retriable && (
-                    <LemonButton
+                    <Button
                         icon={<IconRefresh />}
                         type="tertiary"
                         size="xsmall"
@@ -1469,7 +1469,7 @@ function SuccessActions({
                     />
                 )}
                 {(user?.is_staff || isDev) && traceId && (
-                    <LemonButton
+                    <Button
                         to={`${preflight?.region === Region.EU ? 'https://insights.hanzo.ai/project/2' : ''}${urls.llmAnalyticsTrace(traceId)}`}
                         icon={<IconEye />}
                         type="tertiary"
@@ -1486,7 +1486,7 @@ function SuccessActions({
                                 ? 'What disappointed you about the answer?'
                                 : 'Thank you for your feedback!'}
                         </h4>
-                        <LemonButton
+                        <Button
                             icon={<IconX />}
                             type="tertiary"
                             size="xsmall"
@@ -1497,7 +1497,7 @@ function SuccessActions({
                     </div>
                     {feedbackInputStatus === 'pending' && (
                         <div className="flex w-full gap-1.5 items-center mt-1.5">
-                            <LemonInput
+                            <Input
                                 placeholder="Help us improve Insights AI…"
                                 fullWidth
                                 value={feedback}
@@ -1505,13 +1505,13 @@ function SuccessActions({
                                 onPressEnter={() => submitFeedback()}
                                 autoFocus
                             />
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 onClick={() => submitFeedback()}
                                 disabledReason={!feedback ? 'Please type a few words!' : undefined}
                             >
                                 Submit
-                            </LemonButton>
+                            </Button>
                         </div>
                     )}
                 </MessageTemplate>

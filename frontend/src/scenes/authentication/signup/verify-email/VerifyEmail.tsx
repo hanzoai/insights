@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Modal, Link } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { HeartMascot, MailMascot, SurprisedMascot } from 'lib/components/mascots'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -28,7 +28,7 @@ const SupportButtons = ({ disabledReason }: SupportButtonsProps): JSX.Element =>
 
     return (
         <div className="flex flex-row gap-x-4 justify-start">
-            <LemonButton
+            <Button
                 type="primary"
                 disabledReason={disabledReason}
                 onClick={() => {
@@ -36,9 +36,9 @@ const SupportButtons = ({ disabledReason }: SupportButtonsProps): JSX.Element =>
                 }}
             >
                 Contact support
-            </LemonButton>
+            </Button>
             {uuid && (
-                <LemonButton
+                <Button
                     type="primary"
                     disabledReason={disabledReason}
                     onClick={() => {
@@ -46,7 +46,7 @@ const SupportButtons = ({ disabledReason }: SupportButtonsProps): JSX.Element =>
                     }}
                 >
                     Request a new link
-                </LemonButton>
+                </Button>
             )}
         </div>
     )
@@ -75,7 +75,7 @@ export const VerifyEmailHelpLinks = (): JSX.Element => {
             <div className="flex flex-col justify-center">
                 <div className="deprecated-space-y-2 text-left">
                     {checklist.map((item, index) => (
-                        <LemonCheckbox
+                        <Checkbox
                             key={index}
                             onChange={() => handleChecklistChange(index)}
                             checked={checkListValues[index]}
@@ -100,10 +100,10 @@ const GetHelp = (): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false)
     return (
         <>
-            <LemonButton type="primary" onClick={() => setIsOpen(true)}>
+            <Button type="primary" onClick={() => setIsOpen(true)}>
                 Get help
-            </LemonButton>
-            <LemonModal
+            </Button>
+            <Modal
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
                 title="Get help"
@@ -115,7 +115,7 @@ const GetHelp = (): JSX.Element => {
                 }
             >
                 <VerifyEmailHelpLinks />
-            </LemonModal>
+            </Modal>
         </>
     )
 }

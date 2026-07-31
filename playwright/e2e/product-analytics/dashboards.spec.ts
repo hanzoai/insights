@@ -119,7 +119,7 @@ test.describe('Dashboards', () => {
             await dashboard.openFirstTileMenu()
             await dashboard.selectTileMenuOption('Rename')
 
-            const renameModal = page.locator('.LemonModal').filter({ has: page.getByTestId('insight-name') })
+            const renameModal = page.locator('.Modal').filter({ has: page.getByTestId('insight-name') })
             await renameModal.getByTestId('insight-name').fill(newTileName)
             await renameModal.getByText('Submit').click()
 

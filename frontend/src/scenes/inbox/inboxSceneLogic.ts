@@ -1,7 +1,7 @@
 import { actions, events, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { Scene } from 'scenes/sceneTypes'
@@ -77,11 +77,11 @@ export const inboxSceneLogic = kea<inboxSceneLogicType>([
         runSessionAnalysis: async () => {
             try {
                 await api.signalReports.analyzeSessions()
-                lemonToast.success('Session analysis completed')
+                toast.success('Session analysis completed')
                 actions.runSessionAnalysisSuccess()
             } catch (error: any) {
                 const errorMessage = error?.detail || error?.message || 'Failed to run session analysis'
-                lemonToast.error(errorMessage)
+                toast.error(errorMessage)
                 actions.runSessionAnalysisFailure(errorMessage)
             }
         },

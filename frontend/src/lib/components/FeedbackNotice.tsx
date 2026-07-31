@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconBug } from '@hanzo/icons'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconFeedback } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconFeedback } from 'lib/elements/icons'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { supportLogic } from './Support/supportLogic'
@@ -16,28 +16,28 @@ export const FeedbackNotice = ({ text }: { text: string }): JSX.Element => {
     const showSupportOptions = preflight?.cloud
 
     return (
-        <LemonBanner type="info" className="my-4">
+        <Banner type="info" className="my-4">
             <div className="flex items-center flex-wrap gap-2 justify-between">
                 <div className="flex-1 min-w-full sm:min-w-0">{text}</div>
                 {showSupportOptions ? (
                     <span className="flex items-center gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             icon={<IconBug />}
                             onClick={() => openSupportForm({ kind: 'bug', isEmailFormOpen: true })}
                         >
                             Report a bug
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="secondary"
                             icon={<IconFeedback />}
                             onClick={() => openSupportForm({ kind: 'feedback', isEmailFormOpen: true })}
                         >
                             Give feedback
-                        </LemonButton>
+                        </Button>
                     </span>
                 ) : null}
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

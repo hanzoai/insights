@@ -19,7 +19,7 @@ typeTestCases.forEach(({ type, selector }) => {
     test.skip(`can navigate to ${type} insight from saved insights page`, async ({ page }) => {
         await new InsightPage(page).goToNew(type)
         // have to use contains to make paths match user paths
-        await expect(page.locator('.LemonTabs__tab--active')).toContainText(type, { ignoreCase: true })
+        await expect(page.locator('.Tabs__tab--active')).toContainText(type, { ignoreCase: true })
 
         // we don't need to wait for the insight to load, just that it or its loading state is visible
         const insightStillLoading = await page.locator('.insight-empty-state.warning').isVisible()

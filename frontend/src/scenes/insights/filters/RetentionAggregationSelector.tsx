@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonSelect, LemonSelectOption } from '@hanzo/lemon-ui'
+import { Select, SelectOption } from '@hanzo/elements'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicStringPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 import { PROPERTY_MATH_DEFINITIONS } from 'scenes/trends/mathsLogic'
@@ -40,7 +40,7 @@ export function RetentionAggregationSelector(): JSX.Element {
         }
     }, [aggregationType])
 
-    const options: LemonSelectOption<string>[] = [
+    const options: SelectOption<string>[] = [
         {
             value: 'count',
             label: 'Retention rate',
@@ -54,7 +54,7 @@ export function RetentionAggregationSelector(): JSX.Element {
             labelInMenu: (
                 <div className="flex items-center gap-2">
                     <span>Property value</span>
-                    <LemonSelect
+                    <Select
                         value={propertyMathTypeShown}
                         onSelect={(value) => {
                             const newType = value as PropertyMathType.Average | PropertyMathType.Sum
@@ -87,7 +87,7 @@ export function RetentionAggregationSelector(): JSX.Element {
 
     return (
         <div className="flex items-center gap-2">
-            <LemonSelect
+            <Select
                 value={aggregationType === 'count' ? 'count' : propertyMathTypeShown}
                 onChange={(val) => {
                     if (val === 'count') {

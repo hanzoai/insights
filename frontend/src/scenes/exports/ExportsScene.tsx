@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
 import { IconDownload, IconPencil, IconRefresh, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonSelect, LemonTable, LemonTag, Spinner, lemonToast } from '@hanzo/lemon-ui'
-import { LemonTableColumns } from '@hanzo/lemon-ui'
+import { Button, Select, Table, Tag, Spinner, toast } from '@hanzo/elements'
+import { TableColumns } from '@hanzo/elements'
 
 import { downloadExportedAsset, exportedAssetBlob } from 'lib/components/ExportButton/exporter'
 import { takeScreenshotLogic } from 'lib/components/TakeScreenshot/takeScreenshotLogic'
@@ -42,7 +42,7 @@ function ExportActions({ asset }: { asset: ExportedAssetType }): JSX.Element {
     const handleEdit = async (): Promise<void> => {
         const r = await exportedAssetBlob(asset)
         if (!r) {
-            lemonToast.error('Cannot get the file. Please try again.')
+            toast.error('Cannot get the file. Please try again.')
             return
         }
         setBlob(r)
@@ -51,7 +51,7 @@ function ExportActions({ asset }: { asset: ExportedAssetType }): JSX.Element {
     return (
         <div className="flex gap-2 justify-end">
             {asset.export_format === ExporterFormat.PNG && (
-                <LemonButton
+                <Button
                     tooltip="Edit"
                     size="xsmall"
                     data-attr="export-editor"
@@ -63,7 +63,7 @@ function ExportActions({ asset }: { asset: ExportedAssetType }): JSX.Element {
                     }}
                 />
             )}
-            <LemonButton
+            <Button
                 tooltip="Download"
                 size="xsmall"
                 type={isNotDownloaded ? 'primary' : 'secondary'}
@@ -91,7 +91,7 @@ export function ExportsScene(): JSX.Element {
     const { exports, exportsLoading, assetFormat } = useValues(sidePanelExportsLogic)
     const { loadExports, setAssetFormat } = useActions(sidePanelExportsLogic)
 
-    const columns: LemonTableColumns<ExportedAssetType> = [
+    const columns: TableColumns<ExportedAssetType> = [
         {
             title: 'Filename',
             dataIndex: 'filename',
@@ -102,7 +102,7 @@ export function ExportsScene(): JSX.Element {
             dataIndex: 'export_format',
             render: (_, asset) => (
                 <div className="flex items-center gap-1">
-                    <LemonTag>{asset.export_format}</LemonTag>
+                    <Tag>{asset.export_format}</Tag>
                     {asset.export_format === ExporterFormat.CSV && (
                         <span className="text-xs text-secondary">
                             {asset.export_context?.row_limit
@@ -139,7 +139,7 @@ export function ExportsScene(): JSX.Element {
                 description={sceneConfigurations[Scene.Exports].description}
                 resourceType={{ type: 'exports' }}
                 actions={
-                    <LemonButton
+                    <Button
                         onClick={loadExports}
                         type="primary"
                         size="small"
@@ -148,14 +148,14 @@ export function ExportsScene(): JSX.Element {
                         data-attr="export-refresh"
                     >
                         Refresh
-                    </LemonButton>
+                    </Button>
                 }
             />
 
             <div className="flex justify-end mb-2">
                 <div className="flex items-center gap-2">
                     <span className="text-sm">Format</span>
-                    <LemonSelect
+                    <Select
                         size="small"
                         options={[
                             { label: 'All', value: null },
@@ -171,7 +171,7 @@ export function ExportsScene(): JSX.Element {
                 </div>
             </div>
 
-            <LemonTable
+            <Table
                 columns={columns}
                 dataSource={exports}
                 loading={exportsLoading}

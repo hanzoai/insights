@@ -1,6 +1,6 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
-import { LemonButton, LemonCard, LemonInput, LemonLabel, Link } from '@hanzo/lemon-ui'
+import { Button, Card, Input, Label, Link } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import UniversalFilters from 'lib/components/UniversalFilters/UniversalFilters'
@@ -74,8 +74,8 @@ const SingleTemplateVariable = ({
 
     return variable.type === 'pageview' ? (
         <div>
-            <LemonLabel info={variable.description}>{variable.name}</LemonLabel>
-            <LemonInput
+            <Label info={variable.description}>{variable.name}</Label>
+            <Input
                 placeholder={variable.value}
                 value={variable.value}
                 onChange={(e) =>
@@ -86,7 +86,7 @@ const SingleTemplateVariable = ({
         </div>
     ) : ['event', 'flag', 'person-property'].includes(variable.type) ? (
         <div>
-            <LemonLabel info={variable.description}>{variable.name}</LemonLabel>
+            <Label info={variable.description}>{variable.name}</Label>
             <UniversalFilters
                 rootKey={`session-recordings-${variable.key}`}
                 group={{
@@ -134,14 +134,14 @@ const TemplateVariables = (props: RecordingTemplateCardProps): JSX.Element => {
                     <SingleTemplateVariable key={variable.key} variable={variable} {...props} />
                 ))}
             <div>
-                <LemonButton
+                <Button
                     onClick={() => navigate()}
                     type="primary"
                     className="mt-2"
                     disabledReason={!canApplyFilters ? 'Please set a value for at least one variable' : undefined}
                 >
                     Apply filters
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )
@@ -152,7 +152,7 @@ const RecordingTemplateCard = (props: RecordingTemplateCardProps): JSX.Element =
     const { variablesVisible } = useValues(sessionReplayTemplatesLogic(props))
 
     return (
-        <LemonCard
+        <Card
             className="w-80"
             onClick={() => {
                 showVariables()
@@ -180,7 +180,7 @@ const RecordingTemplateCard = (props: RecordingTemplateCardProps): JSX.Element =
                 <p>{props.template.description}</p>
                 {variablesVisible ? <TemplateVariables {...props} /> : null}
             </div>
-        </LemonCard>
+        </Card>
     )
 }
 

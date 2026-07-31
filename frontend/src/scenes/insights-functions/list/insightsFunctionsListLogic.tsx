@@ -3,7 +3,7 @@ import { actions, connect, kea, key, listeners, path, props, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -209,10 +209,10 @@ export const insightsFunctionsListLogic = kea<insightsFunctionsListLogicType>([
     listeners(({ actions }) => ({
         saveInsightsFunctionOrderSuccess: () => {
             actions.setReorderModalOpen(false)
-            lemonToast.success('Order updated successfully')
+            toast.success('Order updated successfully')
         },
         saveInsightsFunctionOrderFailure: () => {
-            lemonToast.error('Failed to update order')
+            toast.error('Failed to update order')
         },
     })),
 

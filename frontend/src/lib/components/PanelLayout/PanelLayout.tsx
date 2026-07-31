@@ -1,9 +1,9 @@
 import clsx from 'clsx'
 import { PropsWithChildren } from 'react'
 
-import { LemonButton, LemonButtonProps, Tooltip } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Tooltip } from '@hanzo/elements'
 
-import { LemonMenu, LemonMenuItem, LemonMenuProps } from 'lib/lemon-ui/LemonMenu/LemonMenu'
+import { Menu, MenuItem, MenuProps } from 'lib/elements/Menu/Menu'
 
 type PanelContainerProps = PropsWithChildren<{
     primary: boolean
@@ -11,17 +11,17 @@ type PanelContainerProps = PropsWithChildren<{
     column?: boolean
 }>
 
-interface SettingsMenuProps extends Omit<LemonMenuProps, 'items' | 'children'> {
+interface SettingsMenuProps extends Omit<MenuProps, 'items' | 'children'> {
     label?: string
-    items: LemonMenuItem[]
+    items: MenuItem[]
     icon?: JSX.Element
     isAvailable?: boolean
-    whenUnavailable?: LemonMenuItem
+    whenUnavailable?: MenuItem
     highlightWhenActive?: boolean
     closeOnClickInside?: boolean
 }
 
-type SettingsButtonProps = Omit<LemonButtonProps, 'status' | 'sideAction' | 'className'> & {
+type SettingsButtonProps = Omit<ButtonProps, 'status' | 'sideAction' | 'className'> & {
     tooltip?: string
     icon?: JSX.Element | null
     label?: JSX.Element | string
@@ -91,27 +91,27 @@ export function SettingsMenu({
 }: SettingsMenuProps): JSX.Element {
     const active = items.some((cf) => !!cf.active)
     return (
-        <LemonMenu
+        <Menu
             buttonSize="xsmall"
             closeOnClickInside={closeOnClickInside}
             items={isAvailable ? items : whenUnavailable ? [whenUnavailable] : []}
             {...props}
         >
-            <LemonButton
+            <Button
                 className="rounded-[0px]"
                 status={highlightWhenActive && active ? 'danger' : 'default'}
                 size="xsmall"
                 icon={icon}
             >
                 {label}
-            </LemonButton>
-        </LemonMenu>
+            </Button>
+        </Menu>
     )
 }
 
 export function SettingsToggle({ tooltip, icon, label, active, ...props }: SettingsToggleProps): JSX.Element {
     const button = (
-        <LemonButton
+        <Button
             className="rounded-[0px]"
             icon={icon}
             size="xsmall"
@@ -119,7 +119,7 @@ export function SettingsToggle({ tooltip, icon, label, active, ...props }: Setti
             {...props}
         >
             {label}
-        </LemonButton>
+        </Button>
     )
 
     // otherwise the tooltip shows instead of the disabled reason

@@ -3,9 +3,9 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
 import { IconArrowLeft, IconArrowRight, IconSidePanel } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { IconBlank } from 'lib/elements/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { DialogClose, DialogPrimitive, DialogPrimitiveTitle } from 'lib/ui/DialogPrimitive/DialogPrimitive'
 import { cn } from 'lib/utils/css-classes'
@@ -127,7 +127,7 @@ export function SidePanelOfframpModal(): JSX.Element {
                 ))}
 
                 <div className="grid grid-cols-2 @xl:grid-cols-[140px_auto_140px] items-center justify-between px-4 py-3 border-t border-primary">
-                    <LemonButton
+                    <Button
                         type="tertiary"
                         size="small"
                         onClick={() => (isFirstStep ? undefined : setActiveTab(steps[activeIndex - 1].id))}
@@ -139,7 +139,7 @@ export function SidePanelOfframpModal(): JSX.Element {
                         data-attr="context-panel-offramp-back-button"
                     >
                         Back
-                    </LemonButton>
+                    </Button>
                     <ButtonPrimitive
                         onClick={() => (isFirstStep ? undefined : setActiveTab(steps[activeIndex - 1].id))}
                         className={cn(
@@ -166,7 +166,7 @@ export function SidePanelOfframpModal(): JSX.Element {
                         ))}
                     </div>
                     {isLastStep ? (
-                        <LemonButton
+                        <Button
                             type="primary"
                             size="small"
                             onClick={() => dismissOfframpModal()}
@@ -174,10 +174,10 @@ export function SidePanelOfframpModal(): JSX.Element {
                             data-attr="context-panel-offramp-dont-show-again-button"
                         >
                             Don't show again
-                        </LemonButton>
+                        </Button>
                     ) : (
                         <>
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 size="small"
                                 className="hidden @xl:block justify-self-end"
@@ -185,7 +185,7 @@ export function SidePanelOfframpModal(): JSX.Element {
                                 data-attr="context-panel-offramp-next-button"
                             >
                                 Next
-                            </LemonButton>
+                            </Button>
                             <ButtonPrimitive
                                 className="@xl:hidden justify-self-end"
                                 variant="outline"

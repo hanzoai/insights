@@ -7,9 +7,9 @@ import { useEffect } from 'react'
 import React from 'react'
 
 import { IconTrending } from '@hanzo/icons'
-import { LemonRow, Link } from '@hanzo/lemon-ui'
+import { Row, Link } from '@hanzo/elements'
 
-import { IconFlare, IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'
+import { IconFlare, IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 import { percentage } from 'lib/utils'
 import { InsightEmptyState } from 'scenes/insights/EmptyStates'
 import { InsightTooltip } from 'scenes/insights/InsightTooltip/InsightTooltip'
@@ -176,7 +176,7 @@ function BoldNumberComparison({
             : 'No change from'
 
     return (
-        <LemonRow
+        <Row
             icon={
                 !hasComparableDiff ? (
                     <IconFlare />
@@ -224,7 +224,7 @@ function BoldNumberComparison({
                     </Link>
                 )}
             </span>
-        </LemonRow>
+        </Row>
     )
 }
 
@@ -233,7 +233,7 @@ export function InsightsQLBoldNumber(): JSX.Element {
 
     if (!response || responseLoading) {
         return (
-            <div className="BoldNumber LemonTable InsightsQL">
+            <div className="BoldNumber Table InsightsQL">
                 <div className="BoldNumber__value">
                     <Textfit min={32} max={120}>
                         Loading...
@@ -251,7 +251,7 @@ export function InsightsQLBoldNumber(): JSX.Element {
     // If any of the values is null, show empty state
     if (formattedValue === null || directValue === null || resultsValue === null || resultValue === null) {
         return (
-            <div className="LemonTable InsightsQL">
+            <div className="Table InsightsQL">
                 <InsightEmptyState />
             </div>
         )
@@ -260,7 +260,7 @@ export function InsightsQLBoldNumber(): JSX.Element {
     const value = formattedValue ?? directValue ?? resultsValue ?? resultValue
 
     return (
-        <div className="BoldNumber LemonTable InsightsQL">
+        <div className="BoldNumber Table InsightsQL">
             <div className="BoldNumber__value">
                 <Textfit min={32} max={120}>
                     {String(value ?? 'Error')}

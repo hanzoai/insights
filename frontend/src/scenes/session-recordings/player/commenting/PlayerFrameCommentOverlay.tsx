@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonRichContentEditor } from 'lib/lemon-ui/LemonRichContent/LemonRichContentEditor'
+import { Field } from 'lib/elements/Field'
+import { RichContentEditor } from 'lib/elements/RichContent/RichContentEditor'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 
 import { playerCommentOverlayLogic } from './playerFrameCommentOverlayLogic'
@@ -37,21 +37,21 @@ export const PlayerCommentModal = (): JSX.Element => {
                     className="flex flex-col gap-y-1"
                 >
                     <div className="flex flex-col gap-y-1">
-                        <LemonField name="commentId" className="hidden">
+                        <Field name="commentId" className="hidden">
                             <input type="hidden" />
-                        </LemonField>
-                        <LemonField
+                        </Field>
+                        <Field
                             name="timeInRecording"
                             label={<span>Comment at</span>}
                             inline={true}
                             className="justify-end"
                         >
-                            <LemonInput disabled={true} />
-                        </LemonField>
+                            <Input disabled={true} />
+                        </Field>
                     </div>
                     <div>
-                        <LemonField name="content">
-                            <LemonRichContentEditor
+                        <Field name="content">
+                            <RichContentEditor
                                 placeholder="Comment on this recording? Use @ to mention team members"
                                 data-attr="create-recording-comment-input"
                                 onPressCmdEnter={submitRecordingComment}
@@ -65,10 +65,10 @@ export const PlayerCommentModal = (): JSX.Element => {
                                 }}
                                 minRows={3}
                             />
-                        </LemonField>
+                        </Field>
                     </div>
                     <div className="flex gap-2 mt-2 justify-between">
-                        <LemonButton
+                        <Button
                             data-attr="cancel-recording-comment"
                             type="secondary"
                             onClick={() => {
@@ -77,8 +77,8 @@ export const PlayerCommentModal = (): JSX.Element => {
                             }}
                         >
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             form="recording-comment-form"
                             type="primary"
                             onClick={submitRecordingComment}
@@ -87,7 +87,7 @@ export const PlayerCommentModal = (): JSX.Element => {
                             loading={isRecordingCommentSubmitting}
                         >
                             {recordingComment.commentId ? 'Update' : 'Save'}
-                        </LemonButton>
+                        </Button>
                     </div>
                 </Form>
             </div>

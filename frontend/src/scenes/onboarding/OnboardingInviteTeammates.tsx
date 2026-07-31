@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { EmailUnavailableForInvitesBanner, InviteTeamMatesComponent } from 'scenes/settings/organization/InviteModal'
@@ -78,7 +78,7 @@ export const OnboardingInviteTeammates: OnboardingStepComponentType = () => {
             <InviteTeamMatesComponent hideProjectAccessSelector />
             {showInviteLinks && (
                 <>
-                    <LemonDivider className="my-4" />
+                    <Divider className="my-4" />
                     <EmailUnavailableForInvitesBanner />
                     <div className="mt-4">
                         <h3>Invite Links</h3>

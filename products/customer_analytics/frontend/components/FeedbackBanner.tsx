@@ -1,4 +1,4 @@
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 interface FeedbackBannerProps {
     feedbackButtonId: string
@@ -10,12 +10,12 @@ const DEFAULT_MESSAGE =
 
 export function FeedbackBanner({ feedbackButtonId, message = DEFAULT_MESSAGE }: FeedbackBannerProps): JSX.Element {
     return (
-        <LemonBanner
+        <Banner
             type="info"
             className="mb-2 mt-2"
             action={{ children: 'Send feedback', id: `customer-analytics-${feedbackButtonId}-feedback-button` }}
         >
             {message}
-        </LemonBanner>
+        </Banner>
     )
 }

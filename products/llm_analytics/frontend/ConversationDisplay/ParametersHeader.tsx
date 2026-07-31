@@ -1,4 +1,4 @@
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { EventType } from '~/types'
 
@@ -9,9 +9,9 @@ export function ParametersHeader({ eventProperties }: { eventProperties: EventTy
                 Object.entries(eventProperties.$ai_model_parameters).map(
                     ([key, value]) =>
                         value !== null && (
-                            <LemonTag key={key} type="muted">
+                            <Tag key={key} type="muted">
                                 {key}: {`${value}`}
-                            </LemonTag>
+                            </Tag>
                         )
                 )}
         </div>

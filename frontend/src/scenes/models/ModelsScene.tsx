@@ -1,4 +1,4 @@
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -37,7 +37,7 @@ export function ModelsScene(): JSX.Element {
                             interaction="click"
                             scope={Scene.Models}
                         >
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 to={urls.sqlEditor()}
                                 size="small"
@@ -45,7 +45,7 @@ export function ModelsScene(): JSX.Element {
                                 data-attr="new-view-button"
                             >
                                 Create view
-                            </LemonButton>
+                            </Button>
                         </AppShortcut>
                     </div>
                 }

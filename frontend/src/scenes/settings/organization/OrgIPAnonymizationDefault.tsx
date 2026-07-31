@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -16,7 +16,7 @@ export function OrgIPAnonymizationDefault(): JSX.Element {
     })
 
     return (
-        <LemonSwitch
+        <Switch
             onChange={(checked) => {
                 updateOrganization({ default_anonymize_ips: checked })
             }}

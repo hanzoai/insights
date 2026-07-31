@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonDropdown } from '@hanzo/lemon-ui'
+import { Dropdown } from '@hanzo/elements'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 
@@ -32,7 +32,7 @@ export const AssigneeSelect = ({
     }, [ensureAssigneeTypesLoaded])
 
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             visible={showPopover}
             matchWidth={false}
@@ -44,6 +44,6 @@ export const AssigneeSelect = ({
                     {({ assignee: resolvedAssignee }) => children(resolvedAssignee, showPopover)}
                 </AssigneeResolver>
             </div>
-        </LemonDropdown>
+        </Dropdown>
     )
 }

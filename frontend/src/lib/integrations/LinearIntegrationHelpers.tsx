@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonInputSelect, LemonInputSelectOption } from '@hanzo/lemon-ui'
+import { InputSelect, InputSelectOption } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { IntegrationType } from '~/types'
 
@@ -19,7 +19,7 @@ export function LinearTeamPicker({ onChange, value, integration }: LinearTeamPic
     const { options, loading } = useLinearTeams(integration.id)
 
     return (
-        <LemonInputSelect
+        <InputSelect
             onChange={(val) => onChange?.(val[0] ?? null)}
             value={value ? [value] : []}
             mode="single"
@@ -35,19 +35,19 @@ export const LinearTeamSelectField = ({ integrationId }: { integrationId: number
     const { options, loading } = useLinearTeams(integrationId)
 
     return (
-        <LemonField name="teamIds" label="Team">
-            <LemonInputSelect
+        <Field name="teamIds" label="Team">
+            <InputSelect
                 mode="single"
                 data-attr="select-linear-team"
                 placeholder="Select a team..."
                 options={options}
                 loading={loading}
             />
-        </LemonField>
+        </Field>
     )
 }
 
-export function useLinearTeams(integrationId: number): { options: LemonInputSelectOption[]; loading: boolean } {
+export function useLinearTeams(integrationId: number): { options: InputSelectOption[]; loading: boolean } {
     const logic = linearIntegrationLogic({ id: integrationId })
     const { linearTeams, linearTeamsLoading } = useValues(logic)
     const { loadAllLinearTeams } = useActions(logic)

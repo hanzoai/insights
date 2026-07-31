@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -27,7 +27,7 @@ export function FunnelStepReferencePicker(): JSX.Element | null {
     ]
 
     return (
-        <LemonSelect
+        <Select
             value={funnelStepReference || FunnelStepReference.total}
             onChange={(stepRef) => stepRef && updateInsightFilter({ funnelStepReference: stepRef })}
             dropdownMatchSelectWidth={false}

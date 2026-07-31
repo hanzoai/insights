@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { beforeUnload, router } from 'kea-router'
 
-import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { addProductIntent } from 'lib/utils/product-intents'
@@ -732,7 +732,7 @@ export const batchExportConfigurationLogic = kea<batchExportConfigurationLogicTy
                     } as any
                     if (props.id) {
                         const res = await api.batchExports.update(props.id, data)
-                        lemonToast.success('Batch export configuration updated successfully')
+                        toast.success('Batch export configuration updated successfully')
                         void addProductIntent({
                             product_type: ProductKey.PIPELINE_BATCH_EXPORTS,
                             intent_context: ProductIntentContext.BATCH_EXPORT_UPDATED,
@@ -748,7 +748,7 @@ export const batchExportConfigurationLogic = kea<batchExportConfigurationLogicTy
                     })
 
                     router.actions.replace(urls.batchExport(res.id))
-                    lemonToast.success('Batch export created successfully')
+                    toast.success('Batch export created successfully')
                     return res
                 },
             },
@@ -1170,12 +1170,12 @@ export const batchExportConfigurationLogic = kea<batchExportConfigurationLogicTy
             }
             try {
                 await api.batchExports.delete(batchExportId)
-                lemonToast.success('Batch export deleted successfully')
+                toast.success('Batch export deleted successfully')
                 router.actions.replace(urls.destinations())
             } catch (error: any) {
                 // Show error toast with the error message from the API
                 const errorMessage = error.detail || error.message || 'Failed to delete'
-                lemonToast.error(errorMessage)
+                toast.error(errorMessage)
             }
         },
     })),
@@ -1222,7 +1222,7 @@ export const batchExportConfigurationLogic = kea<batchExportConfigurationLogicTy
                 if (!values.isNew && scheduleFieldsChanged) {
                     let userConfirmed = false
                     await new Promise<void>((resolve) => {
-                        LemonDialog.open({
+                        Dialog.open({
                             title: 'Confirm schedule change',
                             description: (
                                 <>

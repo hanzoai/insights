@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { IconCheckCircle, IconClock, IconInfo, IconRefresh, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonTable, Link, Popover } from '@hanzo/lemon-ui'
+import { Button, Table, Link, Popover } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { humanFriendlyDuration } from 'lib/utils'
@@ -213,7 +213,7 @@ export function RevenueAnalyticsViewStatusIcon(): JSX.Element | null {
                           }
                           const isResuming = resumingViewSchedule?.[row.id] || false
                           return (
-                              <LemonButton
+                              <Button
                                   size="small"
                                   type="secondary"
                                   onClick={() => resumeSchedule(row.id)}
@@ -221,7 +221,7 @@ export function RevenueAnalyticsViewStatusIcon(): JSX.Element | null {
                                   icon={<IconRefresh />}
                               >
                                   Resume
-                              </LemonButton>
+                              </Button>
                           )
                       },
                   },
@@ -258,7 +258,7 @@ export function RevenueAnalyticsViewStatusIcon(): JSX.Element | null {
                                         {group}
                                     </div>
                                 )}
-                                <LemonTable
+                                <Table
                                     dataSource={groupRows}
                                     columns={columns}
                                     embedded
@@ -288,7 +288,7 @@ export function RevenueAnalyticsViewStatusIcon(): JSX.Element | null {
                 </div>
             }
         >
-            <LemonButton
+            <Button
                 size="small"
                 type={hasRevenueAnalyticsViewsWithIssues ? 'primary' : 'secondary'}
                 icon={hasRevenueAnalyticsViewsWithIssues ? <IconWarning /> : <IconInfo />}

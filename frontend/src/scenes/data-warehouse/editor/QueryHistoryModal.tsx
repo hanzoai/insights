@@ -4,15 +4,15 @@ import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
 import { IconCode } from '@hanzo/icons'
-import { LemonModal } from '@hanzo/lemon-ui'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
+import { Button } from '@hanzo/elements'
 
 import { SkeletonLog } from 'lib/components/ActivityLog/ActivityLog'
 import { HumanizedActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'
 import MonacoDiffEditor from 'lib/components/MonacoDiffEditor'
 import { TZLabel } from 'lib/components/TZLabel'
-import { PaginationControl, usePagination } from 'lib/lemon-ui/PaginationControl'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { PaginationControl, usePagination } from 'lib/elements/PaginationControl'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 
 import { queryHistoryLogic } from './queryHistoryLogic'
 import { sqlEditorLogic } from './sqlEditorLogic'
@@ -44,7 +44,7 @@ function QueryHistoryLogRow({ logItem }: { logItem: HumanizedActivityLogItem }):
                     </div>
                 </div>
                 <div className="flex flex-row gap-2">
-                    <LemonButton icon={<IconCode />} onClick={() => setIsExpanded(!isExpanded)} active={isExpanded} />
+                    <Button icon={<IconCode />} onClick={() => setIsExpanded(!isExpanded)} active={isExpanded} />
                 </div>
             </div>
             {isExpanded && (
@@ -143,10 +143,10 @@ export function QueryHistoryModal(): JSX.Element {
     const { editingView } = useValues(sqlEditorLogic)
 
     return (
-        <LemonModal title="View history" isOpen={isHistoryModalOpen} onClose={closeHistoryModal} width={800}>
+        <Modal title="View history" isOpen={isHistoryModalOpen} onClose={closeHistoryModal} width={800}>
             <div className="ActivityLog">
                 <QueryHistoryLog id={editingView?.id} />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

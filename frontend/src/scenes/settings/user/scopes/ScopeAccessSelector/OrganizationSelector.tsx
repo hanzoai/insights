@@ -1,4 +1,4 @@
-import { LemonInputSelect } from '@hanzo/lemon-ui'
+import { InputSelect } from '@hanzo/elements'
 
 import type { OrganizationSelectorProps } from './types'
 import { createOrganizationOption } from './utils'
@@ -9,7 +9,7 @@ export const OrganizationSelector = ({
     value,
     onChange,
 }: OrganizationSelectorProps): JSX.Element => (
-    <LemonInputSelect
+    <InputSelect
         mode={mode}
         data-attr="organizations"
         value={value}

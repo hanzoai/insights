@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 import { useCallback, useEffect, useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
 import { SupportForm } from 'lib/components/Support/SupportForm'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -107,28 +107,28 @@ export function TicketPrompt({ conversationId, traceId, summary, initialText }: 
     }
 
     const supportModal = (
-        <LemonModal
+        <Modal
             isOpen={isSupportModalOpen}
             onClose={handleSupportModalCancel}
             title="Create support ticket"
             footer={
                 <div className="flex items-center gap-2">
-                    <LemonButton type="secondary" onClick={handleSupportModalCancel}>
+                    <Button type="secondary" onClick={handleSupportModalCancel}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         data-attr="submit"
                         onClick={handleSupportFormSubmit}
                         loading={isSubmitting}
                     >
                         Submit
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
             <SupportForm />
-        </LemonModal>
+        </Modal>
     )
 
     // With summary: just show the button
@@ -136,9 +136,9 @@ export function TicketPrompt({ conversationId, traceId, summary, initialText }: 
         return (
             <>
                 <div className="flex gap-2 ml-1 mt-1">
-                    <LemonButton type="primary" size="small" onClick={openSupportModal}>
+                    <Button type="primary" size="small" onClick={openSupportModal}>
                         Create support ticket
-                    </LemonButton>
+                    </Button>
                 </div>
                 {supportModal}
             </>
@@ -150,7 +150,7 @@ export function TicketPrompt({ conversationId, traceId, summary, initialText }: 
         <>
             <div className="w-full flex flex-col gap-2 p-3 border border-border rounded-lg bg-bg-light">
                 <p className="m-0 font-medium">Describe your issue</p>
-                <LemonInput
+                <Input
                     placeholder="What do you need help with?"
                     value={issueText}
                     onChange={setIssueText}
@@ -159,9 +159,9 @@ export function TicketPrompt({ conversationId, traceId, summary, initialText }: 
                     autoFocus
                 />
                 <div className="flex gap-2">
-                    <LemonButton type="primary" size="small" onClick={openSupportModal} disabled={!issueText.trim()}>
+                    <Button type="primary" size="small" onClick={openSupportModal} disabled={!issueText.trim()}>
                         Create support ticket
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
             {supportModal}

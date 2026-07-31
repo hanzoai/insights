@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconTrash } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import { SelectorCount } from '~/toolbar/actions/SelectorCount'
 import { experimentsTabLogic } from '~/toolbar/experiments/experimentsTabLogic'
@@ -45,7 +45,7 @@ export function WebExperimentTransformHeader({
             )}
 
             {experimentForm?.variants && (
-                <LemonButton
+                <Button
                     icon={<IconTrash />}
                     size="small"
                     className="shrink"

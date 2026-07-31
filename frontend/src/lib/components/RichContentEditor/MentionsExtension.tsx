@@ -5,9 +5,9 @@ import Fuse from 'fuse.js'
 import { useValues } from 'kea'
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 
-import { LemonButton, ProfilePicture } from '@hanzo/lemon-ui'
+import { Button, ProfilePicture } from '@hanzo/elements'
 
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Popover } from 'lib/elements/Popover'
 import { membersLogic } from 'scenes/organization/membersLogic'
 
 import { OrganizationMemberType } from '~/types'
@@ -120,7 +120,7 @@ export const Mentions = forwardRef<MentionsRef, MentionsProps>(function SlashCom
     return (
         <div className="deprecated-space-y-px">
             {filteredMembers.map((member, index) => (
-                <LemonButton
+                <Button
                     key={member.id}
                     fullWidth
                     icon={<ProfilePicture user={member.user} size="sm" />}
@@ -128,7 +128,7 @@ export const Mentions = forwardRef<MentionsRef, MentionsProps>(function SlashCom
                     onClick={() => void execute(member)}
                 >
                     <span className="ph-no-capture">{`${member.user.first_name} <${member.user.email}>`}</span>
-                </LemonButton>
+                </Button>
             ))}
 
             {filteredMembers.length === 0 && (

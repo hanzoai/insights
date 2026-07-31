@@ -1,9 +1,9 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonBanner, LemonInput, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Input, Link, Tooltip } from '@hanzo/elements'
 
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
+import { Slider } from 'lib/elements/Slider'
 import { humanFriendlyNumber } from 'lib/utils'
 import { insightLogic } from 'scenes/insights/insightLogic'
 
@@ -172,7 +172,7 @@ export function DataCollectionCalculator({ experimentId }: ExperimentCalculatorP
                         </Tooltip>
                     </div>
                     <div className="flex gap-4">
-                        <LemonSlider
+                        <Slider
                             value={minimumDetectableEffect}
                             min={1}
                             max={sliderMaxValue}
@@ -187,7 +187,7 @@ export function DataCollectionCalculator({ experimentId }: ExperimentCalculatorP
                             }}
                             className="w-5/6"
                         />
-                        <LemonInput
+                        <Input
                             className="w-1/6"
                             data-attr="min-detectable-effect"
                             type="number"
@@ -210,10 +210,10 @@ export function DataCollectionCalculator({ experimentId }: ExperimentCalculatorP
                     </div>
                 </div>
                 <div className="flex flex-col experiment-preview-row">
-                    <LemonBanner type="info" className="mb-4">
+                    <Banner type="info" className="mb-4">
                         The calculations are based on the events received in the last 14 days. This event count may
                         differ from what was considered in earlier estimates.
-                    </LemonBanner>
+                    </Banner>
                     {insightType === InsightType.TRENDS ? (
                         <TrendCalculation experimentId={experimentId} />
                     ) : (

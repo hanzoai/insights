@@ -2,7 +2,7 @@ import { Meta } from '@storybook/react'
 import { useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
+import { Slider } from 'lib/elements/Slider'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 
@@ -102,15 +102,15 @@ export function BrandAccentColors(): JSX.Element {
                 <div className="flex gap-2">
                     <label className="flex flex-col gap-1 flex-1">
                         <label htmlFor="primary-hue">Hue</label>
-                        <LemonSlider value={primaryHue} onChange={setPrimaryHue} min={0} max={360} />
+                        <Slider value={primaryHue} onChange={setPrimaryHue} min={0} max={360} />
                     </label>
                     <label className="flex flex-col gap-1 flex-1">
                         <label htmlFor="primary-saturation">Saturation</label>
-                        <LemonSlider value={primarySaturation} onChange={setPrimarySaturation} min={0} max={100} />
+                        <Slider value={primarySaturation} onChange={setPrimarySaturation} min={0} max={100} />
                     </label>
                     <label className="flex flex-col gap-1 flex-1">
                         <label htmlFor="primary-lightness">Lightness</label>
-                        <LemonSlider value={primaryLightness} onChange={setPrimaryLightness} min={0} max={100} />
+                        <Slider value={primaryLightness} onChange={setPrimaryLightness} min={0} max={100} />
                     </label>
 
                     <div

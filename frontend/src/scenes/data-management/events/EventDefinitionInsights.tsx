@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput } from '@hanzo/lemon-ui'
+import { Input } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
 import { INSIGHTS_PER_PAGE, eventInsightsLogic } from 'scenes/data-management/events/eventInsightsLogic'
 import { useSummarizeInsight } from 'scenes/insights/summarizeInsight'
 import { InsightIcon } from 'scenes/saved-insights/SavedInsights'
@@ -20,7 +20,7 @@ export function EventDefinitionInsights({ definition }: { definition: EventDefin
     const { setPage, setFilters } = useActions(eventInsightsLogic({ event }))
     const summarizeInsight = useSummarizeInsight()
 
-    const columns: LemonTableColumns<QueryBasedInsightModel> = [
+    const columns: TableColumns<QueryBasedInsightModel> = [
         {
             key: 'id',
             width: 32,
@@ -35,7 +35,7 @@ export function EventDefinitionInsights({ definition }: { definition: EventDefin
             render: function renderName(name: string, insight) {
                 return (
                     <>
-                        <LemonTableLink
+                        <TableLink
                             to={urls.insightView(insight.short_id)}
                             title={<>{name || <i>{summarizeInsight(insight.query)}</i>}</>}
                             description={insight.description}
@@ -45,8 +45,8 @@ export function EventDefinitionInsights({ definition }: { definition: EventDefin
             },
             sorter: (a, b) => (a.name || summarizeInsight(a.query)).localeCompare(b.name || summarizeInsight(b.query)),
         },
-        createdByColumn() as LemonTableColumn<QueryBasedInsightModel, keyof QueryBasedInsightModel | undefined>,
-        createdAtColumn() as LemonTableColumn<QueryBasedInsightModel, keyof QueryBasedInsightModel | undefined>,
+        createdByColumn() as TableColumn<QueryBasedInsightModel, keyof QueryBasedInsightModel | undefined>,
+        createdAtColumn() as TableColumn<QueryBasedInsightModel, keyof QueryBasedInsightModel | undefined>,
         {
             title: 'Last modified',
             sorter: true,
@@ -61,13 +61,13 @@ export function EventDefinitionInsights({ definition }: { definition: EventDefin
 
     return (
         <SceneSection title="Insights using event" className="saved-insights">
-            <LemonInput
+            <Input
                 type="search"
                 placeholder="Search..."
                 onChange={(value) => setFilters({ search: value })}
                 value={filters.search || ''}
             />
-            <LemonTable
+            <Table
                 id={`event-definition-insights-table-${definition.id}`}
                 loading={insightsLoading}
                 columns={columns}

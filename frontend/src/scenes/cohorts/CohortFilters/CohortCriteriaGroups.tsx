@@ -7,10 +7,10 @@ import { Field as KeaField } from 'kea-forms/lib/components'
 
 import { IconCopy, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { Lettermark, LettermarkColor } from 'lib/lemon-ui/Lettermark'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
 import { alphabet } from 'lib/utils'
 import { CohortCriteriaRowBuilder } from 'scenes/cohorts/CohortFilters/CohortCriteriaRowBuilder'
 import { CohortLogicProps, cohortEditLogic } from 'scenes/cohorts/cohortEditLogic'
@@ -51,22 +51,22 @@ export function CohortCriteriaGroups(logicProps: CohortLogicProps): JSX.Element 
                                                 value={group.type}
                                             />
                                             <div className="flex-1 min-w-[0.5rem]" />
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconCopy />}
                                                 onClick={() => duplicateFilter(groupIndex)}
                                             />
                                             {cohort.filters.properties.values.length > 1 && (
-                                                <LemonButton
+                                                <Button
                                                     icon={<IconTrash />}
                                                     onClick={() => removeFilter(groupIndex)}
                                                 />
                                             )}
                                         </div>
-                                        <LemonDivider className="my-4" />
+                                        <Divider className="my-4" />
                                         {error && (
-                                            <LemonBanner className="m-2" type="error">
+                                            <Banner className="m-2" type="error">
                                                 {error}
-                                            </LemonBanner>
+                                            </Banner>
                                         )}
                                         {kids as React.ReactNode}
                                     </div>
@@ -91,14 +91,14 @@ export function CohortCriteriaGroups(logicProps: CohortLogicProps): JSX.Element 
                                             />
                                             {criteriaIndex === group.values.length - 1 && (
                                                 <div className="m-3">
-                                                    <LemonButton
+                                                    <Button
                                                         data-attr="cohort-add-filter-group-criteria"
                                                         type="secondary"
                                                         onClick={() => addFilter(groupIndex)}
                                                         icon={<IconPlusSmall />}
                                                     >
                                                         Add criteria
-                                                    </LemonButton>
+                                                    </Button>
                                                 </div>
                                             )}
                                         </Group>
@@ -109,7 +109,7 @@ export function CohortCriteriaGroups(logicProps: CohortLogicProps): JSX.Element 
                     </Group>
                 ) : null
             )}
-            <LemonButton
+            <Button
                 data-attr="cohort-add-filter-group"
                 className="mb-4 mt-4"
                 type="secondary"
@@ -118,7 +118,7 @@ export function CohortCriteriaGroups(logicProps: CohortLogicProps): JSX.Element 
                 fullWidth
             >
                 Add criteria group
-            </LemonButton>
+            </Button>
         </>
     )
 }

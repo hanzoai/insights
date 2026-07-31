@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSegmentedButton, LemonSelect, Tooltip } from '@hanzo/lemon-ui'
+import { SegmentedButton, Select, Tooltip } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -113,7 +113,7 @@ export function CustomerAnalyticsFilters(): JSX.Element {
                         dateOptions={DATE_FILTER_DATE_OPTIONS}
                         size="small"
                     />
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         size="small"
                         options={[
                             { label: 'B2C', value: 'b2c', 'data-attr': 'customer-analytics-b2c' },
@@ -134,7 +134,7 @@ export function CustomerAnalyticsFilters(): JSX.Element {
                         }}
                     />
                     {businessType === 'b2b' && !shouldShowGroupsIntroduction && (
-                        <LemonSelect
+                        <Select
                             size="small"
                             data-attr="customer-analytics-group-type"
                             options={groupOptions}

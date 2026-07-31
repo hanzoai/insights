@@ -2,7 +2,7 @@ import { actions, kea, key, listeners, path, props } from 'kea'
 import { forms } from 'kea-forms'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import type { newCategoryLogicType } from './newCategoryLogicType'
 import { MessageCategory, optOutCategoriesLogic } from './optOutCategoriesLogic'
@@ -64,11 +64,11 @@ export const newCategoryLogic = kea<newCategoryLogicType>([
                 if (props.category) {
                     // Update existing category
                     await api.messaging.updateCategory(props.category.id, formValues)
-                    lemonToast.success('Category updated successfully')
+                    toast.success('Category updated successfully')
                 } else {
                     // Create new category
                     await api.messaging.createCategory(formValues)
-                    lemonToast.success('Category created successfully')
+                    toast.success('Category created successfully')
                 }
                 // Reload categories in the parent logic
                 optOutCategoriesLogic.actions.loadCategories()

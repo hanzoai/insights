@@ -17,10 +17,10 @@ import { itemSelectModalLogic } from 'lib/components/FileSystem/ItemSelectModal/
 import { dayjs } from 'lib/dayjs'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useLocalStorage } from 'lib/hooks/useLocalStorage'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { LemonTree, LemonTreeRef, LemonTreeSize, TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
-import { TreeNodeDisplayIcon } from 'lib/lemon-ui/LemonTree/LemonTreeUtils'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture/ProfilePicture'
+import { Tag } from 'lib/elements/Tag'
+import { Tree, TreeRef, TreeSize, TreeDataItem } from 'lib/elements/Tree/Tree'
+import { TreeNodeDisplayIcon } from 'lib/elements/Tree/TreeUtils'
+import { ProfilePicture } from 'lib/elements/ProfilePicture/ProfilePicture'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { ContextMenuGroup, ContextMenuItem } from 'lib/ui/ContextMenu/ContextMenu'
 import { DropdownMenuGroup } from 'lib/ui/DropdownMenu/DropdownMenu'
@@ -49,7 +49,7 @@ export interface ProjectTreeProps {
     onlyTree?: boolean
     showRecents?: boolean // whether to show recents in the tree
     searchPlaceholder?: string
-    treeSize?: LemonTreeSize
+    treeSize?: TreeSize
 }
 
 export const PROJECT_TREE_KEY = 'project-tree'
@@ -150,7 +150,7 @@ export function ProjectTree({
     const { setPanelTreeRef, resetPanelLayout } = useActions(panelLayoutLogic)
     const { mainContentRef } = useValues(panelLayoutLogic)
     const { currentTeamId } = useValues(teamLogic)
-    const treeRef = useRef<LemonTreeRef>(null)
+    const treeRef = useRef<TreeRef>(null)
     const { openItemSelectModal } = useActions(itemSelectModalLogic)
 
     const { customProducts, customProductsLoading } = useValues(customProductsLogic)
@@ -285,7 +285,7 @@ export function ProjectTree({
     )
 
     const tree = (
-        <LemonTree
+        <Tree
             ref={treeRef}
             contentRef={mainContentRef as RefObject<HTMLElement>}
             className="px-0 py-1"
@@ -325,7 +325,7 @@ export function ProjectTree({
                     }
                 }
 
-                // False, because we handle focus of content in LemonTree with mainContentRef prop
+                // False, because we handle focus of content in Tree with mainContentRef prop
                 resetPanelLayout(false)
             }}
             onFolderClick={(folder, isExpanded) => {
@@ -495,7 +495,7 @@ export function ProjectTree({
                             {item.tags?.length && (
                                 <>
                                     {item.tags?.map((tag) => (
-                                        <LemonTag
+                                        <Tag
                                             key={tag}
                                             type={
                                                 tag === 'alpha' ? 'completion' : tag === 'beta' ? 'warning' : 'success'
@@ -504,7 +504,7 @@ export function ProjectTree({
                                             className="ml-2 relative top-[-1px]"
                                         >
                                             {tag.toUpperCase()}
-                                        </LemonTag>
+                                        </Tag>
                                     ))}
                                 </>
                             )}
@@ -519,7 +519,7 @@ export function ProjectTree({
                             {item.record?.protocol === 'products://' && item.tags?.length && (
                                 <>
                                     {item.tags?.map((tag) => (
-                                        <LemonTag
+                                        <Tag
                                             key={tag}
                                             type={
                                                 tag === 'alpha' ? 'completion' : tag === 'beta' ? 'warning' : 'success'
@@ -528,7 +528,7 @@ export function ProjectTree({
                                             className="ml-2 relative top-[-1px]"
                                         >
                                             {tag.toUpperCase()}
-                                        </LemonTag>
+                                        </Tag>
                                     ))}
                                 </>
                             )}
@@ -600,9 +600,9 @@ export function ProjectTree({
                         >
                             {item.displayName}{' '}
                             {isNew ? (
-                                <LemonTag type="highlight" size="small" className="ml-1 relative top-[-1px]">
+                                <Tag type="highlight" size="small" className="ml-1 relative top-[-1px]">
                                     New
-                                </LemonTag>
+                                </Tag>
                             ) : null}
                         </span>
 
@@ -615,14 +615,14 @@ export function ProjectTree({
                         {item.tags?.length && (
                             <>
                                 {item.tags?.map((tag) => (
-                                    <LemonTag
+                                    <Tag
                                         key={tag}
                                         type={tag === 'alpha' ? 'completion' : tag === 'beta' ? 'warning' : 'success'}
                                         size="small"
                                         className="ml-2 relative top-[-1px]"
                                     >
                                         {tag.toUpperCase()}
-                                    </LemonTag>
+                                    </Tag>
                                 ))}
                             </>
                         )}

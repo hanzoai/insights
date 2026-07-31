@@ -2,7 +2,7 @@ import './SessionRecordingsKiosk.scss'
 
 import { useValues } from 'kea'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { SceneExport } from 'scenes/sceneTypes'
 

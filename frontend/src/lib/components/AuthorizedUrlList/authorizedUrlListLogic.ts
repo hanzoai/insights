@@ -18,7 +18,7 @@ import { subscriptions } from 'kea-subscriptions'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { isDomain, isURL } from 'lib/utils'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -320,7 +320,7 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
                         decoded = decodeURIComponent(response.toolbarParams)
                     }
                 } catch {
-                    lemonToast.error('Failed to generate toolbar params')
+                    toast.error('Failed to generate toolbar params')
                 }
                 return decoded
             },

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -13,7 +13,7 @@ export function OrganizationEmailPreferences(): JSX.Element {
     const restrictionReason = useRestrictedArea({ minimumAccessLevel: OrganizationMembershipLevel.Admin })
 
     return (
-        <LemonSwitch
+        <Switch
             data-attr="is-member-join-email-enabled-switch"
             onChange={(checked) => {
                 updateOrganization({ is_member_join_email_enabled: checked })

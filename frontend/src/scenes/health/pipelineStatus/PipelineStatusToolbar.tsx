@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheck, IconEllipsis } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonMenu, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Button, Input, Menu, SegmentedButton } from '@hanzo/elements'
 
 import { pipelineStatusSceneLogic } from './pipelineStatusSceneLogic'
 import type { IssueTypeFilter } from './pipelineStatusSceneLogic'
@@ -21,13 +21,13 @@ export function PipelineStatusToolbar(): JSX.Element {
 
     return (
         <div className="flex flex-wrap items-center gap-2">
-            <LemonSegmentedButton
+            <SegmentedButton
                 value={typeFilter}
                 onChange={(value) => setTypeFilter(value as IssueTypeFilter)}
                 options={TYPE_FILTER_OPTIONS}
                 size="small"
             />
-            <LemonInput
+            <Input
                 type="search"
                 placeholder="Search issues..."
                 onChange={setSearchTerm}
@@ -35,7 +35,7 @@ export function PipelineStatusToolbar(): JSX.Element {
                 className="max-w-60"
             />
             <div className="ml-auto">
-                <LemonMenu
+                <Menu
                     items={[
                         {
                             label: `Show dismissed${dismissedCount > 0 ? ` (${dismissedCount})` : ''}`,
@@ -45,8 +45,8 @@ export function PipelineStatusToolbar(): JSX.Element {
                     ]}
                     placement="bottom-end"
                 >
-                    <LemonButton icon={<IconEllipsis />} type="tertiary" size="small" />
-                </LemonMenu>
+                    <Button icon={<IconEllipsis />} type="tertiary" size="small" />
+                </Menu>
             </div>
         </div>
     )

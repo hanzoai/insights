@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -23,7 +23,7 @@ export function ProductTourEdit({ id }: { id: string }): JSX.Element {
     )
 
     if (!productTour) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
@@ -48,10 +48,10 @@ export function ProductTourEdit({ id }: { id: string }): JSX.Element {
                                 isEditing={isEditingProductTour}
                                 draftSaveStatus={draftSaveStatus}
                             />
-                            <LemonButton type="secondary" size="small" onClick={() => openToolbarModal('preview')}>
+                            <Button type="secondary" size="small" onClick={() => openToolbarModal('preview')}>
                                 Preview
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 type="secondary"
                                 size="small"
                                 onClick={discardDraft}
@@ -59,8 +59,8 @@ export function ProductTourEdit({ id }: { id: string }): JSX.Element {
                                 disabledReason={draftActionInProgress ? 'Discarding draft...' : undefined}
                             >
                                 Cancel
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 type="primary"
                                 size="small"
                                 onClick={publishDraft}
@@ -68,7 +68,7 @@ export function ProductTourEdit({ id }: { id: string }): JSX.Element {
                                 disabledReason={draftActionInProgress ? 'Saving...' : undefined}
                             >
                                 Save
-                            </LemonButton>
+                            </Button>
                         </div>
                     }
                 />

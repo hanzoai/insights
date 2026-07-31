@@ -3,8 +3,8 @@ import { useEffect, useMemo } from 'react'
 import { match } from 'ts-pattern'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect'
+import { Field } from 'lib/elements/Field'
+import { InputSelect } from 'lib/elements/InputSelect'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
 import type { Experiment, FeatureFlagType, MultivariateFlagVariant } from '~/types'
@@ -67,7 +67,7 @@ export function VariantsPanel({ experiment, updateFeatureFlag, disabled = false 
 
     // Find the current value for the autocomplete, either an existing flag or a new entry.
     // Returns:
-    // An array to comply with LemonInputSelect, even though we're in single-select mode.
+    // An array to comply with InputSelect, even though we're in single-select mode.
     // In case of an existing flag, the full FeatureFlagType object is returned, otherwise a string (feature flag key).
     const currentAutocompleteValue = useMemo(() => {
         if (!featureFlagKeyForAutocomplete) {
@@ -131,7 +131,7 @@ export function VariantsPanel({ experiment, updateFeatureFlag, disabled = false 
 
     return (
         <>
-            <LemonField.Pure label="Feature flag key" className="mb-4">
+            <Field.Pure label="Feature flag key" className="mb-4">
                 <>
                     <div className="text-sm text-secondary mb-2">
                         Each experiment is backed by a feature flag. The feature flag key will be used to control the
@@ -140,7 +140,7 @@ export function VariantsPanel({ experiment, updateFeatureFlag, disabled = false 
                         Type to create a new feature flag or select an existing one. Note that only multivariate feature
                         flags are listed.
                     </div>
-                    <LemonInputSelect<FeatureFlagType | string>
+                    <InputSelect<FeatureFlagType | string>
                         mode="single"
                         placeholder="Type to create a new feature flag or select an existing one"
                         options={featureFlagOptions}
@@ -163,7 +163,7 @@ export function VariantsPanel({ experiment, updateFeatureFlag, disabled = false 
                         <div className="text-xs text-danger mt-1">{featureFlagKeyValidation.error}</div>
                     )}
                 </>
-            </LemonField.Pure>
+            </Field.Pure>
 
             {featureFlagKeyForAutocomplete &&
                 match(mode)

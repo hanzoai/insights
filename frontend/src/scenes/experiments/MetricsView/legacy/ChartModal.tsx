@@ -1,4 +1,4 @@
-import { LemonBanner, LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Banner, Button, Modal } from '@hanzo/elements'
 
 import {
     ExperimentFunnelsQuery,
@@ -41,15 +41,15 @@ export function ChartModal({
         result && (result.kind === NodeKind.ExperimentTrendsQuery || result.kind === NodeKind.ExperimentFunnelsQuery)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             width={1200}
             title={`Metric results: ${metric.name || 'Untitled metric'}`}
             footer={
-                <LemonButton type="secondary" onClick={onClose}>
+                <Button type="secondary" onClick={onClose}>
                     Close
-                </LemonButton>
+                </Button>
             }
         >
             {isLegacyResult ? (
@@ -57,12 +57,12 @@ export function ChartModal({
                     <div className="flex justify-end">
                         <LegacyExploreButton result={result} />
                     </div>
-                    <LemonBanner type={result?.significant ? 'success' : 'info'} className="mb-4">
+                    <Banner type={result?.significant ? 'success' : 'info'} className="mb-4">
                         <div className="items-center inline-flex flex-wrap">
                             <WinningVariantText result={result} />
                             <SignificanceText metricUuid={metric.uuid || ''} isSecondary={isSecondary} />
                         </div>
-                    </LemonBanner>
+                    </Banner>
                     <SummaryTable metric={metric} displayOrder={displayOrder} isSecondary={isSecondary} />
                     <LegacyResultsQuery result={result} showTable={true} />
                 </>
@@ -86,12 +86,12 @@ export function ChartModal({
                                     <ExploreAsInsightButton query={query} />
                                 </div>
                             )}
-                            <LemonBanner type={result?.significant ? 'success' : 'info'} className="mb-4">
+                            <Banner type={result?.significant ? 'success' : 'info'} className="mb-4">
                                 <div className="items-center inline-flex flex-wrap">
                                     <WinningVariantText result={result} />
                                     <SignificanceText metricUuid={metric.uuid || ''} isSecondary={isSecondary} />
                                 </div>
-                            </LemonBanner>
+                            </Banner>
                             <SummaryTable metric={metric} displayOrder={displayOrder} isSecondary={isSecondary} />
                             {breakdownResultsLoading && <ResultsBreakdownSkeleton />}
                             {query && breakdownResults && (
@@ -108,6 +108,6 @@ export function ChartModal({
                     )}
                 </ResultsBreakdown>
             )}
-        </LemonModal>
+        </Modal>
     )
 }

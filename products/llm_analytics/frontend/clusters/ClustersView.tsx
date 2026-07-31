@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconChevronDown, IconChevronRight, IconFilter, IconGear } from '@hanzo/icons'
-import { LemonButton, LemonSegmentedButton, LemonSelect, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, SegmentedButton, Select, Spinner, Tooltip } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -69,7 +69,7 @@ export function ClustersView(): JSX.Element {
                         placement="bottom"
                     >
                         <span>
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 value={clusteringLevel}
                                 onChange={(value) => setClusteringLevel(value as ClusteringLevel)}
                                 options={[
@@ -107,7 +107,7 @@ export function ClustersView(): JSX.Element {
                         placement="bottom"
                     >
                         <span>
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 value={clusteringLevel}
                                 onChange={(value) => setClusteringLevel(value as ClusteringLevel)}
                                 options={[
@@ -122,7 +122,7 @@ export function ClustersView(): JSX.Element {
                     <span className="text-muted">|</span>
                     <Tooltip title="Clustering run">
                         <span>
-                            <LemonSelect
+                            <Select
                                 value={effectiveRunId || undefined}
                                 onChange={(value) => setSelectedRunId(value || null)}
                                 options={clusteringRuns.map((run: { runId: string; label: string }) => ({
@@ -168,7 +168,7 @@ export function ClustersView(): JSX.Element {
                         </div>
                     )}
 
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         icon={<IconFilter />}
@@ -178,14 +178,14 @@ export function ClustersView(): JSX.Element {
                         status={activeFilterCount > 0 ? 'danger' : 'default'}
                     >
                         {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
-                    </LemonButton>
+                    </Button>
 
                     {showAdminPanel && (
                         <AccessControlAction
                             resourceType={AccessControlResourceType.LlmAnalytics}
                             minAccessLevel={AccessControlLevel.Editor}
                         >
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 icon={<IconGear />}
@@ -194,7 +194,7 @@ export function ClustersView(): JSX.Element {
                                 data-attr="clusters-run-clustering-button"
                             >
                                 Run clustering
-                            </LemonButton>
+                            </Button>
                         </AccessControlAction>
                     )}
                 </div>
@@ -217,7 +217,7 @@ export function ClustersView(): JSX.Element {
                     >
                         <div className="flex items-center gap-4">
                             <ClusterDistributionBar clusters={sortedClusters} runId={effectiveRunId || ''} />
-                            <LemonButton
+                            <Button
                                 size="small"
                                 noPadding
                                 icon={isScatterPlotExpanded ? <IconChevronDown /> : <IconChevronRight />}

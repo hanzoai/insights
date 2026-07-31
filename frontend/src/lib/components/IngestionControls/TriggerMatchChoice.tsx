@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonLabel, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
+import { Label, Select, Tag } from '@hanzo/elements'
 
 import { Since } from 'scenes/settings/environment/SessionRecordingSettings'
 
@@ -16,13 +16,13 @@ export function MatchTypeSelect(): JSX.Element {
 
     return (
         <div className="flex flex-col gap-y-1">
-            <LemonLabel className="text-base py-2">
+            <Label className="text-base py-2">
                 Trigger matching <Since web={{ version: '1.238.0' }} />
-            </LemonLabel>
+            </Label>
             <div className="flex flex-row gap-x-2 items-center">
                 <div>Start when</div>
                 <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
-                    <LemonSelect
+                    <Select
                         options={[
                             {
                                 label: 'all',
@@ -67,8 +67,8 @@ export function MatchTypeTag(): JSX.Element {
 
     // Let's follow Insights style of AND / OR from funnels
     return (
-        <LemonTag type="danger" className="my-2 mr-2">
+        <Tag type="danger" className="my-2 mr-2">
             {matchType === 'any' ? 'OR' : 'AND'}
-        </LemonTag>
+        </Tag>
     )
 }

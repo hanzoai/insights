@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
 import { passkeySettingsLogic } from './passkeySettingsLogic'
 
@@ -25,48 +25,48 @@ export function PasskeyModals(): JSX.Element {
 
     return (
         <>
-            <LemonModal
+            <Modal
                 isOpen={deleteModalId !== null}
                 onClose={closeDeleteModal}
                 title="Delete passkey?"
                 footer={
                     <>
-                        <LemonButton type="secondary" onClick={closeDeleteModal}>
+                        <Button type="secondary" onClick={closeDeleteModal}>
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             status="danger"
                             onClick={() => deleteModalId && deletePasskey(deleteModalId)}
                         >
                             Delete
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
                 <p>Are you sure you want to delete this passkey? You won't be able to use it to sign in anymore.</p>
-            </LemonModal>
+            </Modal>
 
-            <LemonModal
+            <Modal
                 isOpen={renameModal !== null}
                 onClose={closeRenameModal}
                 title="Rename passkey"
                 footer={
                     <>
-                        <LemonButton type="secondary" onClick={closeRenameModal}>
+                        <Button type="secondary" onClick={closeRenameModal}>
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             onClick={handleRename}
                             disabledReason={!renameLabel.trim() ? 'Name is required' : undefined}
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
-                <LemonInput
+                <Input
                     value={renameLabel}
                     onChange={setRenameLabel}
                     placeholder="Passkey name"
@@ -74,7 +74,7 @@ export function PasskeyModals(): JSX.Element {
                     onPressEnter={handleRename}
                     maxLength={200}
                 />
-            </LemonModal>
+            </Modal>
         </>
     )
 }

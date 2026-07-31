@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 import { useEffect, useState } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 
@@ -44,10 +44,10 @@ export function SuccessStep({ survey }: SuccessStepProps): JSX.Element {
             </div>
 
             <div className="flex items-center justify-center gap-4">
-                <LemonButton type="primary" to={urls.survey(survey.id)}>
+                <Button type="primary" to={urls.survey(survey.id)}>
                     View survey now
-                </LemonButton>
-                <LemonButton to={urls.surveyTemplates()}>Create another survey</LemonButton>
+                </Button>
+                <Button to={urls.surveyTemplates()}>Create another survey</Button>
             </div>
 
             <div className="flex justify-center">

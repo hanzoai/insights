@@ -4,10 +4,10 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { FallbackCoverImage } from 'lib/components/FallbackCoverImage/FallbackCoverImage'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Spinner } from 'lib/elements/Spinner'
 import {
     DashboardTemplateProps,
     dashboardTemplatesLogic,
@@ -142,9 +142,9 @@ function TemplateItem({
             <h5 className="px-2 mb-1">{template?.template_name}</h5>
             <div className="flex gap-x-1 px-2 mb-1">
                 {template.tags?.map((tag, index) => (
-                    <LemonTag key={index} type="option">
+                    <Tag key={index} type="option">
                         {tag}
-                    </LemonTag>
+                    </Tag>
                 ))}
             </div>
             <div className="px-2 py-1 overflow-y-auto grow">

@@ -3,10 +3,10 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { Editor, EmailEditorProps, EditorRef as _EditorRef } from 'react-email-editor'
 
-import { LemonDialog } from '@hanzo/lemon-ui'
+import { Dialog } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { objectsEqual } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
@@ -271,7 +271,7 @@ export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
 
         closeWithConfirmation: () => {
             if (values.emailTemplateChanged) {
-                LemonDialog.open({
+                Dialog.open({
                     title: 'Discard changes',
                     description: 'Are you sure you want to discard your changes?',
                     primaryButton: {
@@ -304,7 +304,7 @@ export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
                 } else {
                     const editor = values.emailEditorRef?.editor
                     if (!editor || !values.isEmailEditorReady) {
-                        lemonToast.error('Editor not ready')
+                        toast.error('Editor not ready')
                         return
                     }
 
@@ -334,11 +334,11 @@ export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
                 }
 
                 await api.messaging.createTemplate(templateData)
-                lemonToast.success('Template saved successfully')
+                toast.success('Template saved successfully')
                 actions.loadTemplates()
                 actions.setIsSaveTemplateModalOpen(false)
             } catch (error) {
-                lemonToast.error('Failed to save template')
+                toast.error('Failed to save template')
                 console.error(error)
             }
         },

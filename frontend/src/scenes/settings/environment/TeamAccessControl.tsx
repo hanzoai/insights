@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconTestTube } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -38,7 +38,7 @@ export function TeamAccessControl(): JSX.Element {
 
     return (
         <div className="space-y-6">
-            <LemonButton
+            <Button
                 icon={<IconTestTube />}
                 onClick={() => {
                     updateEarlyAccessFeatureEnrollment('rbac-ui-redesign', true)
@@ -46,7 +46,7 @@ export function TeamAccessControl(): JSX.Element {
                 type="primary"
             >
                 Try the new UI
-            </LemonButton>
+            </Button>
             <AccessControlObject
                 resource="project"
                 resource_id={`${currentTeam?.id}`}

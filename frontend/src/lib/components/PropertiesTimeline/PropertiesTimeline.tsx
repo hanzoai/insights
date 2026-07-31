@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 import { Properties } from '@hanzo/plugin-scaffold'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { humanList } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -75,7 +75,7 @@ export function PropertiesTimeline({ actor, filter }: PropertiesTimelineProps): 
                 dateRange={dateRange}
                 loading={resultLoading}
             />
-            <LemonDivider className="h-0" />
+            <Divider className="h-0" />
             <PropertiesTable
                 type={actor.type /* "person" or "group" */ as PropertyDefinitionType}
                 properties={propertiesShown}

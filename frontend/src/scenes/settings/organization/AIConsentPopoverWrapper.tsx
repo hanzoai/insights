@@ -1,10 +1,10 @@
 import { useAsyncActions, useValues } from 'kea'
 
 import { IconArrowRight, IconLock } from '@hanzo/icons'
-import { LemonButton, Popover, PopoverProps, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Popover, PopoverProps, Tooltip } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
 
 export function AIConsentPopoverWrapper({
@@ -53,10 +53,10 @@ export function AIConsentPopoverWrapper({
                         .
                     </p>
                     <div className="flex gap-1.5 self-end">
-                        <LemonButton type="secondary" size="xsmall" onClick={onDismiss}>
+                        <Button type="secondary" size="xsmall" onClick={onDismiss}>
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             size="xsmall"
                             onClick={() =>
@@ -73,7 +73,7 @@ export function AIConsentPopoverWrapper({
                             }}
                         >
                             I allow AI analysis in this organization
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             }

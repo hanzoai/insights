@@ -4,14 +4,14 @@ import { useRef } from 'react'
 
 import { IconChevronDown, IconDocument, IconInfo } from '@hanzo/icons'
 import { IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Button, Tag, Link } from '@hanzo/elements'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Banner } from 'lib/elements/Banner'
+import { More } from 'lib/elements/Button/More'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter, humanFriendlyCurrency } from 'lib/utils'
 import { getProductIcon } from 'scenes/onboarding/productSelection/ProductSelection'
@@ -131,15 +131,15 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                 <h3 className="font-bold mb-0 flex items-center gap-x-2">
                                     {displayProductName}{' '}
                                     {isTemporaryFreeProduct && (
-                                        <LemonTag type="highlight">included with your plan</LemonTag>
+                                        <Tag type="highlight">included with your plan</Tag>
                                     )}
                                     {product.type === 'realtime_destinations' && (
                                         <Tooltip
                                             title={`Data pipelines have moved to new usage-based pricing on ${REALTIME_DESTINATIONS_BILLING_START_DATE}.`}
                                         >
-                                            <LemonTag type="success" icon={<IconInfo />}>
+                                            <Tag type="success" icon={<IconInfo />}>
                                                 Migrated
-                                            </LemonTag>
+                                            </Tag>
                                         </Tooltip>
                                     )}
                                 </h3>
@@ -150,7 +150,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                         {/* Product actions */}
                         <div className="flex grow justify-end gap-x-2 items-center">
                             {product.docs_url && (
-                                <LemonButton
+                                <Button
                                     icon={<IconDocument />}
                                     size="small"
                                     to={product.docs_url}
@@ -161,27 +161,27 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                             {product.contact_support ? (
                                 <>
                                     {product.subscribed && <p className="m-0">Need to manage your plan?</p>}
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         to="mailto:sales@hanzo.ai?subject=Enterprise%20plan%20request"
                                     >
                                         Get in touch
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             ) : (
                                 product.subscribed && (
                                     <More
                                         overlay={
                                             <>
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     to="https://hanzo.ai/docs/billing/estimating-usage-costs#how-to-reduce-your-insights-costs"
                                                 >
                                                     Learn how to reduce your bill
-                                                </LemonButton>
+                                                </Button>
                                                 {billing?.subscription_level === 'custom' &&
                                                     (product.plans?.length > 0 ? (
-                                                        <LemonButton
+                                                        <Button
                                                             fullWidth
                                                             onClick={() => {
                                                                 setSurveyResponse('$survey_response_1', product.type)
@@ -189,14 +189,14 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                                             }}
                                                         >
                                                             Unsubscribe
-                                                        </LemonButton>
+                                                        </Button>
                                                     ) : (
-                                                        <LemonButton
+                                                        <Button
                                                             fullWidth
                                                             to="mailto:sales@hanzo.ai?subject=Custom%20plan%20unsubscribe%20request"
                                                         >
                                                             Contact support to unsubscribe
-                                                        </LemonButton>
+                                                        </Button>
                                                     ))}
                                             </>
                                         }
@@ -210,10 +210,10 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                 <div className="px-8 pb-8 sm:pb-0">
                     {/* Exceeded limit notice */}
                     {product.percentage_usage > 1 && (
-                        <LemonBanner className="mt-6" type="error">
+                        <Banner className="mt-6" type="error">
                             You have exceeded the {hasCustomLimitSet ? 'billing limit' : 'free tier limit'} for this
                             product.
-                        </LemonBanner>
+                        </Banner>
                     )}
 
                     {/* Combined monetary gauge for product variants - only show for subscribed users */}
@@ -285,7 +285,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                     return (
                                         <div key={variant.key}>
                                             <div className="grid grid-cols-[auto_1fr_130px_100px] gap-4 items-center">
-                                                <LemonButton
+                                                <Button
                                                     icon={
                                                         variantExpandedStates?.[variant.key] ? (
                                                             <IconChevronDown />
@@ -396,19 +396,19 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                                         'free-20240813-beta-users-initial',
                                                     ].includes(currentPlan?.plan_key || '') &&
                                                     new Date() < new Date('2024-09-04') && (
-                                                        <LemonBanner type="info" className="mb-6">
+                                                        <Banner type="info" className="mb-6">
                                                             <p>
                                                                 Free usage for beta users until September 2, 2024. Then,
                                                                 get 2 million rows free every month.
                                                             </p>
-                                                        </LemonBanner>
+                                                        </Banner>
                                                     )}
                                             </div>
                                         ) : product.tiered ? (
                                             <>
                                                 <div className="flex w-full items-center gap-x-8">
                                                     {product.subscribed && (
-                                                        <LemonButton
+                                                        <Button
                                                             icon={
                                                                 showTierBreakdown ? (
                                                                     <IconChevronDown />
@@ -518,9 +518,9 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                     )}
 
                     {product.price_description ? (
-                        <LemonBanner type="info">
+                        <Banner type="info">
                             <span>{product.price_description}</span>
-                        </LemonBanner>
+                        </Banner>
                     ) : null}
 
                     {/* Table with tiers */}
@@ -532,7 +532,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                             {/* Legacy teams addon */}
                             {product.type === 'platform_and_support' &&
                                 product.addons.find((addon) => addon.legacy_product && addon.subscribed) && (
-                                    <LemonBanner type="warning" className="my-4" hideIcon>
+                                    <Banner type="warning" className="my-4" hideIcon>
                                         <p>
                                             You're currently subscribed to our legacy{' '}
                                             {
@@ -542,13 +542,13 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                             add-on. If you'd like to move to one of our new add-ons please subscribe
                                             below.
                                         </p>
-                                    </LemonBanner>
+                                    </Banner>
                                 )}
 
                             {/* Add-ons title */}
                             <h4 className="my-4">Add-ons</h4>
                             {billing?.subscription_level == 'free' && (
-                                <LemonBanner type="warning" className="text-sm mb-4" hideIcon>
+                                <Banner type="warning" className="text-sm mb-4" hideIcon>
                                     <div className="flex justify-between items-center">
                                         <div>
                                             Add-ons are only available on paid plans. Upgrade to access these features.
@@ -564,7 +564,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                             Upgrade now
                                         </BillingUpgradeCTA>
                                     </div>
-                                </LemonBanner>
+                                </Banner>
                             )}
                             <div className="gap-y-4 flex flex-col">
                                 {visibleAddons.map((addon: BillingProductV2AddonType, i: number) => {

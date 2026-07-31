@@ -2,7 +2,7 @@ import React from 'react'
 
 import { IconClock, IconFilter, IconList, IconSort } from '@hanzo/icons'
 
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
+import { Tag } from 'lib/elements/Tag/Tag'
 import { pluralize } from 'lib/utils'
 import { humanFriendlyDurationFilter } from 'scenes/session-recordings/filters/DurationFilter'
 
@@ -42,7 +42,7 @@ function FiltersSummary({ filters }: { filters: RecordingUniversalFilters }): JS
             <CompactUniversalFiltersDisplay groupFilter={filters.filter_group} />
             {filters.filter_test_accounts && (
                 <div>
-                    <LemonTag size="small">Test accounts excluded</LemonTag>
+                    <Tag size="small">Test accounts excluded</Tag>
                 </div>
             )}
         </InsightDetailSectionDisplay>

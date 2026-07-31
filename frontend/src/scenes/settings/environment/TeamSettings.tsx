@@ -2,15 +2,15 @@ import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonLabel, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Label, Skeleton } from '@hanzo/elements'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { JSSnippet, JSSnippetV2 as JSSnippetV2Component } from 'lib/components/JSSnippet'
 import { getPublicSupportSnippet } from 'lib/components/Support/supportLogic'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Link } from 'lib/lemon-ui/Link'
+import { Field } from 'lib/elements/Field'
+import { Link } from 'lib/elements/Link'
 import { debounce, inStorybook, inStorybookTestRunner } from 'lib/utils'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -38,16 +38,16 @@ export function TeamDisplayName({ updateInline = false }: { updateInline?: boole
 
     return (
         <div className="deprecated-space-y-4 max-w-160">
-            <LemonInput value={name} onChange={handleChange} />
+            <Input value={name} onChange={handleChange} />
             {!updateInline && (
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={() => updateCurrentTeam({ name })}
                     disabled={!name || !currentTeam || name === currentTeam.name}
                     loading={currentTeamLoading}
                 >
                     Rename project
-                </LemonButton>
+                </Button>
             )}
         </div>
     )
@@ -58,8 +58,8 @@ export function WebSnippet(): JSX.Element {
 
     return currentTeamLoading && !currentTeam ? (
         <div className="deprecated-space-y-4">
-            <LemonSkeleton className="w-1/2 h-4" />
-            <LemonSkeleton repeat={3} />
+            <Skeleton className="w-1/2 h-4" />
+            <Skeleton repeat={3} />
         </div>
     ) : (
         <JSSnippet />
@@ -71,8 +71,8 @@ export function WebSnippetV2(): JSX.Element {
 
     return currentTeamLoading && !currentTeam ? (
         <div className="deprecated-space-y-4">
-            <LemonSkeleton className="w-1/2 h-4" />
-            <LemonSkeleton repeat={3} />
+            <Skeleton className="w-1/2 h-4" />
+            <Skeleton repeat={3} />
         </div>
     ) : (
         <JSSnippetV2Component />
@@ -105,7 +105,7 @@ function DebugInfoPanel(): JSX.Element | null {
             </h3>
             <p>Include this snippet when creating an issue (feature request or bug report) on GitHub.</p>
             {anyLoading ? (
-                <LemonSkeleton repeat={2} active={true} />
+                <Skeleton repeat={2} active={true} />
             ) : (
                 <CodeSnippet compact thing="debug info">
                     {getPublicSupportSnippet(region, currentOrganization, currentTeam, false)}
@@ -126,20 +126,20 @@ export function TeamVariables(): JSX.Element {
     const RESET_CONFIRMATION = 'RESET'
 
     const openDialog = (): void => {
-        LemonDialog.openForm({
+        Dialog.openForm({
             maxWidth: 480,
             title: 'Reset project token?',
             description:
                 'This will immediately invalidate your current project token. Any apps, websites, or services using it will stop sending data to Insights until you update them with the new token. This action cannot be undone.',
             initialValues: { confirmation: '' },
             content: (
-                <LemonField name="confirmation">
-                    <LemonInput
+                <Field name="confirmation">
+                    <Input
                         placeholder={`Type "${RESET_CONFIRMATION}" to confirm`}
                         autoFocus
                         data-attr="reset-api-key-confirmation-input"
                     />
-                </LemonField>
+                </Field>
             ),
             errors: {
                 confirmation: (value: string) =>
@@ -160,13 +160,13 @@ export function TeamVariables(): JSX.Element {
     return (
         <div className="space-y-4 max-w-200">
             <div className="border rounded p-4 space-y-3 bg-bg-light">
-                <LemonLabel className="mb-0">Project token</LemonLabel>
+                <Label className="mb-0">Project token</Label>
                 <CodeSnippet
                     compact
                     thing="project token"
                     actions={
                         isTeamTokenResetAvailable ? (
-                            <LemonButton icon={<IconRefresh />} noPadding onClick={openDialog} tooltip="Reset token" />
+                            <Button icon={<IconRefresh />} noPadding onClick={openDialog} tooltip="Reset token" />
                         ) : undefined
                     }
                 >
@@ -180,7 +180,7 @@ export function TeamVariables(): JSX.Element {
 
             <div className="flex gap-4 flex-wrap">
                 <div className="border rounded p-4 space-y-3 bg-bg-light flex-1 min-w-60">
-                    <LemonLabel className="mb-0">Project ID</LemonLabel>
+                    <Label className="mb-0">Project ID</Label>
                     <CodeSnippet compact thing="project ID">
                         {String(currentTeam?.id || '')}
                     </CodeSnippet>
@@ -190,7 +190,7 @@ export function TeamVariables(): JSX.Element {
                 </div>
                 {region ? (
                     <div className="border rounded p-4 space-y-3 bg-bg-light flex-1 min-w-60">
-                        <LemonLabel className="mb-0">Region</LemonLabel>
+                        <Label className="mb-0">Region</Label>
                         <CodeSnippet compact thing="project region">
                             {`${region} Cloud`}
                         </CodeSnippet>
@@ -208,11 +208,11 @@ export function TeamTimezone({ displayWarning = true }: { displayWarning?: boole
     return (
         <div className="flex flex-col sm:flex-row gap-8">
             <div className="flex flex-col gap-2 flex-1 max-w-120">
-                <LemonLabel id="timezone">Time zone</LemonLabel>
+                <Label id="timezone">Time zone</Label>
                 <TimezoneConfig displayWarning={displayWarning} />
             </div>
             <div className="flex flex-col gap-2">
-                <LemonLabel id="timezone">Week starts on</LemonLabel>
+                <Label id="timezone">Week starts on</Label>
                 <WeekStartConfig displayWarning={displayWarning} />
             </div>
         </div>
@@ -222,7 +222,7 @@ export function TeamTimezone({ displayWarning = true }: { displayWarning?: boole
 export function TeamBusinessModel(): JSX.Element {
     return (
         <div className="deprecated-space-y-2">
-            <LemonLabel id="business-model">Business model</LemonLabel>
+            <Label id="business-model">Business model</Label>
             <BusinessModelConfig />
         </div>
     )

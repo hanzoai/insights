@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
 import { IconCamera, IconPause, IconPlay, IconRewindPlay } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { isChristmas, isHalloween } from 'lib/holidays'
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconFullScreen, IconGhost, IconSanta, IconSkipEnd, IconSkipStart } from 'lib/lemon-ui/icons'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconFullScreen, IconGhost, IconSanta, IconSkipEnd, IconSkipStart } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 import {
     CommentOnRecordingButton,
@@ -48,7 +48,7 @@ function PlayPauseButton(): JSX.Element {
     }
 
     return (
-        <LemonButton
+        <Button
             size="large"
             noPadding={true}
             onClick={togglePlayPause}
@@ -67,7 +67,7 @@ function PlayPauseButton(): JSX.Element {
             ) : (
                 getPlayIcon()
             )}
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -75,7 +75,7 @@ function FullScreen(): JSX.Element {
     const { isFullScreen } = useValues(sessionRecordingPlayerLogic)
     const { setIsFullScreen } = useActions(sessionRecordingPlayerLogic)
     return (
-        <LemonButton
+        <Button
             size="xsmall"
             onClick={() => setIsFullScreen(!isFullScreen)}
             tooltip={
@@ -93,7 +93,7 @@ function SkipToStart(): JSX.Element {
     const { seekToStart } = useActions(sessionRecordingPlayerLogic)
 
     return (
-        <LemonButton
+        <Button
             size="small"
             noPadding={true}
             onClick={seekToStart}
@@ -101,7 +101,7 @@ function SkipToStart(): JSX.Element {
             data-attr="recording-skip-to-start"
         >
             <IconSkipStart className="text-2xl" />
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -167,7 +167,7 @@ function SkipToNext(): JSX.Element | null {
                 </>
             }
         >
-            <LemonButton
+            <Button
                 size="small"
                 noPadding={true}
                 onClick={() => goToRecording(false)}
@@ -175,7 +175,7 @@ function SkipToNext(): JSX.Element | null {
                 className={cn('SkipToNextButton', animate && 'SkipToNextButton--animating')}
             >
                 <IconSkipEnd className="text-2xl" />
-            </LemonButton>
+            </Button>
         </Tooltip>
     )
 }
@@ -184,7 +184,7 @@ export function Screenshot({ className }: { className?: string }): JSX.Element {
     const { takeScreenshot } = useActions(sessionRecordingPlayerLogic)
 
     return (
-        <LemonButton
+        <Button
             size="xsmall"
             onClick={(e) => {
                 e.stopPropagation()

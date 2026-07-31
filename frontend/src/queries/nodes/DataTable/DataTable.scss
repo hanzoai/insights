@@ -10,7 +10,7 @@
     }
 
     // This style makes the sticky css fail, so we need to remove it when there are pinned columns
-    .DataTable__row td:first-child:not(.LemonTable__cell--pinned, .LemonTable__header--pinned) {
+    .DataTable__row td:first-child:not(.Table__cell--pinned, .Table__header--pinned) {
         &::after {
             position: absolute;
             top: 0;
@@ -56,7 +56,7 @@
         text-overflow: clip;
         white-space: normal;
 
-        .LemonTable__header-content div {
+        .Table__header-content div {
             overflow-wrap: break-word;
             white-space: normal;
 

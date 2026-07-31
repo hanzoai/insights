@@ -4,14 +4,14 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
 import { IconCheckCircle } from '@hanzo/icons'
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconCancel, IconErrorOutline, IconTrendingFlat, IconTrendingFlatDown } from 'lib/lemon-ui/icons'
+import { Banner } from 'lib/elements/Banner'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconCancel, IconErrorOutline, IconTrendingFlat, IconTrendingFlatDown } from 'lib/elements/icons'
 import { capitalizeFirstLetter, percentage, pluralize } from 'lib/utils'
 import { funnelCorrelationDetailsLogic } from 'scenes/funnels/funnelCorrelationDetailsLogic'
 import { funnelCorrelationLogic } from 'scenes/funnels/funnelCorrelationLogic'
@@ -64,10 +64,10 @@ export function CorrelationMatrix(): JSX.Element {
         )
 
     return (
-        <LemonModal
+        <Modal
             isOpen={correlationDetailsModalOpen}
             onClose={closeCorrelationDetailsModal}
-            footer={<LemonButton onClick={closeCorrelationDetailsModal}>Dismiss</LemonButton>}
+            footer={<Button onClick={closeCorrelationDetailsModal}>Dismiss</Button>}
             title="Correlation details"
         >
             <div className="correlation-table-wrapper">
@@ -219,12 +219,12 @@ export function CorrelationMatrix(): JSX.Element {
                         </div>
                     </>
                 ) : (
-                    <LemonBanner type="error">
+                    <Banner type="error">
                         We could not load the details for this correlation value. Please recreate your funnel and try
                         again.
-                    </LemonBanner>
+                    </Banner>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

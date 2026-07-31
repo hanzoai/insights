@@ -1,6 +1,6 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -163,7 +163,7 @@ export const editCustomProductsModalLogic = kea<editCustomProductsModalLogicType
                 await api.userProductList.updateByPath({ product_path: productPath, enabled: newEnabledState })
             } catch (error) {
                 console.error('Failed to toggle product:', error)
-                lemonToast.error('Failed to toggle product. Try again?')
+                toast.error('Failed to toggle product. Try again?')
 
                 // Revert state
                 actions.setSelectedPaths(
@@ -202,7 +202,7 @@ export const editCustomProductsModalLogic = kea<editCustomProductsModalLogicType
 
             const results = await Promise.allSettled(updatePromises)
             if (results.some((result) => result.status === 'rejected')) {
-                lemonToast.error('Failed to toggle category. Try again?')
+                toast.error('Failed to toggle category. Try again?')
             }
 
             actions.loadCustomProducts()
@@ -213,7 +213,7 @@ export const editCustomProductsModalLogic = kea<editCustomProductsModalLogicType
                 actions.updateUser({ allow_sidebar_suggestions: values.allowSidebarSuggestions }) // Store is updated already
             } catch (error) {
                 console.error('Failed to save sidebar suggestions preference:', error)
-                lemonToast.error('Failed to save preference. Try again?')
+                toast.error('Failed to save preference. Try again?')
             } finally {
                 actions.setSidebarSuggestionsLoading(false)
             }
@@ -228,7 +228,7 @@ export const editCustomProductsModalLogic = kea<editCustomProductsModalLogicType
                 actions.updateUser({ shortcut_position: value })
             } catch (error) {
                 console.error('Failed to save shortcut position preference:', error)
-                lemonToast.error('Failed to save preference. Try again?')
+                toast.error('Failed to save preference. Try again?')
             } finally {
                 actions.setShortcutPositionLoading(false)
             }

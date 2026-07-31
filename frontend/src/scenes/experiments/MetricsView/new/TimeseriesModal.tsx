@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconClock, IconInfo } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonDialog, LemonDivider, LemonModal, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Button, Dialog, Divider, Modal, Link, Tooltip } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { More } from 'lib/elements/Button/More'
+import { Spinner } from 'lib/elements/Spinner'
 import { urls } from 'scenes/urls'
 
 import { ExperimentMetric, isExperimentRatioMetric } from '~/queries/schema/schema-general'
@@ -49,7 +49,7 @@ export function TimeseriesModal({
             : dayjs(experiment.start_date).isBefore(dayjs().subtract(30, 'days'))
 
     const handleRecalculate = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Recalculate timeseries data',
             content: (
                 <div>
@@ -71,7 +71,7 @@ export function TimeseriesModal({
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             width={1000}
@@ -80,20 +80,20 @@ export function TimeseriesModal({
                     <div className="flex items-center">
                         <span>Time series</span>
                     </div>
-                    <LemonDivider vertical className="h-4 self-stretch" />
+                    <Divider vertical className="h-4 self-stretch" />
                     <div className="flex items-center">
                         <MetricTitle metric={metric} />
                     </div>
-                    <LemonDivider vertical className="h-4 self-stretch" />
+                    <Divider vertical className="h-4 self-stretch" />
                     <div className="flex items-center">
                         <VariantTag variantKey={variantResult.key} />
                     </div>
                 </div>
             }
             footer={
-                <LemonButton type="secondary" onClick={onClose}>
+                <Button type="secondary" onClick={onClose}>
                     Close
-                </LemonButton>
+                </Button>
             }
         >
             <div>
@@ -109,7 +109,7 @@ export function TimeseriesModal({
                     <div>
                         {isStaleExperiment && !isRecalculating && (
                             <div className="mb-2">
-                                <LemonBanner type="warning">
+                                <Banner type="warning">
                                     <div className="flex items-center justify-between">
                                         <div className="flex-1">
                                             <div className="text-sm">
@@ -118,21 +118,21 @@ export function TimeseriesModal({
                                                 data.
                                             </div>
                                         </div>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             size="small"
                                             onClick={handleRecalculate}
                                             className="ml-4"
                                         >
                                             Recalculate
-                                        </LemonButton>
+                                        </Button>
                                     </div>
-                                </LemonBanner>
+                                </Banner>
                             </div>
                         )}
                         {isRecalculating && (
                             <div className="mb-4">
-                                <LemonBanner type="info">
+                                <Banner type="info">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <Spinner className="text-sm" />
@@ -144,7 +144,7 @@ export function TimeseriesModal({
                                             <Link onClick={() => loadTimeseries({ metric })}>Refresh</Link>
                                         </div>
                                     </div>
-                                </LemonBanner>
+                                </Banner>
                             </div>
                         )}
                         <div className="flex justify-between items-center mt-2 mb-4">
@@ -159,7 +159,7 @@ export function TimeseriesModal({
                             <More
                                 overlay={
                                     <>
-                                        <LemonButton onClick={handleRecalculate}>Recalculate</LemonButton>
+                                        <Button onClick={handleRecalculate}>Recalculate</Button>
                                     </>
                                 }
                             />
@@ -184,6 +184,6 @@ export function TimeseriesModal({
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

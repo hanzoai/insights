@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { toParams } from 'lib/utils'
 
 import { PersonType } from '~/types'
@@ -69,7 +69,7 @@ export const personDeleteModalLogic = kea<personDeleteModalLogicType>([
                     await api.delete(`api/person/${person.id}?${toParams(params)}`)
                     insights.capture('delete person', params)
 
-                    lemonToast.success(
+                    toast.success(
                         <>
                             The person <strong>{asDisplay(person)}</strong> was removed from the project.
                             {deleteEvents

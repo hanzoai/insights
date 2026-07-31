@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Skeleton } from '@hanzo/elements'
 
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 import { teamLogic } from 'scenes/teamLogic'
 
 export function DataAttributes(): JSX.Element {
@@ -14,13 +14,13 @@ export function DataAttributes(): JSX.Element {
     useEffect(() => setValue(currentTeam?.data_attributes || []), [currentTeam])
 
     if (!currentTeam) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
         <>
             <div className="deprecated-space-y-4 max-w-160">
-                <LemonInputSelect
+                <InputSelect
                     mode="multiple"
                     allowCustomValues
                     onChange={(values: string[]) => setValue(values || [])}
@@ -30,14 +30,14 @@ export function DataAttributes(): JSX.Element {
                     loading={currentTeamLoading}
                     disabled={currentTeamLoading}
                 />
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={() =>
                         updateCurrentTeam({ data_attributes: value.map((s) => s.trim()).filter((a) => a) || [] })
                     }
                 >
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

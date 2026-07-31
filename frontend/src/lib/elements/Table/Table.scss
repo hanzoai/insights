@@ -1,0 +1,381 @@
+@keyframes Table__row__highlight__animation {
+    0% {
+        background-color: var(--color-accent-highlight-secondary);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+.Table {
+    --row-base-height: auto;
+    --row-horizontal-padding: 0.5rem;
+    --table-background-color: var(--color-bg-surface-primary);
+
+    position: relative;
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    font-size: 13px;
+    background: var(--table-background-color) !important;
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius);
+
+    .WebAnalyticsDashboard &,
+    .Insight &,
+    .InsightCard__viz & {
+        // Special override for scenes where the table is primarily next to insights
+        --table-background-color: var(--color-bg-surface-primary);
+    }
+
+    .WebAnalyticsDashboard &,
+    .WebAnalyticsModal & {
+        // Special override for scenes where the surroundings provide a border
+        border: none;
+    }
+
+    &.Table--with-ribbon {
+        --row-ribbon-width: 0.25rem;
+
+        .Table__content > table > tbody > tr > :first-child {
+            position: relative;
+
+            &::after {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: var(--row-ribbon-width);
+                height: 100%;
+                content: '';
+                background: var(--row-ribbon-color);
+            }
+        }
+    }
+
+    &--xs {
+        .Table__content > table > tbody > tr > td {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+    }
+
+    &--embedded {
+        background: none !important;
+        border: none;
+        border-radius: 0;
+    }
+
+    &--stealth {
+        background: none !important;
+
+        .Table__content > table {
+            > thead {
+                background: none;
+                border-bottom: none;
+            }
+
+            > thead,
+            > tbody {
+                > tr {
+                    &:not(:first-child) {
+                        border-top: none;
+                    }
+                }
+            }
+        }
+    }
+
+    &--lowercase-header {
+        .Table__content > table {
+            > thead {
+                text-transform: none;
+                letter-spacing: normal;
+            }
+        }
+    }
+
+    &.Table--inset {
+        --row-horizontal-padding: 0.5rem;
+    }
+
+    .PaginationControl {
+        height: var(--row-base-height);
+        padding: 0.5rem;
+        border-top: 1px solid var(--color-border-primary);
+    }
+
+    a.Link {
+        color: var(--text-3000);
+
+        &:not(:disabled):hover {
+            color: var(--primary-3000-hover);
+        }
+    }
+}
+
+.Table__content > table {
+    width: 100%;
+    border-spacing: 0;
+    border-collapse: collapse;
+
+    > thead {
+        position: relative;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03125rem;
+        background: var(--table-background-color);
+
+        > tr {
+            > th {
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+                font-weight: 700;
+                text-align: left;
+
+                // box shadow as a border supports sticky headers
+                // Also it needs to be on the th - any higher and safari will not render the shadow
+                box-shadow: inset 0 -1px var(--color-border-primary);
+
+                .Button {
+                    margin: -0.5rem 0;
+                }
+            }
+
+            &.Table__row--grouping {
+                --row-base-height: 2.5rem; // Make group headers smaller for better hierarchy
+            }
+        }
+    }
+
+    > tbody {
+        > tr {
+            &:not(:first-child) {
+                border-top: 1px solid var(--color-border-primary);
+            }
+
+            &.Table__expansion {
+                position: relative;
+                background: var(--color-bg-primary);
+
+                > td {
+                    // Disable padding inside the expansion for better tailored placement of contents
+                    padding: 0 !important;
+                }
+            }
+
+            &.Table__row--status-highlighted {
+                font-weight: 600;
+                color: var(--text-3000);
+
+                > td:not(.Table__cell--sticky) {
+                    background: var(--color-accent-highlight-secondary);
+                }
+            }
+
+            &.Table__row--status-highlight-new {
+                animation: Table__row__highlight__animation 1.5s ease-out;
+            }
+
+            &:not(.Table__expansion) {
+                > td {
+                    // Make spacing of buttons tighter in tables by adding negative vertical margin
+                    .Button {
+                        margin-top: -0.25rem;
+                        margin-bottom: -0.25rem;
+                    }
+                }
+            }
+
+            > td {
+                padding-top: 0.3125rem;
+                padding-bottom: 0.3125rem;
+                color: var(--color-text-secondary);
+
+                // Cancel the vertical margin for CodeSnippet actions
+                // This is annoyingly specific, but really needed for CodeSnippet to look good in expanded table rows
+                .CodeSnippet__actions > .Button,
+                .ButtonWithSideAction__side-button > .Button {
+                    margin-top: 0;
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+
+    > thead,
+    > tbody {
+        > tr {
+            height: var(--row-base-height);
+
+            > th,
+            > td {
+                padding-right: var(--row-horizontal-padding);
+                padding-left: var(--row-horizontal-padding);
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+                &:first-child {
+                    padding-left: calc(var(--row-horizontal-padding) * 2 + var(--row-ribbon-width, 0px));
+                }
+
+                &:last-child {
+                    padding-right: calc(var(--row-horizontal-padding) * 2 + var(--row-ribbon-width, 0px));
+                }
+
+                &.Table__boundary:not(:first-of-type) {
+                    border-left: 1px solid var(--color-border-primary);
+                }
+
+                &.Table__toggle {
+                    padding-right: var(--row-horizontal-padding);
+                }
+
+                &.Table__toggle + * {
+                    border-left: none !important;
+                }
+
+                &[colspan='0'] {
+                    padding-right: 0 !important;
+
+                    // Hidden cells should not affect the width of the table
+                    padding-left: 0 !important;
+                }
+            }
+        }
+    }
+}
+
+.Table__empty-state {
+    color: var(--color-text-secondary);
+}
+
+.Table__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: var(--table-background-color);
+    opacity: 0;
+    transition: opacity 200ms ease;
+
+    .Table--loading & {
+        pointer-events: auto;
+        opacity: 0.5;
+    }
+}
+
+.Table__header {
+    cursor: default;
+
+    .Table__header-content {
+        color: var(--color-text-secondary);
+
+        .reduce-visual-noise & {
+            color: var(--color-text-tertiary) !important;
+        }
+    }
+
+    &.Table__header--actionable {
+        cursor: pointer;
+
+        &:hover {
+            &:not(:has(.Table__header--no-hover:hover)) {
+                .Table__header-content {
+                    color: var(--color-text-primary);
+                }
+            }
+        }
+
+        &:active {
+            .Table__header-content {
+                color: var(--color-text-primary);
+            }
+        }
+    }
+
+    .sorting-indicator {
+        .reduce-visual-noise & {
+            color: var(--color-text-tertiary) !important;
+            opacity: 0.5;
+        }
+    }
+
+    &:hover {
+        .sorting-indicator {
+            .reduce-visual-noise & {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+.Table__header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 1.5;
+
+    div {
+        white-space: nowrap;
+    }
+}
+
+.Table__footer {
+    cursor: default;
+    border-top: 1px solid var(--color-border-primary);
+}
+
+// NOTE: this is outside of the storybook check for 3000 selective styling
+.Table__cell--sticky {
+    background: var(--table-background-color);
+
+    .Table__row--status-highlighted &::before {
+        background: var(--color-accent-highlight-secondary);
+    }
+}
+
+.Table__header--sticky {
+    background: var(--table-background-color);
+}
+
+.Table__cell--pinned,
+.Table__header--pinned {
+    background: var(--table-background-color);
+}
+
+// Stickiness is disabled in snapshots due to flakiness
+body:not(.storybook-test-runner) {
+    .Table__header--sticky,
+    .Table__cell--sticky,
+    .Table__header--pinned,
+    .Table__cell--pinned {
+        position: sticky !important; // Important to override .Table--with-ribbon's rule, which has more specificity
+        left: 0;
+        z-index: 1;
+        overflow: visible !important;
+
+        // Replicate .scrollable style for sticky cells
+        &::before {
+            position: absolute;
+            inset: 0;
+            z-index: -1; // Place below cell content
+            clip-path: inset(0 -16px 0 0);
+            content: '';
+            box-shadow: -16px 0 16px 16px transparent;
+            transition: box-shadow 200ms ease;
+        }
+    }
+
+    .ScrollableShadows--left {
+        .Table__cell--sticky::before,
+        .Table__header--sticky::before,
+        .Table__cell--pinned::before,
+        .Table__header--pinned::before {
+            box-shadow: -16px 0 16px 16px rgb(0 0 0 / 25%);
+        }
+    }
+}

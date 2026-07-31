@@ -4,8 +4,8 @@ import { useActions, useValues } from 'kea'
 
 import { IconEmoji, IconPlay, IconRewindPlay, IconWarning } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconSkipBackward } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconSkipBackward } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 
@@ -53,7 +53,7 @@ const PlayerFrameOverlayActions = (): JSX.Element | null => {
     return (
         <div className="flex gap-1 mt-4">
             <CommentOnRecordingButton className="text-2xl text-white" data-attr="replay-overlay-comment" />
-            <LemonButton
+            <Button
                 size="xsmall"
                 icon={<IconEmoji className="text-2xl text-white" />}
                 onClick={(e) => {
@@ -86,7 +86,7 @@ const PlayerFrameOverlayContent = (): JSX.Element | null => {
                     An error occurred that is preventing this recording from being played. You can refresh the page to
                     reload the recording.
                 </div>
-                <LemonButton
+                <Button
                     onClick={() => {
                         window.location.reload()
                     }}
@@ -95,8 +95,8 @@ const PlayerFrameOverlayContent = (): JSX.Element | null => {
                     center
                 >
                     Reload
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     targetBlank
                     to="https://hanzo.ai/support?utm_medium=in-product&utm_campaign=recording-not-found"
                     type="secondary"
@@ -104,7 +104,7 @@ const PlayerFrameOverlayContent = (): JSX.Element | null => {
                     center
                 >
                     Contact support
-                </LemonButton>
+                </Button>
             </div>
         )
     }
@@ -115,14 +115,14 @@ const PlayerFrameOverlayContent = (): JSX.Element | null => {
     }
     if (pausedState) {
         content = endReached ? (
-            <LemonButton
+            <Button
                 icon={<IconRewindPlay className="text-6xl text-white" />}
                 aria-label="Rewind recording"
                 data-attr="replay-overlay-rewind"
             />
         ) : (
             <div className="flex flex-col items-center justify-center">
-                <LemonButton
+                <Button
                     icon={<IconPlay className="text-6xl text-white" />}
                     aria-label="Resume recording"
                     data-attr="replay-overlay-resume"

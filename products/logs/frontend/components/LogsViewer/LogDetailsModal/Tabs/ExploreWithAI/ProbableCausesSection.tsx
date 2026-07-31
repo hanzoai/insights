@@ -1,4 +1,4 @@
-import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Tooltip } from '@hanzo/elements'
 
 import { CONFIDENCE_CONFIG } from './constants'
 import { ProbableCause } from './types'
@@ -15,9 +15,9 @@ export function ProbableCausesSection({ causes }: ProbableCausesSectionProps): J
                     <div className="flex items-center gap-2">
                         <span className="text-muted text-xs font-mono">{index + 1}.</span>
                         <Tooltip title="AI's confidence in this hypothesis">
-                            <LemonTag type={CONFIDENCE_CONFIG[cause.confidence]?.type ?? 'muted'} size="small">
+                            <Tag type={CONFIDENCE_CONFIG[cause.confidence]?.type ?? 'muted'} size="small">
                                 {CONFIDENCE_CONFIG[cause.confidence]?.label ?? cause.confidence}
-                            </LemonTag>
+                            </Tag>
                         </Tooltip>
                         <span className="font-medium text-sm">{cause.hypothesis}</span>
                     </div>

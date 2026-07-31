@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
 
 export interface StepScreenshotThumbnailProps {
     mediaId: string
@@ -29,7 +29,7 @@ export function StepScreenshotThumbnail({ mediaId }: StepScreenshotThumbnailProp
                     onError={() => setHasError(true)}
                 />
             </button>
-            <LemonModal
+            <Modal
                 isOpen={showScreenshotModal}
                 onClose={() => setShowScreenshotModal(false)}
                 title="Element screenshot"
@@ -42,7 +42,7 @@ export function StepScreenshotThumbnail({ mediaId }: StepScreenshotThumbnailProp
                         className="max-w-full max-h-[70vh]"
                     />
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }

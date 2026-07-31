@@ -1,5 +1,5 @@
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconAreaChart } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconAreaChart } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import type { ResultBreakdownRenderProps } from './types'
@@ -13,7 +13,7 @@ type SafeResultBreakdownRenderProps = {
 
 export function ExploreAsInsightButton({ query }: SafeResultBreakdownRenderProps): JSX.Element {
     return (
-        <LemonButton
+        <Button
             className="ml-auto -translate-y-2"
             size="xsmall"
             type="primary"
@@ -22,6 +22,6 @@ export function ExploreAsInsightButton({ query }: SafeResultBreakdownRenderProps
             targetBlank
         >
             Explore as Insight
-        </LemonButton>
+        </Button>
     )
 }

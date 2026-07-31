@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput, LemonLabel, LemonSelect } from '@hanzo/lemon-ui'
+import { Input, Label, Select } from '@hanzo/elements'
 
 import { quickSurveyFormLogic } from 'scenes/surveys/quick-create/quickSurveyFormLogic'
 import { FunnelContext } from 'scenes/surveys/utils/opportunityDetection'
@@ -13,10 +13,10 @@ export function FunnelSequence({ steps }: { steps: FunnelContext['steps'] }): JS
 
     return (
         <div>
-            <LemonLabel className="mb-2">When should the survey appear?</LemonLabel>
+            <Label className="mb-2">When should the survey appear?</Label>
             <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span>User does</span>
-                <LemonSelect
+                <Select
                     value={selectedEvents?.at(0) || null}
                     onChange={(val) => {
                         const step = steps.find((s) => s.name === val) as EventsNode | undefined
@@ -30,7 +30,7 @@ export function FunnelSequence({ steps }: { steps: FunnelContext['steps'] }): JS
                     size="small"
                 />
                 <span>, but not</span>
-                <LemonSelect
+                <Select
                     value={cancelEvents?.at(0) || null}
                     onChange={(val) => {
                         const step = steps.find((s) => s.name === val) as EventsNode | undefined
@@ -48,7 +48,7 @@ export function FunnelSequence({ steps }: { steps: FunnelContext['steps'] }): JS
                     size="small"
                 />
                 <span>within</span>
-                <LemonInput
+                <Input
                     type="number"
                     min={1}
                     value={delaySeconds}

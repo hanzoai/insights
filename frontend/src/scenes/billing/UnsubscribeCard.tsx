@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
@@ -39,7 +39,7 @@ export const UnsubscribeCard = ({ product }: { product: BillingProductV2Type }):
                     </Link>
                     .
                 </p>
-                <LemonButton
+                <Button
                     status="danger"
                     type="secondary"
                     size="small"
@@ -49,7 +49,7 @@ export const UnsubscribeCard = ({ product }: { product: BillingProductV2Type }):
                     }}
                 >
                     Downgrade to free plan
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

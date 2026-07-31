@@ -13,7 +13,7 @@ import {
 import { InsightsAppToolbarEvent, calculateViewportRange } from 'lib/components/IframedToolbarBrowser/utils'
 import { heatmapDataLogic } from 'lib/components/heatmaps/heatmapDataLogic'
 import { CommonFilters, HeatmapFixedPositionMode } from 'lib/components/heatmaps/types'
-import { LemonBannerProps } from 'lib/lemon-ui/LemonBanner'
+import { BannerProps } from 'lib/elements/Banner'
 import { objectsEqual } from 'lib/utils'
 import { removeReplayIframeDataFromLocalStorage } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 
@@ -26,7 +26,7 @@ export type HeatmapsBrowserLogicProps = {
 }
 
 export interface IFrameBanner {
-    level: LemonBannerProps['type']
+    level: BannerProps['type']
     message: string | JSX.Element
 }
 

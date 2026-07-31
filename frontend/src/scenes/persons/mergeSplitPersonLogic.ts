@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
 import { PersonType } from '~/types'
@@ -45,7 +45,7 @@ export const mergeSplitPersonLogic = kea<mergeSplitPersonLogicType>([
                             : {}
                     )
                     if (splitAction.success) {
-                        lemonToast.success(
+                        toast.success(
                             'Person succesfully split. This may take up to a couple of minutes to complete.'
                         )
                         eventUsageLogic.actions.reportPersonSplit(values.person.distinct_ids.length)

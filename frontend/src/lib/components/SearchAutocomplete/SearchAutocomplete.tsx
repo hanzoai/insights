@@ -2,7 +2,7 @@ import { Fragment, forwardRef, useEffect, useRef, useState } from 'react'
 
 import { IconInfo, IconMinusSmall, IconSearch, IconX } from '@hanzo/icons'
 
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
+import { Input } from 'lib/elements/Input'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { ListBox } from 'lib/ui/ListBox/ListBox'
 import {
@@ -239,7 +239,7 @@ export const SearchAutocomplete = forwardRef<HTMLDivElement, SearchAutocompleteP
                 <PopoverPrimitive open={open} onOpenChange={setOpen}>
                     <ListBox.Item asChild virtualFocusIgnore>
                         <PopoverPrimitiveTrigger asChild>
-                            <LemonInput
+                            <Input
                                 type="text"
                                 placeholder={inputPlaceholder}
                                 className="w-full"

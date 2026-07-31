@@ -22,7 +22,7 @@ export const getAPISteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                             If you'd rather roll your own exception capturing (or if you're using a platform we don't have an SDK for), you can use the [capture API](/docs/api/capture.md) or \`capture\` method to capture an \`$exception\` event with the following properties:
                         `}
                     </Markdown>
-                    <div className="LemonMarkdown">
+                    <div className="Markdown">
                         <table className="my-4">
                             <thead>
                                 <tr>

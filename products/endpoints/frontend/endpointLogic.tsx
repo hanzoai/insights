@@ -4,8 +4,8 @@ import { router } from 'kea-router'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { Dialog } from 'lib/elements/Dialog'
+import { toast } from 'lib/elements/Toast/Toast'
 import { debounce, slugify } from 'lib/utils'
 import { permanentlyMount } from 'lib/utils/kea-logic-builders'
 import { teamLogic } from 'scenes/teamLogic'
@@ -215,7 +215,7 @@ export const endpointLogic = kea<endpointLogicType>([
                 actions.setEndpointDescription('')
                 actions.loadEndpoints()
                 insightPickerEndpointModalLogic.findMounted()?.actions.closeModal()
-                lemonToast.success(<>Endpoint created</>, {
+                toast.success(<>Endpoint created</>, {
                     button: {
                         label: 'View',
                         action: () => {
@@ -242,9 +242,9 @@ export const endpointLogic = kea<endpointLogicType>([
             },
             createEndpointFailure: ({ queryError }) => {
                 if (queryError) {
-                    lemonToast.error(`Failed to create endpoint: ${queryError}`)
+                    toast.error(`Failed to create endpoint: ${queryError}`)
                 } else {
-                    lemonToast.error('Failed to create endpoint')
+                    toast.error('Failed to create endpoint')
                 }
             },
             updateEndpoint: async ({ name, request, options }) => {
@@ -265,14 +265,14 @@ export const endpointLogic = kea<endpointLogicType>([
                     actions.loadVersions(endpointName)
                 }
                 if (options?.showViewButton) {
-                    lemonToast.success(<>Endpoint updated</>, {
+                    toast.success(<>Endpoint updated</>, {
                         button: {
                             label: 'View',
                             action: () => router.actions.push(urls.endpoint(endpointName)),
                         },
                     })
                 } else {
-                    lemonToast.success('Endpoint updated')
+                    toast.success('Endpoint updated')
                     actions.loadEndpoint(endpointName)
                 }
 
@@ -285,9 +285,9 @@ export const endpointLogic = kea<endpointLogicType>([
             },
             updateEndpointFailure: ({ queryError }) => {
                 if (queryError) {
-                    lemonToast.error(`Failed to update endpoint: ${queryError}`)
+                    toast.error(`Failed to update endpoint: ${queryError}`)
                 } else {
-                    lemonToast.error('Failed to update endpoint')
+                    toast.error('Failed to update endpoint')
                 }
             },
             deleteEndpoint: async ({ name }) => {
@@ -300,15 +300,15 @@ export const endpointLogic = kea<endpointLogicType>([
                 }
             },
             deleteEndpointSuccess: () => {
-                lemonToast.success('Endpoint deleted')
+                toast.success('Endpoint deleted')
                 actions.loadEndpoints()
             },
             deleteEndpointFailure: () => {
-                lemonToast.error('Failed to delete endpoint')
+                toast.error('Failed to delete endpoint')
             },
             confirmToggleActive: ({ endpoint }) => {
                 const isActivating = !endpoint.is_active
-                LemonDialog.open({
+                Dialog.open({
                     title: isActivating ? 'Activate endpoint?' : 'Deactivate endpoint?',
                     content: (
                         <div className="text-sm text-secondary">

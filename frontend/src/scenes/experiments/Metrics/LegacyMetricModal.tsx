@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDialog, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Dialog, Modal, Select } from '@hanzo/elements'
 
 import { ExperimentFunnelsQuery, ExperimentTrendsQuery } from '~/queries/schema/schema-general'
 import { InsightType } from '~/types'
@@ -45,18 +45,18 @@ export function LegacyMetricModal({ isSecondary }: { isSecondary?: boolean }): J
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isSecondary ? isSecondaryMetricModalOpen : isPrimaryMetricModalOpen}
             onClose={onClose}
             width={1000}
             title="Edit experiment metric"
             footer={
                 <div className="flex items-center w-full">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         status="danger"
                         onClick={() => {
-                            LemonDialog.open({
+                            Dialog.open({
                                 title: 'Delete this metric?',
                                 content: <div className="text-sm text-secondary">This action cannot be undone.</div>,
                                 primaryButton: {
@@ -81,12 +81,12 @@ export function LegacyMetricModal({ isSecondary }: { isSecondary?: boolean }): J
                         }}
                     >
                         Delete
-                    </LemonButton>
+                    </Button>
                     <div className="flex items-center gap-2 ml-auto">
-                        <LemonButton form="edit-experiment-goal-form" type="secondary" onClick={onClose}>
+                        <Button form="edit-experiment-goal-form" type="secondary" onClick={onClose}>
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             disabledReason={
                                 insightType === InsightType.FUNNELS &&
                                 funnelStepsLength < 2 &&
@@ -102,14 +102,14 @@ export function LegacyMetricModal({ isSecondary }: { isSecondary?: boolean }): J
                             data-attr="create-annotation-submit"
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             }
         >
             <div className="flex items-center w-full gap-2 mb-4">
                 <span>Metric type</span>
-                <LemonSelect
+                <Select
                     data-attr="metrics-selector"
                     value={insightType}
                     onChange={(newInsightType) => {
@@ -133,6 +133,6 @@ export function LegacyMetricModal({ isSecondary }: { isSecondary?: boolean }): J
             ) : (
                 <FunnelsMetricForm isSecondary={isSecondary} />
             )}
-        </LemonModal>
+        </Modal>
     )
 }

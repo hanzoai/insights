@@ -179,7 +179,7 @@ describe('VariantsPanelLinkFeatureFlag', () => {
 
             const inactiveTag = screen.getByText('Inactive')
             expect(inactiveTag).toBeInTheDocument()
-            expect(inactiveTag.closest('.LemonTag')).toBeInTheDocument()
+            expect(inactiveTag.closest('.Tag')).toBeInTheDocument()
         })
 
         it('does not render description when name is not set', () => {
@@ -215,8 +215,8 @@ describe('VariantsPanelLinkFeatureFlag', () => {
                 />
             )
 
-            const controlTag = screen.getByText('control').closest('.LemonTag')
-            expect(controlTag).toHaveClass('LemonTag--primary')
+            const controlTag = screen.getByText('control').closest('.Tag')
+            expect(controlTag).toHaveClass('Tag--primary')
         })
 
         it('renders multiple variants', () => {

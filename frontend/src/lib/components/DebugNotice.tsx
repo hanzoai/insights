@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 import { IconCode, IconWarning, IconX } from '@hanzo/icons'
-import { Link, Tooltip } from '@hanzo/lemon-ui'
+import { Link, Tooltip } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconBranch } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconBranch } from 'lib/elements/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
 export interface DebugNoticeProps {
@@ -63,7 +63,7 @@ export function DebugNotice({ isCollapsed }: DebugNoticeProps): JSX.Element | nu
         <div className="border rounded bg-primary overflow-hidden w-full font-mono text-xs *:flex *:items-center *:gap-2 *:pl-2 *:pr-0.5 *:h-7 *:border-l-4">
             <div className="border-brand-blue justify-between">
                 <b>DEBUG mode</b>
-                <LemonButton
+                <Button
                     icon={<IconX />}
                     tooltip="Dismiss"
                     tooltipPlacement="right"

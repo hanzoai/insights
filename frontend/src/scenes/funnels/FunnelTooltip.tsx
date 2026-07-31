@@ -3,9 +3,9 @@ import { useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonRow } from 'lib/lemon-ui/LemonRow'
-import { Lettermark, LettermarkColor } from 'lib/lemon-ui/Lettermark'
+import { Divider } from 'lib/elements/Divider'
+import { Row } from 'lib/elements/Row'
+import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
 import { humanFriendlyDuration, humanFriendlyNumber, percentage } from 'lib/utils'
 import { ClickToInspectActors } from 'scenes/insights/InsightTooltip/InsightTooltip'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -52,7 +52,7 @@ export function FunnelTooltip({
                 'shadow-none': embedded,
             })}
         >
-            <LemonRow icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />} fullWidth>
+            <Row icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />} fullWidth>
                 <strong>
                     <EntityFilterInfo filter={getActionFilterFromFunnelStep(series)} allowWrap />
                     <span className="mx-1">•</span>
@@ -63,8 +63,8 @@ export function FunnelTooltip({
                         formatPropertyValueForDisplay
                     )}
                 </strong>
-            </LemonRow>
-            <LemonDivider className="my-2" />
+            </Row>
+            <Divider className="my-2" />
             <table>
                 <tbody>
                     <tr>

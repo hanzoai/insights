@@ -5,9 +5,9 @@ import { JSONViewer } from 'lib/components/JSONViewer'
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { SurveyResponseDisplay } from 'lib/components/SurveyResponseDisplay/SurveyResponseDisplay'
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonTableProps } from 'lib/lemon-ui/LemonTable'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { TableProps } from 'lib/elements/Table'
+import { Link } from 'lib/elements/Link'
 
 import { KNOWN_PROMOTED_PROPERTY_PARENTS } from '~/taxonomy/taxonomy'
 import { PropertyDefinitionType } from '~/types'
@@ -17,7 +17,7 @@ import { EvaluationDisplay } from 'products/llm_analytics/frontend/ConversationD
 
 interface EventDetailsProps {
     event: ErrorPropertyTabEvent
-    tableProps?: Partial<LemonTableProps<Record<string, any>>>
+    tableProps?: Partial<TableProps<Record<string, any>>>
 }
 
 export function EventDetails({ event, tableProps }: EventDetailsProps): JSX.Element {
@@ -83,10 +83,10 @@ export function EventDetails({ event, tableProps }: EventDetailsProps): JSX.Elem
                     case 'exception_properties':
                         return (
                             <div className="mx-3 -mt-4">
-                                <LemonBanner type="info" dismissKey="event-details-exception-properties-why-banner">
+                                <Banner type="info" dismissKey="event-details-exception-properties-why-banner">
                                     These are the internal properties that Insights uses to display information about
                                     exceptions.
-                                </LemonBanner>
+                                </Banner>
                                 <PropertiesTable
                                     type={PropertyDefinitionType.Event}
                                     properties={properties}

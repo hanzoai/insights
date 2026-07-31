@@ -3,12 +3,12 @@ import insights from '@hanzo/insights'
 import { useState } from 'react'
 
 import { IconCheck, IconPencil, IconX } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton, LemonTag, LemonTextAreaMarkdown } from '@hanzo/lemon-ui'
+import { Button, Skeleton, Tag, TextAreaMarkdown } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { dayjs } from 'lib/dayjs'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
-import { LemonWidget } from 'lib/lemon-ui/LemonWidget/LemonWidget'
+import { Markdown } from 'lib/elements/Markdown'
+import { Widget } from 'lib/elements/Widget/Widget'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -32,29 +32,29 @@ export function UserInterview(): JSX.Element {
         return (
             <div className="@container">
                 <div className="grid grid-cols-1 items-start gap-4 @4xl:grid-cols-3">
-                    <LemonWidget title="Summary" className="col-span-2">
+                    <Widget title="Summary" className="col-span-2">
                         <div className="space-y-1.5 p-3">
-                            <LemonSkeleton.Text className="h-6 w-[20%]" />
-                            <LemonSkeleton.Text className="h-3 w-[60%]" />
-                            <LemonSkeleton.Text className="h-3 w-[70%]" />
-                            <LemonSkeleton.Text className="h-3 w-[80%]" />
-                            <LemonSkeleton.Text className="h-3 w-[40%]" />
-                            <LemonSkeleton.Text className="h-3 w-[55%]" />
-                            <LemonSkeleton.Text className="h-3 w-[65%]" />
+                            <Skeleton.Text className="h-6 w-[20%]" />
+                            <Skeleton.Text className="h-3 w-[60%]" />
+                            <Skeleton.Text className="h-3 w-[70%]" />
+                            <Skeleton.Text className="h-3 w-[80%]" />
+                            <Skeleton.Text className="h-3 w-[40%]" />
+                            <Skeleton.Text className="h-3 w-[55%]" />
+                            <Skeleton.Text className="h-3 w-[65%]" />
                         </div>
-                    </LemonWidget>
-                    <LemonWidget title="Transcript" className="col-span-1">
+                    </Widget>
+                    <Widget title="Transcript" className="col-span-1">
                         <div className="space-y-1.5 p-3">
-                            <LemonSkeleton.Text className="h-3 w-[80%]" />
-                            <LemonSkeleton.Text className="h-3 w-[40%]" />
-                            <LemonSkeleton.Text className="h-3 w-[60%]" />
-                            <LemonSkeleton.Text className="h-3 w-[70%]" />
-                            <LemonSkeleton.Text className="h-3 w-[80%]" />
-                            <LemonSkeleton.Text className="h-3 w-[40%]" />
-                            <LemonSkeleton.Text className="h-3 w-[60%]" />
-                            <LemonSkeleton.Text className="h-3 w-[70%]" />
+                            <Skeleton.Text className="h-3 w-[80%]" />
+                            <Skeleton.Text className="h-3 w-[40%]" />
+                            <Skeleton.Text className="h-3 w-[60%]" />
+                            <Skeleton.Text className="h-3 w-[70%]" />
+                            <Skeleton.Text className="h-3 w-[80%]" />
+                            <Skeleton.Text className="h-3 w-[40%]" />
+                            <Skeleton.Text className="h-3 w-[60%]" />
+                            <Skeleton.Text className="h-3 w-[70%]" />
                         </div>
-                    </LemonWidget>
+                    </Widget>
                 </div>
             </div>
         )
@@ -68,20 +68,20 @@ export function UserInterview(): JSX.Element {
         <div className="@container">
             <InterviewMetadata interview={userInterview} />
             <div className="grid grid-cols-1 items-start gap-4 @4xl:grid-cols-3">
-                <LemonWidget
+                <Widget
                     title="Summary"
                     className="col-span-2"
                     actions={
                         summaryInEditing !== null ? (
                             <>
-                                <LemonButton
+                                <Button
                                     size="xsmall"
                                     icon={<IconX />}
                                     tooltip="Discard changes"
                                     onClick={() => setSummaryInEditing(null)}
                                     disabledReason={userInterviewLoading ? 'Saving…' : undefined}
                                 />
-                                <LemonButton
+                                <Button
                                     size="xsmall"
                                     icon={<IconCheck />}
                                     tooltip="Save"
@@ -96,7 +96,7 @@ export function UserInterview(): JSX.Element {
                                 />
                             </>
                         ) : (
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 icon={<IconPencil />}
                                 onClick={() => setSummaryInEditing(userInterview.summary || '')}
@@ -105,19 +105,19 @@ export function UserInterview(): JSX.Element {
                     }
                 >
                     {summaryInEditing !== null ? (
-                        <LemonTextAreaMarkdown
+                        <TextAreaMarkdown
                             value={summaryInEditing}
                             onChange={(newValue) => setSummaryInEditing(newValue)}
                             className="pb-2 px-3"
                         />
                     ) : (
-                        <LemonMarkdown className="p-3">
+                        <Markdown className="p-3">
                             {userInterview.summary || '_No summary available._'}
-                        </LemonMarkdown>
+                        </Markdown>
                     )}
-                </LemonWidget>
+                </Widget>
                 <div className="col-span-1 flex flex-col gap-y-4">
-                    <LemonWidget title="Participants">
+                    <Widget title="Participants">
                         <div className="p-3 flex flex-col gap-y-2">
                             {userInterview.interviewee_emails.map((interviewee_email) => (
                                 <PersonDisplay
@@ -132,12 +132,12 @@ export function UserInterview(): JSX.Element {
                                 />
                             ))}
                         </div>
-                    </LemonWidget>
-                    <LemonWidget title="Transcript">
-                        <LemonMarkdown className="p-3">
+                    </Widget>
+                    <Widget title="Transcript">
+                        <Markdown className="p-3">
                             {userInterview.transcript || '_No transcript available._'}
-                        </LemonMarkdown>
-                    </LemonWidget>
+                        </Markdown>
+                    </Widget>
                 </div>
             </div>
         </div>
@@ -148,9 +148,9 @@ function InterviewMetadata({ interview }: { interview: UserInterviewType }): JSX
     return (
         <header className="flex gap-x-2 gap-y-1 flex-wrap items-center">
             {interview.created_at && (
-                <LemonTag className="bg-bg-light">
+                <Tag className="bg-bg-light">
                     Created: {dayjs(interview.created_at).format('YYYY-MM-DD HH:mm')}
-                </LemonTag>
+                </Tag>
             )}
         </header>
     )

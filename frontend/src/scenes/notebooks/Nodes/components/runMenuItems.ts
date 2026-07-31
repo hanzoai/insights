@@ -1,8 +1,8 @@
-import { LemonMenuItems } from '@hanzo/lemon-ui'
+import { MenuItems } from '@hanzo/elements'
 
 export type NotebookRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
 
-export const buildRunMenuItems = (onRun: (mode: NotebookRunMode) => void): LemonMenuItems => [
+export const buildRunMenuItems = (onRun: (mode: NotebookRunMode) => void): MenuItems => [
     {
         label: 'Run (auto)',
         onClick: () => onRun('auto'),

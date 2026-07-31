@@ -1,10 +1,10 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { IconErrorOutline } from 'lib/lemon-ui/icons'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { SceneExport } from 'scenes/sceneTypes'
 
 export const scene: SceneExport = {
@@ -39,7 +39,7 @@ export function VercelLinkError(): JSX.Element {
                 <p>To complete Vercel SSO, please log out and sign in with the correct account.</p>
             </div>
             <div className="flex flex-col gap-2">
-                <LemonButton
+                <Button
                     fullWidth
                     type="primary"
                     center
@@ -48,10 +48,10 @@ export function VercelLinkError(): JSX.Element {
                     }}
                 >
                     {expectedEmail ? `Log out and continue with ${expectedEmail}` : 'Log out and continue'}
-                </LemonButton>
-                <LemonButton fullWidth type="secondary" center to="/">
+                </Button>
+                <Button fullWidth type="secondary" center to="/">
                     Cancel
-                </LemonButton>
+                </Button>
             </div>
         </BridgePage>
     )

@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonBanner, LemonButton, LemonLabel, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Label, Modal, Link } from '@hanzo/elements'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Table } from 'lib/elements/Table'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { NodeKind } from '~/queries/schema/schema-general'
@@ -60,7 +60,7 @@ export function LegacySharedMetricModal({ isSecondary }: { isSecondary?: boolean
     ).sort()
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             width={500}
@@ -69,7 +69,7 @@ export function LegacySharedMetricModal({ isSecondary }: { isSecondary?: boolean
                 <div className="flex justify-between w-full">
                     <div>
                         {editingSharedMetricId && (
-                            <LemonButton
+                            <Button
                                 status="danger"
                                 onClick={() => {
                                     removeSharedMetricFromExperiment(editingSharedMetricId)
@@ -78,17 +78,17 @@ export function LegacySharedMetricModal({ isSecondary }: { isSecondary?: boolean
                                 type="secondary"
                             >
                                 Remove from experiment
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                     <div className="flex gap-2">
-                        <LemonButton onClick={onClose} type="secondary">
+                        <Button onClick={onClose} type="secondary">
                             Cancel
-                        </LemonButton>
+                        </Button>
                         {/* Changing the existing metric is a pain because saved metrics are stored separately */}
                         {/* Only allow deletion for now */}
                         {mode === 'create' && (
-                            <LemonButton
+                            <Button
                                 onClick={() => {
                                     addSharedMetricsToExperiment(selectedMetricIds, {
                                         type: isSecondary ? 'secondary' : 'primary',
@@ -99,7 +99,7 @@ export function LegacySharedMetricModal({ isSecondary }: { isSecondary?: boolean
                                 disabledReason={addSharedMetricDisabledReason()}
                             >
                                 {selectedMetricIds.length < 2 ? 'Add metric' : 'Add metrics'}
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -110,17 +110,17 @@ export function LegacySharedMetricModal({ isSecondary }: { isSecondary?: boolean
                     {availableSharedMetrics.length > 0 ? (
                         <>
                             {experiment.saved_metrics.length > 0 && (
-                                <LemonBanner type="info">
+                                <Banner type="info">
                                     {`Hiding ${experiment.saved_metrics.length} shared ${
                                         experiment.saved_metrics.length > 1 ? 'metrics' : 'metric'
                                     } already in use with this experiment.`}
-                                </LemonBanner>
+                                </Banner>
                             )}
                             {availableTags.length > 0 && (
                                 <div className="flex flex-wrap gap-2">
-                                    <LemonLabel>Quick select:</LemonLabel>
+                                    <Label>Quick select:</Label>
                                     {availableTags.map((tag: string, index: number) => (
-                                        <LemonButton
+                                        <Button
                                             key={index}
                                             size="xsmall"
                                             type="secondary"
@@ -133,11 +133,11 @@ export function LegacySharedMetricModal({ isSecondary }: { isSecondary?: boolean
                                             }}
                                         >
                                             {tag}
-                                        </LemonButton>
+                                        </Button>
                                     ))}
                                 </div>
                             )}
-                            <LemonTable
+                            <Table
                                 dataSource={availableSharedMetrics}
                                 columns={[
                                     {
@@ -192,19 +192,19 @@ export function LegacySharedMetricModal({ isSecondary }: { isSecondary?: boolean
                                 ]}
                                 footer={
                                     <div className="flex items-center justify-center m-2">
-                                        <LemonButton
+                                        <Button
                                             to={`${urls.experiments()}?tab=shared-metrics`}
                                             size="xsmall"
                                             type="tertiary"
                                         >
                                             See all shared metrics
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 }
                             />
                         </>
                     ) : (
-                        <LemonBanner
+                        <Banner
                             className="w-full"
                             type="info"
                             action={{
@@ -215,7 +215,7 @@ export function LegacySharedMetricModal({ isSecondary }: { isSecondary?: boolean
                             {compatibleSharedMetrics.length > 0
                                 ? 'All of your shared metrics are already in this experiment.'
                                 : "You don't have any shared metrics that match the experiment type. Shared metrics let you create reusable metrics that you can quickly add to any experiment."}
-                        </LemonBanner>
+                        </Banner>
                     )}
                 </div>
             )}
@@ -252,6 +252,6 @@ export function LegacySharedMetricModal({ isSecondary }: { isSecondary?: boolean
                     })()}
                 </div>
             )}
-        </LemonModal>
+        </Modal>
     )
 }

@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 
 import { IconDatabase, IconPlus, IconRefresh } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTable, LemonTableColumn } from 'lib/lemon-ui/LemonTable'
-import { LemonTag, LemonTagType } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Table, TableColumn } from 'lib/elements/Table'
+import { Tag, TagType } from 'lib/elements/Tag/Tag'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
@@ -29,7 +29,7 @@ export const scene: SceneExport = {
     logic: materializedColumnsLogic,
 }
 
-type SlotColumn = LemonTableColumn<MaterializedColumnSlot, keyof MaterializedColumnSlot | undefined>
+type SlotColumn = TableColumn<MaterializedColumnSlot, keyof MaterializedColumnSlot | undefined>
 
 export function MaterializedColumns(): JSX.Element {
     const { user } = useValues(userLogic)
@@ -53,7 +53,7 @@ export function MaterializedColumns(): JSX.Element {
     const typeColumn: SlotColumn = {
         title: 'Type',
         render: function Render(_, slot: MaterializedColumnSlot): JSX.Element {
-            return <LemonTag>{slot.property_type}</LemonTag>
+            return <Tag>{slot.property_type}</Tag>
         },
     }
 
@@ -85,16 +85,16 @@ export function MaterializedColumns(): JSX.Element {
     const stateColumn: SlotColumn = {
         title: 'State',
         render: function Render(_, slot: MaterializedColumnSlot): JSX.Element {
-            const type: LemonTagType =
+            const type: TagType =
                 slot.state === MaterializedColumnSlotState.READY
                     ? 'success'
                     : slot.state === MaterializedColumnSlotState.ERROR
                       ? 'danger'
                       : 'warning'
             return (
-                <LemonTag type={type} className="uppercase">
+                <Tag type={type} className="uppercase">
                     {slot.state}
-                </LemonTag>
+                </Tag>
             )
         },
     }
@@ -125,7 +125,7 @@ export function MaterializedColumns(): JSX.Element {
         title: '',
         render: function Render(_, slot: MaterializedColumnSlot): JSX.Element {
             return (
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     status="danger"
@@ -137,7 +137,7 @@ export function MaterializedColumns(): JSX.Element {
                     }
                 >
                     Delete
-                </LemonButton>
+                </Button>
             )
         },
     }
@@ -209,31 +209,31 @@ export function MaterializedColumns(): JSX.Element {
                             </div>
                         </div>
 
-                        <LemonDivider />
+                        <Divider />
 
                         <div className="flex justify-between items-center">
                             <h3 className="text-lg font-semibold">Materialized Slots</h3>
                             <div className="flex gap-2">
-                                <LemonButton
+                                <Button
                                     icon={slotsLoading ? <Spinner /> : <IconRefresh />}
                                     onClick={loadSlots}
                                     type="secondary"
                                     size="small"
                                 >
                                     Refresh
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     icon={<IconPlus />}
                                     onClick={() => setShowCreateModal(true)}
                                     type="primary"
                                     size="small"
                                 >
                                     Assign Slot
-                                </LemonButton>
+                                </Button>
                             </div>
                         </div>
 
-                        <LemonTable
+                        <Table
                             loading={slotsLoading}
                             columns={columns}
                             dataSource={slots}
@@ -241,7 +241,7 @@ export function MaterializedColumns(): JSX.Element {
                             emptyState="No materialized slots assigned yet. Click 'Assign Slot' to get started."
                         />
 
-                        <LemonDivider />
+                        <Divider />
 
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Auto-Materialized Properties</h3>
@@ -258,9 +258,9 @@ export function MaterializedColumns(): JSX.Element {
                             ) : (
                                 <div className="flex flex-wrap gap-2">
                                     {autoMaterializedColumns.map((column: AutoMaterializedColumn) => (
-                                        <LemonTag key={column.column_name} type="default">
+                                        <Tag key={column.column_name} type="default">
                                             {column.property_name}
-                                        </LemonTag>
+                                        </Tag>
                                     ))}
                                 </div>
                             )}

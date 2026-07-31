@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDialog, LemonInput, LemonTable } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Table } from '@hanzo/elements'
 
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { DataWarehouseSourceIcon, mapUrlToProvider } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 import { urls } from 'scenes/urls'
 
@@ -18,9 +18,9 @@ export function DataWarehouseSelfManagedSourcesTable(): JSX.Element {
     return (
         <div>
             <div className="flex gap-2 justify-between items-center mb-4">
-                <LemonInput type="search" placeholder="Search..." onChange={setSearchTerm} value={searchTerm} />
+                <Input type="search" placeholder="Search..." onChange={setSearchTerm} value={searchTerm} />
             </div>
-            <LemonTable
+            <Table
                 id="self-managed-sources"
                 dataSource={filteredSelfManagedTables}
                 pagination={{ pageSize: 10 }}
@@ -36,7 +36,7 @@ export function DataWarehouseSelfManagedSourcesTable(): JSX.Element {
                         dataIndex: 'name',
                         key: 'name',
                         render: (_, item: DatabaseSchemaDataWarehouseTable) => (
-                            <LemonTableLink
+                            <TableLink
                                 to={urls.dataWarehouseSource(`self-managed-${item.id}`)}
                                 title={item.name}
                             />
@@ -46,19 +46,19 @@ export function DataWarehouseSelfManagedSourcesTable(): JSX.Element {
                         key: 'actions',
                         render: (_, item: DatabaseSchemaDataWarehouseTable) => (
                             <div className="flex flex-row justify-end">
-                                <LemonButton
+                                <Button
                                     data-attr={`refresh-data-warehouse-${item.name}`}
                                     key={`refresh-data-warehouse-${item.name}`}
                                     onClick={() => refreshSelfManagedTableSchema(item.id)}
                                 >
                                     Update schema from source
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     status="danger"
                                     data-attr={`delete-data-warehouse-${item.name}`}
                                     key={`delete-data-warehouse-${item.name}`}
                                     onClick={() => {
-                                        LemonDialog.open({
+                                        Dialog.open({
                                             title: 'Delete table?',
                                             description:
                                                 'Table deletion cannot be undone. All views and joins related to this table will be deleted.',
@@ -77,7 +77,7 @@ export function DataWarehouseSelfManagedSourcesTable(): JSX.Element {
                                     }}
                                 >
                                     Delete
-                                </LemonButton>
+                                </Button>
                             </div>
                         ),
                     },

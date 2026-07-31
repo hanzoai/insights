@@ -3,8 +3,8 @@ import { lazyLoaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { LemonSelectOptions } from 'lib/lemon-ui/LemonSelect/LemonSelect'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { SelectOptions } from 'lib/elements/Select/Select'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { InsightVizNode } from '~/queries/schema/schema-general'
 import { isInsightVizNode } from '~/queries/utils'
@@ -80,20 +80,20 @@ export const customerJourneysLogic = kea<customerJourneysLogicType>([
             actions.selectFirstJourneyIfNeeded(journeys)
         },
         addJourneySuccess: ({ journeys }) => {
-            lemonToast.success('Customer journey created')
+            toast.success('Customer journey created')
             actions.selectFirstJourneyIfNeeded(journeys)
         },
         addJourneyFailure: ({ error }) => {
             insights.captureException(error)
-            lemonToast.error(error || 'Failed to create customer journey')
+            toast.error(error || 'Failed to create customer journey')
         },
         deleteJourneySuccess: ({ journeys }) => {
-            lemonToast.success('Customer journey deleted')
+            toast.success('Customer journey deleted')
             actions.selectFirstJourneyIfNeeded(journeys)
         },
         deleteJourneyFailure: ({ error }) => {
             insights.captureException(error)
-            lemonToast.error('Failed to delete customer journey')
+            toast.error('Failed to delete customer journey')
         },
         selectFirstJourneyIfNeeded: ({ journeys }) => {
             if (journeys.length > 0) {
@@ -113,7 +113,7 @@ export const customerJourneysLogic = kea<customerJourneysLogicType>([
     selectors({
         journeyOptions: [
             (s) => [s.journeys],
-            (journeys): LemonSelectOptions<string> =>
+            (journeys): SelectOptions<string> =>
                 journeys.map((journey) => ({
                     value: journey.id,
                     label: journey.name,

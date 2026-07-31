@@ -1,4 +1,4 @@
-import { LemonDialog } from '@hanzo/lemon-ui'
+import { Dialog } from '@hanzo/elements'
 
 import { Survey } from '~/types'
 
@@ -6,7 +6,7 @@ import { isSurveyRunning } from './utils'
 
 export function openDeleteSurveyDialog(survey: Pick<Survey, 'start_date'>, onConfirm: () => void): void {
     const isDraft = !survey.start_date
-    LemonDialog.open({
+    Dialog.open({
         title: 'Permanently delete this survey?',
         content: isDraft ? (
             <div className="text-sm text-secondary">
@@ -38,7 +38,7 @@ export function openDeleteSurveyDialog(survey: Pick<Survey, 'start_date'>, onCon
 
 export function openArchiveSurveyDialog(survey: Pick<Survey, 'start_date' | 'end_date'>, onConfirm: () => void): void {
     const isRunning = isSurveyRunning(survey)
-    LemonDialog.open({
+    Dialog.open({
         title: 'Archive this survey?',
         content: isRunning ? (
             <div className="text-sm text-secondary">

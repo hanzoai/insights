@@ -3,19 +3,19 @@ import { useEffect, useState } from 'react'
 
 import { IconPlus, IconRefresh, IconTrash } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInput,
-    LemonModal,
-    LemonSelect,
-    LemonSkeleton,
-    LemonTable,
-    LemonTag,
+    Button,
+    Input,
+    Modal,
+    Select,
+    Skeleton,
+    Table,
+    Tag,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { IconKey } from 'lib/lemon-ui/icons'
+import { TableColumns } from 'lib/elements/Table'
+import { IconKey } from 'lib/elements/icons'
 
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
@@ -56,7 +56,7 @@ function StateTag({ state, errorMessage }: { state: LLMProviderKeyState; errorMe
             break
     }
 
-    const tag = <LemonTag type={tagProps.type}>{tagProps.children}</LemonTag>
+    const tag = <Tag type={tagProps.type}>{tagProps.children}</Tag>
 
     if (errorMessage && (state === 'invalid' || state === 'error')) {
         return <Tooltip title={errorMessage}>{tag}</Tooltip>
@@ -212,31 +212,31 @@ function AddKeyModal(): JSX.Element {
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={newKeyModalOpen}
             onClose={handleClose}
             title="Add API key"
             width={480}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={handleClose}>
+                    <Button type="secondary" onClick={handleClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={handleSubmit}
                         loading={providerKeysLoading}
                         disabled={!isValid}
                     >
                         Add key
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="space-y-4">
                 <div>
                     <label className="text-sm font-medium">Provider</label>
-                    <LemonSelect
+                    <Select
                         value={provider}
                         onChange={handleProviderChange}
                         options={[
@@ -252,7 +252,7 @@ function AddKeyModal(): JSX.Element {
                 </div>
                 <div>
                     <label className="text-sm font-medium">Name</label>
-                    <LemonInput
+                    <Input
                         value={name}
                         onChange={setName}
                         placeholder="e.g. Production key"
@@ -263,7 +263,7 @@ function AddKeyModal(): JSX.Element {
                 </div>
                 <div>
                     <label className="text-sm font-medium">API key</label>
-                    <LemonInput
+                    <Input
                         value={apiKey}
                         onChange={handleApiKeyChange}
                         onBlur={handleApiKeyBlur}
@@ -281,7 +281,7 @@ function AddKeyModal(): JSX.Element {
                     />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -324,23 +324,23 @@ function EditKeyModal({ keyToEdit }: { keyToEdit: LLMProviderKey }): JSX.Element
     const isValid = name.length > 0 && keyValidated
 
     return (
-        <LemonModal
+        <Modal
             isOpen
             onClose={handleClose}
             title="Edit API key"
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={handleClose}>
+                    <Button type="secondary" onClick={handleClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={handleSubmit}
                         loading={providerKeysLoading}
                         disabled={!isValid}
                     >
                         Save changes
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -348,16 +348,16 @@ function EditKeyModal({ keyToEdit }: { keyToEdit: LLMProviderKey }): JSX.Element
                 <div>
                     <label className="text-sm font-medium">Provider</label>
                     <div className="mt-1">
-                        <LemonTag type="default">{LLM_PROVIDER_LABELS[keyToEdit.provider]}</LemonTag>
+                        <Tag type="default">{LLM_PROVIDER_LABELS[keyToEdit.provider]}</Tag>
                     </div>
                 </div>
                 <div>
                     <label className="text-sm font-medium">Name</label>
-                    <LemonInput value={name} onChange={setName} className="mt-1" fullWidth />
+                    <Input value={name} onChange={setName} className="mt-1" fullWidth />
                 </div>
                 <div>
                     <label className="text-sm font-medium">API key</label>
-                    <LemonInput
+                    <Input
                         value={apiKey}
                         onChange={handleApiKeyChange}
                         onBlur={handleApiKeyBlur}
@@ -379,7 +379,7 @@ function EditKeyModal({ keyToEdit }: { keyToEdit: LLMProviderKey }): JSX.Element
                     )}
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -421,17 +421,17 @@ function DeleteKeyModal({
         })) ?? []
 
     return (
-        <LemonModal
+        <Modal
             isOpen
             onClose={handleClose}
             title="Delete API key?"
             width={480}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={handleClose}>
+                    <Button type="secondary" onClick={handleClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         status="danger"
                         onClick={handleDelete}
@@ -439,12 +439,12 @@ function DeleteKeyModal({
                         disabled={dependentConfigsLoading}
                     >
                         Delete key
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             {dependentConfigsLoading ? (
-                <LemonSkeleton className="h-20" />
+                <Skeleton className="h-20" />
             ) : (
                 <div className="space-y-4">
                     <p>
@@ -468,7 +468,7 @@ function DeleteKeyModal({
                     {hasEvaluations && hasAlternatives && (
                         <div>
                             <label className="text-sm font-medium">Replace with another key</label>
-                            <LemonSelect
+                            <Select
                                 value={replacementKeyId}
                                 onChange={setReplacementKeyId}
                                 options={replacementOptions}
@@ -491,7 +491,7 @@ function DeleteKeyModal({
                     )}
                 </div>
             )}
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -509,7 +509,7 @@ export function LLMProviderKeysSettings(): JSX.Element {
     } = useValues(llmProviderKeysLogic)
     const { setNewKeyModalOpen, validateProviderKey, setEditingKey, setKeyToDelete } = useActions(llmProviderKeysLogic)
 
-    const columns: LemonTableColumns<LLMProviderKey> = [
+    const columns: TableColumns<LLMProviderKey> = [
         {
             title: 'Name',
             key: 'name',
@@ -528,7 +528,7 @@ export function LLMProviderKeysSettings(): JSX.Element {
         {
             title: 'Provider',
             key: 'provider',
-            render: (_, key) => <LemonTag type="default">{LLM_PROVIDER_LABELS[key.provider]}</LemonTag>,
+            render: (_, key) => <Tag type="default">{LLM_PROVIDER_LABELS[key.provider]}</Tag>,
         },
         {
             title: 'Key',
@@ -568,7 +568,7 @@ export function LLMProviderKeysSettings(): JSX.Element {
                             resourceType={AccessControlResourceType.LlmAnalytics}
                             minAccessLevel={AccessControlLevel.Editor}
                         >
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="secondary"
                                 icon={<IconRefresh />}
@@ -576,22 +576,22 @@ export function LLMProviderKeysSettings(): JSX.Element {
                                 onClick={() => validateProviderKey({ id: key.id })}
                             >
                                 Validate
-                            </LemonButton>
+                            </Button>
                         </AccessControlAction>
                     )}
                     <AccessControlAction
                         resourceType={AccessControlResourceType.LlmAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton size="small" type="secondary" onClick={() => setEditingKey(key)}>
+                        <Button size="small" type="secondary" onClick={() => setEditingKey(key)}>
                             Edit
-                        </LemonButton>
+                        </Button>
                     </AccessControlAction>
                     <AccessControlAction
                         resourceType={AccessControlResourceType.LlmAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             type="secondary"
                             status="danger"
@@ -610,7 +610,7 @@ export function LLMProviderKeysSettings(): JSX.Element {
         <>
             <div className="space-y-6">
                 {isLoading ? (
-                    <LemonSkeleton className="w-full h-64" />
+                    <Skeleton className="w-full h-64" />
                 ) : (
                     <>
                         <div className="flex justify-between items-start">
@@ -618,13 +618,13 @@ export function LLMProviderKeysSettings(): JSX.Element {
                                 resourceType={AccessControlResourceType.LlmAnalytics}
                                 minAccessLevel={AccessControlLevel.Editor}
                             >
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     icon={<IconPlus />}
                                     onClick={() => setNewKeyModalOpen(true)}
                                 >
                                     Add API key
-                                </LemonButton>
+                                </Button>
                             </AccessControlAction>
                         </div>
 
@@ -645,17 +645,17 @@ export function LLMProviderKeysSettings(): JSX.Element {
                                     resourceType={AccessControlResourceType.LlmAnalytics}
                                     minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         icon={<IconPlus />}
                                         onClick={() => setNewKeyModalOpen(true)}
                                     >
                                         Add API key
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             </div>
                         ) : (
-                            <LemonTable
+                            <Table
                                 columns={columns}
                                 dataSource={providerKeys}
                                 loading={providerKeysLoading}

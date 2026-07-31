@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonDivider, LemonTabs, LemonTag, LemonTagType, Link } from '@hanzo/lemon-ui'
+import { Divider, Tabs, Tag, TagType, Link } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
@@ -288,9 +288,9 @@ export function ItemPerformanceEventDetail({ item }: ItemPerformanceEventProps):
                     <SizeDescription sizeInfo={sizeInfo} />.
                 </p>
             </>
-            <LemonDivider dashed />
+            <Divider dashed />
 
-            <LemonTabs
+            <Tabs
                 size="small"
                 activeKey={activeTab}
                 onChange={(newKey) => setActiveTab(newKey)}
@@ -301,7 +301,7 @@ export function ItemPerformanceEventDetail({ item }: ItemPerformanceEventProps):
                         content: (
                             <>
                                 <SimpleKeyValueList item={sanitizedProps} />
-                                <LemonDivider dashed />
+                                <Divider dashed />
                                 <NetworkRequestTiming performanceEvent={item} />
                             </>
                         ),
@@ -432,7 +432,7 @@ export function HeadersDisplay({
                         <h4 className="font-semibold">Request Headers</h4>
                         <SimpleKeyValueList item={request || {}} emptyMessage={emptyMessage} />
                     </div>
-                    <LemonDivider dashed />
+                    <Divider dashed />
                     <div>
                         <h4 className="font-semibold">Response Headers</h4>
                         <SimpleKeyValueList item={response || {}} emptyMessage={emptyMessage} />
@@ -460,7 +460,7 @@ export function StatusTag({ item, detailed }: { item: PerformanceEvent; detailed
 
     const statusDescription = `${item.response_status} ${friendlyHttpStatus[item.response_status] || ''}`
 
-    let statusType: LemonTagType = 'success'
+    let statusType: TagType = 'success'
     if (item.response_status >= 400 || item.response_status < 100) {
         statusType = 'warning'
     } else if (item.response_status >= 500) {
@@ -471,7 +471,7 @@ export function StatusTag({ item, detailed }: { item: PerformanceEvent; detailed
         <div className="flex gap-4 items-center justify-between overflow-hidden">
             {detailed ? <div className="font-semibold">Status code</div> : null}
             <div>
-                <LemonTag type={statusType}>{statusDescription}</LemonTag>
+                <Tag type={statusType}>{statusDescription}</Tag>
                 {detailed && fromDiskCache ? <span className="text-secondary"> (from cache)</span> : null}
             </div>
         </div>
@@ -508,7 +508,7 @@ function StatusRow({ item }: { item: PerformanceEvent }): JSX.Element | null {
                 {methodRow}
                 {statusRow}
             </div>
-            <LemonDivider dashed />
+            <Divider dashed />
         </p>
     ) : null
 }

@@ -3,15 +3,15 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import {
-    LemonBanner,
-    LemonButton,
-    LemonSkeleton,
-    LemonWidget,
+    Banner,
+    Button,
+    Skeleton,
+    Widget,
     PaginationControl,
     ProfilePicture,
-    lemonToast,
+    toast,
     usePagination,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { activityLogLogic } from 'lib/components/ActivityLog/activityLogLogic'
 import { ActivityLogItem, userNameForLogItem } from 'lib/components/ActivityLog/humanizeActivity'
@@ -43,7 +43,7 @@ function NotebookHistoryList({ onItemClick }: { onItemClick: (logItem: ActivityL
             <ul className="flex-1 overflow-y-auto p-2 deprecated-space-y-px">
                 {activityLoading ? (
                     <div className="deprecated-space-y-px">
-                        <LemonSkeleton className="w-full h-10" repeat={10} />
+                        <Skeleton className="w-full h-10" repeat={10} />
                     </div>
                 ) : (
                     activityWithChangedContent?.map((logItem: ActivityLogItem) => {
@@ -76,7 +76,7 @@ function NotebookHistoryList({ onItemClick }: { onItemClick: (logItem: ActivityL
                         return (
                             <li key={logItem.created_at}>
                                 {isButton ? (
-                                    <LemonButton
+                                    <Button
                                         fullWidth
                                         size="small"
                                         active={previewContent === changedContent}
@@ -84,7 +84,7 @@ function NotebookHistoryList({ onItemClick }: { onItemClick: (logItem: ActivityL
                                         noPadding
                                     >
                                         {buttonContent}
-                                    </LemonButton>
+                                    </Button>
                                 ) : (
                                     buttonContent
                                 )}
@@ -107,14 +107,14 @@ export function NotebookHistory(): JSX.Element {
         const content = logItem.detail.changes?.find((x) => x.field === 'content')?.after
 
         if (!content) {
-            lemonToast.error('Could not revert to this version')
+            toast.error('Could not revert to this version')
             return
         }
         setPreviewContent(content as JSONContent)
     }
 
     return (
-        <LemonWidget title="Notebook History" onClose={() => setShowHistory(false)}>
+        <Widget title="Notebook History" onClose={() => setShowHistory(false)}>
             <div className="NotebookHistory">
                 <p className="m-3">
                     Below is the history of all persisted changes. You can select any version to view how it was at that
@@ -123,7 +123,7 @@ export function NotebookHistory(): JSX.Element {
 
                 <NotebookHistoryList onItemClick={onRevert} />
             </div>
-        </LemonWidget>
+        </Widget>
     )
 }
 
@@ -145,7 +145,7 @@ export function NotebookHistoryWarning(): JSX.Element | null {
     }
 
     return (
-        <LemonBanner type="info" className="mb-6">
+        <Banner type="info" className="mb-6">
             <span className="flex items-center gap-2 flex-wrap overflow-auto">
                 <span className="flex-1 min-w-120">
                     <b>Hello time traveller!</b>
@@ -154,18 +154,18 @@ export function NotebookHistoryWarning(): JSX.Element | null {
                 </span>
 
                 <span className="flex items-center gap-2">
-                    <LemonButton type="secondary" onClick={() => clearPreviewContent()}>
+                    <Button type="secondary" onClick={() => clearPreviewContent()}>
                         Cancel
-                    </LemonButton>
+                    </Button>
 
-                    <LemonButton type="primary" onClick={onRevert}>
+                    <Button type="primary" onClick={onRevert}>
                         Revert to this version
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={onCopy}>
+                    </Button>
+                    <Button type="primary" onClick={onCopy}>
                         Create a copy
-                    </LemonButton>
+                    </Button>
                 </span>
             </span>
-        </LemonBanner>
+        </Banner>
     )
 }

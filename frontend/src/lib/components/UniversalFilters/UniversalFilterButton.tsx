@@ -5,10 +5,10 @@ import { useValues } from 'kea'
 import React from 'react'
 
 import { IconFilter, IconLogomark, IconX } from '@hanzo/icons'
-import { LemonButton, PopoverReferenceContext } from '@hanzo/lemon-ui'
+import { Button, PopoverReferenceContext } from '@hanzo/elements'
 
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
-import { IconWithCount } from 'lib/lemon-ui/icons'
+import { IconWithCount } from 'lib/elements/icons'
 import { midEllipsis } from 'lib/utils'
 
 import { cohortsModel } from '~/models/cohortsModel'
@@ -61,7 +61,7 @@ export const UniversalFilterButton = React.forwardRef<HTMLElement, UniversalFilt
                 {closable && (
                     // The context below prevents close button from going into active status when filter popover is open
                     <PopoverReferenceContext.Provider value={null}>
-                        <LemonButton
+                        <Button
                             size="xsmall"
                             icon={<IconX className="w-3 h-3" />}
                             onClick={(e) => {
@@ -113,7 +113,7 @@ const EventLabel = ({
     return (
         <div className="flex truncate  items-center deprecated-space-x-1">
             <EntityFilterInfo filter={filter} />
-            <LemonButton
+            <Button
                 size="xsmall"
                 icon={
                     <IconWithCount count={filter.properties?.length || 0} showZero={false}>

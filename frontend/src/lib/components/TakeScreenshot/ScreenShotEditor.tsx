@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { IconPencil, IconUndo } from '@hanzo/icons'
-import { LemonButton, LemonColorPicker, LemonInput, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, ColorPicker, Input, Modal, Select } from '@hanzo/elements'
 
 import { getSeriesColorPalette } from 'lib/colors'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { downloadFile } from 'lib/utils'
 
 import { FilmCameraMascot } from '../mascots'
@@ -367,7 +367,7 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
     if (isLoading) {
         return (
             <>
-                <LemonModal isOpen={isOpen} onClose={handleClose} width="auto" maxWidth="100%">
+                <Modal isOpen={isOpen} onClose={handleClose} width="auto" maxWidth="100%">
                     <div className="flex flex-col items-center justify-center py-10">
                         <FilmCameraMascot className="h-32 w-32" />
                         <div className="mt-2">
@@ -375,14 +375,14 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                             Taking a screenshot...
                         </div>
                     </div>
-                </LemonModal>
+                </Modal>
             </>
         )
     }
 
     return (
         <>
-            <LemonModal
+            <Modal
                 isOpen={isOpen}
                 onClose={handleClose}
                 title="Edit Screenshot"
@@ -392,14 +392,14 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                 footer={
                     <div className="flex justify-between items-center w-full">
                         <div className="flex gap-2 items-center">
-                            <LemonColorPicker
+                            <ColorPicker
                                 selectedColor={color}
                                 onSelectColor={(newColor) => {
                                     setColor(newColor)
                                 }}
                                 colors={getSeriesColorPalette().slice(0, 20)}
                             />
-                            <LemonSelect
+                            <Select
                                 value={lineWidth}
                                 onChange={setLineWidth}
                                 options={Array.from({ length: 10 }, (_, i) => {
@@ -416,7 +416,7 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                                     }
                                 })}
                             />
-                            <LemonButton
+                            <Button
                                 type={mode === 'draw' ? 'primary' : 'secondary'}
                                 onClick={() => {
                                     setMode('draw')
@@ -426,7 +426,7 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                                 icon={<IconPencil />}
                                 tooltip="Draw"
                             />
-                            <LemonSelect
+                            <Select
                                 value={fontSize}
                                 onChange={setFontSize}
                                 options={Array.from({ length: 20 }, (_, i) => {
@@ -434,7 +434,7 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                                     return { label: value.toString(), value }
                                 })}
                             />
-                            <LemonButton
+                            <Button
                                 type={mode === 'text' || mode === 'moveText' ? 'primary' : 'secondary'}
                                 onClick={() => {
                                     setMode('text')
@@ -442,8 +442,8 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                                 tooltip="Add or Move Text"
                             >
                                 Text
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 onClick={handleUndoLastChange}
                                 disabledReason={historyStack.length === 0 ? 'No actions to undo' : undefined}
                                 icon={<IconUndo />}
@@ -451,17 +451,17 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                             />
                         </div>
                         <div className="flex gap-2 items-center">
-                            <LemonButton type="secondary" onClick={handleClose}>
+                            <Button type="secondary" onClick={handleClose}>
                                 Cancel
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 type="primary"
                                 onClick={() => {
                                     void handleSave()
                                 }}
                             >
                                 Download
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 }
@@ -496,7 +496,7 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                                 // eslint-disable-next-line react/forbid-dom-props
                                 style={{ top: textInputPosition.y, left: textInputPosition.x }}
                             >
-                                <LemonInput
+                                <Input
                                     value={currentText}
                                     onChange={setCurrentText}
                                     onKeyDown={(e) => {
@@ -512,15 +512,15 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                                     placeholder="Type and press Enter"
                                 />
                                 <div className="flex gap-2 items-center mt-2">
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         type="primary"
                                         onClick={() => handleTextSubmit(currentText)}
                                         className="ml-1"
                                     >
                                         Add
-                                    </LemonButton>
-                                    <LemonButton
+                                    </Button>
+                                    <Button
                                         size="small"
                                         type="secondary"
                                         onClick={() => {
@@ -530,13 +530,13 @@ export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): 
                                         className="ml-1"
                                     >
                                         Cancel
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             </div>
                         )}
                     </div>
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }

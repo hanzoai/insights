@@ -1,14 +1,14 @@
 import clsx from 'clsx'
 
 import { IconAI } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { ErrorEventType } from 'lib/components/Errors/types'
 import { getExceptionAttributes, getRecordingStatus, getSessionId } from 'lib/components/Errors/utils'
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
 import { PersonDisplay, PersonIcon } from 'scenes/persons/PersonDisplay'
@@ -41,7 +41,7 @@ export function EventsTable({ query, queryKey, onEventSelect, selectedEvent }: E
 
     function renderTitle(record: ErrorEventType): JSX.Element {
         return (
-            <LemonTableLink
+            <TableLink
                 title={
                     <div className="flex gap-x-1">
                         <Link onClick={() => onEventSelect(record)} subtle className="line-clamp-1">
@@ -137,7 +137,7 @@ const Actions = (record: ErrorEventType): JSX.Element => {
                 />
             </div>
             {record.properties.$ai_trace_id && (
-                <LemonButton
+                <Button
                     size="small"
                     icon={<IconAI />}
                     onClick={(event) => {
@@ -153,7 +153,7 @@ const Actions = (record: ErrorEventType): JSX.Element => {
                     tooltip={record.properties.$ai_trace_id ? 'View LLM Trace' : undefined}
                 />
             )}
-            <LemonButton
+            <Button
                 size="small"
                 icon={<IconLink />}
                 data-attr="events-table-event-link"

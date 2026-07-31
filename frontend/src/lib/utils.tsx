@@ -19,7 +19,7 @@ import {
 } from '~/types'
 
 import { CUSTOM_OPTION_KEY } from './components/DateFilter/types'
-import { LemonTagType } from './lemon-ui/LemonTag'
+import { TagType } from './elements/Tag'
 import { getAppContext } from './utils/getAppContext'
 
 // WARNING: Be very careful importing things here. This file is heavily used and can trigger a lot of cyclic imports
@@ -1767,7 +1767,7 @@ export function hashCodeForString(s: string): number {
     return Math.abs(hash)
 }
 
-export function colorForString(s: string): LemonTagType {
+export function colorForString(s: string): TagType {
     /*
     Returns a color name for a given string, where the color will always be the same for the same string.
     */

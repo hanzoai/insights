@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconCode } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType, TaxonomicFilterValue } from 'lib/components/TaxonomicFilter/types'
 
@@ -24,7 +24,7 @@ export const InsightsFlowTaxonomicFilters = ({
     return (
         <div className="flex flex-col gap-2 p-2">
             {variables.map((variable: any) => (
-                <LemonButton
+                <Button
                     key={variable.key || variable.name}
                     size="small"
                     fullWidth
@@ -39,7 +39,7 @@ export const InsightsFlowTaxonomicFilters = ({
                     }
                 >
                     {variable.key}
-                </LemonButton>
+                </Button>
             ))}
         </div>
     )

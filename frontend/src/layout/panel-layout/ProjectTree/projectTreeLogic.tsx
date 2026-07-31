@@ -3,10 +3,10 @@ import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
 
 import { IconPlus } from '@hanzo/icons'
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { LemonTreeSelectMode, TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { TreeSelectMode, TreeDataItem } from 'lib/elements/Tree/Tree'
 
 import { breadcrumbsLogic } from '~/layout/navigation/Breadcrumbs/breadcrumbsLogic'
 import { PROJECT_TREE_KEY } from '~/layout/panel-layout/ProjectTree/ProjectTree'
@@ -142,7 +142,7 @@ export const projectTreeLogic = kea<projectTreeLogicType>([
         setEditingItemId: (id: string) => ({ id }),
         setSortMethod: (sortMethod: ProjectTreeSortMethod) => ({ sortMethod }),
         setOnlyFolders: (onlyFolders: boolean) => ({ onlyFolders }),
-        setSelectMode: (selectMode: LemonTreeSelectMode) => ({ selectMode }),
+        setSelectMode: (selectMode: TreeSelectMode) => ({ selectMode }),
         setTreeTableColumnSizes: (sizes: number[]) => ({ sizes }),
     }),
     loaders(({ actions, values }) => ({
@@ -426,7 +426,7 @@ export const projectTreeLogic = kea<projectTreeLogicType>([
             },
         ],
         selectMode: [
-            'default' as LemonTreeSelectMode,
+            'default' as TreeSelectMode,
             {
                 setSelectMode: (_, { selectMode }) => selectMode,
             },

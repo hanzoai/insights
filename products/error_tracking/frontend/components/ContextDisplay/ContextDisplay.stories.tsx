@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/react'
 
-import { LemonCard } from '@hanzo/lemon-ui'
+import { Card } from '@hanzo/elements'
 
 import { getAdditionalProperties, getExceptionAttributes } from 'lib/components/Errors/utils'
 
@@ -62,9 +62,9 @@ function ContextWrapperAllEvents({ children }: { children: (props: ContextDispla
             {eventNames.map((name: TestEventName) => {
                 const props = getProps(name)
                 return (
-                    <LemonCard key={name} hoverEffect={false} className="p-0 w-[900px]">
+                    <Card key={name} hoverEffect={false} className="p-0 w-[900px]">
                         {children(props)}
-                    </LemonCard>
+                    </Card>
                 )
             })}
         </div>

@@ -1,5 +1,5 @@
 import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { EventDetails } from '~/scenes/activity/explore/EventDetails'
 import { EventType } from '~/types'
@@ -49,21 +49,21 @@ export function LLMAnalyticsEventCard({ event, isExpanded, onToggleExpand }: LLM
                     )}
                 </div>
                 <div className="flex-1 flex items-center gap-2 flex-wrap min-w-0">
-                    <LemonTag
+                    <Tag
                         type={isGeneration ? 'success' : isEmbedding ? 'warning' : 'default'}
                         size="small"
                         className="uppercase"
                     >
                         {isGeneration ? 'Generation' : isEmbedding ? 'Embedding' : 'Span'}
-                    </LemonTag>
+                    </Tag>
                     {hasError && (
-                        <LemonTag type="danger" size="small">
+                        <Tag type="danger" size="small">
                             Error
-                        </LemonTag>
+                        </Tag>
                     )}
                     <span className="text-xs truncate">{isGeneration || isEmbedding ? model : spanName}</span>
                     {typeof latency === 'number' && (
-                        <LemonTag type="muted" size="small">
+                        <Tag type="muted" size="small">
                             {latency.toFixed(2)}s
                             {event.properties.$ai_stream &&
                                 typeof event.properties.$ai_time_to_first_token === 'number' && (
@@ -75,12 +75,12 @@ export function LLMAnalyticsEventCard({ event, isExpanded, onToggleExpand }: LLM
                                         )
                                     </span>
                                 )}
-                        </LemonTag>
+                        </Tag>
                     )}
                     {(isGeneration || isEmbedding) && typeof cost === 'number' && (
-                        <LemonTag type="muted" size="small">
+                        <Tag type="muted" size="small">
                             {formatLLMCost(cost)}
-                        </LemonTag>
+                        </Tag>
                     )}
                 </div>
             </div>

@@ -4,21 +4,21 @@ import { useRef } from 'react'
 
 import { IconBug, IconInfo, IconQuestion } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonInput,
-    LemonSegmentedButton,
-    LemonSegmentedButtonOption,
+    Banner,
+    Input,
+    SegmentedButton,
+    SegmentedButtonOption,
     Link,
     Tooltip,
-    lemonToast,
-} from '@hanzo/lemon-ui'
+    toast,
+} from '@hanzo/elements'
 
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonFileInput } from 'lib/lemon-ui/LemonFileInput/LemonFileInput'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect/LemonSelect'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
-import { IconFeedback } from 'lib/lemon-ui/icons'
+import { Field } from 'lib/elements/Field'
+import { FileInput } from 'lib/elements/FileInput/FileInput'
+import { Select } from 'lib/elements/Select/Select'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
+import { IconFeedback } from 'lib/elements/icons'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -30,7 +30,7 @@ import {
     supportLogic,
 } from './supportLogic'
 
-const SUPPORT_TICKET_OPTIONS: LemonSegmentedButtonOption<SupportTicketKind>[] = [
+const SUPPORT_TICKET_OPTIONS: SegmentedButtonOption<SupportTicketKind>[] = [
     {
         value: 'support',
         label: 'Question',
@@ -87,7 +87,7 @@ export function SupportForm(): JSX.Element | null {
             setSendSupportRequestValue('message', sendSupportRequest.message + `\n\nAttachment "${fileName}": ${url}`)
         },
         onError: (detail) => {
-            lemonToast.error(`Error uploading image: ${detail}`)
+            toast.error(`Error uploading image: ${detail}`)
         },
     })
 
@@ -110,19 +110,19 @@ export function SupportForm(): JSX.Element | null {
         >
             {!user && (
                 <>
-                    <LemonField name="name" label="Name">
-                        <LemonInput data-attr="name" placeholder="Jane" />
-                    </LemonField>
-                    <LemonField name="email" label="Email">
-                        <LemonInput data-attr="email" placeholder="your@email.com" />
-                    </LemonField>
+                    <Field name="name" label="Name">
+                        <Input data-attr="name" placeholder="Jane" />
+                    </Field>
+                    <Field name="email" label="Email">
+                        <Input data-attr="email" placeholder="your@email.com" />
+                    </Field>
                 </>
             )}
-            <LemonField name="kind" label="Message type">
-                <LemonSegmentedButton onChange={changeKind} fullWidth options={SUPPORT_TICKET_OPTIONS} />
-            </LemonField>
-            <LemonField name="target_area" label="Topic">
-                <LemonSelect
+            <Field name="kind" label="Message type">
+                <SegmentedButton onChange={changeKind} fullWidth options={SUPPORT_TICKET_OPTIONS} />
+            </Field>
+            <Field name="target_area" label="Topic">
+                <Select
                     disabledReason={
                         !user
                             ? 'Please login to your account before opening a ticket unrelated to authentication issues.'
@@ -131,27 +131,27 @@ export function SupportForm(): JSX.Element | null {
                     fullWidth
                     options={TARGET_AREA_TO_NAME}
                 />
-            </LemonField>
+            </Field>
             {sendSupportRequest.target_area === 'error_tracking' && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     This topic is for our Error Tracking <i>product</i>. If you're reporting an error in Insights please
                     choose the relevant topic so your submission is sent to the correct team.
-                </LemonBanner>
+                </Banner>
             )}
-            <LemonField
+            <Field
                 name="message"
                 label={sendSupportRequest.kind ? SUPPORT_TICKET_KIND_TO_PROMPT[sendSupportRequest.kind] : 'Content'}
             >
                 {(props) => (
                     <div ref={dropRef} className="flex flex-col gap-2" onPaste={handlePaste}>
-                        <LemonTextArea
+                        <TextArea
                             placeholder={SUPPORT_TICKET_TEMPLATES[sendSupportRequest.kind] ?? 'Type your message here'}
                             data-attr="support-form-content-input"
                             minRows={5}
                             {...props}
                         />
                         {objectStorageAvailable && !!user && (
-                            <LemonFileInput
+                            <FileInput
                                 accept="image/*"
                                 multiple={false}
                                 alternativeDropTargetRef={dropRef}
@@ -162,10 +162,10 @@ export function SupportForm(): JSX.Element | null {
                         )}
                     </div>
                 )}
-            </LemonField>
+            </Field>
             <div className="flex gap-2 flex-col">
                 <div className="flex justify-between items-center">
-                    <label className="LemonLabel">
+                    <label className="Label">
                         Severity level
                         <Tooltip title="Severity levels help us prioritize your request.">
                             <span>
@@ -181,15 +181,15 @@ export function SupportForm(): JSX.Element | null {
                         Definitions
                     </Link>
                 </div>
-                <LemonField name="severity_level">
-                    <LemonSelect
+                <Field name="severity_level">
+                    <Select
                         fullWidth
                         options={Object.entries(SEVERITY_LEVEL_TO_NAME).map(([key, value]) => ({
                             label: value,
                             value: key,
                         }))}
                     />
-                </LemonField>
+                </Field>
             </div>
         </Form>
     )

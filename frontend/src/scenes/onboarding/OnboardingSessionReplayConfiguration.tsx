@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { FilmCameraMascot } from 'lib/components/mascots'
 
@@ -48,12 +48,12 @@ export const OnboardingSessionReplayConfiguration: OnboardingStepComponentType =
                 </div>
             </div>
             <div className="mt-6 w-full flex justify-end gap-2">
-                <LemonButton type="secondary" data-attr="skip-session-replay" onClick={() => handleNext(false)}>
+                <Button type="secondary" data-attr="skip-session-replay" onClick={() => handleNext(false)}>
                     No, thanks
-                </LemonButton>
-                <LemonButton type="primary" data-attr="enable-session-replay" onClick={() => handleNext(true)}>
+                </Button>
+                <Button type="primary" data-attr="enable-session-replay" onClick={() => handleNext(true)}>
                     Enable Session Replay
-                </LemonButton>
+                </Button>
             </div>
         </OnboardingStep>
     )

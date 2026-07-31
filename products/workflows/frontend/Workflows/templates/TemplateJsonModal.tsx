@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCopy } from '@hanzo/icons'
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -14,15 +14,15 @@ export function TemplateJsonModal(props: WorkflowTemplateLogicProps = {}): JSX.E
     const { hideTemplateJsonModal } = useActions(logic)
 
     return (
-        <LemonModal
+        <Modal
             onClose={hideTemplateJsonModal}
             isOpen={templateJsonModalVisible}
             title="Template JSON"
             width="60vw"
             footer={
-                <LemonButton type="secondary" onClick={hideTemplateJsonModal}>
+                <Button type="secondary" onClick={hideTemplateJsonModal}>
                     Close
-                </LemonButton>
+                </Button>
             }
         >
             <div className="space-y-4">
@@ -32,13 +32,13 @@ export function TemplateJsonModal(props: WorkflowTemplateLogicProps = {}): JSX.E
                 </div>
                 <div className="relative">
                     <div className="absolute top-2 right-2 z-10">
-                        <LemonButton
+                        <Button
                             icon={<IconCopy />}
                             size="small"
                             onClick={() => copyToClipboard(templateJson, 'template JSON')}
                         >
                             Copy
-                        </LemonButton>
+                        </Button>
                     </div>
                     <CodeEditorResizeable
                         language="json"
@@ -51,6 +51,6 @@ export function TemplateJsonModal(props: WorkflowTemplateLogicProps = {}): JSX.E
                     />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { TextareaPrimitive } from 'lib/ui/TextareaPrimitive/TextareaPrimitive'
 
@@ -95,7 +95,7 @@ export function SceneTextarea({
             >
                 {defaultValue !== '' ? (
                     markdown ? (
-                        <LemonMarkdown lowKeyHeadings>{defaultValue}</LemonMarkdown>
+                        <Markdown lowKeyHeadings>{defaultValue}</Markdown>
                     ) : (
                         defaultValue
                     )

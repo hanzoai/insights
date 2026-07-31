@@ -1,21 +1,21 @@
 import { useActions, useValues } from 'kea'
 
 import { IconGraph, IconLifecycle, IconTrends } from '@hanzo/icons'
-import { LemonSelect, LemonSelectOptions, LemonSelectProps } from '@hanzo/lemon-ui'
+import { Select, SelectOptions, SelectProps } from '@hanzo/elements'
 
-import { Icon123, IconAreaChart, IconHeatmap, IconTableChart } from 'lib/lemon-ui/icons'
+import { Icon123, IconAreaChart, IconHeatmap, IconTableChart } from 'lib/elements/icons'
 
 import { ChartDisplayType } from '~/types'
 
 import { dataVisualizationLogic } from '../dataVisualizationLogic'
 
-interface TableDisplayProps extends Pick<LemonSelectProps<ChartDisplayType>, 'disabledReason'> {}
+interface TableDisplayProps extends Pick<SelectProps<ChartDisplayType>, 'disabledReason'> {}
 
 export const TableDisplay = ({ disabledReason }: TableDisplayProps): JSX.Element => {
     const { setVisualizationType } = useActions(dataVisualizationLogic)
     const { visualizationType } = useValues(dataVisualizationLogic)
 
-    const options: LemonSelectOptions<ChartDisplayType> = [
+    const options: SelectOptions<ChartDisplayType> = [
         {
             title: 'Table',
             options: [
@@ -64,7 +64,7 @@ export const TableDisplay = ({ disabledReason }: TableDisplayProps): JSX.Element
     ]
 
     return (
-        <LemonSelect
+        <Select
             disabledReason={disabledReason}
             value={visualizationType}
             onChange={(value) => {

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonColorButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, ColorButton, Modal } from '@hanzo/elements'
 
 import { DataColorToken } from 'lib/colors'
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
@@ -35,19 +35,19 @@ export function ResultCustomizationsModal(): JSX.Element | null {
     }
 
     return (
-        <LemonModal
+        <Modal
             data-attr="legend-entry-modal"
             isOpen={modalVisible}
             title="Customize result color"
             width={520}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={closeModal}>
+                    <Button type="secondary" onClick={closeModal}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={save}>
+                    </Button>
+                    <Button type="primary" onClick={save}>
                         Save customizations
-                    </LemonButton>
+                    </Button>
                 </>
             }
             onClose={closeModal}
@@ -65,7 +65,7 @@ export function ResultCustomizationsModal(): JSX.Element | null {
             <h3 className="l4 mt-2 mb-2">Color</h3>
             <div className="flex flex-wrap gap-1">
                 {Object.keys(theme).map((key) => (
-                    <LemonColorButton
+                    <ColorButton
                         key={key}
                         colorToken={key as DataColorToken}
                         type={key === colorToken ? 'secondary' : 'tertiary'}
@@ -78,7 +78,7 @@ export function ResultCustomizationsModal(): JSX.Element | null {
                     />
                 ))}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 

@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { QuickFilterContext } from '~/queries/schema/schema-general'
 import { QuickFilter } from '~/types'
@@ -46,7 +46,7 @@ export const quickFiltersLogic = kea<quickFiltersLogicType>([
                         contexts: [props.context],
                     })
 
-                    lemonToast.success('Quick filter created successfully')
+                    toast.success('Quick filter created successfully')
                     insights.capture(QuickFiltersEvents.QuickFilterCreated, {
                         name: payload.name,
                         property_name: payload.property_name,
@@ -58,7 +58,7 @@ export const quickFiltersLogic = kea<quickFiltersLogicType>([
                 },
                 updateFilter: async ({ id, payload }) => {
                     const updatedFilter = await api.quickFilters.update(id, payload)
-                    lemonToast.success('Quick filter updated successfully')
+                    toast.success('Quick filter updated successfully')
                     insights.capture(QuickFiltersEvents.QuickFilterUpdated, {
                         ...(payload.name && { name: payload.name }),
                         ...(payload.property_name && { property_name: payload.property_name }),
@@ -71,7 +71,7 @@ export const quickFiltersLogic = kea<quickFiltersLogicType>([
                 },
                 deleteFilter: async ({ id }) => {
                     await api.quickFilters.delete(id)
-                    lemonToast.success('Quick filter deleted successfully')
+                    toast.success('Quick filter deleted successfully')
                     return values.quickFilters.filter((f: QuickFilter) => f.id !== id)
                 },
             },

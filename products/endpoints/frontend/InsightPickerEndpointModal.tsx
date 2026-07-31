@@ -3,9 +3,9 @@ import { BindLogic } from 'kea'
 
 import { IconCode2, IconFunnels, IconPlus, IconRetention, IconTrends } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
+import { Popover } from 'lib/elements/Popover'
 import { INSIGHT_TYPES_METADATA } from 'scenes/saved-insights/SavedInsights'
 import { SavedInsightsTable } from 'scenes/saved-insights/SavedInsightsTable'
 import { addSavedInsightsModalLogic } from 'scenes/saved-insights/addSavedInsightsModalLogic'
@@ -51,7 +51,7 @@ export function InsightPickerEndpointModal({ tabId }: InsightPickerEndpointModal
     return (
         <>
             <BindLogic logic={addSavedInsightsModalLogic} props={{}}>
-                <LemonModal
+                <Modal
                     title="New insight-based endpoint"
                     onClose={closeModal}
                     isOpen={isOpen}
@@ -71,7 +71,7 @@ export function InsightPickerEndpointModal({ tabId }: InsightPickerEndpointModal
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 {QUICK_CREATE_TYPES.map(({ type, icon: Icon, label }) => (
-                                    <LemonButton
+                                    <Button
                                         key={type}
                                         type="primary"
                                         icon={<Icon />}
@@ -80,7 +80,7 @@ export function InsightPickerEndpointModal({ tabId }: InsightPickerEndpointModal
                                         data-attr={`endpoint-quick-create-${type.toLowerCase()}`}
                                     >
                                         {label}
-                                    </LemonButton>
+                                    </Button>
                                 ))}
                                 <Popover
                                     visible={showMoreInsightTypes}
@@ -90,7 +90,7 @@ export function InsightPickerEndpointModal({ tabId }: InsightPickerEndpointModal
                                             {additionalTypes.map(([type, metadata]) => {
                                                 const Icon = metadata.icon
                                                 return (
-                                                    <LemonButton
+                                                    <Button
                                                         key={type}
                                                         type="tertiary"
                                                         fullWidth
@@ -99,15 +99,15 @@ export function InsightPickerEndpointModal({ tabId }: InsightPickerEndpointModal
                                                         data-attr={`endpoint-create-${type.toLowerCase()}`}
                                                     >
                                                         {metadata.name}
-                                                    </LemonButton>
+                                                    </Button>
                                                 )
                                             })}
                                         </div>
                                     }
                                 >
-                                    <LemonButton type="secondary" onClick={() => toggleShowMoreInsightTypes()}>
+                                    <Button type="secondary" onClick={() => toggleShowMoreInsightTypes()}>
                                         More
-                                    </LemonButton>
+                                    </Button>
                                 </Popover>
                             </div>
                         </div>
@@ -124,7 +124,7 @@ export function InsightPickerEndpointModal({ tabId }: InsightPickerEndpointModal
                             />
                         </div>
                     </div>
-                </LemonModal>
+                </Modal>
             </BindLogic>
 
             {insightQuery && (

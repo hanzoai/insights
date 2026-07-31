@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonTable } from '@hanzo/lemon-ui'
+import { Button, Table } from '@hanzo/elements'
 
 import { viewLinkLogic } from 'scenes/data-warehouse/viewLinkLogic'
 
@@ -37,7 +37,7 @@ export function TableFields({ fixedFields, joinedFields, rowsRefs, tableName }: 
                 <div className="pl-4 mt-4">
                     <h4>Schema</h4>
                 </div>
-                <LemonTable
+                <Table
                     className="bg-primary rounded-none"
                     columns={[
                         {
@@ -57,7 +57,7 @@ export function TableFields({ fixedFields, joinedFields, rowsRefs, tableName }: 
             <div>
                 <div className="px-4 my-4 flex flex-row justify-between">
                     <h4>Joined Tables</h4>
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="xsmall"
                         icon={<IconPlus />}
@@ -67,9 +67,9 @@ export function TableFields({ fixedFields, joinedFields, rowsRefs, tableName }: 
                         }}
                     >
                         Add join
-                    </LemonButton>
+                    </Button>
                 </div>
-                <LemonTable
+                <Table
                     className="bg-primary rounded-none"
                     columns={[
                         {

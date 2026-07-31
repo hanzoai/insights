@@ -3,18 +3,18 @@ import { router } from 'kea-router'
 
 import { IconCopy, IconPencil } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonTable,
-    LemonTableColumn,
-    LemonTableColumns,
-    LemonTag,
+    Banner,
+    Button,
+    Table,
+    TableColumn,
+    TableColumns,
+    Tag,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -33,13 +33,13 @@ export const scene: SceneExport = {
 export function SharedMetrics(): JSX.Element {
     const { sharedMetrics, sharedMetricsLoading } = useValues(sharedMetricsLogic)
 
-    const columns: LemonTableColumns<SharedMetric> = [
+    const columns: TableColumns<SharedMetric> = [
         {
             key: 'name',
             title: 'Name',
             render: (_, sharedMetric) => {
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={sharedMetric.id ? urls.experimentsSharedMetric(sharedMetric.id) : undefined}
                         title={
                             <>
@@ -49,9 +49,9 @@ export function SharedMetrics(): JSX.Element {
                                         title="This metric uses the legacy engine, so some features and improvements may be missing."
                                         docLink="https://hanzo.ai/docs/experiments/new-experimentation-engine"
                                     >
-                                        <LemonTag type="warning" className="ml-1">
+                                        <Tag type="warning" className="ml-1">
                                             Legacy
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )}
                             </>
@@ -72,7 +72,7 @@ export function SharedMetrics(): JSX.Element {
             render: function Render(tags: SharedMetric['tags']) {
                 return tags ? <ObjectTags tags={tags} staticOnly /> : null
             },
-        } as LemonTableColumn<SharedMetric, keyof SharedMetric | undefined>,
+        } as TableColumn<SharedMetric, keyof SharedMetric | undefined>,
         {
             title: 'Type',
             key: 'type',
@@ -83,15 +83,15 @@ export function SharedMetrics(): JSX.Element {
                 return metric.query.kind === NodeKind.ExperimentTrendsQuery ? 'Trend' : 'Funnel'
             },
         },
-        createdByColumn<SharedMetric>() as LemonTableColumn<SharedMetric, keyof SharedMetric | undefined>,
-        createdAtColumn<SharedMetric>() as LemonTableColumn<SharedMetric, keyof SharedMetric | undefined>,
+        createdByColumn<SharedMetric>() as TableColumn<SharedMetric, keyof SharedMetric | undefined>,
+        createdAtColumn<SharedMetric>() as TableColumn<SharedMetric, keyof SharedMetric | undefined>,
         {
             key: 'actions',
             title: 'Actions',
             render: (_, sharedMetric) => {
                 return (
                     <div className="flex gap-1">
-                        <LemonButton
+                        <Button
                             className="max-w-72"
                             type="secondary"
                             size="xsmall"
@@ -100,7 +100,7 @@ export function SharedMetrics(): JSX.Element {
                                 router.actions.push(urls.experimentsSharedMetric(sharedMetric.id))
                             }}
                         />
-                        <LemonButton
+                        <Button
                             className="max-w-72"
                             type="secondary"
                             size="xsmall"
@@ -117,17 +117,17 @@ export function SharedMetrics(): JSX.Element {
 
     return (
         <div className="deprecated-space-y-4">
-            <LemonBanner type="info">
+            <Banner type="info">
                 Shared metrics let you create reusable metrics that you can quickly add to any experiment. They are
                 ideal for tracking key metrics like conversion rates or revenue across different experiments without
                 having to set them up each time.
-            </LemonBanner>
+            </Banner>
             <div className="flex justify-end">
-                <LemonButton size="small" type="primary" to={urls.experimentsSharedMetric('new')}>
+                <Button size="small" type="primary" to={urls.experimentsSharedMetric('new')}>
                     New shared metric
-                </LemonButton>
+                </Button>
             </div>
-            <LemonTable
+            <Table
                 columns={columns}
                 dataSource={sharedMetrics || []}
                 loading={sharedMetricsLoading}

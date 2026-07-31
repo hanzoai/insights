@@ -1,4 +1,4 @@
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Spinner } from 'lib/elements/Spinner'
 
 interface ChartLoadingStateProps {
     height: number

@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
+import { Button, Divider } from '@hanzo/elements'
 
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonSnack } from 'lib/lemon-ui/LemonSnack/LemonSnack'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { More } from 'lib/elements/Button/More'
+import { Dialog } from 'lib/elements/Dialog'
+import { Snack } from 'lib/elements/Snack/Snack'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { DashboardTemplateEditor } from 'scenes/dashboard/DashboardTemplateEditor'
 import { dashboardTemplateEditorLogic } from 'scenes/dashboard/dashboardTemplateEditorLogic'
 import { dashboardTemplatesLogic } from 'scenes/dashboard/dashboards/templates/dashboardTemplatesLogic'
@@ -21,7 +21,7 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
 
     const { user } = useValues(userLogic)
 
-    const columns: LemonTableColumns<DashboardTemplateType> = [
+    const columns: TableColumns<DashboardTemplateType> = [
         {
             title: 'Name',
             dataIndex: 'template_name',
@@ -41,9 +41,9 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
             dataIndex: 'team_id',
             render: (_, { scope }) => {
                 if (scope === 'global') {
-                    return <LemonSnack>Official</LemonSnack>
+                    return <Snack>Official</Snack>
                 }
-                return <LemonSnack>Team</LemonSnack>
+                return <Snack>Team</Snack>
             },
         },
         {
@@ -56,7 +56,7 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
                     <More
                         overlay={
                             <>
-                                <LemonButton
+                                <Button
                                     onClick={() => {
                                         if (id === undefined) {
                                             console.error('Dashboard template id not defined')
@@ -68,8 +68,8 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
                                     fullWidth
                                 >
                                     Edit
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     onClick={() => {
                                         if (id === undefined) {
                                             console.error('Dashboard template id not defined')
@@ -85,16 +85,16 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
                                     fullWidth
                                 >
                                     Make visible to {scope === 'global' ? 'this team only' : 'everyone'}
-                                </LemonButton>
+                                </Button>
 
-                                <LemonDivider />
-                                <LemonButton
+                                <Divider />
+                                <Button
                                     onClick={() => {
                                         if (id === undefined) {
                                             console.error('Dashboard template id not defined')
                                             return
                                         }
-                                        LemonDialog.open({
+                                        Dialog.open({
                                             title: 'Delete dashboard template?',
                                             description: 'This action cannot be undone.',
                                             primaryButton: {
@@ -115,7 +115,7 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
                                     }
                                 >
                                     Delete dashboard
-                                </LemonButton>
+                                </Button>
                             </>
                         }
                     />
@@ -126,7 +126,7 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
 
     return (
         <>
-            <LemonTable
+            <Table
                 data-attr="dashboards-template-table"
                 pagination={{ pageSize: 10 }}
                 dataSource={Object.values(allTemplates)}

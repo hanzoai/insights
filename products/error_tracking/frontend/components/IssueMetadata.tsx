@@ -3,7 +3,7 @@ import { PropsWithChildren, useState } from 'react'
 import { match } from 'ts-pattern'
 
 import { IconChevronRight } from '@hanzo/icons'
-import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
+import { Skeleton, Tooltip } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { humanFriendlyLargeNumber } from 'lib/utils'
@@ -147,7 +147,7 @@ function renderMetric(name: string, value: number | undefined, loading: boolean,
     return (
         <>
             {match([loading])
-                .with([true], () => <LemonSkeleton className="w-[80px] h-2" />)
+                .with([true], () => <Skeleton className="w-[80px] h-2" />)
                 .with([false], () => (
                     <Tooltip title={tooltip} delayMs={0} placement="right">
                         <div className="flex items-center gap-1">

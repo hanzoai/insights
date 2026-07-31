@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconChevronDown, IconPlay } from '@hanzo/icons'
-import { LemonButton, LemonMenuItems, LemonMenuOverlay } from '@hanzo/lemon-ui'
+import { Button, MenuItems, MenuOverlay } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -34,7 +34,7 @@ export const DuckSqlRunMenu = ({
     const duckSqlRunIconClass = isFresh ? 'text-success' : isStale ? 'text-danger' : undefined
     const duckSqlRunTooltip = `Run SQL (DuckDB) query.${queued ? ' Queued.' : isStale ? ' Stale.' : ''}`
 
-    const duckSqlRunMenuItems: LemonMenuItems = [...buildRunMenuItems(onRun)]
+    const duckSqlRunMenuItems: MenuItems = [...buildRunMenuItems(onRun)]
 
     if (featureFlags[FEATURE_FLAGS.NOTEBOOK_PYTHON]) {
         duckSqlRunMenuItems.push({
@@ -44,7 +44,7 @@ export const DuckSqlRunMenu = ({
     }
 
     return (
-        <LemonButton
+        <Button
             onClick={() => onRun('auto')}
             size="small"
             icon={<IconPlay className={duckSqlRunIconClass} />}
@@ -55,7 +55,7 @@ export const DuckSqlRunMenu = ({
                 icon: <IconChevronDown />,
                 dropdown: {
                     placement: 'bottom-end',
-                    overlay: <LemonMenuOverlay items={duckSqlRunMenuItems} />,
+                    overlay: <MenuOverlay items={duckSqlRunMenuItems} />,
                 },
                 divider: false,
                 'aria-label': 'Open run options',

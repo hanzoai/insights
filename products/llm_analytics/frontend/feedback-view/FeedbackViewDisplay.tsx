@@ -1,6 +1,6 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
-import { LemonBanner, LemonCard, LemonSkeleton, LemonSwitch, Link } from '@hanzo/lemon-ui'
+import { Banner, Card, Skeleton, Switch, Link } from '@hanzo/elements'
 
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -23,11 +23,11 @@ export function FeedbackViewDisplay(): JSX.Element {
     const { updateCurrentTeam } = useActions(teamLogic)
 
     if (surveyEventsLoading || surveysLoading) {
-        return <LemonSkeleton className="h-8" />
+        return <Skeleton className="h-8" />
     }
 
     if (hasLoadingError) {
-        return <LemonBanner type="error">Failed to load feedback data</LemonBanner>
+        return <Banner type="error">Failed to load feedback data</Banner>
     }
 
     const surveyResponseEvents = (surveyEvents ?? []).filter((e) => e.event === 'survey sent')
@@ -47,17 +47,17 @@ export function FeedbackViewDisplay(): JSX.Element {
     return (
         <div className="flex flex-col gap-3">
             {hasSurveyEvents && !currentTeam?.surveys_opt_in && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     <div className="flex items-center justify-between gap-2">
                         <span>Surveys are disabled for this project. Your feedback surveys won't work.</span>
-                        <LemonSwitch
+                        <Switch
                             checked={false}
                             onChange={(checked) => updateCurrentTeam({ surveys_opt_in: checked })}
                             label="Enable surveys"
                             bordered
                         />
                     </div>
-                </LemonBanner>
+                </Banner>
             )}
 
             {groupedResponses.map((response) => {
@@ -71,7 +71,7 @@ export function FeedbackViewDisplay(): JSX.Element {
             {surveyShownEvents.map((event) => {
                 const survey = surveys[event.properties?.[SurveyEventProperties.SURVEY_ID]]
                 return (
-                    <LemonCard key={event.id} className="p-3" hoverEffect={false}>
+                    <Card key={event.id} className="p-3" hoverEffect={false}>
                         <span className="text-secondary">
                             {survey ? (
                                 <Link to={urls.survey(survey.id)} target="_blank" targetBlankIcon>
@@ -82,7 +82,7 @@ export function FeedbackViewDisplay(): JSX.Element {
                             )}{' '}
                             was shown but received no response
                         </span>
-                    </LemonCard>
+                    </Card>
                 )
             })}
         </div>

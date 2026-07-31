@@ -5,17 +5,17 @@ import { router } from 'kea-router'
 import { useEffect, useRef } from 'react'
 
 import { IconEllipsis, IconEye, IconPencil, IconShare, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonMenu, ProfilePicture } from '@hanzo/lemon-ui'
+import { Button, Menu, ProfilePicture } from '@hanzo/elements'
 
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 import {
     DEFAULT_EXTENSIONS,
-    LemonRichContentEditor,
+    RichContentEditor,
     serializationOptions,
-} from 'lib/lemon-ui/LemonRichContent/LemonRichContentEditor'
+} from 'lib/elements/RichContent/RichContentEditor'
 import { colonDelimitedDuration } from 'lib/utils'
 
 import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
@@ -64,7 +64,7 @@ const CommentBottomRow = ({ comment }: { comment: CommentType }): JSX.Element =>
         <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center gap-1">
                 {recordingLinkInfo ? (
-                    <LemonButton
+                    <Button
                         icon={<IconEye />}
                         size="xsmall"
                         type="tertiary"
@@ -73,14 +73,14 @@ const CommentBottomRow = ({ comment }: { comment: CommentType }): JSX.Element =>
                         data-attr="view-comment-in-recording-at-timestamp"
                     >
                         {timeInRecordingLabel}
-                    </LemonButton>
+                    </Button>
                 ) : null}
                 <span className="text-xs text-secondary italic">{comment.version ? <span>(edited)</span> : null}</span>
             </div>
             <div className="flex items-center">
                 <div data-attr="comment-reactions" className="flex items-center">
                     {Object.entries(reactions).map(([emoji, commentList]) => (
-                        <LemonButton
+                        <Button
                             key={emoji}
                             type="tertiary"
                             onClick={() => {
@@ -110,7 +110,7 @@ const CommentBottomRow = ({ comment }: { comment: CommentType }): JSX.Element =>
                                 <span>{emoji}</span>
                                 <span className="text-xs font-semibold">{commentList.length}</span>
                             </div>
-                        </LemonButton>
+                        </Button>
                     ))}
                     <EmojiPickerPopover
                         onSelect={(emoji: string): void => {
@@ -135,7 +135,7 @@ const CommentEditingForm = ({ comment }: { comment: CommentType }): JSX.Element 
 
     return editingComment?.id === comment.id ? (
         <div className="deprecated-space-y-2 border-t p-2">
-            <LemonRichContentEditor
+            <RichContentEditor
                 placeholder="Edit comment"
                 initialContent={comment.rich_content}
                 onCreate={setEditingCommentRichContentEditor}
@@ -153,7 +153,7 @@ const CommentEditingForm = ({ comment }: { comment: CommentType }): JSX.Element 
             />
             <div className="flex justify-between items-center gap-2">
                 <div className="flex-1" />
-                <LemonButton
+                <Button
                     type="secondary"
                     onClick={() => {
                         setEditingComment(null)
@@ -162,15 +162,15 @@ const CommentEditingForm = ({ comment }: { comment: CommentType }): JSX.Element 
                     disabled={commentsLoading}
                 >
                     Cancel
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="primary"
                     onClick={persistEditedComment}
                     disabledReason={isEditingCommentEmpty ? 'No message' : commentsLoading ? 'Saving...' : null}
                     sideIcon={<KeyboardShortcut command enter />}
                 >
                     Save changes
-                </LemonButton>
+                </Button>
             </div>
         </div>
     ) : null
@@ -194,7 +194,7 @@ const CommentTopRow = ({ comment }: { comment: CommentType }): JSX.Element => {
                     </span>
                 ) : null}
 
-                <LemonMenu
+                <Menu
                     items={[
                         {
                             icon: <IconShare />,
@@ -214,8 +214,8 @@ const CommentTopRow = ({ comment }: { comment: CommentType }): JSX.Element => {
                         },
                     ]}
                 >
-                    <LemonButton icon={<IconEllipsis />} size="xsmall" />
-                </LemonMenu>
+                    <Button icon={<IconEllipsis />} size="xsmall" />
+                </Menu>
             </div>
         </div>
     )
@@ -246,7 +246,7 @@ const Comment = ({ comment }: { comment: CommentType }): JSX.Element => {
 
                     <div className="flex flex-col flex-1">
                         <CommentTopRow comment={comment} />
-                        <LemonMarkdown lowKeyHeadings>{getText(comment)}</LemonMarkdown>
+                        <Markdown lowKeyHeadings>{getText(comment)}</Markdown>
                     </div>
                 </div>
                 <CommentBottomRow comment={comment} />

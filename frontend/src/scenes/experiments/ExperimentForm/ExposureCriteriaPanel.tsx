@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonCollapse, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
+import { Collapse, Select, Tag } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
@@ -30,7 +30,7 @@ export function ExposureCriteriaPanel({ experiment, onChange }: ExposureCriteria
     return (
         <div className="space-y-4">
             {/* Advanced Settings */}
-            <LemonCollapse
+            <Collapse
                 panels={[
                     {
                         key: 'advanced-settings',
@@ -55,7 +55,7 @@ export function ExposureCriteriaPanel({ experiment, onChange }: ExposureCriteria
                                         title="Default"
                                         description={
                                             <>
-                                                When a <LemonTag>$feature_flag_called</LemonTag> event is recorded, a
+                                                When a <Tag>$feature_flag_called</Tag> event is recorded, a
                                                 user is considered <strong>exposed</strong> to the experiment.
                                             </>
                                         }
@@ -132,7 +132,7 @@ export function ExposureCriteriaPanel({ experiment, onChange }: ExposureCriteria
                                     <label className="block text-sm font-medium text-default mb-2">
                                         Multiple variant handling
                                     </label>
-                                    <LemonSelect
+                                    <Select
                                         value={experiment.exposure_criteria?.multiple_variant_handling || 'exclude'}
                                         onChange={(value) => {
                                             onChange({

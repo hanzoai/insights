@@ -3,9 +3,9 @@ import { router } from 'kea-router'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea'
-import { IconErrorOutline } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { TextArea } from 'lib/elements/TextArea'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { urls } from 'scenes/urls'
 
@@ -22,7 +22,7 @@ import { MetricsPanel } from './MetricsPanel'
 import { VariantsPanel } from './VariantsPanel'
 import { createExperimentLogic } from './createExperimentLogic'
 
-const LemonFieldError = ({ error }: { error: string }): JSX.Element => {
+const FieldError = ({ error }: { error: string }): JSX.Element => {
     return (
         <div className="text-danger flex items-center gap-1 text-sm">
             <IconErrorOutline className="text-xl shrink-0" /> {error}
@@ -89,21 +89,21 @@ export const ExperimentForm = ({ draftExperiment, tabId }: ExperimentFormProps):
                     }}
                     actions={
                         <>
-                            <LemonButton
+                            <Button
                                 data-attr="cancel-experiment"
                                 type="secondary"
                                 size="small"
                                 onClick={handleCancel}
                             >
                                 Cancel
-                            </LemonButton>
+                            </Button>
 
                             <AccessControlAction
                                 resourceType={AccessControlResourceType.Experiment}
                                 minAccessLevel={AccessControlLevel.Editor}
                                 userAccessLevel={experiment.user_access_level}
                             >
-                                <LemonButton
+                                <Button
                                     loading={isExperimentSubmitting}
                                     disabledReason={!canSubmitExperiment ? experimentValidationErrors : undefined}
                                     data-attr="save-experiment"
@@ -112,16 +112,16 @@ export const ExperimentForm = ({ draftExperiment, tabId }: ExperimentFormProps):
                                     onClick={saveExperiment}
                                 >
                                     Save as draft
-                                </LemonButton>
+                                </Button>
                             </AccessControlAction>
                         </>
                     }
                 />
                 {experimentErrors.name && typeof experimentErrors.name === 'string' && (
-                    <LemonFieldError error={experimentErrors.name} />
+                    <FieldError error={experimentErrors.name} />
                 )}
                 <SceneSection title="Hypothesis" description="Describe your experiment in a few sentences.">
-                    <LemonTextArea
+                    <TextArea
                         placeholder="The goal of this experiment is ..."
                         data-attr="experiment-hypothesis"
                         value={experiment.description}
@@ -140,16 +140,16 @@ export const ExperimentForm = ({ draftExperiment, tabId }: ExperimentFormProps):
             <>
                 <SceneDivider />
                 <div className="flex justify-end gap-2">
-                    <LemonButton data-attr="cancel-experiment" type="secondary" size="small" onClick={handleCancel}>
+                    <Button data-attr="cancel-experiment" type="secondary" size="small" onClick={handleCancel}>
                         Cancel
-                    </LemonButton>
+                    </Button>
 
                     <AccessControlAction
                         resourceType={AccessControlResourceType.Experiment}
                         minAccessLevel={AccessControlLevel.Editor}
                         userAccessLevel={experiment.user_access_level}
                     >
-                        <LemonButton
+                        <Button
                             loading={isExperimentSubmitting}
                             disabledReason={!canSubmitExperiment ? experimentValidationErrors : undefined}
                             data-attr="save-experiment"
@@ -158,7 +158,7 @@ export const ExperimentForm = ({ draftExperiment, tabId }: ExperimentFormProps):
                             onClick={saveExperiment}
                         >
                             Save as draft
-                        </LemonButton>
+                        </Button>
                     </AccessControlAction>
                 </div>
             </>

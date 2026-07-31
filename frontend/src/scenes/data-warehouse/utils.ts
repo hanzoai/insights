@@ -1,4 +1,4 @@
-import { LemonTagType } from '@hanzo/lemon-ui'
+import { TagType } from '@hanzo/elements'
 
 import { DataVisualizationNode, DatabaseSchemaField, NodeKind } from '~/queries/schema/schema-general'
 import {
@@ -106,7 +106,7 @@ export const SyncTypeLabelMap: Record<NonNullable<ExternalDataSourceSyncSchema['
     append: 'Append only',
 }
 
-export const StatusTagSetting: Record<ExternalDataJobStatus, LemonTagType> = {
+export const StatusTagSetting: Record<ExternalDataJobStatus, TagType> = {
     [ExternalDataJobStatus.Running]: 'primary',
     [ExternalDataJobStatus.Completed]: 'success',
     [ExternalDataJobStatus.Failed]: 'danger',

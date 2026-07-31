@@ -1,5 +1,5 @@
 import { IconCopy, IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonTable, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Table, Link, Tooltip } from '@hanzo/elements'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
@@ -10,7 +10,7 @@ export type PropertiesTableProps = {
 
 export function PropertiesTable({ entries, alternatingColors = true }: PropertiesTableProps): JSX.Element {
     return (
-        <LemonTable
+        <Table
             embedded
             size="small"
             dataSource={entries.filter(([, value]) => value !== undefined).map(([key, value]) => ({ key, value }))}
@@ -25,7 +25,7 @@ export function PropertiesTable({ entries, alternatingColors = true }: Propertie
                     render: (dataValue, record) => (
                         <div className="flex gap-x-2 justify-between items-center">
                             <div>{String(dataValue)}</div>
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 tooltip="Copy value"
                                 className="invisible group-hover:visible"
@@ -36,7 +36,7 @@ export function PropertiesTable({ entries, alternatingColors = true }: Propertie
                                 }
                             >
                                 <IconCopy />
-                            </LemonButton>
+                            </Button>
                         </div>
                     ),
                 },

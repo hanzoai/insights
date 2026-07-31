@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput } from '@hanzo/lemon-ui'
+import { Input } from '@hanzo/elements'
 
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Modal } from 'lib/elements/Modal'
 
 import { newWorkflowLogic } from './newWorkflowLogic'
 import { WorkflowTemplateChooser } from './templates/WorkflowTemplateChooser'
@@ -16,7 +16,7 @@ export function NewWorkflowModal(): JSX.Element {
     const { setTemplateFilter } = useActions(workflowTemplatesLogic)
 
     return (
-        <LemonModal
+        <Modal
             onClose={hideNewWorkflowModal}
             isOpen={newWorkflowModalVisible}
             title="Create a workflow"
@@ -25,7 +25,7 @@ export function NewWorkflowModal(): JSX.Element {
                 <div className="flex flex-col gap-2">
                     <div>Choose a template or start with a blank slate</div>
                     <div>
-                        <LemonInput
+                        <Input
                             type="search"
                             placeholder="Filter templates"
                             onChange={setTemplateFilter}
@@ -44,6 +44,6 @@ export function NewWorkflowModal(): JSX.Element {
             <div className="NewWorkflowModal">
                 <WorkflowTemplateChooser showEmptyWorkflow />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { CyclotronJobFiltersType, InsightsFunctionSubTemplateIdType, InsightsFunctionTypeType } from '~/types'
 
@@ -69,9 +69,9 @@ export function LinkedInsightsFunctions({
             queryParams={queryParams}
             extraControls={
                 <>
-                    <LemonButton type="secondary" size="small" onClick={() => setShowNewDestination(false)}>
+                    <Button type="secondary" size="small" onClick={() => setShowNewDestination(false)}>
                         Cancel
-                    </LemonButton>
+                    </Button>
                 </>
             }
         />
@@ -84,14 +84,14 @@ export function LinkedInsightsFunctions({
             emptyText={emptyText}
             extraControls={
                 <>
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="small"
                         disabledReason={newDisabledReason}
                         onClick={() => setShowNewDestination(true)}
                     >
                         New notification
-                    </LemonButton>
+                    </Button>
                 </>
             }
         />

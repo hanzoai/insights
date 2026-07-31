@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCopy, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
+import { Slider } from 'lib/elements/Slider'
 
 import { llmEvaluationLogic } from '../llmEvaluationLogic'
 import { EvaluationConditionSet } from '../types'
@@ -75,7 +75,7 @@ export function EvaluationTriggers(): JSX.Element {
                                 )}
                             </div>
                             <div className="flex gap-1">
-                                <LemonButton
+                                <Button
                                     icon={<IconCopy />}
                                     size="small"
                                     type="secondary"
@@ -83,7 +83,7 @@ export function EvaluationTriggers(): JSX.Element {
                                     tooltip="Duplicate condition set"
                                 />
                                 {evaluation.conditions.length > 1 && (
-                                    <LemonButton
+                                    <Button
                                         icon={<IconTrash />}
                                         size="small"
                                         type="secondary"
@@ -102,7 +102,7 @@ export function EvaluationTriggers(): JSX.Element {
                             </label>
                             <div className="flex items-center gap-4 max-w-md">
                                 <div className="flex-1">
-                                    <LemonSlider
+                                    <Slider
                                         value={percentageValue}
                                         onChange={(value) => updateConditionSet(index, { rollout_percentage: value })}
                                         min={0.1}
@@ -111,7 +111,7 @@ export function EvaluationTriggers(): JSX.Element {
                                     />
                                 </div>
                                 <div className="w-24">
-                                    <LemonInput
+                                    <Input
                                         type="number"
                                         value={percentageValue}
                                         onChange={(value) =>
@@ -165,9 +165,9 @@ export function EvaluationTriggers(): JSX.Element {
 
             {/* Add Condition Set Button */}
             <div className="flex justify-center">
-                <LemonButton type="secondary" icon={<IconPlus />} onClick={addConditionSet}>
+                <Button type="secondary" icon={<IconPlus />} onClick={addConditionSet}>
                     Add Condition Set
-                </LemonButton>
+                </Button>
             </div>
 
             {/* Help Section */}

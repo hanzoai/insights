@@ -5,15 +5,15 @@ import { useMemo, useState } from 'react'
 
 import { IconFlag, IconQuestion, IconTrash, IconX } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonInput,
-    LemonMenu,
-    LemonSelect,
-    LemonSkeleton,
-    LemonTag,
+    Banner,
+    Button,
+    Input,
+    Menu,
+    Select,
+    Skeleton,
+    Tag,
     Link,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { FlagSelector } from 'lib/components/FlagSelector'
@@ -22,9 +22,9 @@ import { SceneFile } from 'lib/components/Scenes/SceneFile'
 import { SceneMetalyticsSummaryButton } from 'lib/components/Scenes/SceneMetalyticsSummaryButton'
 import { SceneSelect } from 'lib/components/Scenes/SceneSelect'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Dialog } from 'lib/elements/Dialog'
+import { Field } from 'lib/elements/Field'
+import { Tabs } from 'lib/elements/Tabs'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { JSONEditorInput } from 'scenes/feature-flags/JSONEditorInput'
 import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
@@ -120,7 +120,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
     }
 
     if (earlyAccessFeatureLoading) {
-        return <LemonSkeleton active />
+        return <Skeleton active />
     }
 
     const destinationFilters: CyclotronJobFiltersType | null =
@@ -165,7 +165,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                             {!earlyAccessFeatureLoading ? (
                                 canShowSaveButtons ? (
                                     <>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             data-attr="cancel-feature"
                                             onClick={() => {
@@ -180,8 +180,8 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                             disabledReason={isEarlyAccessFeatureSubmitting ? 'Saving…' : undefined}
                                         >
                                             Cancel
-                                        </LemonButton>
-                                        <LemonButton
+                                        </Button>
+                                        <Button
                                             type="primary"
                                             htmlType="submit"
                                             data-attr="save-feature"
@@ -204,12 +204,12 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                             size="small"
                                         >
                                             {isNewEarlyAccessFeature ? 'Save as draft' : 'Save'}
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 ) : (
                                     <>
                                         {earlyAccessFeature.stage == EarlyAccessFeatureStage.Draft && (
-                                            <LemonMenu
+                                            <Menu
                                                 items={[
                                                     {
                                                         title: 'Choose stage',
@@ -240,17 +240,17 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                                     },
                                                 ]}
                                             >
-                                                <LemonButton
+                                                <Button
                                                     tooltip="Publish this feature to make it available"
                                                     type="primary"
                                                     size="small"
                                                 >
                                                     Release
-                                                </LemonButton>
-                                            </LemonMenu>
+                                                </Button>
+                                            </Menu>
                                         )}
                                         {earlyAccessFeature.stage != EarlyAccessFeatureStage.GeneralAvailability && (
-                                            <LemonButton
+                                            <Button
                                                 type="secondary"
                                                 onClick={() => editFeature(true)}
                                                 loading={false}
@@ -258,7 +258,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                                 size="small"
                                             >
                                                 Edit
-                                            </LemonButton>
+                                            </Button>
                                         )}
                                     </>
                                 )
@@ -325,7 +325,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                         <ScenePanelDivider />
                         <ButtonPrimitive
                             onClick={() => {
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: 'Permanently delete feature?',
                                     description: 'Doing so will remove any opt in conditions from the feature flag.',
                                     primaryButton: {
@@ -355,21 +355,21 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                 </ScenePanel>
 
                 {earlyAccessFeature.stage === EarlyAccessFeatureStage.Concept && !isEditingFeature && (
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         The{' '}
-                        <LemonTag type="default" className="uppercase">
+                        <Tag type="default" className="uppercase">
                             Concept
-                        </LemonTag>{' '}
+                        </Tag>{' '}
                         stage assigns the feature flag to the user. Gate your code behind a different feature flag if
                         you'd like to keep it hidden, and then switch your code to this feature flag when you're ready
                         to release to your early access users.
-                    </LemonBanner>
+                    </Banner>
                 )}
                 <div className="flex-1 min-w-[20rem] max-w-prose">
                     {'feature_flag' in earlyAccessFeature ? (
-                        <LemonField.Pure label="Connected Feature flag">
+                        <Field.Pure label="Connected Feature flag">
                             <div>
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     onClick={() =>
                                         earlyAccessFeature.feature_flag &&
@@ -378,11 +378,11 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                     icon={<IconFlag />}
                                 >
                                     {earlyAccessFeature.feature_flag.key}
-                                </LemonButton>
+                                </Button>
                             </div>
-                        </LemonField.Pure>
+                        </Field.Pure>
                     ) : (
-                        <LemonField
+                        <Field
                             name="feature_flag_id"
                             label="Link feature flag (optional)"
                             help="A feature flag will be generated from the feature name if not provided"
@@ -391,7 +391,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                 <div className="flex">
                                     <FlagSelector value={value} onChange={onChange} />
                                     {value && (
-                                        <LemonButton
+                                        <Button
                                             className="ml-2"
                                             icon={<IconX />}
                                             size="small"
@@ -401,7 +401,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                     )}
                                 </div>
                             )}
-                        </LemonField>
+                        </Field>
                     )}
                 </div>
 
@@ -410,8 +410,8 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                         <b>Stage</b>
                         <div>
                             {isEditingFeature ? (
-                                <LemonField name="stage">
-                                    <LemonSelect
+                                <Field name="stage">
+                                    <Select
                                         options={[
                                             {
                                                 value: 'concept',
@@ -431,9 +431,9 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                             },
                                         ]}
                                     />
-                                </LemonField>
+                                </Field>
                             ) : (
-                                <LemonTag
+                                <Tag
                                     type={
                                         earlyAccessFeature.stage === EarlyAccessFeatureStage.Beta
                                             ? 'warning'
@@ -444,7 +444,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                     className="mt-2 uppercase"
                                 >
                                     {earlyAccessFeature.stage}
-                                </LemonTag>
+                                </Tag>
                             )}
                         </div>
                     </div>
@@ -452,9 +452,9 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
 
                 {isEditingFeature || isNewEarlyAccessFeature ? (
                     <div className="max-w-prose">
-                        <LemonField name="documentation_url" label="Documentation URL" showOptional>
-                            <LemonInput autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
-                        </LemonField>
+                        <Field name="documentation_url" label="Documentation URL" showOptional>
+                            <Input autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+                        </Field>
                     </div>
                 ) : (
                     <div>
@@ -473,7 +473,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
 
                 {isEditingFeature || isNewEarlyAccessFeature ? (
                     <div className="max-w-prose">
-                        <LemonField
+                        <Field
                             name="payload"
                             label="Payload"
                             showOptional
@@ -486,7 +486,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                             }
                         >
                             <JSONEditorInput placeholder='{"key": "value", "anotherKey": {"nested": "object"}}' />
-                        </LemonField>
+                        </Field>
                     </div>
                 ) : (
                     <div className="max-w-prose">
@@ -532,14 +532,14 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                                 </p>
                             }
                             actions={
-                                <LemonButton
+                                <Button
                                     key="help-button"
                                     onClick={toggleImplementOptInInstructionsModal}
                                     sideIcon={<IconQuestion />}
                                     type="secondary"
                                 >
                                     Implement public opt-in
-                                </LemonButton>
+                                </Button>
                             }
                         >
                             <PersonList earlyAccessFeature={earlyAccessFeature} />
@@ -607,7 +607,7 @@ export function PersonList({ earlyAccessFeature }: PersonListProps): JSX.Element
 
     return (
         <>
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 onChange={(newKey) => setActiveTab(newKey)}
                 sceneInset
@@ -707,7 +707,7 @@ function PersonsTableByFilter({ recordingsFilters, properties }: PersonsTableByF
             UPDATE: Absolute postion was overlapping with filters, so we put a bit on top. Still need to find a better solution.       
              */}
             <div className="flex justify-end mb-2">
-                <LemonButton
+                <Button
                     key="view-opt-in-session-recordings"
                     to={urls.replay(ReplayTabs.Home, recordingsFilters)}
                     onClick={() => {
@@ -720,7 +720,7 @@ function PersonsTableByFilter({ recordingsFilters, properties }: PersonsTableByF
                     type="secondary"
                 >
                     View recordings
-                </LemonButton>
+                </Button>
             </div>
             <Query query={query} setQuery={setQuery} context={context} />
         </div>

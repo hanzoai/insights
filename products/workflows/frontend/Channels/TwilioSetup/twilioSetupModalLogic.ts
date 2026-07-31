@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import { IntegrationType } from '~/types'
 
@@ -46,10 +46,10 @@ export const twilioSetupModalLogic = kea<twilioSetupModalLogicType>([
                         },
                     })
                     actions.loadIntegrations()
-                    lemonToast.success('Twilio channel created successfully!')
+                    toast.success('Twilio channel created successfully!')
                     props.onComplete(integration.id)
                 } catch (error: any) {
-                    lemonToast.error(error.detail || 'Failed to create Twilio channel')
+                    toast.error(error.detail || 'Failed to create Twilio channel')
                     throw error
                 }
             },

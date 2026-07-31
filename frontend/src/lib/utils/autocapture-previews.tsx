@@ -1,6 +1,6 @@
 import insights from '@hanzo/insights'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { ElementType } from '~/types'
 

@@ -2,13 +2,13 @@ import './PropertyDefinitionsTable.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { LemonInput, LemonSelect, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Input, Select, Tag, Link } from '@hanzo/elements'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { EVENT_PROPERTY_DEFINITIONS_PER_PAGE } from 'lib/constants'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Banner } from 'lib/elements/Banner'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { cn } from 'lib/utils/css-classes'
 import { DefinitionHeader, getPropertyDefinitionIcon } from 'scenes/data-management/events/DefinitionHeader'
 import { propertyDefinitionsTableLogic } from 'scenes/data-management/properties/propertyDefinitionsTableLogic'
@@ -25,7 +25,7 @@ export function PropertyDefinitionsTable(): JSX.Element {
         useValues(propertyDefinitionsTableLogic)
     const { loadPropertyDefinitions, setFilters, setPropertyType } = useActions(propertyDefinitionsTableLogic)
 
-    const columns: LemonTableColumns<PropertyDefinition> = [
+    const columns: TableColumns<PropertyDefinition> = [
         {
             key: 'icon',
             width: 0,
@@ -52,9 +52,9 @@ export function PropertyDefinitionsTable(): JSX.Element {
             key: 'type',
             render: function RenderType(_, definition: PropertyDefinition) {
                 return definition.property_type ? (
-                    <LemonTag type="success" className="uppercase">
+                    <Tag type="success" className="uppercase">
                         {definition.property_type}
-                    </LemonTag>
+                    </Tag>
                 ) : (
                     <span className="text-secondary">—</span>
                 )
@@ -66,7 +66,7 @@ export function PropertyDefinitionsTable(): JSX.Element {
             render: function Render(_, definition: PropertyDefinition) {
                 return <ObjectTags tags={definition.tags ?? []} staticOnly />
             },
-        } as LemonTableColumn<PropertyDefinition, keyof PropertyDefinition | undefined>,
+        } as TableColumn<PropertyDefinition, keyof PropertyDefinition | undefined>,
     ]
 
     return (
@@ -78,7 +78,7 @@ export function PropertyDefinitionsTable(): JSX.Element {
                     type: sceneConfigurations[Scene.PropertyDefinition].iconType || 'default_icon_type',
                 }}
             />
-            <LemonBanner type="info">
+            <Banner type="info">
                 Looking for {filters.type === 'person' ? 'person ' : ''}property usage statistics?{' '}
                 <Link
                     to={urls.insightNewInsightsQL({
@@ -93,21 +93,21 @@ export function PropertyDefinitionsTable(): JSX.Element {
                 >
                     Query with SQL
                 </Link>
-            </LemonBanner>
+            </Banner>
             <div className={cn('flex gap-2 flex-wrap')}>
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search for properties"
                     onChange={(e) => setFilters({ property: e || '' })}
                     value={filters.property}
                 />
-                <LemonSelect
+                <Select
                     options={propertyTypeOptions}
                     value={`${filters.type}::${filters.group_type_index ?? ''}`}
                     onSelect={setPropertyType}
                 />
             </div>
-            <LemonTable
+            <Table
                 columns={columns}
                 className="event-properties-definition-table"
                 data-attr="event-properties-definition-table"

@@ -93,7 +93,7 @@ export const dashboardsLogic = kea([
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs/LemonTabs'
+import { Tabs } from 'lib/elements/Tabs/Tabs'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -116,7 +116,7 @@ export function Dashboards(): JSX.Element {
 
   return (
     <div>
-      <LemonTabs
+      <Tabs
         activeKey={currentTab}
         onChange={(tab) => router.actions.push(urls.dashboards(tab as DashboardsTabs))}
         tabs={Object.values(DashboardsTabs).map((tab) => ({

@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonTabs } from '@hanzo/lemon-ui'
+import { Tabs } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
@@ -165,7 +165,7 @@ export function SDKInstallNextJSInstructions({ hideWizard }: { hideWizard?: bool
 
             <h3>Initialize</h3>
 
-            <LemonTabs
+            <Tabs
                 activeKey={nextJsRouter}
                 onChange={(key) => setNextJsRouter(key as NextJSRouter)}
                 tabs={[

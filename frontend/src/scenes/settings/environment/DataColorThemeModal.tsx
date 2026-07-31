@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconCopy, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonColorGlyph, LemonInput, LemonLabel, LemonModal, LemonTable } from '@hanzo/lemon-ui'
+import { Button, ColorGlyph, Input, Label, Modal, Table } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { dataColorThemesModalLogic } from './dataColorThemeModalLogic'
 
@@ -17,7 +17,7 @@ export function DataColorThemeModal(): JSX.Element {
     const title = isOfficial ? 'Official theme' : isNew ? 'Add theme' : 'Edit theme'
 
     return (
-        <LemonModal
+        <Modal
             title={title}
             onClose={closeModal}
             isOpen={isOpen}
@@ -26,24 +26,24 @@ export function DataColorThemeModal(): JSX.Element {
                 isOfficial ? (
                     <div className="flex justify-between items-center w-full">
                         <span className="italic text-secondary">Official themes can't be edited.</span>
-                        <LemonButton type="secondary" onClick={closeModal}>
+                        <Button type="secondary" onClick={closeModal}>
                             Close
-                        </LemonButton>
+                        </Button>
                     </div>
                 ) : (
-                    <LemonButton type="primary" onClick={submitTheme}>
+                    <Button type="primary" onClick={submitTheme}>
                         Save
-                    </LemonButton>
+                    </Button>
                 )
             }
             hasUnsavedInput={themeChanged}
         >
             <Form logic={dataColorThemesModalLogic} formKey="theme" className="flex flex-col gap-2">
-                <LemonField name="name" label="Name">
-                    <LemonInput placeholder="My custom theme" autoFocus={isNew} disabled={isOfficial} />
-                </LemonField>
-                <LemonLabel>Colors</LemonLabel>
-                <LemonTable
+                <Field name="name" label="Name">
+                    <Input placeholder="My custom theme" autoFocus={isNew} disabled={isOfficial} />
+                </Field>
+                <Label>Colors</Label>
+                <Table
                     dataSource={theme?.colors?.map((color, index) => ({
                         name: `preset-${index + 1}`,
                         color,
@@ -54,7 +54,7 @@ export function DataColorThemeModal(): JSX.Element {
                             title: '',
                             dataIndex: 'color',
                             key: 'glyph',
-                            render: (_, { color }) => <LemonColorGlyph color={color} />,
+                            render: (_, { color }) => <ColorGlyph color={color} />,
                             width: 24,
                         },
                         {
@@ -66,9 +66,9 @@ export function DataColorThemeModal(): JSX.Element {
                             title: 'Color',
                             dataIndex: 'color',
                             render: (_, { index }) => (
-                                <LemonField key={index} name={['colors', index]}>
-                                    <LemonInput className="max-w-20 font-mono" disabled={isOfficial} />
-                                </LemonField>
+                                <Field key={index} name={['colors', index]}>
+                                    <Input className="max-w-20 font-mono" disabled={isOfficial} />
+                                </Field>
                             ),
                         },
                         {
@@ -78,28 +78,28 @@ export function DataColorThemeModal(): JSX.Element {
                             render: (_, { index }) =>
                                 isOfficial ? null : (
                                     <div className="flex">
-                                        <LemonButton onClick={() => duplicateColor(index)}>
+                                        <Button onClick={() => duplicateColor(index)}>
                                             <IconCopy className="text-lg" />
-                                        </LemonButton>
-                                        <LemonButton onClick={() => removeColor(index)}>
+                                        </Button>
+                                        <Button onClick={() => removeColor(index)}>
                                             <IconTrash className="text-danger text-lg" />
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 ),
                         },
                     ]}
                 />
                 {!isOfficial && (
-                    <LemonButton
+                    <Button
                         type="secondary"
                         className="self-start"
                         onClick={addColor}
                         icon={<IconPlus className="text-lg" />}
                     >
                         Add color
-                    </LemonButton>
+                    </Button>
                 )}
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }
