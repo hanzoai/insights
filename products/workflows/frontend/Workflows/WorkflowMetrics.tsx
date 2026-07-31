@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { getColorVar } from 'lib/colors'
 import { AppMetricSummary } from 'lib/components/AppMetrics/AppMetricSummary'
@@ -87,7 +87,7 @@ export function WorkflowMetrics({ id }: WorkflowMetricsProps): JSX.Element {
         <div className="flex flex-col gap-2">
             <div className="flex flex-row gap-2 flex-wrap justify-between">
                 <div>
-                    <LemonSelect
+                    <Select
                         size="small"
                         options={[
                             {

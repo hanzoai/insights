@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 
 import { InsightQueryNode } from '~/queries/schema/schema-general'
@@ -43,7 +43,7 @@ export function InsightAIAnalysis({ query }: InsightAIAnalysisProps): JSX.Elemen
         <div className="mt-4 mb-4">
             <h2 className="font-semibold text-lg m-0 mb-2 flex items-center gap-2">
                 AI analysis
-                <LemonTag type="warning">BETA</LemonTag>
+                <Tag type="warning">BETA</Tag>
             </h2>
 
             {!hasClickedAnalyze ? (
@@ -53,12 +53,12 @@ export function InsightAIAnalysis({ query }: InsightAIAnalysisProps): JSX.Elemen
                         recommendations. Find similar insights and get suggestions for next steps.
                     </p>
                     {analysisError && (
-                        <LemonBanner type="error" className="mb-4">
+                        <Banner type="error" className="mb-4">
                             {analysisError}
-                        </LemonBanner>
+                        </Banner>
                     )}
                     <AIConsentPopoverWrapper onApprove={startAnalysis}>
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={startAnalysis}
                             sideIcon={null}
@@ -68,7 +68,7 @@ export function InsightAIAnalysis({ query }: InsightAIAnalysisProps): JSX.Elemen
                             }
                         >
                             Analyze with AI
-                        </LemonButton>
+                        </Button>
                     </AIConsentPopoverWrapper>
                 </>
             ) : isAnalyzing ? (
@@ -86,7 +86,7 @@ export function InsightAIAnalysis({ query }: InsightAIAnalysisProps): JSX.Elemen
                                     ? 'Thanks for your feedback!'
                                     : 'Was this analysis helpful?'}
                             </span>
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconThumbsUp />}
                                 onClick={() => reportAnalysisFeedback(true)}
@@ -94,7 +94,7 @@ export function InsightAIAnalysis({ query }: InsightAIAnalysisProps): JSX.Elemen
                                 disabled={analysisFeedbackGiven !== null}
                                 active={analysisFeedbackGiven === true}
                             />
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconThumbsDown />}
                                 onClick={() => reportAnalysisFeedback(false)}

@@ -4,7 +4,7 @@ import { useFeatureFlagEnabled } from '@hanzo/insights/react'
 import { useMemo } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonDialog, LemonInput, LemonTextArea, Link } from '@hanzo/lemon-ui'
+import { Dialog, Input, TextArea, Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { GitHubRepositorySelectField } from 'lib/integrations/GitHubIntegrationHelpers'
@@ -12,7 +12,7 @@ import { JiraProjectSelectField } from 'lib/integrations/JiraIntegrationHelpers'
 import { LinearTeamSelectField } from 'lib/integrations/LinearIntegrationHelpers'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { ICONS } from 'lib/integrations/utils'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     DropdownMenu,
@@ -152,7 +152,7 @@ const createGitHubIssueForm = (
     const insightsUrl = window.location.origin + window.location.pathname
     const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${insightsUrl}`
 
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create GitHub issue',
         shouldAwaitSubmit: true,
         initialValues: {
@@ -164,12 +164,12 @@ const createGitHubIssueForm = (
         content: (
             <div className="flex flex-col gap-y-2">
                 <GitHubRepositorySelectField integrationId={integration.id} />
-                <LemonField name="title" label="Title">
-                    <LemonInput data-attr="issue-title" placeholder="Issue title" size="small" />
-                </LemonField>
-                <LemonField name="body" label="Body">
-                    <LemonTextArea data-attr="issue-body" placeholder="Start typing..." />
-                </LemonField>
+                <Field name="title" label="Title">
+                    <Input data-attr="issue-title" placeholder="Issue title" size="small" />
+                </Field>
+                <Field name="body" label="Body">
+                    <TextArea data-attr="issue-body" placeholder="Start typing..." />
+                </Field>
             </div>
         ),
         errors: {
@@ -191,7 +191,7 @@ const createGitLabIssueForm = (
     const insightsUrl = window.location.origin + window.location.pathname
     const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${insightsUrl}`
 
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create GitLab issue',
         shouldAwaitSubmit: true,
         initialValues: {
@@ -201,12 +201,12 @@ const createGitLabIssueForm = (
         },
         content: (
             <div className="flex flex-col gap-y-2">
-                <LemonField name="title" label="Title">
-                    <LemonInput data-attr="issue-title" placeholder="Issue title" size="small" />
-                </LemonField>
-                <LemonField name="body" label="Body">
-                    <LemonTextArea data-attr="issue-body" placeholder="Start typing..." />
-                </LemonField>
+                <Field name="title" label="Title">
+                    <Input data-attr="issue-title" placeholder="Issue title" size="small" />
+                </Field>
+                <Field name="body" label="Body">
+                    <TextArea data-attr="issue-body" placeholder="Start typing..." />
+                </Field>
             </div>
         ),
         errors: {
@@ -223,7 +223,7 @@ const createLinearIssueForm = (
     integration: IntegrationType,
     onSubmit: onSubmitFormType
 ): void => {
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create Linear issue',
         shouldAwaitSubmit: true,
         initialValues: {
@@ -235,12 +235,12 @@ const createLinearIssueForm = (
         content: (
             <div className="flex flex-col gap-y-2">
                 <LinearTeamSelectField integrationId={integration.id} />
-                <LemonField name="title" label="Title">
-                    <LemonInput data-attr="issue-title" placeholder="Issue title" size="small" />
-                </LemonField>
-                <LemonField name="description" label="Description">
-                    <LemonTextArea data-attr="issue-description" placeholder="Start typing..." />
-                </LemonField>
+                <Field name="title" label="Title">
+                    <Input data-attr="issue-title" placeholder="Issue title" size="small" />
+                </Field>
+                <Field name="description" label="Description">
+                    <TextArea data-attr="issue-description" placeholder="Start typing..." />
+                </Field>
             </div>
         ),
         errors: {
@@ -261,7 +261,7 @@ const createJiraIssueForm = (
     const insightsUrl = window.location.origin + window.location.pathname
     const description = issue.description + '\n\n' + `Insights issue: ${insightsUrl}`
 
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create Jira issue',
         shouldAwaitSubmit: true,
         initialValues: {
@@ -273,12 +273,12 @@ const createJiraIssueForm = (
         content: (
             <div className="flex flex-col gap-y-2">
                 <JiraProjectSelectField integrationId={integration.id} />
-                <LemonField name="title" label="Summary">
-                    <LemonInput data-attr="jira-issue-title" placeholder="Issue summary" size="small" />
-                </LemonField>
-                <LemonField name="description" label="Description">
-                    <LemonTextArea data-attr="jira-issue-description" placeholder="Start typing..." />
-                </LemonField>
+                <Field name="title" label="Summary">
+                    <Input data-attr="jira-issue-title" placeholder="Issue summary" size="small" />
+                </Field>
+                <Field name="description" label="Description">
+                    <TextArea data-attr="jira-issue-description" placeholder="Start typing..." />
+                </Field>
             </div>
         ),
         errors: {

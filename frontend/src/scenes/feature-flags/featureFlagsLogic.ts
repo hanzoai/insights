@@ -2,7 +2,7 @@ import { actions, connect, kea, listeners, path, props, reducers, selectors } fr
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { PaginationManual } from '@hanzo/lemon-ui'
+import { PaginationManual } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'

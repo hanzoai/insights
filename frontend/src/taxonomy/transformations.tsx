@@ -1,4 +1,4 @@
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 
 import { CoreFilterDefinition } from '~/types'
 

@@ -3,12 +3,12 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconFlag, IconRocket } from '@hanzo/icons'
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { IconRecording, IconSurveys } from 'lib/lemon-ui/icons'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { IconRecording, IconSurveys } from 'lib/elements/icons'
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
@@ -111,7 +111,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeFlagAttributes>
                 <div className="flex items-center gap-2 p-3">
                     <IconFlag className="text-lg" />
                     {featureFlagLoading ? (
-                        <LemonSkeleton className="h-6 flex-1" />
+                        <Skeleton className="h-6 flex-1" />
                     ) : (
                         <>
                             <span className="flex-1 font-semibold truncate">{featureFlag.key}</span>
@@ -129,7 +129,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeFlagAttributes>
 
                 {expanded ? (
                     <>
-                        <LemonDivider className="my-0" />
+                        <Divider className="my-0" />
                         <div className="p-2">
                             <FeatureFlagReleaseConditions readOnly filters={featureFlag.filters} />
                         </div>

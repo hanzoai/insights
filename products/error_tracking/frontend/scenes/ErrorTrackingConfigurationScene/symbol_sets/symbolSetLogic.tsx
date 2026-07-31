@@ -2,7 +2,7 @@ import { actions, defaults, kea, listeners, path, reducers, selectors } from 'ke
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { ErrorTrackingSymbolSet, SymbolSetStatusFilter } from 'lib/components/Errors/types'
@@ -81,7 +81,7 @@ export const symbolSetLogic = kea<symbolSetLogicType>([
             defaults: { minified: [], sourceMap: [] } as { minified: File[]; sourceMap: File[] },
             submit: async ({ minified, sourceMap }) => {
                 if (minified.length < 1 || sourceMap.length < 1) {
-                    lemonToast.error('Please select both a minified file and a source map file')
+                    toast.error('Please select both a minified file and a source map file')
                     return
                 }
 
@@ -100,7 +100,7 @@ export const symbolSetLogic = kea<symbolSetLogicType>([
                 actions.setUploadSymbolSetId(null)
                 actions.loadSymbolSets()
                 actions.resetUploadSymbolSet()
-                lemonToast.success('Source map uploaded')
+                toast.success('Source map uploaded')
             },
         },
     })),
@@ -108,7 +108,7 @@ export const symbolSetLogic = kea<symbolSetLogicType>([
     listeners(({ actions }) => ({
         deleteSymbolSet: async ({ id }: { id: ErrorTrackingSymbolSet['id'] }) => {
             await api.errorTracking.symbolSets.delete(id)
-            lemonToast.success('Symbol set deleted')
+            toast.success('Symbol set deleted')
             actions.loadSymbolSets()
         },
         setSymbolSetStatusFilter: () => actions.loadSymbolSets(),

@@ -588,8 +588,8 @@
     // a design system is only one system if every surface reads the same register.
     // (This supersedes the hand-measured 9px, which matched no declared token.)
     //
-    // One token decides each tier. `--lemon-button-radius` resolves to `--radius`
-    // (LemonButton.scss), so pointing that at the control radius rounds every
+    // One token decides each tier. `--button-radius` resolves to `--radius`
+    // (Button.scss), so pointing that at the control radius rounds every
     // button from here — nothing needs a per-component override.
     --radius-sm: 0.375rem; // 6px — inner/nested elements, one step down
     --radius: 0.625rem; // 10px — controls: buttons, inputs, selects
@@ -687,8 +687,8 @@
     --z-layout-navbar-under: 755;
     --z-main-nav: 750;
     --z-resizer: 701;
-    --z-lemon-sidebar: 700;
-    --z-lemon-activation-sidebar: 650;
+    --z-sidebar: 700;
+    --z-activation-sidebar: 650;
     --z-mobile-nav-overlay: 600;
     --z-top-navigation: 550;
     --z-top-navigation-under: 549;
@@ -1325,7 +1325,7 @@
             background-color: var(--color-bg-primary);
         }
 
-        .LemonButton,
+        .Button,
         .Link {
             .text-link {
                 color: var(--text-3000) !important;
@@ -1663,7 +1663,7 @@
         ::-webkit-scrollbar,
         *> ::-webkit-scrollbar,
         // Scrollbar in WebKit/Blink browsers
-        .LemonTabs__bar::after,
+        .Tabs__bar::after,
         // Active tab slider
         .scrollable::after,
         // Scrollability indicators

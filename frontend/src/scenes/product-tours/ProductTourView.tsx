@@ -2,13 +2,13 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconCode, IconCursorClick, IconDocument, IconTrash } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonDialog, LemonDivider, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
+import { Banner, Button, Dialog, Divider, Select, Tag } from '@hanzo/elements'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { SceneFile } from 'lib/components/Scenes/SceneFile'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tabs } from 'lib/elements/Tabs'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
@@ -89,7 +89,7 @@ function LaunchValidationContent({ issues }: { issues: LaunchValidationIssue[] }
                                 <span className="text-muted">{config.instruction}</span>
                             </div>
                             {config.docsLink && (
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="primary"
                                     icon={<IconDocument />}
@@ -97,7 +97,7 @@ function LaunchValidationContent({ issues }: { issues: LaunchValidationIssue[] }
                                     to={config.docsLink}
                                 >
                                     Read the docs
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -132,7 +132,7 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
     const [tabKey, setTabKey] = useState('overview')
 
     if (productTourLoading || !productTour) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     const status = getProductTourStatus(productTour)
@@ -150,7 +150,7 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
                         menuItem
                         variant="danger"
                         onClick={() => {
-                            LemonDialog.open({
+                            Dialog.open({
                                 title: 'Delete this product tour?',
                                 content: (
                                     <div className="text-sm text-secondary">
@@ -184,19 +184,19 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
                 isLoading={productTourLoading}
                 actions={
                     <>
-                        <LemonButton type="secondary" size="small" onClick={() => openToolbarModal('preview')}>
+                        <Button type="secondary" size="small" onClick={() => openToolbarModal('preview')}>
                             Preview
-                        </LemonButton>
-                        <LemonButton type="secondary" size="small" onClick={() => editingProductTour(true)}>
+                        </Button>
+                        <Button type="secondary" size="small" onClick={() => editingProductTour(true)}>
                             Edit
-                        </LemonButton>
+                        </Button>
                         {status === ProgressStatus.Draft && (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 size="small"
                                 onClick={() => {
                                     if (launchValidationIssues.length > 0) {
-                                        LemonDialog.open({
+                                        Dialog.open({
                                             title: 'Tour not ready to launch',
                                             content: <LaunchValidationContent issues={launchValidationIssues} />,
                                             maxWidth: 600,
@@ -214,7 +214,7 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
                                         })
                                         return
                                     }
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: 'Launch this product tour?',
                                         content: (
                                             <div className="text-sm text-secondary">
@@ -237,15 +237,15 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
                                 }}
                             >
                                 Launch
-                            </LemonButton>
+                            </Button>
                         )}
                         {isRunning && (
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 status="danger"
                                 size="small"
                                 onClick={() => {
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: 'Stop this product tour?',
                                         content: (
                                             <div className="text-sm text-secondary">
@@ -267,14 +267,14 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
                                 }}
                             >
                                 Stop
-                            </LemonButton>
+                            </Button>
                         )}
                         {status === ProgressStatus.Complete && !productTour.archived && (
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 onClick={() => {
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: 'Resume this product tour?',
                                         content: (
                                             <div className="text-sm text-secondary">
@@ -296,29 +296,29 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
                                 }}
                             >
                                 Resume
-                            </LemonButton>
+                            </Button>
                         )}
                     </>
                 }
             />
 
             {hasDraft && (
-                <LemonBanner type="info" className="mb-4">
+                <Banner type="info" className="mb-4">
                     <div className="flex items-center justify-between w-full">
                         <span>You have unsaved changes</span>
                         <div className="flex items-center gap-2">
-                            <LemonButton type="secondary" size="xsmall" onClick={discardDraft}>
+                            <Button type="secondary" size="xsmall" onClick={discardDraft}>
                                 Discard
-                            </LemonButton>
-                            <LemonButton type="primary" size="xsmall" onClick={() => editingProductTour(true)}>
+                            </Button>
+                            <Button type="primary" size="xsmall" onClick={() => editingProductTour(true)}>
                                 Continue editing
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
-                </LemonBanner>
+                </Banner>
             )}
 
-            <LemonTabs
+            <Tabs
                 activeKey={tabKey}
                 onChange={setTabKey}
                 sceneInset
@@ -341,11 +341,11 @@ export function ProductTourView({ id }: { id: string }): JSX.Element {
                                         />
                                     }
                                 />
-                                <LemonDivider />
+                                <Divider />
                                 {!isAnnouncement(productTour) && (
                                     <>
                                         <StepsFunnel tour={productTour} dateRange={dateRange} />
-                                        <LemonDivider />
+                                        <Divider />
                                     </>
                                 )}
                                 <TargetingSummary tour={productTour} targetingFlagFilters={targetingFlagFilters} />
@@ -464,7 +464,7 @@ function StepsFunnel({ tour, dateRange }: { tour: ProductTour; dateRange: DateRa
             <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold">Step completion funnel</h3>
                 {hasVersionHistory && (
-                    <LemonSelect
+                    <Select
                         size="small"
                         options={versionOptions}
                         value={selectedVersionId}
@@ -517,7 +517,7 @@ function TargetingSummary({
                 <div className="flex flex-col font-medium gap-1">
                     <div className="flex flex-row gap-1">
                         <span>URL {SurveyMatchTypeLabels[conditions.urlMatchType || SurveyMatchType.Contains]}:</span>
-                        <LemonTag>{conditions.url}</LemonTag>
+                        <Tag>{conditions.url}</Tag>
                     </div>
                 </div>
             )}

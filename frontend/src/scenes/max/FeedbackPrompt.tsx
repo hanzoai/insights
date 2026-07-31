@@ -3,7 +3,7 @@ import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
 import { IconDocument } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
 import { SupportForm } from 'lib/components/Support/SupportForm'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -128,23 +128,23 @@ export function FeedbackPrompt({ conversationId, traceId }: FeedbackPromptProps)
     }
 
     const supportModal = (
-        <LemonModal
+        <Modal
             isOpen={isSupportModalOpen}
             onClose={handleSupportModalCancel}
             title="Give feedback"
             footer={
                 <div className="flex items-center gap-2">
-                    <LemonButton type="secondary" onClick={handleSupportModalCancel}>
+                    <Button type="secondary" onClick={handleSupportModalCancel}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" data-attr="submit" onClick={handleSupportFormSubmit}>
+                    </Button>
+                    <Button type="primary" data-attr="submit" onClick={handleSupportFormSubmit}>
                         Submit
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
             <SupportForm />
-        </LemonModal>
+        </Modal>
     )
 
     if (status === 'done') {
@@ -161,7 +161,7 @@ export function FeedbackPrompt({ conversationId, traceId }: FeedbackPromptProps)
                 <MessageTemplate type="ai">
                     <div className="flex flex-col gap-2">
                         <p className="m-0 font-medium">What could we improve?</p>
-                        <LemonInput
+                        <Input
                             placeholder="Help us improve Insights AI..."
                             value={feedbackText}
                             onChange={setFeedbackText}
@@ -170,12 +170,12 @@ export function FeedbackPrompt({ conversationId, traceId }: FeedbackPromptProps)
                             autoFocus
                         />
                         <div className="flex gap-2">
-                            <LemonButton type="primary" size="small" onClick={submitFeedback} loading={isSubmitting}>
+                            <Button type="primary" size="small" onClick={submitFeedback} loading={isSubmitting}>
                                 Submit
-                            </LemonButton>
-                            <LemonButton type="secondary" size="small" onClick={showTicketPreviewOrOpenModal}>
+                            </Button>
+                            <Button type="secondary" size="small" onClick={showTicketPreviewOrOpenModal}>
                                 Open support ticket
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 </MessageTemplate>
@@ -201,9 +201,9 @@ export function FeedbackPrompt({ conversationId, traceId }: FeedbackPromptProps)
                         <p className="m-0 text-sm whitespace-pre-wrap">{feedbackText}</p>
                     </div>
                     <div>
-                        <LemonButton type="primary" size="small" onClick={openSupportModalWithPrefill}>
+                        <Button type="primary" size="small" onClick={openSupportModalWithPrefill}>
                             Review support ticket
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </MessageTemplate>

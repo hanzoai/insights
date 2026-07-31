@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
-import { LemonInput } from '@hanzo/lemon-ui'
+import { Input } from '@hanzo/elements'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 // Used to trigger the AI prompt when the user enters an AI-related referral source. This is a simple heuristic and can be adjusted as needed.
 const AI_REFERRAL_PATTERNS = [
@@ -76,9 +76,9 @@ export default function SignupReferralSource({ disabled }: { disabled: boolean }
 
     return (
         <>
-            <LemonField name="referral_source" label="Where did you hear about us?" showOptional>
+            <Field name="referral_source" label="Where did you hear about us?" showOptional>
                 {({ value, onChange }) => (
-                    <LemonInput
+                    <Input
                         className="ph-ignore-input"
                         data-attr="signup-referral-source"
                         placeholder=""
@@ -90,21 +90,21 @@ export default function SignupReferralSource({ disabled }: { disabled: boolean }
                         }}
                     />
                 )}
-            </LemonField>
+            </Field>
             <AnimatedCollapsible collapsed={!showAIPrompt}>
-                <LemonField
+                <Field
                     name="referral_source_ai_prompt"
                     label="What prompt or search led you to Insights?"
                     help="Paste the prompt or search queries if you remember, even roughly"
                     showOptional
                 >
-                    <LemonInput
+                    <Input
                         className="ph-ignore-input"
                         data-attr="signup-referral-source-ai-prompt"
                         placeholder="e.g. Product analytics tool with error tracking"
                         disabled={disabled}
                     />
-                </LemonField>
+                </Field>
             </AnimatedCollapsible>
         </>
     )

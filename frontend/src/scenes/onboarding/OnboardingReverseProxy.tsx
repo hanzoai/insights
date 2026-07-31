@@ -1,4 +1,4 @@
-import { LemonDivider, Link } from '@hanzo/lemon-ui'
+import { Divider, Link } from '@hanzo/elements'
 
 import { InviteMembersButton } from 'lib/components/Account/InviteMembersButton'
 
@@ -72,7 +72,7 @@ export const OnboardingReverseProxy: OnboardingStepComponentType = () => {
                         </li>
                     ))}
                 </ul>
-                <LemonDivider className="my-6" />
+                <Divider className="my-6" />
                 <h3>Need help with this step?</h3>
                 <p>Invite a team member to help you get set up.</p>
                 <div className="mt-3 w-40">

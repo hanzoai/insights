@@ -2,20 +2,20 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonBanner, LemonInput, LemonSwitch } from '@hanzo/lemon-ui'
+import { Banner, Input, Switch } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS, OrganizationMembershipLevel } from 'lib/constants'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Dialog } from 'lib/elements/Dialog'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { capitalizeFirstLetter, fullName } from 'lib/utils'
 import {
     getReasonForAccessLevelChangeProhibition,
@@ -43,13 +43,13 @@ function RemoveMemberModal({ member }: { member: OrganizationMemberType }): JSX.
             </p>
             {scopedApiKeys?.keys && scopedApiKeys.keys.length > 0 && (
                 <div className="mt-4">
-                    <LemonBanner type="warning" className="mb-2">
+                    <Banner type="warning" className="mb-2">
                         The following API keys which belong to {member.user.uuid == user?.uuid ? 'you' : 'this member'}{' '}
                         will lose access to this organization and will stop working immediately. Please confirm they
                         will not affect any services that depend on them before removing{' '}
                         {member.user.uuid == user?.uuid ? 'yourself' : 'this member'}.
-                    </LemonBanner>
-                    <LemonTable
+                    </Banner>
+                    <Table
                         dataSource={scopedApiKeys.keys}
                         columns={[
                             {
@@ -106,7 +106,7 @@ function ActionsComponent(_: any, member: OrganizationMemberType): JSX.Element |
                 <>
                     {!disallowedReason &&
                         allowedLevels.map((listLevel) => (
-                            <LemonButton
+                            <Button
                                 fullWidth
                                 key={`${member.user.uuid}-level-${listLevel}`}
                                 onClick={(event) => {
@@ -115,7 +115,7 @@ function ActionsComponent(_: any, member: OrganizationMemberType): JSX.Element |
                                         throw Error
                                     }
                                     if (listLevel === OrganizationMembershipLevel.Owner) {
-                                        LemonDialog.open({
+                                        Dialog.open({
                                             title: `Add additional owner to ${user.organization?.name}?`,
                                             description: `Please confirm that you would like to make ${fullName(
                                                 member.user
@@ -142,11 +142,11 @@ function ActionsComponent(_: any, member: OrganizationMemberType): JSX.Element |
                                 ) : (
                                     <>Downgrade to {membershipLevelToName.get(listLevel)}</>
                                 )}
-                            </LemonButton>
+                            </Button>
                         ))}
                     {allowDeletion && (
                         <>
-                            <LemonButton
+                            <Button
                                 status="danger"
                                 data-attr="delete-org-membership"
                                 onClick={() => {
@@ -154,7 +154,7 @@ function ActionsComponent(_: any, member: OrganizationMemberType): JSX.Element |
                                         throw Error
                                     }
                                     loadMemberScopedApiKeys(member)
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: `${
                                             member.user.uuid == user.uuid
                                                 ? 'Leave'
@@ -174,7 +174,7 @@ function ActionsComponent(_: any, member: OrganizationMemberType): JSX.Element |
                                 fullWidth
                             >
                                 {member.user.uuid !== user.uuid ? 'Remove from organization' : 'Leave organization'}
-                            </LemonButton>
+                            </Button>
                         </>
                     )}
                 </>
@@ -206,7 +206,7 @@ export function Members(): JSX.Element | null {
         return null
     }
 
-    const columns: LemonTableColumns<OrganizationMemberType> = [
+    const columns: TableColumns<OrganizationMemberType> = [
         {
             key: 'user_profile_picture',
             render: function ProfilePictureRender(_, member) {
@@ -236,9 +236,9 @@ export function Members(): JSX.Element | null {
                             preflight?.email_service_available && (
                                 <>
                                     {' '}
-                                    <LemonTag type="highlight" data-attr="pending-email-verification">
+                                    <Tag type="highlight" data-attr="pending-email-verification">
                                         pending email verification
-                                    </LemonTag>
+                                    </Tag>
                                 </>
                             )}
                     </>
@@ -252,9 +252,9 @@ export function Members(): JSX.Element | null {
             key: 'level',
             render: function LevelRender(_, member) {
                 return (
-                    <LemonTag data-attr="membership-level">
+                    <Tag data-attr="membership-level">
                         {capitalizeFirstLetter(membershipLevelToName.get(member.level) ?? `unknown (${member.level})`)}
-                    </LemonTag>
+                    </Tag>
                 )
             },
             sorter: (a, b) => a.level - b.level,
@@ -273,7 +273,7 @@ export function Members(): JSX.Element | null {
                                     : ''
                             }
                         >
-                            <LemonTag
+                            <Tag
                                 onClick={
                                     member.user.uuid == user.uuid && !member.is_2fa_enabled
                                         ? () => openTwoFactorSetupModal()
@@ -283,7 +283,7 @@ export function Members(): JSX.Element | null {
                                 type={member.is_2fa_enabled ? 'success' : 'warning'}
                             >
                                 {member.is_2fa_enabled ? '2FA enabled' : '2FA not enabled'}
-                            </LemonTag>
+                            </Tag>
                         </Tooltip>
                     </>
                 )
@@ -325,9 +325,9 @@ export function Members(): JSX.Element | null {
 
     return (
         <>
-            <LemonInput type="search" placeholder="Search for members" value={search} onChange={setSearch} />
+            <Input type="search" placeholder="Search for members" value={search} onChange={setSearch} />
 
-            <LemonTable
+            <Table
                 dataSource={filteredMembers ?? []}
                 columns={columns}
                 rowKey="id"
@@ -340,7 +340,7 @@ export function Members(): JSX.Element | null {
             <h3 className="mt-4">Two-factor authentication</h3>
             <PayGateMini feature={AvailableFeature.TWOFA_ENFORCEMENT}>
                 <p>Require all organization members to use two-factor authentication.</p>
-                <LemonSwitch
+                <Switch
                     label="Enforce 2FA"
                     bordered
                     checked={!!currentOrganization?.enforce_2fa}
@@ -352,7 +352,7 @@ export function Members(): JSX.Element | null {
             <h3 className="mt-4">Invite settings</h3>
             <PayGateMini feature={AvailableFeature.ORGANIZATION_INVITE_SETTINGS}>
                 <p>Control who can send organization invites.</p>
-                <LemonSwitch
+                <Switch
                     label={
                         <span>
                             Members can invite others to join <i>{currentOrganization?.name}</i>
@@ -371,7 +371,7 @@ export function Members(): JSX.Element | null {
                     <h3 className="mt-4">Security settings</h3>
                     <PayGateMini feature={AvailableFeature.ORGANIZATION_SECURITY_SETTINGS}>
                         <p>Configure security permissions for organization members.</p>
-                        <LemonSwitch
+                        <Switch
                             label={
                                 <span>
                                     Members can use personal API keys{' '}

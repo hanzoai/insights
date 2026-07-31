@@ -2,12 +2,12 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { compactNumber } from 'lib/utils'
 import { formatCurrency } from 'lib/utils/geography/currency'
@@ -103,7 +103,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodePersonAttribute
                     )
                 })
             ) : (
-                <LemonSkeleton className="h-4 w-18 my-1" />
+                <Skeleton className="h-4 w-18 my-1" />
             )}
         </div>
     )
@@ -117,7 +117,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodePersonAttribute
             <div className="flex flex-1 flex-col overflow-auto">
                 <div className={clsx('p-4 flex-0 flex flex-col gap-2 justify-between min-h-20 items-start')}>
                     {personLoading ? (
-                        <LemonSkeleton className="h-6" />
+                        <Skeleton className="h-6" />
                     ) : (
                         <>
                             <div className="flex gap-2">
@@ -170,7 +170,7 @@ function LastSeen(): JSX.Element {
         <div className="flex items-center gap-1">
             <span className="text-secondary">Last seen:</span>{' '}
             {infoLoading ? (
-                <LemonSkeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
             ) : info?.lastSeen ? (
                 <TZLabel time={info.lastSeen} />
             ) : (
@@ -186,7 +186,7 @@ function SessionCount(): JSX.Element {
         <div className="flex items-center gap-1">
             <span className="text-secondary">Session count (30d):</span>{' '}
             {infoLoading ? (
-                <LemonSkeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
             ) : info?.sessionCount ? (
                 compactNumber(info.sessionCount)
             ) : (
@@ -202,7 +202,7 @@ function EventCount(): JSX.Element {
         <div className="flex items-center gap-1">
             <span className="text-secondary">Event count (30d):</span>{' '}
             {infoLoading ? (
-                <LemonSkeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
             ) : info?.eventCount ? (
                 compactNumber(info.eventCount)
             ) : (
@@ -224,7 +224,7 @@ function MRR(): JSX.Element | null {
         <div className="flex items-center gap-1">
             <span className="text-secondary">MRR:</span>{' '}
             {revenueDataLoading ? (
-                <LemonSkeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
             ) : revenueData?.mrr ? (
                 <div className="flex gap-2 items-center">
                     {formatCurrency(revenueData.mrr, baseCurrency)}
@@ -249,7 +249,7 @@ function LifetimeValue(): JSX.Element | null {
         <div className="flex items-center gap-1">
             <span className="text-secondary">Lifetime value:</span>{' '}
             {revenueDataLoading ? (
-                <LemonSkeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
             ) : revenueData?.lifetimeValue ? (
                 <div className="flex gap-2 items-center">
                     {formatCurrency(revenueData.lifetimeValue, baseCurrency)}

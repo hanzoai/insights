@@ -1,9 +1,9 @@
 import { useAsyncActions } from 'kea'
 import { useCallback } from 'react'
 
-import { LemonDialog, LemonInput, Link, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, Input, Link, toast } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { urls } from 'scenes/urls'
 
@@ -27,7 +27,7 @@ function IssueCohortCreate({ issue }: { issue: ErrorTrackingRelationalIssue }): 
     const onCreate: IssueCohortFormHandler = useCallback(
         async (name, description) => {
             await createIssueCohort(issue.id, name, description ?? '')
-            lemonToast.success(`Cohort created`)
+            toast.success(`Cohort created`)
         },
         [issue, createIssueCohort]
     )
@@ -41,7 +41,7 @@ function IssueCohortCreate({ issue }: { issue: ErrorTrackingRelationalIssue }): 
 type IssueCohortFormHandler = (name: string, description?: string) => void
 
 function createIssueCohortForm(issue: ErrorTrackingRelationalIssue, onSubmit: IssueCohortFormHandler): void {
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create cohort',
         shouldAwaitSubmit: true,
         initialValues: {
@@ -50,12 +50,12 @@ function createIssueCohortForm(issue: ErrorTrackingRelationalIssue, onSubmit: Is
         },
         content: (
             <div className="flex flex-col gap-y-2 w-[600px]">
-                <LemonField name="cohortName" label="Cohort Name">
-                    <LemonInput data-attr="cohort-name" placeholder="Cohort name" size="small" />
-                </LemonField>
-                <LemonField name="cohortDescription" label="Cohort Description">
-                    <LemonInput data-attr="cohort-description" placeholder="Cohort description" />
-                </LemonField>
+                <Field name="cohortName" label="Cohort Name">
+                    <Input data-attr="cohort-name" placeholder="Cohort name" size="small" />
+                </Field>
+                <Field name="cohortDescription" label="Cohort Description">
+                    <Input data-attr="cohort-description" placeholder="Cohort description" />
+                </Field>
             </div>
         ),
         errors: {

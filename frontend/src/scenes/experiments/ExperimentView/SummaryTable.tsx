@@ -2,11 +2,11 @@ import { useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonTable, LemonTableColumns, LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Table, TableColumns, Tag, Tooltip } from '@hanzo/elements'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
+import { Progress } from 'lib/elements/Progress'
 import { humanFriendlyNumber } from 'lib/utils'
 
 import {
@@ -62,7 +62,7 @@ export function SummaryTable({
 
     const winningVariant = getHighestProbabilityVariant(result)
 
-    const columns: LemonTableColumns<any> = [
+    const columns: TableColumns<any> = [
         {
             key: 'variants',
             title: 'Variant',
@@ -105,7 +105,7 @@ export function SummaryTable({
                         title={
                             <div>
                                 The number of users who were exposed to this variant. By default, this is measured by
-                                the count of <LemonTag type="option">$feature_flag_called</LemonTag> events per unique
+                                the count of <Tag type="option">$feature_flag_called</Tag> events per unique
                                 user. Check your metric settings to confirm how this is measured.
                             </div>
                         }
@@ -328,7 +328,7 @@ export function SummaryTable({
                 <>
                     {percentage && (insightType === InsightType.FUNNELS ? hasValidConversionRate : true) ? (
                         <span className="inline-flex items-center w-52 deprecated-space-x-4">
-                            <LemonProgress className="inline-flex w-3/4" percent={percentage} />
+                            <Progress className="inline-flex w-3/4" percent={percentage} />
                             <span className={`w-1/4 font-semibold ${isWinning && 'text-success'}`}>
                                 {percentage.toFixed(2)}%
                             </span>
@@ -390,7 +390,7 @@ export function SummaryTable({
 
     return (
         <div className="mb-4" data-attr="experiment-results">
-            <LemonTable
+            <Table
                 loading={false}
                 columns={columns}
                 dataSource={tabularExperimentResults(displayOrder, isSecondary)}

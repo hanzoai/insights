@@ -2,12 +2,12 @@ import { useActions } from 'kea'
 import { Field, Form } from 'kea-forms'
 import { useState } from 'react'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input/Input'
+import { Modal } from 'lib/elements/Modal'
 import { asyncMigrationParameterFormLogic } from 'scenes/instance/AsyncMigrations/asyncMigrationParameterFormLogic'
 import { AsyncMigrationModalProps, asyncMigrationsLogic } from 'scenes/instance/AsyncMigrations/asyncMigrationsLogic'
 
@@ -17,19 +17,19 @@ export function AsyncMigrationParametersModal(props: AsyncMigrationModalProps): 
     const [collapsed, setCollapsed] = useState(true)
 
     return (
-        <LemonModal title="" onClose={closeAsyncMigrationsModal} isOpen={true} simple>
+        <Modal title="" onClose={closeAsyncMigrationsModal} isOpen={true} simple>
             <Form
                 logic={asyncMigrationParameterFormLogic}
                 props={props}
                 formKey="parameters"
                 enableFormOnSubmit
                 id="async-migration-parameters-form"
-                className="LemonModal__layout"
+                className="Modal__layout"
             >
-                <LemonModal.Header>
+                <Modal.Header>
                     <h3>Advanced migration configuration</h3>
-                </LemonModal.Header>
-                <LemonModal.Content>
+                </Modal.Header>
+                <Modal.Content>
                     <p>
                         This async migration allows tuning parameters used in the async migration.
                         {collapsed && (
@@ -51,14 +51,14 @@ export function AsyncMigrationParametersModal(props: AsyncMigrationModalProps): 
                             ([parameterName, [defaultValue, parameterDescription]]) => (
                                 <Field name={parameterName} key={parameterName} label={<>{parameterDescription}</>}>
                                     {/* TODO: Send the parameter type from the backend */}
-                                    <LemonInput type={typeof defaultValue === 'number' ? 'number' : 'text'} />
+                                    <Input type={typeof defaultValue === 'number' ? 'number' : 'text'} />
                                 </Field>
                             )
                         )}
                     </AnimatedCollapsible>
-                </LemonModal.Content>
-                <LemonModal.Footer>
-                    <LemonButton
+                </Modal.Content>
+                <Modal.Footer>
+                    <Button
                         form="async-migration-parameters-form"
                         type="secondary"
                         data-attr="async-migration-parameters-cancel"
@@ -66,17 +66,17 @@ export function AsyncMigrationParametersModal(props: AsyncMigrationModalProps): 
                         onClick={closeAsyncMigrationsModal}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         form="async-migration-parameters-form"
                         htmlType="submit"
                         type="primary"
                         data-attr="async-migration-parameters-submit"
                     >
                         Run migration
-                    </LemonButton>
-                </LemonModal.Footer>
+                    </Button>
+                </Modal.Footer>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

@@ -3,16 +3,16 @@ import { useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 import { IconCopy, IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonCollapse, LemonInput, LemonLabel, LemonSelect, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Collapse, Input, Label, Select, Spinner, Tooltip } from '@hanzo/elements'
 
 import { allOperatorsToHumanName } from 'lib/components/DefinitionPopover/utils'
 import { EditableField } from 'lib/components/EditableField/EditableField'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isPropertyFilterWithOperator } from 'lib/components/PropertyFilters/utils'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
-import { Link } from 'lib/lemon-ui/Link'
-import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
+import { Radio } from 'lib/elements/Radio'
+import { Slider } from 'lib/elements/Slider'
+import { Link } from 'lib/elements/Link'
+import { IconArrowDown, IconArrowUp } from 'lib/elements/icons'
 import { humanFriendlyNumber } from 'lib/utils'
 import { clamp } from 'lib/utils'
 
@@ -111,7 +111,7 @@ function ConditionHeader({
                 </span>
                 {totalGroups > 1 && (
                     <>
-                        <LemonButton
+                        <Button
                             icon={<IconArrowDown />}
                             size="xsmall"
                             noPadding
@@ -122,7 +122,7 @@ function ConditionHeader({
                                 onMoveDown()
                             }}
                         />
-                        <LemonButton
+                        <Button
                             icon={<IconArrowUp />}
                             size="xsmall"
                             noPadding
@@ -135,7 +135,7 @@ function ConditionHeader({
                         />
                     </>
                 )}
-                <LemonButton
+                <Button
                     icon={<IconCopy />}
                     size="xsmall"
                     noPadding
@@ -146,7 +146,7 @@ function ConditionHeader({
                     }}
                 />
                 {totalGroups > 1 && (
-                    <LemonButton
+                    <Button
                         icon={<IconTrash />}
                         size="xsmall"
                         noPadding
@@ -217,7 +217,7 @@ export function FeatureFlagReleaseConditionsCollapsible({
 
             setTimeout(() => {
                 // Find the panel by its position in the collapse
-                const panels = collapseRef.current?.querySelectorAll('.LemonCollapse__panel')
+                const panels = collapseRef.current?.querySelectorAll('.Collapse__panel')
                 if (panels && panels[panelIndex]) {
                     panels[panelIndex].scrollIntoView({ behavior: 'smooth', block: 'start' })
                 }
@@ -228,7 +228,7 @@ export function FeatureFlagReleaseConditionsCollapsible({
     if (readOnly) {
         return (
             <div className="flex flex-col gap-2">
-                <LemonLabel>Release conditions</LemonLabel>
+                <Label>Release conditions</Label>
                 {filterGroups.map((group, index) => {
                     // Use description if available, otherwise summarize the filters
                     const summary =
@@ -262,7 +262,7 @@ export function FeatureFlagReleaseConditionsCollapsible({
     return (
         <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-                <LemonLabel>Release conditions</LemonLabel>
+                <Label>Release conditions</Label>
             </div>
             <p className="text-xs text-muted mb-2">
                 Target users or groups for this flag. Conditions are evaluated top to bottom – the first match wins. A
@@ -272,8 +272,8 @@ export function FeatureFlagReleaseConditionsCollapsible({
             {/* Match by selector */}
             {showGroupsOptions && (
                 <div className="mb-2">
-                    <LemonLabel className="mb-2">Match by</LemonLabel>
-                    <LemonRadio
+                    <Label className="mb-2">Match by</Label>
+                    <Radio
                         data-attr="feature-flag-aggregation-filter"
                         value={releaseFilters.aggregation_group_type_index != null ? 'group' : 'user'}
                         onChange={(value: string) => {
@@ -315,7 +315,7 @@ export function FeatureFlagReleaseConditionsCollapsible({
                     />
                     {releaseFilters.aggregation_group_type_index != null && groupTypes.size > 0 && (
                         <div className="mt-3 ml-6">
-                            <LemonSelect
+                            <Select
                                 dropdownMatchSelectWidth={false}
                                 data-attr="feature-flag-group-type-select"
                                 value={releaseFilters.aggregation_group_type_index}
@@ -342,7 +342,7 @@ export function FeatureFlagReleaseConditionsCollapsible({
                                 or
                             </div>
                         )}
-                        <LemonCollapse
+                        <Collapse
                             multiple
                             activeKeys={openConditions}
                             onChange={handleOpenConditionsChange}
@@ -394,7 +394,7 @@ export function FeatureFlagReleaseConditionsCollapsible({
                                             </div>
 
                                             <div>
-                                                <LemonLabel className="mb-1">Match filters</LemonLabel>
+                                                <Label className="mb-1">Match filters</Label>
                                                 <PropertyFilters
                                                     orFiltering={true}
                                                     pageKey={`feature-flag-workflow-${id}-${group.sort_key ?? index}`}
@@ -411,10 +411,10 @@ export function FeatureFlagReleaseConditionsCollapsible({
                                             </div>
 
                                             <div>
-                                                <LemonLabel className="mb-1">Rollout percentage</LemonLabel>
+                                                <Label className="mb-1">Rollout percentage</Label>
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex-1">
-                                                        <LemonSlider
+                                                        <Slider
                                                             value={group.rollout_percentage ?? 100}
                                                             onChange={(value) => {
                                                                 updateConditionSet(index, value)
@@ -424,7 +424,7 @@ export function FeatureFlagReleaseConditionsCollapsible({
                                                             step={1}
                                                         />
                                                     </div>
-                                                    <LemonInput
+                                                    <Input
                                                         type="number"
                                                         min={0}
                                                         max={100}
@@ -517,7 +517,7 @@ export function FeatureFlagReleaseConditionsCollapsible({
                                                     <span>
                                                         Set variant for all {aggregationTargetName} in this set to
                                                     </span>
-                                                    <LemonSelect
+                                                    <Select
                                                         placeholder="Select variant"
                                                         allowClear={true}
                                                         value={group.variant ?? null}
@@ -542,9 +542,9 @@ export function FeatureFlagReleaseConditionsCollapsible({
                 ))}
             </div>
 
-            <LemonButton type="secondary" icon={<IconPlus />} onClick={handleAddConditionSet} className="mt-1">
+            <Button type="secondary" icon={<IconPlus />} onClick={handleAddConditionSet} className="mt-1">
                 Add condition set
-            </LemonButton>
+            </Button>
         </div>
     )
 }

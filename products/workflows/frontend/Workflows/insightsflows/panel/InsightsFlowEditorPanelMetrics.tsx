@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonButton, SpinnerOverlay } from '@hanzo/lemon-ui'
+import { Button, SpinnerOverlay } from '@hanzo/elements'
 
 import { AppMetricsFilters } from 'lib/components/AppMetrics/AppMetricsFilters'
 import { appMetricsLogic } from 'lib/components/AppMetrics/appMetricsLogic'
-import { IconOpenInApp } from 'lib/lemon-ui/icons'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { LineGraph } from '~/queries/nodes/DataVisualization/Components/Charts/LineGraph'
@@ -72,9 +72,9 @@ export function InsightsFlowEditorPanelMetrics(): JSX.Element | null {
     return (
         <>
             <div className="border-b">
-                <LemonButton to={urls.workflow(workflow.id, 'metrics')} size="xsmall" sideIcon={<IconOpenInApp />}>
+                <Button to={urls.workflow(workflow.id, 'metrics')} size="xsmall" sideIcon={<IconOpenInApp />}>
                     Click here to open in full metrics viewer
-                </LemonButton>
+                </Button>
             </div>
             <div className="p-2 flex flex-col gap-2 overflow-y-auto">
                 <div className="flex flex-row gap-2 flex-wrap justify-end">

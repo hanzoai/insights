@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 
 import { IconPlus } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import type { MetricContext } from './experimentMetricModalLogic'
 import { metricSourceModalLogic } from './metricSourceModalLogic'
@@ -11,7 +11,7 @@ export const AddMetricButton = ({ metricContext }: { metricContext: MetricContex
     const { openMetricSourceModal } = useActions(metricSourceModalLogic)
 
     return (
-        <LemonButton
+        <Button
             icon={<IconPlus />}
             type="secondary"
             size="xsmall"
@@ -20,6 +20,6 @@ export const AddMetricButton = ({ metricContext }: { metricContext: MetricContex
             }}
         >
             Add {metricContext.type} metric
-        </LemonButton>
+        </Button>
     )
 }

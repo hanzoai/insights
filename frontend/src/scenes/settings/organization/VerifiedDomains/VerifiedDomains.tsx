@@ -6,15 +6,15 @@ import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { RestrictionScope } from 'lib/components/RestrictedArea'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch/LemonSwitch'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconExclamation, IconOffline } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Dialog } from 'lib/elements/Dialog'
+import { Switch } from 'lib/elements/Switch/Switch'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconExclamation, IconOffline } from 'lib/elements/icons'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { urls } from 'scenes/urls'
 
@@ -46,14 +46,14 @@ export function VerifiedDomains(): JSX.Element {
             </p>
 
             <VerifiedDomainsTable />
-            <LemonButton
+            <Button
                 type="primary"
                 onClick={() => setAddModalShown(true)}
                 className="mt-4"
                 disabledReason={verifiedDomainsLoading || updatingDomainLoading ? 'loading...' : restrictionReason}
             >
                 Add domain
-            </LemonButton>
+            </Button>
         </PayGateMini>
     )
 }
@@ -77,13 +77,13 @@ function VerifiedDomainsTable(): JSX.Element {
         scope: RestrictionScope.Organization,
     })
 
-    const columns: LemonTableColumns<OrganizationDomainType> = [
+    const columns: TableColumns<OrganizationDomainType> = [
         {
             key: 'domain',
             title: 'Domain name',
             dataIndex: 'domain',
             render: function RenderDomainName(_, { domain }) {
-                return <LemonTag>{domain}</LemonTag>
+                return <Tag>{domain}</Tag>
             },
         },
         ...(preflight?.cloud
@@ -114,7 +114,7 @@ function VerifiedDomainsTable(): JSX.Element {
                           )
                       },
                   },
-              ] as LemonTableColumns<OrganizationDomainType>)
+              ] as TableColumns<OrganizationDomainType>)
             : []),
         {
             key: 'jit_provisioning_enabled',
@@ -133,7 +133,7 @@ function VerifiedDomainsTable(): JSX.Element {
             render: function AutomaticProvisioning(_, { jit_provisioning_enabled, id, is_verified }) {
                 return is_verified ? (
                     <div className="flex items-center">
-                        <LemonSwitch
+                        <Switch
                             checked={jit_provisioning_enabled}
                             disabled={updatingDomainLoading || !is_verified}
                             disabledReason={restrictionReason}
@@ -224,9 +224,9 @@ function VerifiedDomainsTable(): JSX.Element {
                 return is_verified ? (
                     <></>
                 ) : (
-                    <LemonButton type="primary" onClick={() => setVerifyModal(id)} disabledReason={restrictionReason}>
+                    <Button type="primary" onClick={() => setVerifyModal(id)} disabledReason={restrictionReason}>
                         Verify
-                    </LemonButton>
+                    </Button>
                 )
             },
         },
@@ -241,7 +241,7 @@ function VerifiedDomainsTable(): JSX.Element {
                             <>
                                 {is_verified && (
                                     <>
-                                        <LemonButton
+                                        <Button
                                             onClick={() => setConfigureSAMLModalId(id)}
                                             fullWidth
                                             disabledReason={
@@ -250,23 +250,23 @@ function VerifiedDomainsTable(): JSX.Element {
                                             }
                                         >
                                             Configure SAML
-                                        </LemonButton>
+                                        </Button>
                                         {/* TODO: After SCIM is fully rolled out, show the Configure SCIM button with 'Upgrade to enable SCIM' disabledReason */}
                                         {isSCIMAvailable && (
-                                            <LemonButton
+                                            <Button
                                                 onClick={() => setConfigureSCIMModalId(id)}
                                                 fullWidth
                                                 disabledReason={restrictionReason}
                                             >
                                                 Configure SCIM
-                                            </LemonButton>
+                                            </Button>
                                         )}
                                     </>
                                 )}
-                                <LemonButton
+                                <Button
                                     status="danger"
                                     onClick={() =>
-                                        LemonDialog.open({
+                                        Dialog.open({
                                             title: `Remove ${domain}?`,
                                             description:
                                                 'This cannot be undone. If you have SAML configured or SSO enforced,it will be immediately disabled.',
@@ -285,7 +285,7 @@ function VerifiedDomainsTable(): JSX.Element {
                                     disabledReason={restrictionReason}
                                 >
                                     Remove domain
-                                </LemonButton>
+                                </Button>
                             </>
                         }
                     />
@@ -295,7 +295,7 @@ function VerifiedDomainsTable(): JSX.Element {
     ]
     return (
         <div>
-            <LemonTable
+            <Table
                 dataSource={verifiedDomains}
                 columns={columns}
                 loading={verifiedDomainsLoading}

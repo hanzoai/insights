@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { urls } from 'scenes/urls'
 
 import api from '~/lib/api'
@@ -13,7 +13,7 @@ import { llmAnalyticsDatasetsLogic } from './llmAnalyticsDatasetsLogic'
 import { EMPTY_JSON } from './utils'
 
 jest.mock('~/lib/api')
-jest.mock('lib/lemon-ui/LemonToast/LemonToast')
+jest.mock('lib/elements/Toast/Toast')
 
 describe('llmAnalyticsDatasetLogic', () => {
     const mockDataset: Dataset = {
@@ -135,7 +135,7 @@ describe('llmAnalyticsDatasetLogic', () => {
                 description: 'New description',
                 metadata: { test: 'value' },
             })
-            expect(lemonToast.success).toHaveBeenCalledWith('Dataset created successfully')
+            expect(toast.success).toHaveBeenCalledWith('Dataset created successfully')
             expect(routerReplaceSpy).toHaveBeenCalledWith(urls.llmAnalyticsDataset(mockDataset.id))
             expect(logic.values.dataset).toEqual(mockDataset)
             expect(logic.values.isEditingDataset).toBe(false)
@@ -219,7 +219,7 @@ describe('llmAnalyticsDatasetLogic', () => {
                 logic.actions.submitDatasetForm()
             }).toFinishAllListeners()
 
-            expect(lemonToast.error).toHaveBeenCalledWith('Custom error message')
+            expect(toast.error).toHaveBeenCalledWith('Custom error message')
         })
 
         it('handles creation error without detail', async () => {
@@ -237,7 +237,7 @@ describe('llmAnalyticsDatasetLogic', () => {
                 logic.actions.submitDatasetForm()
             }).toFinishAllListeners()
 
-            expect(lemonToast.error).toHaveBeenCalledWith('Failed to save dataset')
+            expect(toast.error).toHaveBeenCalledWith('Failed to save dataset')
         })
     })
 
@@ -274,7 +274,7 @@ describe('llmAnalyticsDatasetLogic', () => {
                 description: 'Updated description',
                 metadata: { updated: 'metadata' },
             })
-            expect(lemonToast.success).toHaveBeenCalledWith('Dataset updated successfully')
+            expect(toast.success).toHaveBeenCalledWith('Dataset updated successfully')
             expect(logic.values.dataset).toEqual(updatedDataset)
             expect(logic.values.isEditingDataset).toBe(false)
         })
@@ -315,7 +315,7 @@ describe('llmAnalyticsDatasetLogic', () => {
                 logic.actions.submitDatasetForm()
             }).toFinishAllListeners()
 
-            expect(lemonToast.error).toHaveBeenCalledWith('Update failed')
+            expect(toast.error).toHaveBeenCalledWith('Update failed')
         })
     })
 

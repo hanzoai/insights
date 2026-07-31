@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
-import { LemonRichContentEditor } from 'lib/lemon-ui/LemonRichContent/LemonRichContentEditor'
+import { RichContentEditor } from 'lib/elements/RichContent/RichContentEditor'
 
 import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
 
@@ -32,7 +32,7 @@ export const CommentComposer = (props: CommentsLogicProps): JSX.Element => {
 
     return (
         <div className="deprecated-space-y-2">
-            <LemonRichContentEditor
+            <RichContentEditor
                 key={key}
                 logicKey="discussions"
                 placeholder={placeholder}
@@ -44,16 +44,16 @@ export const CommentComposer = (props: CommentsLogicProps): JSX.Element => {
             <div className="flex justify-between items-center gap-2">
                 <div className="flex-1" />
                 {replyingCommentId ? (
-                    <LemonButton type="secondary" onClick={() => setReplyingComment(null)}>
+                    <Button type="secondary" onClick={() => setReplyingComment(null)}>
                         Cancel reply
-                    </LemonButton>
+                    </Button>
                 ) : null}
                 {itemContext ? (
-                    <LemonButton type="secondary" onClick={() => clearItemContext()}>
+                    <Button type="secondary" onClick={() => clearItemContext()}>
                         Cancel
-                    </LemonButton>
+                    </Button>
                 ) : null}
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={sendComposedContent}
                     disabledReason={isEmpty ? 'No message' : null}
@@ -61,7 +61,7 @@ export const CommentComposer = (props: CommentsLogicProps): JSX.Element => {
                     data-attr="discussions-comment"
                 >
                     Add {replyingCommentId ? 'reply' : 'comment'}
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

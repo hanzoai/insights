@@ -6,7 +6,7 @@ import { useState } from 'react'
  * @returns The wrapped event handler and a loading state.
  * @example
  * const { loading, onEvent } = useAsyncHandler(() => await api.doSomething())
- * return <LemonButton onClick={onEvent} loading={loading}>Click me</button>
+ * return <Button onClick={onEvent} loading={loading}>Click me</button>
  */
 export function useAsyncHandler<E extends React.UIEvent>(
     onEvent: ((e: E) => any) | undefined

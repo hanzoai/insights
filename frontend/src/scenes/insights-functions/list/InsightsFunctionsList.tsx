@@ -4,25 +4,25 @@ import { useCallback, useMemo } from 'react'
 
 import { IconBell } from '@hanzo/icons'
 import {
-    LemonBadge,
-    LemonButton,
-    LemonCheckbox,
-    LemonInput,
-    LemonTable,
-    LemonTableColumn,
-    LemonTag,
+    Badge,
+    Button,
+    Checkbox,
+    Input,
+    Table,
+    TableColumn,
+    Tag,
     Link,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { updatedAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { More } from 'lib/elements/Button/More'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { updatedAtColumn } from 'lib/elements/Table/columnUtils'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { urls } from 'scenes/urls'
 
 import { InsightsFunctionConfigurationContextId, InsightsFunctionType } from '~/types'
@@ -67,7 +67,7 @@ function NotificationContextTag({ insightsFunction }: { insightsFunction: Insigh
 
     return (
         <Tooltip title={tooltipTitle}>
-            <LemonTag
+            <Tag
                 size="small"
                 type="muted"
                 icon={<IconBell />}
@@ -85,7 +85,7 @@ function NotificationContextTag({ insightsFunction }: { insightsFunction: Insigh
                 }
             >
                 {context.label}
-            </LemonTag>
+            </Tag>
         </Tooltip>
     )
 }
@@ -130,7 +130,7 @@ export function InsightsFunctionList({
     )
 
     const columns = useMemo(() => {
-        const columns: LemonTableColumn<InsightsFunctionType, any>[] = [
+        const columns: TableColumn<InsightsFunctionType, any>[] = [
             {
                 title: '',
                 width: 0,
@@ -146,7 +146,7 @@ export function InsightsFunctionList({
                 dataIndex: 'name',
                 render: (_, insightsFunction) => {
                     return (
-                        <LemonTableLink
+                        <TableLink
                             to={urlForInsightsFunction(insightsFunction)}
                             title={
                                 <>
@@ -179,7 +179,7 @@ export function InsightsFunctionList({
                 },
             },
 
-            updatedAtColumn() as LemonTableColumn<InsightsFunctionType, any>,
+            updatedAtColumn() as TableColumn<InsightsFunctionType, any>,
             {
                 title: 'Last 7 days',
                 width: 0,
@@ -240,7 +240,7 @@ export function InsightsFunctionList({
                     return (
                         <More
                             overlay={
-                                <LemonMenuOverlay
+                                <MenuOverlay
                                     items={
                                         isManualFunction(insightsFunction)
                                             ? [
@@ -279,13 +279,13 @@ export function InsightsFunctionList({
                 width: 0,
                 render: function Render(_, insightsFunction) {
                     return (
-                        <LemonButton
+                        <Button
                             size="small"
                             tooltip="Transformations are executed in a specific order. Click to reorder them."
                             onClick={() => setReorderModalOpen(true)}
                         >
-                            <LemonBadge.Number count={insightsFunction.execution_order ?? 0} status="muted" />
-                        </LemonButton>
+                            <Badge.Number count={insightsFunction.execution_order ?? 0} status="muted" />
+                        </Button>
                     )
                 },
             })
@@ -297,7 +297,7 @@ export function InsightsFunctionList({
     return (
         <div className="flex flex-col gap-4">
             <div className="flex gap-2 items-center">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search..."
                     value={filters.search ?? ''}
@@ -316,7 +316,7 @@ export function InsightsFunctionList({
                         onChange={(user) => setFilters({ createdBy: user?.uuid || null })}
                     />
                 </div>
-                <LemonCheckbox
+                <Checkbox
                     label="Show paused"
                     bordered
                     size="small"
@@ -327,7 +327,7 @@ export function InsightsFunctionList({
             </div>
 
             <BindLogic logic={insightsFunctionsListLogic} props={props}>
-                <LemonTable
+                <Table
                     dataSource={filteredInsightsFunctions}
                     size="small"
                     loading={loading}

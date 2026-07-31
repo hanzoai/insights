@@ -3,13 +3,13 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconCheck, IconFilter, IconX } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonLabel, LemonSelect } from '@hanzo/lemon-ui'
+import { Banner, Button, Label, Select } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { ExcludedProperties, TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 import MaxTool from 'scenes/max/MaxTool'
@@ -150,7 +150,7 @@ export function InsightsFunctionFilters({
             )}
         >
             {showSourcePicker && (
-                <LemonField
+                <Field
                     name="filters"
                     label="Source"
                     info={
@@ -168,7 +168,7 @@ export function InsightsFunctionFilters({
                 >
                     {({ value, onChange }) => {
                         return (
-                            <LemonSelect
+                            <Select
                                 options={[
                                     { value: 'events', label: 'Events' },
                                     ...(cdpPersonUpdatesEnabled
@@ -185,9 +185,9 @@ export function InsightsFunctionFilters({
                             />
                         )
                     }}
-                </LemonField>
+                </Field>
             )}
-            <LemonField
+            <Field
                 name="filters"
                 label={isDataWarehouse ? null : useMapping ? 'Global filters' : 'Filters'}
                 info={
@@ -246,13 +246,13 @@ export function InsightsFunctionFilters({
                             {showEventMatchers ? (
                                 <>
                                     <div className="flex gap-2 justify-between w-full">
-                                        <LemonLabel>
+                                        <Label>
                                             {isDataWarehouse
                                                 ? 'Match tables'
                                                 : isTransformation
                                                   ? 'Match events'
                                                   : 'Match events and actions'}
-                                        </LemonLabel>
+                                        </Label>
                                     </div>
                                     <p className="mb-0 text-xs text-secondary">
                                         If set, the {type} will only run if the <b>event matches any</b> of the below.
@@ -304,7 +304,7 @@ export function InsightsFunctionFilters({
                                         <span className="text-sm font-medium">Suggested by Max</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <LemonButton
+                                        <Button
                                             status="danger"
                                             icon={<IconX />}
                                             onClick={() => {
@@ -316,8 +316,8 @@ export function InsightsFunctionFilters({
                                             size="small"
                                         >
                                             Reject
-                                        </LemonButton>
-                                        <LemonButton
+                                        </Button>
+                                        <Button
                                             type="tertiary"
                                             icon={<IconCheck color="var(--success)" />}
                                             onClick={() => {
@@ -329,24 +329,24 @@ export function InsightsFunctionFilters({
                                             size="small"
                                         >
                                             Accept
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 </div>
                             )}
                         </>
                     )
                 }}
-            </LemonField>
+            </Field>
 
             {filtersContainPersonProperties && showEventMatchers ? (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     You are filtering on Person properties. Be aware that this filtering applies at the time the event
                     is processed so if Person Profiles are not enabled or the person property has not been set by then
                     then the filters may not work as expected.
-                </LemonBanner>
+                </Banner>
             ) : null}
             {showMasking ? (
-                <LemonField
+                <Field
                     name="masking"
                     label="Trigger options"
                     info={`
@@ -356,7 +356,7 @@ export function InsightsFunctionFilters({
                 >
                     {({ value, onChange }) => (
                         <div className="flex flex-wrap gap-1 items-center">
-                            <LemonSelect
+                            <Select
                                 options={[
                                     {
                                         value: null,
@@ -387,7 +387,7 @@ export function InsightsFunctionFilters({
                                 <>
                                     <div className="flex flex-wrap gap-1 items-center">
                                         <span>of</span>
-                                        <LemonSelect
+                                        <Select
                                             value={value?.ttl}
                                             onChange={(val) => onChange({ ...value, ttl: val })}
                                             options={[
@@ -432,7 +432,7 @@ export function InsightsFunctionFilters({
                                     </div>
                                     <div className="flex flex-wrap gap-1 items-center">
                                         <span>or until</span>
-                                        <LemonSelect
+                                        <Select
                                             value={value?.threshold}
                                             onChange={(val) => onChange({ ...value, threshold: val })}
                                             options={[
@@ -463,7 +463,7 @@ export function InsightsFunctionFilters({
                             ) : null}
                         </div>
                     )}
-                </LemonField>
+                </Field>
             ) : null}
         </div>
     )

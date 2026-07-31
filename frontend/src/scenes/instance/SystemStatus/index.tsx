@@ -3,11 +3,11 @@ import './index.scss'
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonBanner, Link } from '@hanzo/lemon-ui'
+import { Banner, Link } from '@hanzo/elements'
 
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tab, Tabs } from 'lib/elements/Tabs'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { InternalMetricsTab } from 'scenes/instance/SystemStatus/InternalMetricsTab'
 import { OverviewTab } from 'scenes/instance/SystemStatus/OverviewTab'
@@ -45,7 +45,7 @@ export function SystemStatus(): JSX.Element {
             ),
             content: <OverviewTab />,
         },
-    ] as LemonTab<InstanceStatusTabName>[]
+    ] as Tab<InstanceStatusTabName>[]
 
     if (user?.is_staff) {
         tabs = tabs.concat([
@@ -59,9 +59,9 @@ export function SystemStatus(): JSX.Element {
                 label: (
                     <>
                         Settings{' '}
-                        <LemonTag type="warning" className="ml-1 uppercase">
+                        <Tag type="warning" className="ml-1 uppercase">
                             Beta
-                        </LemonTag>
+                        </Tag>
                     </>
                 ),
                 content: <InstanceConfigTab />,
@@ -96,13 +96,13 @@ export function SystemStatus(): JSX.Element {
             </p>
             <SceneDivider />
             {error && (
-                <LemonBanner type="error">
+                <Banner type="error">
                     <div>Something went wrong</div>
                     <div>{error || 'An unknown error occurred. Please try again or contact us.'}</div>
-                </LemonBanner>
+                </Banner>
             )}
             {siteUrlMisconfigured && (
-                <LemonBanner
+                <Banner
                     type="warning"
                     action={{
                         children: 'Learn more',
@@ -120,10 +120,10 @@ export function SystemStatus(): JSX.Element {
                     </b>
                     . In order for Insights to work properly, please set this to the origin where your instance is
                     hosted.
-                </LemonBanner>
+                </Banner>
             )}
 
-            <LemonTabs activeKey={tab} onChange={setTab} tabs={tabs} />
+            <Tabs activeKey={tab} onChange={setTab} tabs={tabs} />
         </SceneContent>
     )
 }

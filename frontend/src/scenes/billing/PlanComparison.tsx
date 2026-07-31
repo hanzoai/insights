@@ -6,10 +6,10 @@ import React, { useState } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
 import { IconCheckCircle, IconWarning, IconX } from '@hanzo/icons'
-import { LemonModal, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Modal, Tag, Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { getProductIcon } from 'scenes/onboarding/productSelection/ProductSelection'
 
@@ -221,12 +221,12 @@ export const PlanComparison = ({
                                                         : 'If subscribed, charged on all usage.'
                                                 }
                                             >
-                                                <LemonTag
+                                                <Tag
                                                     type={addon.inclusion_only ? 'option' : 'primary'}
                                                     className="ml-2"
                                                 >
                                                     {addon.inclusion_only ? 'config' : 'add-on'}
-                                                </LemonTag>
+                                                </Tag>
                                             </Tooltip>
                                         </p>
                                         <p className="ml-0 text-xs text-secondary mt-1">Priced per {addon.unit}</p>
@@ -416,14 +416,14 @@ export const PlanComparisonModal = ({
     onClose?: () => void
 }): JSX.Element | null => {
     return (
-        <LemonModal isOpen={modalOpen} onClose={onClose}>
+        <Modal isOpen={modalOpen} onClose={onClose}>
             <div className="PlanComparisonModal flex w-full h-full justify-center p-6">
                 <div className="text-left bg-surface-primary rounded relative w-full">
                     {title ? <h2>{title}</h2> : <h2>{product.name} plans</h2>}
                     <PlanComparison product={product} includeAddons={includeAddons} />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 

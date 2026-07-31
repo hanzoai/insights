@@ -5,7 +5,7 @@ import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { convertPropertyGroupToProperties, isValidPropertyFilter } from 'lib/components/PropertyFilters/utils'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { isActionFilter, isEventFilter } from 'lib/components/UniversalFilters/utils'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { genericOperatorMap } from 'lib/utils'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { toLocalFilters } from 'scenes/insights/filters/ActionFilter/entityFilterLogic'
@@ -82,7 +82,7 @@ export async function updatePlaylist(
     const newPlaylist = await api.recordings.updatePlaylist(shortId, playlist)
     refreshTreeItem('session_recording_playlist', shortId)
     if (!silent) {
-        lemonToast.success('Playlist updated successfully')
+        toast.success('Playlist updated successfully')
     }
     return newPlaylist
 }
@@ -99,7 +99,7 @@ export async function duplicatePlaylist(
         return null
     }
 
-    lemonToast.success('Playlist duplicated successfully')
+    toast.success('Playlist duplicated successfully')
 
     return newPlaylist
 }

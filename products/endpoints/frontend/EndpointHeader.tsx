@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { EndpointRequest } from '~/queries/schema/schema-general'
@@ -99,15 +99,15 @@ export const EndpointSceneHeader = ({ tabId }: EndpointSceneHeaderProps): JSX.El
                 actions={
                     <>
                         {endpoint && (
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 onClick={handleDiscardChanges}
                                 disabledReason={!hasChanges && 'No changes to discard'}
                             >
                                 Discard changes
-                            </LemonButton>
+                            </Button>
                         )}
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={handleSave}
                             disabledReason={
@@ -121,7 +121,7 @@ export const EndpointSceneHeader = ({ tabId }: EndpointSceneHeaderProps): JSX.El
                             }
                         >
                             Update
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             />

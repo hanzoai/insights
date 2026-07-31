@@ -29,7 +29,7 @@ export class InsightPage {
         this.saveButton = page.getByTestId('insight-save-button')
         this.editButton = page.getByTestId('insight-edit-button')
         this.topBarName = page.locator('.scene-name')
-        this.activeTab = page.locator('.LemonTabs__tab--active')
+        this.activeTab = page.locator('.Tabs__tab--active')
 
         this.trends = new TrendsInsight(page)
         this.funnels = new FunnelsInsight(page)
@@ -47,7 +47,7 @@ export class InsightPage {
 
     async goToNewInsight(type: InsightType): Promise<InsightPage> {
         await this.page.goto(urls.insightNew({ type }), { waitUntil: 'domcontentloaded' })
-        await this.page.waitForSelector('.LemonTabs__tab--active')
+        await this.page.waitForSelector('.Tabs__tab--active')
         return this
     }
 
@@ -127,7 +127,7 @@ class TrendsInsight {
 
         this.detailsTable = page.getByTestId('insights-table-graph')
         this.detailsLabels = this.detailsTable.locator('.insights-label')
-        this.detailsLoader = page.locator('.LemonTableLoader')
+        this.detailsLoader = page.locator('.TableLoader')
         this.addSeriesButton = page.getByTestId('add-action-event-button')
         this.firstSeries = page.getByTestId('trend-element-subject-0')
         this.secondSeries = page.getByTestId('trend-element-subject-1')
@@ -306,7 +306,7 @@ class StickinessInsight {
     constructor(page: Page) {
         this.chart = page.getByTestId('insights-graph')
         this.detailsTable = page.getByTestId('insights-table-graph')
-        this.detailsLoader = page.locator('.LemonTableLoader')
+        this.detailsLoader = page.locator('.TableLoader')
     }
 
     async waitForChart(): Promise<void> {

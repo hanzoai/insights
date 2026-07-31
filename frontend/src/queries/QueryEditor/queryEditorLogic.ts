@@ -1,6 +1,6 @@
 import { actions, kea, key, listeners, path, props, propsChanged, reducers, selectors } from 'kea'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { QueryEditorProps } from '~/queries/QueryEditor/QueryEditor'
 import { Node } from '~/queries/schema/schema-general'
@@ -56,7 +56,7 @@ export const queryEditorLogic = kea<queryEditorLogicType>([
     listeners(({ actions, props, values }) => ({
         saveQuery: () => {
             if (values.error) {
-                lemonToast.error(`Error parsing JSON: ${values.error}`)
+                toast.error(`Error parsing JSON: ${values.error}`)
             } else {
                 const withoutFormatting = JSON.stringify(JSON.parse(values.queryInput))
                 actions.setQueryInput(prettyJSON(withoutFormatting))

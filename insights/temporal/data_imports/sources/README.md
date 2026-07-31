@@ -17,11 +17,11 @@ All of the below are defined in `insights/schema.py` with a union of them define
 
 #### `SourceFieldInputConfig`
 
-This is your basic input field. You can set a `placeholder`, whether it's `required`, and the `type` (text, email, number, textarea, etc). This renders as a `<LemonInput />`.
+This is your basic input field. You can set a `placeholder`, whether it's `required`, and the `type` (text, email, number, textarea, etc). This renders as a `<Input />`.
 
 #### `SourceFieldSwitchGroupConfig`
 
-This renders a toggle that when enabled will render a group of sub-fields. This is useful when you may have optional settings that a user can turn on/off. This field has a `default` that can be set, along with a list of `fields` that will be shown when it's enabled. The field itself will be rendered as a `<LemonSwitch />`
+This renders a toggle that when enabled will render a group of sub-fields. This is useful when you may have optional settings that a user can turn on/off. This field has a `default` that can be set, along with a list of `fields` that will be shown when it's enabled. The field itself will be rendered as a `<Switch />`
 
 #### `SourceFieldSelectConfig`
 

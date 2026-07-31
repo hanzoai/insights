@@ -4,9 +4,9 @@ import { useRef } from 'react'
 import { IconUpload } from '@hanzo/icons'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonFileInput } from 'lib/lemon-ui/LemonFileInput'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
+import { Banner } from 'lib/elements/Banner'
+import { FileInput } from 'lib/elements/FileInput'
+import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { SceneExport } from 'scenes/sceneTypes'
 import { userLogic } from 'scenes/userLogic'
 
@@ -44,7 +44,7 @@ export function SessionRecordingFilePlaybackScene(): JSX.Element {
                 <SpinnerOverlay />
             ) : sessionRecording ? (
                 <div className="flex flex-col gap-2 h-screen pb-4">
-                    <LemonBanner
+                    <Banner
                         type="info"
                         action={{
                             onClick: () => resetSessionRecording(),
@@ -52,7 +52,7 @@ export function SessionRecordingFilePlaybackScene(): JSX.Element {
                         }}
                     >
                         You are viewing a recording loaded from a file.
-                    </LemonBanner>
+                    </Banner>
                     <SessionRecordingPlayer {...playerProps} />
                 </div>
             ) : (
@@ -60,7 +60,7 @@ export function SessionRecordingFilePlaybackScene(): JSX.Element {
                     ref={dropRef}
                     className="w-full border rounded p-20 text-secondary flex flex-col items-center justify-center"
                 >
-                    <LemonFileInput
+                    <FileInput
                         accept="application/json"
                         multiple={false}
                         onChange={(files) => loadFromFile(files[0])}

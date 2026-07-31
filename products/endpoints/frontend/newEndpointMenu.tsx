@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 import { router } from 'kea-router'
 
 import { IconGraph, IconServer } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
 import { urls } from 'scenes/urls'
@@ -40,7 +40,7 @@ export function OverlayForNewEndpointMenu(): JSX.Element {
     return (
         <>
             {options.map((option) => (
-                <LemonButton
+                <Button
                     key={option.name}
                     icon={<option.icon />}
                     onClick={option.onClick}
@@ -52,7 +52,7 @@ export function OverlayForNewEndpointMenu(): JSX.Element {
                         <strong>{option.name}</strong>
                         <span className="text-xs font-sans font-normal">{option.description}</span>
                     </div>
-                </LemonButton>
+                </Button>
             ))}
         </>
     )

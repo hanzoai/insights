@@ -1,4 +1,4 @@
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { QuickFiltersSection } from 'lib/components/QuickFilters/QuickFiltersSection'
 
@@ -13,7 +13,7 @@ export function IssuesFilters(): JSX.Element {
                 <ErrorFilters.DateRange />
                 <ErrorFilters.Status />
                 <ErrorFilters.Assignee />
-                <LemonDivider vertical />
+                <Divider vertical />
                 <QuickFiltersSection context={QuickFilterContext.ErrorTrackingIssueFilters} />
             </div>
             <div className="flex gap-2 items-start">

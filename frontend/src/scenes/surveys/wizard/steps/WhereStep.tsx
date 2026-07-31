@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonInputSelect, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { InputSelect, SegmentedButton } from '@hanzo/elements'
 
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
+import { Radio } from 'lib/elements/Radio'
 
 import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { PropertyDefinitionType, SurveyDisplayConditions, SurveyMatchType, SurveySchedule } from '~/types'
@@ -77,7 +77,7 @@ export function WhereStep(): JSX.Element {
                 <h2 className="text-xl font-semibold mb-2">Where should this appear?</h2>
                 <p className="text-secondary mb-6">Choose which pages will show this survey</p>
 
-                <LemonRadio
+                <Radio
                     value={targetingMode}
                     onChange={setTargetingMode}
                     options={[
@@ -96,7 +96,7 @@ export function WhereStep(): JSX.Element {
 
                 {targetingMode === 'specific' && (
                     <div className="mt-4 ml-6">
-                        <LemonInputSelect
+                        <InputSelect
                             mode="single"
                             value={urlPattern ? [urlPattern] : []}
                             onChange={(val) => setUrlPattern(val[0] || '')}
@@ -149,7 +149,7 @@ export function WhereStep(): JSX.Element {
                 <h2 className="text-xl font-semibold mb-2">How often can someone see this?</h2>
                 <p className="text-secondary mb-6">Control how frequently the same person can be shown this survey</p>
 
-                <LemonSegmentedButton
+                <SegmentedButton
                     value={frequency}
                     onChange={setFrequency}
                     options={FREQUENCY_OPTIONS.map((opt) => ({

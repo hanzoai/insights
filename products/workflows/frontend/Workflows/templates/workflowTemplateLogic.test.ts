@@ -23,15 +23,15 @@ jest.mock('lib/api', () => ({
     },
 }))
 
-jest.mock('lib/lemon-ui/LemonToast', () => ({
-    lemonToast: {
+jest.mock('lib/elements/Toast', () => ({
+    toast: {
         success: jest.fn(),
         error: jest.fn(),
     },
 }))
 
 const mockApi = api.insightsFlowTemplates as jest.Mocked<typeof api.insightsFlowTemplates>
-const mockToast = require('lib/lemon-ui/LemonToast').lemonToast
+const mockToast = require('lib/elements/Toast').toast
 
 describe('workflowTemplateLogic', () => {
     beforeEach(() => {

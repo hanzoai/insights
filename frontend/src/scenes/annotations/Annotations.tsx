@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPencil } from '@hanzo/icons'
-import { LemonSelect, Link } from '@hanzo/lemon-ui'
+import { Select, Link } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -9,12 +9,12 @@ import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
 import { MicrophoneMascot } from 'lib/components/mascots'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { createdAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { createdAtColumn } from 'lib/elements/Table/columnUtils'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { cn } from 'lib/utils/css-classes'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
@@ -51,7 +51,7 @@ export function Annotations(): JSX.Element {
     const { loadingNext, next } = useValues(annotationsModel)
     const { loadAnnotationsNext } = useActions(annotationsModel)
 
-    const columns: LemonTableColumns<AnnotationType> = [
+    const columns: TableColumns<AnnotationType> = [
         {
             title: 'Annotation',
             key: 'annotation',
@@ -104,7 +104,7 @@ export function Annotations(): JSX.Element {
                             : `This annotation applies to all insights in the ${currentOrganization?.name} organization`
                 return (
                     <Tooltip title={tooltip} placement="right">
-                        <LemonTag className="uppercase">
+                        <Tag className="uppercase">
                             {annotation.scope === AnnotationScope.Insight ? (
                                 <Link
                                     to={urls.insightView(annotation.insight_short_id as InsightShortId)}
@@ -117,7 +117,7 @@ export function Annotations(): JSX.Element {
                             ) : (
                                 scopeName
                             )}
-                        </LemonTag>
+                        </Tag>
                     </Tooltip>
                 )
             },
@@ -144,12 +144,12 @@ export function Annotations(): JSX.Element {
                     b.created_by?.first_name || b.created_by?.email || ''
                 ),
         },
-        createdAtColumn() as LemonTableColumn<AnnotationType, keyof AnnotationType | undefined>,
+        createdAtColumn() as TableColumn<AnnotationType, keyof AnnotationType | undefined>,
         {
             key: 'actions',
             width: 0,
             render: function RenderActions(_, annotation): JSX.Element {
-                return <LemonButton icon={<IconPencil />} size="small" to={urls.annotation(annotation.id)} />
+                return <Button icon={<IconPencil />} size="small" to={urls.annotation(annotation.id)} />
             },
         },
     ]
@@ -170,20 +170,20 @@ export function Annotations(): JSX.Element {
                         interaction="click"
                         scope={Scene.Annotations}
                     >
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={() => openModalToCreateAnnotation()}
                             size="small"
                             tooltip="New annotation"
                         >
                             New annotation
-                        </LemonButton>
+                        </Button>
                     </AppShortcut>
                 }
             />
             <div className="flex flex-row items-center gap-2 justify-end">
                 <div>Scope:</div>
-                <LemonSelect options={annotationScopesMenuOptions()} value={scope} onSelect={setScope} />
+                <Select options={annotationScopesMenuOptions()} value={scope} onSelect={setScope} />
             </div>
             <div data-attr="annotations-content">
                 <div className={cn('mt-4 mb-0 empty:hidden')}>
@@ -200,7 +200,7 @@ export function Annotations(): JSX.Element {
                 </div>
                 {!shouldShowEmptyState && (
                     <>
-                        <LemonTable
+                        <Table
                             data-attr="annotations-table"
                             rowKey="id"
                             dataSource={filteredAnnotations}
@@ -215,7 +215,7 @@ export function Annotations(): JSX.Element {
                         />
                         {next && (
                             <div className="flex justify-center mt-6">
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     loading={loadingNext}
                                     onClick={(): void => {
@@ -223,7 +223,7 @@ export function Annotations(): JSX.Element {
                                     }}
                                 >
                                     Load more annotations
-                                </LemonButton>
+                                </Button>
                             </div>
                         )}
                     </>

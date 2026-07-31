@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCalendar, IconPlus } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { ActionStep } from '~/toolbar/actions/ActionStep'
 import { ActionsListView } from '~/toolbar/actions/ActionsListView'
@@ -69,7 +69,7 @@ export function ElementInfo(): JSX.Element | null {
                     </>
                 )}
                 {automaticActionCreationEnabled ? (
-                    <LemonButton
+                    <Button
                         size="small"
                         type="primary"
                         status="alt"
@@ -77,16 +77,16 @@ export function ElementInfo(): JSX.Element | null {
                         icon={<IconPlus />}
                     >
                         Select element
-                    </LemonButton>
+                    </Button>
                 ) : (
-                    <LemonButton
+                    <Button
                         size="small"
                         type="secondary"
                         onClick={() => createAction(element)}
                         icon={<IconPlus />}
                     >
                         Create a new action
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
         </>

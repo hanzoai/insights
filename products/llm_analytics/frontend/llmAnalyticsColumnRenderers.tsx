@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
 import { IconFilter } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'
 
@@ -129,7 +129,7 @@ function PersonColumnCell({ person }: { person: PersonData | null | undefined })
 
             {filterIdentifier && (
                 <Tooltip title={`Filter by ${filterIdentifier.value}`}>
-                    <LemonButton size="xsmall" icon={<IconFilter />} onClick={handleFilterByPerson} noPadding />
+                    <Button size="xsmall" icon={<IconFilter />} onClick={handleFilterByPerson} noPadding />
                 </Tooltip>
             )}
         </div>
@@ -158,7 +158,7 @@ function PersonColumnCellWithRedirect({ person }: { person: PersonData | null | 
 
             {filterIdentifier && (
                 <Tooltip title={`View traces for ${filterIdentifier.value}`}>
-                    <LemonButton size="xsmall" icon={<IconFilter />} onClick={handleFilterAndRedirect} noPadding />
+                    <Button size="xsmall" icon={<IconFilter />} onClick={handleFilterAndRedirect} noPadding />
                 </Tooltip>
             )}
         </div>

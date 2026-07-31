@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDialog, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Dialog, Select } from '@hanzo/elements'
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { sceneLogic } from 'scenes/sceneLogic'
@@ -79,15 +79,15 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
         <div className="flex gap-x-2 justify-between">
             <ConfettiComponent />
             <div className="flex gap-x-2">
-                <LemonButton type="secondary" size="small" onClick={openInNewTabs}>
+                <Button type="secondary" size="small" onClick={openInNewTabs}>
                     Open all
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     disabledReason={!hasAtLeastTwoIssues ? 'Select at least two issues to merge' : null}
                     type="secondary"
                     size="small"
                     onClick={() =>
-                        LemonDialog.open({
+                        Dialog.open({
                             title: 'Merge Issues',
                             content: `Are you sure you want to merge these ${selectedIds.length} issues?`,
                             primaryButton: {
@@ -101,8 +101,8 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
                     }
                 >
                     Merge
-                </LemonButton>
-                <LemonSelect
+                </Button>
+                <Select
                     onChange={(value) => {
                         if (value == currentStatus) {
                             return
@@ -132,15 +132,15 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
                 />
                 <AssigneeSelect assignee={null} onChange={(assignee) => assignIssues(selectedIds, assignee)}>
                     {(displayAssignee) => (
-                        <LemonButton type="secondary" size="small">
+                        <Button type="secondary" size="small">
                             <AssigneeLabelDisplay assignee={displayAssignee} placeholder="Assign" />
-                        </LemonButton>
+                        </Button>
                     )}
                 </AssigneeSelect>
             </div>
-            <LemonButton type="secondary" size="small" onClick={excludeSelectedIssues}>
+            <Button type="secondary" size="small" onClick={excludeSelectedIssues}>
                 Hide from search
-            </LemonButton>
+            </Button>
         </div>
     )
 }

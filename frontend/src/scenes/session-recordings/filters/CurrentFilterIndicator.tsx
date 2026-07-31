@@ -2,7 +2,7 @@ import equal from 'fast-deep-equal'
 import { useActions, useValues } from 'kea'
 
 import { IconFilter } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { sessionRecordingsPlaylistLogic } from '../playlist/sessionRecordingsPlaylistLogic'
 import { sessionRecordingSavedFiltersLogic } from './sessionRecordingSavedFiltersLogic'
@@ -29,7 +29,7 @@ export function CurrentFilterIndicator(): JSX.Element | null {
         <div className="text-xs flex gap-2 items-center pt-2">
             <div className="font-semibold whitespace-nowrap flex-shrink-0">Current filter applied:</div>
             <div className="flex items-center min-w-0 flex-1">
-                <LemonTag
+                <Tag
                     data-attr="current-filter-indicator"
                     type={hasFilterChanges ? 'option' : 'primary'}
                     icon={<IconFilter />}
@@ -41,7 +41,7 @@ export function CurrentFilterIndicator(): JSX.Element | null {
                         {appliedSavedFilter.name || appliedSavedFilter.derived_name || 'Unnamed'}
                         {hasFilterChanges && ' (edited)'}
                     </span>
-                </LemonTag>
+                </Tag>
             </div>
         </div>
     )

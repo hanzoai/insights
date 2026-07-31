@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconArrowLeft } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Divider, Tag } from '@hanzo/elements'
 
 import { MessageInput } from '../Chat/MessageInput'
 import { MessageList } from '../Chat/MessageList'
@@ -14,11 +14,11 @@ export function Ticket(): JSX.Element {
     return (
         <div className="flex flex-col h-full bg-surface-primary border rounded-lg p-2">
             <div className="flex items-center gap-2">
-                <LemonButton icon={<IconArrowLeft />} size="small" onClick={() => setView('list')} />
+                <Button icon={<IconArrowLeft />} size="small" onClick={() => setView('list')} />
                 {currentTicket?.ticket_number && (
                     <span className="text-xs font-mono text-muted-alt">#{currentTicket.ticket_number}</span>
                 )}
-                <LemonTag
+                <Tag
                     type={
                         currentTicket?.status === 'resolved'
                             ? 'success'
@@ -29,9 +29,9 @@ export function Ticket(): JSX.Element {
                     size="small"
                 >
                     {currentTicket?.status === 'on_hold' ? 'On hold' : currentTicket?.status}
-                </LemonTag>
+                </Tag>
             </div>
-            <LemonDivider />
+            <Divider />
             <MessageList
                 messages={messages}
                 messagesLoading={messagesLoading}

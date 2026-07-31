@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 
 import { IconCheck, IconFilter } from '@hanzo/icons'
 
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { IconBlank } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {

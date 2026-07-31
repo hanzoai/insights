@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonInput, LemonLabel } from '@hanzo/lemon-ui'
+import { Banner, Input, Label } from '@hanzo/elements'
 
 import { HeatmapsForbiddenURL } from 'scenes/heatmaps/components/HeatmapsForbiddenURL'
 import { heatmapLogic } from 'scenes/heatmaps/scenes/heatmap/heatmapLogic'
@@ -15,9 +15,9 @@ export function HeatmapHeader(): JSX.Element {
                 <div className="flex gap-2 flex-1 min-w-0">
                     <div className="flex-1">
                         <div>
-                            <LemonLabel>Heatmap data URL</LemonLabel>
+                            <Label>Heatmap data URL</Label>
                             <div className="flex gap-2 justify-between">
-                                <LemonInput
+                                <Input
                                     size="small"
                                     placeholder={displayUrl ? `Same as display URL: ${displayUrl}` : 'Enter a URL'}
                                     value={dataUrl ?? ''}
@@ -35,7 +35,7 @@ export function HeatmapHeader(): JSX.Element {
                         {/* Screenshot display section */}
                         {screenshotError && (
                             <div className="mt-2">
-                                <LemonBanner type="error">{screenshotError}</LemonBanner>
+                                <Banner type="error">{screenshotError}</Banner>
                             </div>
                         )}
                     </div>

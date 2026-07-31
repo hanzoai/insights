@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Modal, Select } from '@hanzo/elements'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 import { pluralize } from 'lib/utils'
 
 import { PersonType } from '~/types'
@@ -17,18 +17,18 @@ export function MergeSplitPerson({ person }: { person: PersonType }): JSX.Elemen
     const { execute, cancel } = useActions(mergeSplitPersonLogic(logicProps))
 
     return (
-        <LemonModal
+        <Modal
             isOpen
             width="40rem"
             title="Split users"
             footer={
                 <div className="flex items-center gap-2">
-                    <LemonButton onClick={cancel} disabledReason={executedLoading && 'Splitting the user'}>
+                    <Button onClick={cancel} disabledReason={executedLoading && 'Splitting the user'}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={execute} loading={executedLoading}>
+                    </Button>
+                    <Button type="primary" onClick={execute} loading={executedLoading}>
                         Split users
-                    </LemonButton>
+                    </Button>
                 </div>
             }
             onClose={cancel}
@@ -40,7 +40,7 @@ export function MergeSplitPerson({ person }: { person: PersonType }): JSX.Elemen
                     <SplitPerson />
                 </BindLogic>
             )}
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -64,7 +64,7 @@ function SplitPerson(): JSX.Element | null {
                 You can select a distinct ID for which all the current properties will be assigned (<i>optional</i>).
                 All other new users will start without any properties.
             </p>
-            <LemonSelect
+            <Select
                 fullWidth
                 options={options}
                 placeholder="Select a distinct ID to which to assign all properties (optional)"
@@ -72,11 +72,11 @@ function SplitPerson(): JSX.Element | null {
                 value={selectedPersonToAssignSplit}
                 onChange={(value) => setSelectedPersonToAssignSplit(value as string)}
             />
-            <LemonBanner type="warning" className="mt-4">
+            <Banner type="warning" className="mt-4">
                 This will create <strong>{person.distinct_ids.length - 1}</strong>{' '}
                 {pluralize(person.distinct_ids.length - 1, 'new user', undefined, false)}. This might change the
                 numbers in your charts, even historically. Please be certain.
-            </LemonBanner>
+            </Banner>
         </>
     )
 }

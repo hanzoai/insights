@@ -11,11 +11,11 @@ import {
     IconThumbsUp,
     IconThumbsUpFilled,
 } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Skeleton } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
@@ -130,9 +130,9 @@ export function OpenQuestionSummaryV2({
                     <span className="font-semibold">Response summary</span>
                 </div>
                 <div className="space-y-2">
-                    <LemonSkeleton className="h-4 w-full" />
-                    <LemonSkeleton className="h-4 w-3/4" />
-                    <LemonSkeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
                 </div>
             </div>
         )
@@ -146,9 +146,9 @@ export function OpenQuestionSummaryV2({
                         <IconSparkles />
                         <span>Failed to generate summary</span>
                     </div>
-                    <LemonButton size="small" onClick={() => loadSummary(true)}>
+                    <Button size="small" onClick={() => loadSummary(true)}>
                         Retry
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         )
@@ -169,7 +169,7 @@ export function OpenQuestionSummaryV2({
                             onDismiss={handleDismissPopover}
                             hidden={!showConsentPopover}
                         >
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 icon={<IconSparkles />}
@@ -177,7 +177,7 @@ export function OpenQuestionSummaryV2({
                                 disabledReason={dataProcessingApprovalDisabledReason}
                             >
                                 Generate summary
-                            </LemonButton>
+                            </Button>
                         </AIConsentPopoverWrapper>
                     </div>
                 </div>
@@ -223,7 +223,7 @@ export function OpenQuestionSummaryV2({
             >
                 <div className="px-3 pb-3">
                     <div className="prose prose-base max-w-none">
-                        <LemonMarkdown>{summary.content}</LemonMarkdown>
+                        <Markdown>{summary.content}</Markdown>
                     </div>
 
                     <div className="flex items-center justify-between text-xs text-muted mt-3 pt-2 border-t">
@@ -237,7 +237,7 @@ export function OpenQuestionSummaryV2({
                                 {' • AI-generated • Verify key details'}
                             </span>
                             {dataProcessingAccepted || !showConsentPopover ? (
-                                <LemonButton
+                                <Button
                                     type="tertiary"
                                     size="xsmall"
                                     icon={<IconRefresh />}
@@ -250,7 +250,7 @@ export function OpenQuestionSummaryV2({
                                 />
                             ) : (
                                 <AIConsentPopoverWrapper showArrow onDismiss={handleDismissPopover}>
-                                    <LemonButton
+                                    <Button
                                         type="tertiary"
                                         size="xsmall"
                                         icon={<IconRefresh />}
@@ -267,7 +267,7 @@ export function OpenQuestionSummaryV2({
                         <div className="flex items-center gap-1" ref={triggerRef}>
                             {rating === null && <span>Was this helpful?</span>}
                             {rating !== 'down' && (
-                                <LemonButton
+                                <Button
                                     icon={rating === 'up' ? <IconThumbsUpFilled /> : <IconThumbsUp />}
                                     type="tertiary"
                                     size="xsmall"
@@ -276,7 +276,7 @@ export function OpenQuestionSummaryV2({
                                 />
                             )}
                             {rating !== 'up' && (
-                                <LemonButton
+                                <Button
                                     icon={rating === 'down' ? <IconThumbsDownFilled /> : <IconThumbsDown />}
                                     type="tertiary"
                                     size="xsmall"

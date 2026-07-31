@@ -1,4 +1,4 @@
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
+import { Label } from 'lib/elements/Label'
 import { DefaultExperimentConfidenceLevel } from 'scenes/settings/environment/DefaultExperimentConfidenceLevel'
 import { DefaultExperimentStatsMethod } from 'scenes/settings/environment/DefaultExperimentStatsMethod'
 import { ExperimentRecalculationTime } from 'scenes/settings/environment/ExperimentRecalculationTime'
@@ -11,7 +11,7 @@ export function ExperimentsSettings(): JSX.Element {
     return (
         <div className="space-y-8">
             <div>
-                <LemonLabel className="text-base">Default statistical method</LemonLabel>
+                <Label className="text-base">Default statistical method</Label>
                 <p className="text-secondary mt-2">
                     Choose the default statistical method for experiment analysis. This setting applies to all new
                     experiments in this environment and can be overridden per experiment.

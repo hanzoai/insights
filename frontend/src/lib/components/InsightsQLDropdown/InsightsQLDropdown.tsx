@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { LemonButton, LemonDropdown } from '@hanzo/lemon-ui'
+import { Button, Dropdown } from '@hanzo/elements'
 
 import { NodeKind } from '~/queries/schema/schema-general'
 
@@ -24,7 +24,7 @@ export const InsightsQLDropdown = ({
 
     return (
         <div className={clsx('flex-auto overflow-hidden', className)}>
-            <LemonDropdown
+            <Dropdown
                 visible={isInsightsQLDropdownVisible}
                 closeOnClickInside={false}
                 onClickOutside={() => setIsInsightsQLDropdownVisible(false)}
@@ -43,14 +43,14 @@ export const InsightsQLDropdown = ({
                     </div>
                 }
             >
-                <LemonButton
+                <Button
                     fullWidth
                     type="secondary"
                     onClick={() => setIsInsightsQLDropdownVisible(!isInsightsQLDropdownVisible)}
                 >
                     <code>{insightsQLValue}</code>
-                </LemonButton>
-            </LemonDropdown>
+                </Button>
+            </Dropdown>
         </div>
     )
 }

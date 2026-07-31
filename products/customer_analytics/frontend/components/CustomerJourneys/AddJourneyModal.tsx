@@ -1,10 +1,10 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
+import { Table } from 'lib/elements/Table'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { useSummarizeInsight } from 'scenes/insights/summarizeInsight'
 import { InsightIcon } from 'scenes/saved-insights/SavedInsights'
@@ -38,29 +38,29 @@ export function AddJourneyModal(): JSX.Element {
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isAddJourneyModalOpen}
             onClose={hideAddJourneyModal}
             title="Add customer journey"
             description="Select an existing funnel insight to track as a customer journey"
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={hideAddJourneyModal}>
+                    <Button type="secondary" onClick={hideAddJourneyModal}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={handleAddJourney}
                         disabledReason={!selectedInsight ? 'No insight selected' : null}
                     >
                         Add journey
-                    </LemonButton>
+                    </Button>
                 </>
             }
             width="60rem"
         >
             <div className="space-y-4">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search funnels..."
                     value={searchTerm}
@@ -69,7 +69,7 @@ export function AddJourneyModal(): JSX.Element {
                 />
 
                 <div className="overflow-x-hidden">
-                    <LemonTable
+                    <Table
                         dataSource={funnels}
                         columns={[
                             {
@@ -138,6 +138,6 @@ export function AddJourneyModal(): JSX.Element {
                     />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

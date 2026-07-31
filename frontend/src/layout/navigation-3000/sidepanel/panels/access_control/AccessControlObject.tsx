@@ -3,23 +3,23 @@ import { useEffect, useState } from 'react'
 
 import { IconInfo, IconTrash } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonDialog,
-    LemonInputSelect,
-    LemonModal,
-    LemonSelect,
-    LemonSelectProps,
-    LemonTable,
+    Banner,
+    Button,
+    Dialog,
+    InputSelect,
+    Modal,
+    Select,
+    SelectProps,
+    Table,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
 import { UserSelectItem } from 'lib/components/UserSelectItem'
-import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { ProfileBubbles, ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { ProfileBubbles, ProfilePicture } from 'lib/elements/ProfilePicture'
 import { capitalizeFirstLetter, fullName } from 'lib/utils'
 import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'
 import { urls } from 'scenes/urls'
@@ -59,13 +59,13 @@ export function AccessControlObject(props: AccessControlLogicProps): JSX.Element
                 <PayGateMini feature={AvailableFeature.ADVANCED_PERMISSIONS}>
                     <div className="deprecated-space-y-6">
                         {canEditAccessControls === false ? (
-                            <LemonBanner type="warning">
+                            <Banner type="warning">
                                 <Tooltip
                                     title={`You don't have permission to edit access controls for ${suffix}. You must be the creator of it, a Project admin, an Organization admin, or have manager access to the resource.`}
                                 >
                                     <span className="font-medium">Permission required</span>
                                 </Tooltip>
-                            </LemonBanner>
+                            </Banner>
                         ) : null}
 
                         <div className="deprecated-space-y-2">
@@ -93,7 +93,7 @@ function AccessControlObjectDefaults(): JSX.Element | null {
     const { guardAvailableFeature } = useValues(upgradeModalLogic)
 
     return (
-        <LemonSelect
+        <Select
             placeholder="Loading..."
             value={accessControlDefault?.access_level ?? undefined}
             onChange={(newValue) => {
@@ -135,7 +135,7 @@ function AccessControlObjectUsers(): JSX.Element | null {
     }
 
     // TODO(@zach): show project admins (that are not organization admins) in the table
-    const columns: LemonTableColumns<AccessControlTypeMember | AccessControlTypeOrganizationAdmins> = [
+    const columns: TableColumns<AccessControlTypeMember | AccessControlTypeOrganizationAdmins> = [
         {
             key: 'user',
             title: 'User',
@@ -226,16 +226,16 @@ function AccessControlObjectUsers(): JSX.Element | null {
             <div className="deprecated-space-y-2">
                 <div className="flex gap-2 items-center justify-between">
                     <h3 className="mb-0">Members</h3>
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => setModelOpen(true)}
                         disabledReason={!canEditAccessControls ? 'You cannot edit this' : undefined}
                     >
                         Add
-                    </LemonButton>
+                    </Button>
                 </div>
 
-                <LemonTable columns={columns} dataSource={accessControlMembers} loading={accessControlsLoading} />
+                <Table columns={columns} dataSource={accessControlMembers} loading={accessControlsLoading} />
             </div>
 
             <AddItemsControlsModal
@@ -272,14 +272,14 @@ function AccessControlObjectRoles(): JSX.Element | null {
 
     const [modelOpen, setModelOpen] = useState(false)
 
-    const columns: LemonTableColumns<AccessControlTypeRole> = [
+    const columns: TableColumns<AccessControlTypeRole> = [
         {
             title: 'Role',
             key: 'role',
             width: 0,
             render: (_, { role }) => (
                 <span className="whitespace-nowrap">
-                    <LemonTableLink
+                    <TableLink
                         to={urls.settings('organization-roles') + `#role=${role}`}
                         title={rolesById[role]?.name}
                     />
@@ -339,16 +339,16 @@ function AccessControlObjectRoles(): JSX.Element | null {
             <div className="deprecated-space-y-2">
                 <div className="flex gap-2 items-center justify-between">
                     <h3 className="mb-0">Roles</h3>
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => setModelOpen(true)}
                         disabledReason={!canEditAccessControls ? 'You cannot edit this' : undefined}
                     >
                         Add
-                    </LemonButton>
+                    </Button>
                 </div>
 
-                <LemonTable columns={columns} dataSource={accessControlRoles} loading={accessControlsLoading} />
+                <Table columns={columns} dataSource={accessControlRoles} loading={accessControlsLoading} />
             </div>
 
             <AddItemsControlsModal
@@ -371,7 +371,7 @@ function AccessControlObjectRoles(): JSX.Element | null {
 }
 
 function SimplLevelComponent(props: {
-    size?: LemonSelectProps<any>['size']
+    size?: SelectProps<any>['size']
     level: AccessControlLevel | null
     levels: AccessControlLevel[]
     onChange: (newValue: AccessControlLevel) => void
@@ -380,7 +380,7 @@ function SimplLevelComponent(props: {
     const { canEditAccessControls, minimumAccessLevel } = useValues(accessControlLogic)
 
     return (
-        <LemonSelect
+        <Select
             size={props.size}
             placeholder="Select level..."
             value={props.level}
@@ -410,12 +410,12 @@ function RemoveAccessButton({
     const { canEditAccessControls } = useValues(accessControlLogic)
 
     return (
-        <LemonButton
+        <Button
             icon={<IconTrash />}
             size="small"
             disabledReason={!canEditAccessControls ? 'You cannot edit this' : undefined}
             onClick={() =>
-                LemonDialog.open({
+                Dialog.open({
                     title: 'Remove access',
                     content: `Are you sure you want to remove this ${subject}'s explicit access?`,
                     primaryButton: {
@@ -458,7 +458,7 @@ function AddItemsControlsModal(props: {
             : undefined
 
     return (
-        <LemonModal
+        <Modal
             isOpen={props.modelOpen || false}
             onClose={() => props.setModelOpen(false)}
             title="Add access"
@@ -466,10 +466,10 @@ function AddItemsControlsModal(props: {
             description="Allow other users or roles to access this resource"
             footer={
                 <div className="flex items-center justify-end gap-2">
-                    <LemonButton type="secondary" onClick={() => props.setModelOpen(false)}>
+                    <Button type="secondary" onClick={() => props.setModelOpen(false)}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={onSubmit}
                         disabledReason={
@@ -481,13 +481,13 @@ function AddItemsControlsModal(props: {
                         }
                     >
                         Add
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
             <div className="flex gap-2 items-center w-full">
                 <div className="min-w-[16rem] w-full">
-                    <LemonInputSelect
+                    <InputSelect
                         placeholder={props.placeholder}
                         value={items}
                         onChange={(newValues: string[]) => setItems(newValues)}
@@ -498,6 +498,6 @@ function AddItemsControlsModal(props: {
                 </div>
                 <SimplLevelComponent levels={availableLevels} level={level} onChange={setLevel} />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

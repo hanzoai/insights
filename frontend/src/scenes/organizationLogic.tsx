@@ -6,7 +6,7 @@ import api, { ApiConfig, ApiError } from 'lib/api'
 import { timeSensitiveAuthenticationLogic } from 'lib/components/TimeSensitiveAuthentication/timeSensitiveAuthenticationLogic'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { isUserLoggedIn } from 'lib/utils'
 import { getAppContext } from 'lib/utils/getAppContext'
 
@@ -157,7 +157,7 @@ export const organizationLogic = kea<organizationLogicType>([
             window.location.href = urls.onboarding()
         },
         updateOrganizationSuccess: () => {
-            lemonToast.success('Organization updated successfully!')
+            toast.success('Organization updated successfully!')
         },
         deleteOrganization: async ({ organizationId, redirectPath }) => {
             try {
@@ -174,13 +174,13 @@ export const organizationLogic = kea<organizationLogicType>([
                 organizationDeleted: true,
             })
 
-            lemonToast.success('Organization has been deleted', {
+            toast.success('Organization has been deleted', {
                 toastId: 'deleteOrganization',
             })
             location.reload()
         },
         deleteOrganizationFailure: ({ error }) => {
-            lemonToast.error(error, {
+            toast.error(error, {
                 toastId: 'deleteOrganization',
             })
         },

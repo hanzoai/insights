@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { urls } from 'scenes/urls'
@@ -41,12 +41,12 @@ export function PreviewingCustomCssModal(): JSX.Element | null {
             <div className="flex justify-between items-center deprecated-space-x-2">
                 <h3 className="mb-0">Custom CSS</h3>
                 <div className="flex deprecated-space-x-2">
-                    <LemonButton type="secondary" onClick={() => setEditingInline(!editingInline)}>
+                    <Button type="secondary" onClick={() => setEditingInline(!editingInline)}>
                         {editingInline ? 'Minimize editor' : 'Edit'}
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={saveCustomCss}>
+                    </Button>
+                    <Button type="primary" onClick={saveCustomCss}>
                         Save and close
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </dialog>

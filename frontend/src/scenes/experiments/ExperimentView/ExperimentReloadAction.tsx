@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useRef } from 'react'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonSwitch } from '@hanzo/lemon-ui'
+import { Badge, Button, Switch } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
 import { usePageVisibilityCb } from 'lib/hooks/usePageVisibility'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { Radio } from 'lib/elements/Radio'
+import { Spinner } from 'lib/elements/Spinner'
 import { Label } from 'lib/ui/Label/Label'
 import { humanFriendlyDuration } from 'lib/utils'
 
@@ -135,7 +135,7 @@ export const ExperimentReloadAction = ({
         <div className="flex flex-col">
             <Label intent="menu">Last refreshed</Label>
             <div className="relative">
-                <LemonButton
+                <Button
                     onClick={onClick}
                     type="secondary"
                     size="xsmall"
@@ -148,11 +148,11 @@ export const ExperimentReloadAction = ({
                             closeOnClickInside: false,
                             placement: 'bottom-end',
                             overlay: (
-                                <LemonMenuOverlay
+                                <MenuOverlay
                                     items={[
                                         {
                                             label: () => (
-                                                <LemonSwitch
+                                                <Switch
                                                     onChange={(checked) =>
                                                         setAutoRefresh(checked, autoRefresh.interval)
                                                     }
@@ -168,7 +168,7 @@ export const ExperimentReloadAction = ({
                                             items: [
                                                 {
                                                     label: () => (
-                                                        <LemonRadio
+                                                        <Radio
                                                             value={autoRefresh.interval}
                                                             options={options}
                                                             onChange={(value: number) => {
@@ -187,8 +187,8 @@ export const ExperimentReloadAction = ({
                     }}
                 >
                     {isRefreshing ? 'Loading…' : <ExperimentLastRefreshText lastRefresh={lastRefresh} />}
-                </LemonButton>
-                <LemonBadge
+                </Button>
+                <Badge
                     size="small"
                     content={
                         <>

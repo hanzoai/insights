@@ -3,10 +3,10 @@ import { useActions, useValues } from 'kea'
 import { IconClock } from '@hanzo/icons'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
-import { LemonRow } from 'lib/lemon-ui/LemonRow'
-import { Lettermark, LettermarkColor } from 'lib/lemon-ui/Lettermark'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/lemon-ui/icons'
+import { Row } from 'lib/elements/Row'
+import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/elements/icons'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { getActionFilterFromFunnelStep } from 'scenes/insights/views/Funnels/funnelStepTableUtils'
@@ -70,7 +70,7 @@ export function StepLegend({ step, stepIndex, showTime, showPersonsModal, inCard
     return (
         <div className="StepLegend" style={{ opacity: isOptionalStep ? 0.6 : 1 }}>
             {/* Step */}
-            <LemonRow
+            <Row
                 icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />}
                 sideIcon={
                     hasAvailableFeature(AvailableFeature.PATHS_ADVANCED) && <FunnelStepMore stepIndex={stepIndex} />
@@ -78,10 +78,10 @@ export function StepLegend({ step, stepIndex, showTime, showPersonsModal, inCard
             >
                 <EntityFilterInfo filter={getActionFilterFromFunnelStep(step)} allowWrap />
                 {isOptionalStep ? <div className="ml-1 text-xs font-normal">(optional)</div> : null}
-            </LemonRow>
+            </Row>
 
             {/* Conversions */}
-            <LemonRow
+            <Row
                 icon={<IconTrendingFlat />}
                 status="success"
                 style={{ color: 'unset' }} // Prevent status color from affecting text
@@ -100,11 +100,11 @@ export function StepLegend({ step, stepIndex, showTime, showPersonsModal, inCard
                         <span>{convertedCountPresentationWithPercentage}</span>
                     )}
                 </Tooltip>
-            </LemonRow>
+            </Row>
 
             {/* Drop-offs */}
             {!isFirstStep && (
-                <LemonRow
+                <Row
                     icon={<IconTrendingFlatDown />}
                     status="danger"
                     style={{ color: 'unset' }} // Prevent status color from affecting text
@@ -123,14 +123,14 @@ export function StepLegend({ step, stepIndex, showTime, showPersonsModal, inCard
                             <span>{droppedOffCountPresentationWithPercentage}</span>
                         )}
                     </Tooltip>
-                </LemonRow>
+                </Row>
             )}
 
             {/* Median conversion time */}
             {!isFirstStep && !isBreakdown && showTime && (
-                <LemonRow icon={<IconClock />} title="Median time of conversion from previous step">
+                <Row icon={<IconClock />} title="Median time of conversion from previous step">
                     {formatMedianConversionTime(step)}
-                </LemonRow>
+                </Row>
             )}
         </div>
     )

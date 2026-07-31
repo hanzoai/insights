@@ -3,10 +3,10 @@ import { useActions, useValues } from 'kea'
 import { IconBolt, IconPlus, IconPlusSmall, IconX } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Switch } from 'lib/elements/Switch'
+import { Tag } from 'lib/elements/Tag'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { defaultEvaluationContextsLogic } from './defaultEvaluationContextsLogic'
@@ -40,7 +40,7 @@ export function DefaultEvaluationContexts(): JSX.Element | null {
 
     return (
         <div className="space-y-4">
-            <LemonSwitch
+            <Switch
                 data-attr="default-evaluation-contexts-switch"
                 onChange={toggleEnabled}
                 label="Apply default evaluation contexts to new flags"
@@ -53,7 +53,7 @@ export function DefaultEvaluationContexts(): JSX.Element | null {
                 <div className="space-y-3">
                     <div className="flex flex-wrap gap-2 items-center">
                         {tags.map((tag: { id: number; name: string }) => (
-                            <LemonTag
+                            <Tag
                                 key={tag.id}
                                 type="success"
                                 icon={<IconBolt />}
@@ -61,12 +61,12 @@ export function DefaultEvaluationContexts(): JSX.Element | null {
                                 onClose={() => removeTag(tag.name)}
                             >
                                 {tag.name}
-                            </LemonTag>
+                            </Tag>
                         ))}
 
                         {isAdding ? (
                             <div className="inline-flex items-center gap-1">
-                                <LemonInput
+                                <Input
                                     size="small"
                                     value={newTagInput}
                                     onChange={setNewTagInput}
@@ -75,14 +75,14 @@ export function DefaultEvaluationContexts(): JSX.Element | null {
                                     autoFocus
                                     className="w-32"
                                 />
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="primary"
                                     onClick={handleAddTag}
                                     disabled={!newTagInput.trim()}
                                     icon={<IconPlusSmall />}
                                 />
-                                <LemonButton
+                                <Button
                                     size="small"
                                     onClick={() => {
                                         setIsAdding(false)
@@ -93,14 +93,14 @@ export function DefaultEvaluationContexts(): JSX.Element | null {
                             </div>
                         ) : (
                             canAddMoreTags && (
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="secondary"
                                     onClick={() => setIsAdding(true)}
                                     icon={<IconPlus />}
                                 >
                                     Add tag
-                                </LemonButton>
+                                </Button>
                             )
                         )}
                     </div>

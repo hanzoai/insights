@@ -197,26 +197,26 @@
                 "timestamp": "2023-06-06T11:14:36.611000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "a.LemonButton.LemonButton--full-width.LemonButton--has-icon.LemonButton--has-side-icon.LemonButton--status-stealth.LemonButton--tertiary:attr__class=\"LemonButton LemonButton--tertiary LemonButton--status-stealth LemonButton--full-width LemonButton--has-icon LemonButton--has-side-icon\"attr__data-attr=\"menu-item-dashboards\"attr__href=\"/dashboard\"attr__type=\"button\"href=\"/dashboard\"nth-child=\"1\"nth-of-type=\"1\"text=\"Dashboards\";div.LemonButtonWithSideAction.LemonButtonWithSideAction--undefined:attr__class=\"LemonButtonWithSideAction LemonButtonWithSideAction--undefined\"nth-child=\"1\"nth-of-type=\"1\";li:nth-child=\"4\"nth-of-type=\"2\";ul:nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider__content:attr__class=\"SideBar__slider__content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider:attr__class=\"SideBar__slider\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__class=\"\"attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "a.Button.Button--full-width.Button--has-icon.Button--has-side-icon.Button--status-stealth.Button--tertiary:attr__class=\"Button Button--tertiary Button--status-stealth Button--full-width Button--has-icon Button--has-side-icon\"attr__data-attr=\"menu-item-dashboards\"attr__href=\"/dashboard\"attr__type=\"button\"href=\"/dashboard\"nth-child=\"1\"nth-of-type=\"1\"text=\"Dashboards\";div.ButtonWithSideAction.ButtonWithSideAction--undefined:attr__class=\"ButtonWithSideAction ButtonWithSideAction--undefined\"nth-child=\"1\"nth-of-type=\"1\";li:nth-child=\"4\"nth-of-type=\"2\";ul:nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider__content:attr__class=\"SideBar__slider__content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider:attr__class=\"SideBar__slider\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__class=\"\"attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:14:36.801000Z",
                 "elements": [
                     {
                         "text": "Dashboards",
                         "tag_name": "a",
                         "attr_class": [
-                            "LemonButton",
-                            "LemonButton--full-width",
-                            "LemonButton--has-icon",
-                            "LemonButton--has-side-icon",
-                            "LemonButton--status-stealth",
-                            "LemonButton--tertiary"
+                            "Button",
+                            "Button--full-width",
+                            "Button--has-icon",
+                            "Button--has-side-icon",
+                            "Button--status-stealth",
+                            "Button--tertiary"
                         ],
                         "href": "/dashboard",
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton LemonButton--tertiary LemonButton--status-stealth LemonButton--full-width LemonButton--has-icon LemonButton--has-side-icon",
+                            "attr__class": "Button Button--tertiary Button--status-stealth Button--full-width Button--has-icon Button--has-side-icon",
                             "attr__data-attr": "menu-item-dashboards",
                             "attr__href": "/dashboard",
                             "attr__type": "button"
@@ -226,13 +226,13 @@
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonButtonWithSideAction", "LemonButtonWithSideAction--undefined"],
+                        "attr_class": ["ButtonWithSideAction", "ButtonWithSideAction--undefined"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButtonWithSideAction LemonButtonWithSideAction--undefined"
+                            "attr__class": "ButtonWithSideAction ButtonWithSideAction--undefined"
                         },
                         "order": 1
                     },
@@ -1463,7 +1463,7 @@
                 "timestamp": "2023-06-06T11:14:34.108000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "div.grow.overflow-y-auto.px-2.py-1:attr__class=\"px-2 py-1 overflow-y-auto grow\"nth-child=\"3\"nth-of-type=\"2\";div.TemplateItem.border.cursor-pointer.flex.flex-col.rounded.transition-all:attr__class=\"cursor-pointer border rounded TemplateItem flex flex-col transition-all\"attr__data-attr=\"create-dashboard-blank\"nth-child=\"1\"nth-of-type=\"1\";div.DashboardTemplateChooser:attr__class=\"DashboardTemplateChooser\"nth-child=\"1\"nth-of-type=\"1\";div:nth-child=\"1\"nth-of-type=\"1\";div.NewDashboardModal:attr__class=\"NewDashboardModal\"nth-child=\"1\"nth-of-type=\"1\";section.LemonModal__content:attr__class=\"LemonModal__content\"nth-child=\"2\"nth-of-type=\"1\";div.LemonModal__layout:attr__class=\"LemonModal__layout\"nth-child=\"2\"nth-of-type=\"2\";div.LemonModal.ReactModal__Content.ReactModal__Content--after-open:attr__aria-modal=\"true\"attr__class=\"ReactModal__Content ReactModal__Content--after-open LemonModal\"attr__role=\"dialog\"attr__tabindex=\"-1\"nth-child=\"1\"nth-of-type=\"1\";div.LemonModal__overlay.ReactModal__Overlay.ReactModal__Overlay--after-open:attr__class=\"ReactModal__Overlay ReactModal__Overlay--after-open LemonModal__overlay\"nth-child=\"1\"nth-of-type=\"1\";div.ReactModalPortal:attr__class=\"ReactModalPortal\"nth-child=\"131\"nth-of-type=\"126\";body.ReactModal__Body--open:attr__class=\"ReactModal__Body--open\"attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "div.grow.overflow-y-auto.px-2.py-1:attr__class=\"px-2 py-1 overflow-y-auto grow\"nth-child=\"3\"nth-of-type=\"2\";div.TemplateItem.border.cursor-pointer.flex.flex-col.rounded.transition-all:attr__class=\"cursor-pointer border rounded TemplateItem flex flex-col transition-all\"attr__data-attr=\"create-dashboard-blank\"nth-child=\"1\"nth-of-type=\"1\";div.DashboardTemplateChooser:attr__class=\"DashboardTemplateChooser\"nth-child=\"1\"nth-of-type=\"1\";div:nth-child=\"1\"nth-of-type=\"1\";div.NewDashboardModal:attr__class=\"NewDashboardModal\"nth-child=\"1\"nth-of-type=\"1\";section.Modal__content:attr__class=\"Modal__content\"nth-child=\"2\"nth-of-type=\"1\";div.Modal__layout:attr__class=\"Modal__layout\"nth-child=\"2\"nth-of-type=\"2\";div.Modal.ReactModal__Content.ReactModal__Content--after-open:attr__aria-modal=\"true\"attr__class=\"ReactModal__Content ReactModal__Content--after-open Modal\"attr__role=\"dialog\"attr__tabindex=\"-1\"nth-child=\"1\"nth-of-type=\"1\";div.Modal__overlay.ReactModal__Overlay.ReactModal__Overlay--after-open:attr__class=\"ReactModal__Overlay ReactModal__Overlay--after-open Modal__overlay\"nth-child=\"1\"nth-of-type=\"1\";div.ReactModalPortal:attr__class=\"ReactModalPortal\"nth-child=\"131\"nth-of-type=\"126\";body.ReactModal__Body--open:attr__class=\"ReactModal__Body--open\"attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:14:36.746000Z",
                 "elements": [
                     {
@@ -1541,40 +1541,40 @@
                     {
                         "text": null,
                         "tag_name": "section",
-                        "attr_class": ["LemonModal__content"],
+                        "attr_class": ["Modal__content"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 2,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonModal__content"
+                            "attr__class": "Modal__content"
                         },
                         "order": 5
                     },
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonModal__layout"],
+                        "attr_class": ["Modal__layout"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 2,
                         "nth_of_type": 2,
                         "attributes": {
-                            "attr__class": "LemonModal__layout"
+                            "attr__class": "Modal__layout"
                         },
                         "order": 6
                     },
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonModal", "ReactModal__Content", "ReactModal__Content--after-open"],
+                        "attr_class": ["Modal", "ReactModal__Content", "ReactModal__Content--after-open"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
                             "attr__aria-modal": "true",
-                            "attr__class": "ReactModal__Content ReactModal__Content--after-open LemonModal",
+                            "attr__class": "ReactModal__Content ReactModal__Content--after-open Modal",
                             "attr__role": "dialog",
                             "attr__tabindex": "-1"
                         },
@@ -1583,13 +1583,13 @@
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonModal__overlay", "ReactModal__Overlay", "ReactModal__Overlay--after-open"],
+                        "attr_class": ["Modal__overlay", "ReactModal__Overlay", "ReactModal__Overlay--after-open"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "ReactModal__Overlay ReactModal__Overlay--after-open LemonModal__overlay"
+                            "attr__class": "ReactModal__Overlay ReactModal__Overlay--after-open Modal__overlay"
                         },
                         "order": 8
                     },
@@ -1825,32 +1825,32 @@
                 "timestamp": "2023-06-06T11:14:33.043000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "span.LemonButton__content:attr__class=\"LemonButton__content\"nth-child=\"1\"nth-of-type=\"1\"text=\"Add to a new dashboard\";button.LemonButton.LemonButton--secondary.LemonButton--status-primary:attr__class=\"LemonButton LemonButton--secondary LemonButton--status-primary\"attr__type=\"button\"nth-child=\"1\"nth-of-type=\"1\"text=\"Add to a new dashboard\";div.flex-1:attr__class=\"flex-1\"nth-child=\"1\"nth-of-type=\"1\";footer.LemonModal__footer:attr__class=\"LemonModal__footer\"nth-child=\"3\"nth-of-type=\"1\";div.LemonModal__layout:attr__class=\"LemonModal__layout\"nth-child=\"2\"nth-of-type=\"2\";div.LemonModal.ReactModal__Content.ReactModal__Content--after-open:attr__aria-modal=\"true\"attr__class=\"ReactModal__Content ReactModal__Content--after-open LemonModal\"attr__role=\"dialog\"attr__tabindex=\"-1\"nth-child=\"1\"nth-of-type=\"1\";div.LemonModal__overlay.ReactModal__Overlay.ReactModal__Overlay--after-open:attr__class=\"ReactModal__Overlay ReactModal__Overlay--after-open LemonModal__overlay\"nth-child=\"1\"nth-of-type=\"1\";div.ReactModalPortal:attr__class=\"ReactModalPortal\"nth-child=\"130\"nth-of-type=\"125\";body.ReactModal__Body--open:attr__class=\"ReactModal__Body--open\"attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "span.Button__content:attr__class=\"Button__content\"nth-child=\"1\"nth-of-type=\"1\"text=\"Add to a new dashboard\";button.Button.Button--secondary.Button--status-primary:attr__class=\"Button Button--secondary Button--status-primary\"attr__type=\"button\"nth-child=\"1\"nth-of-type=\"1\"text=\"Add to a new dashboard\";div.flex-1:attr__class=\"flex-1\"nth-child=\"1\"nth-of-type=\"1\";footer.Modal__footer:attr__class=\"Modal__footer\"nth-child=\"3\"nth-of-type=\"1\";div.Modal__layout:attr__class=\"Modal__layout\"nth-child=\"2\"nth-of-type=\"2\";div.Modal.ReactModal__Content.ReactModal__Content--after-open:attr__aria-modal=\"true\"attr__class=\"ReactModal__Content ReactModal__Content--after-open Modal\"attr__role=\"dialog\"attr__tabindex=\"-1\"nth-child=\"1\"nth-of-type=\"1\";div.Modal__overlay.ReactModal__Overlay.ReactModal__Overlay--after-open:attr__class=\"ReactModal__Overlay ReactModal__Overlay--after-open Modal__overlay\"nth-child=\"1\"nth-of-type=\"1\";div.ReactModalPortal:attr__class=\"ReactModalPortal\"nth-child=\"130\"nth-of-type=\"125\";body.ReactModal__Body--open:attr__class=\"ReactModal__Body--open\"attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:14:33.745000Z",
                 "elements": [
                     {
                         "text": "Add to a new dashboard",
                         "tag_name": "span",
-                        "attr_class": ["LemonButton__content"],
+                        "attr_class": ["Button__content"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton__content"
+                            "attr__class": "Button__content"
                         },
                         "order": 0
                     },
                     {
                         "text": "Add to a new dashboard",
                         "tag_name": "button",
-                        "attr_class": ["LemonButton", "LemonButton--secondary", "LemonButton--status-primary"],
+                        "attr_class": ["Button", "Button--secondary", "Button--status-primary"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton LemonButton--secondary LemonButton--status-primary",
+                            "attr__class": "Button Button--secondary Button--status-primary",
                             "attr__type": "button"
                         },
                         "order": 1
@@ -1871,40 +1871,40 @@
                     {
                         "text": null,
                         "tag_name": "footer",
-                        "attr_class": ["LemonModal__footer"],
+                        "attr_class": ["Modal__footer"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 3,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonModal__footer"
+                            "attr__class": "Modal__footer"
                         },
                         "order": 3
                     },
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonModal__layout"],
+                        "attr_class": ["Modal__layout"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 2,
                         "nth_of_type": 2,
                         "attributes": {
-                            "attr__class": "LemonModal__layout"
+                            "attr__class": "Modal__layout"
                         },
                         "order": 4
                     },
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonModal", "ReactModal__Content", "ReactModal__Content--after-open"],
+                        "attr_class": ["Modal", "ReactModal__Content", "ReactModal__Content--after-open"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
                             "attr__aria-modal": "true",
-                            "attr__class": "ReactModal__Content ReactModal__Content--after-open LemonModal",
+                            "attr__class": "ReactModal__Content ReactModal__Content--after-open Modal",
                             "attr__role": "dialog",
                             "attr__tabindex": "-1"
                         },
@@ -1913,13 +1913,13 @@
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonModal__overlay", "ReactModal__Overlay", "ReactModal__Overlay--after-open"],
+                        "attr_class": ["Modal__overlay", "ReactModal__Overlay", "ReactModal__Overlay--after-open"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "ReactModal__Overlay ReactModal__Overlay--after-open LemonModal__overlay"
+                            "attr__class": "ReactModal__Overlay ReactModal__Overlay--after-open Modal__overlay"
                         },
                         "order": 6
                     },
@@ -2155,19 +2155,19 @@
                 "timestamp": "2023-06-06T11:14:31.443000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "span.LemonButton__content:attr__class=\"LemonButton__content\"nth-child=\"2\"nth-of-type=\"2\"text=\"Add to dashboard\";button.LemonButton.LemonButton--has-icon.LemonButton--secondary.LemonButton--status-primary:attr__class=\"LemonButton LemonButton--secondary LemonButton--status-primary LemonButton--has-icon\"attr__type=\"button\"nth-child=\"1\"nth-of-type=\"1\"text=\"Add to dashboard\";span.save-to-dashboard:attr__class=\"save-to-dashboard\"attr__data-attr=\"save-to-dashboard-button\"nth-child=\"5\"nth-of-type=\"1\";div.flex.gap-2.items-center.justify-between:attr__class=\"flex justify-between items-center gap-2\"nth-child=\"1\"nth-of-type=\"1\";div.page-buttons:attr__class=\"page-buttons\"nth-child=\"2\"nth-of-type=\"2\";div.flex.justify-between.page-title-row:attr__class=\"page-title-row flex justify-between\"nth-child=\"1\"nth-of-type=\"1\";div.insights-page:attr__class=\"insights-page\"nth-child=\"3\"nth-of-type=\"3\";div.main-app-content:attr__class=\"main-app-content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__content:attr__class=\"SideBar__content\"nth-child=\"3\"nth-of-type=\"3\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "span.Button__content:attr__class=\"Button__content\"nth-child=\"2\"nth-of-type=\"2\"text=\"Add to dashboard\";button.Button.Button--has-icon.Button--secondary.Button--status-primary:attr__class=\"Button Button--secondary Button--status-primary Button--has-icon\"attr__type=\"button\"nth-child=\"1\"nth-of-type=\"1\"text=\"Add to dashboard\";span.save-to-dashboard:attr__class=\"save-to-dashboard\"attr__data-attr=\"save-to-dashboard-button\"nth-child=\"5\"nth-of-type=\"1\";div.flex.gap-2.items-center.justify-between:attr__class=\"flex justify-between items-center gap-2\"nth-child=\"1\"nth-of-type=\"1\";div.page-buttons:attr__class=\"page-buttons\"nth-child=\"2\"nth-of-type=\"2\";div.flex.justify-between.page-title-row:attr__class=\"page-title-row flex justify-between\"nth-child=\"1\"nth-of-type=\"1\";div.insights-page:attr__class=\"insights-page\"nth-child=\"3\"nth-of-type=\"3\";div.main-app-content:attr__class=\"main-app-content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__content:attr__class=\"SideBar__content\"nth-child=\"3\"nth-of-type=\"3\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:14:33.734000Z",
                 "elements": [
                     {
                         "text": "Add to dashboard",
                         "tag_name": "span",
-                        "attr_class": ["LemonButton__content"],
+                        "attr_class": ["Button__content"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 2,
                         "nth_of_type": 2,
                         "attributes": {
-                            "attr__class": "LemonButton__content"
+                            "attr__class": "Button__content"
                         },
                         "order": 0
                     },
@@ -2175,17 +2175,17 @@
                         "text": "Add to dashboard",
                         "tag_name": "button",
                         "attr_class": [
-                            "LemonButton",
-                            "LemonButton--has-icon",
-                            "LemonButton--secondary",
-                            "LemonButton--status-primary"
+                            "Button",
+                            "Button--has-icon",
+                            "Button--secondary",
+                            "Button--status-primary"
                         ],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton LemonButton--secondary LemonButton--status-primary LemonButton--has-icon",
+                            "attr__class": "Button Button--secondary Button--status-primary Button--has-icon",
                             "attr__type": "button"
                         },
                         "order": 1
@@ -2948,19 +2948,19 @@
                 "timestamp": "2023-06-06T11:14:30.043000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "span.LemonButton__content:attr__class=\"LemonButton__content\"nth-child=\"1\"nth-of-type=\"1\"text=\"Save\";button.LemonButton.LemonButton--has-side-icon.LemonButton--primary.LemonButton--status-primary:attr__class=\"LemonButton LemonButton--primary LemonButton--status-primary LemonButton--has-side-icon\"attr__data-attr=\"insight-save-button\"attr__type=\"button\"nth-child=\"1\"nth-of-type=\"1\"text=\"Save\";div.LemonButtonWithSideAction.LemonButtonWithSideAction--undefined:attr__class=\"LemonButtonWithSideAction LemonButtonWithSideAction--undefined\"nth-child=\"5\"nth-of-type=\"4\";div.flex.gap-2.items-center.justify-between:attr__class=\"flex justify-between items-center gap-2\"nth-child=\"1\"nth-of-type=\"1\";div.page-buttons:attr__class=\"page-buttons\"nth-child=\"2\"nth-of-type=\"2\";div.flex.justify-between.page-title-row:attr__class=\"page-title-row flex justify-between\"nth-child=\"1\"nth-of-type=\"1\";div.insights-page:attr__class=\"insights-page\"nth-child=\"3\"nth-of-type=\"3\";div.main-app-content:attr__class=\"main-app-content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__content:attr__class=\"SideBar__content\"nth-child=\"3\"nth-of-type=\"3\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "span.Button__content:attr__class=\"Button__content\"nth-child=\"1\"nth-of-type=\"1\"text=\"Save\";button.Button.Button--has-side-icon.Button--primary.Button--status-primary:attr__class=\"Button Button--primary Button--status-primary Button--has-side-icon\"attr__data-attr=\"insight-save-button\"attr__type=\"button\"nth-child=\"1\"nth-of-type=\"1\"text=\"Save\";div.ButtonWithSideAction.ButtonWithSideAction--undefined:attr__class=\"ButtonWithSideAction ButtonWithSideAction--undefined\"nth-child=\"5\"nth-of-type=\"4\";div.flex.gap-2.items-center.justify-between:attr__class=\"flex justify-between items-center gap-2\"nth-child=\"1\"nth-of-type=\"1\";div.page-buttons:attr__class=\"page-buttons\"nth-child=\"2\"nth-of-type=\"2\";div.flex.justify-between.page-title-row:attr__class=\"page-title-row flex justify-between\"nth-child=\"1\"nth-of-type=\"1\";div.insights-page:attr__class=\"insights-page\"nth-child=\"3\"nth-of-type=\"3\";div.main-app-content:attr__class=\"main-app-content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__content:attr__class=\"SideBar__content\"nth-child=\"3\"nth-of-type=\"3\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:14:30.758000Z",
                 "elements": [
                     {
                         "text": "Save",
                         "tag_name": "span",
-                        "attr_class": ["LemonButton__content"],
+                        "attr_class": ["Button__content"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton__content"
+                            "attr__class": "Button__content"
                         },
                         "order": 0
                     },
@@ -2968,17 +2968,17 @@
                         "text": "Save",
                         "tag_name": "button",
                         "attr_class": [
-                            "LemonButton",
-                            "LemonButton--has-side-icon",
-                            "LemonButton--primary",
-                            "LemonButton--status-primary"
+                            "Button",
+                            "Button--has-side-icon",
+                            "Button--primary",
+                            "Button--status-primary"
                         ],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton LemonButton--primary LemonButton--status-primary LemonButton--has-side-icon",
+                            "attr__class": "Button Button--primary Button--status-primary Button--has-side-icon",
                             "attr__data-attr": "insight-save-button",
                             "attr__type": "button"
                         },
@@ -2987,13 +2987,13 @@
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonButtonWithSideAction", "LemonButtonWithSideAction--undefined"],
+                        "attr_class": ["ButtonWithSideAction", "ButtonWithSideAction--undefined"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 5,
                         "nth_of_type": 4,
                         "attributes": {
-                            "attr__class": "LemonButtonWithSideAction LemonButtonWithSideAction--undefined"
+                            "attr__class": "ButtonWithSideAction ButtonWithSideAction--undefined"
                         },
                         "order": 2
                     },
@@ -4370,7 +4370,7 @@
                 "timestamp": "2023-06-06T11:14:27.577000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "path:attr__d=\"M4,14V17C4,19 7.05,20.72 11,21V18.11L11.13,18C7.12,17.76 4,16.06 4,14M12,13C7.58,13 4,11.21 4,9V12C4,14.21 7.58,16 12,16C12.39,16 12.77,16 13.16,16L17,12.12C15.4,12.72 13.71,13 12,13M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M21,11.13C20.85,11.13 20.71,11.19 20.61,11.3L19.61,12.3L21.66,14.3L22.66,13.3C22.87,13.1 22.88,12.76 22.66,12.53L21.42,11.3C21.32,11.19 21.18,11.13 21.04,11.13M19.04,12.88L13,18.94V21H15.06L21.12,14.93L19.04,12.88Z\"attr__fill=\"currentColor\"attr__href=\"/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20\"href=\"/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20\"nth-child=\"1\"nth-of-type=\"1\";svg.LemonIcon:attr__aria-hidden=\"true\"attr__class=\"LemonIcon\"attr__fill=\"none\"attr__focusable=\"false\"attr__height=\"1em\"attr__viewBox=\"0 0 24 24\"attr__width=\"1em\"attr__xmlns=\"http://www.w3.org/2000/svg\"nth-child=\"1\"nth-of-type=\"1\";span.LemonButton__icon:attr__class=\"LemonButton__icon\"nth-child=\"1\"nth-of-type=\"1\";a.LemonButton.LemonButton--has-icon.LemonButton--no-content.LemonButton--secondary.LemonButton--status-primary-alt.ant-tooltip-open:attr__class=\"LemonButton LemonButton--secondary LemonButton--status-primary-alt LemonButton--no-content LemonButton--has-icon ant-tooltip-open\"attr__data-attr=\"open-json-editor-button\"attr__href=\"/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20\"attr__type=\"button\"href=\"/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20\"nth-child=\"6\"nth-of-type=\"1\";div.flex.gap-4.items-center:attr__class=\"flex gap-4 items-center\"nth-child=\"1\"nth-of-type=\"1\";div.h-full.relative.deprecated-space-y-4.w-full:attr__class=\"relative w-full h-full deprecated-space-y-4\"nth-child=\"1\"nth-of-type=\"1\";span.DraggableToNotebook:attr__class=\"DraggableToNotebook\"attr__draggable=\"false\"nth-child=\"5\"nth-of-type=\"1\";div.main-app-content:attr__class=\"main-app-content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__content:attr__class=\"SideBar__content\"nth-child=\"3\"nth-of-type=\"3\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "path:attr__d=\"M4,14V17C4,19 7.05,20.72 11,21V18.11L11.13,18C7.12,17.76 4,16.06 4,14M12,13C7.58,13 4,11.21 4,9V12C4,14.21 7.58,16 12,16C12.39,16 12.77,16 13.16,16L17,12.12C15.4,12.72 13.71,13 12,13M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M21,11.13C20.85,11.13 20.71,11.19 20.61,11.3L19.61,12.3L21.66,14.3L22.66,13.3C22.87,13.1 22.88,12.76 22.66,12.53L21.42,11.3C21.32,11.19 21.18,11.13 21.04,11.13M19.04,12.88L13,18.94V21H15.06L21.12,14.93L19.04,12.88Z\"attr__fill=\"currentColor\"attr__href=\"/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20\"href=\"/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20\"nth-child=\"1\"nth-of-type=\"1\";svg.Icon:attr__aria-hidden=\"true\"attr__class=\"Icon\"attr__fill=\"none\"attr__focusable=\"false\"attr__height=\"1em\"attr__viewBox=\"0 0 24 24\"attr__width=\"1em\"attr__xmlns=\"http://www.w3.org/2000/svg\"nth-child=\"1\"nth-of-type=\"1\";span.Button__icon:attr__class=\"Button__icon\"nth-child=\"1\"nth-of-type=\"1\";a.Button.Button--has-icon.Button--no-content.Button--secondary.Button--status-primary-alt.ant-tooltip-open:attr__class=\"Button Button--secondary Button--status-primary-alt Button--no-content Button--has-icon ant-tooltip-open\"attr__data-attr=\"open-json-editor-button\"attr__href=\"/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20\"attr__type=\"button\"href=\"/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20\"nth-child=\"6\"nth-of-type=\"1\";div.flex.gap-4.items-center:attr__class=\"flex gap-4 items-center\"nth-child=\"1\"nth-of-type=\"1\";div.h-full.relative.deprecated-space-y-4.w-full:attr__class=\"relative w-full h-full deprecated-space-y-4\"nth-child=\"1\"nth-of-type=\"1\";span.DraggableToNotebook:attr__class=\"DraggableToNotebook\"attr__draggable=\"false\"nth-child=\"5\"nth-of-type=\"1\";div.main-app-content:attr__class=\"main-app-content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__content:attr__class=\"SideBar__content\"nth-child=\"3\"nth-of-type=\"3\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:14:30.691000Z",
                 "elements": [
                     {
@@ -4391,14 +4391,14 @@
                     {
                         "text": null,
                         "tag_name": "svg",
-                        "attr_class": ["LemonIcon"],
+                        "attr_class": ["Icon"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
                             "attr__aria-hidden": "true",
-                            "attr__class": "LemonIcon",
+                            "attr__class": "Icon",
                             "attr__fill": "none",
                             "attr__focusable": "false",
                             "attr__height": "1em",
@@ -4411,13 +4411,13 @@
                     {
                         "text": null,
                         "tag_name": "span",
-                        "attr_class": ["LemonButton__icon"],
+                        "attr_class": ["Button__icon"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton__icon"
+                            "attr__class": "Button__icon"
                         },
                         "order": 2
                     },
@@ -4425,11 +4425,11 @@
                         "text": null,
                         "tag_name": "a",
                         "attr_class": [
-                            "LemonButton",
-                            "LemonButton--has-icon",
-                            "LemonButton--no-content",
-                            "LemonButton--secondary",
-                            "LemonButton--status-primary-alt",
+                            "Button",
+                            "Button--has-icon",
+                            "Button--no-content",
+                            "Button--secondary",
+                            "Button--status-primary-alt",
                             "ant-tooltip-open"
                         ],
                         "href": "/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20",
@@ -4437,7 +4437,7 @@
                         "nth_child": 6,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton LemonButton--secondary LemonButton--status-primary-alt LemonButton--no-content LemonButton--has-icon ant-tooltip-open",
+                            "attr__class": "Button Button--secondary Button--status-primary-alt Button--no-content Button--has-icon ant-tooltip-open",
                             "attr__data-attr": "open-json-editor-button",
                             "attr__href": "/insights/new#q=%7B%22kind%22%3A%22DataTableNode%22%2C%22full%22%3Atrue%2C%22source%22%3A%7B%22kind%22%3A%22EventsQuery%22%2C%22select%22%3A%5B%22*%22%2C%22event%22%2C%22person%22%2C%22coalesce(properties.%24current_url%2C%20properties.%24screen_name)%20--%20Url%20%2F%20Screen%22%2C%22properties.%24lib%22%2C%22timestamp%22%5D%2C%22orderBy%22%3A%5B%22timestamp%20DESC%22%5D%2C%22after%22%3A%22-24h%22%7D%2C%22propertiesViaUrl%22%3Atrue%2C%22showSavedQueries%22%3Atrue%7D%20",
                             "attr__type": "button"
@@ -5189,7 +5189,7 @@
                 "timestamp": "2023-06-06T11:14:25.843000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "span.grow.text-default:attr__class=\"text-default grow\"attr__href=\"/events\"href=\"/events\"nth-child=\"1\"nth-of-type=\"1\"text=\"Event Explorer\";span.LemonButton__content:attr__class=\"LemonButton__content\"nth-child=\"2\"nth-of-type=\"2\";a.LemonButton.LemonButton--full-width.LemonButton--has-icon.LemonButton--status-stealth.LemonButton--tertiary:attr__class=\"LemonButton LemonButton--tertiary LemonButton--status-stealth LemonButton--full-width LemonButton--has-icon\"attr__data-attr=\"menu-item-events\"attr__href=\"/events\"attr__type=\"button\"href=\"/events\"nth-child=\"1\"nth-of-type=\"1\"text=\"Event Explorer\";li:nth-child=\"14\"nth-of-type=\"10\";ul:nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider__content:attr__class=\"SideBar__slider__content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider:attr__class=\"SideBar__slider\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "span.grow.text-default:attr__class=\"text-default grow\"attr__href=\"/events\"href=\"/events\"nth-child=\"1\"nth-of-type=\"1\"text=\"Event Explorer\";span.Button__content:attr__class=\"Button__content\"nth-child=\"2\"nth-of-type=\"2\";a.Button.Button--full-width.Button--has-icon.Button--status-stealth.Button--tertiary:attr__class=\"Button Button--tertiary Button--status-stealth Button--full-width Button--has-icon\"attr__data-attr=\"menu-item-events\"attr__href=\"/events\"attr__type=\"button\"href=\"/events\"nth-child=\"1\"nth-of-type=\"1\"text=\"Event Explorer\";li:nth-child=\"14\"nth-of-type=\"10\";ul:nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider__content:attr__class=\"SideBar__slider__content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider:attr__class=\"SideBar__slider\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:14:27.346000Z",
                 "elements": [
                     {
@@ -5209,13 +5209,13 @@
                     {
                         "text": null,
                         "tag_name": "span",
-                        "attr_class": ["LemonButton__content"],
+                        "attr_class": ["Button__content"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 2,
                         "nth_of_type": 2,
                         "attributes": {
-                            "attr__class": "LemonButton__content"
+                            "attr__class": "Button__content"
                         },
                         "order": 1
                     },
@@ -5223,18 +5223,18 @@
                         "text": "Event Explorer",
                         "tag_name": "a",
                         "attr_class": [
-                            "LemonButton",
-                            "LemonButton--full-width",
-                            "LemonButton--has-icon",
-                            "LemonButton--status-stealth",
-                            "LemonButton--tertiary"
+                            "Button",
+                            "Button--full-width",
+                            "Button--has-icon",
+                            "Button--status-stealth",
+                            "Button--tertiary"
                         ],
                         "href": "/events",
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton LemonButton--tertiary LemonButton--status-stealth LemonButton--full-width LemonButton--has-icon",
+                            "attr__class": "Button Button--tertiary Button--status-stealth Button--full-width Button--has-icon",
                             "attr__data-attr": "menu-item-events",
                             "attr__href": "/events",
                             "attr__type": "button"
@@ -6369,25 +6369,25 @@
                 "timestamp": "2023-06-06T11:14:24.945000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "a.LemonButton.LemonButton--full-width.LemonButton--has-icon.LemonButton--status-stealth.LemonButton--tertiary:attr__class=\"LemonButton LemonButton--tertiary LemonButton--status-stealth LemonButton--full-width LemonButton--has-icon\"attr__data-attr=\"menu-item-datamanagement\"attr__href=\"/data-management/events\"attr__type=\"button\"href=\"/data-management/events\"nth-child=\"1\"nth-of-type=\"1\"text=\"Data Management\";li:nth-child=\"15\"nth-of-type=\"11\";ul:nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider__content:attr__class=\"SideBar__slider__content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider:attr__class=\"SideBar__slider\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "a.Button.Button--full-width.Button--has-icon.Button--status-stealth.Button--tertiary:attr__class=\"Button Button--tertiary Button--status-stealth Button--full-width Button--has-icon\"attr__data-attr=\"menu-item-datamanagement\"attr__href=\"/data-management/events\"attr__type=\"button\"href=\"/data-management/events\"nth-child=\"1\"nth-of-type=\"1\"text=\"Data Management\";li:nth-child=\"15\"nth-of-type=\"11\";ul:nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider__content:attr__class=\"SideBar__slider__content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider:attr__class=\"SideBar__slider\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:14:27.255000Z",
                 "elements": [
                     {
                         "text": "Data Management",
                         "tag_name": "a",
                         "attr_class": [
-                            "LemonButton",
-                            "LemonButton--full-width",
-                            "LemonButton--has-icon",
-                            "LemonButton--status-stealth",
-                            "LemonButton--tertiary"
+                            "Button",
+                            "Button--full-width",
+                            "Button--has-icon",
+                            "Button--status-stealth",
+                            "Button--tertiary"
                         ],
                         "href": "/data-management/events",
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton LemonButton--tertiary LemonButton--status-stealth LemonButton--full-width LemonButton--has-icon",
+                            "attr__class": "Button Button--tertiary Button--status-stealth Button--full-width Button--has-icon",
                             "attr__data-attr": "menu-item-datamanagement",
                             "attr__href": "/data-management/events",
                             "attr__type": "button"
@@ -19675,25 +19675,25 @@
                 "timestamp": "2023-06-06T11:09:53.972000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "button.LemonButton.LemonButton--has-icon.LemonButton--small.LemonButton--status-primary.LemonButton--tertiary:attr__class=\"LemonButton LemonButton--tertiary LemonButton--status-primary LemonButton--small LemonButton--has-icon\"attr__type=\"button\"nth-child=\"1\"nth-of-type=\"1\"text=\"Cards\";li.LemonSegmentedButton__option:attr__class=\"LemonSegmentedButton__option\"nth-child=\"2\"nth-of-type=\"2\";ul:nth-child=\"2\"nth-of-type=\"1\";div.LemonSegmentedButton:attr__class=\"LemonSegmentedButton\"attr__style=\"--lemon-segmented-button-slider-width: 61.984375px; --lemon-segmented-button-slider-offset: 0px;\"nth-child=\"1\"nth-of-type=\"1\";div:nth-child=\"2\"nth-of-type=\"1\";div.flex.items-center.justify-between.mb-4.mt-2:attr__class=\"flex justify-between mb-4 mt-2 items-center\"nth-child=\"5\"nth-of-type=\"5\";div.saved-insights:attr__class=\"saved-insights\"nth-child=\"3\"nth-of-type=\"3\";div.main-app-content:attr__class=\"main-app-content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__content:attr__class=\"SideBar__content\"nth-child=\"3\"nth-of-type=\"3\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "button.Button.Button--has-icon.Button--small.Button--status-primary.Button--tertiary:attr__class=\"Button Button--tertiary Button--status-primary Button--small Button--has-icon\"attr__type=\"button\"nth-child=\"1\"nth-of-type=\"1\"text=\"Cards\";li.SegmentedButton__option:attr__class=\"SegmentedButton__option\"nth-child=\"2\"nth-of-type=\"2\";ul:nth-child=\"2\"nth-of-type=\"1\";div.SegmentedButton:attr__class=\"SegmentedButton\"attr__style=\"--segmented-button-slider-width: 61.984375px; --segmented-button-slider-offset: 0px;\"nth-child=\"1\"nth-of-type=\"1\";div:nth-child=\"2\"nth-of-type=\"1\";div.flex.items-center.justify-between.mb-4.mt-2:attr__class=\"flex justify-between mb-4 mt-2 items-center\"nth-child=\"5\"nth-of-type=\"5\";div.saved-insights:attr__class=\"saved-insights\"nth-child=\"3\"nth-of-type=\"3\";div.main-app-content:attr__class=\"main-app-content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__content:attr__class=\"SideBar__content\"nth-child=\"3\"nth-of-type=\"3\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:09:56.364000Z",
                 "elements": [
                     {
                         "text": "Cards",
                         "tag_name": "button",
                         "attr_class": [
-                            "LemonButton",
-                            "LemonButton--has-icon",
-                            "LemonButton--small",
-                            "LemonButton--status-primary",
-                            "LemonButton--tertiary"
+                            "Button",
+                            "Button--has-icon",
+                            "Button--small",
+                            "Button--status-primary",
+                            "Button--tertiary"
                         ],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton LemonButton--tertiary LemonButton--status-primary LemonButton--small LemonButton--has-icon",
+                            "attr__class": "Button Button--tertiary Button--status-primary Button--small Button--has-icon",
                             "attr__type": "button"
                         },
                         "order": 0
@@ -19701,13 +19701,13 @@
                     {
                         "text": null,
                         "tag_name": "li",
-                        "attr_class": ["LemonSegmentedButton__option"],
+                        "attr_class": ["SegmentedButton__option"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 2,
                         "nth_of_type": 2,
                         "attributes": {
-                            "attr__class": "LemonSegmentedButton__option"
+                            "attr__class": "SegmentedButton__option"
                         },
                         "order": 1
                     },
@@ -19725,14 +19725,14 @@
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonSegmentedButton"],
+                        "attr_class": ["SegmentedButton"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonSegmentedButton",
-                            "attr__style": "--lemon-segmented-button-slider-width: 61.984375px; --lemon-segmented-button-slider-offset: 0px;"
+                            "attr__class": "SegmentedButton",
+                            "attr__style": "--segmented-button-slider-width: 61.984375px; --segmented-button-slider-offset: 0px;"
                         },
                         "order": 3
                     },
@@ -20468,19 +20468,19 @@
                 "timestamp": "2023-06-06T11:09:51.569000Z",
                 "team_id": 1,
                 "distinct_id": "T41Cd0saoxbnDii1Disc52mf3M1jzXMG3lloeXdXy0E",
-                "elements_chain": "span.LemonButton__content:attr__class=\"LemonButton__content\"attr__href=\"/insights\"href=\"/insights\"nth-child=\"2\"nth-of-type=\"2\";a.LemonButton.LemonButton--full-width.LemonButton--has-icon.LemonButton--has-side-icon.LemonButton--status-stealth.LemonButton--tertiary:attr__class=\"LemonButton LemonButton--tertiary LemonButton--status-stealth LemonButton--full-width LemonButton--has-icon LemonButton--has-side-icon\"attr__data-attr=\"menu-item-savedinsights\"attr__href=\"/insights\"attr__type=\"button\"href=\"/insights\"nth-child=\"1\"nth-of-type=\"1\"text=\"Insights\";div.LemonButtonWithSideAction.LemonButtonWithSideAction--undefined:attr__class=\"LemonButtonWithSideAction LemonButtonWithSideAction--undefined\"nth-child=\"1\"nth-of-type=\"1\";li:nth-child=\"5\"nth-of-type=\"3\";ul:nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider__content:attr__class=\"SideBar__slider__content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider:attr__class=\"SideBar__slider\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
+                "elements_chain": "span.Button__content:attr__class=\"Button__content\"attr__href=\"/insights\"href=\"/insights\"nth-child=\"2\"nth-of-type=\"2\";a.Button.Button--full-width.Button--has-icon.Button--has-side-icon.Button--status-stealth.Button--tertiary:attr__class=\"Button Button--tertiary Button--status-stealth Button--full-width Button--has-icon Button--has-side-icon\"attr__data-attr=\"menu-item-savedinsights\"attr__href=\"/insights\"attr__type=\"button\"href=\"/insights\"nth-child=\"1\"nth-of-type=\"1\"text=\"Insights\";div.ButtonWithSideAction.ButtonWithSideAction--undefined:attr__class=\"ButtonWithSideAction ButtonWithSideAction--undefined\"nth-child=\"1\"nth-of-type=\"1\";li:nth-child=\"5\"nth-of-type=\"3\";ul:nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider__content:attr__class=\"SideBar__slider__content\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar__slider:attr__class=\"SideBar__slider\"nth-child=\"1\"nth-of-type=\"1\";div.SideBar:attr__class=\"SideBar\"nth-child=\"4\"nth-of-type=\"3\";div.flex.flex-col.h-screen:attr__class=\"h-screen flex flex-col\"nth-child=\"1\"nth-of-type=\"1\";div:attr__id=\"root\"attr_id=\"root\"nth-child=\"4\"nth-of-type=\"1\";body:attr__theme=\"light\"nth-child=\"2\"nth-of-type=\"1\"",
                 "created_at": "2023-06-06T11:09:53.333000Z",
                 "elements": [
                     {
                         "text": null,
                         "tag_name": "span",
-                        "attr_class": ["LemonButton__content"],
+                        "attr_class": ["Button__content"],
                         "href": "/insights",
                         "attr_id": null,
                         "nth_child": 2,
                         "nth_of_type": 2,
                         "attributes": {
-                            "attr__class": "LemonButton__content",
+                            "attr__class": "Button__content",
                             "attr__href": "/insights"
                         },
                         "order": 0
@@ -20489,19 +20489,19 @@
                         "text": "Insights",
                         "tag_name": "a",
                         "attr_class": [
-                            "LemonButton",
-                            "LemonButton--full-width",
-                            "LemonButton--has-icon",
-                            "LemonButton--has-side-icon",
-                            "LemonButton--status-stealth",
-                            "LemonButton--tertiary"
+                            "Button",
+                            "Button--full-width",
+                            "Button--has-icon",
+                            "Button--has-side-icon",
+                            "Button--status-stealth",
+                            "Button--tertiary"
                         ],
                         "href": "/insights",
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButton LemonButton--tertiary LemonButton--status-stealth LemonButton--full-width LemonButton--has-icon LemonButton--has-side-icon",
+                            "attr__class": "Button Button--tertiary Button--status-stealth Button--full-width Button--has-icon Button--has-side-icon",
                             "attr__data-attr": "menu-item-savedinsights",
                             "attr__href": "/insights",
                             "attr__type": "button"
@@ -20511,13 +20511,13 @@
                     {
                         "text": null,
                         "tag_name": "div",
-                        "attr_class": ["LemonButtonWithSideAction", "LemonButtonWithSideAction--undefined"],
+                        "attr_class": ["ButtonWithSideAction", "ButtonWithSideAction--undefined"],
                         "href": null,
                         "attr_id": null,
                         "nth_child": 1,
                         "nth_of_type": 1,
                         "attributes": {
-                            "attr__class": "LemonButtonWithSideAction LemonButtonWithSideAction--undefined"
+                            "attr__class": "ButtonWithSideAction ButtonWithSideAction--undefined"
                         },
                         "order": 2
                     },

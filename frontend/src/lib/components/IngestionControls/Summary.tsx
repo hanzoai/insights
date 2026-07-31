@@ -1,7 +1,7 @@
 import { match } from 'ts-pattern'
 
 import { IconCheck, IconCircleDashed } from '@hanzo/icons'
-import { LemonBanner, Link } from '@hanzo/lemon-ui'
+import { Banner, Link } from '@hanzo/elements'
 
 import { pluralize } from 'lib/utils'
 
@@ -31,7 +31,7 @@ export function IngestionControlsSummary({
     const hasAnyTriggers = triggers.some((t) => t.enabled)
 
     return (
-        <LemonBanner type="info" hideIcon>
+        <Banner type="info" hideIcon>
             <div className="flex flex-col gap-1">
                 <h3 className="mb-0">
                     {hasAnyTriggers ? 'Trigger summary' : `No triggers — all ${controlDescription}`}
@@ -57,7 +57,7 @@ export function IngestionControlsSummary({
                     ))}
                 </div>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }
 

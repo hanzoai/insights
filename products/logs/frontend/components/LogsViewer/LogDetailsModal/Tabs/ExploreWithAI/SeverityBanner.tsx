@@ -1,7 +1,7 @@
 import { IconAIText } from '@hanzo/icons'
-import { LemonBanner, LemonTag, LemonTagType, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Tag, TagType, Tooltip } from '@hanzo/elements'
 
-const BANNER_TO_TAG_TYPE: Record<SeverityBannerProps['type'], LemonTagType> = {
+const BANNER_TO_TAG_TYPE: Record<SeverityBannerProps['type'], TagType> = {
     error: 'danger',
     warning: 'warning',
     success: 'success',
@@ -17,18 +17,18 @@ export interface SeverityBannerProps {
 
 export function SeverityBanner({ type, headline, impact, severityLabel }: SeverityBannerProps): JSX.Element {
     return (
-        <LemonBanner type={type} hideIcon={false} icon={<IconAIText className="text-lg" />}>
+        <Banner type={type} hideIcon={false} icon={<IconAIText className="text-lg" />}>
             <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
                     <Tooltip title="AI's assessment of this log's severity">
-                        <LemonTag type={BANNER_TO_TAG_TYPE[type]} size="small">
+                        <Tag type={BANNER_TO_TAG_TYPE[type]} size="small">
                             {severityLabel}
-                        </LemonTag>
+                        </Tag>
                     </Tooltip>
                     <span className="font-semibold">{headline}</span>
                 </div>
                 <span className="text-sm opacity-80">{impact}</span>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

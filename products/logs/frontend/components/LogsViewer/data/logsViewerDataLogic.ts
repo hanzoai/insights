@@ -3,7 +3,7 @@ import { actions, afterMount, connect, events, kea, key, listeners, path, props,
 import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dataColorVars } from 'lib/colors'
@@ -419,13 +419,13 @@ export const logsViewerDataLogic = kea<logsViewerDataLogicType>([
         fetchLogsFailure: ({ error }) => {
             const errorStr = String(error).toLowerCase()
             if (error !== NEW_QUERY_STARTED_ERROR_MESSAGE && !errorStr.includes('abort')) {
-                lemonToast.error(`Failed to load logs: ${error}`)
+                toast.error(`Failed to load logs: ${error}`)
             }
         },
         fetchNextLogsPageFailure: ({ error }) => {
             const errorStr = String(error).toLowerCase()
             if (error !== NEW_QUERY_STARTED_ERROR_MESSAGE && !errorStr.includes('abort')) {
-                lemonToast.error(`Failed to load more logs: ${error}`)
+                toast.error(`Failed to load more logs: ${error}`)
             }
         },
         fetchLogsSuccess: ({ logs }) => {

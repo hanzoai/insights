@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 
 import { IconDay, IconLaptop, IconNight, IconPalette } from '@hanzo/icons'
 
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Link } from 'lib/lemon-ui/Link/Link'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { Link } from 'lib/elements/Link/Link'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'
 import { urls } from 'scenes/urls'
@@ -30,7 +30,7 @@ export function ThemeMenu(): JSX.Element {
                         <IconPalette />
                         Color theme
                         <div className="ml-auto flex items-center gap-1">
-                            <LemonTag>{themeMode}</LemonTag>
+                            <Tag>{themeMode}</Tag>
                             <MenuOpenIndicator intent="sub" className="ml-auto" />
                         </div>
                     </ButtonPrimitive>

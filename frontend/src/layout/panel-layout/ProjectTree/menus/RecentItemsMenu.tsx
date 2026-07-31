@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconClock } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { keybindToKeyboardShortcutProps } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     DropdownMenu,

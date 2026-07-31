@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useState } from 'react'
 
 import { IconBook, IconTerminal } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, LemonTag } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Tag } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconDocumentExpand } from 'lib/lemon-ui/icons'
+import { Spinner } from 'lib/elements/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconDocumentExpand } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
@@ -84,12 +84,12 @@ export const NotebookSyncInfo = (props: NotebookLogicProps): JSX.Element | null 
 
     return shown ? (
         <Tooltip title={content.tooltip} placement="left">
-            <LemonTag className="uppercase select-none">{content.content}</LemonTag>
+            <Tag className="uppercase select-none">{content.content}</Tag>
         </Tooltip>
     ) : null
 }
 
-interface NotebookExpandButtonProps extends Pick<LemonButtonProps, 'size' | 'type'> {
+interface NotebookExpandButtonProps extends Pick<ButtonProps, 'size' | 'type'> {
     inPanel: boolean
 }
 
@@ -114,7 +114,7 @@ export const NotebookExpandButton = (props: NotebookExpandButtonProps): JSX.Elem
         )
     }
     return (
-        <LemonButton
+        <Button
             {...props}
             onClick={() => setIsExpanded(!isExpanded)}
             icon={<IconDocumentExpand mode={isExpanded ? 'expand' : 'collapse'} />}
@@ -124,12 +124,12 @@ export const NotebookExpandButton = (props: NotebookExpandButtonProps): JSX.Elem
     )
 }
 
-export const NotebookTableOfContentsButton = (props: Pick<LemonButtonProps, 'size' | 'type'>): JSX.Element => {
+export const NotebookTableOfContentsButton = (props: Pick<ButtonProps, 'size' | 'type'>): JSX.Element => {
     const { showTableOfContents } = useValues(notebookSettingsLogic)
     const { setShowTableOfContents } = useActions(notebookSettingsLogic)
 
     return (
-        <LemonButton
+        <Button
             {...props}
             onClick={() => setShowTableOfContents(!showTableOfContents)}
             icon={<IconBook />}
@@ -139,7 +139,7 @@ export const NotebookTableOfContentsButton = (props: Pick<LemonButtonProps, 'siz
     )
 }
 
-export const NotebookKernelInfoButton = (props: Pick<LemonButtonProps, 'size' | 'type'>): JSX.Element | null => {
+export const NotebookKernelInfoButton = (props: Pick<ButtonProps, 'size' | 'type'>): JSX.Element | null => {
     const { featureFlags } = useValues(featureFlagLogic)
     const { showKernelInfo } = useValues(notebookSettingsLogic)
     const { setShowKernelInfo } = useActions(notebookSettingsLogic)
@@ -149,7 +149,7 @@ export const NotebookKernelInfoButton = (props: Pick<LemonButtonProps, 'size' | 
     }
 
     return (
-        <LemonButton
+        <Button
             {...props}
             onClick={() => setShowKernelInfo(!showKernelInfo)}
             icon={<IconTerminal />}

@@ -6,7 +6,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonBadge, LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Badge, Button, Modal } from '@hanzo/elements'
 
 import { InsightsFunctionType } from '~/types'
 
@@ -38,7 +38,7 @@ const MinimalTransformationView = ({
             {...attributes}
             {...listeners}
         >
-            <LemonBadge.Number count={order + 1} maxDigits={3} status="muted" />
+            <Badge.Number count={order + 1} maxDigits={3} status="muted" />
             <span className="font-semibold">{insightsFunction.name}</span>
         </div>
     )
@@ -121,7 +121,7 @@ export function InsightsFunctionOrderModal(): JSX.Element {
     }
 
     return (
-        <LemonModal
+        <Modal
             onClose={() => setReorderModalOpen(false)}
             isOpen={reorderModalOpen}
             width={600}
@@ -134,12 +134,12 @@ export function InsightsFunctionOrderModal(): JSX.Element {
             }
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={() => setReorderModalOpen(false)}>
+                    <Button type="secondary" onClick={() => setReorderModalOpen(false)}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton loading={loading} type="primary" onClick={handleSaveOrder}>
+                    </Button>
+                    <Button loading={loading} type="primary" onClick={handleSaveOrder}>
                         Save order
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -152,6 +152,6 @@ export function InsightsFunctionOrderModal(): JSX.Element {
                     </SortableContext>
                 </DndContext>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

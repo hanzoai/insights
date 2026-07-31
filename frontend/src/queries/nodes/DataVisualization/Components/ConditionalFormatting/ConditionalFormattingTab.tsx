@@ -4,14 +4,14 @@ import { useActions, useValues } from 'kea'
 
 import { IconPlusSmall, IconTrash } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonCollapse,
-    LemonColorGlyph,
-    LemonColorPicker,
-    LemonInput,
-    LemonSelect,
-    LemonTag,
-} from '@hanzo/lemon-ui'
+    Button,
+    Collapse,
+    ColorGlyph,
+    ColorPicker,
+    Input,
+    Select,
+    Tag,
+} from '@hanzo/elements'
 
 import { ConditionalFormattingRule } from '~/queries/schema/schema-general'
 
@@ -60,7 +60,7 @@ export const ConditionalFormattingTab = (): JSX.Element => {
             <p>You can add rules to make the cells in the table change color if they meet certain conditions.</p>
 
             {conditionalFormattingRules.length > 0 && (
-                <LemonCollapse
+                <Collapse
                     activeKeys={conditionalFormattingRulesPanelActiveKeys}
                     onChange={(activeKeys) => setConditionalFormattingRulesPanelActiveKeys(activeKeys)}
                     multiple={true}
@@ -70,7 +70,7 @@ export const ConditionalFormattingTab = (): JSX.Element => {
                         key: rule.id,
                         header: (
                             <>
-                                <LemonColorGlyph color={rule.color} />
+                                <ColorGlyph color={rule.color} />
                                 <span className="ml-2">{getRuleHeader(rule)}</span>
                             </>
                         ),
@@ -80,7 +80,7 @@ export const ConditionalFormattingTab = (): JSX.Element => {
                 />
             )}
 
-            <LemonButton
+            <Button
                 className="mt-1"
                 onClick={() => addConditionalFormattingRule()}
                 icon={<IconPlusSmall />}
@@ -88,7 +88,7 @@ export const ConditionalFormattingTab = (): JSX.Element => {
                 type="secondary"
             >
                 Add rule
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -103,7 +103,7 @@ const RuleItem = ({ rule: propsRule }: { rule: ConditionalFormattingRule }): JSX
 
     return (
         <div className="gap-2 flex flex-col">
-            <LemonSelect
+            <Select
                 placeholder="Column"
                 className="w-full"
                 value={rule.columnName || null}
@@ -112,9 +112,9 @@ const RuleItem = ({ rule: propsRule }: { rule: ConditionalFormattingRule }): JSX
                     label: (
                         <div className="items-center flex-1">
                             {name}
-                            <LemonTag className="ml-2" type="default">
+                            <Tag className="ml-2" type="default">
                                 {type.name}
-                            </LemonTag>
+                            </Tag>
                         </div>
                     ),
                 }))}
@@ -127,7 +127,7 @@ const RuleItem = ({ rule: propsRule }: { rule: ConditionalFormattingRule }): JSX
                 }}
             />
 
-            <LemonSelect
+            <Select
                 className="w-full"
                 options={FORMATTING_TEMPLATES.filter((n) => {
                     const column = columns.find((n) => n.name === rule.columnName)
@@ -138,21 +138,21 @@ const RuleItem = ({ rule: propsRule }: { rule: ConditionalFormattingRule }): JSX
             />
 
             <div className="flex flex-1">
-                <LemonColorPicker
+                <ColorPicker
                     selectedColor={rule.color}
                     onSelectColor={selectColor}
                     colors={DEFAULT_PICKER_COLORS}
                     showCustomColor
                     hideDropdown
                 />
-                <LemonInput
+                <Input
                     placeholder="value"
                     className="ml-2 flex-1"
                     onChange={(value) => updateInput(value)}
                     value={rule.input}
                     disabled={template.hideInput}
                 />
-                <LemonButton
+                <Button
                     icon={<IconTrash />}
                     status="danger"
                     title="Delete rule"

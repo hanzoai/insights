@@ -6,7 +6,7 @@ import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { ValidatedPasswordResult, validatePassword } from 'lib/components/PasswordStrength'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import type { passwordResetLogicType } from './passwordResetLogicType'
 
@@ -103,7 +103,7 @@ export const passwordResetLogic = kea<passwordResetLogicType>([
                         password,
                         token: values.validatedResetToken.token,
                     })
-                    lemonToast.success('Your password has been changed. Redirecting…')
+                    toast.success('Your password has been changed. Redirecting…')
                     await breakpoint(3000)
 
                     const url = new URL('/login', window.location.origin)

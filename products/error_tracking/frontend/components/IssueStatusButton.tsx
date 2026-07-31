@@ -1,4 +1,4 @@
-import { LemonButton, LemonMenuOverlay } from '@hanzo/lemon-ui'
+import { Button, MenuOverlay } from '@hanzo/elements'
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 
@@ -27,7 +27,7 @@ export const IssueStatusButton = ({
     return (
         <>
             <ConfettiComponent />
-            <LemonButton
+            <Button
                 type="primary"
                 onClick={handleResolve}
                 tooltip={status === 'active' ? STATUS_INTENT_LABEL['resolved'] : STATUS_INTENT_LABEL['active']}
@@ -38,7 +38,7 @@ export const IssueStatusButton = ({
                               dropdown: {
                                   placement: 'bottom-end',
                                   overlay: (
-                                      <LemonMenuOverlay
+                                      <MenuOverlay
                                           items={[
                                               {
                                                   label: 'Suppress',
@@ -55,7 +55,7 @@ export const IssueStatusButton = ({
                 size="small"
             >
                 {status === 'active' ? 'Resolve' : 'Reopen'}
-            </LemonButton>
+            </Button>
         </>
     )
 }

@@ -6,13 +6,13 @@ import { router } from 'kea-router'
 import { useState } from 'react'
 
 import { IconPencil, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Dialog, Tag } from '@hanzo/elements'
 
 import { FallbackCoverImage } from 'lib/components/FallbackCoverImage/FallbackCoverImage'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { More } from 'lib/elements/Button/More'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { toast } from 'lib/elements/Toast'
+import { Spinner } from 'lib/elements/Spinner'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
@@ -51,23 +51,23 @@ export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JS
         <div>
             <div className="mb-4 flex flex-wrap gap-2">
                 {availableTags.length > 0 && (
-                    <LemonButton
+                    <Button
                         type={tagFilter === null ? 'primary' : 'secondary'}
                         onClick={() => setTagFilter(null)}
                         size="small"
                     >
                         All
-                    </LemonButton>
+                    </Button>
                 )}
                 {availableTags.map((tag) => (
-                    <LemonButton
+                    <Button
                         key={tag}
                         type={tagFilter === tag ? 'primary' : 'secondary'}
                         onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
                         size="small"
                     >
                         {tag}
-                    </LemonButton>
+                    </Button>
                 ))}
             </div>
             <div className="WorkflowTemplateChooser">
@@ -106,7 +106,7 @@ export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JS
                                 canDeleteTemplate(template)
                                     ? (e) => {
                                           e.stopPropagation()
-                                          LemonDialog.open({
+                                          Dialog.open({
                                               title: 'Delete template?',
                                               description: (
                                                   <>
@@ -121,9 +121,9 @@ export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JS
                                                   onClick: async () => {
                                                       try {
                                                           await deleteInsightsFlowTemplate(template)
-                                                          lemonToast.success(`Template "${template.name}" deleted`)
+                                                          toast.success(`Template "${template.name}" deleted`)
                                                       } catch (error: any) {
-                                                          lemonToast.error(
+                                                          toast.error(
                                                               `Failed to delete template: ${error.detail || error.message || 'Unknown error'}`
                                                           )
                                                       }
@@ -190,7 +190,7 @@ function TemplateItem({
                             closeOnClickInside: true,
                         }}
                         overlay={
-                            <LemonMenuOverlay
+                            <MenuOverlay
                                 items={[
                                     ...(onEdit
                                         ? [
@@ -237,14 +237,14 @@ function TemplateItem({
             <h5 className="px-2 mb-1">{template?.name || 'Unnamed template'}</h5>
             <div className="flex gap-x-1 px-2 mb-1 flex-wrap">
                 {scopeTag && (
-                    <LemonTag key="scope" type="option">
+                    <Tag key="scope" type="option">
                         {scopeTag}
-                    </LemonTag>
+                    </Tag>
                 )}
                 {template.tags.map((tag) => (
-                    <LemonTag key={tag} type="default">
+                    <Tag key={tag} type="default">
                         {tag}
-                    </LemonTag>
+                    </Tag>
                 ))}
             </div>
             <div className={clsx('px-2 py-1 grow', isHovering ? 'overflow-y-auto' : 'overflow-hidden')}>

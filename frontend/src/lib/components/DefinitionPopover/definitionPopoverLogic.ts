@@ -5,7 +5,7 @@ import { loaders } from 'kea-loaders'
 import api from 'lib/api'
 import { getSingularType } from 'lib/components/DefinitionPopover/utils'
 import { TaxonomicDefinitionTypes, TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { DataWarehouseTableForInsight } from 'scenes/data-warehouse/types'
@@ -96,11 +96,11 @@ export const definitionPopoverLogic = kea<definitionPopoverLogicType>([
                             cohortsModel.findMounted()?.actions.updateCohort(definition as CohortType)
                         }
                     } catch (error: any) {
-                        lemonToast.error(error.message)
+                        toast.error(error.message)
                     }
                     breakpoint()
                     // Disregard save attempts for any other types of taxonomy groups
-                    lemonToast.success(`${capitalizeFirstLetter(values.singularType)} definition saved`)
+                    toast.success(`${capitalizeFirstLetter(values.singularType)} definition saved`)
                     // Update item in infinite list
                     props.updateRemoteItem?.(definition)
                     return definition

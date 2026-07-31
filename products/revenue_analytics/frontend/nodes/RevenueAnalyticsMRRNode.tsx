@@ -2,7 +2,7 @@ import { BindLogic, BuiltLogic, LogicWrapper, useActions, useMountedLogic, useVa
 import { useState } from 'react'
 
 import { IconGraph } from '@hanzo/icons'
-import { LemonButton, LemonSegmentedButton, LemonSegmentedButtonOption } from '@hanzo/lemon-ui'
+import { Button, SegmentedButton, SegmentedButtonOption } from '@hanzo/elements'
 
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { getCurrencySymbol } from 'lib/utils/geography/currency'
@@ -28,7 +28,7 @@ import {
     goalLinesFromRevenueGoals,
 } from './shared'
 
-const MODE_OPTIONS: LemonSegmentedButtonOption<'mrr' | 'arr'>[] = [
+const MODE_OPTIONS: SegmentedButtonOption<'mrr' | 'arr'>[] = [
     { value: 'mrr', label: 'MRR' },
     { value: 'arr', label: 'ARR' },
 ]
@@ -110,7 +110,7 @@ const Tile = ({ context }: TileProps): JSX.Element => {
             tooltip="MRR is the total amount of recurring revenue generated from all sources, including all products and services in the last 30 days. ARR is that value multiplied by 12."
             extra={
                 <div className="flex items-center gap-1 text-muted-alt">
-                    <LemonButton
+                    <Button
                         icon={<IconGraph />}
                         onClick={handleBreakdownClick}
                         tooltip="View MRR breakdown"
@@ -125,9 +125,9 @@ const Tile = ({ context }: TileProps): JSX.Element => {
                         }
                     >
                         MRR Breakdown
-                    </LemonButton>
+                    </Button>
 
-                    <LemonSegmentedButton value={mrrMode} onChange={setMRRMode} options={MODE_OPTIONS} size="small" />
+                    <SegmentedButton value={mrrMode} onChange={setMRRMode} options={MODE_OPTIONS} size="small" />
                 </div>
             }
         >

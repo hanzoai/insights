@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { MouseEvent, useCallback } from 'react'
 import { P, match } from 'ts-pattern'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Dayjs } from 'lib/dayjs'
@@ -32,7 +32,7 @@ export function TimeBoundary({ time, loading, label, updateDateRange }: TimeBoun
     return (
         <>
             {match([loading, time])
-                .with([true, P.any], () => <LemonSkeleton className="w-[50px] h-2" />)
+                .with([true, P.any], () => <Skeleton className="w-[50px] h-2" />)
                 .with([false, P.nullish], () => <span className="text-xs text-muted">-</span>)
                 .with([false, P.any], () => (
                     <span

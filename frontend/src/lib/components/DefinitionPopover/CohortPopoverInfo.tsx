@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { DefinitionPopover } from 'lib/components/DefinitionPopover/DefinitionPopover'
 import {
@@ -36,7 +36,7 @@ export function CohortPopoverInfo({ cohort }: { cohort: CohortType }): JSX.Eleme
     }
     return cohort.filters?.properties?.values?.length ? (
         <>
-            <LemonDivider className="DefinitionPopover my-2" />
+            <Divider className="DefinitionPopover my-2" />
             {cohort.filters.properties.values.slice(0, MAX_CRITERIA_GROUPS).map(
                 (cohortGroup, cohortGroupIndex) =>
                     isCohortCriteriaGroup(cohortGroup) && (
@@ -104,7 +104,7 @@ export function CohortPopoverInfo({ cohort }: { cohort: CohortType }): JSX.Eleme
         </>
     ) : (
         <>
-            {(cohort.groups?.length || 0 > 0) && <LemonDivider className="DefinitionPopover my-2" />}
+            {(cohort.groups?.length || 0 > 0) && <Divider className="DefinitionPopover my-2" />}
             {cohort.groups &&
                 cohort.groups.map((group, index) => (
                     <DefinitionPopover.Section key={index}>

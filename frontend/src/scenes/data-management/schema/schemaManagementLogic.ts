@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import type { schemaManagementLogicType } from './schemaManagementLogicType'
@@ -124,22 +124,22 @@ export const schemaManagementLogic = kea<schemaManagementLogicType>([
                 createPropertyGroup: async (data: Partial<SchemaPropertyGroup>) => {
                     try {
                         const response = await api.create(`api/projects/@current/schema_property_groups/`, data)
-                        lemonToast.success('Property group created')
+                        toast.success('Property group created')
                         return [response, ...values.propertyGroups]
                     } catch (error: any) {
                         const errorMessage = getErrorMessage(error, 'Failed to create property group')
-                        lemonToast.error(errorMessage)
+                        toast.error(errorMessage)
                         throw new Error(errorMessage)
                     }
                 },
                 updatePropertyGroup: async ({ id, data }: { id: string; data: Partial<SchemaPropertyGroup> }) => {
                     try {
                         const response = await api.update(`api/projects/@current/schema_property_groups/${id}/`, data)
-                        lemonToast.success('Property group updated')
+                        toast.success('Property group updated')
                         return values.propertyGroups.map((pg) => (pg.id === id ? response : pg))
                     } catch (error: any) {
                         const errorMessage = getErrorMessage(error, 'Failed to update property group')
-                        lemonToast.error(errorMessage)
+                        toast.error(errorMessage)
                         throw new Error(errorMessage)
                     }
                 },
@@ -157,7 +157,7 @@ export const schemaManagementLogic = kea<schemaManagementLogicType>([
                 // Check for validation errors
                 const validationError = values.propertyGroupFormValidationError
                 if (validationError) {
-                    lemonToast.error(validationError)
+                    toast.error(validationError)
                     throw new Error(validationError)
                 }
 
@@ -279,10 +279,10 @@ export const schemaManagementLogic = kea<schemaManagementLogicType>([
             try {
                 await api.delete(`api/projects/@current/schema_property_groups/${id}/`)
                 actions.loadPropertyGroups()
-                lemonToast.success('Property group deleted')
+                toast.success('Property group deleted')
             } catch (error: any) {
                 const errorMessage = getErrorMessage(error, 'Failed to delete property group')
-                lemonToast.error(errorMessage)
+                toast.error(errorMessage)
             }
         },
     })),

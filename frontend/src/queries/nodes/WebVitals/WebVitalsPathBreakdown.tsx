@@ -3,7 +3,7 @@ import { BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { webAnalyticsLogic } from 'scenes/web-analytics/webAnalyticsLogic'
 
@@ -154,7 +154,7 @@ const Content = ({
         <div className={clsx('pt-4', { 'h-full': loadedValues })}>
             <div className={clsx('flex flex-col gap-1', { 'justify-center': hasNoValues, 'h-full': loadedValues })}>
                 {responseLoading ? (
-                    <LemonSkeleton fade className={clsx('w-full', SKELETON_HEIGHT[band])} />
+                    <Skeleton fade className={clsx('w-full', SKELETON_HEIGHT[band])} />
                 ) : values?.length ? (
                     values?.map(({ path, value }) => {
                         const width = computePositionInBand(value, webVitalsTab) * 100

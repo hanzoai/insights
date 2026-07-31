@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { IconOpenSidebar, IconPlus, IconX } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { cn } from 'lib/utils/css-classes'
 import { userLogic } from 'scenes/userLogic'
 
@@ -76,7 +76,7 @@ export const ProductIntroduction = ({
             {!isEmpty && (
                 <div className="flex justify-end -mb-6 -mt-2 -mr-2">
                     <div>
-                        <LemonButton
+                        <Button
                             icon={<IconX />}
                             size="small"
                             onClick={() => {
@@ -117,7 +117,7 @@ export const ProductIntroduction = ({
                     )}
                     <div className="flex items-center gap-x-4 gap-y-2 mt-6 flex-wrap">
                         {action ? (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 icon={<IconPlus />}
                                 onClick={() => {
@@ -128,12 +128,12 @@ export const ProductIntroduction = ({
                                 disabledReason={disabledReason}
                             >
                                 Create {thingName}
-                            </LemonButton>
+                            </Button>
                         ) : (
                             actionElementOverride
                         )}
                         {docsURL && (
-                            <LemonButton
+                            <Button
                                 type={actionable ? 'tertiary' : 'secondary'}
                                 sideIcon={<IconOpenSidebar className="w-4 h-4" />}
                                 to={`${docsURL}?utm_medium=in-product&utm_campaign=empty-state-docs-link`}
@@ -141,7 +141,7 @@ export const ProductIntroduction = ({
                                 targetBlank
                             >
                                 Learn more
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 </div>

@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { IconExternal } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Skeleton } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 import { LearnMorePopover } from 'scenes/web-analytics/WebAnalyticsDashboard'
@@ -154,7 +154,7 @@ export const NonIntegratedConversionsTable = (): JSX.Element | null => {
                     <p className="text-xs text-muted m-0">
                         Use the "Explore conversion goals" section above, or configure them in settings.
                     </p>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         to={urls.settings('environment-marketing-analytics')}
@@ -162,7 +162,7 @@ export const NonIntegratedConversionsTable = (): JSX.Element | null => {
                         sideIcon={<IconExternal />}
                     >
                         Configure conversion goals
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         )
@@ -173,7 +173,7 @@ export const NonIntegratedConversionsTable = (): JSX.Element | null => {
             <div className="col-span-1 row-span-1 flex flex-col @4xl/main-content:col-span-2 @7xl/main-content:order-3">
                 {TileHeader}
                 <div className="p-4">
-                    <LemonSkeleton className="h-32" />
+                    <Skeleton className="h-32" />
                 </div>
             </div>
         )

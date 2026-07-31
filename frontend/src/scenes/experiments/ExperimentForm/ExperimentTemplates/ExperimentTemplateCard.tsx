@@ -1,4 +1,4 @@
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Tag } from 'lib/elements/Tag'
 
 import { ExperimentTemplate } from './constants'
 
@@ -24,9 +24,9 @@ export const ExperimentTemplateCard = ({ template, onSelect }: ExperimentTemplat
 
             <div className="mt-auto pt-2 border-t">
                 <div className="flex items-center gap-2">
-                    <LemonTag size="small" type="success">
+                    <Tag size="small" type="success">
                         {template.metrics.length} metrics
-                    </LemonTag>
+                    </Tag>
                     {template.metrics.map((metric, index) => (
                         <span key={index} className="text-xs text-muted truncate">
                             {metric.name}

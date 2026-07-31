@@ -5,7 +5,7 @@ import { lazyLoaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { GROUPS_LIST_DEFAULT_QUERY } from 'scenes/groups/groupsListLogic'
 import { PERSON_EVENTS_CONTEXT_KEY } from 'scenes/persons/personsLogic'
 import { PEOPLE_LIST_CONTEXT_KEY, PEOPLE_LIST_DEFAULT_QUERY } from 'scenes/persons/personsSceneLogic'
@@ -238,7 +238,7 @@ export const tableViewLogic = kea<tableViewLogicType>([
 
         saveCurrentAsViewFailure: (error) => {
             insights.captureException(error)
-            lemonToast.error('Error saving view')
+            toast.error('Error saving view')
         },
 
         updateViewSuccess: ({ payload }) => {
@@ -246,35 +246,35 @@ export const tableViewLogic = kea<tableViewLogicType>([
             if (updatedView) {
                 actions.applyView(updatedView)
             }
-            lemonToast.success(`View "${updatedView?.name || ''}" updated`)
+            toast.success(`View "${updatedView?.name || ''}" updated`)
         },
 
         updateViewFailure: (error) => {
             insights.captureException(error)
-            lemonToast.error('Error updating view')
+            toast.error('Error updating view')
         },
 
         deleteViewSuccess: () => {
-            lemonToast.success('View deleted')
+            toast.success('View deleted')
         },
 
         deleteViewFailure: (error) => {
             insights.captureException(error)
-            lemonToast.error('Error deleting view')
+            toast.error('Error deleting view')
         },
 
         loadViewsFailure: (error) => {
             insights.captureException(error)
-            lemonToast.error('Error loading views')
+            toast.error('Error loading views')
         },
 
         submitNewViewFormSuccess: ({ newViewForm }) => {
-            lemonToast.success(`View "${newViewForm.name}" saved`)
+            toast.success(`View "${newViewForm.name}" saved`)
         },
 
         submitNewViewFormFailure: (error) => {
             insights.captureException(error)
-            lemonToast.error('Error creating view')
+            toast.error('Error creating view')
         },
     })),
 

@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 
-import { LemonLabel } from '@hanzo/lemon-ui'
+import { Label } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { OrganizationSelector } from './OrganizationSelector'
 import type { OrganizationOption } from './types'
@@ -18,9 +18,9 @@ export const RequiredOrganizationAccessSelector = ({
 }: RequiredOrganizationAccessSelectorProps): JSX.Element => {
     return (
         <div className="flex flex-col gap-2">
-            <LemonLabel>Select organization</LemonLabel>
+            <Label>Select organization</Label>
             <p className="text-sm text-muted mb-2">This application requires access to a specific organization.</p>
-            <LemonField name="scoped_organizations">
+            <Field name="scoped_organizations">
                 {({ value, onChange }) => {
                     const arrayValue = Array.isArray(value) ? value : []
 
@@ -39,7 +39,7 @@ export const RequiredOrganizationAccessSelector = ({
                         />
                     )
                 }}
-            </LemonField>
+            </Field>
         </div>
     )
 }

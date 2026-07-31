@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input/Input'
 
 import { ExperimentIdType } from '~/types'
 
@@ -48,8 +48,8 @@ export function AuthorizedUrlForm({
             enableFormOnSubmit
             className="w-full deprecated-space-y-2"
         >
-            <LemonField name="url">
-                <LemonInput
+            <Field name="url">
+                <Input
                     autoFocus
                     placeholder={
                         allowWildCards
@@ -58,14 +58,14 @@ export function AuthorizedUrlForm({
                     }
                     data-attr="url-input"
                 />
-            </LemonField>
+            </Field>
             <div className="flex justify-end gap-2">
-                <LemonButton type="secondary" onClick={cancelProposingUrl}>
+                <Button type="secondary" onClick={cancelProposingUrl}>
                     Cancel
-                </LemonButton>
-                <LemonButton htmlType="submit" type="primary" loading={isProposedUrlSubmitting} data-attr="url-save">
+                </Button>
+                <Button htmlType="submit" type="primary" loading={isProposedUrlSubmitting} data-attr="url-save">
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </Form>
     )

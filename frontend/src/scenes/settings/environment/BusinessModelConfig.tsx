@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -9,7 +9,7 @@ export function BusinessModelConfig(): JSX.Element {
     const { updateCurrentTeam } = useActions(teamLogic)
 
     return (
-        <LemonSelect
+        <Select
             value={currentTeam?.business_model || null}
             onChange={(value) => updateCurrentTeam({ business_model: value })}
             disabledReason={currentTeamLoading ? 'Loading...' : undefined}

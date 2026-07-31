@@ -2,7 +2,7 @@ import { actions, kea, key, path, props, reducers, selectors, useActions, useVal
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tab, Tabs } from 'lib/elements/Tabs'
 import { PipelinePluginConfiguration } from 'scenes/data-pipelines/legacy-plugins/PipelinePluginConfiguration'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -101,7 +101,7 @@ export function LegacyPluginScene(): JSX.Element {
 
     const pluginConfigId = parseInt(id)
 
-    const tabs: (LemonTab<LegacyPluginSceneTab> | null)[] = [
+    const tabs: (Tab<LegacyPluginSceneTab> | null)[] = [
         {
             label: 'Configuration',
             key: 'configuration',
@@ -124,5 +124,5 @@ export function LegacyPluginScene(): JSX.Element {
         },
     ]
 
-    return <LemonTabs activeKey={currentTab} tabs={tabs} onChange={setCurrentTab} />
+    return <Tabs activeKey={currentTab} tabs={tabs} onChange={setCurrentTab} />
 }

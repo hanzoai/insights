@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props, reducers } from 'kea'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { ApiError } from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -208,7 +208,7 @@ export const variableModalLogic = kea<variableModalLogicType>([
                 actions.closeModal()
             } catch (e: any) {
                 const error = e as ApiError
-                lemonToast.error(error.detail ?? error.message)
+                toast.error(error.detail ?? error.message)
             }
         },
     })),

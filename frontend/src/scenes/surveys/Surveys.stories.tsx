@@ -327,7 +327,7 @@ export const NewSurveyTargetingSection: StoryFn = () => {
 NewSurveyTargetingSection.parameters = {
     pageUrl: urls.survey('new?edit=true'),
     testOptions: {
-        waitForSelector: ['.LemonBanner .LemonIcon', '.TaxonomicPropertyFilter__row'],
+        waitForSelector: ['.Banner .Icon', '.TaxonomicPropertyFilter__row'],
     },
 }
 

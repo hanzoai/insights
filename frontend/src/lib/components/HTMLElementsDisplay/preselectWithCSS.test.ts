@@ -59,7 +59,7 @@ const elements = [
     {
         attributes: {
             type: 'button',
-            class: 'LemonButton LemonButton--tertiary LemonButton--status-primary LemonButton--full-width',
+            class: 'Button Button--tertiary Button--status-primary Button--full-width',
             href: '/insights/0UJGO3yI',
         },
         href: '/insights/0UJGO3yI',
@@ -266,7 +266,7 @@ describe('can preselect selectors for editing', () => {
     })
 
     test('no child combinator', () => {
-        const autoSelector = '.top-list-container-horizontal .top-list:nth-child(1) .LemonButton:nth-child(1)'
+        const autoSelector = '.top-list-container-horizontal .top-list:nth-child(1) .Button:nth-child(1)'
 
         const expectedSelectedElements = {
             4: {
@@ -276,7 +276,7 @@ describe('can preselect selectors for editing', () => {
                 class: ['top-list'],
             },
             8: {
-                class: ['LemonButton'],
+                class: ['Button'],
             },
         }
 
@@ -285,7 +285,7 @@ describe('can preselect selectors for editing', () => {
 
     test('multiple css matches on single elements', () => {
         const autoSelector =
-            '.top-list-container-horizontal .top-list:nth-child(1) .LemonButton.LemonButton--status-primary:nth-child(1)'
+            '.top-list-container-horizontal .top-list:nth-child(1) .Button.Button--status-primary:nth-child(1)'
 
         const expectedSelectedElements = {
             4: {
@@ -295,7 +295,7 @@ describe('can preselect selectors for editing', () => {
                 class: ['top-list'],
             },
             8: {
-                class: ['LemonButton', 'LemonButton--status-primary'],
+                class: ['Button', 'Button--status-primary'],
             },
         }
 
@@ -304,7 +304,7 @@ describe('can preselect selectors for editing', () => {
 
     test('multiple types of css matches', () => {
         const autoSelector =
-            '.top-list-container-horizontal .top-list:nth-child(1) .LemonButton.LemonButton--status-primary[href="/insights/0UJGO3yI"]'
+            '.top-list-container-horizontal .top-list:nth-child(1) .Button.Button--status-primary[href="/insights/0UJGO3yI"]'
 
         const expectedSelectedElements = {
             4: {
@@ -314,7 +314,7 @@ describe('can preselect selectors for editing', () => {
                 class: ['top-list'],
             },
             8: {
-                class: ['LemonButton', 'LemonButton--status-primary'],
+                class: ['Button', 'Button--status-primary'],
                 href: '/insights/0UJGO3yI',
             },
         }
@@ -381,7 +381,7 @@ describe('can preselect selectors for editing', () => {
     })
 
     test('fixing the storybook example', () => {
-        const selector = 'div div.SideBar .LemonButton__content span.text-default'
+        const selector = 'div div.SideBar .Button__content span.text-default'
 
         expect(preselect(elementsChain(EXAMPLE_ELEMENTS), selector)).toEqual({
             '1': {
@@ -392,7 +392,7 @@ describe('can preselect selectors for editing', () => {
                 tag: 'div',
             },
             '10': {
-                class: ['LemonButton__content'],
+                class: ['Button__content'],
             },
             '11': {
                 class: ['text-default'],

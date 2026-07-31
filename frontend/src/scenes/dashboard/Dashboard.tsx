@@ -3,7 +3,7 @@ import './Dashboard.scss'
 import clsx from 'clsx'
 import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { NotFound } from 'lib/components/NotFound'
@@ -125,11 +125,11 @@ function DashboardScene(): JSX.Element {
                                 dashboard && <DashboardEditBar />}
                             {[DashboardPlacement.FeatureFlag, DashboardPlacement.Group].includes(placement) &&
                                 dashboard?.id && (
-                                    <LemonButton type="secondary" size="small" to={urls.dashboard(dashboard.id)}>
+                                    <Button type="secondary" size="small" to={urls.dashboard(dashboard.id)}>
                                         {placement === DashboardPlacement.Group
                                             ? 'Edit dashboard template'
                                             : 'Edit dashboard'}
-                                    </LemonButton>
+                                    </Button>
                                 )}
                             {![DashboardPlacement.Export, DashboardPlacement.Builtin].includes(placement) && (
                                 <div

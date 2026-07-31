@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton, LemonCollapse, LemonInput, LemonSwitch, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Collapse, Input, Switch, Tooltip } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
+import { Field } from 'lib/elements/Field'
+import { Slider } from 'lib/elements/Slider'
 
 import { ProductTourAppearance } from '~/types'
 
@@ -60,7 +60,7 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
             <div>
                 <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Auto-show this {entityKeyword}</span>
-                    <LemonSwitch
+                    <Switch
                         checked={productTourForm.auto_launch}
                         onChange={(checked) => setProductTourFormValue('auto_launch', checked)}
                     />
@@ -70,14 +70,14 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
                         <p className="text-xs text-secondary mt-2 mb-2">
                             Show automatically when some conditions are met
                         </p>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             icon={<IconGear />}
                             onClick={() => setShowAutoShowModal(true)}
                             fullWidth
                         >
                             Configure targeting
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
             </div>
@@ -85,7 +85,7 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
             <div className="pt-4 border-t">
                 <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Manual trigger</span>
-                    <LemonSwitch
+                    <Switch
                         checked={showManualTrigger}
                         onChange={(checked) => {
                             setShowManualTrigger(checked)
@@ -100,7 +100,7 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
                         <p className="text-xs text-secondary mt-2 mb-2">
                             Show when clicking an element matching this selector
                         </p>
-                        <LemonInput
+                        <Input
                             size="small"
                             className="font-mono"
                             value={conditions.selector || ''}
@@ -158,9 +158,9 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
 
             {!isBanner && (
                 <>
-                    <LemonField.Pure label="Border radius">
+                    <Field.Pure label="Border radius">
                         <div className="flex items-center gap-3">
-                            <LemonSlider
+                            <Slider
                                 className="flex-1"
                                 value={currentAppearance.borderRadius}
                                 onChange={(borderRadius) => updateAppearance({ borderRadius })}
@@ -172,11 +172,11 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
                                 {currentAppearance.borderRadius}px
                             </span>
                         </div>
-                    </LemonField.Pure>
+                    </Field.Pure>
 
-                    <LemonField.Pure label="Button radius">
+                    <Field.Pure label="Button radius">
                         <div className="flex items-center gap-3">
-                            <LemonSlider
+                            <Slider
                                 className="flex-1"
                                 value={currentAppearance.buttonBorderRadius}
                                 onChange={(buttonBorderRadius) => updateAppearance({ buttonBorderRadius })}
@@ -188,7 +188,7 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
                                 {currentAppearance.buttonBorderRadius}px
                             </span>
                         </div>
-                    </LemonField.Pure>
+                    </Field.Pure>
                 </>
             )}
 
@@ -206,7 +206,7 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
                 <>
                     <div className="flex items-center justify-between">
                         <span className="text-sm">Dark overlay</span>
-                        <LemonSwitch
+                        <Switch
                             checked={currentAppearance.showOverlay ?? true}
                             onChange={(showOverlay) => updateAppearance({ showOverlay })}
                         />
@@ -214,7 +214,7 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
 
                     <div className="flex items-center justify-between">
                         <span className="text-sm">Dismiss on outside clicks</span>
-                        <LemonSwitch
+                        <Switch
                             checked={currentAppearance.dismissOnClickOutside ?? true}
                             onChange={(dismissOnClickOutside) => updateAppearance({ dismissOnClickOutside })}
                         />
@@ -224,7 +224,7 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
                         <Tooltip title="Branding only appears on the first step">
                             <span className="text-sm border-b border-dashed border-current">Remove branding</span>
                         </Tooltip>
-                        <LemonSwitch
+                        <Switch
                             checked={!!currentAppearance.whiteLabel}
                             onChange={(whiteLabel) => updateAppearance({ whiteLabel })}
                         />
@@ -240,8 +240,8 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
                 <div className="flex items-center justify-between px-3 py-2 bg-surface-primary border-b font-semibold">
                     <span className="text-xs font-semibold uppercase tracking-wide text-muted">Tour settings</span>
                 </div>
-                <div className="flex-1 overflow-y-auto [&_.LemonCollapse]:border-0 [&_.LemonCollapse]:rounded-none">
-                    <LemonCollapse
+                <div className="flex-1 overflow-y-auto [&_.Collapse]:border-0 [&_.Collapse]:rounded-none">
+                    <Collapse
                         defaultActiveKey="display"
                         panels={[
                             {

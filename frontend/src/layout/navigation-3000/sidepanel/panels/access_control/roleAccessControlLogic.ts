@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { membersLogic } from 'scenes/organization/membersLogic'
@@ -92,7 +92,7 @@ export const roleAccessControlLogic = kea<roleAccessControlLogicType>([
                         return values.roles
                     }
                     await api.roles.delete(role.id)
-                    lemonToast.success(`Role "${role.name}" deleted`)
+                    toast.success(`Role "${role.name}" deleted`)
                     return values.roles?.filter((r) => r.id !== role.id) || []
                 },
             },
@@ -138,7 +138,7 @@ export const roleAccessControlLogic = kea<roleAccessControlLogicType>([
                     actions.selectRoleId(role.id)
                 } catch (e) {
                     const error = (e as Record<string, any>).detail || 'Failed to save role'
-                    lemonToast.error(error)
+                    toast.error(error)
                 }
             },
         },

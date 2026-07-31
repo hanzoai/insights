@@ -3,9 +3,9 @@ import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonDropdown, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Dropdown, Link } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import MaxTool from 'scenes/max/MaxTool'
 
@@ -54,15 +54,15 @@ export function InsightsFunctionCode(): JSX.Element {
                 </div>
 
                 {templateHasChanged ? (
-                    <LemonDropdown showArrow overlay={<InsightsFunctionTemplateOptions />}>
-                        <LemonButton type="tertiary" size={showSource ? 'xsmall' : 'small'} icon={<IconInfo />}>
+                    <Dropdown showArrow overlay={<InsightsFunctionTemplateOptions />}>
+                        <Button type="tertiary" size={showSource ? 'xsmall' : 'small'} icon={<IconInfo />}>
                             Modified code
-                        </LemonButton>
-                    </LemonDropdown>
+                        </Button>
+                    </Dropdown>
                 ) : null}
 
                 {!showSource ? (
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={() => {
                             setShowSource(true)
@@ -75,16 +75,16 @@ export function InsightsFunctionCode(): JSX.Element {
                         }}
                     >
                         Edit source code
-                    </LemonButton>
+                    </Button>
                 ) : (
-                    <LemonButton size="xsmall" type="secondary" onClick={() => setShowSource(false)}>
+                    <Button size="xsmall" type="secondary" onClick={() => setShowSource(false)}>
                         Hide source code
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
 
             {showSource ? (
-                <LemonField name="iql">
+                <Field name="iql">
                     {({ value, onChange }) => (
                         <>
                             {!type.startsWith('site_') ? (
@@ -94,19 +94,19 @@ export function InsightsFunctionCode(): JSX.Element {
                                 </span>
                             ) : null}
                             {mightDropEvents && (
-                                <LemonBanner type="warning" className="mt-2">
+                                <Banner type="warning" className="mt-2">
                                     <b>Warning:</b> Returning null or undefined will drop the event. If this is
                                     unintentional, return the event object instead.
-                                </LemonBanner>
+                                </Banner>
                             )}
                             {type === 'source_webhook' && (
-                                <LemonBanner type="info" className="mt-2">
+                                <Banner type="info" className="mt-2">
                                     <b>HTTP requests:</b> Webhook sources can call <code>insightsCapture</code> to
                                     ingest events to Insights. You can also do HTTP calls with <code>fetch</code>. In
                                     this case however, the request will be queued to a background task, a{' '}
                                     <code>201 Created</code> response will be returned and the event will be ingested
                                     asynchronously.
-                                </LemonBanner>
+                                </Banner>
                             )}
                             <CodeEditorResizeable
                                 language={type.startsWith('site_') ? 'typescript' : 'iql'}
@@ -152,7 +152,7 @@ export function InsightsFunctionCode(): JSX.Element {
                             />
                         </>
                     )}
-                </LemonField>
+                </Field>
             ) : null}
         </div>
     )

@@ -5,7 +5,7 @@ import { beforeUnload, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { isEmail, isURL } from 'lib/utils'
 import { getInsightId } from 'scenes/insights/utils'
 
@@ -99,7 +99,7 @@ export const subscriptionLogic = kea<subscriptionLogicType>([
                 // this change is propagated to `subscriptions` there
                 subscriptionsLogic.findMounted(props)?.actions.loadSubscriptions()
                 actions.loadSubscriptionSuccess(updatedSub)
-                lemonToast.success(`Subscription saved.`)
+                toast.success(`Subscription saved.`)
 
                 return updatedSub
             },

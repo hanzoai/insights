@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheck, IconGear, IconPlusSmall } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { IconBlank } from 'lib/elements/icons'
 import { ButtonGroupPrimitive, ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { Combobox } from 'lib/ui/Combobox/Combobox'
 import { Label } from 'lib/ui/Label/Label'

@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 
 import { IconFilter } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonCheckbox,
-    LemonDivider,
-    LemonTable,
-    LemonTag,
-    LemonTagType,
+    Button,
+    Checkbox,
+    Divider,
+    Table,
+    Tag,
+    TagType,
     Spinner,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 
@@ -18,7 +18,7 @@ import { DataModelingNode, DataModelingNodeType } from '~/types'
 import { dataModelingLogic } from '../dataModelingLogic'
 import { PAGE_SIZE } from './constants'
 
-const NODE_TYPE_TAG_SETTINGS: Record<DataModelingNodeType, { label: string; type: LemonTagType }> = {
+const NODE_TYPE_TAG_SETTINGS: Record<DataModelingNodeType, { label: string; type: TagType }> = {
     table: { label: 'Table', type: 'default' },
     view: { label: 'View', type: 'primary' },
     matview: { label: 'Materialized view', type: 'success' },
@@ -59,7 +59,7 @@ export function TableView(): JSX.Element {
         )
     }
     return (
-        <LemonTable
+        <Table
             className="h-[calc(100vh-17rem)] overflow-y-auto"
             dataSource={visibleNodes}
             loading={nodesLoading}
@@ -74,7 +74,7 @@ export function TableView(): JSX.Element {
                     key: 'type',
                     render: (_, node: DataModelingNode) => {
                         const settings = NODE_TYPE_TAG_SETTINGS[node.type]
-                        return <LemonTag type={settings.type}>{settings.label}</LemonTag>
+                        return <Tag type={settings.type}>{settings.label}</Tag>
                     },
                     moreIcon: <IconFilter className="w-4 h-4" />,
                     moreFilterCount: filterTypes.length,
@@ -82,7 +82,7 @@ export function TableView(): JSX.Element {
                         <div className="space-y-1">
                             <div className="px-2 py-1 space-y-1">
                                 {availableTypes.map((type: DataModelingNodeType) => (
-                                    <LemonCheckbox
+                                    <Checkbox
                                         key={type}
                                         label={NODE_TYPE_TAG_SETTINGS[type].label}
                                         checked={filterTypes.includes(type)}
@@ -93,10 +93,10 @@ export function TableView(): JSX.Element {
                                 ))}
                                 {availableTypes.length === 0 && <span className="text-muted text-xs">No types</span>}
                             </div>
-                            <LemonDivider className="my-1" />
-                            <LemonButton size="small" fullWidth onClick={clearFilterTypes}>
+                            <Divider className="my-1" />
+                            <Button size="small" fullWidth onClick={clearFilterTypes}>
                                 Clear filters
-                            </LemonButton>
+                            </Button>
                         </div>
                     ),
                 },
@@ -110,7 +110,7 @@ export function TableView(): JSX.Element {
                         <div className="space-y-1">
                             <div className="px-2 py-1 space-y-1 max-h-60 overflow-y-auto">
                                 {availableDagIds.map((dagId: string) => (
-                                    <LemonCheckbox
+                                    <Checkbox
                                         key={dagId}
                                         label={dagId}
                                         checked={filterDagIds.includes(dagId)}
@@ -121,10 +121,10 @@ export function TableView(): JSX.Element {
                                 ))}
                                 {availableDagIds.length === 0 && <span className="text-muted text-xs">No DAGs</span>}
                             </div>
-                            <LemonDivider className="my-1" />
-                            <LemonButton size="small" fullWidth onClick={clearFilterDagIds}>
+                            <Divider className="my-1" />
+                            <Button size="small" fullWidth onClick={clearFilterDagIds}>
                                 Clear filters
-                            </LemonButton>
+                            </Button>
                         </div>
                     ),
                 },

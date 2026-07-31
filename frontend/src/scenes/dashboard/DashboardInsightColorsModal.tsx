@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonLabel, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
-import { LemonButton, LemonColorPicker, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
+import { Label, Modal, Select } from '@hanzo/elements'
+import { Button, ColorPicker, Table, TableColumns } from '@hanzo/elements'
 
 import { DataColorToken } from 'lib/colors'
 import stringWithWBR from 'lib/utils/stringWithWBR'
@@ -40,7 +40,7 @@ export function DashboardInsightColorsModal(): JSX.Element {
 
     const themes = _themes || []
 
-    const columns: LemonTableColumns<BreakdownColorConfig> = [
+    const columns: TableColumns<BreakdownColorConfig> = [
         {
             title: 'Breakdown',
             key: 'breakdown_value',
@@ -63,7 +63,7 @@ export function DashboardInsightColorsModal(): JSX.Element {
             width: 400,
             render: (_, { colorToken, ...config }) => {
                 return (
-                    <LemonColorPicker
+                    <ColorPicker
                         selectedColorToken={colorToken}
                         onSelectColorToken={(colorToken) => {
                             if (dashboardMode !== DashboardMode.Edit) {
@@ -76,7 +76,7 @@ export function DashboardInsightColorsModal(): JSX.Element {
                             })
                         }}
                         customButton={
-                            colorToken === null ? <LemonButton type="tertiary">Customize color</LemonButton> : undefined
+                            colorToken === null ? <Button type="tertiary">Customize color</Button> : undefined
                         }
                         themeId={dataColorThemeId}
                     />
@@ -86,11 +86,11 @@ export function DashboardInsightColorsModal(): JSX.Element {
     ]
 
     return (
-        <LemonModal title="Customize Breakdown Colors" isOpen={isOpen} onClose={hideInsightColorsModal}>
-            <LemonLabel info="Select a color theme for all insights on this dashboard. If a theme is selected, it will be applied to all series and breakdowns.">
+        <Modal title="Customize Breakdown Colors" isOpen={isOpen} onClose={hideInsightColorsModal}>
+            <Label info="Select a color theme for all insights on this dashboard. If a theme is selected, it will be applied to all series and breakdowns.">
                 Color theme
-            </LemonLabel>
-            <LemonSelect
+            </Label>
+            <Select
                 className="mt-2"
                 value={dataColorThemeId || null}
                 placeholder="Defined by insight"
@@ -105,7 +105,7 @@ export function DashboardInsightColorsModal(): JSX.Element {
                 options={themes.map((theme) => ({ value: theme.id, label: theme.name }))}
             />
 
-            <LemonLabel className="mt-4">Breakdown colors</LemonLabel>
+            <Label className="mt-4">Breakdown colors</Label>
             <p className="text-muted-alt mb-4">
                 Assign custom colors to breakdown values that will be used consistently across all insights on this
                 dashboard. <i>Note: This feature currently only works for trend and step-based funnel insights.</i>
@@ -116,7 +116,7 @@ export function DashboardInsightColorsModal(): JSX.Element {
                 </div>
             ) : (
                 <>
-                    <LemonTable
+                    <Table
                         columns={columns}
                         dataSource={breakdownValues.map((breakdownValue) => ({
                             ...breakdownValue,
@@ -131,6 +131,6 @@ export function DashboardInsightColorsModal(): JSX.Element {
                     />
                 </>
             )}
-        </LemonModal>
+        </Modal>
     )
 }

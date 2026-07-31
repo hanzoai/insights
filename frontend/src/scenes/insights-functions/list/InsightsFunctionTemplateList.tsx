@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconMegaphone, IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonTable, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Table, Link } from '@hanzo/elements'
 
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { isManagedSourceTemplate } from 'scenes/data-warehouse/utils'
 
@@ -33,7 +33,7 @@ export function InsightsFunctionTemplateList({
     return (
         <div className="flex flex-col gap-4">
             <div className="flex gap-2 items-center">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search..."
                     value={filters.search ?? ''}
@@ -48,7 +48,7 @@ export function InsightsFunctionTemplateList({
                 {extraControls}
             </div>
 
-            <LemonTable
+            <Table
                 dataSource={filteredTemplates}
                 size="small"
                 loading={loading}
@@ -80,7 +80,7 @@ export function InsightsFunctionTemplateList({
                                     AccessControlLevel.Editor
                                 )
                             return (
-                                <LemonTableLink
+                                <TableLink
                                     to={hasAccess ? (urlForTemplate(template) ?? undefined) : undefined}
                                     title={
                                         <>
@@ -106,7 +106,7 @@ export function InsightsFunctionTemplateList({
 
                             if (template.status === 'coming_soon') {
                                 return (
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         data-attr="request-destination"
                                         icon={<IconMegaphone />}
@@ -114,12 +114,12 @@ export function InsightsFunctionTemplateList({
                                         onClick={() => registerInterest(template)}
                                     >
                                         Notify me
-                                    </LemonButton>
+                                    </Button>
                                 )
                             }
 
                             const button = (
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     data-attr="new-destination"
                                     icon={<IconPlusSmall />}
@@ -128,7 +128,7 @@ export function InsightsFunctionTemplateList({
                                     disabledReason={dataWarehouseSourceAccessDisabledReason ?? undefined}
                                 >
                                     Create
-                                </LemonButton>
+                                </Button>
                             )
                             return button
                         },

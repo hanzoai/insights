@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonBanner, LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Banner, Button, Input } from '@hanzo/elements'
 
 import PasswordStrength from 'lib/components/PasswordStrength'
 import passkeyLogo from 'lib/components/SocialLoginButton/passkey.svg'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { IconKey } from 'lib/lemon-ui/icons'
+import { Field } from 'lib/elements/Field'
+import { IconKey } from 'lib/elements/icons'
 
 import { signupLogic } from '../signupLogic'
 
@@ -30,9 +30,9 @@ export function SignupPanelAuth(): JSX.Element | null {
             </div>
 
             {passkeyError && (
-                <LemonBanner type="error" className="mb-4">
+                <Banner type="error" className="mb-4">
                     {passkeyError}
-                </LemonBanner>
+                </Banner>
             )}
 
             {passkeySignupEnabled && (
@@ -46,7 +46,7 @@ export function SignupPanelAuth(): JSX.Element | null {
                             </p>
                         </div>
                     ) : (
-                        <LemonButton
+                        <Button
                             fullWidth
                             type="secondary"
                             center
@@ -58,7 +58,7 @@ export function SignupPanelAuth(): JSX.Element | null {
                             data-attr="signup-passkey"
                         >
                             Sign up with passkey
-                        </LemonButton>
+                        </Button>
                     )}
 
                     <div className="flex items-center gap-3 my-4">
@@ -70,7 +70,7 @@ export function SignupPanelAuth(): JSX.Element | null {
             )}
 
             <Form logic={signupLogic} formKey="signupPanelAuth" className="deprecated-space-y-4" enableFormOnSubmit>
-                <LemonField
+                <Field
                     name="password"
                     label={
                         <div className="flex flex-1 items-center justify-between">
@@ -82,7 +82,7 @@ export function SignupPanelAuth(): JSX.Element | null {
                         </div>
                     }
                 >
-                    <LemonInput
+                    <Input
                         type="password"
                         autoComplete="new-password"
                         className="ph-ignore-input"
@@ -90,8 +90,8 @@ export function SignupPanelAuth(): JSX.Element | null {
                         placeholder="••••••••••"
                         disabled={isSignupPanelAuthSubmitting || passkeyRegistered}
                     />
-                </LemonField>
-                <LemonButton
+                </Field>
+                <Button
                     fullWidth
                     type="primary"
                     status="alt"
@@ -103,7 +103,7 @@ export function SignupPanelAuth(): JSX.Element | null {
                     size="large"
                 >
                     Continue
-                </LemonButton>
+                </Button>
             </Form>
         </div>
     )

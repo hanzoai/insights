@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props, reducers } from 'kea'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
@@ -70,7 +70,7 @@ export const funnelCorrelationFeedbackLogic = kea<funnelCorrelationFeedbackLogic
             )
             actions.setCorrelationFeedbackRating(0)
             actions.setCorrelationDetailedFeedback('')
-            lemonToast.success('Thanks for your feedback! Your comments help us improve')
+            toast.success('Thanks for your feedback! Your comments help us improve')
         },
         setCorrelationFeedbackRating: ({ rating }) => {
             const feedbackBoxVisible = rating > 0

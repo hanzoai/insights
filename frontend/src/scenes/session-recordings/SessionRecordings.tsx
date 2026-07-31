@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconDocument, IconEllipsis, IconGear, IconHeadset, IconOpenSidebar } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonMenu, Link } from '@hanzo/lemon-ui'
+import { Badge, Button, Menu, Link } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
@@ -12,9 +12,9 @@ import { WarningMascot } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useAsyncHandler } from 'lib/hooks/useAsyncHandler'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Banner } from 'lib/elements/Banner'
+import { Tab, Tabs } from 'lib/elements/Tabs'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { cn } from 'lib/utils/css-classes'
@@ -58,7 +58,7 @@ function Header(): JSX.Element {
                 <>
                     <LiveRecordingsCount />
                     {!isRemovingSidePanelFlag && (
-                        <LemonMenu
+                        <Menu
                             items={[
                                 {
                                     label: 'Playback from Insights JSON file',
@@ -71,8 +71,8 @@ function Header(): JSX.Element {
                             ]}
                             placement="bottom-end"
                         >
-                            <LemonButton icon={<IconEllipsis />} size="small" />
-                        </LemonMenu>
+                            <Button icon={<IconEllipsis />} size="small" />
+                        </Menu>
                     )}
                     <ScenePanel>
                         <ScenePanelActionsSection>
@@ -109,7 +109,7 @@ function Header(): JSX.Element {
                         interaction="click"
                         scope={Scene.Replay}
                     >
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={(e) => newPlaylistHandler.onEvent?.(e)}
                             data-attr="save-recordings-playlist-button"
@@ -118,7 +118,7 @@ function Header(): JSX.Element {
                             tooltip="New collection"
                         >
                             New collection
-                        </LemonButton>
+                        </Button>
                     </AppShortcut>
                 </AccessControlAction>
             )}
@@ -133,7 +133,7 @@ function Warnings(): JSX.Element {
     return (
         <>
             {recordingsDisabled ? (
-                <LemonBanner type="info" hideIcon={true}>
+                <Banner type="info" hideIcon={true}>
                     <div className="flex gap-8 p-8 md:flex-row justify-center flex-wrap">
                         <div className="flex justify-center items-center w-full md:w-50">
                             <WarningMascot className="w-full h-auto md:h-[200px] md:w-[200px] max-w-50" />
@@ -166,15 +166,15 @@ function Warnings(): JSX.Element {
                                 your users.
                             </p>
                             <div className="flex items-center gap-x-4 gap-y-2 flex-wrap">
-                                <LemonButton
+                                <Button
                                     className="hidden @md:flex"
                                     type="primary"
                                     icon={<IconGear />}
                                     to={urls.replaySettings()}
                                 >
                                     Configure
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     type="tertiary"
                                     sideIcon={<IconOpenSidebar className="w-4 h-4" />}
                                     to="https://hanzo.ai/docs/session-replay?utm_medium=in-product&utm_campaign=empty-state-docs-link"
@@ -182,11 +182,11 @@ function Warnings(): JSX.Element {
                                     targetBlank
                                 >
                                     Learn more
-                                </LemonButton>
+                                </Button>
                             </div>
                         </div>
                     </div>
-                </LemonBanner>
+                </Banner>
             ) : null}
         </>
     )
@@ -258,18 +258,18 @@ export function SessionRecordingsPageTabs(): JSX.Element {
     const { tab, shouldShowNewBadge } = useValues(sessionReplaySceneLogic)
 
     return (
-        <LemonTabs
+        <Tabs
             activeKey={tab}
             onChange={(t) => router.actions.push(urls.replay(t as ReplayTabs))}
             sceneInset
             className="-mt-4"
-            tabs={ReplayPageTabs.map((replayTab): LemonTab<string> => {
+            tabs={ReplayPageTabs.map((replayTab): Tab<string> => {
                 return {
                     label: (
                         <>
                             {replayTab.label}
                             {replayTab.label === ReplayTabs.Templates && shouldShowNewBadge && (
-                                <LemonBadge className="ml-1" size="small" />
+                                <Badge className="ml-1" size="small" />
                             )}
                         </>
                     ),

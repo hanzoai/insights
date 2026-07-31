@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonTable, LemonTableColumns, LemonTag, LemonTagType } from '@hanzo/lemon-ui'
+import { Button, Table, TableColumns, Tag, TagType } from '@hanzo/elements'
 
 import { sourceWizardLogic } from 'scenes/data-warehouse/new/sourceWizardLogic'
 import { dataWarehouseSettingsLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsLogic'
@@ -17,7 +17,7 @@ export const SyncProgressStep = (): JSX.Element => {
     const source = dataWarehouseSources?.results.find((n) => n.id === sourceId)
     const schemas = source?.schemas ?? []
 
-    const getSyncStatus = (schema: ExternalDataSourceSchema): { status: string; tagType: LemonTagType } => {
+    const getSyncStatus = (schema: ExternalDataSourceSchema): { status: string; tagType: TagType } => {
         if (!schema.should_sync) {
             return {
                 status: 'Not synced',
@@ -45,7 +45,7 @@ export const SyncProgressStep = (): JSX.Element => {
         }
     }
 
-    const columns: LemonTableColumns<ExternalDataSourceSchema> = [
+    const columns: TableColumns<ExternalDataSourceSchema> = [
         {
             title: 'Table',
             key: 'table',
@@ -59,7 +59,7 @@ export const SyncProgressStep = (): JSX.Element => {
             render: function RenderStatus(_, schema) {
                 const { status, tagType } = getSyncStatus(schema)
 
-                return <LemonTag type={tagType}>{status}</LemonTag>
+                return <Tag type={tagType}>{status}</Tag>
             },
         },
     ]
@@ -72,14 +72,14 @@ export const SyncProgressStep = (): JSX.Element => {
                 if (schema.table && schema.status === 'Completed') {
                     const query = defaultQuery(schema.table.name, schema.table.columns)
                     return (
-                        <LemonButton
+                        <Button
                             className="my-1"
                             type="primary"
                             onClick={cancelWizard}
                             to={urls.sqlEditor({ query: query.source.query })}
                         >
                             Query
-                        </LemonButton>
+                        </Button>
                     )
                 }
 
@@ -90,7 +90,7 @@ export const SyncProgressStep = (): JSX.Element => {
 
     return (
         <SceneSection title="You're all set! We'll import the data in the background, and after it's done, you will be able to query it in Insights.">
-            <LemonTable
+            <Table
                 emptyState="No schemas selected"
                 dataSource={schemas}
                 loading={dataWarehouseSourcesLoading}

@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, LemonInput, LemonTable, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Input, Table, Tag } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
 import { urls } from 'scenes/urls'
@@ -54,7 +54,7 @@ export function EarlyAccessFeatures(): JSX.Element {
                         interaction="click"
                         scope={Scene.EarlyAccessFeatures}
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             type="primary"
                             to={urls.earlyAccessFeature('new')}
@@ -62,7 +62,7 @@ export function EarlyAccessFeatures(): JSX.Element {
                             data-attr="create-feature"
                         >
                             New feature
-                        </LemonButton>
+                        </Button>
                     </AppShortcut>
                 }
             />
@@ -80,7 +80,7 @@ export function EarlyAccessFeatures(): JSX.Element {
             {!shouldShowEmptyState && (
                 <>
                     <div className="mb-4">
-                        <LemonInput
+                        <Input
                             type="search"
                             placeholder="Search early access features..."
                             value={searchTerm}
@@ -88,7 +88,7 @@ export function EarlyAccessFeatures(): JSX.Element {
                             allowClear
                         />
                     </div>
-                    <LemonTable
+                    <Table
                         loading={earlyAccessFeaturesLoading}
                         columns={[
                             {
@@ -96,7 +96,7 @@ export function EarlyAccessFeatures(): JSX.Element {
                                 key: 'name',
                                 render(_, feature) {
                                     return (
-                                        <LemonTableLink
+                                        <TableLink
                                             title={feature.name}
                                             description={feature.description}
                                             to={urls.earlyAccessFeature(feature.id)}
@@ -110,7 +110,7 @@ export function EarlyAccessFeatures(): JSX.Element {
                                 dataIndex: 'stage',
                                 render(_, { stage }) {
                                     return (
-                                        <LemonTag
+                                        <Tag
                                             type={
                                                 stage === 'beta'
                                                     ? 'warning'
@@ -122,7 +122,7 @@ export function EarlyAccessFeatures(): JSX.Element {
                                             data-attr="feature-stage"
                                         >
                                             {stage}
-                                        </LemonTag>
+                                        </Tag>
                                     )
                                 },
                                 sorter: (a, b) => STAGES_IN_ORDER[a.stage] - STAGES_IN_ORDER[b.stage],

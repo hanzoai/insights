@@ -6,21 +6,21 @@ import { ReactNode, useRef, useState } from 'react'
 
 import { IconMagicWand, IconSidebarClose } from '@hanzo/icons'
 import {
-    LemonBadge,
-    LemonBanner,
-    LemonButton,
-    LemonCollapse,
-    LemonSkeleton,
-    LemonTag,
+    Badge,
+    Banner,
+    Button,
+    Collapse,
+    Skeleton,
+    Tag,
     Link,
     Spinner,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
-import { LemonTableLoader } from 'lib/lemon-ui/LemonTable/LemonTableLoader'
+import { TableLoader } from 'lib/elements/Table/TableLoader'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { range } from 'lib/utils'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
@@ -137,7 +137,7 @@ export function Playlist({
             title: (
                 <div className="flex flex-row deprecated-space-x-1 items-center">
                     <span>Pinned recordings</span>
-                    <LemonBadge.Number count={pinnedRecordings.length} status="muted" size="small" />
+                    <Badge.Number count={pinnedRecordings.length} status="muted" size="small" />
                 </div>
             ),
             items: pinnedRecordings,
@@ -150,7 +150,7 @@ export function Playlist({
             title: (
                 <div className="flex flex-row deprecated-space-x-1 items-center">
                     <span>Results</span>
-                    <LemonBadge.Number count={otherRecordings.length} status="muted" size="small" />
+                    <Badge.Number count={otherRecordings.length} status="muted" size="small" />
                 </div>
             ),
             items: otherRecordings,
@@ -164,7 +164,7 @@ export function Playlist({
                                 <Spinner textColored /> Loading older recordings
                             </>
                         ) : hasNext ? (
-                            <LemonButton onClick={() => maybeLoadSessionRecordings('older')}>Load more</LemonButton>
+                            <Button onClick={() => maybeLoadSessionRecordings('older')}>Load more</Button>
                         ) : (
                             'No more results'
                         )}
@@ -215,7 +215,7 @@ export function Playlist({
                 onClick={() => setPlaylistCollapsed(false)}
                 data-attr="expand-playlist"
             >
-                <LemonButton
+                <Button
                     icon={<IconSidebarClose className={clsx(!isPlaylistCollapsed && 'rotate-180')} />}
                     tooltip="Expand playlist"
                     size="xsmall"
@@ -261,7 +261,7 @@ export function Playlist({
                                 <div className="shrink-0 bg-bg-3000 relative flex justify-between items-center gap-0.5 whitespace-nowrap border-b">
                                     {title && <TitleWithCount title={title} count={itemsCount} />}
                                     <div className="flex items-center gap-0.5">
-                                        <LemonButton
+                                        <Button
                                             icon={
                                                 <IconSidebarClose
                                                     className={clsx(!isPlaylistCollapsed && 'rotate-180')}
@@ -280,12 +280,12 @@ export function Playlist({
                                         />
                                     </div>
                                 </div>
-                                <LemonTableLoader loading={sessionRecordingsResponseLoading} />
+                                <TableLoader loading={sessionRecordingsResponseLoading} />
                             </div>
                         </DraggableToNotebook>
                         <div className="overflow-y-auto flex-1 min-h-0" onScroll={handleScroll} ref={contentRef}>
                             {sectionCount > 1 ? (
-                                <LemonCollapse
+                                <Collapse
                                     defaultActiveKeys={openSections}
                                     panels={sections.map((s) => {
                                         return {
@@ -324,7 +324,7 @@ export function Playlist({
                         </div>
                     </div>
                     {featureFlags[FEATURE_FLAGS.MAX_SESSION_SUMMARIZATION_BUTTON] && (
-                        <LemonButton
+                        <Button
                             icon={<IconMagicWand />}
                             type="primary"
                             onClick={() => {
@@ -336,10 +336,10 @@ export function Playlist({
                             disabledReason={!firstItem ? 'No recordings in the list' : undefined}
                         >
                             Summarize these recordings
-                            <LemonTag type="warning" size="small" className="ml-auto uppercase">
+                            <Tag type="warning" size="small" className="ml-auto uppercase">
                                 Beta
-                            </LemonTag>
-                        </LemonButton>
+                            </Tag>
+                        </Button>
                     )}
                 </div>
             </div>
@@ -380,7 +380,7 @@ const ListEmptyState = (): JSX.Element => {
     return (
         <div className="p-3 text-sm text-secondary">
             {sessionRecordingsAPIErrored ? (
-                <LemonBanner type="error">Error while trying to load recordings.</LemonBanner>
+                <Banner type="error">Error while trying to load recordings.</Banner>
             ) : unusableEventsInFilter.length ? (
                 <UnusableEventsWarning unusableEventsInFilter={unusableEventsInFilter} />
             ) : (
@@ -404,7 +404,7 @@ const CollectionEmptyState = ({
     return (
         <div className="p-3 text-sm text-secondary">
             {sessionRecordingsAPIErrored ? (
-                <LemonBanner type="error">Error while trying to load recordings.</LemonBanner>
+                <Banner type="error">Error while trying to load recordings.</Banner>
             ) : unusableEventsInFilter.length ? (
                 <UnusableEventsWarning unusableEventsInFilter={unusableEventsInFilter} />
             ) : isSynthetic ? (
@@ -479,8 +479,8 @@ const LoadingState = (): JSX.Element => {
         <>
             {range(5).map((i) => (
                 <div key={i} className="p-4 deprecated-space-y-2">
-                    <LemonSkeleton className="w-1/2 h-4" />
-                    <LemonSkeleton className="w-1/3 h-4" />
+                    <Skeleton className="w-1/2 h-4" />
+                    <Skeleton className="w-1/3 h-4" />
                 </div>
             ))}
         </>
@@ -492,7 +492,7 @@ const LoadingState = (): JSX.Element => {
  */
 const UnusableEventsWarning = (props: { unusableEventsInFilter: string[] }): JSX.Element => {
     return (
-        <LemonBanner type="warning">
+        <Banner type="warning">
             <p>Cannot use these events to filter for session recordings:</p>
             <li className="my-1">
                 {props.unusableEventsInFilter.map((event) => (
@@ -510,6 +510,6 @@ const UnusableEventsWarning = (props: { unusableEventsInFilter: string[] }): JSX
                     and the Mobile SDKs (Android, iOS, React Native and Flutter)
                 </Link>
             </p>
-        </LemonBanner>
+        </Banner>
     )
 }

@@ -3,14 +3,14 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
 import { IconBrackets, IconEllipsis, IconPencil, IconSidePanel, IconSparkles, IconWrench, IconX } from '@hanzo/icons'
-import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tooltip } from '@hanzo/elements'
 
 import { RenderKeybind } from 'lib/components/AppShortcuts/AppShortcutMenu'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { ProductSetupButton } from 'lib/components/ProductSetup'
 import { AI_AVAILABLE } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 import { ButtonPrimitive, buttonPrimitiveVariants } from 'lib/ui/Button/ButtonPrimitives'
 import { TextareaPrimitive } from 'lib/ui/TextareaPrimitive/TextareaPrimitive'
 import { WrappingLoadingSkeleton } from 'lib/ui/WrappingLoadingSkeleton/WrappingLoadingSkeleton'
@@ -100,7 +100,7 @@ export function SceneTitlePanelButton({
                     </ButtonPrimitive>
                 )}
 
-                {/* Size to mimic lemon button small */}
+                {/* Size to mimic button small */}
                 <ButtonPrimitive
                     className={cn(buttonClassName, 'group -mr-[2px]')}
                     onClick={(e) => {
@@ -131,7 +131,7 @@ export function SceneTitlePanelButton({
     }
 
     return (
-        <LemonButton
+        <Button
             className={cn(!inPanel && '-mr-2')}
             onClick={() => setScenePanelOpen(!scenePanelOpenManual)}
             icon={inPanel ? <IconX className="text-primary p-0.5" /> : <IconEllipsis className="text-primary" />}
@@ -482,7 +482,7 @@ function SceneName({
                                     className: `${textClasses} w-full hover:bg-fill-input py-0`,
                                     autoHeight: true,
                                 }),
-                                '[&_.LemonIcon]:size-4 input-like'
+                                '[&_.Icon]:size-4 input-like'
                             )}
                             wrapperClassName="flex-1 min-w-0"
                             placeholder="Enter name"
@@ -523,7 +523,7 @@ function SceneName({
                         <ButtonPrimitive
                             className={cn(
                                 buttonPrimitiveVariants({ size: 'fit', className: textClasses }),
-                                'flex text-left [&_.LemonIcon]:size-4 pl-[var(--button-padding-x-sm)] focus-visible:z-50'
+                                'flex text-left [&_.Icon]:size-4 pl-[var(--button-padding-x-sm)] focus-visible:z-50'
                             )}
                             onClick={() => setIsEditing(true)}
                             fullWidth
@@ -637,7 +637,7 @@ function SceneDescription({
                                 className: `${textClasses} w-full hover:bg-fill-input px-[var(--button-padding-x-sm)]`,
                                 autoHeight: true,
                             }),
-                            '[&_.LemonIcon]:size-4 input-like'
+                            '[&_.Icon]:size-4 input-like'
                         )}
                         wrapperClassName="w-full"
                         markdown={markdown}
@@ -653,14 +653,14 @@ function SceneDescription({
                     >
                         <ButtonPrimitive
                             onClick={() => setIsEditing(true)}
-                            className="flex text-start px-[var(--button-padding-x-sm)] py-[var(--button-padding-y-base)] [&_.LemonIcon]:size-4 focus-visible:z-50"
+                            className="flex text-start px-[var(--button-padding-x-sm)] py-[var(--button-padding-y-base)] [&_.Icon]:size-4 focus-visible:z-50"
                             autoHeight
                             fullWidth
                             size="base"
                         >
-                            <LemonMarkdown lowKeyHeadings>
+                            <Markdown lowKeyHeadings>
                                 {description || (canEdit ? 'Enter description (optional)' : 'No description')}
-                            </LemonMarkdown>
+                            </Markdown>
                             {canEdit && !forceEdit && <IconPencil />}
                         </ButtonPrimitive>
                     </Tooltip>
@@ -669,7 +669,7 @@ function SceneDescription({
         ) : (
             <>
                 {markdown && description !== null && description !== undefined ? (
-                    <LemonMarkdown
+                    <Markdown
                         lowKeyHeadings
                         className={buttonPrimitiveVariants({
                             inert: true,
@@ -678,7 +678,7 @@ function SceneDescription({
                         })}
                     >
                         {description}
-                    </LemonMarkdown>
+                    </Markdown>
                 ) : (
                     <p
                         className={buttonPrimitiveVariants({

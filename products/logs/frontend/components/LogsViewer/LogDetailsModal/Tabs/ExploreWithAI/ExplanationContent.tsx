@@ -1,6 +1,6 @@
-import { LemonCollapse } from '@hanzo/lemon-ui'
+import { Collapse } from '@hanzo/elements'
 
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 
 import { ImmediateActionsSection } from './ImmediateActionsSection'
 import { KeyFieldsSection } from './KeyFieldsSection'
@@ -59,12 +59,12 @@ export function ExplanationContent({ explanation, onApplyFilter }: ExplanationCo
             {/* Technical Explanation */}
             {technical_explanation && (
                 <div className="bg-bg-light rounded p-3 text-sm">
-                    <LemonMarkdown>{technical_explanation}</LemonMarkdown>
+                    <Markdown>{technical_explanation}</Markdown>
                 </div>
             )}
 
             {/* Collapsible Sections */}
-            <LemonCollapse
+            <Collapse
                 panels={collapsePanels}
                 multiple
                 defaultActiveKeys={isCriticalOrError ? ['causes', 'actions', 'fields'] : ['actions']}

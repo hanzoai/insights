@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { LemonCollapse, LemonTable, LemonTableColumns, LemonTabs } from '@hanzo/lemon-ui'
+import { Collapse, Table, TableColumns, Tabs } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
@@ -112,13 +112,13 @@ function SqlCollapsible({
     const [activeTab, setActiveTab] = useState<'insightsql' | 'datastore'>('insightsql')
 
     return (
-        <LemonCollapse
+        <Collapse
             panels={[
                 {
                     key: 'sql',
                     header: 'SQL',
                     content: showDatastoreSql ? (
-                        <LemonTabs
+                        <Tabs
                             activeKey={activeTab}
                             onChange={setActiveTab}
                             tabs={[
@@ -170,7 +170,7 @@ export function ResultDetails({
 }): JSX.Element {
     const { featureFlags } = useValues(experimentLogic)
 
-    const columns: LemonTableColumns<ExperimentVariantResult & { key: string }> = [
+    const columns: TableColumns<ExperimentVariantResult & { key: string }> = [
         {
             key: 'variant',
             title: 'Variant',
@@ -290,7 +290,7 @@ export function ResultDetails({
 
     return (
         <div className="space-y-4">
-            <LemonTable columns={columns} dataSource={dataSource} loading={false} />
+            <Table columns={columns} dataSource={dataSource} loading={false} />
             {isExperimentFunnelMetric(metric) && (
                 <FunnelChart
                     steps={convertExperimentResultToFunnelSteps(result, metric)}

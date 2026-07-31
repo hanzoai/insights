@@ -4,8 +4,8 @@ import { loaders } from 'kea-loaders'
 import { combineUrl, router } from 'kea-router'
 
 import api, { CountedPaginatedResponse } from '~/lib/api'
-import { lemonToast } from '~/lib/lemon-ui/LemonToast/LemonToast'
-import { PaginationManual } from '~/lib/lemon-ui/PaginationControl'
+import { toast } from '~/lib/elements/Toast/Toast'
+import { PaginationManual } from '~/lib/elements/PaginationControl'
 import { tabAwareActionToUrl } from '~/lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareUrlToAction } from '~/lib/logic/scenes/tabAwareUrlToAction'
 import { objectsEqual } from '~/lib/utils'
@@ -205,7 +205,7 @@ export const llmAnalyticsDatasetLogic = kea<llmAnalyticsDatasetLogicType>([
                         })
                         llmAnalyticsDatasetsLogic.findMounted()?.actions.loadDatasets(false)
 
-                        lemonToast.success('Dataset created successfully')
+                        toast.success('Dataset created successfully')
                         router.actions.replace(urls.llmAnalyticsDataset(savedDataset.id))
 
                         void actions.addProductIntent({
@@ -217,14 +217,14 @@ export const llmAnalyticsDatasetLogic = kea<llmAnalyticsDatasetLogicType>([
                             ...formValues,
                             metadata: coerceJsonToObject(formValues.metadata),
                         })
-                        lemonToast.success('Dataset updated successfully')
+                        toast.success('Dataset updated successfully')
                     }
                     actions.setDataset(savedDataset)
                     actions.editDataset(false)
                     actions.setDatasetFormValues(getDatasetFormDefaults(savedDataset))
                 } catch (error: any) {
                     const message = error?.detail || 'Failed to save dataset'
-                    lemonToast.error(message)
+                    toast.error(message)
                     throw error
                 }
             },
@@ -287,7 +287,7 @@ export const llmAnalyticsDatasetLogic = kea<llmAnalyticsDatasetLogicType>([
             if (props.datasetId !== 'new') {
                 try {
                     await api.datasets.update(props.datasetId, { deleted: true })
-                    lemonToast.info(`${values.dataset?.name || 'Dataset'} has been deleted.`, {
+                    toast.info(`${values.dataset?.name || 'Dataset'} has been deleted.`, {
                         button: {
                             label: 'Undo',
                             dataAttr: 'undo-delete-dataset',
@@ -298,7 +298,7 @@ export const llmAnalyticsDatasetLogic = kea<llmAnalyticsDatasetLogicType>([
                     })
                     router.actions.replace(urls.llmAnalyticsDatasets(), router.values.searchParams)
                 } catch {
-                    lemonToast.error('Failed to delete dataset')
+                    toast.error('Failed to delete dataset')
                 }
                 actions.setDeletingDataset(false)
             }
@@ -323,7 +323,7 @@ export const llmAnalyticsDatasetLogic = kea<llmAnalyticsDatasetLogicType>([
             if (props.datasetId !== 'new') {
                 try {
                     await api.datasetItems.update(itemId, { deleted: true })
-                    lemonToast.info(`Dataset item ${truncateValue(itemId)} has been deleted.`, {
+                    toast.info(`Dataset item ${truncateValue(itemId)} has been deleted.`, {
                         button: {
                             label: 'Undo',
                             dataAttr: 'undo-delete-dataset-item',
@@ -335,7 +335,7 @@ export const llmAnalyticsDatasetLogic = kea<llmAnalyticsDatasetLogicType>([
                     })
                     await asyncActions.loadDatasetItems(false)
                 } catch {
-                    lemonToast.error('Failed to delete dataset item')
+                    toast.error('Failed to delete dataset item')
                 }
             }
         },

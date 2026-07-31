@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tabs } from 'lib/elements/Tabs'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { cn } from 'lib/utils/css-classes'
 import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
@@ -104,7 +104,7 @@ function NewSurveyButton(): JSX.Element {
                     interaction="click"
                     scope={Scene.Surveys}
                 >
-                    <LemonButton
+                    <Button
                         size="small"
                         to={guidedEditorEnabled ? urls.surveyWizard() : urls.surveyTemplates()}
                         type="primary"
@@ -113,7 +113,7 @@ function NewSurveyButton(): JSX.Element {
                         onClick={trackAddNewClick}
                     >
                         <span className={cn('pr-3', isRemovingSidePanelFlag && 'pr-0')}>New survey</span>
-                    </LemonButton>
+                    </Button>
                 </AppShortcut>
             </AccessControlAction>
         </MaxTool>
@@ -182,7 +182,7 @@ function Surveys(): JSX.Element {
                 }
             />
             <SurveysDisabledBanner />
-            <LemonTabs
+            <Tabs
                 activeKey={tab}
                 onChange={(newTab) => setTab(newTab as SurveysTabs)}
                 tabs={[

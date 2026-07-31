@@ -1,7 +1,7 @@
 import { IconLetter } from '@hanzo/icons'
-import { LemonSelectOptions } from '@hanzo/lemon-ui'
+import { SelectOptions } from '@hanzo/elements'
 
-import { IconSlack } from 'lib/lemon-ui/icons'
+import { IconSlack } from 'lib/elements/icons'
 import { range } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -33,26 +33,26 @@ export const urlForSubscription = (
     return ''
 }
 
-export const targetTypeOptions: LemonSelectOptions<'email' | 'slack'> = [
+export const targetTypeOptions: SelectOptions<'email' | 'slack'> = [
     { value: 'email', label: 'Email', icon: <IconLetter /> },
     { value: 'slack', label: 'Slack', icon: <IconSlack /> },
     // { value: 'webhook', label: 'Webhook', icon: <IconOpenInNew /> },
 ]
 
-export const intervalOptions: LemonSelectOptions<number> = range(1, 13).map((x) => ({ value: x, label: x.toString() }))
+export const intervalOptions: SelectOptions<number> = range(1, 13).map((x) => ({ value: x, label: x.toString() }))
 
-export const frequencyOptionsSingular: LemonSelectOptions<'daily' | 'weekly' | 'monthly'> = [
+export const frequencyOptionsSingular: SelectOptions<'daily' | 'weekly' | 'monthly'> = [
     { value: 'daily', label: 'day' },
     { value: 'weekly', label: 'week' },
     { value: 'monthly', label: 'month' },
 ]
-export const frequencyOptionsPlural: LemonSelectOptions<'daily' | 'weekly' | 'monthly'> = [
+export const frequencyOptionsPlural: SelectOptions<'daily' | 'weekly' | 'monthly'> = [
     { value: 'daily', label: 'days' },
     { value: 'weekly', label: 'weeks' },
     { value: 'monthly', label: 'months' },
 ]
 
-export const weekdayOptions: LemonSelectOptions<
+export const weekdayOptions: SelectOptions<
     'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
 > = [
     { value: 'monday', label: 'Monday' },
@@ -64,11 +64,11 @@ export const weekdayOptions: LemonSelectOptions<
     { value: 'sunday', label: 'Sunday' },
 ]
 
-export const monthlyWeekdayOptions: LemonSelectOptions<
+export const monthlyWeekdayOptions: SelectOptions<
     'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday' | 'day'
 > = [...weekdayOptions, { value: 'day', label: 'day' }]
 
-export const bysetposOptions: LemonSelectOptions<'1' | '2' | '3' | '4' | '-1'> = [
+export const bysetposOptions: SelectOptions<'1' | '2' | '3' | '4' | '-1'> = [
     { value: '1', label: 'first' },
     { value: '2', label: 'second' },
     { value: '3', label: 'third' },
@@ -76,7 +76,7 @@ export const bysetposOptions: LemonSelectOptions<'1' | '2' | '3' | '4' | '-1'> =
     { value: '-1', label: 'last' },
 ]
 
-export const timeOptions: LemonSelectOptions<string> = range(0, 24).map((x) => ({
+export const timeOptions: SelectOptions<string> = range(0, 24).map((x) => ({
     value: String(x),
     label: `${String(x).padStart(2, '0')}:00`,
 }))

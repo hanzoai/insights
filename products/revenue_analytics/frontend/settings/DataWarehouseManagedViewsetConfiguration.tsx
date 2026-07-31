@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, lemonToast } from '@hanzo/lemon-ui'
+import { Banner, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { DataWarehouseManagedViewsetCard } from 'scenes/data-management/managed-viewsets/DataWarehouseManagedViewsetCard'
@@ -20,11 +20,11 @@ export function DataWarehouseManagedViewsetConfiguration(): JSX.Element {
     const onConfirmDisable = async (): Promise<boolean> => {
         try {
             await api.dataWarehouseManagedViewsets.toggle('revenue_analytics', false)
-            lemonToast.success('Revenue analytics disabled successfully')
+            toast.success('Revenue analytics disabled successfully')
             loadCurrentTeam()
             return true
         } catch (error: any) {
-            lemonToast.error(`Failed to disable revenue analytics: ${error.message || 'Unknown error'}`)
+            toast.error(`Failed to disable revenue analytics: ${error.message || 'Unknown error'}`)
             return false
         }
     }
@@ -32,14 +32,14 @@ export function DataWarehouseManagedViewsetConfiguration(): JSX.Element {
     return (
         <>
             {!isEnabled && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     <div className="flex items-center gap-2">
                         <span>
                             <strong>Revenue analytics is currently disabled.</strong> Enable it below to start
                             configuring revenue sources and events.
                         </span>
                     </div>
-                </LemonBanner>
+                </Banner>
             )}
 
             <DataWarehouseManagedViewsetCard

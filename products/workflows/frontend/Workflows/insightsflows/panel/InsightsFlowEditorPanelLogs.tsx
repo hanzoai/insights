@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { IconOpenInApp } from 'lib/lemon-ui/icons'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { LogsViewer } from 'scenes/insights-functions/logs/LogsViewer'
 import { urls } from 'scenes/urls'
 
@@ -19,11 +19,11 @@ export function InsightsFlowEditorPanelLogs(): JSX.Element | null {
     return (
         <>
             <div className="border-b">
-                <LemonButton to={urls.workflow(workflow.id, 'logs')} size="xsmall" sideIcon={<IconOpenInApp />}>
+                <Button to={urls.workflow(workflow.id, 'logs')} size="xsmall" sideIcon={<IconOpenInApp />}>
                     {shouldShowActionLevelLogs
                         ? 'Click here to open in full log viewer'
                         : 'Click here to open batch workflow invocations tab'}
-                </LemonButton>
+                </Button>
             </div>
             {shouldShowActionLevelLogs && (
                 <div className="p-2 flex flex-col gap-2 overflow-y-auto">

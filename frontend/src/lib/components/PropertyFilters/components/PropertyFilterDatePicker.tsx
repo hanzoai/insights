@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { LemonCalendarSelectInput } from '@hanzo/lemon-ui'
+import { CalendarSelectInput } from '@hanzo/elements'
 
 import { PropertyValueProps } from 'lib/components/PropertyFilters/components/PropertyValue'
 import { dayjs } from 'lib/dayjs'
@@ -43,7 +43,7 @@ export function PropertyFilterDatePicker({
     }, [includeTimeInFilter])
 
     return (
-        <LemonCalendarSelectInput
+        <CalendarSelectInput
             value={datePickerValue}
             format={dateFormat}
             visible={datePickerOpen}

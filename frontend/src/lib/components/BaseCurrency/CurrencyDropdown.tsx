@@ -1,4 +1,4 @@
-import { LemonSelect, LemonSelectProps } from '@hanzo/lemon-ui'
+import { Select, SelectProps } from '@hanzo/elements'
 
 import { CurrencyCode } from '~/queries/schema/schema-general'
 
@@ -7,7 +7,7 @@ import { OPTIONS_FOR_IMPORTANT_CURRENCIES, OPTIONS_FOR_OTHER_CURRENCIES } from '
 type CurrencyDropdownProps = {
     value: CurrencyCode | null
     onChange: (currency: CurrencyCode) => void
-    size?: LemonSelectProps<any>['size']
+    size?: SelectProps<any>['size']
     visible?: boolean // Useful for stories to display the dropdown content
     disabledReason?: string
 }
@@ -20,7 +20,7 @@ export const CurrencyDropdown = ({
     disabledReason,
 }: CurrencyDropdownProps): JSX.Element => {
     return (
-        <LemonSelect
+        <Select
             visible={visible}
             value={value}
             onChange={(newValue) => onChange(newValue as CurrencyCode)}

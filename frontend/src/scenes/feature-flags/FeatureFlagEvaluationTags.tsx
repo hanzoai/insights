@@ -3,9 +3,9 @@ import { useActions, useValues } from 'kea'
 
 import { IconBolt, IconCheck, IconPencil, IconPlus, IconX } from '@hanzo/icons'
 
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { InputSelect } from 'lib/elements/InputSelect'
+import { Tag } from 'lib/elements/Tag'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { colorForString } from 'lib/utils'
 
@@ -90,7 +90,7 @@ export function FeatureFlagEvaluationTags({
     if (isEditing) {
         return (
             <div className={clsx(className, 'flex flex-col gap-2')}>
-                <LemonInputSelect
+                <InputSelect
                     mode="multiple"
                     allowCustomValues
                     value={localTags}
@@ -126,7 +126,7 @@ export function FeatureFlagEvaluationTags({
                                                 : 'Click to mark as evaluation context'
                                         }
                                     >
-                                        <LemonTag
+                                        <Tag
                                             type={isEvaluationTag ? 'success' : colorForString(tag)}
                                             icon={
                                                 <IconBolt
@@ -140,7 +140,7 @@ export function FeatureFlagEvaluationTags({
                                             className="cursor-pointer"
                                         >
                                             {tag}
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )
                             })}
@@ -182,18 +182,18 @@ export function FeatureFlagEvaluationTags({
                     const isEvaluationTag = evaluationTags.includes(tag)
                     return (
                         <Tooltip key={tag} title={isEvaluationTag ? 'Evaluation context' : undefined}>
-                            <LemonTag
+                            <Tag
                                 type={isEvaluationTag ? 'success' : colorForString(tag)}
                                 icon={isEvaluationTag ? <IconBolt /> : undefined}
                             >
                                 {tag}
-                            </LemonTag>
+                            </Tag>
                         </Tooltip>
                     )
                 })}
 
             {!staticOnly && (
-                <LemonTag
+                <Tag
                     type="none"
                     onClick={() => setIsEditing(true)}
                     data-attr="button-edit-tags"
@@ -202,7 +202,7 @@ export function FeatureFlagEvaluationTags({
                     size="medium"
                 >
                     {tags.length > 0 ? 'Edit' : 'Add tags'}
-                </LemonTag>
+                </Tag>
             )}
         </div>
     )

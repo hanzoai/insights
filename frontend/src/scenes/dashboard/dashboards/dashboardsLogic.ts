@@ -2,7 +2,7 @@ import Fuse from 'fuse.js'
 import { actions, connect, kea, path, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
-import { Sorting } from 'lib/lemon-ui/LemonTable/sorting'
+import { Sorting } from 'lib/elements/Table/sorting'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareScene } from 'lib/logic/scenes/tabAwareScene'

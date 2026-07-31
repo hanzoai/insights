@@ -2,7 +2,7 @@ import { BaseEdge, Edge, EdgeLabelRenderer, EdgeProps, useEdges } from '@xyflow/
 import { useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
 import { InsightsFlowEdge } from '../types'
@@ -154,7 +154,7 @@ export function getSmartStepPath({
 
 function EdgeLabel({ transform, label }: { transform: string; label: string }): JSX.Element {
     return (
-        <LemonTag
+        <Tag
             style={{
                 transform,
             }}
@@ -163,7 +163,7 @@ function EdgeLabel({ transform, label }: { transform: string; label: string }): 
             type="muted"
         >
             {label}
-        </LemonTag>
+        </Tag>
     )
 }
 

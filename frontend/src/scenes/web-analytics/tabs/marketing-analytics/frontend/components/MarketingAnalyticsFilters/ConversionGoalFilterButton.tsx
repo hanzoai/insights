@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconBookmark, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { marketingAnalyticsLogic } from '../../logic/marketingAnalyticsLogic'
 
@@ -11,9 +11,9 @@ export function ConversionGoalFilterButton(): JSX.Element {
 
     if (!draftConversionGoal) {
         return (
-            <LemonButton type="secondary" size="small" icon={<IconPlus />} onClick={showConversionGoalModal}>
+            <Button type="secondary" size="small" icon={<IconPlus />} onClick={showConversionGoalModal}>
                 Explore a conversion goal
-            </LemonButton>
+            </Button>
         )
     }
 
@@ -26,14 +26,14 @@ export function ConversionGoalFilterButton(): JSX.Element {
                 {draftConversionGoal.conversion_goal_name}
                 <IconPencil className="w-3 h-3" />
             </span>
-            <LemonButton
+            <Button
                 icon={<IconBookmark />}
                 size="xsmall"
                 onClick={saveConversionGoal}
                 tooltip="Save conversion goal"
                 type="tertiary"
             />
-            <LemonButton
+            <Button
                 icon={<IconTrash />}
                 size="xsmall"
                 onClick={clearConversionGoal}

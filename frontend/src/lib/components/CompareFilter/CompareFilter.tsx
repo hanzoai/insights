@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { IconClock } from '@hanzo/icons'
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { RollingDateRangeFilter } from 'lib/components/DateFilter/RollingDateRangeFilter'
 import { useWindowSize } from 'lib/hooks/useWindowSize'
@@ -72,7 +72,7 @@ export function CompareFilter({
     }
 
     return (
-        <LemonSelect
+        <Select
             icon={<IconClock />}
             onSelect={(newValue) => {
                 if (newValue === 'compareTo') {

@@ -3,9 +3,9 @@ import './BreakdownTagMenu.scss'
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonInput, LemonLabel, LemonSwitch } from '@hanzo/lemon-ui'
+import { Input, Label, Switch } from '@hanzo/elements'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
@@ -21,7 +21,7 @@ export const GlobalBreakdownOptionsMenu = (): JSX.Element => {
     return (
         <>
             {isTrends && (
-                <LemonSwitch
+                <Switch
                     fullWidth
                     className="min-h-10 px-2"
                     checked={!breakdownHideOtherAggregation}
@@ -45,10 +45,10 @@ export const GlobalBreakdownOptionsMenu = (): JSX.Element => {
                 />
             )}
             <div className="px-2 flex gap-2 items-baseline">
-                <LemonLabel className="font-medium" htmlFor="breakdown-limit">
+                <Label className="font-medium" htmlFor="breakdown-limit">
                     Breakdown limit
-                </LemonLabel>
-                <LemonInput
+                </Label>
+                <Input
                     id="breakdown-limit"
                     min={1}
                     max={1000}

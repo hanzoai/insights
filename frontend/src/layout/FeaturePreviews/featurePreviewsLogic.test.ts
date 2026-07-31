@@ -3,7 +3,7 @@ import { MOCK_DEFAULT_USER } from 'lib/api.mock'
 import { expectLogic } from 'kea-test-utils'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { userLogic } from 'scenes/userLogic'
 
 import { useMocks } from '~/mocks/jest'
@@ -13,8 +13,8 @@ import { featurePreviewsLogic } from './featurePreviewsLogic'
 
 // Mock insights-js
 jest.mock('@hanzo/insights')
-// Mock lemonToast
-jest.mock('lib/lemon-ui/LemonToast')
+// Mock toast
+jest.mock('lib/elements/Toast')
 
 // Set up the mock methods that various parts of the code need
 const mockedInsights = insights as jest.Mocked<typeof insights>
@@ -130,7 +130,7 @@ describe('featurePreviewsLogic - updateEarlyAccessFeatureEnrollment (impersonate
         logic.actions.updateEarlyAccessFeatureEnrollment('test-flag', true)
 
         expect(mockUpdateEnrollment).not.toHaveBeenCalled()
-        expect(lemonToast.error).toHaveBeenCalledWith(
+        expect(toast.error).toHaveBeenCalledWith(
             'Cannot update early access feature enrollment while impersonating a user'
         )
     })
@@ -140,8 +140,8 @@ describe('featurePreviewsLogic - updateEarlyAccessFeatureEnrollment (impersonate
         logic.actions.updateEarlyAccessFeatureEnrollment('beta-flag', true, 'beta')
 
         expect(mockUpdateEnrollment).not.toHaveBeenCalled()
-        expect(lemonToast.error).toHaveBeenCalledTimes(2)
-        expect(lemonToast.error).toHaveBeenCalledWith(
+        expect(toast.error).toHaveBeenCalledTimes(2)
+        expect(toast.error).toHaveBeenCalledWith(
             'Cannot update early access feature enrollment while impersonating a user'
         )
     })

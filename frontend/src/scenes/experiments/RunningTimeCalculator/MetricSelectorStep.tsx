@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect, LemonTag, Spinner } from '@hanzo/lemon-ui'
+import { Select, Tag, Spinner } from '@hanzo/elements'
 
 import {
     ExperimentMetric,
@@ -77,7 +77,7 @@ export const MetricSelectorStep = ({
         >
             <div className="mb-4">
                 <div className="card-secondary mb-2">Experiment metric</div>
-                <LemonSelect
+                <Select
                     options={metricOptions.map((option, index) => ({
                         label: (
                             <div className="cursor-default text-xs font-semibold whitespace-nowrap overflow-hidden text-ellipsis flex-grow flex items-center">
@@ -89,7 +89,7 @@ export const MetricSelectorStep = ({
                                 )}
                                 {option.isSharedMetric && (
                                     <span className="ml-1">
-                                        <LemonTag>Shared</LemonTag>
+                                        <Tag>Shared</Tag>
                                     </span>
                                 )}
                             </div>

@@ -3,9 +3,9 @@ import './PropertyKeyInfo.scss'
 import clsx from 'clsx'
 import React, { useState } from 'react'
 
-import { LemonDivider, TooltipProps } from '@hanzo/lemon-ui'
+import { Divider, TooltipProps } from '@hanzo/elements'
 
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Popover } from 'lib/elements/Popover'
 import { pluralize } from 'lib/utils'
 
 import { PropertyKey, getCoreFilterDefinition } from '~/taxonomy/helpers'
@@ -77,7 +77,7 @@ export const PropertyKeyInfo = React.forwardRef<HTMLSpanElement, PropertyKeyInfo
                     </div>
                     {coreDefinition.description || coreDefinition.examples ? (
                         <>
-                            <LemonDivider className="my-3" />
+                            <Divider className="my-3" />
                             <div>
                                 {coreDefinition.description ? <p>{coreDefinition.description}</p> : null}
                                 {coreDefinition.examples ? (
@@ -95,7 +95,7 @@ export const PropertyKeyInfo = React.forwardRef<HTMLSpanElement, PropertyKeyInfo
 
                     {!coreDefinition.virtual && (
                         <>
-                            <LemonDivider className="my-3" />
+                            <Divider className="my-3" />
                             <div>
                                 Sent as <code>{value}</code>
                             </div>

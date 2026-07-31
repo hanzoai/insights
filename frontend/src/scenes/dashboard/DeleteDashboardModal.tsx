@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Field } from 'lib/elements/Field'
+import { Modal } from 'lib/elements/Modal'
 import { deleteDashboardLogic } from 'scenes/dashboard/deleteDashboardLogic'
 
 export function DeleteDashboardModal(): JSX.Element {
@@ -12,13 +12,13 @@ export function DeleteDashboardModal(): JSX.Element {
     const { isDeleteDashboardSubmitting, deleteDashboardModalVisible } = useValues(deleteDashboardLogic)
 
     return (
-        <LemonModal
+        <Modal
             title="Delete dashboard"
             onClose={hideDeleteDashboardModal}
             isOpen={deleteDashboardModalVisible}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         form="delete-dashboard-form"
                         type="secondary"
                         data-attr="dashboard-delete"
@@ -26,8 +26,8 @@ export function DeleteDashboardModal(): JSX.Element {
                         onClick={hideDeleteDashboardModal}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         form="delete-dashboard-form"
                         htmlType="submit"
                         type="secondary"
@@ -37,7 +37,7 @@ export function DeleteDashboardModal(): JSX.Element {
                         disabled={isDeleteDashboardSubmitting}
                     >
                         Delete dashboard
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -48,20 +48,20 @@ export function DeleteDashboardModal(): JSX.Element {
                 enableFormOnSubmit
                 className="deprecated-space-y-2"
             >
-                <LemonField
+                <Field
                     name="deleteInsights"
                     help="This will only delete insights if they're not on any other dashboards."
                 >
                     {({ value, onChange }) => (
-                        <LemonCheckbox
+                        <Checkbox
                             data-attr="delete-dashboard-insights-checkbox"
                             checked={value}
                             label="Delete this dashboard's insights"
                             onChange={onChange}
                         />
                     )}
-                </LemonField>
+                </Field>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

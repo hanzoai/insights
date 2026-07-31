@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconExternal } from '@hanzo/icons'
-import { LemonTable, LemonTableColumns, Link } from '@hanzo/lemon-ui'
+import { Table, TableColumns, Link } from '@hanzo/elements'
 
 import { ErrorTrackingRelease } from 'lib/components/Errors/types'
 import { humanFriendlyDetailedTime } from 'lib/utils'
@@ -39,7 +39,7 @@ const ReleasesTable = (): JSX.Element => {
     // @ts-expect-error: typegen typing issue
     const { pagination, releases, releaseResponseLoading } = useValues(releasesLogic)
 
-    const columns: LemonTableColumns<ErrorTrackingRelease> = [
+    const columns: TableColumns<ErrorTrackingRelease> = [
         {
             title: 'Version',
             width: 200,
@@ -125,7 +125,7 @@ const ReleasesTable = (): JSX.Element => {
     )
 
     return (
-        <LemonTable<ErrorTrackingRelease>
+        <Table<ErrorTrackingRelease>
             id="releases"
             pagination={pagination}
             columns={columns}

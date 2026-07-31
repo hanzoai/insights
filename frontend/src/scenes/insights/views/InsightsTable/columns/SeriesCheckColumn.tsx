@@ -1,4 +1,4 @@
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
+import { Checkbox } from 'lib/elements/Checkbox'
 import { IndexedTrendResult } from 'scenes/trends/types'
 
 type SeriesCheckColumnTitleProps = {
@@ -20,7 +20,7 @@ export function SeriesCheckColumnTitle({
     const areAllSeriesChecked = indexedResults.every((dataset) => !getTrendsHidden(dataset))
 
     return (
-        <LemonCheckbox
+        <Checkbox
             checked={areAllSeriesChecked || (isAnySeriesChecked ? 'indeterminate' : false)}
             onChange={(checked) => {
                 if (!checked) {
@@ -53,7 +53,7 @@ export function SeriesCheckColumnItem({
     disabledReason,
 }: SeriesCheckColumnItemProps): JSX.Element {
     return (
-        <LemonCheckbox
+        <Checkbox
             checked={!isHidden}
             onChange={() => toggleResultHidden(item)}
             disabled={!canCheckUncheckSeries}

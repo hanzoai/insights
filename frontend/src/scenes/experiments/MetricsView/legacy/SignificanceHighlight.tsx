@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 
 import { IconMinus, IconTrending } from '@hanzo/icons'
-import { LemonTagType, Tooltip } from '@hanzo/lemon-ui'
+import { TagType, Tooltip } from '@hanzo/elements'
 
 import { experimentLogic } from '../../experimentLogic'
 
@@ -36,7 +36,7 @@ export function SignificanceHighlight({
     const isSignificant = isSecondary
         ? isSecondaryMetricSignificant(identifier)
         : isPrimaryMetricSignificant(identifier)
-    const result: { color: LemonTagType; label: string } = isSignificant
+    const result: { color: TagType; label: string } = isSignificant
         ? { color: 'success', label: 'Significant' }
         : { color: 'primary', label: 'Not significant' }
 

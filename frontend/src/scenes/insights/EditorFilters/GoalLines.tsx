@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { GoalLinesList } from 'lib/components/GoalLinesList'
 
@@ -20,7 +20,7 @@ export function GoalLines({ insightProps }: GoalLinesProps): JSX.Element {
     return (
         <div>
             <GoalLinesList goalLines={goalLines} removeGoalLine={removeGoalLine} updateGoalLine={updateGoalLine} />
-            <LemonButton
+            <Button
                 type="secondary"
                 onClick={addGoalLine}
                 icon={<IconPlusSmall />}
@@ -28,7 +28,7 @@ export function GoalLines({ insightProps }: GoalLinesProps): JSX.Element {
                 className={goalLines.length > 0 ? 'mt-2' : ''}
             >
                 Add goal line
-            </LemonButton>
+            </Button>
         </div>
     )
 }

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { userPreferencesLogic } from 'lib/logic/userPreferencesLogic'
@@ -21,7 +21,7 @@ const Component = (): JSX.Element | null => {
     const { pinGroupProperty, unpinGroupProperty } = useActions(userPreferencesLogic)
 
     if (groupDataLoading) {
-        return <LemonSkeleton className="h-6" />
+        return <Skeleton className="h-6" />
     } else if (!groupData) {
         return <NotFound object="group" />
     }

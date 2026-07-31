@@ -1,4 +1,4 @@
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 
 import { ScenePanelLabel } from '~/layout/scenes/SceneLayout'
 import { UserBasicType } from '~/types'

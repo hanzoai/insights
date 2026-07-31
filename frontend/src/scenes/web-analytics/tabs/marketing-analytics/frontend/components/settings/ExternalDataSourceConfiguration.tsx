@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconGear, IconPencil, IconTrash } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Tag, Link } from '@hanzo/elements'
 
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
+import { Table } from 'lib/elements/Table'
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 import { urls } from 'scenes/urls'
 
@@ -177,10 +177,10 @@ export function ExternalDataSourceConfiguration(): JSX.Element {
             description="Connect and configure data sources to enable marketing analytics. Native sources sync automatically, while warehouse and self-managed sources need column mapping."
         >
             {hasNoConfiguredSources && (
-                <LemonBanner type="error" className="mb-4">
+                <Banner type="error" className="mb-4">
                     To use the Marketing analytics dashboard, you need at least one data source properly configured. Add
                     a native integration (like Google Ads or Facebook Ads) or connect a data warehouse source below.
-                </LemonBanner>
+                </Banner>
             )}
             <PaginationControls
                 hasMoreItems={hasMoreSources}
@@ -191,7 +191,7 @@ export function ExternalDataSourceConfiguration(): JSX.Element {
                 maxItemsToShow={MAX_ITEMS_TO_SHOW}
                 additionalControls={<AddIntegrationButton />}
             />
-            <LemonTable
+            <Table
                 rowKey={(item) => item.id}
                 loading={loading}
                 dataSource={displayedSources}
@@ -222,7 +222,7 @@ export function ExternalDataSourceConfiguration(): JSX.Element {
                         title: 'Type',
                         width: 150,
                         render: (_, item: UnifiedSource): JSX.Element => (
-                            <LemonTag
+                            <Tag
                                 type={
                                     item.sourceTypeLabel === 'Native'
                                         ? 'success'
@@ -232,7 +232,7 @@ export function ExternalDataSourceConfiguration(): JSX.Element {
                                 }
                             >
                                 {item.sourceTypeLabel}
-                            </LemonTag>
+                            </Tag>
                         ),
                     },
                     {
@@ -299,7 +299,7 @@ export function ExternalDataSourceConfiguration(): JSX.Element {
                         render: (_, item: UnifiedSource): JSX.Element => {
                             if (item.isNative) {
                                 return (
-                                    <LemonButton
+                                    <Button
                                         icon={<IconGear />}
                                         size="small"
                                         to={item.sourceUrl}
@@ -311,14 +311,14 @@ export function ExternalDataSourceConfiguration(): JSX.Element {
                                 const tableHasMapping = hasAnyMapping(item.table)
                                 return (
                                     <div className="flex gap-1">
-                                        <LemonButton
+                                        <Button
                                             icon={<IconPencil />}
                                             size="small"
                                             onClick={() => setEditingTable(item.table!)}
                                             tooltip="Map columns"
                                         />
                                         {tableHasMapping && (
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconTrash />}
                                                 size="small"
                                                 status="danger"

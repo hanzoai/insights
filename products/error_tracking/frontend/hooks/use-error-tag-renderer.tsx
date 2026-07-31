@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useCallback } from 'react'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { ErrorEventType } from 'lib/components/Errors/types'
 import { dayjs } from 'lib/dayjs'
@@ -22,7 +22,7 @@ const tagColor = {
 
 export function ExceptionTag({ color, label }: ExceptionTagProps): JSX.Element {
     return (
-        <LemonTag
+        <Tag
             size="small"
             className={cn(
                 'font-semibold text-white border-gray-100/20 px-1 py-[0.1rem] text-[11px] rounded-sm inline',
@@ -30,7 +30,7 @@ export function ExceptionTag({ color, label }: ExceptionTagProps): JSX.Element {
             )}
         >
             {label}
-        </LemonTag>
+        </Tag>
     )
 }
 

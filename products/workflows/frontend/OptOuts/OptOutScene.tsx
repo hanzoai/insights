@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconDownload, IconExternal } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { userLogic } from 'scenes/userLogic'
 
@@ -24,7 +24,7 @@ export function OptOutScene(): JSX.Element {
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Message categories</h2>
                     <div className="flex gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             onClick={() => openImportModal()}
@@ -32,8 +32,8 @@ export function OptOutScene(): JSX.Element {
                             tooltip="Import subscription topics and preferences from Customer.io"
                         >
                             Import from Customer.io
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="secondary"
                             size="small"
                             onClick={() => openPreferencesPage()}
@@ -47,7 +47,7 @@ export function OptOutScene(): JSX.Element {
                             icon={<IconExternal />}
                         >
                             Preview opt-out page
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
                 <OptOutCategories />

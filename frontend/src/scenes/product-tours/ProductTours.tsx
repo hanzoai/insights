@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tabs } from 'lib/elements/Tabs'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -33,9 +33,9 @@ function NewTourButton(): JSX.Element {
 
     return (
         <>
-            <LemonButton size="small" type="primary" onClick={() => setIsModalOpen(true)} data-attr="new-product-tour">
+            <Button size="small" type="primary" onClick={() => setIsModalOpen(true)} data-attr="new-product-tour">
                 New
-            </LemonButton>
+            </Button>
             <NewProductTourModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -65,7 +65,7 @@ function ProductTours(): JSX.Element {
                 resourceType={{ type: 'product_tour' }}
                 actions={<NewTourButton />}
             />
-            <LemonTabs
+            <Tabs
                 activeKey={tab}
                 onChange={(newTab) => setTab(newTab as ProductToursTabs)}
                 tabs={[

@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
 import { IconGear, IconLetter, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tag, Tooltip } from '@hanzo/elements'
 
 import { EmailIntegrationDomainGroupedType, IntegrationType } from '~/types'
 
@@ -50,9 +50,9 @@ export function IntegrationEmailDomainView({
                                             : 'You cannot send messages from this channel until it has been verified'
                                     }
                                 >
-                                    <LemonTag type={verified ? 'success' : 'warning'}>
+                                    <Tag type={verified ? 'success' : 'warning'}>
                                         {verified ? 'Verified' : 'Unverified'}
-                                    </LemonTag>
+                                    </Tag>
                                 </Tooltip>
                             )}
                         </div>
@@ -66,7 +66,7 @@ export function IntegrationEmailDomainView({
                         <span className="flex-1">
                             {integration.config.name} &lt;{integration.config.email}&gt;
                         </span>
-                        <LemonButton
+                        <Button
                             type="primary"
                             size="small"
                             onClick={() => {
@@ -75,8 +75,8 @@ export function IntegrationEmailDomainView({
                             icon={<IconGear />}
                         >
                             Configure
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             size="small"
                             status="danger"
@@ -86,7 +86,7 @@ export function IntegrationEmailDomainView({
                             icon={<IconTrash />}
                         >
                             Disconnect
-                        </LemonButton>
+                        </Button>
                     </div>
                 ))}
             </div>

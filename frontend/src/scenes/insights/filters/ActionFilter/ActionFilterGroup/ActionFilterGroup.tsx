@@ -5,7 +5,7 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconPlusSmall, IconTrash, IconUndo } from '@hanzo/icons'
-import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tooltip } from '@hanzo/elements'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -21,8 +21,8 @@ import {
     TaxonomicStringPopover,
 } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonDropdown } from 'lib/lemon-ui/LemonDropdown'
-import { SortableDragIcon } from 'lib/lemon-ui/icons'
+import { Dropdown } from 'lib/elements/Dropdown'
+import { SortableDragIcon } from 'lib/elements/icons'
 import { teamLogic } from 'scenes/teamLogic'
 import { MathCategory, mathsLogic } from 'scenes/trends/mathsLogic'
 
@@ -224,7 +224,7 @@ export function ActionFilterGroup({
                                     {/* InsightsQL expression selector */}
                                     {(mathDefinitions as Record<string, any>)[filter.math || BaseMathType.TotalCount]
                                         ?.category === MathCategory.InsightsQLExpression && (
-                                        <LemonDropdown
+                                        <Dropdown
                                             visible={isInsightsQLDropdownVisible}
                                             closeOnClickInside={false}
                                             onClickOutside={() => setInsightsQLDropdownVisible(false)}
@@ -241,7 +241,7 @@ export function ActionFilterGroup({
                                                 </div>
                                             }
                                         >
-                                            <LemonButton
+                                            <Button
                                                 fullWidth
                                                 type="secondary"
                                                 size="small"
@@ -249,8 +249,8 @@ export function ActionFilterGroup({
                                                 onClick={() => setInsightsQLDropdownVisible(!isInsightsQLDropdownVisible)}
                                             >
                                                 <code>{filter.math_insightsql || 'count()'}</code>
-                                            </LemonButton>
-                                        </LemonDropdown>
+                                            </Button>
+                                        </Dropdown>
                                     )}
                                 </div>
                             )}
@@ -259,7 +259,7 @@ export function ActionFilterGroup({
                     {!readOnly && (
                         <div className="flex shrink-0 gap-1">
                             <Tooltip title="Remove group">
-                                <LemonButton
+                                <Button
                                     size="small"
                                     icon={<IconTrash />}
                                     onClick={() => removeLocalFilter({ index })}
@@ -267,7 +267,7 @@ export function ActionFilterGroup({
                                 />
                             </Tooltip>
                             <Tooltip title="Split events">
-                                <LemonButton
+                                <Button
                                     size="small"
                                     icon={<IconUndo />}
                                     onClick={() => {

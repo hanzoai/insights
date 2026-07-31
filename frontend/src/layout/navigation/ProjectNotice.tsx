@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 
 import { IconGear, IconPlus } from '@hanzo/icons'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonBannerAction } from 'lib/lemon-ui/LemonBanner/LemonBanner'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { BannerAction } from 'lib/elements/Banner/Banner'
+import { Link } from 'lib/elements/Link'
 import { cn } from 'lib/utils/css-classes'
 import { verifyEmailLogic } from 'scenes/authentication/signup/verify-email/verifyEmailLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -20,7 +20,7 @@ import { ProjectNoticeVariant, navigationLogic } from './navigationLogic'
 
 interface ProjectNoticeBlueprint {
     message: JSX.Element | string
-    action?: LemonBannerAction
+    action?: BannerAction
     type?: 'info' | 'warning' | 'success' | 'error'
     closeable?: boolean
 }
@@ -135,13 +135,13 @@ export function ProjectNotice({ className }: { className?: string }): JSX.Elemen
         sceneConfig?.layout && ['app-raw', 'app-raw-no-header'].includes(sceneConfig.layout)
 
     return (
-        <LemonBanner
+        <Banner
             type={relevantNotice.type || 'info'}
             className={cn('my-4', requiresHorizontalMargin && 'mx-4', className)}
             action={relevantNotice.action}
             onClose={relevantNotice.closeable ? () => closeProjectNotice(projectNoticeVariant) : undefined}
         >
             {relevantNotice.message}
-        </LemonBanner>
+        </Banner>
     )
 }

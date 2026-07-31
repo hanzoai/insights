@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 import { match } from 'ts-pattern'
 
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
 import { TabsPrimitiveContent } from 'lib/ui/TabsPrimitive/TabsPrimitive'
 import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'

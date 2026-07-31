@@ -5,7 +5,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef } from 'react'
 import { CSSTransition } from 'react-transition-group'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { cn } from 'lib/utils/css-classes'
@@ -149,7 +149,7 @@ function SuggestionsList(): JSX.Element {
                         aria-label={`Select suggestion: ${suggestion.content}`}
                         asChild
                     >
-                        <LemonButton
+                        <Button
                             className="QuestionInput__QuestionSuggestion text-left"
                             style={{ '--index': index } as React.CSSProperties}
                             size="small"
@@ -157,7 +157,7 @@ function SuggestionsList(): JSX.Element {
                             fullWidth
                         >
                             <span className="font-normal">{formatSuggestion(suggestion.content)}</span>
-                        </LemonButton>
+                        </Button>
                     </ToggleGroupItem>
                 ))}
             </ToggleGroup>

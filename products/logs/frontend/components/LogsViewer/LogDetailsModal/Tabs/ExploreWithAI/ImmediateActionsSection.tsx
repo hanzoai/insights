@@ -1,4 +1,4 @@
-import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Tooltip } from '@hanzo/elements'
 
 import { PRIORITY_TAG_TYPE, PRIORITY_TOOLTIP } from './constants'
 import { ImmediateAction } from './types'
@@ -18,9 +18,9 @@ export function ImmediateActionsSection({ actions }: ImmediateActionsSectionProp
             {sortedActions.map((action, index) => (
                 <div key={index} className="flex items-start gap-2 p-2 bg-bg-light rounded">
                     <Tooltip title={PRIORITY_TOOLTIP[action.priority]}>
-                        <LemonTag type={PRIORITY_TAG_TYPE[action.priority] ?? 'muted'} size="small">
+                        <Tag type={PRIORITY_TAG_TYPE[action.priority] ?? 'muted'} size="small">
                             {action.priority.toUpperCase()}
-                        </LemonTag>
+                        </Tag>
                     </Tooltip>
                     <div className="flex flex-col gap-0.5">
                         <span className="text-sm font-medium">{action.action}</span>

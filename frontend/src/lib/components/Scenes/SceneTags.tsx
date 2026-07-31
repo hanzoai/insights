@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { Spinner } from 'lib/elements/Spinner'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
 import { ScenePanelLabel } from '~/layout/scenes/SceneLayout'
@@ -50,7 +50,7 @@ export const SceneTags = ({
     return localIsEditing ? (
         <div className="flex flex-col gap-1">
             <ScenePanelLabel htmlFor="new-tag-input" title={label}>
-                <LemonInputSelect
+                <InputSelect
                     mode="multiple"
                     allowCustomValues
                     value={localTags}

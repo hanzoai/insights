@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Link } from 'lib/lemon-ui/Link'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Tag } from 'lib/elements/Tag'
+import { Link } from 'lib/elements/Link'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import type { FeatureFlagType } from '~/types'
@@ -86,9 +86,9 @@ export const VariantsPanelLinkFeatureFlag = ({
                     <div className="text-sm text-muted-alt text-center">
                         Select an existing multivariate feature flag to use with this experiment
                     </div>
-                    <LemonButton type="primary" size="small" onClick={setShowFeatureFlagSelector}>
+                    <Button type="primary" size="small" onClick={setShowFeatureFlagSelector}>
                         Select Feature Flag
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         )
@@ -104,7 +104,7 @@ export const VariantsPanelLinkFeatureFlag = ({
                 <div className="flex flex-row gap-4">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                         <div className="font-semibold text-base truncate">{linkedFeatureFlag.key}</div>
-                        {!linkedFeatureFlag.active && <LemonTag type="default">Inactive</LemonTag>}
+                        {!linkedFeatureFlag.active && <Tag type="default">Inactive</Tag>}
                         <Link
                             to={urls.featureFlag(linkedFeatureFlag.id as number)}
                             target="_blank"
@@ -116,7 +116,7 @@ export const VariantsPanelLinkFeatureFlag = ({
                     </div>
                     {/* Only show Change button when not read-only */}
 
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         onClick={setShowFeatureFlagSelector}
@@ -125,7 +125,7 @@ export const VariantsPanelLinkFeatureFlag = ({
                         }
                     >
                         Change
-                    </LemonButton>
+                    </Button>
                 </div>
 
                 {/* Description */}
@@ -139,9 +139,9 @@ export const VariantsPanelLinkFeatureFlag = ({
                         <div className="text-xs uppercase tracking-wide font-semibold text-muted">Variants</div>
                         <div className="flex flex-wrap gap-1.5">
                             {variants.map(({ key }) => (
-                                <LemonTag key={key} type={key === 'control' ? 'primary' : 'default'}>
+                                <Tag key={key} type={key === 'control' ? 'primary' : 'default'}>
                                     {key}
-                                </LemonTag>
+                                </Tag>
                             ))}
                         </div>
                     </div>

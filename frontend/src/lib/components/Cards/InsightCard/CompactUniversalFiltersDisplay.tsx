@@ -10,7 +10,7 @@ import {
 } from 'lib/components/PropertyFilters/utils'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { allOperatorsMapping, capitalizeFirstLetter } from 'lib/utils'
 import { urls } from 'scenes/urls'
 

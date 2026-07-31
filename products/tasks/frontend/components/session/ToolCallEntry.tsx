@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { IconChevronRight, IconTerminal } from '@hanzo/icons'
-import { LemonTag, Spinner } from '@hanzo/lemon-ui'
+import { Tag, Spinner } from '@hanzo/elements'
 
 import { ToolStatus } from '../../lib/parse-logs'
 
@@ -37,9 +37,9 @@ export function ToolCallEntry({ toolName, status, args, result, timestamp }: Too
             )}
             {isLoading ? <Spinner className="text-muted" /> : <IconTerminal className="text-muted" fontSize="14" />}
             <code className="text-xs text-secondary">{toolName}</code>
-            <LemonTag type={config.type} size="small">
+            <Tag type={config.type} size="small">
                 {config.label}
-            </LemonTag>
+            </Tag>
         </>
     )
 

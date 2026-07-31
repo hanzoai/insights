@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonLabel } from '@hanzo/lemon-ui'
+import { Label } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
+import { Button } from 'lib/elements/Button'
+import { Collapse } from 'lib/elements/Collapse'
+import { Input } from 'lib/elements/Input/Input'
 
 import { WebExperimentTransformField } from '~/toolbar/experiments/WebExperimentTransformField'
 import { WebExperimentTransformHeader } from '~/toolbar/experiments/WebExperimentTransformHeader'
@@ -24,8 +24,8 @@ export function WebExperimentVariant({ variant }: WebExperimentVariantProps): JS
         <div className="deprecated-space-y-4">
             {selectedExperimentId === 'new' && experimentForm.variants && experimentForm.variants[variant].is_new && (
                 <div>
-                    <LemonLabel>Variant key</LemonLabel>
-                    <LemonInput
+                    <Label>Variant key</Label>
+                    <Input
                         key="variant-name-small"
                         className="mb-2"
                         value={localTentativeValue}
@@ -48,8 +48,8 @@ export function WebExperimentVariant({ variant }: WebExperimentVariantProps): JS
                 </div>
             )}
             <div className="flex items-center justify-between mb-2">
-                <LemonLabel>Transformations</LemonLabel>
-                <LemonButton
+                <Label>Transformations</Label>
+                <Button
                     type="secondary"
                     size="xsmall"
                     icon={<IconPlus />}
@@ -59,13 +59,13 @@ export function WebExperimentVariant({ variant }: WebExperimentVariantProps): JS
                     }}
                 >
                     Add transformation
-                </LemonButton>
+                </Button>
             </div>
             {experimentForm?.variants &&
             experimentForm?.variants[variant] &&
             experimentForm?.variants[variant].transforms &&
             experimentForm?.variants[variant].transforms?.length > 0 ? (
-                <LemonCollapse
+                <Collapse
                     size="small"
                     activeKey={experimentForm?.variants[variant].transforms.length === 1 ? 0 : undefined}
                     panels={experimentForm?.variants[variant].transforms.map((transform, transformIndex) => {

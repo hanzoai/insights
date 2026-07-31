@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconExpand45 } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -89,7 +89,7 @@ export function NotebookPanel(): JSX.Element | null {
                                         <IconExpand45 className="text-tertiary size-3 group-hover:text-primary z-10" />
                                     </Link>
                                 ) : (
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         sideIcon={<IconExpand45 />}
                                         to={urls.notebook(selectedNotebook)}
@@ -143,7 +143,7 @@ export function NotebookPanel(): JSX.Element | null {
                                             <IconExpand45 className="text-tertiary size-3 group-hover:text-primary z-10" />
                                         </Link>
                                     ) : (
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             sideIcon={<IconExpand45 />}
                                             to={urls.notebook(selectedNotebook)}

@@ -17,7 +17,7 @@ export const EmbeddingEvent = (): JSX.Element => {
                 `}
             </Markdown>
 
-            <div className="LemonMarkdown">
+            <div className="Markdown">
                 <table className="my-4">
                     <thead>
                         <tr>
@@ -190,7 +190,7 @@ export const EmbeddingEvent = (): JSX.Element => {
                 `}
             </Markdown>
 
-            <div className="LemonMarkdown">
+            <div className="Markdown">
                 <table className="my-4">
                     <thead>
                         <tr>

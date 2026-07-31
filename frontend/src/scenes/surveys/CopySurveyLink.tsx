@@ -1,7 +1,7 @@
 import { IconCode } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { IconLink } from 'lib/lemon-ui/icons'
+import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 function getSurveyUrl(surveyId: string): string {
@@ -64,7 +64,7 @@ export function CopySurveyLink({
 }): JSX.Element {
     return (
         <div className={`flex flex-row gap-2 ${className ?? ''}`}>
-            <LemonButton
+            <Button
                 icon={<IconLink />}
                 onClick={() => {
                     copyToClipboard(getSurveyUrl(surveyId), 'survey link')
@@ -73,9 +73,9 @@ export function CopySurveyLink({
                 tooltip="Responses are anonymous. Add the distinct_id query parameter to identify respondents."
             >
                 Copy URL
-            </LemonButton>
+            </Button>
             {enableIframeEmbedding && (
-                <LemonButton
+                <Button
                     icon={<IconCode />}
                     onClick={() => {
                         copyToClipboard(getEmbedSnippet(surveyId), 'embed code')
@@ -84,7 +84,7 @@ export function CopySurveyLink({
                     tooltip="Copy HTML snippet to embed this survey in an iframe"
                 >
                     Copy embed code
-                </LemonButton>
+                </Button>
             )}
         </div>
     )

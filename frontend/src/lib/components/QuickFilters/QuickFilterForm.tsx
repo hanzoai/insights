@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Input, Select } from '@hanzo/elements'
 
 import { OperatorValueSelect } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { QuickFilterContext } from '~/queries/schema/schema-general'
@@ -40,12 +40,12 @@ export function QuickFilterForm({ context }: QuickFilterFormProps): JSX.Element 
             <div className="space-y-6">
                 <div className="flex gap-4">
                     <div className="flex-1">
-                        <LemonField name="name" label="Filter name">
-                            <LemonInput placeholder="e.g. Environment" disabled={quickFiltersLoading} autoFocus />
-                        </LemonField>
+                        <Field name="name" label="Filter name">
+                            <Input placeholder="e.g. Environment" disabled={quickFiltersLoading} autoFocus />
+                        </Field>
                     </div>
                     <div className="flex-1">
-                        <LemonField name="propertyName" label="Event property">
+                        <Field name="propertyName" label="Event property">
                             {({ value, onChange }) => (
                                 <TaxonomicPopover
                                     groupType={TaxonomicFilterGroupType.EventProperties}
@@ -58,7 +58,7 @@ export function QuickFilterForm({ context }: QuickFilterFormProps): JSX.Element 
                                     fullWidth
                                 />
                             )}
-                        </LemonField>
+                        </Field>
                     </div>
                 </div>
 
@@ -66,7 +66,7 @@ export function QuickFilterForm({ context }: QuickFilterFormProps): JSX.Element 
                     <div>
                         <div className="flex items-center justify-between mb-2">
                             <label className="block font-medium">Filter options</label>
-                            <LemonButton
+                            <Button
                                 data-attr="quick-filter-form-add-option-button"
                                 size="small"
                                 type="secondary"
@@ -74,7 +74,7 @@ export function QuickFilterForm({ context }: QuickFilterFormProps): JSX.Element 
                                 onClick={addOption}
                             >
                                 Add option
-                            </LemonButton>
+                            </Button>
                         </div>
                         <div className="space-y-2">
                             {options.map((option: QuickFilterOption, index: number) => (
@@ -86,7 +86,7 @@ export function QuickFilterForm({ context }: QuickFilterFormProps): JSX.Element 
 
                 <div className="border rounded p-4 bg-bg-3000">
                     <div className="text-xs font-semibold uppercase text-muted mb-2">Preview</div>
-                    <LemonSelect
+                    <Select
                         value={null}
                         options={[
                             { value: null, label: `Any ${name?.toLowerCase() || 'items'}` },
@@ -103,22 +103,22 @@ export function QuickFilterForm({ context }: QuickFilterFormProps): JSX.Element 
                 </div>
 
                 <div className="flex justify-between gap-2 pt-4 border-t">
-                    <LemonButton
+                    <Button
                         data-attr="quick-filter-form-back-button"
                         type="secondary"
                         onClick={handleFormBack}
                         disabled={quickFiltersLoading}
                     >
                         Back
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         data-attr="quick-filter-form-submit-button"
                         type="primary"
                         htmlType="submit"
                         loading={quickFiltersLoading || isQuickFilterSubmitting}
                     >
                         {editedFilter ? 'Update filter' : 'Create filter'}
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </Form>
@@ -175,19 +175,19 @@ function FilterOptionRow({
                         size="small"
                     />
                 </div>
-                {rowErrors?.value && <LemonField.Error error={rowErrors.value} />}
+                {rowErrors?.value && <Field.Error error={rowErrors.value} />}
             </div>
             <div className="flex flex-col w-[30%] gap-2">
-                <LemonInput
+                <Input
                     value={option.label}
                     onChange={(value) => updateOption(index, { label: value })}
                     placeholder="Display name (e.g., Production)"
                     disabledReason={!propertyName ? 'Select an event property first' : undefined}
                 />
-                {rowErrors?.label && <LemonField.Error error={rowErrors.label} />}
+                {rowErrors?.label && <Field.Error error={rowErrors.label} />}
             </div>
             {options.length > 1 && (
-                <LemonButton
+                <Button
                     size="small"
                     status="danger"
                     icon={<IconTrash />}

@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
 import { IconDownload } from '@hanzo/icons'
-import { LemonButton, LemonTable, LemonTableColumn } from '@hanzo/lemon-ui'
+import { Button, Table, TableColumn } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { PhonePairMascots } from 'lib/components/mascots'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
 import { MaxTool } from 'scenes/max/MaxTool'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -47,7 +47,7 @@ export function UserInterviews(): JSX.Element {
                 customInsights={PhonePairMascots}
                 isEmpty={!userInterviewsLoading && userInterviews.length === 0}
                 actionElementOverride={
-                    <LemonButton
+                    <Button
                         type="primary"
                         icon={<IconDownload />}
                         onClick={() => updateHasSeenProductIntroFor(ProductKey.USER_INTERVIEWS)}
@@ -55,26 +55,26 @@ export function UserInterviews(): JSX.Element {
                         data-attr="install-recorder"
                     >
                         Install Insights Recorder
-                    </LemonButton>
+                    </Button>
                 }
                 className="my-0"
             />
             <MaxTool identifier="analyze_user_interviews" context={{}}>
-                <LemonTable
+                <Table
                     loading={userInterviewsLoading}
                     columns={[
                         {
                             title: 'Interviewees',
                             key: 'interviewees',
                             render: (_, row) => (
-                                <LemonTableLink
+                                <TableLink
                                     title={row.interviewee_emails.join(', ')}
                                     to={urls.userInterview(row.id)}
                                 />
                             ),
                         },
-                        createdAtColumn() as LemonTableColumn<UserInterviewType, keyof UserInterviewType | undefined>,
-                        createdByColumn() as LemonTableColumn<UserInterviewType, keyof UserInterviewType | undefined>,
+                        createdAtColumn() as TableColumn<UserInterviewType, keyof UserInterviewType | undefined>,
+                        createdByColumn() as TableColumn<UserInterviewType, keyof UserInterviewType | undefined>,
                     ]}
                     dataSource={userInterviews}
                     loadingSkeletonRows={5}

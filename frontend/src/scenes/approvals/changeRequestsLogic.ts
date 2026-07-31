@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { teamLogic } from 'scenes/teamLogic'
@@ -117,40 +117,40 @@ export const changeRequestsLogic = kea<changeRequestsLogicType>([
                 )
 
                 if (response.status === ChangeRequestState.Applied) {
-                    lemonToast.success('Change request approved and applied successfully')
+                    toast.success('Change request approved and applied successfully')
 
                     setTimeout(() => {
                         window.location.reload()
                     }, 2000)
                 } else if (response.status === ChangeRequestState.Failed) {
-                    lemonToast.error(`Approval succeeded but application failed: ${response.message}`)
+                    toast.error(`Approval succeeded but application failed: ${response.message}`)
                     actions.loadChangeRequests()
                 } else {
-                    lemonToast.success(response.message || 'Change request approved')
+                    toast.success(response.message || 'Change request approved')
                     actions.loadChangeRequests()
                 }
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to approve change request')
+                toast.error(error.detail || 'Failed to approve change request')
             }
         },
 
         rejectRequest: async ({ id, reason }) => {
             try {
                 await api.create(`api/environments/${values.currentTeamId}/change_requests/${id}/reject/`, { reason })
-                lemonToast.success('Change request rejected')
+                toast.success('Change request rejected')
                 actions.loadChangeRequests()
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to reject change request')
+                toast.error(error.detail || 'Failed to reject change request')
             }
         },
 
         cancelRequest: async ({ id, reason }) => {
             try {
                 await api.create(`api/environments/${values.currentTeamId}/change_requests/${id}/cancel/`, { reason })
-                lemonToast.success('Change request canceled')
+                toast.success('Change request canceled')
                 actions.loadChangeRequests()
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to cancel change request')
+                toast.error(error.detail || 'Failed to cancel change request')
             }
         },
     })),

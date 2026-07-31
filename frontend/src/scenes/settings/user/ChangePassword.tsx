@@ -1,10 +1,10 @@
 import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
 import PasswordStrength from 'lib/components/PasswordStrength'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { userLogic } from 'scenes/userLogic'
 
 import { changePasswordLogic } from './changePasswordLogic'
@@ -27,17 +27,17 @@ export function ChangePassword(): JSX.Element {
             className="deprecated-space-y-4 max-w-160"
         >
             {hasPassword && (
-                <LemonField name="current_password" label="Current Password">
-                    <LemonInput
+                <Field name="current_password" label="Current Password">
+                    <Input
                         autoComplete="current-password"
                         type="password"
                         className="ph-ignore-input"
                         placeholder="••••••••••"
                     />
-                </LemonField>
+                </Field>
             )}
 
-            <LemonField
+            <Field
                 name="password"
                 label={
                     <div className="flex flex-1 items-center justify-between">
@@ -46,28 +46,28 @@ export function ChangePassword(): JSX.Element {
                     </div>
                 }
             >
-                <LemonInput
+                <Input
                     autoComplete="new-password"
                     type="password"
                     className="ph-ignore-input"
                     placeholder="••••••••••"
                 />
-            </LemonField>
+            </Field>
 
             {!hasPassword && (
-                <LemonField name="confirm_password" label="Confirm Password">
-                    <LemonInput
+                <Field name="confirm_password" label="Confirm Password">
+                    <Input
                         autoComplete="new-password"
                         type="password"
                         className="ph-ignore-input"
                         placeholder="••••••••••"
                     />
-                </LemonField>
+                </Field>
             )}
 
-            <LemonButton type="primary" htmlType="submit" loading={isChangePasswordSubmitting}>
+            <Button type="primary" htmlType="submit" loading={isChangePasswordSubmitting}>
                 {hasPassword ? 'Change password' : 'Set password'}
-            </LemonButton>
+            </Button>
         </Form>
     )
 }

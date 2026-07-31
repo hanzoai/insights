@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 
 import { IconTrash } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { personDeleteModalLogic } from 'scenes/persons/personDeleteModalLogic'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
@@ -15,7 +15,7 @@ export function DeletePersonButton({ person }: DeletePersonButtonProps): JSX.Ele
     const { showPersonDeleteModal } = useActions(personDeleteModalLogic)
     const { loadData } = useActions(dataNodeLogic)
     return (
-        <LemonButton
+        <Button
             onClick={() => showPersonDeleteModal(person, () => loadData())}
             icon={<IconTrash />}
             status="danger"

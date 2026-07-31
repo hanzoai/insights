@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { IconRevert, IconX } from '@hanzo/icons'
 
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 import { SettingsBar, SettingsButton } from 'scenes/session-recordings/components/PanelSettings'
 import { Timestamp } from 'scenes/session-recordings/player/controller/PlayerControllerTime'
 
@@ -70,13 +70,13 @@ export function SessionRecordingPlayerExplorer({
                 />
             </div>
             {!noticeHidden && (
-                <LemonBanner square={true} type="info" onClose={() => setNoticeHidden(true)}>
+                <Banner square={true} type="info" onClose={() => setNoticeHidden(true)}>
                     This is a snapshot of the screen that was recorded. It may not be 100% accurate, but should be close
                     enough to help you debug.
                     <br />
                     You can interact with the content below but most things won't work as it is only a snapshot of your
                     app. Use your Browser Developer Tools to inspect the content.
-                </LemonBanner>
+                </Banner>
             )}
         </div>
     )

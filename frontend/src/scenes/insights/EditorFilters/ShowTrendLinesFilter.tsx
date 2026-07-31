@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox } from '@hanzo/lemon-ui'
+import { Checkbox } from '@hanzo/elements'
 
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -55,7 +55,7 @@ export function ShowTrendLinesFilter(): JSX.Element {
     }
 
     return (
-        <LemonCheckbox
+        <Checkbox
             className="p-1 px-2"
             onChange={toggleShowTrendLines}
             checked={!disabledReason && !!showTrendLines}

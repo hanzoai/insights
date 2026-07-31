@@ -1,7 +1,7 @@
 import { Meta } from '@storybook/react'
 import { useActions, useValues } from 'kea'
 
-import { LemonCard } from '@hanzo/lemon-ui'
+import { Card } from '@hanzo/elements'
 
 import { CollapsibleExceptionList } from 'lib/components/Errors/ExceptionList/CollapsibleExceptionList'
 import { RawExceptionList } from 'lib/components/Errors/ExceptionList/RawExceptionList'
@@ -24,9 +24,9 @@ const meta: Meta = {
             sceneLogic.mount()
             return (
                 <StyleVariables>
-                    <LemonCard hoverEffect={false} className="p-2 w-[900px]">
+                    <Card hoverEffect={false} className="p-2 w-[900px]">
                         <Story />
-                    </LemonCard>
+                    </Card>
                 </StyleVariables>
             )
         },
@@ -134,9 +134,9 @@ function StacktraceWrapperAllEvents({ children }: { children: JSX.Element }): JS
             {eventNames.map((name: TestEventName) => {
                 return (
                     <ExceptionLogicWrapper key={name} eventName={name}>
-                        <LemonCard hoverEffect={false} className="p-2">
+                        <Card hoverEffect={false} className="p-2">
                             {children}
-                        </LemonCard>
+                        </Card>
                     </ExceptionLogicWrapper>
                 )
             })}

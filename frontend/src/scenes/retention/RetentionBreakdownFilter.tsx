@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect, LemonSelectOption } from '@hanzo/lemon-ui'
+import { Select, SelectOption } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 
@@ -26,10 +26,10 @@ export function RetentionBreakdownFilter(): JSX.Element | null {
     ]
 
     return (
-        <LemonSelect
+        <Select
             value={selectedBreakdownValue}
             onChange={(value) => setSelectedBreakdownValue(value)}
-            options={options as LemonSelectOption<string | number | boolean | null>[]}
+            options={options as SelectOption<string | number | boolean | null>[]}
             placeholder="Select breakdown value"
             size="small"
             data-attr="retention-breakdown-filter"

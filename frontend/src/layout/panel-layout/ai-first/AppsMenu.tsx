@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
 import { IconApps, IconChevronRight } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { RenderKeybind } from 'lib/components/AppShortcuts/AppShortcutMenu'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -205,14 +205,14 @@ export function AppsMenu({ isCollapsed }: { isCollapsed: boolean }): JSX.Element
                                                                 {iconForType(product.iconType)}
                                                                 <span className="flex-1">{product.path}</span>
                                                                 {product.tags?.includes('beta') && (
-                                                                    <LemonTag type="highlight" size="small">
+                                                                    <Tag type="highlight" size="small">
                                                                         BETA
-                                                                    </LemonTag>
+                                                                    </Tag>
                                                                 )}
                                                                 {product.tags?.includes('alpha') && (
-                                                                    <LemonTag type="completion" size="small">
+                                                                    <Tag type="completion" size="small">
                                                                         ALPHA
-                                                                    </LemonTag>
+                                                                    </Tag>
                                                                 )}
                                                             </ButtonPrimitive>
                                                         }

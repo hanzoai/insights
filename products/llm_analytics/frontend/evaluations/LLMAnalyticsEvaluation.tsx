@@ -5,18 +5,18 @@ import { useRef } from 'react'
 
 import { IconArrowLeft, IconInfo } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonDivider,
-    LemonInput,
-    LemonSelect,
-    LemonSkeleton,
-    LemonSwitch,
-    LemonTag,
-    LemonTextArea,
+    Banner,
+    Button,
+    Divider,
+    Input,
+    Select,
+    Skeleton,
+    Switch,
+    Tag,
+    TextArea,
     Link,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { NotFound } from 'lib/components/NotFound'
@@ -75,7 +75,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
     const settingsUrl = combineUrl(urls.llmAnalyticsEvaluations(), { ...searchParams, tab: 'settings' }).url
 
     if (evaluationLoading) {
-        return <LemonSkeleton className="w-full h-96" />
+        return <Skeleton className="w-full h-96" />
     }
 
     if (!evaluation) {
@@ -115,39 +115,39 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
                     <h1 className="text-2xl font-semibold">{isNewEvaluation ? 'New evaluation' : evaluation.name}</h1>
                     <div className="flex items-center gap-2">
                         {isNewEvaluation ? (
-                            <LemonTag type="primary">New</LemonTag>
+                            <Tag type="primary">New</Tag>
                         ) : (
                             <>
-                                <LemonTag type={evaluation.enabled ? 'success' : 'default'}>
+                                <Tag type={evaluation.enabled ? 'success' : 'default'}>
                                     {evaluation.enabled ? 'Enabled' : 'Disabled'}
-                                </LemonTag>
-                                {hasUnsavedChanges && <LemonTag type="warning">Unsaved Changes</LemonTag>}
+                                </Tag>
+                                {hasUnsavedChanges && <Tag type="warning">Unsaved Changes</Tag>}
                             </>
                         )}
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <LemonButton type="secondary" icon={<IconArrowLeft />} onClick={handleCancel}>
+                    <Button type="secondary" icon={<IconArrowLeft />} onClick={handleCancel}>
                         {hasUnsavedChanges ? 'Cancel' : 'Back'}
-                    </LemonButton>
+                    </Button>
                     <AccessControlAction
                         resourceType={AccessControlResourceType.LlmAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={handleSave}
                             disabled={saveButtonDisabled}
                             loading={evaluationFormSubmitting}
                         >
                             {isNewEvaluation ? 'Create Evaluation' : 'Save Changes'}
-                        </LemonButton>
+                        </Button>
                     </AccessControlAction>
                 </div>
             </div>
 
             {evaluationProviderKeyIssue && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     <div className="space-y-2">
                         <p>
                             This evaluation uses API key{' '}
@@ -158,7 +158,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
                         <p>Error: {evaluationProviderKeyIssue.error_message || 'Unknown error'}</p>
                         <Link to={settingsUrl}>Go to settings to fix this key.</Link>
                     </div>
-                </LemonBanner>
+                </Banner>
             )}
 
             {/* Configuration Form */}
@@ -170,7 +170,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
 
                         <div className="space-y-4">
                             <Field name="name" label="Name">
-                                <LemonInput
+                                <Input
                                     value={evaluation.name}
                                     onChange={setEvaluationName}
                                     placeholder="e.g., Helpfulness Check"
@@ -179,7 +179,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
                             </Field>
 
                             <Field name="description" label="Description (optional)">
-                                <LemonTextArea
+                                <TextArea
                                     value={evaluation.description || ''}
                                     onChange={setEvaluationDescription}
                                     placeholder="Describe what this evaluation checks for..."
@@ -190,7 +190,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
 
                             <Field name="enabled" label="Status">
                                 <div className="flex items-center gap-2">
-                                    <LemonSwitch checked={evaluation.enabled} onChange={setEvaluationEnabled} />
+                                    <Switch checked={evaluation.enabled} onChange={setEvaluationEnabled} />
                                     <span>{evaluation.enabled ? 'Enabled' : 'Disabled'}</span>
                                     <span className="text-muted text-sm">
                                         {evaluation.enabled
@@ -212,7 +212,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
                                 }
                             >
                                 <div className="flex items-center gap-2">
-                                    <LemonSwitch
+                                    <Switch
                                         checked={evaluation.output_config.allows_na ?? false}
                                         onChange={setAllowsNA}
                                     />
@@ -242,7 +242,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
 
                             <div className="space-y-4">
                                 <Field name="provider" label="Provider">
-                                    <LemonSelect
+                                    <Select
                                         value={selectedProvider}
                                         onChange={(value) => setSelectedProvider(value as LLMProvider)}
                                         options={[
@@ -268,7 +268,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
                                         </div>
                                     }
                                 >
-                                    <LemonSelect
+                                    <Select
                                         value={selectedKeyId || 'insights_default'}
                                         onChange={(value) =>
                                             setSelectedKeyId(value === 'insights_default' ? null : value)
@@ -289,7 +289,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
 
                                 <Field name="model" label="Model">
                                     <>
-                                        <LemonSelect
+                                        <Select
                                             value={selectedModel || undefined}
                                             onChange={(value) => setSelectedModel(value || '')}
                                             options={availableModels.map((model) => ({
@@ -330,7 +330,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
             {/* Evaluation Runs (only for existing evaluations) */}
             {!isNewEvaluation && (
                 <>
-                    <LemonDivider />
+                    <Divider />
                     <div className="max-w-6xl">
                         <div className="flex justify-between items-center mb-4">
                             <div>

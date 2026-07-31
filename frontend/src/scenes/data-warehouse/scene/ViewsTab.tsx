@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonInput, LemonTable, LemonTag, LemonTagType, Link, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Input, Table, Tag, TagType, Link, Spinner, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { More } from 'lib/elements/Button/More'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -13,7 +13,7 @@ import { DataWarehouseSavedQuery, DataWarehouseSavedQueryRunHistory } from '~/ty
 
 import { PAGE_SIZE, viewsTabLogic } from './viewsTabLogic'
 
-const STATUS_TAG_SETTINGS: Record<string, LemonTagType> = {
+const STATUS_TAG_SETTINGS: Record<string, TagType> = {
     Running: 'primary',
     Completed: 'success',
     Failed: 'danger',
@@ -98,7 +98,7 @@ export function ViewsTab(): JSX.Element {
         <div className="space-y-4">
             {(filteredViews.length > 0 || filteredMaterializedViews.length > 0 || searchTerm) && (
                 <div className="flex gap-2 justify-between items-center">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search views..."
                         onChange={setSearchTerm}
@@ -115,7 +115,7 @@ export function ViewsTab(): JSX.Element {
                         Materialized views are refreshed on a schedule and stored as tables for faster query
                         performance.
                     </p>
-                    <LemonTable
+                    <Table
                         dataSource={visibleMaterializedViews}
                         loading={viewsLoading}
                         columns={[
@@ -149,13 +149,13 @@ export function ViewsTab(): JSX.Element {
                                             </span>
                                         </>
                                     ) : view.origin === DataWarehouseSavedQueryOrigin.ENDPOINT ? (
-                                        <LemonTableLink
+                                        <TableLink
                                             to={urls.endpoint(view.name)}
                                             title={view.name}
                                             description={`Created by the ${view.name} endpoint.`}
                                         />
                                     ) : (
-                                        <LemonTableLink
+                                        <TableLink
                                             to={urls.sqlEditor({ view_id: view.id })}
                                             title={view.name}
                                             description="Materialized view"
@@ -183,14 +183,14 @@ export function ViewsTab(): JSX.Element {
                                     if (view.latest_error && view.status === 'Failed') {
                                         return (
                                             <Tooltip title={view.latest_error} interactive>
-                                                <LemonTag type="danger">Failed</LemonTag>
+                                                <Tag type="danger">Failed</Tag>
                                             </Tooltip>
                                         )
                                     }
                                     return (
-                                        <LemonTag type={STATUS_TAG_SETTINGS[view.status] || 'default'}>
+                                        <Tag type={STATUS_TAG_SETTINGS[view.status] || 'default'}>
                                             {view.status}
-                                        </LemonTag>
+                                        </Tag>
                                     )
                                 },
                             },
@@ -231,7 +231,7 @@ export function ViewsTab(): JSX.Element {
                                     <More
                                         overlay={
                                             <>
-                                                <LemonButton
+                                                <Button
                                                     onClick={() => runMaterialization(view.id)}
                                                     disabledReason={
                                                         view.status === 'Running'
@@ -240,14 +240,14 @@ export function ViewsTab(): JSX.Element {
                                                     }
                                                 >
                                                     Sync now
-                                                </LemonButton>
-                                                <LemonButton
+                                                </Button>
+                                                <Button
                                                     status="danger"
                                                     onClick={() => deleteView(view.id)}
                                                     disabledReason={getDisabledReason(view)}
                                                 >
                                                     Delete
-                                                </LemonButton>
+                                                </Button>
                                             </>
                                         }
                                     />
@@ -277,7 +277,7 @@ export function ViewsTab(): JSX.Element {
                     <p className="text-muted mb-2">
                         Views are virtual tables created from SQL queries. They are computed on-the-fly when queried.
                     </p>
-                    <LemonTable
+                    <Table
                         dataSource={visibleViews}
                         loading={viewsLoading}
                         columns={[
@@ -311,7 +311,7 @@ export function ViewsTab(): JSX.Element {
                                             </span>
                                         </>
                                     ) : (
-                                        <LemonTableLink to={urls.sqlEditor({ view_id: view.id })} title={view.name} />
+                                        <TableLink to={urls.sqlEditor({ view_id: view.id })} title={view.name} />
                                     ),
                             },
                             {
@@ -353,13 +353,13 @@ export function ViewsTab(): JSX.Element {
                                     <More
                                         overlay={
                                             <>
-                                                <LemonButton
+                                                <Button
                                                     status="danger"
                                                     onClick={() => deleteView(view.id)}
                                                     disabledReason={getDisabledReason(view)}
                                                 >
                                                     Delete
-                                                </LemonButton>
+                                                </Button>
                                             </>
                                         }
                                     />
@@ -393,9 +393,9 @@ export function ViewsTab(): JSX.Element {
                             Create your first view to transform and organize your data warehouse tables.
                         </p>
                     )}
-                    <LemonButton type="primary" to={urls.sqlEditor()} className="inline-block">
+                    <Button type="primary" to={urls.sqlEditor()} className="inline-block">
                         Create view
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </div>

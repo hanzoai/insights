@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { TextMorph } from 'torph/react'
 
 import { IconCopy } from '@hanzo/icons'
-import { LemonButton, Spinner } from '@hanzo/lemon-ui'
+import { Button, Spinner } from '@hanzo/elements'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { LogEntry, parseLogs } from '../lib/parse-logs'
 import { TaskRun } from '../types'
@@ -121,8 +121,8 @@ export function TaskSessionView({ logs, isPolling, run }: TaskSessionViewProps):
 
     const handleCopyLogs = (): void => {
         navigator.clipboard.writeText(logs).then(
-            () => lemonToast.success('Logs copied to clipboard'),
-            () => lemonToast.error('Failed to copy logs')
+            () => toast.success('Logs copied to clipboard'),
+            () => toast.error('Failed to copy logs')
         )
     }
 
@@ -141,9 +141,9 @@ export function TaskSessionView({ logs, isPolling, run }: TaskSessionViewProps):
                     {run && <TaskRunStatusBadge run={run} />}
                     <span className="text-sm font-semibold">Logs ({entries.length})</span>
                 </div>
-                <LemonButton size="xsmall" icon={<IconCopy />} onClick={handleCopyLogs}>
+                <Button size="xsmall" icon={<IconCopy />} onClick={handleCopyLogs}>
                     Copy
-                </LemonButton>
+                </Button>
             </div>
             <div className="flex-1 overflow-auto p-4 font-mono text-sm bg-bg-3000">
                 {entries.map((entry) => (

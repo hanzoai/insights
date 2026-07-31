@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, LemonModal, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Button, Modal, SegmentedButton } from '@hanzo/elements'
 
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { featureFlagLogic as featureFlagSceneLogic } from 'scenes/feature-flags/featureFlagLogic'
@@ -23,22 +23,22 @@ export function AutoShowModal({ tourId, isOpen, onClose }: AutoShowModalProps): 
     const [showUserTargeting, setShowUserTargeting] = useState(hasCustomTargeting)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             title="Auto-show settings"
             width={640}
             footer={
-                <LemonButton type="primary" onClick={onClose}>
+                <Button type="primary" onClick={onClose}>
                     Done
-                </LemonButton>
+                </Button>
             }
         >
             <div className="space-y-6">
                 {/* Who to show */}
                 <div>
                     <h5 className="font-semibold mb-2">Who to show</h5>
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         size="small"
                         fullWidth
                         value={showUserTargeting ? 'conditions' : 'everyone'}
@@ -86,6 +86,6 @@ export function AutoShowModal({ tourId, isOpen, onClose }: AutoShowModalProps): 
                 {/* Where, when, how often */}
                 <AutoShowSection id={tourId} />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

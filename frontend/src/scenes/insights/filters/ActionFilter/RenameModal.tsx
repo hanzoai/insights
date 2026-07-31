@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
 import { entityFilterLogic } from 'scenes/insights/filters/ActionFilter/entityFilterLogic'
 import { renameModalLogic } from 'scenes/insights/filters/ActionFilter/renameModalLogic'
@@ -24,7 +24,7 @@ export function RenameModal({ typeKey, view }: RenameModalProps): JSX.Element {
     const title = `Rename ${view === InsightType.FUNNELS ? 'funnel step' : 'graph series'}`
 
     return (
-        <LemonModal
+        <Modal
             data-attr="filter-rename-modal"
             isOpen={modalVisible}
             title={title}
@@ -32,12 +32,12 @@ export function RenameModal({ typeKey, view }: RenameModalProps): JSX.Element {
             forceAbovePopovers={true}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={hideModal}>
+                    <Button type="secondary" onClick={hideModal}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={() => renameFilter(name)}>
+                    </Button>
+                    <Button type="primary" onClick={() => renameFilter(name)}>
                         {title}
-                    </LemonButton>
+                    </Button>
                 </>
             }
             onClose={hideModal}
@@ -46,7 +46,7 @@ export function RenameModal({ typeKey, view }: RenameModalProps): JSX.Element {
             <strong>meaningful label for you and your team members</strong>. Custom names are also shown on dashboards.
             <br />
             <div className="l4 mt-2 mb-2">Name</div>
-            <LemonInput
+            <Input
                 value={name}
                 onPressEnter={() => renameFilter(name)}
                 onChange={(value) => setName(value)}
@@ -61,6 +61,6 @@ export function RenameModal({ typeKey, view }: RenameModalProps): JSX.Element {
                 autoFocus
                 onFocus={(e) => e.target.select()}
             />
-        </LemonModal>
+        </Modal>
     )
 }

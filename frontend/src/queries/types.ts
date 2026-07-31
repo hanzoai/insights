@@ -1,6 +1,6 @@
 import { ComponentType, HTMLProps } from 'react'
 
-import { ExpandableConfig } from 'lib/lemon-ui/LemonTable'
+import { ExpandableConfig } from 'lib/elements/Table'
 
 import { QueryFeature } from '~/queries/nodes/DataTable/queryFeatures'
 import {

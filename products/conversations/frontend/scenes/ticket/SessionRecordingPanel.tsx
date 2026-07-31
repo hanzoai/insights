@@ -1,4 +1,4 @@
-import { LemonButton, LemonCollapse } from '@hanzo/lemon-ui'
+import { Button, Collapse } from '@hanzo/elements'
 
 import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'
 import { urls } from 'scenes/urls'
@@ -21,7 +21,7 @@ export function SessionRecordingPanel({ sessionContext, distinctId }: SessionRec
         : null
 
     return (
-        <LemonCollapse
+        <Collapse
             className="bg-surface-primary"
             panels={[
                 {
@@ -42,13 +42,13 @@ export function SessionRecordingPanel({ sessionContext, distinctId }: SessionRec
                             )}
                             {distinctId && (
                                 <div className="mt-2 pt-2 border-t flex justify-end">
-                                    <LemonButton
+                                    <Button
                                         type="tertiary"
                                         size="xsmall"
                                         to={`${urls.personByDistinctId(distinctId)}#activeTab=${PersonsTabType.SESSION_RECORDINGS}`}
                                     >
                                         See all recordings →
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             )}
                         </div>

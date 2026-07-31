@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { LemonButton, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Modal, Select } from '@hanzo/elements'
 
 import { llmEvaluationsLogic } from '../evaluations/llmEvaluationsLogic'
 import { llmEvaluationExecutionLogic } from '../llmEvaluationExecutionLogic'
@@ -37,31 +37,31 @@ export function EvaluationRunModal({
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={visible}
             onClose={onClose}
             title="Run Evaluation"
             description="Select an evaluation to run on this generation"
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={onClose}>
+                    <Button type="secondary" onClick={onClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={handleRun}
                         loading={evaluationRunLoading}
                         disabledReason={!selectedEvaluationId ? 'Please select an evaluation' : undefined}
                     >
                         Run Evaluation
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium mb-2">Select Evaluation</label>
-                    <LemonSelect
+                    <Select
                         value={selectedEvaluationId}
                         onChange={setSelectedEvaluationId}
                         options={
@@ -85,6 +85,6 @@ export function EvaluationRunModal({
                     </p>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

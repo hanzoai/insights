@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconDatabase, IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonCard, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Card, Skeleton } from '@hanzo/elements'
 
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 
@@ -76,7 +76,7 @@ function InternalInlineSourceSetup({
         <div className="space-y-6">
             {/* Source Selection */}
             {currentView === 'selection' && (
-                <LemonCard hoverEffect={false}>
+                <Card hoverEffect={false}>
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-primary">
@@ -103,7 +103,7 @@ function InternalInlineSourceSetup({
 
                         {featured && !expanded && hiddenSources.length > 0 && (
                             <div className="flex justify-center pt-2">
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     icon={<IconPlus />}
                                     onClick={() => setExpanded(true)}
@@ -111,21 +111,21 @@ function InternalInlineSourceSetup({
                                 >
                                     Show {hiddenSources.length} more source
                                     {hiddenSources.length !== 1 ? 's' : ''}
-                                </LemonButton>
+                                </Button>
                             </div>
                         )}
                     </div>
-                </LemonCard>
+                </Card>
             )}
 
             {/* Source Connection Wizard */}
             {currentView === 'connecting' && selectedSource && (
-                <LemonCard hoverEffect={false}>
+                <Card hoverEffect={false}>
                     <div className="space-y-4">
                         <div className="flex items-center justify-between mb-4">
-                            <LemonButton type="secondary" size="small" onClick={handleBack}>
+                            <Button type="secondary" size="small" onClick={handleBack}>
                                 ← Back to sources
-                            </LemonButton>
+                            </Button>
                         </div>
                         <NewSourcesWizard
                             hideBackButton
@@ -134,7 +134,7 @@ function InternalInlineSourceSetup({
                             initialSource={selectedSource}
                         />
                     </div>
-                </LemonCard>
+                </Card>
             )}
         </div>
     )
@@ -144,7 +144,7 @@ export function InlineSourceSetup(props: InlineSourceSetupProps): JSX.Element {
     const { availableSources, availableSourcesLoading } = useValues(availableSourcesDataLogic)
 
     if (availableSourcesLoading || availableSources === null) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (

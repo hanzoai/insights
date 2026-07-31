@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 import { urls } from 'scenes/urls'
 
 import { ProductKey } from '~/queries/schema/schema-general'
@@ -16,7 +16,7 @@ const InitialBillingLimitNoticeContents = ({ product }: { product: BillingProduc
         hasCustomLimitSet && currentAndUpgradePlans?.currentPlan?.initial_billing_limit == customLimitUsd
 
     return isUsingInitialBillingLimit ? (
-        <LemonBanner
+        <Banner
             type="info"
             className="my-4"
             action={{
@@ -33,7 +33,7 @@ const InitialBillingLimitNoticeContents = ({ product }: { product: BillingProduc
                 This protects you from accidentally incurring large unexpected charges. Some features may stop working
                 and data may be dropped if your usage exceeds your limit.
             </p>
-        </LemonBanner>
+        </Banner>
     ) : null
 }
 

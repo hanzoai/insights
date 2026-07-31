@@ -5,14 +5,14 @@ import { router } from 'kea-router'
 import insights from '@hanzo/insights'
 
 import { IconCopy } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input, TextArea } from '@hanzo/elements'
 
 import { SharingModalContent } from 'lib/components/Sharing/SharingModal'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Banner } from 'lib/elements/Banner'
+import { Collapse } from 'lib/elements/Collapse'
+import { Dialog } from 'lib/elements/Dialog'
+import { Field } from 'lib/elements/Field'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { urls } from 'scenes/urls'
 
@@ -30,18 +30,18 @@ function TimestampForm(props: PlayerShareLogicProps): JSX.Element {
     return (
         <Form logic={playerShareLogic} props={props} formKey="privateLinkForm">
             <div className="flex gap-2 items-center">
-                <LemonField name="includeTime">
-                    <LemonCheckbox label="Start at" checked={privateLinkForm.includeTime} />
-                </LemonField>
-                <LemonField name="time" inline>
-                    <LemonInput
+                <Field name="includeTime">
+                    <Checkbox label="Start at" checked={privateLinkForm.includeTime} />
+                </Field>
+                <Field name="time" inline>
+                    <Input
                         className={clsx('w-20', { 'opacity-50': !privateLinkForm.includeTime })}
                         placeholder="00:00"
                         onFocus={() => setPrivateLinkFormValue('includeTime', true)}
                         fullWidth={false}
                         size="small"
                     />
-                </LemonField>
+                </Field>
             </div>
         </Form>
     )
@@ -82,7 +82,7 @@ function PrivateLink(props: PlayerShareLogicProps): JSX.Element {
                 </div>
                 <div>Make sure the person you share it with has access to this Insights project.</div>
             </div>
-            <LemonButton
+            <Button
                 type="secondary"
                 fullWidth
                 center
@@ -94,7 +94,7 @@ function PrivateLink(props: PlayerShareLogicProps): JSX.Element {
                 disabledReason={privateLinkFormHasErrors ? 'Fix all errors before continuing' : undefined}
             >
                 <span className="break-all">{privateLinkUrl}</span>
-            </LemonButton>
+            </Button>
             <TimestampForm {...props} />
         </div>
     )
@@ -119,7 +119,7 @@ function IntegrationNudgeBanner({
 
     if (hasIntegration) {
         return (
-            <LemonBanner
+            <Banner
                 type="info"
                 dismissKey={`share-integration-nudge-${kind}-configured`}
                 action={{
@@ -137,12 +137,12 @@ function IntegrationNudgeBanner({
             >
                 Your {displayName} integration is connected. Use the <strong>Linked issues</strong> tab in the sidebar
                 to create tracked issues directly from Insights.
-            </LemonBanner>
+            </Banner>
         )
     }
 
     return (
-        <LemonBanner
+        <Banner
             type="info"
             dismissKey={`share-integration-nudge-${kind}-not-configured`}
             action={{
@@ -158,7 +158,7 @@ function IntegrationNudgeBanner({
             }}
         >
             Set up a {displayName} integration to create issues that are tracked and linked to this recording.
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -174,57 +174,57 @@ function LinearLink({ onCloseDialog, ...props }: PlayerShareLogicProps & { onClo
             <p className="mt-2">Add an issue to your Linear workspace with a link to this recording.</p>
 
             <Form logic={playerShareLogic} props={props} formKey="linearLinkForm" className="flex flex-col gap-2">
-                <LemonField className="gap-1" name="issueTitle" label="Issue title">
-                    <LemonInput fullWidth />
-                </LemonField>
-                <LemonField
+                <Field className="gap-1" name="issueTitle" label="Issue title">
+                    <Input fullWidth />
+                </Field>
+                <Field
                     className="gap-1"
                     name="issueDescription"
                     label="Issue description"
                     help={<span>We'll include a link to the recording in the description.</span>}
                 >
-                    <LemonTextArea />
-                </LemonField>
+                    <TextArea />
+                </Field>
                 <div className="flex gap-1 items-center">
-                    <LemonField name="includeTime">
-                        <LemonCheckbox label="Start at" checked={linearLinkForm.includeTime} />
-                    </LemonField>
-                    <LemonField name="time" inline>
-                        <LemonInput
+                    <Field name="includeTime">
+                        <Checkbox label="Start at" checked={linearLinkForm.includeTime} />
+                    </Field>
+                    <Field name="time" inline>
+                        <Input
                             className={clsx('w-20', { 'opacity-50': !linearLinkForm.includeTime })}
                             onFocus={() => setLinearLinkFormValue('includeTime', true)}
                             placeholder="00:00"
                             fullWidth={false}
                             size="small"
                         />
-                    </LemonField>
+                    </Field>
                 </div>
-                <LemonCollapse
+                <Collapse
                     panels={[
                         {
                             key: 'more-options',
                             header: 'More options',
                             content: (
                                 <div className="flex flex-col gap-2">
-                                    <LemonField
+                                    <Field
                                         className="gap-1"
                                         name="assignee"
                                         label="Assignee"
                                         help={<span>Linear username or 'me' to assign to yourself</span>}
                                     >
-                                        <LemonInput
+                                        <Input
                                             fullWidth
                                             placeholder="username or me"
                                             data-attr="linear-share-assignee"
                                         />
-                                    </LemonField>
-                                    <LemonField className="gap-1" name="labels" label="Label">
-                                        <LemonInput
+                                    </Field>
+                                    <Field className="gap-1" name="labels" label="Label">
+                                        <Input
                                             fullWidth
                                             placeholder="bug or feature"
                                             data-attr="linear-share-labels"
                                         />
-                                    </LemonField>
+                                    </Field>
                                 </div>
                             ),
                         },
@@ -232,14 +232,14 @@ function LinearLink({ onCloseDialog, ...props }: PlayerShareLogicProps & { onClo
                     defaultActiveKey={props.expandMoreOptions ? 'more-options' : undefined}
                 />
                 <div className="flex justify-end">
-                    <LemonButton
+                    <Button
                         type="primary"
                         to={linearUrl}
                         targetBlank={true}
                         disabledReason={linearLinkFormHasErrors ? 'Fix all errors before continuing' : undefined}
                     >
                         Create issue
-                    </LemonButton>
+                    </Button>
                 </div>
             </Form>
         </>
@@ -261,75 +261,75 @@ function GithubIssueLink({
             <p className="mt-2">Add an issue to your Github repository with a link to this recording.</p>
 
             <Form logic={playerShareLogic} props={props} formKey="githubLinkForm" className="flex flex-col gap-2">
-                <LemonField className="gap-1" name="githubUsername" label="Username or Organization Name">
-                    <LemonInput fullWidth data-attr="github-share-username" />
-                </LemonField>
-                <LemonField className="gap-1" name="githubRepoName" label="Repository Name">
-                    <LemonInput fullWidth data-attr="github-share-repo-name" />
-                </LemonField>
-                <LemonField className="gap-1" name="githubIssueTitle" label="Issue Title">
-                    <LemonInput fullWidth data-attr="github-share-issue-title" />
-                </LemonField>
-                <LemonField
+                <Field className="gap-1" name="githubUsername" label="Username or Organization Name">
+                    <Input fullWidth data-attr="github-share-username" />
+                </Field>
+                <Field className="gap-1" name="githubRepoName" label="Repository Name">
+                    <Input fullWidth data-attr="github-share-repo-name" />
+                </Field>
+                <Field className="gap-1" name="githubIssueTitle" label="Issue Title">
+                    <Input fullWidth data-attr="github-share-issue-title" />
+                </Field>
+                <Field
                     className="gap-1"
                     name="githubIssueDescription"
                     label="Issue description"
                     help={<span>We'll include a link to the recording in the description.</span>}
                 >
-                    <LemonTextArea />
-                </LemonField>
+                    <TextArea />
+                </Field>
                 <div className="flex gap-1 items-center">
-                    <LemonField name="includeTime">
-                        <LemonCheckbox label="Start at" checked={githubLinkForm.includeTime} />
-                    </LemonField>
-                    <LemonField name="time" inline>
-                        <LemonInput
+                    <Field name="includeTime">
+                        <Checkbox label="Start at" checked={githubLinkForm.includeTime} />
+                    </Field>
+                    <Field name="time" inline>
+                        <Input
                             className={clsx('w-20', { 'opacity-50': !githubLinkForm.includeTime })}
                             onFocus={() => setGithubLinkFormValue('includeTime', true)}
                             placeholder="00:00"
                             fullWidth={false}
                             size="small"
                         />
-                    </LemonField>
+                    </Field>
                 </div>
-                <LemonCollapse
+                <Collapse
                     panels={[
                         {
                             key: 'more-options',
                             header: 'More options',
                             content: (
                                 <div className="flex flex-col gap-2">
-                                    <LemonField
+                                    <Field
                                         className="gap-1"
                                         name="githubAssignees"
                                         label="Assignees"
                                         help={<span>Comma-separated GitHub usernames to assign</span>}
                                     >
-                                        <LemonInput
+                                        <Input
                                             fullWidth
                                             placeholder="user1, user2"
                                             data-attr="github-share-assignees"
                                         />
-                                    </LemonField>
-                                    <LemonField
+                                    </Field>
+                                    <Field
                                         className="gap-1"
                                         name="githubLabels"
                                         label="Labels"
                                         help={<span>Comma-separated labels to add to the issue</span>}
                                     >
-                                        <LemonInput
+                                        <Input
                                             fullWidth
                                             placeholder="bug, enhancement"
                                             data-attr="github-share-labels"
                                         />
-                                    </LemonField>
+                                    </Field>
                                 </div>
                             ),
                         },
                     ]}
                 />
                 <div className="flex justify-end">
-                    <LemonButton
+                    <Button
                         type="primary"
                         to={githubUrl}
                         targetBlank={true}
@@ -342,7 +342,7 @@ function GithubIssueLink({
                         }
                     >
                         Create issue
-                    </LemonButton>
+                    </Button>
                 </div>
             </Form>
         </>
@@ -374,7 +374,7 @@ const shareTitleMapping = {
 }
 
 export function openPlayerShareDialog(props: PlayerShareLogicProps): void {
-    LemonDialog.open({
+    Dialog.open({
         title: props.shareType ? shareTitleMapping[props.shareType] : '',
         content: (closeDialog) => <PlayerShareRecording {...props} onCloseDialog={closeDialog} />,
         maxWidth: '85vw',

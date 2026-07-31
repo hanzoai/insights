@@ -1,4 +1,4 @@
-import { LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Link, Tooltip } from '@hanzo/elements'
 import { ErrorTrackingAlerting } from '@hanzo/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/alerting/ErrorTrackingAlerting'
 import { Releases } from '@hanzo/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/releases/Releases'
 import { AutoAssignmentRules } from '@hanzo/products-error-tracking/frontend/scenes/ErrorTrackingConfigurationScene/rules/AutoAssignmentRules'
@@ -205,9 +205,9 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: (
                     <>
                         Web snippet V2{' '}
-                        <LemonTag type="warning" className="ml-1 uppercase">
+                        <Tag type="warning" className="ml-1 uppercase">
                             Experimental
-                        </LemonTag>
+                        </Tag>
                     </>
                 ),
                 description:
@@ -355,9 +355,9 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: (
                     <>
                         CSP reporting{' '}
-                        <LemonTag type="warning" className="ml-1 uppercase">
+                        <Tag type="warning" className="ml-1 uppercase">
                             Beta
-                        </LemonTag>
+                        </Tag>
                     </>
                 ),
                 description:
@@ -420,9 +420,9 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: (
                     <>
                         Chart color themes
-                        <LemonTag type="warning" className="ml-1 uppercase">
+                        <Tag type="warning" className="ml-1 uppercase">
                             Beta
-                        </LemonTag>
+                        </Tag>
                     </>
                 ),
                 description: 'Customize the color palette used in charts and visualizations.',
@@ -795,9 +795,9 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: (
                     <>
                         Data retention
-                        <LemonTag type="success" className="ml-1 uppercase">
+                        <Tag type="success" className="ml-1 uppercase">
                             New
-                        </LemonTag>
+                        </Tag>
                     </>
                 ),
                 description:
@@ -810,9 +810,9 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: (
                     <>
                         Integrations
-                        <LemonTag type="success" className="ml-1 uppercase">
+                        <Tag type="success" className="ml-1 uppercase">
                             New
-                        </LemonTag>
+                        </Tag>
                     </>
                 ),
                 description: 'Configure integrations to create and link issues from session replays.',

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { SupermanMascot } from 'lib/components/mascots'

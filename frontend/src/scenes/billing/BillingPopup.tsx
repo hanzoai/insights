@@ -1,4 +1,4 @@
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
+import { Dialog } from 'lib/elements/Dialog'
 
 import { Billing } from './Billing'
 
@@ -11,7 +11,7 @@ export function openBillingPopupModal({
     title = 'Unlock premium features',
     description,
 }: BillingPopupProps = {}): void {
-    LemonDialog.open({
+    Dialog.open({
         title: title,
         description: description,
         content: <Billing />,

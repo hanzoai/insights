@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonCollapse, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Collapse, Modal, Link } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -20,7 +20,7 @@ export function InstructionsModal({ onClose, visible, flag }: InstructionsModalP
     const { preflight } = useValues(preflightLogic)
 
     const getCloudPanels = (): JSX.Element => (
-        <LemonCollapse
+        <Collapse
             className="mt-2 bg-surface-primary"
             defaultActiveKey="1"
             panels={[
@@ -84,7 +84,7 @@ export function InstructionsModal({ onClose, visible, flag }: InstructionsModalP
     const panels: JSX.Element = preflight?.cloud ? getCloudPanels() : getSelfHostedPanels()
 
     return (
-        <LemonModal title="How to implement opt-in feature flags" isOpen={visible} onClose={onClose} width={640}>
+        <Modal title="How to implement opt-in feature flags" isOpen={visible} onClose={onClose} width={640}>
             <div>
                 <div className="mb-2">
                     Implement manual release condition toggles to give your users the ability choose which features they
@@ -92,7 +92,7 @@ export function InstructionsModal({ onClose, visible, flag }: InstructionsModalP
                 </div>
                 {panels}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 

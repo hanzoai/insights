@@ -1,6 +1,6 @@
 import './EmptyMessage.scss'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 export interface EmptyMessageProps {
     title: string
@@ -26,9 +26,9 @@ export function EmptyMessage({
 
                 <p className="text-secondary description">{description}</p>
                 {buttonText && (
-                    <LemonButton type="secondary" to={buttonTo} onClick={buttonOnClick} size={size}>
+                    <Button type="secondary" to={buttonTo} onClick={buttonOnClick} size={size}>
                         {buttonText}
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
         </div>

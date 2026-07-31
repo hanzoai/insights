@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 import { useCallback, useState } from 'react'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
+import { Button, Divider } from '@hanzo/elements'
 
 import { ExportButton } from 'lib/components/ExportButton/ExportButton'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
@@ -255,7 +255,7 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
             <div className="relative w-full flex flex-col gap-4 flex-1 overflow-hidden">
                 {!readOnly && showResultControls && (
                     <>
-                        <LemonDivider className="my-0" />
+                        <Divider className="my-0" />
                         <div className="flex gap-4 justify-between flex-wrap px-px">
                             <div className="flex gap-4 items-center">
                                 <Reload />
@@ -280,7 +280,7 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
 
                                     <TableDisplay />
 
-                                    <LemonButton
+                                    <Button
                                         icon={<IconGear />}
                                         type={isChartSettingsPanelOpen ? 'primary' : 'secondary'}
                                         onClick={() => toggleChartSettingsPanel()}

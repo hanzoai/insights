@@ -1,7 +1,7 @@
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -169,7 +169,7 @@ export const retentionModalLogic = kea<retentionModalLogicType>([
             }
             const cohort = await api.create('api/cohort', { ...cohortParams, query: values.actorsQuery })
             cohortsModel.actions.cohortCreated(cohort)
-            lemonToast.success('Cohort saved', {
+            toast.success('Cohort saved', {
                 toastId: `cohort-saved-${cohort.id}`,
                 button: {
                     label: 'View cohort',

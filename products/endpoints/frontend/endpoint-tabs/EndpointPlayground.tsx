@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconExternal } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonLabel, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Divider, Label, Select } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { IconPlayCircle } from 'lib/lemon-ui/icons'
+import { Field } from 'lib/elements/Field'
+import { IconPlayCircle } from 'lib/elements/icons'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
 import { urls } from 'scenes/urls'
 
@@ -275,7 +275,7 @@ export function EndpointPlayground({ tabId }: EndpointPlaygroundProps): JSX.Elem
         >
             <div className="flex gap-4" data-attr="endpoint-playground">
                 <div className="flex-1 flex flex-col gap-2">
-                    <LemonField.Pure
+                    <Field.Pure
                         label="Request payload"
                         info={
                             <>
@@ -292,9 +292,9 @@ export function EndpointPlayground({ tabId }: EndpointPlaygroundProps): JSX.Elem
                         onChange={(value) => setPayloadJson(value ?? '')}
                         maxHeight={400}
                     />
-                    {payloadJsonError && <LemonField.Pure error={payloadJsonError} />}
+                    {payloadJsonError && <Field.Pure error={payloadJsonError} />}
 
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="small"
                         icon={<IconPlayCircle />}
@@ -308,7 +308,7 @@ export function EndpointPlayground({ tabId }: EndpointPlaygroundProps): JSX.Elem
                         }
                     >
                         Execute endpoint
-                    </LemonButton>
+                    </Button>
                     {endpointResult &&
                         !endpointResultLoading &&
                         (() => {
@@ -319,7 +319,7 @@ export function EndpointPlayground({ tabId }: EndpointPlaygroundProps): JSX.Elem
                                     Array.isArray(parsed.results) &&
                                     parsed.results.length === 0
                                 ) {
-                                    return <LemonField.Pure error="No results" />
+                                    return <Field.Pure error="No results" />
                                 }
                             } catch {
                                 // Invalid JSON, don't show anything
@@ -329,7 +329,7 @@ export function EndpointPlayground({ tabId }: EndpointPlaygroundProps): JSX.Elem
                 </div>
 
                 <div className="flex-3 flex flex-col gap-2">
-                    <LemonField.Pure
+                    <Field.Pure
                         label="API response"
                         info={
                             <>
@@ -353,19 +353,19 @@ export function EndpointPlayground({ tabId }: EndpointPlaygroundProps): JSX.Elem
                     />
                 </div>
             </div>
-            <LemonDivider className="my-4" />
+            <Divider className="my-4" />
             <div className="flex flex-col gap-4">
-                <LemonLabel info="Create a personal API key and copy a code example to call this endpoint from your application.">
+                <Label info="Create a personal API key and copy a code example to call this endpoint from your application.">
                     Example usage
-                </LemonLabel>
+                </Label>
                 <div className="flex gap-2">
-                    <LemonSelect
+                    <Select
                         options={versionOptions}
                         onChange={setSelectedCodeExampleVersion}
                         value={effectiveVersion || endpoint.current_version}
                         placeholder="Select version"
                     />
-                    <LemonSelect
+                    <Select
                         options={[
                             { value: 'terminal', label: 'Terminal' },
                             { value: 'python', label: 'Python' },
@@ -378,7 +378,7 @@ export function EndpointPlayground({ tabId }: EndpointPlaygroundProps): JSX.Elem
                         }}
                         value={activeCodeExampleTab}
                     />
-                    <LemonButton
+                    <Button
                         to={urls.settings('user', 'personal-api-keys')}
                         type="secondary"
                         size="small"
@@ -386,7 +386,7 @@ export function EndpointPlayground({ tabId }: EndpointPlaygroundProps): JSX.Elem
                         targetBlank
                     >
                         API keys
-                    </LemonButton>
+                    </Button>
                 </div>
                 <div>
                     <CodeSnippet language={getLanguage(activeCodeExampleTab)} wrap={true}>

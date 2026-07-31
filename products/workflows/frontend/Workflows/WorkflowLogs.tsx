@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconClock } from '@hanzo/icons'
-import { LemonCollapse, LemonDivider, ProfilePicture, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Collapse, Divider, ProfilePicture, Spinner, Tooltip } from '@hanzo/elements'
 
 import PropertyFiltersDisplay from 'lib/components/PropertyFilters/components/PropertyFiltersDisplay'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -46,7 +46,7 @@ function BatchRunHeader({ job }: { job: InsightsFlowBatchJob }): JSX.Element {
                     </Tooltip>
                 )}
                 <TZLabel title="Created at" time={job.created_at} />
-                <LemonDivider vertical className="h-full" />
+                <Divider vertical className="h-full" />
 
                 <Tooltip
                     title={`${job.scheduled_at ? 'Scheduled' : 'Triggered'} by ${job.created_by?.email || 'unknown user'}`}
@@ -125,7 +125,7 @@ function WorkflowBatchRunLogs({ id }: WorkflowLogsProps): JSX.Element {
     }
 
     const futureJobsSection = futureJobs.length ? (
-        <LemonCollapse
+        <Collapse
             panels={futureJobs.map((job) => ({
                 key: job.id,
                 header: <BatchRunHeader job={job} />,
@@ -137,7 +137,7 @@ function WorkflowBatchRunLogs({ id }: WorkflowLogsProps): JSX.Element {
     )
 
     const pastJobsSection = pastJobs.length ? (
-        <LemonCollapse
+        <Collapse
             panels={pastJobs.map((job) => ({
                 key: job.id,
                 header: <BatchRunHeader job={job} />,

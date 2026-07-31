@@ -18552,7 +18552,7 @@ class DataTableNode(BaseModel):
         default=None,
         description="Default columns to use when resetting column configuration",
     )
-    embedded: bool | None = Field(default=None, description="Uses the embedded version of LemonTable")
+    embedded: bool | None = Field(default=None, description="Uses the embedded version of Table")
     expandable: bool | None = Field(
         default=None,
         description="Can expand row to show raw event data (default: true)",

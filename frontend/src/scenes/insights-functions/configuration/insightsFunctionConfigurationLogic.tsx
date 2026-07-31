@@ -7,7 +7,7 @@ import { CombinedLocation } from 'kea-router/lib/utils'
 import { subscriptions } from 'kea-subscriptions'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { CyclotronJobInputsValidation } from 'lib/components/CyclotronJob/CyclotronJobInputsValidation'
@@ -527,7 +527,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                         })
                     }
 
-                    lemonToast.success('Configuration saved')
+                    toast.success('Configuration saved')
                     refreshTreeItem('insights_function/', res.id)
 
                     return res
@@ -698,7 +698,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 if (data.fn) {
                     const fnSize = new Blob([data.fn]).size
                     if (fnSize > SCRIPT_CODE_SIZE_LIMIT) {
-                        lemonToast.error(
+                        toast.error(
                             `Custom code exceeds maximum size of ${
                                 SCRIPT_CODE_SIZE_LIMIT / 1024
                             }KB. Please simplify your code or contact support to increase the limit.`
@@ -1301,7 +1301,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 }, 1)
             } else {
                 console.error(errorObject)
-                lemonToast.error('Error submitting configuration')
+                toast.error('Error submitting configuration')
             }
         },
 
@@ -1388,7 +1388,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                     description: values.configuration.description,
                 })
 
-                lemonToast.success('Template updates applied but not saved.')
+                toast.success('Template updates applied but not saved.')
             }
         },
         setConfigurationValue: () => {

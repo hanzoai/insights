@@ -1,7 +1,7 @@
 import { actions, kea, key, listeners, path, props, reducers } from 'kea'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import type { takeScreenshotLogicType } from './takeScreenshotLogicType'
 
@@ -168,7 +168,7 @@ export const takeScreenshotLogic = kea<takeScreenshotLogicType>([
     listeners(({ actions, props }) => ({
         setBlob: async ({ blob }) => {
             if (!blob) {
-                lemonToast.error('Cannot take screenshot. Please try again.')
+                toast.error('Cannot take screenshot. Please try again.')
                 insights.capture('screenshot_failed', {
                     screenshot_key: props.screenshotKey,
                 })

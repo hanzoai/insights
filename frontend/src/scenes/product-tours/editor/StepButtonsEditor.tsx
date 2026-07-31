@@ -1,4 +1,4 @@
-import { LemonInput, LemonSelect, LemonSwitch } from '@hanzo/lemon-ui'
+import { Input, Select, Switch } from '@hanzo/elements'
 
 import { ProductTourButtonAction, ProductTourStepButton, ProductTourStepButtons } from '~/types'
 
@@ -43,14 +43,14 @@ function ButtonEditor({
                 <span className={`text-xs font-medium text-muted w-16 shrink-0 ${!label ? 'hidden' : ''}`}>
                     {label}
                 </span>
-                <LemonInput
+                <Input
                     value={button.text}
                     onChange={(text) => onChange({ ...button, text })}
                     placeholder="Button text"
                     size="small"
                     className="flex-1"
                 />
-                <LemonSelect
+                <Select
                     value={button.action}
                     onChange={(action) => {
                         const newAction = action as ProductTourButtonAction
@@ -72,7 +72,7 @@ function ButtonEditor({
             {button.action === 'link' && (
                 <div className="flex items-center gap-3">
                     <span className={`w-16 shrink-0 ${!label ? 'hidden' : ''}`} />
-                    <LemonInput
+                    <Input
                         value={button.link ?? ''}
                         onChange={(link) => onChange({ ...button, link })}
                         placeholder="https://example.com"
@@ -151,7 +151,7 @@ export function StepButtonsEditor({
         return (
             <div className="space-y-3">
                 {isTourContext && (
-                    <LemonSwitch
+                    <Switch
                         checked={customButtonsEnabled}
                         onChange={toggleCustomButtons}
                         label="Use custom buttons"
@@ -173,7 +173,7 @@ export function StepButtonsEditor({
                         <div className="flex-1 space-y-2">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium text-muted">Secondary</span>
-                                <LemonSwitch
+                                <Switch
                                     checked={!!secondaryButton}
                                     onChange={toggleSecondaryButton}
                                     size="small"
@@ -201,7 +201,7 @@ export function StepButtonsEditor({
     return (
         <div className="space-y-3">
             {isTourContext && (
-                <LemonSwitch checked={customButtonsEnabled} onChange={toggleCustomButtons} label="Use custom buttons" />
+                <Switch checked={customButtonsEnabled} onChange={toggleCustomButtons} label="Use custom buttons" />
             )}
             {(customButtonsEnabled || !isTourContext) && (
                 <>
@@ -225,7 +225,7 @@ export function StepButtonsEditor({
                     )}
                     <div className="flex items-center gap-3">
                         <span className="w-16 shrink-0" />
-                        <LemonSwitch
+                        <Switch
                             checked={!!secondaryButton}
                             onChange={toggleSecondaryButton}
                             label="Secondary button"

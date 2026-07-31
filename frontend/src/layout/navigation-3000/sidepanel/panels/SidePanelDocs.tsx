@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
 import { IconHome } from '@hanzo/icons'
-import { LemonButton, LemonSelect, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Select, Skeleton } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
@@ -14,14 +14,14 @@ import { sidePanelDocsLogic } from './sidePanelDocsLogic'
 export function SidePanelDocsSkeleton(): JSX.Element {
     return (
         <div className="absolute inset-0 p-4 deprecated-space-y-2">
-            <LemonSkeleton className="w-full h-10 mb-12" />
-            <LemonSkeleton className="w-1/3 h-8" />
-            <LemonSkeleton className="w-1/2 h-4 mb-10" />
-            <LemonSkeleton className="w-full h-4" />
-            <LemonSkeleton className="w-full h-4 opacity-80" />
-            <LemonSkeleton className="w-full h-4 opacity-60" />
-            <LemonSkeleton className="w-full h-4 opacity-40" />
-            <LemonSkeleton className="w-1/2 h-4 opacity-20" />
+            <Skeleton className="w-full h-10 mb-12" />
+            <Skeleton className="w-1/3 h-8" />
+            <Skeleton className="w-1/2 h-4 mb-10" />
+            <Skeleton className="w-full h-4" />
+            <Skeleton className="w-full h-4 opacity-80" />
+            <Skeleton className="w-full h-4 opacity-60" />
+            <Skeleton className="w-full h-4 opacity-40" />
+            <Skeleton className="w-1/2 h-4 opacity-20" />
         </div>
     )
 }
@@ -58,7 +58,7 @@ export const SidePanelDocs = (): JSX.Element => {
     return (
         <>
             <SidePanelPaneHeader>
-                <LemonButton
+                <Button
                     size="small"
                     sideIcon={<IconHome />}
                     type="secondary"
@@ -76,7 +76,7 @@ export const SidePanelDocs = (): JSX.Element => {
                 />
 
                 {menuOptions && (
-                    <LemonSelect
+                    <Select
                         placeholder="Navigate"
                         dropdownMatchSelectWidth={false}
                         onChange={navigateToPage}
@@ -88,7 +88,7 @@ export const SidePanelDocs = (): JSX.Element => {
                 )}
 
                 <div className="flex-1" />
-                <LemonButton
+                <Button
                     size="small"
                     targetBlank
                     // We can't use the normal `to` property as that is intercepted to open this panel :D
@@ -98,7 +98,7 @@ export const SidePanelDocs = (): JSX.Element => {
                     }}
                 >
                     Open in new tab
-                </LemonButton>
+                </Button>
             </SidePanelPaneHeader>
             <div className="relative flex-1 overflow-hidden">
                 <iframe

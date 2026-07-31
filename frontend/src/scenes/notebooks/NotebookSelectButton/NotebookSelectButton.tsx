@@ -2,15 +2,15 @@ import { BuiltLogic, useActions, useValues } from 'kea'
 import { ReactChild, ReactElement, useEffect } from 'react'
 
 import { IconNotebook, IconPlusSmall } from '@hanzo/icons'
-import { LemonDivider, LemonDropdown, LemonTag, ProfilePicture } from '@hanzo/lemon-ui'
+import { Divider, Dropdown, Tag, ProfilePicture } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { dayjs } from 'lib/dayjs'
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { PopoverProps } from 'lib/lemon-ui/Popover'
-import { IconWithCount } from 'lib/lemon-ui/icons'
+import { Button, ButtonProps } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input/Input'
+import { PopoverProps } from 'lib/elements/Popover'
+import { IconWithCount } from 'lib/elements/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { Label } from 'lib/ui/Label/Label'
 import { useNotebookNode } from 'scenes/notebooks/Nodes/NotebookNodeContext'
@@ -41,7 +41,7 @@ export type NotebookSelectPopoverProps = NotebookSelectProps &
     }
 
 export type NotebookSelectButtonProps = NotebookSelectProps &
-    Omit<LemonButtonProps, 'onClick' | 'children' | 'sideAction'> & {
+    Omit<ButtonProps, 'onClick' | 'children' | 'sideAction'> & {
         onClick?: () => void
         children?: ReactChild
     }
@@ -99,7 +99,7 @@ function NotebooksChoiceList(props: {
                         ? stripSessionSummaryPrefix(notebook.title || undefined) || notebook.title
                         : notebook.title
                     return (
-                        <LemonButton
+                        <Button
                             key={i}
                             sideIcon={
                                 notebook.created_by ? (
@@ -119,13 +119,13 @@ function NotebooksChoiceList(props: {
                                     {notebook.created_by?.first_name || notebook.created_by?.email || 'Unknown'}
                                     {` · ${dayjs(notebook.last_modified_at ?? notebook.created_at).fromNow()}`}
                                     {isSession ? (
-                                        <LemonTag size="small" type="muted" className="ml-2 inline-block align-middle">
+                                        <Tag size="small" type="muted" className="ml-2 inline-block align-middle">
                                             {SESSION_SUMMARY_PREFIX}
-                                        </LemonTag>
+                                        </Tag>
                                     ) : null}
                                 </span>
                             </div>
-                        </LemonButton>
+                        </Button>
                     )
                 })
             )}
@@ -181,7 +181,7 @@ export function NotebookSelectList(props: NotebookSelectProps): JSX.Element {
     return (
         <div className="flex flex-col flex-1 h-full">
             <div className="deprecated-space-y-2 flex-0">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Filter notebooks..."
                     value={searchQuery}
@@ -217,7 +217,7 @@ export function NotebookSelectList(props: NotebookSelectProps): JSX.Element {
                     </ButtonPrimitive>
                 </div>
             </div>
-            <LemonDivider className="-mx-1 w-[calc(100%+var(--spacing))] my-1" />
+            <Divider className="-mx-1 w-[calc(100%+var(--spacing))] my-1" />
             <div className="overflow-y-auto overflow-x-hidden flex-1">
                 {notebooksLoading && !notebooksNotContainingResource.length && !notebooksContainingResource.length ? (
                     <div className="px-2 py-1 flex flex-row items-center deprecated-space-x-1">
@@ -244,7 +244,7 @@ export function NotebookSelectList(props: NotebookSelectProps): JSX.Element {
                                         openAndAddToNotebook(notebookShortId, true)
                                     }}
                                 />
-                                <LemonDivider />
+                                <Divider />
                             </>
                         ) : null}
                         {resource ? <h5>Add to</h5> : null}
@@ -287,7 +287,7 @@ export function NotebookSelectPopover({
     const renderedChildren = typeof children === 'function' ? children(!!showPopover) : children
 
     return (
-        <LemonDropdown
+        <Dropdown
             overlay={
                 <div className="max-w-160">
                     <NotebookSelectList {...props} onNotebookOpened={onNotebookOpened} />
@@ -300,7 +300,7 @@ export function NotebookSelectPopover({
             closeOnClickInside={false}
         >
             {renderedChildren}
-        </LemonDropdown>
+        </Dropdown>
     )
 }
 
@@ -319,7 +319,7 @@ export function NotebookSelectButton({ children, onNotebookOpened, ...props }: N
     }, [nodeLogic])
 
     const button = (
-        <LemonButton
+        <Button
             icon={
                 <IconWithCount count={notebooksContainingResource.length ?? 0} showZero={false}>
                     <IconNotebook />
@@ -339,7 +339,7 @@ export function NotebookSelectButton({ children, onNotebookOpened, ...props }: N
             tooltip="Add to notebook"
         >
             {children ?? 'Notebooks'}
-        </LemonButton>
+        </Button>
     )
 
     return nodeLogic ? button : <NotebookSelectPopover {...props}>{button}</NotebookSelectPopover>

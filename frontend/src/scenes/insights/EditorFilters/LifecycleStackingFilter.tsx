@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
+import { Checkbox } from 'lib/elements/Checkbox'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
@@ -10,7 +10,7 @@ export function LifecycleStackingFilter(): JSX.Element {
     const { updateInsightFilter } = useActions(insightVizDataLogic(insightProps))
 
     return (
-        <LemonCheckbox
+        <Checkbox
             className="p-1 px-2"
             checked={lifecycleFilter?.stacked ?? true}
             onChange={(checked) => {

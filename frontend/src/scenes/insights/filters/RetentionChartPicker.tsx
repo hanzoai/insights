@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconGraph, IconTrends } from '@hanzo/icons'
-import { LemonSelect, LemonSelectOptions } from '@hanzo/lemon-ui'
+import { Select, SelectOptions } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -17,7 +17,7 @@ function ChartFilterOptionLabel(props: { label: string; description?: string }):
     )
 }
 
-const OPTIONS: LemonSelectOptions<ChartDisplayType> = [
+const OPTIONS: SelectOptions<ChartDisplayType> = [
     {
         title: 'Time series',
         options: [
@@ -53,7 +53,7 @@ export function RetentionChartPicker(): JSX.Element {
     const { updateInsightFilter } = useActions(insightVizDataLogic(insightProps))
 
     return (
-        <LemonSelect
+        <Select
             key="2"
             value={retentionFilter?.display || ChartDisplayType.ActionsLineGraph}
             onChange={(value) => {

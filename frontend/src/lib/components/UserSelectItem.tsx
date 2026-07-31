@@ -1,5 +1,5 @@
-import { LemonInputSelectOption } from 'lib/lemon-ui/LemonInputSelect'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { InputSelectOption } from 'lib/elements/InputSelect'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { fullName } from 'lib/utils'
 
 import { UserBasicType, UserType } from '~/types'
@@ -19,10 +19,10 @@ export function UserSelectItem({ user }: UserSelectItemProps): JSX.Element {
     )
 }
 
-export function usersLemonSelectOptions(
+export function usersSelectOptions(
     users: (UserBasicType | UserType)[],
     key: 'email' | 'uuid' = 'email'
-): LemonInputSelectOption[] {
+): InputSelectOption[] {
     return users.map((user) => ({
         key: user[key],
         label: `${fullName(user)} ${user.email}`,

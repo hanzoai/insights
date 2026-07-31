@@ -1,4 +1,4 @@
-import { LemonCollapse } from '@hanzo/lemon-ui'
+import { Collapse } from '@hanzo/elements'
 
 import { BaseCurrency } from 'lib/components/BaseCurrency/BaseCurrency'
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
@@ -47,7 +47,7 @@ export function MarketingAnalyticsSettings({
             <FlaggedFeature flag="advance-marketing-analytics-settings">
                 <>
                     <SceneDivider />
-                    <LemonCollapse
+                    <Collapse
                         panels={[
                             {
                                 key: 'advanced-marketing-settings',

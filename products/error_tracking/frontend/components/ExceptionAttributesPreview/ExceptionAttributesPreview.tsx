@@ -2,7 +2,7 @@ import { Children } from 'react'
 import { match } from 'ts-pattern'
 
 import { IconBug } from '@hanzo/icons'
-import { LemonTag, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Spinner, Tooltip } from '@hanzo/elements'
 
 import { ExceptionAttributes } from 'lib/components/Errors/types'
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
@@ -70,9 +70,9 @@ function Property({ property, title, iconOnly }: { property: string; title?: str
             <PropertyIcon property={property} value={title} className="text-sm text-secondary" />
         </Tooltip>
     ) : (
-        <LemonTag className="bg-fill-primary">
+        <Tag className="bg-fill-primary">
             <PropertyIcon property={property} value={title} className="text-sm text-secondary" />
             <span className="capitalize">{title}</span>
-        </LemonTag>
+        </Tag>
     )
 }

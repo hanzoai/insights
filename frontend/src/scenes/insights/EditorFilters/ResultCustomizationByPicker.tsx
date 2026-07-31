@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { SegmentedButton } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { trendsDataLogic } from 'scenes/trends/trendsDataLogic'
@@ -13,7 +13,7 @@ export function ResultCustomizationByPicker(): JSX.Element | null {
     const { updateInsightFilter } = useActions(trendsDataLogic(insightProps))
 
     return (
-        <LemonSegmentedButton
+        <SegmentedButton
             className="pb-2 px-2"
             onChange={(value) => updateInsightFilter({ resultCustomizationBy: value as ResultCustomizationBy })}
             value={resultCustomizationBy}

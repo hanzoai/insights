@@ -2,7 +2,7 @@ import { actions, kea, listeners, path, reducers } from 'kea'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import type { aiRegexHelperLogicType } from './aiRegexHelperLogicType'
@@ -82,7 +82,7 @@ export const aiRegexHelperLogic = kea<aiRegexHelperLogicType>([
             try {
                 await copyToClipboard(values.generatedRegex, 'Regex copied to clipboard')
             } catch {
-                lemonToast.error('Failed to copy regex to clipboard')
+                toast.error('Failed to copy regex to clipboard')
             }
         },
         onClose: () => {

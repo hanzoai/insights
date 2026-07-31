@@ -13,11 +13,11 @@ import {
     IconDatabase,
     IconPlusSmall,
 } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
-import { LemonTree, LemonTreeRef, TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
-import { TreeNodeDisplayIcon } from 'lib/lemon-ui/LemonTree/LemonTreeUtils'
-import { IconTextSize } from 'lib/lemon-ui/icons'
+import { Tree, TreeRef, TreeDataItem } from 'lib/elements/Tree/Tree'
+import { TreeNodeDisplayIcon } from 'lib/elements/Tree/TreeUtils'
+import { IconTextSize } from 'lib/elements/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator } from 'lib/ui/DropdownMenu/DropdownMenu'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -180,13 +180,13 @@ export const QueryDatabase = (): JSX.Element => {
         }
     }
 
-    const treeRef = useRef<LemonTreeRef>(null)
+    const treeRef = useRef<TreeRef>(null)
     useEffect(() => {
         setTreeRef(treeRef)
     }, [treeRef, setTreeRef])
 
     return (
-        <LemonTree
+        <Tree
             ref={treeRef}
             // TODO: Can move this to treedata selector but selectors are maxed out on dependencies
             data={searchTerm ? searchTreeData : treeData}

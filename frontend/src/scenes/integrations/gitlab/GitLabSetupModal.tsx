@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconGitLab } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Modal, Link } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { GitLabSetupModalLogicProps, gitlabSetupModalLogic } from './gitlabSetupModalLogic'
 
@@ -14,7 +14,7 @@ export const GitLabSetupModal = (props: GitLabSetupModalLogicProps): JSX.Element
     const { submitGitlabIntegration } = useActions(logic)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={props.isOpen}
             title={
                 <div className="flex items-center gap-2">
@@ -26,10 +26,10 @@ export const GitLabSetupModal = (props: GitLabSetupModalLogicProps): JSX.Element
         >
             <Form logic={gitlabSetupModalLogic} props={props} formKey="gitlabIntegration">
                 <div className="gap-4 flex flex-col">
-                    <LemonField name="hostname" label="Hostname">
-                        <LemonInput type="text" placeholder="https://gitlab.com" />
-                    </LemonField>
-                    <LemonField
+                    <Field name="hostname" label="Hostname">
+                        <Input type="text" placeholder="https://gitlab.com" />
+                    </Field>
+                    <Field
                         name="projectId"
                         label="Project ID"
                         help={
@@ -41,9 +41,9 @@ export const GitLabSetupModal = (props: GitLabSetupModalLogicProps): JSX.Element
                             </Link>
                         }
                     >
-                        <LemonInput type="text" placeholder="1234567" />
-                    </LemonField>
-                    <LemonField
+                        <Input type="text" placeholder="1234567" />
+                    </Field>
+                    <Field
                         name="projectAccessToken"
                         label="Project access token"
                         help={
@@ -58,23 +58,23 @@ export const GitLabSetupModal = (props: GitLabSetupModalLogicProps): JSX.Element
                             </>
                         }
                     >
-                        <LemonInput
+                        <Input
                             type="password"
                             placeholder="xxxxx-x_xxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxx.xx.xxxxxxxxx"
                         />
-                    </LemonField>
+                    </Field>
                     <div className="flex justify-end">
-                        <LemonButton
+                        <Button
                             type="primary"
                             htmlType="submit"
                             loading={isGitlabIntegrationSubmitting}
                             onClick={submitGitlabIntegration}
                         >
                             Connect
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

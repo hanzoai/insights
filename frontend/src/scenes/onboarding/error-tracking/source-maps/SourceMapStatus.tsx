@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheckCircle, IconRefresh, IconWarning } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 
@@ -45,7 +45,7 @@ export function SourceMapStatus(): JSX.Element {
                         </>
                     )}
                 </div>
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     icon={<IconRefresh />}
@@ -53,7 +53,7 @@ export function SourceMapStatus(): JSX.Element {
                     loading={lastSymbolSetLoading}
                 >
                     Refresh
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

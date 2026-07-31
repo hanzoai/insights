@@ -1,4 +1,4 @@
-import { Link, Tooltip } from '@hanzo/lemon-ui'
+import { Link, Tooltip } from '@hanzo/elements'
 
 import { BatchExportService } from '~/types'
 

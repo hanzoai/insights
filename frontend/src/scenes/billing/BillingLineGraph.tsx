@@ -14,7 +14,7 @@ import { getGraphColors } from 'lib/colors'
 import { Dayjs } from 'lib/dayjs'
 import { useChart } from 'lib/hooks/useChart'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconX } from '@hanzo/icons'
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { queryDatabaseLogic } from 'scenes/data-warehouse/editor/sidebar/queryDatabaseLogic'
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
@@ -24,12 +24,12 @@ export const SyncMoreNotice = (): JSX.Element | null => {
     }
 
     return (
-        <LemonBanner type="info" className="h-[265px] min-h-[auto] z-10">
+        <Banner type="info" className="h-[265px] min-h-[auto] z-10">
             <div
                 data-attr="sql-editor-source-empty-state"
                 className="p-4 text-center flex flex-col justify-center items-center relative"
             >
-                <LemonButton
+                <Button
                     type="tertiary"
                     size="small"
                     onClick={() => setSyncMoreNoticeDismissed(true)}
@@ -47,7 +47,7 @@ export const SyncMoreNotice = (): JSX.Element | null => {
                     Your datastore is already connected and queryable here. Add Postgres, Stripe, or another external
                     source to join it with your product data.
                 </p>
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={() => {
                         addProductIntent({
@@ -63,8 +63,8 @@ export const SyncMoreNotice = (): JSX.Element | null => {
                     id="data-warehouse-sql-editor-add-data-source"
                 >
                     Add data source
-                </LemonButton>
+                </Button>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

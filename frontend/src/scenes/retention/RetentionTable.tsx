@@ -6,7 +6,7 @@ import React from 'react'
 
 import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { gradateColor, humanFriendlyNumber } from 'lib/utils'
 import { insightLogic } from 'scenes/insights/insightLogic'
 

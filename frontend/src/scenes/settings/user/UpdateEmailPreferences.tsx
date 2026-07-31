@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSwitch, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input, Switch, Tag } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -47,7 +47,7 @@ export function UpdateEmailPreferences(): JSX.Element {
         <div className="space-y-3">
             <div className="border rounded p-4">
                 <div className="space-y-2">
-                    <LemonSwitch
+                    <Switch
                         data-attr="security_alerts_enabled"
                         checked={true}
                         disabled={true}
@@ -71,7 +71,7 @@ export function UpdateEmailPreferences(): JSX.Element {
 
                 {weeklyDigestEnabled && (
                     <div>
-                        <LemonButton
+                        <Button
                             icon={weeklyDigestProjectsExpanded ? <IconChevronDown /> : <IconChevronRight />}
                             onClick={() => setWeeklyDigestProjectsExpanded(!weeklyDigestProjectsExpanded)}
                             size="small"
@@ -79,13 +79,13 @@ export function UpdateEmailPreferences(): JSX.Element {
                             className="p-0"
                         >
                             Select projects ({currentOrganization?.teams?.length || 0} available)
-                        </LemonButton>
+                        </Button>
 
                         {weeklyDigestProjectsExpanded && (
                             <div className="mt-3 ml-6 space-y-2">
                                 <div className="flex flex-col gap-2">
                                     <div className="flex flex-row items-center gap-4">
-                                        <LemonButton
+                                        <Button
                                             size="xsmall"
                                             type="secondary"
                                             onClick={() => {
@@ -96,8 +96,8 @@ export function UpdateEmailPreferences(): JSX.Element {
                                             }}
                                         >
                                             Enable for all teams
-                                        </LemonButton>
-                                        <LemonButton
+                                        </Button>
+                                        <Button
                                             size="xsmall"
                                             type="secondary"
                                             onClick={() => {
@@ -108,11 +108,11 @@ export function UpdateEmailPreferences(): JSX.Element {
                                             }}
                                         >
                                             Disable for all teams
-                                        </LemonButton>
+                                        </Button>
                                     </div>
 
                                     {currentOrganization?.teams?.map((team) => (
-                                        <LemonCheckbox
+                                        <Checkbox
                                             key={`weekly-digest-${team.id}`}
                                             id={`weekly-digest-${team.id}`}
                                             data-attr={`weekly_digest_${team.id}`}
@@ -124,7 +124,7 @@ export function UpdateEmailPreferences(): JSX.Element {
                                             label={
                                                 <div className="flex items-center gap-2">
                                                     <span>{team.name}</span>
-                                                    <LemonTag type="muted">id: {team.id.toString()}</LemonTag>
+                                                    <Tag type="muted">id: {team.id.toString()}</Tag>
                                                 </div>
                                             }
                                         />
@@ -148,7 +148,7 @@ export function UpdateEmailPreferences(): JSX.Element {
                         <label className="text-sm font-medium">Failure rate threshold</label>
                         <div className="flex flex-col gap-2">
                             <div className="flex items-center gap-2">
-                                <LemonInput
+                                <Input
                                     type="number"
                                     size="xsmall"
                                     min={0}
@@ -256,7 +256,7 @@ const SimpleSwitch = ({
 
     return (
         <div className="space-y-2">
-            <LemonSwitch
+            <Switch
                 data-attr={dataAttr}
                 onChange={(newChecked) => {
                     user?.notification_settings &&

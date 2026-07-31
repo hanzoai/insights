@@ -18,7 +18,7 @@
     // @include root-variables;
 }
 
-.LemonModal__overlay--force-modal-above-popovers {
+.Modal__overlay--force-modal-above-popovers {
     z-index: calc(var(--z-toolbar) + var(--z-force-modal-above-popovers)) !important;
 }
 

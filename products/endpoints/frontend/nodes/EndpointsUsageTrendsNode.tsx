@@ -1,7 +1,7 @@
 import { BuiltLogic, LogicWrapper, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 
@@ -48,7 +48,7 @@ export function EndpointsUsageTrendsNode(props: {
     if (responseLoading) {
         return (
             <div className="border rounded bg-bg-light p-4 h-60">
-                <LemonSkeleton className="w-full h-full" />
+                <Skeleton className="w-full h-full" />
             </div>
         )
     }

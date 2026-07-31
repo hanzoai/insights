@@ -1,4 +1,4 @@
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 
@@ -29,7 +29,7 @@ export const ProductPricingModal = ({
     const numberOfSigFigs = tiers.map((tier) => tier.unit_amount_usd?.split('.')[1]?.length).sort((a, b) => b - a)[0]
 
     return (
-        <LemonModal isOpen={modalOpen} onClose={onClose}>
+        <Modal isOpen={modalOpen} onClose={onClose}>
             <div className="flex items-center w-full h-full justify-center p-8">
                 <div className="text-left bg-surface-primary rounded relative w-full">
                     <h5 className="text-gray mb-1">{capitalizeFirstLetter(product.name)} pricing, starting at</h5>
@@ -72,6 +72,6 @@ export const ProductPricingModal = ({
                     </div>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

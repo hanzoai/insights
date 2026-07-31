@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 
 import { IconSupport } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 
 import { llmAnalyticsSessionFeedbackLogic } from './llmAnalyticsSessionFeedbackLogic'
 
@@ -54,7 +54,7 @@ export function LLMASessionFeedbackDisplay({ sessionId }: LLMASessionFeedbackDis
                 <>
                     {sessionFeedback.map((feedback: { rating: string; triggerType: string }, index: number) => (
                         <span key={`feedback-group-${index}`} className="contents">
-                            <LemonTag
+                            <Tag
                                 size="medium"
                                 className="bg-surface-primary"
                                 type={getFeedbackTagType(feedback.rating)}
@@ -63,15 +63,15 @@ export function LLMASessionFeedbackDisplay({ sessionId }: LLMASessionFeedbackDis
                                 {feedback.rating === 'implicit_dismiss'
                                     ? 'Dismissed'
                                     : feedback.rating.charAt(0).toUpperCase() + feedback.rating.slice(1)}
-                            </LemonTag>
-                            <LemonTag
+                            </Tag>
+                            <Tag
                                 size="medium"
                                 className="bg-surface-primary"
                                 type="muted"
                                 title={`Trigger: ${feedback.triggerType}`}
                             >
                                 {formatTriggerType(feedback.triggerType)}
-                            </LemonTag>
+                            </Tag>
                         </span>
                     ))}
                 </>
@@ -85,14 +85,14 @@ export function LLMASessionFeedbackDisplay({ sessionId }: LLMASessionFeedbackDis
                             target="_blank"
                             className="flex"
                         >
-                            <LemonTag
+                            <Tag
                                 size="medium"
                                 className="bg-surface-primary"
                                 icon={<IconSupport />}
                                 title={`Support ticket: ${ticket.ticketId}`}
                             >
                                 Ticket
-                            </LemonTag>
+                            </Tag>
                         </Link>
                     ))}
                 </>

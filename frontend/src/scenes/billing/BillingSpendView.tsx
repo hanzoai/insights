@@ -3,16 +3,16 @@ import './BillingUsage.scss'
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox } from '@hanzo/lemon-ui'
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Checkbox } from '@hanzo/elements'
+import { Select } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { Label } from 'lib/elements/Label/Label'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { ExporterFormat } from '~/types'
 
@@ -87,8 +87,8 @@ export function BillingSpendView(): JSX.Element {
                 <div className="flex gap-4 items-start flex-wrap">
                     {/* Products */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Products</LemonLabel>
-                        <LemonInputSelect
+                        <Label>Products</Label>
+                        <InputSelect
                             mode="multiple"
                             displayMode="count"
                             bulkActions="select-and-clear-all"
@@ -103,8 +103,8 @@ export function BillingSpendView(): JSX.Element {
 
                     {/* Projects */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Projects</LemonLabel>
-                        <LemonInputSelect
+                        <Label>Projects</Label>
+                        <InputSelect
                             mode="multiple"
                             displayMode="count"
                             bulkActions="select-and-clear-all"
@@ -122,14 +122,14 @@ export function BillingSpendView(): JSX.Element {
 
                     {/* Breakdowns */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Break down by</LemonLabel>
+                        <Label>Break down by</Label>
                         <div className="flex gap-2 items-center min-h-10">
-                            <LemonCheckbox
+                            <Checkbox
                                 label="Product"
                                 checked={filters.breakdowns?.includes('type')}
                                 onChange={() => toggleBreakdown('type')}
                             />
-                            <LemonCheckbox
+                            <Checkbox
                                 label="Project"
                                 checked={filters.breakdowns?.includes('team')}
                                 onChange={() => toggleBreakdown('team')}
@@ -139,7 +139,7 @@ export function BillingSpendView(): JSX.Element {
 
                     {/* Date Range */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Date range (UTC)</LemonLabel>
+                        <Label>Date range (UTC)</Label>
                         <div className="bg-bg-light rounded-md">
                             <DateFilter
                                 className="h-8 flex items-center"
@@ -153,9 +153,9 @@ export function BillingSpendView(): JSX.Element {
 
                     {/* Interval */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Group by</LemonLabel>
+                        <Label>Group by</Label>
                         <div className="bg-bg-light rounded-md">
-                            <LemonSelect
+                            <Select
                                 className="h-10.5 flex items-center"
                                 size="small"
                                 value={filters.interval || 'day'}
@@ -171,9 +171,9 @@ export function BillingSpendView(): JSX.Element {
 
                     {/* Exclude Empty Series */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Options</LemonLabel>
+                        <Label>Options</Label>
                         <div className="flex items-center min-h-10">
-                            <LemonCheckbox
+                            <Checkbox
                                 label="Hide results with no spend"
                                 checked={excludeEmptySeries}
                                 onChange={(value) => setExcludeEmptySeries(value)}
@@ -183,15 +183,15 @@ export function BillingSpendView(): JSX.Element {
 
                     {/* Clear Filters / Export */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>&nbsp;</LemonLabel>
+                        <Label>&nbsp;</Label>
                         <div className="flex items-center gap-2">
-                            <LemonButton type="secondary" size="medium" onClick={resetFilters}>
+                            <Button type="secondary" size="medium" onClick={resetFilters}>
                                 Clear filters
-                            </LemonButton>
+                            </Button>
                             {showSeries && (
-                                <LemonButton type="secondary" size="medium" onClick={onExportCsv}>
+                                <Button type="secondary" size="medium" onClick={onExportCsv}>
                                     Export CSV
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
                     </div>

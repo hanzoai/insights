@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonInput, LemonSelect, LemonSnack, LemonTable, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Input, Select, Snack, Table, Tag, Link, Tooltip } from '@hanzo/elements'
 
-import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { urls } from 'scenes/urls'
 
@@ -41,7 +41,7 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
     const { filteredMappedFlags, isLoading, searchTerm, filters, pagination } = useValues(relatedFlagsLogic)
     const { setSearchTerm, setFilters } = useActions(relatedFlagsLogic)
 
-    const columns: LemonTableColumns<RelatedFeatureFlag> = [
+    const columns: TableColumns<RelatedFeatureFlag> = [
         {
             title: 'Key',
             dataIndex: 'key',
@@ -52,14 +52,14 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
             render: function Render(_, featureFlag: RelatedFeatureFlag) {
                 const isExperiment = (featureFlag.experiment_set || []).length > 0
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={featureFlag.id ? urls.featureFlag(featureFlag.id) : undefined}
                         title={
                             <>
                                 {stringWithWBR(featureFlag.key, 17)}
-                                <LemonTag type={isExperiment ? 'completion' : 'default'} className="ml-2">
+                                <Tag type={isExperiment ? 'completion' : 'default'} className="ml-2">
                                     {isExperiment ? 'Experiment' : 'Feature flag'}
-                                </LemonTag>
+                                </Tag>
                             </>
                         }
                         description={featureFlag.name}
@@ -124,7 +124,7 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
                     <div>
                         {featureFlag.active ? <>{featureFlagMatchMapping[featureFlag.evaluation.reason]}</> : '--'}
 
-                        {matchesSet && <LemonSnack>Set {(featureFlag.evaluation.condition_index ?? 0) + 1}</LemonSnack>}
+                        {matchesSet && <Snack>Set {(featureFlag.evaluation.condition_index ?? 0) + 1}</Snack>}
                     </div>
                 )
             },
@@ -152,7 +152,7 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
     return (
         <>
             <div className="flex justify-between mb-4 gap-2 flex-wrap">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search for feature flags"
                     onChange={setSearchTerm}
@@ -162,7 +162,7 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
                     <span>
                         <b>Type</b>
                     </span>
-                    <LemonSelect
+                    <Select
                         options={options}
                         onChange={(type) => {
                             if (type) {
@@ -182,7 +182,7 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
                     <span className="ml-2">
                         <b>Match evaluation</b>
                     </span>
-                    <LemonSelect
+                    <Select
                         options={
                             [
                                 { label: 'All', value: 'all' },
@@ -208,7 +208,7 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
                     <span className="ml-2">
                         <b>Flag status</b>
                     </span>
-                    <LemonSelect
+                    <Select
                         onChange={(status) => {
                             if (status) {
                                 if (status === 'all') {
@@ -233,7 +233,7 @@ export function RelatedFeatureFlags({ distinctId, groupTypeIndex, groups }: Prop
                     />
                 </div>
             </div>
-            <LemonTable
+            <Table
                 columns={columns}
                 loading={isLoading}
                 dataSource={filteredMappedFlags}

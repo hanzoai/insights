@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { dayjs } from 'lib/dayjs'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
+import { Label } from 'lib/elements/Label/Label'
 import { humanFriendlyCurrency } from 'lib/utils'
 
 import { BillingPortalButton } from './BillingPortalButton'
@@ -18,11 +18,11 @@ export const BillingSummary = (): JSX.Element => {
                         <>
                             <div className="flex flex-row flex-wrap gap-x-10 gap-y-4 items-end">
                                 <div>
-                                    <LemonLabel
+                                    <Label
                                         info={`This is the current amount you have been billed for this ${billing.billing_period.interval} so far. This number updates once daily.`}
                                     >
                                         Current bill total
-                                    </LemonLabel>
+                                    </Label>
                                     <div className="font-bold text-6xl">
                                         {billing.discount_percent
                                             ? // if they have a discount percent, we want to show the amount they are due - so the total after discount
@@ -36,7 +36,7 @@ export const BillingSummary = (): JSX.Element => {
                                 {billing.projected_total_amount_usd &&
                                     parseFloat(billing.projected_total_amount_usd) > 0 && (
                                         <div>
-                                            <LemonLabel
+                                            <Label
                                                 info={`This is roughly calculated based on your current bill${
                                                     billing?.discount_percent ? ', discounts on your account,' : ''
                                                 } and the remaining time left in this billing period. This number updates once daily. ${
@@ -50,7 +50,7 @@ export const BillingSummary = (): JSX.Element => {
                                                 className="text-secondary"
                                             >
                                                 Projected total
-                                            </LemonLabel>
+                                            </Label>
                                             <div className="font-semibold text-2xl text-secondary">
                                                 {billing.discount_percent
                                                     ? humanFriendlyCurrency(
@@ -64,7 +64,7 @@ export const BillingSummary = (): JSX.Element => {
                                     )}
                                 {billing.discount_amount_usd && (
                                     <div>
-                                        <LemonLabel
+                                        <Label
                                             info={`The total credits remaining in your account.${
                                                 billing.amount_off_expires_at
                                                     ? ' Your credits expire on ' +
@@ -74,7 +74,7 @@ export const BillingSummary = (): JSX.Element => {
                                             className="text-secondary"
                                         >
                                             Available credits
-                                        </LemonLabel>
+                                        </Label>
                                         <div className="font-semibold text-2xl text-secondary">
                                             {humanFriendlyCurrency(billing.discount_amount_usd, 0)}
                                         </div>
@@ -82,12 +82,12 @@ export const BillingSummary = (): JSX.Element => {
                                 )}
                                 {billing.discount_percent && (
                                     <div>
-                                        <LemonLabel
+                                        <Label
                                             info="The discount applied to your current bill, reflected in the total amount."
                                             className="text-secondary"
                                         >
                                             Applied discount
-                                        </LemonLabel>
+                                        </Label>
                                         <div className="font-semibold text-2xl text-secondary">
                                             {billing.discount_percent}%
                                         </div>

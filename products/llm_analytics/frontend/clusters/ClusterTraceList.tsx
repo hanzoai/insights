@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
+import { Button, Tag, Link, Spinner } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { urls } from 'scenes/urls'
@@ -79,9 +79,9 @@ function TraceListItem({
         <div className="p-3">
             {/* Header row with rank, title, and link */}
             <div className="flex items-center gap-2 mb-2">
-                <LemonTag type="muted" size="small">
+                <Tag type="muted" size="small">
                     #{traceInfo.rank + 1}
-                </LemonTag>
+                </Tag>
                 <span className="font-medium text-sm flex-1 min-w-0 truncate">{summary?.title || 'Loading...'}</span>
                 <Link
                     to={urls.llmAnalyticsTrace(
@@ -113,7 +113,7 @@ function TraceListItem({
                     {/* Expandable buttons row */}
                     <div className="flex items-center gap-2">
                         {summary.flowDiagram && (
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 type="secondary"
                                 icon={showFlow ? <IconChevronDown /> : <IconChevronRight />}
@@ -121,10 +121,10 @@ function TraceListItem({
                                 data-attr="clusters-trace-flow-toggle"
                             >
                                 Flow
-                            </LemonButton>
+                            </Button>
                         )}
                         {bulletItems.length > 0 && (
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 type="secondary"
                                 icon={showBullets ? <IconChevronDown /> : <IconChevronRight />}
@@ -132,10 +132,10 @@ function TraceListItem({
                                 data-attr="clusters-trace-summary-toggle"
                             >
                                 Summary
-                            </LemonButton>
+                            </Button>
                         )}
                         {noteItems.length > 0 && (
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 type="secondary"
                                 icon={showNotes ? <IconChevronDown /> : <IconChevronRight />}
@@ -143,7 +143,7 @@ function TraceListItem({
                                 data-attr="clusters-trace-notes-toggle"
                             >
                                 Notes
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
 

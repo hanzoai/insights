@@ -2,7 +2,7 @@ import { actions, connect, events, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
 import { ExperimentHoldoutType } from '~/types'
@@ -71,15 +71,15 @@ export const holdoutsLogic = kea<holdoutsLogicType>([
     })),
     listeners(({ actions }) => ({
         createHoldoutSuccess: () => {
-            lemonToast.success('Holdout created')
+            toast.success('Holdout created')
             actions.loadHoldouts()
         },
         updateHoldoutSuccess: () => {
-            lemonToast.success('Holdout updated')
+            toast.success('Holdout updated')
             actions.loadHoldouts()
         },
         deleteHoldoutSuccess: () => {
-            lemonToast.success('Holdout deleted')
+            toast.success('Holdout deleted')
             actions.loadHoldouts()
         },
     })),

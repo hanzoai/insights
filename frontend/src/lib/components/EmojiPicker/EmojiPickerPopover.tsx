@@ -8,8 +8,8 @@ import { useState } from 'react'
 
 import { IconEmojiAdd } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Button } from 'lib/elements/Button'
+import { Popover } from 'lib/elements/Popover'
 
 const EmojiPickerCategoryHeader = ({ category, ...props }: EmojiPickerListCategoryHeaderProps): JSX.Element => (
     <div className="bg-bg-light px-3 pt-3 pb-1.5 font-medium text-neutral-600 text-sm" {...props}>
@@ -91,7 +91,7 @@ export function EmojiPickerPopover({
                 </EmojiPicker.Root>
             }
         >
-            <LemonButton
+            <Button
                 data-attr={dataAttr}
                 icon={<IconEmojiAdd className="text-lg" />}
                 onClick={() => {

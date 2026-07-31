@@ -19,14 +19,14 @@ import {
     IconPlus,
     IconShare,
 } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonMenu, LemonModal, LemonTable, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Divider, Menu, Modal, Table, Tooltip } from '@hanzo/elements'
 
 import { ExportButton } from 'lib/components/ExportButton/ExportButton'
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { LoadingBar } from 'lib/lemon-ui/LoadingBar'
-import { IconTableChart } from 'lib/lemon-ui/icons'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { LoadingBar } from 'lib/elements/LoadingBar'
+import { IconTableChart } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { transformDataTableToDataTableRows } from 'lib/utils/dataTableTransformations'
@@ -222,9 +222,9 @@ function RowDetailsModal({ isOpen, onClose, row, columns, columnKeys }: RowDetai
     })
 
     return (
-        <LemonModal title="Row Details" isOpen={isOpen} onClose={onClose} width={800}>
+        <Modal title="Row Details" isOpen={isOpen} onClose={onClose} width={800}>
             <div className="RowDetailsModal max-h-[70vh] overflow-y-auto px-2 overflow-x-hidden">
-                <LemonTable
+                <Table
                     dataSource={tableData}
                     className="w-full table-fixed"
                     columns={[
@@ -245,7 +245,7 @@ function RowDetailsModal({ isOpen, onClose, row, columns, columnKeys }: RowDetai
                                     <div className="flex-1 overflow-x-auto pr-2">{record.value}</div>
                                     <div className="flex flex-row gap-1 flex-shrink-0 ml-auto">
                                         {record.isJson && record.rawValue && record.rawValue != 'null' && (
-                                            <LemonButton
+                                            <Button
                                                 size="small"
                                                 icon={<IconCode />}
                                                 onClick={() =>
@@ -258,7 +258,7 @@ function RowDetailsModal({ isOpen, onClose, row, columns, columnKeys }: RowDetai
                                             />
                                         )}
                                         {showRawJson[record.column] && (
-                                            <LemonButton
+                                            <Button
                                                 size="small"
                                                 icon={wordWrap[record.column] ? <IconMinus /> : <IconPlus />}
                                                 onClick={() =>
@@ -270,7 +270,7 @@ function RowDetailsModal({ isOpen, onClose, row, columns, columnKeys }: RowDetai
                                                 tooltip={wordWrap[record.column] ? 'Collapse' : 'Expand'}
                                             />
                                         )}
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             icon={<IconCopy />}
                                             onClick={() => void copyToClipboard(record.rawValue, 'value')}
@@ -283,7 +283,7 @@ function RowDetailsModal({ isOpen, onClose, row, columns, columnKeys }: RowDetai
                     ]}
                 />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -336,7 +336,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                 width: 30,
                 renderCell: ({ row }: { row: any }) => (
                     <div className="hover-actions-cell flex justify-center items-center">
-                        <LemonButton
+                        <Button
                             size="xsmall"
                             icon={<IconExpand45 />}
                             onClick={(e) => {
@@ -531,7 +531,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                                             disabledReason={!hasColumns ? 'No results to visualize' : undefined}
                                         />
 
-                                        <LemonButton
+                                        <Button
                                             disabledReason={!hasColumns ? 'No results to visualize' : undefined}
                                             type="secondary"
                                             icon={<IconGear />}
@@ -539,7 +539,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                                             tooltip="Visualization settings"
                                         />
                                         {editingInsight || insightLoading ? (
-                                            <LemonButton
+                                            <Button
                                                 disabledReason={
                                                     !updateInsightButtonEnabled
                                                         ? 'No updates to save'
@@ -555,7 +555,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                                                     dropdown: {
                                                         placement: 'bottom-end',
                                                         overlay: (
-                                                            <LemonMenuOverlay
+                                                            <MenuOverlay
                                                                 items={[
                                                                     {
                                                                         label: 'Save as...',
@@ -568,16 +568,16 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                                                 }}
                                             >
                                                 Save insight
-                                            </LemonButton>
+                                            </Button>
                                         ) : (
-                                            <LemonButton
+                                            <Button
                                                 disabledReason={!hasColumns ? 'No results to save' : undefined}
                                                 type="primary"
                                                 onClick={() => saveAsInsight()}
                                                 id="sql-editor-save-insight"
                                             >
                                                 Save insight
-                                            </LemonButton>
+                                            </Button>
                                         )}
                                     </div>
                                 </div>
@@ -585,7 +585,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                         </>
                     )}
                     {activeTab === OutputTab.Results && (
-                        <LemonButton
+                        <Button
                             disabledReason={
                                 insightLoading
                                     ? 'Loading insight...'
@@ -599,10 +599,10 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                             icon={<IconGraph />}
                         >
                             {editingInsight || insightLoading ? 'View insight' : 'Create insight'}
-                        </LemonButton>
+                        </Button>
                     )}
                     {activeTab === OutputTab.Results && (
-                        <LemonMenu
+                        <Menu
                             items={Object.values(copyMap).map(({ label, copyFn }) => ({
                                 label,
                                 onClick: () => {
@@ -615,13 +615,13 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                             }))}
                             placement="bottom-end"
                         >
-                            <LemonButton
+                            <Button
                                 id="sql-editor-copy-dropdown"
                                 disabledReason={!response?.columns || !rows.length ? 'No results to copy' : undefined}
                                 type="secondary"
                                 icon={<IconCopy />}
                             />
-                        </LemonMenu>
+                        </Menu>
                     )}
                     {activeTab === OutputTab.Results && exportContext && (
                         <Tooltip title="Export the table results" className={!hasColumns ? 'hidden' : ''}>
@@ -647,7 +647,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                     )}
                     {activeTab === OutputTab.Results && (
                         <Tooltip title="Share your current query">
-                            <LemonButton
+                            <Button
                                 id="sql-editor-share"
                                 disabledReason={!hasQueryInput && 'No query to share'}
                                 type="secondary"
@@ -772,7 +772,7 @@ function InternalDataTableVisualization(
                     {isChartSettingsPanelOpen && (
                         <>
                             <SideBar />
-                            <LemonDivider vertical className="h-full" />
+                            <Divider vertical className="h-full" />
                         </>
                     )}
                     <div className={clsx('w-full h-full flex-1 overflow-auto')}>{component}</div>

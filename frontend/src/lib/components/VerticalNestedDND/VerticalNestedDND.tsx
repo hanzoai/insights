@@ -34,8 +34,8 @@ import { createPortal } from 'react-dom'
 import { IconTrash } from '@hanzo/icons'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
-import { IconDragHandle } from 'lib/lemon-ui/icons'
+import { Button, ButtonProps } from 'lib/elements/Button'
+import { IconDragHandle } from 'lib/elements/icons'
 
 const NOOP = (): void => {}
 export interface VDNDChildItem {
@@ -401,9 +401,9 @@ export function VerticalNestedDND<ChildItem extends VDNDChildItem, Item extends 
                     {renderAddContainerItem ? (
                         renderAddContainerItem({ onAddContainer: handleAddContainerItem })
                     ) : (
-                        <LemonButton onClick={handleAddContainerItem} fullWidth={false} type="primary">
+                        <Button onClick={handleAddContainerItem} fullWidth={false} type="primary">
                             Add container
-                        </LemonButton>
+                        </Button>
                     )}
                     {renderAdditionalControls ? renderAdditionalControls() : null}
                 </div>
@@ -730,13 +730,13 @@ export const Container = forwardRef(function Container_<Item extends VNDNDContai
                 {renderAddChildItem ? (
                     renderAddChildItem(item, { onAddChild })
                 ) : (
-                    <LemonButton
+                    <Button
                         onClick={onRemove ? () => onAddChild(item.id) : undefined}
                         fullWidth={false}
                         type="secondary"
                     >
                         Add child
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
         </Component>
@@ -834,20 +834,20 @@ export const ChildItem = React.memo(
     })
 )
 
-export function Remove(props: LemonButtonProps): JSX.Element {
+export function Remove(props: ButtonProps): JSX.Element {
     return (
-        <LemonButton type="secondary" fullWidth={false} status="danger" size="small" {...props}>
+        <Button type="secondary" fullWidth={false} status="danger" size="small" {...props}>
             <IconTrash />
-        </LemonButton>
+        </Button>
     )
 }
 
-export const Handle = forwardRef<HTMLButtonElement, LemonButtonProps>(function Handle_(props, ref) {
+export const Handle = forwardRef<HTMLButtonElement, ButtonProps>(function Handle_(props, ref) {
     return (
-        <LemonButton type="tertiary" fullWidth={false} ref={ref} size="small" {...props} className="self-start">
+        <Button type="tertiary" fullWidth={false} ref={ref} size="small" {...props} className="self-start">
             <div>
                 <IconDragHandle />
             </div>
-        </LemonButton>
+        </Button>
     )
 })

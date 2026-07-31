@@ -24,7 +24,7 @@ export class Navigation {
     }
 
     async openMenuItem(name: string): Promise<void> {
-        // Use navbar-specific selector for items that have duplicates in LemonTree
+        // Use navbar-specific selector for items that have duplicates in Tree
         const navbarSelector = this.page.getByTestId(`navbar-${name}`)
         const menuSelector = this.page.getByTestId(`menu-item-${name}`)
 

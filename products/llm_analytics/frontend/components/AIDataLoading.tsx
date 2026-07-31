@@ -1,4 +1,4 @@
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
 export function AIDataLoading({ variant = 'inline' }: { variant?: 'inline' | 'block' }): JSX.Element {
     if (variant === 'inline') {

@@ -3,10 +3,10 @@ import { DeepPartialMap, ValidationErrorType } from 'kea-forms'
 import { useState } from 'react'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonSwitch, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Switch, Link } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
+import { Dialog } from 'lib/elements/Dialog'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'
 import { sanitizeSurveyAppearance, validateSurveyAppearance } from 'scenes/surveys/utils'
 import { teamLogic } from 'scenes/teamLogic'
@@ -23,7 +23,7 @@ export function SurveyEnableToggle(): JSX.Element {
 
     return (
         <AccessControlAction resourceType={AccessControlResourceType.Survey} minAccessLevel={AccessControlLevel.Editor}>
-            <LemonSwitch
+            <Switch
                 data-attr="opt-in-surveys-switch"
                 onChange={(checked) => {
                     updateCurrentTeam({
@@ -96,9 +96,9 @@ export function SurveyDefaultAppearance(): JSX.Element {
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             {globalSurveyAppearanceConfigAvailable && (
-                                <LemonButton type="primary" onClick={updateSurveySettings}>
+                                <Button type="primary" onClick={updateSurveySettings}>
                                     Save appearance changes
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
 
@@ -156,7 +156,7 @@ export function SurveySettings({ isModal = false }: { isModal?: boolean }): JSX.
 }
 
 function openSurveysSettingsDialog(): void {
-    LemonDialog.open({
+    Dialog.open({
         title: 'Surveys settings',
         content: <SurveySettings isModal />,
         width: 600,
@@ -174,7 +174,7 @@ export function SurveysDisabledBanner(): JSX.Element | null {
     }
 
     return (
-        <LemonBanner
+        <Banner
             type="warning"
             action={{
                 type: 'secondary',
@@ -197,6 +197,6 @@ export function SurveysDisabledBanner(): JSX.Element | null {
                 fetching and rendering them manually
             </Link>
             .
-        </LemonBanner>
+        </Banner>
     )
 }

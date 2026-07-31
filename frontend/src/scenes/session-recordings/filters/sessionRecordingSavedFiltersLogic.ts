@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
 import api from 'lib/api'
-import { PaginationManual } from 'lib/lemon-ui/PaginationControl'
+import { PaginationManual } from 'lib/elements/PaginationControl'
 import { objectClean, toParams } from 'lib/utils'
 import { sessionRecordingEventUsageLogic } from 'scenes/session-recordings/sessionRecordingEventUsageLogic'
 import { urls } from 'scenes/urls'

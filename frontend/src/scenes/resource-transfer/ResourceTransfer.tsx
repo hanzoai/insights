@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
-import { LemonButton, LemonInputSelect, LemonSelect, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, InputSelect, Select, Skeleton } from '@hanzo/elements'
 
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -61,7 +61,7 @@ export function ResourceTransfer(props: ResourceTransferLogicProps): JSX.Element
                     </p>
                     <div>
                         <label className="font-semibold leading-6 block mb-1">Destination project</label>
-                        <LemonSelect
+                        <Select
                             fullWidth
                             placeholder="Select a project"
                             value={destinationTeamId}
@@ -80,9 +80,9 @@ export function ResourceTransfer(props: ResourceTransferLogicProps): JSX.Element
                     <>
                         {previewLoading ? (
                             <div className="space-y-3">
-                                <LemonSkeleton className="h-10 w-full" />
-                                <LemonSkeleton className="h-10 w-full" />
-                                <LemonSkeleton className="h-10 w-full" />
+                                <Skeleton className="h-10 w-full" />
+                                <Skeleton className="h-10 w-full" />
+                                <Skeleton className="h-10 w-full" />
                             </div>
                         ) : preview ? (
                             <div className="space-y-4">
@@ -110,13 +110,13 @@ export function ResourceTransfer(props: ResourceTransferLogicProps): JSX.Element
                                     </div>
                                 )}
                                 <div className="flex justify-end">
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         onClick={submitTransfer}
                                         loading={transferResultLoading}
                                     >
                                         Copy
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             </div>
                         ) : null}
@@ -204,7 +204,7 @@ function ResourceRow({
                     <span className="font-medium truncate">{resource.display_name}</span>
                     <span className="text-muted text-xs shrink-0">{resource.friendly_kind}</span>
                 </div>
-                <LemonSelect
+                <Select
                     size="small"
                     value={modeValue}
                     onChange={handleModeChange}
@@ -218,15 +218,15 @@ function ResourceRow({
             {choice.mode === 'substitute' && !isSearching && (
                 <div className="text-sm text-muted pl-2 flex items-center gap-1">
                     Linked to: <span className="font-medium text-default">{choice.display_name}</span>
-                    <LemonButton size="xsmall" type="tertiary" onClick={() => setIsSearching(true)}>
+                    <Button size="xsmall" type="tertiary" onClick={() => setIsSearching(true)}>
                         Change
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
 
             {isSearching && (
                 <div className="pl-2">
-                    <LemonInputSelect
+                    <InputSelect
                         mode="single"
                         placeholder={`Search for ${resource.friendly_kind.toLowerCase()}...`}
                         options={
@@ -247,7 +247,7 @@ function ResourceRow({
             {resource.suggested_substitution && choice.mode === 'copy' && (
                 <div className="text-xs text-muted pl-2">
                     Previously copied to:{' '}
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         type="tertiary"
                         onClick={() =>
@@ -260,7 +260,7 @@ function ResourceRow({
                         }
                     >
                         {resource.suggested_substitution.display_name}
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </div>

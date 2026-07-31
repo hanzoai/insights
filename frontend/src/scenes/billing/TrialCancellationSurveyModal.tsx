@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { SurveyEventProperties } from '@hanzo/insights'
 import { useState } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonLabel, LemonModal, LemonTextArea, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Label, Modal, TextArea, Tooltip } from '@hanzo/elements'
 
 import { BillingProductV2AddonType, BillingProductV2Type } from '~/types'
 
@@ -35,7 +35,7 @@ export const TrialCancellationSurveyModal = ({
     }
 
     return (
-        <LemonModal
+        <Modal
             onClose={() => {
                 reportSurveyDismissed(surveyID)
             }}
@@ -43,15 +43,15 @@ export const TrialCancellationSurveyModal = ({
             title={`${action} for ${product.name}`}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={() => {
                             reportSurveyDismissed(surveyID)
                         }}
                     >
                         Close
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         disabledReason={
                             surveyResponse['$survey_response_2'].length === 0 ? 'Please select a reason' : undefined
@@ -60,22 +60,22 @@ export const TrialCancellationSurveyModal = ({
                         loading={trialLoading}
                     >
                         {action}
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="flex flex-col gap-3.5">
                 {isPlatformAndSupportAddon(product) && <AddonFeatureLossNotice product={product} />}
 
-                <LemonLabel>
+                <Label>
                     Why are you {actionVerb}? <i className="text-secondary">(you can select multiple)</i>
                     <Tooltip title="Required">
                         <span className="text-danger">*</span>
                     </Tooltip>
-                </LemonLabel>
+                </Label>
                 <div className="grid grid-cols-2 gap-2">
                     {randomizedReasons.map((reason) => (
-                        <LemonCheckbox
+                        <Checkbox
                             bordered
                             key={reason.reason}
                             label={reason.reason}
@@ -88,7 +88,7 @@ export const TrialCancellationSurveyModal = ({
                     ))}
                 </div>
                 {surveyResponse.$survey_response_2.length > 0 && (
-                    <LemonTextArea
+                    <TextArea
                         data-attr="trial-cancel-reason-survey-textarea"
                         placeholder={trialCancelReasonQuestions}
                         value={surveyResponse[SurveyEventProperties.SURVEY_RESPONSE]}
@@ -98,6 +98,6 @@ export const TrialCancellationSurveyModal = ({
                     />
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

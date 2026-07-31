@@ -1,17 +1,17 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, LemonDialog, LemonDivider, LemonInput, LemonSelect, LemonTable, Spinner } from '@hanzo/lemon-ui'
+import { Button, Dialog, Divider, Input, Select, Table, Spinner } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { dayjs } from 'lib/dayjs'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTableColumn } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { More } from 'lib/elements/Button/More'
+import { TableColumn } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn } from 'lib/elements/Table/columnUtils'
 import { cn } from 'lib/utils/css-classes'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -75,7 +75,7 @@ export function SurveysTable(): JSX.Element {
                         interaction="click"
                         scope={Scene.Surveys}
                     >
-                        <LemonInput
+                        <Input
                             type="search"
                             placeholder="Search for surveys"
                             onChange={setSearchTerm}
@@ -89,7 +89,7 @@ export function SurveysTable(): JSX.Element {
                                 <span>
                                     <b>Type</b>
                                 </span>
-                                <LemonSelect
+                                <Select
                                     dropdownMatchSelectWidth={false}
                                     onChange={(type) => {
                                         setSurveysFilters({ type })
@@ -107,7 +107,7 @@ export function SurveysTable(): JSX.Element {
                                 <span className="ml-1">
                                     <b>Status</b>
                                 </span>
-                                <LemonSelect
+                                <Select
                                     dropdownMatchSelectWidth={false}
                                     onChange={(status) => {
                                         setSurveysFilters({ status })
@@ -134,7 +134,7 @@ export function SurveysTable(): JSX.Element {
                     </div>
                 </div>
             </div>
-            <LemonTable
+            <Table
                 dataSource={searchedSurveys}
                 defaultSorting={{
                     columnKey: 'created_at',
@@ -148,13 +148,13 @@ export function SurveysTable(): JSX.Element {
                 footer={
                     (searchTerm ? hasNextSearchPage : hasNextPage) && (
                         <div className="flex justify-center p-1">
-                            <LemonButton
+                            <Button
                                 onClick={searchTerm ? loadNextSearchPage : loadNextPage}
                                 className="min-w-full text-center"
                                 disabledReason={dataLoading ? 'Loading surveys' : ''}
                             >
                                 <span className="flex-1 text-center">{dataLoading ? 'Loading...' : 'Load more'}</span>
-                            </LemonButton>
+                            </Button>
                         </div>
                     )
                 }
@@ -163,7 +163,7 @@ export function SurveysTable(): JSX.Element {
                         dataIndex: 'name',
                         title: 'Name',
                         render: function RenderName(_, survey) {
-                            return <LemonTableLink to={urls.survey(survey.id)} title={stringWithWBR(survey.name, 17)} />
+                            return <TableLink to={urls.survey(survey.id)} title={stringWithWBR(survey.name, 17)} />
                         },
                     },
                     {
@@ -203,7 +203,7 @@ export function SurveysTable(): JSX.Element {
                     },
                     ...(tab === SurveysTabs.Active
                         ? [
-                              createdAtColumn<Survey>() as LemonTableColumn<Survey, keyof Survey | undefined>,
+                              createdAtColumn<Survey>() as TableColumn<Survey, keyof Survey | undefined>,
                               {
                                   title: 'Status',
                                   width: 100,
@@ -220,18 +220,18 @@ export function SurveysTable(): JSX.Element {
                                 <More
                                     overlay={
                                         <>
-                                            <LemonButton
+                                            <Button
                                                 fullWidth
                                                 onClick={() => router.actions.push(urls.survey(survey.id))}
                                             >
                                                 View
-                                            </LemonButton>
+                                            </Button>
                                             <AccessControlAction
                                                 resourceType={AccessControlResourceType.Survey}
                                                 minAccessLevel={AccessControlLevel.Editor}
                                                 userAccessLevel={survey.user_access_level}
                                             >
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     onClick={() => {
                                                         if (hasMultipleProjects) {
@@ -242,7 +242,7 @@ export function SurveysTable(): JSX.Element {
                                                     }}
                                                 >
                                                     Duplicate
-                                                </LemonButton>
+                                                </Button>
                                             </AccessControlAction>
                                             {!survey.start_date && (
                                                 <AccessControlAction
@@ -250,11 +250,11 @@ export function SurveysTable(): JSX.Element {
                                                     minAccessLevel={AccessControlLevel.Editor}
                                                     userAccessLevel={survey.user_access_level}
                                                 >
-                                                    <LemonButton
+                                                    <Button
                                                         fullWidth
                                                         onClick={() => {
                                                             const warnings = getSurveyWarnings(survey, teamSdkVersions)
-                                                            LemonDialog.open({
+                                                            Dialog.open({
                                                                 title: 'Launch this survey?',
                                                                 content: (
                                                                     <div>
@@ -289,7 +289,7 @@ export function SurveysTable(): JSX.Element {
                                                         }}
                                                     >
                                                         Launch survey
-                                                    </LemonButton>
+                                                    </Button>
                                                 </AccessControlAction>
                                             )}
                                             {isSurveyRunning(survey) && (
@@ -298,10 +298,10 @@ export function SurveysTable(): JSX.Element {
                                                     minAccessLevel={AccessControlLevel.Editor}
                                                     userAccessLevel={survey.user_access_level}
                                                 >
-                                                    <LemonButton
+                                                    <Button
                                                         fullWidth
                                                         onClick={() => {
-                                                            LemonDialog.open({
+                                                            Dialog.open({
                                                                 title: 'Stop this survey?',
                                                                 content: (
                                                                     <div className="text-sm text-secondary">
@@ -333,7 +333,7 @@ export function SurveysTable(): JSX.Element {
                                                         }}
                                                     >
                                                         Stop survey
-                                                    </LemonButton>
+                                                    </Button>
                                                 </AccessControlAction>
                                             )}
                                             {survey.end_date && !survey.archived && (
@@ -342,10 +342,10 @@ export function SurveysTable(): JSX.Element {
                                                     minAccessLevel={AccessControlLevel.Editor}
                                                     userAccessLevel={survey.user_access_level}
                                                 >
-                                                    <LemonButton
+                                                    <Button
                                                         fullWidth
                                                         onClick={() => {
-                                                            LemonDialog.open({
+                                                            Dialog.open({
                                                                 title: 'Resume this survey?',
                                                                 content: (
                                                                     <div className="text-sm text-secondary">
@@ -377,17 +377,17 @@ export function SurveysTable(): JSX.Element {
                                                         }}
                                                     >
                                                         Resume survey
-                                                    </LemonButton>
+                                                    </Button>
                                                 </AccessControlAction>
                                             )}
-                                            <LemonDivider />
+                                            <Divider />
                                             {survey.archived && (
                                                 <AccessControlAction
                                                     resourceType={AccessControlResourceType.Survey}
                                                     minAccessLevel={AccessControlLevel.Editor}
                                                     userAccessLevel={survey.user_access_level}
                                                 >
-                                                    <LemonButton
+                                                    <Button
                                                         fullWidth
                                                         onClick={() => {
                                                             updateSurvey({
@@ -398,7 +398,7 @@ export function SurveysTable(): JSX.Element {
                                                         }}
                                                     >
                                                         Unarchive
-                                                    </LemonButton>
+                                                    </Button>
                                                 </AccessControlAction>
                                             )}
                                             {!survey.archived && (
@@ -407,7 +407,7 @@ export function SurveysTable(): JSX.Element {
                                                     minAccessLevel={AccessControlLevel.Editor}
                                                     userAccessLevel={survey.user_access_level}
                                                 >
-                                                    <LemonButton
+                                                    <Button
                                                         fullWidth
                                                         onClick={() =>
                                                             openArchiveSurveyDialog(survey, () => {
@@ -426,7 +426,7 @@ export function SurveysTable(): JSX.Element {
                                                         }
                                                     >
                                                         Archive
-                                                    </LemonButton>
+                                                    </Button>
                                                 </AccessControlAction>
                                             )}
                                             {canDeleteSurvey(survey) && (
@@ -435,7 +435,7 @@ export function SurveysTable(): JSX.Element {
                                                     minAccessLevel={AccessControlLevel.Editor}
                                                     userAccessLevel={survey.user_access_level}
                                                 >
-                                                    <LemonButton
+                                                    <Button
                                                         status="danger"
                                                         onClick={() =>
                                                             openDeleteSurveyDialog(survey, () =>
@@ -445,7 +445,7 @@ export function SurveysTable(): JSX.Element {
                                                         fullWidth
                                                     >
                                                         Delete permanently
-                                                    </LemonButton>
+                                                    </Button>
                                                 </AccessControlAction>
                                             )}
                                         </>

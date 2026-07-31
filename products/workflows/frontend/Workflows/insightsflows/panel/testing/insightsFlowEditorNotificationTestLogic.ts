@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, key, listeners, path, props, reducer
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -227,7 +227,7 @@ export const insightsFlowEditorNotificationTestLogic = kea<insightsFlowEditorNot
                     return values.testInvocation
                 } catch (error: any) {
                     console.error('Workflow test error:', error)
-                    lemonToast.error('Error testing workflow')
+                    toast.error('Error testing workflow')
                     throw error
                 }
             },

@@ -2,7 +2,7 @@ import { actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 
 import { ApiRequest, getCookie } from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import type { customerIOImportLogicType } from './customerIOImportLogicType'
 import { optOutCategoriesLogic } from './optOutCategoriesLogic'
@@ -151,7 +151,7 @@ export const customerIOImportLogic = kea<customerIOImportLogicType>([
             if (importProgress.status === 'completed') {
                 const categoriesCreated = importProgress.categories_created || 0
                 const globallyUnsubscribed = importProgress.globally_unsubscribed_count || 0
-                lemonToast.success(
+                toast.success(
                     `API import completed! Created ${categoriesCreated} categories and imported ${globallyUnsubscribed} globally unsubscribed users.`
                 )
                 // Show CSV phase after API import completes
@@ -163,14 +163,14 @@ export const customerIOImportLogic = kea<customerIOImportLogicType>([
                 }
             } else if (importProgress.status === 'failed') {
                 const errorMessage = importProgress.errors?.join(', ') || 'Import failed'
-                lemonToast.error(errorMessage)
+                toast.error(errorMessage)
             }
         },
         uploadCSV: async () => {
             const CSRF_COOKIE_NAME = 'insights_csrftoken'
             const file = customerIOImportLogic.values.csvFile
             if (!file) {
-                lemonToast.error('Please select a CSV file')
+                toast.error('Please select a CSV file')
                 return
             }
 
@@ -203,7 +203,7 @@ export const customerIOImportLogic = kea<customerIOImportLogicType>([
                 actions.setCSVProgress(data)
 
                 if (data.status === 'completed') {
-                    lemonToast.success(
+                    toast.success(
                         `CSV import completed! Processed ${data.rows_processed} rows with ${data.users_with_optouts} users having opt-outs.`
                     )
                     // Refresh categories
@@ -211,11 +211,11 @@ export const customerIOImportLogic = kea<customerIOImportLogicType>([
                         optOutCategoriesLogic.actions.loadCategories()
                     }
                 } else if (data.status === 'failed') {
-                    lemonToast.error(data.details || 'CSV import failed')
+                    toast.error(data.details || 'CSV import failed')
                 }
             } catch (error: any) {
                 console.error('CSV upload error:', error)
-                lemonToast.error(error.message || error.detail || 'Failed to upload CSV')
+                toast.error(error.message || error.detail || 'Failed to upload CSV')
             } finally {
                 actions.setIsUploadingCSV(false)
             }

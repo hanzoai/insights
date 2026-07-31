@@ -3,7 +3,7 @@ import { MOCK_DEFAULT_ORGANIZATION } from 'lib/api.mock'
 import { Meta } from '@storybook/react'
 import { useState } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { mswDecorator } from '~/mocks/browser'
 import { ProductKey } from '~/queries/schema/schema-general'
@@ -45,9 +45,9 @@ export const Default = (): JSX.Element => {
                 selectedProduct={product}
                 onSelectProduct={setProduct}
             >
-                <LemonButton type="primary" onClick={() => setVisible(!visible)}>
+                <Button type="primary" onClick={() => setVisible(!visible)}>
                     Quick start
-                </LemonButton>
+                </Button>
             </ProductSetupPopover>
         </div>
     )

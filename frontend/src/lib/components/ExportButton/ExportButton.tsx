@@ -3,8 +3,8 @@ import { forwardRef } from 'react'
 
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { now } from 'lib/dayjs'
-import { LemonButton, LemonButtonProps, LemonButtonWithDropdown } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Button, ButtonProps, ButtonWithDropdown } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
 
 import { ExportContext, ExporterFormat, OnlineExportContext } from '~/types'
 
@@ -19,7 +19,7 @@ export interface ExportButtonItem {
 }
 
 export interface ExportButtonProps
-    extends Pick<LemonButtonProps, 'disabledReason' | 'icon' | 'sideIcon' | 'id' | 'type' | 'fullWidth'> {
+    extends Pick<ButtonProps, 'disabledReason' | 'icon' | 'sideIcon' | 'id' | 'type' | 'fullWidth'> {
     items: ExportButtonItem[]
     buttonCopy?: string
 }
@@ -47,7 +47,7 @@ export const ExportButton: React.FunctionComponent<ExportButtonProps & React.Ref
         }
 
         return (
-            <LemonButtonWithDropdown
+            <ButtonWithDropdown
                 ref={ref}
                 data-attr="export-button"
                 {...buttonProps}
@@ -58,7 +58,7 @@ export const ExportButton: React.FunctionComponent<ExportButtonProps & React.Ref
                     overlay: (
                         <>
                             <h5>File type</h5>
-                            <LemonDivider />
+                            <Divider />
                             {items.map(({ title, ...triggerExportProps }, i) => {
                                 const exportFormatExtension = Object.keys(ExporterFormat)
                                     .find((key) => ExporterFormat[key as any] === triggerExportProps.export_format)
@@ -80,7 +80,7 @@ export const ExportButton: React.FunctionComponent<ExportButtonProps & React.Ref
                                 }
 
                                 return (
-                                    <LemonButton
+                                    <Button
                                         key={i}
                                         fullWidth
                                         onClick={() => void onExportClick(triggerExportProps)}
@@ -91,7 +91,7 @@ export const ExportButton: React.FunctionComponent<ExportButtonProps & React.Ref
                                         }
                                     >
                                         {title ? title : `.${exportFormatExtension}`}
-                                    </LemonButton>
+                                    </Button>
                                 )
                             })}
                         </>
@@ -99,6 +99,6 @@ export const ExportButton: React.FunctionComponent<ExportButtonProps & React.Ref
                 }}
             >
                 {buttonCopy ?? 'Export'}
-            </LemonButtonWithDropdown>
+            </ButtonWithDropdown>
         )
     })

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { SetupTaskId } from 'lib/components/ProductSetup'
@@ -40,9 +40,9 @@ export function MessageChannels(): JSX.Element {
             <div className="flex flex-col gap-4">
                 {integrationsLoading && !integrations?.length && (
                     <>
-                        <LemonSkeleton className="h-20" />
-                        <LemonSkeleton className="h-20" />
-                        <LemonSkeleton className="h-20" />
+                        <Skeleton className="h-20" />
+                        <Skeleton className="h-20" />
+                        <Skeleton className="h-20" />
                     </>
                 )}
                 {showProductIntroduction && (

@@ -5,7 +5,7 @@ import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { toParams } from 'lib/utils'
 import { capitalizeFirstLetter } from 'lib/utils'
@@ -166,7 +166,7 @@ export const groupLogic = kea<groupLogicType>([
 
                 actions.setGroupData({ ...group, group_properties: updatedProperties }) // To update the UI immediately while the request is being processed
                 await api.groups.updateProperty(group.group_type_index, group.group_key, key, parsedValue)
-                lemonToast.success(`Group property ${action}`)
+                toast.success(`Group property ${action}`)
 
                 eventUsageLogic.actions.reportGroupPropertyUpdated(
                     action,
@@ -185,7 +185,7 @@ export const groupLogic = kea<groupLogicType>([
 
                 actions.setGroupData({ ...group, group_properties: updatedProperties }) // To update the UI immediately
                 await api.groups.deleteProperty(group.group_type_index, group.group_key, key)
-                lemonToast.success(`Group property deleted`)
+                toast.success(`Group property deleted`)
 
                 eventUsageLogic.actions.reportGroupPropertyUpdated('removed', 1, undefined, undefined)
             }

@@ -2,7 +2,7 @@ import { actions, kea, key, listeners, path, props, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { SharePasswordType } from '~/types'
 
@@ -89,7 +89,7 @@ export const sharePasswordsLogic = kea<sharePasswordsLogicType>([
                 )
 
                 actions.createPasswordSuccess(response)
-                lemonToast.success('Password created successfully')
+                toast.success('Password created successfully')
 
                 // Reload passwords list (but don't let this failure affect the success)
                 try {
@@ -102,7 +102,7 @@ export const sharePasswordsLogic = kea<sharePasswordsLogicType>([
             } catch (error: any) {
                 console.error('Password creation error:', error)
                 actions.createPasswordFailure(error)
-                lemonToast.error(error.detail || error.message || 'Failed to create password')
+                toast.error(error.detail || error.message || 'Failed to create password')
             }
         },
 
@@ -118,9 +118,9 @@ export const sharePasswordsLogic = kea<sharePasswordsLogicType>([
                 )
 
                 actions.loadSharePasswords()
-                lemonToast.success('Password deleted')
+                toast.success('Password deleted')
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to delete password')
+                toast.error(error.detail || 'Failed to delete password')
             }
         },
     })),

@@ -4,7 +4,7 @@ import { Textfit } from './Textfit'
 
 type Story = StoryObj<typeof Textfit>
 const meta: Meta<typeof Textfit> = {
-    title: 'Lemon UI/TextFit',
+    title: 'Elements/TextFit',
     component: Textfit,
     tags: ['autodocs'],
     args: {

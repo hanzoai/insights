@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconGear, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, lemonToast } from '@hanzo/lemon-ui'
+import { Button, toast } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
+import { Table } from 'lib/elements/Table'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { CURRENCY_SYMBOL_TO_EMOJI_MAP, getCurrencySymbol } from 'lib/utils/geography/currency'
@@ -46,10 +46,10 @@ export function EventConfiguration({ buttonRef }: { buttonRef?: React.RefObject<
             deleteEvent(eventToBeDeleted)
             save()
             setEventToBeDeleted(null)
-            lemonToast.success(`Revenue event "${eventToBeDeleted}" removed successfully`)
+            toast.success(`Revenue event "${eventToBeDeleted}" removed successfully`)
             return true
         } catch (error: any) {
-            lemonToast.error(`Failed to remove event: ${error.message || 'Unknown error'}`)
+            toast.error(`Failed to remove event: ${error.message || 'Unknown error'}`)
         }
 
         return false
@@ -66,18 +66,18 @@ export function EventConfiguration({ buttonRef }: { buttonRef?: React.RefObject<
                         resourceType={AccessControlResourceType.RevenueAnalytics}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton
+                        <Button
                             type="primary"
                             icon={<IconPlus />}
                             onClick={() => setModalState({ isOpen: true })}
                             ref={buttonRef}
                         >
                             Add Revenue Event
-                        </LemonButton>
+                        </Button>
                     </AccessControlAction>
                 </div>
             </div>
-            <LemonTable<RevenueAnalyticsEventItem>
+            <Table<RevenueAnalyticsEventItem>
                 dataSource={events}
                 rowKey={(item) => item.eventName}
                 emptyState="No event sources configured yet"
@@ -189,7 +189,7 @@ export function EventConfiguration({ buttonRef }: { buttonRef?: React.RefObject<
                                     resourceType={AccessControlResourceType.RevenueAnalytics}
                                     minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         type="secondary"
                                         icon={<IconGear />}
@@ -202,7 +202,7 @@ export function EventConfiguration({ buttonRef }: { buttonRef?: React.RefObject<
                                     resourceType={AccessControlResourceType.RevenueAnalytics}
                                     minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         type="secondary"
                                         status="danger"

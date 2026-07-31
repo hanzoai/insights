@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
 import {
-    LemonButton,
-    LemonButtonProps,
-    LemonDropdown,
-    LemonDropdownProps,
-    LemonInput,
+    Button,
+    ButtonProps,
+    Dropdown,
+    DropdownProps,
+    Input,
     ProfilePicture,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { fullName } from 'lib/utils'
 import { membersLogic } from 'scenes/organization/membersLogic'
@@ -22,7 +22,7 @@ export type MemberSelectProps = {
     value: string | number | null
     excludedMembers?: (string | number)[]
     onChange: (value: UserBasicType | null) => void
-    children?: (selectedUser: UserBasicType | null) => LemonDropdownProps['children']
+    children?: (selectedUser: UserBasicType | null) => DropdownProps['children']
 }
 
 export function MemberSelect({
@@ -33,7 +33,7 @@ export function MemberSelect({
     onChange,
     children,
     ...buttonProps
-}: MemberSelectProps & Pick<LemonButtonProps, 'type' | 'size'>): JSX.Element {
+}: MemberSelectProps & Pick<ButtonProps, 'type' | 'size'>): JSX.Element {
     const { meFirstMembers, filteredMembers, search, membersLoading } = useValues(membersLogic)
     const { ensureAllMembersLoaded, setSearch } = useActions(membersLogic)
     const [showPopover, setShowPopover] = useState(false)
@@ -61,7 +61,7 @@ export function MemberSelect({
     const selectableMembers = filteredMembers.filter((m) => !excludedMembers.includes(m.user[propToCompare]))
 
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             visible={showPopover}
             matchWidth={false}
@@ -70,7 +70,7 @@ export function MemberSelect({
             onVisibilityChange={(visible) => setShowPopover(visible)}
             overlay={
                 <div className="max-w-100 deprecated-space-y-2">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search"
                         autoFocus
@@ -81,15 +81,15 @@ export function MemberSelect({
                     <ul className="deprecated-space-y-px">
                         {allowNone && (
                             <li>
-                                <LemonButton fullWidth role="menuitem" size="small" onClick={() => _onChange(null)}>
+                                <Button fullWidth role="menuitem" size="small" onClick={() => _onChange(null)}>
                                     {defaultLabel}
-                                </LemonButton>
+                                </Button>
                             </li>
                         )}
 
                         {selectableMembers.map((member) => (
                             <li key={member.user.uuid}>
-                                <LemonButton
+                                <Button
                                     fullWidth
                                     role="menuitem"
                                     size="small"
@@ -102,7 +102,7 @@ export function MemberSelect({
                                             {meFirstMembers[0] === member && `(you)`}
                                         </span>
                                     </span>
-                                </LemonButton>
+                                </Button>
                             </li>
                         ))}
 
@@ -120,7 +120,7 @@ export function MemberSelect({
             {children ? (
                 children(selectedMemberAsUser)
             ) : (
-                <LemonButton size="small" type="secondary" {...buttonProps}>
+                <Button size="small" type="secondary" {...buttonProps}>
                     {selectedMemberAsUser ? (
                         <span>
                             {fullName(selectedMemberAsUser)}
@@ -129,8 +129,8 @@ export function MemberSelect({
                     ) : (
                         defaultLabel
                     )}
-                </LemonButton>
+                </Button>
             )}
-        </LemonDropdown>
+        </Dropdown>
     )
 }

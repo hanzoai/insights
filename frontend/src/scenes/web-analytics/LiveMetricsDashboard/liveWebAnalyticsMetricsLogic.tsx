@@ -1,6 +1,6 @@
 import { actions, connect, events, kea, listeners, path, reducers, selectors } from 'kea'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -187,7 +187,7 @@ export const liveWebAnalyticsMetricsLogic = kea<liveWebAnalyticsMetricsLogicType
         },
         resumeStream: () => {
             if (cache.hasInitialized) {
-                lemonToast.info('Refreshing live data...', {
+                toast.info('Refreshing live data...', {
                     toastId: RECONNECT_TOAST_ID,
                     autoClose: 2000,
                 })
@@ -222,7 +222,7 @@ export const liveWebAnalyticsMetricsLogic = kea<liveWebAnalyticsMetricsLogicType
                 actions.setInitialData([...bucketMap.entries()].map(([timestamp, bucket]) => ({ timestamp, bucket })))
             } catch (error) {
                 console.error('Failed to load initial live pageview data:', error)
-                lemonToast.error('Failed to load initial data')
+                toast.error('Failed to load initial data')
             } finally {
                 actions.setIsLoading(false)
                 cache.hasInitialized = true
@@ -266,7 +266,7 @@ export const liveWebAnalyticsMetricsLogic = kea<liveWebAnalyticsMetricsLogicType
                 },
                 signal: cache.eventSourceController.signal,
                 onMessage: (event) => {
-                    lemonToast.dismiss(ERROR_TOAST_ID)
+                    toast.dismiss(ERROR_TOAST_ID)
                     cache.hasShownLiveStreamErrorToast = false
                     cache.retryDelay = INITIAL_RETRY_DELAY_MS
 
@@ -288,7 +288,7 @@ export const liveWebAnalyticsMetricsLogic = kea<liveWebAnalyticsMetricsLogicType
                 onError: (error) => {
                     if (!cache.hasShownLiveStreamErrorToast) {
                         console.error('Live stream error:', error)
-                        lemonToast.error('Live stream connection lost. Retrying...', {
+                        toast.error('Live stream connection lost. Retrying...', {
                             toastId: ERROR_TOAST_ID,
                             autoClose: 5000,
                         })

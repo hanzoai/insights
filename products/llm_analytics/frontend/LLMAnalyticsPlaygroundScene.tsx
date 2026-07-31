@@ -3,21 +3,21 @@ import { useRef, useState } from 'react'
 
 import { IconGear, IconMessage, IconPencil, IconPlay, IconPlus, IconTrash } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonInput,
-    LemonModal,
-    LemonSelect,
-    LemonSkeleton,
-    LemonSwitch,
-    LemonTable,
-    LemonTableColumns,
-    LemonTag,
-    LemonTextArea,
+    Banner,
+    Button,
+    Input,
+    Modal,
+    Select,
+    Skeleton,
+    Switch,
+    Table,
+    TableColumns,
+    Tag,
+    TextArea,
     Link,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
+import { IconArrowDown, IconArrowUp } from 'lib/elements/icons'
 import { humanFriendlyDuration } from 'lib/utils'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -54,11 +54,11 @@ function RateLimitBanner(): JSX.Element | null {
     }
 
     return (
-        <LemonBanner type="warning" className="mb-4">
+        <Banner type="warning" className="mb-4">
             You've hit our playground request limit. You can make another request in{' '}
             <strong>{humanFriendlyDuration(Math.ceil((rateLimitedUntil - Date.now()) / 1000), { maxUnits: 1 })}</strong>
             . We're working on bring-your-own-key and other improvements to remove this limit.
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -70,13 +70,13 @@ function SubscriptionRequiredBanner(): JSX.Element | null {
     }
 
     return (
-        <LemonBanner type="warning" className="mb-4">
+        <Banner type="warning" className="mb-4">
             The playground requires a{' '}
             <Link to="/organization/billing" className="font-semibold">
                 valid payment method
             </Link>{' '}
             on file to prevent abuse.
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -116,7 +116,7 @@ function ConversationPanel(): JSX.Element {
                     <h3 className="text-lg font-semibold">Messages</h3>
                     <div className="flex items-center gap-2">
                         {!tools && (
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 icon={<IconPlus />}
@@ -124,9 +124,9 @@ function ConversationPanel(): JSX.Element {
                                 tooltip="Add tools block"
                             >
                                 Add tools
-                            </LemonButton>
+                            </Button>
                         )}
-                        <LemonSwitch
+                        <Switch
                             bordered
                             checked={expandTextAreas}
                             onChange={setExpandTextAreas}
@@ -187,14 +187,14 @@ function ToolsDisplay({ expandTextAreas }: { expandTextAreas: boolean }): JSX.El
         <>
             <div className="border rounded p-3 relative group bg-white dark:bg-[var(--bg-surface-primary)] border-l-4 border-l-[var(--color-orange-500)]">
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={<IconPencil />}
                         tooltip="Edit tools"
                         noPadding
                         onClick={() => setShowEditModal(true)}
                     />
-                    <LemonButton
+                    <Button
                         size="small"
                         status="danger"
                         icon={<IconTrash />}
@@ -208,7 +208,7 @@ function ToolsDisplay({ expandTextAreas }: { expandTextAreas: boolean }): JSX.El
                     <span className="text-xs font-medium px-2 py-1 rounded">Tools</span>
                 </div>
 
-                <LemonTextArea
+                <TextArea
                     className="text-sm w-full font-mono"
                     placeholder="Tools available to the AI assistant (JSON format)..."
                     value={toolsJsonString}
@@ -218,7 +218,7 @@ function ToolsDisplay({ expandTextAreas }: { expandTextAreas: boolean }): JSX.El
                 />
             </div>
 
-            <LemonModal
+            <Modal
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 title="Edit tools"
@@ -228,7 +228,7 @@ function ToolsDisplay({ expandTextAreas }: { expandTextAreas: boolean }): JSX.El
                 <div className="space-y-4">
                     <div>
                         <label className="font-semibold mb-1 block text-sm">Tools (JSON)</label>
-                        <LemonTextArea
+                        <TextArea
                             className="text-sm w-full font-mono"
                             placeholder="Tools available to the AI assistant (JSON format)..."
                             value={toolsJsonString}
@@ -237,12 +237,12 @@ function ToolsDisplay({ expandTextAreas }: { expandTextAreas: boolean }): JSX.El
                         />
                     </div>
                     <div className="flex justify-end gap-2">
-                        <LemonButton type="secondary" onClick={() => setShowEditModal(false)}>
+                        <Button type="secondary" onClick={() => setShowEditModal(false)}>
                             Close
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }
@@ -256,7 +256,7 @@ function SystemMessageDisplay({ expandTextAreas }: { expandTextAreas: boolean })
         <>
             <div className="border rounded p-3 relative group bg-white dark:bg-[var(--color-bg-surface-primary)] border-l-4 border-l-[var(--color-purple-500)]">
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={<IconPencil />}
                         tooltip="Edit system prompt"
@@ -269,7 +269,7 @@ function SystemMessageDisplay({ expandTextAreas }: { expandTextAreas: boolean })
                     <span className="text-xs font-medium px-2 py-1 rounded">System</span>
                 </div>
 
-                <LemonTextArea
+                <TextArea
                     className="text-sm w-full"
                     placeholder="System instructions for the AI assistant..."
                     value={systemPrompt}
@@ -279,7 +279,7 @@ function SystemMessageDisplay({ expandTextAreas }: { expandTextAreas: boolean })
                 />
             </div>
 
-            <LemonModal
+            <Modal
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 title="Edit system prompt"
@@ -289,7 +289,7 @@ function SystemMessageDisplay({ expandTextAreas }: { expandTextAreas: boolean })
                 <div className="space-y-4">
                     <div>
                         <label className="font-semibold mb-1 block text-sm">System Instructions</label>
-                        <LemonTextArea
+                        <TextArea
                             className="text-sm w-full"
                             placeholder="System instructions for the AI assistant..."
                             value={systemPrompt}
@@ -298,12 +298,12 @@ function SystemMessageDisplay({ expandTextAreas }: { expandTextAreas: boolean })
                         />
                     </div>
                     <div className="flex justify-end gap-2">
-                        <LemonButton type="secondary" onClick={() => setShowEditModal(false)}>
+                        <Button type="secondary" onClick={() => setShowEditModal(false)}>
                             Close
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }
@@ -358,14 +358,14 @@ function MessageDisplay({
                 )}`}
             >
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={<IconPencil />}
                         tooltip="Edit in large modal"
                         noPadding
                         onClick={() => setShowEditModal(true)}
                     />
-                    <LemonButton
+                    <Button
                         size="small"
                         status="danger"
                         icon={<IconTrash />}
@@ -376,7 +376,7 @@ function MessageDisplay({
                 </div>
 
                 <div className="flex items-center gap-2 mb-2">
-                    <LemonSelect<MessageRole>
+                    <Select<MessageRole>
                         size="small"
                         options={roleOptions}
                         value={message.role}
@@ -385,7 +385,7 @@ function MessageDisplay({
                     />
                 </div>
 
-                <LemonTextArea
+                <TextArea
                     className="text-sm w-full"
                     placeholder={`Enter ${message.role} message here...`}
                     value={message.content}
@@ -396,7 +396,7 @@ function MessageDisplay({
             </div>
 
             {/* Edit modal for long messages */}
-            <LemonModal
+            <Modal
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 title="Edit message"
@@ -405,7 +405,7 @@ function MessageDisplay({
                 <div className="space-y-4">
                     <div>
                         <label className="font-semibold mb-1 block text-sm">Role</label>
-                        <LemonSelect<MessageRole>
+                        <Select<MessageRole>
                             options={roleOptions}
                             value={message.role}
                             onChange={handleRoleChange}
@@ -414,7 +414,7 @@ function MessageDisplay({
                     </div>
                     <div>
                         <label className="font-semibold mb-1 block text-sm">Content</label>
-                        <LemonTextArea
+                        <TextArea
                             className="text-sm w-full"
                             placeholder={`Enter ${message.role} message here...`}
                             value={message.content}
@@ -423,12 +423,12 @@ function MessageDisplay({
                         />
                     </div>
                     <div className="flex justify-end gap-2">
-                        <LemonButton type="secondary" onClick={() => setShowEditModal(false)}>
+                        <Button type="secondary" onClick={() => setShowEditModal(false)}>
                             Close
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }
@@ -443,16 +443,16 @@ function OutputSection(): JSX.Element {
                 <h3 className="text-lg font-semibold">AI Response</h3>
                 <div className="flex gap-2">
                     {!submitting && currentResponse && currentResponse.trim() && !responseHasError && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             onClick={() => addResponseToHistory(currentResponse)}
                         >
                             Add to chat history
-                        </LemonButton>
+                        </Button>
                     )}
                     {!submitting && lastRunDetails && !responseHasError && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             onClick={addCurrentRunToComparison}
@@ -460,7 +460,7 @@ function OutputSection(): JSX.Element {
                             data-attr="playground-add-to-compare"
                         >
                             Add to compare
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
             </div>
@@ -473,7 +473,7 @@ function OutputSection(): JSX.Element {
                 }`}
             >
                 {submitting && (currentResponse === null || currentResponse === '') && (
-                    <LemonSkeleton active className="my-2" />
+                    <Skeleton active className="my-2" />
                 )}
                 {currentResponse !== null ? (
                     <pre
@@ -524,9 +524,9 @@ function ConfigurationPanel(): JSX.Element {
             <div>
                 <label className="font-semibold mb-1 block text-sm">Model</label>
                 {modelOptionsLoading && !options.length ? (
-                    <LemonSkeleton className="h-10" />
+                    <Skeleton className="h-10" />
                 ) : (
-                    <LemonSelect
+                    <Select
                         className="w-full"
                         placeholder="Select model"
                         value={model}
@@ -559,7 +559,7 @@ function ConfigurationPanel(): JSX.Element {
 
             <div>
                 <label className="font-semibold mb-1 block text-sm">Max tokens (optional)</label>
-                <LemonInput
+                <Input
                     type="number"
                     value={maxTokens ?? undefined}
                     onChange={(val) => setMaxTokens(val ?? null)}
@@ -586,7 +586,7 @@ function ConfigurationPanel(): JSX.Element {
 
             <div>
                 <label className="font-semibold mb-1 block text-sm">Reasoning level (optional)</label>
-                <LemonSelect<'minimal' | 'low' | 'medium' | 'high' | null>
+                <Select<'minimal' | 'low' | 'medium' | 'high' | null>
                     className="w-full"
                     placeholder="None"
                     value={reasoningLevel}
@@ -612,11 +612,11 @@ function ComparisonTablePanel(): JSX.Element {
     const { comparisonItems } = useValues(llmAnalyticsPlaygroundLogic)
     const { clearComparison } = useActions(llmAnalyticsPlaygroundLogic)
 
-    const columns: LemonTableColumns<ComparisonItem> = [
+    const columns: TableColumns<ComparisonItem> = [
         {
             title: 'Model',
             dataIndex: 'model',
-            render: (model) => <LemonTag>{typeof model === 'string' ? model || '-' : '-'}</LemonTag>,
+            render: (model) => <Tag>{typeof model === 'string' ? model || '-' : '-'}</Tag>,
             sorter: (a, b) => a.model.localeCompare(b.model),
         },
         {
@@ -655,7 +655,7 @@ function ComparisonTablePanel(): JSX.Element {
         <div className="border rounded p-4 min-h-0 flex flex-col">
             <div className="flex justify-between items-center mb-4 shrink-0">
                 <h3 className="text-lg font-semibold">Comparison</h3>
-                <LemonButton
+                <Button
                     type="secondary"
                     status="danger"
                     size="small"
@@ -664,10 +664,10 @@ function ComparisonTablePanel(): JSX.Element {
                     tooltip="Clear all comparison items"
                 >
                     Clear all
-                </LemonButton>
+                </Button>
             </div>
             <div className="flex-1 overflow-hidden">
-                <LemonTable dataSource={comparisonItems} columns={columns} rowKey="id" loading={false} embedded />
+                <Table dataSource={comparisonItems} columns={columns} rowKey="id" loading={false} embedded />
             </div>
         </div>
     )
@@ -698,7 +698,7 @@ function StickyActionBar(): JSX.Element {
             <div className="sticky bottom-0 bg-bg-light dark:bg-[var(--color-bg-surface-primary)] border-t border-border z-10 ml-[calc(var(--scene-padding)*-1)] mr-[calc(var(--scene-padding)*-1)] mb-[calc(var(--scene-padding-bottom)*-1)]">
                 <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
                     <div className="flex gap-2 items-center">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             icon={<IconPlus />}
                             onClick={() => {
@@ -709,8 +709,8 @@ function StickyActionBar(): JSX.Element {
                             data-attr="ai-playground-run-button"
                         >
                             Add message
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="secondary"
                             status="danger"
                             icon={<IconTrash />}
@@ -725,18 +725,18 @@ function StickyActionBar(): JSX.Element {
                             tooltip="Clear all messages"
                         >
                             Clear all
-                        </LemonButton>
+                        </Button>
                         {messages.length > 3 && (
                             <>
                                 <div className="border-l border-border mx-2 h-6" />
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="secondary"
                                     icon={<IconArrowUp />}
                                     onClick={scrollToTop}
                                     tooltip="Jump to top"
                                 />
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="secondary"
                                     icon={<IconArrowDown />}
@@ -765,7 +765,7 @@ function StickyActionBar(): JSX.Element {
                             )}
                         </div>
 
-                        <LemonButton
+                        <Button
                             type="secondary"
                             icon={<IconGear />}
                             onClick={() => setShowConfigModal(true)}
@@ -773,8 +773,8 @@ function StickyActionBar(): JSX.Element {
                             size="small"
                         >
                             Settings
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             icon={<IconPlay />}
                             onClick={submitPrompt}
@@ -783,12 +783,12 @@ function StickyActionBar(): JSX.Element {
                             data-attr="playground-run"
                         >
                             Run
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </div>
 
-            <LemonModal
+            <Modal
                 isOpen={showConfigModal}
                 onClose={() => setShowConfigModal(false)}
                 title="Model Configuration"
@@ -796,11 +796,11 @@ function StickyActionBar(): JSX.Element {
             >
                 <ConfigurationPanel />
                 <div className="flex justify-end gap-2 mt-4">
-                    <LemonButton type="secondary" onClick={() => setShowConfigModal(false)}>
+                    <Button type="secondary" onClick={() => setShowConfigModal(false)}>
                         Close
-                    </LemonButton>
+                    </Button>
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }

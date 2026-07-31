@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Modal, Link } from '@hanzo/elements'
 
 import { isValidRegexp } from 'lib/utils/regexp'
 import { AiRegexHelperButton } from 'scenes/session-recordings/components/AiRegexHelper/AiRegexHelper'
@@ -37,17 +37,17 @@ export function PathRegexModal({ filter, isOpen, onSave, onClose }: PathRegexMod
     }, [isOpen, filter])
 
     return (
-        <LemonModal isOpen={isOpen} onClose={onClose}>
-            <LemonModal.Header>
+        <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal.Header>
                 {isNew ? <b>Add Path Cleaning Rule</b> : <b>Edit Path Cleaning Rule</b>}
-            </LemonModal.Header>
+            </Modal.Header>
 
-            <LemonModal.Content>
+            <Modal.Content>
                 <div className="px-2 py-1" data-attr="path-regex-modal-content">
                     <div className="deprecated-space-y-2">
                         <div>
                             <span>Regex</span>
-                            <LemonInput
+                            <Input
                                 value={regex}
                                 onChange={(regex) => setRegex(regex)}
                                 onPressEnter={() => false}
@@ -70,7 +70,7 @@ export function PathRegexModal({ filter, isOpen, onSave, onClose }: PathRegexMod
                         </div>
                         <div>
                             <span>Alias</span>
-                            <LemonInput
+                            <Input
                                 value={alias}
                                 onChange={(alias) => setAlias(alias)}
                                 onPressEnter={() => false}
@@ -91,10 +91,10 @@ export function PathRegexModal({ filter, isOpen, onSave, onClose }: PathRegexMod
                         <AiRegexHelperButton />
 
                         <div className="flex flex-1 justify-end gap-2">
-                            <LemonButton type="secondary" onClick={onClose}>
+                            <Button type="secondary" onClick={onClose}>
                                 Cancel
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 type="primary"
                                 onClick={() => {
                                     onSave({
@@ -106,11 +106,11 @@ export function PathRegexModal({ filter, isOpen, onSave, onClose }: PathRegexMod
                                 disabledReason={disabledReason}
                             >
                                 Save
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 </div>
-            </LemonModal.Content>
-        </LemonModal>
+            </Modal.Content>
+        </Modal>
     )
 }

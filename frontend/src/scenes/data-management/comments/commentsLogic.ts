@@ -2,7 +2,7 @@ import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea
 import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
-import { LemonSelectOption, lemonToast } from '@hanzo/lemon-ui'
+import { SelectOption, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { capitalizeFirstLetter } from 'lib/utils'
@@ -15,7 +15,7 @@ import { ActivityScope, CommentType, InsightShortId } from '~/types'
 
 import type { commentsLogicType } from './commentsLogicType'
 
-export const SCOPE_OPTIONS: LemonSelectOption<ActivityScope | null>[] = Object.values(ActivityScope).map((scope) => ({
+export const SCOPE_OPTIONS: SelectOption<ActivityScope | null>[] = Object.values(ActivityScope).map((scope) => ({
     value: scope,
     label: capitalizeFirstLetter(scope),
 }))
@@ -140,11 +140,11 @@ export const commentsLogic = kea<commentsLogicType>([
         setFilterCreatedBy: actions.loadComments,
         setSearchText: actions.loadComments,
         deleteCommentSuccess: () => {
-            lemonToast.success('Comment deleted')
+            toast.success('Comment deleted')
         },
         deleteCommentFailure: (e) => {
             insights.captureException(e, { action: 'data management scene deleting comment' })
-            lemonToast.error('Could not delete comment, refresh and try again')
+            toast.error('Could not delete comment, refresh and try again')
         },
     })),
 ])

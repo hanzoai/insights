@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
+import { Switch } from 'lib/elements/Switch'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -24,7 +24,7 @@ export function RequireEvaluationContexts(): JSX.Element | null {
     }
 
     return (
-        <LemonSwitch
+        <Switch
             data-attr="require-evaluation-contexts-switch"
             onChange={handleToggle}
             label="Require evaluation contexts for new flags"

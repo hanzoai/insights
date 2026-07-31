@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
+import { Skeleton, Tooltip } from '@hanzo/elements'
 
 import { WebVitalsMetric } from '~/queries/schema/schema-general'
 
@@ -47,7 +47,7 @@ export function WebVitalsTab({ value, metric, isActive, setTab, isLoading }: Web
 
             <div className="flex flex-row items-end">
                 {isLoading ? (
-                    <LemonSkeleton fade className="w-20 h-8" />
+                    <Skeleton fade className="w-20 h-8" />
                 ) : showNoData ? (
                     <span className="text-xs text-text-tertiary">No data for this range</span>
                 ) : (

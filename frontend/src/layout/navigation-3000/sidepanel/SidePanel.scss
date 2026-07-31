@@ -43,7 +43,7 @@
     user-select: none;
     background: var(--color-bg-surface-tertiary);
 
-    .LemonButton__icon {
+    .Button__icon {
         transform: rotate(-90deg);
     }
 }
@@ -69,42 +69,42 @@
 
     // NOTE: The below overrides make is to that the shadows are below the buttons after rotation
     // This is very very specific to SidePanel, hence !important is used universally
-    .LemonButton {
+    .Button {
         padding-right: 1px !important; // padding-bottom in regular buttons
         padding-bottom: 0 !important;
 
-        .LemonButton__chrome {
+        .Button__chrome {
             padding: 0.25rem
                 calc(
-                    var(--lemon-button-padding-right, var(--lemon-button-padding-horizontal)) +
-                        var(--lemon-button-chrome-depth) * 0.5
+                    var(--button-padding-right, var(--button-padding-horizontal)) +
+                        var(--button-chrome-depth) * 0.5
                 )
                 0.25rem
                 calc(
-                    var(--lemon-button-padding-left, var(--lemon-button-padding-horizontal)) - var(
-                            --lemon-button-chrome-depth
+                    var(--button-padding-left, var(--button-padding-horizontal)) - var(
+                            --button-chrome-depth
                         ) *
                         0.5
                 ) !important;
 
             &::after {
-                inset: -1px calc(var(--lemon-button-chrome-depth) - 1px) -1px -1px !important;
-                box-shadow: var(--lemon-button-chrome-depth) 0 0 -1px var(--lemon-button-frame-bg-color) !important;
+                inset: -1px calc(var(--button-chrome-depth) - 1px) -1px -1px !important;
+                box-shadow: var(--button-chrome-depth) 0 0 -1px var(--button-frame-bg-color) !important;
             }
         }
 
         &:hover:not([aria-disabled='true']),
         &:not([aria-disabled='true']):active {
-            .LemonButton__chrome {
-                transform: translateX(var(--lemon-button-depth)) !important;
+            .Button__chrome {
+                transform: translateX(var(--button-depth)) !important;
 
                 &::after {
-                    box-shadow: calc(var(--lemon-button-chrome-depth) - var(--lemon-button-depth)) 0 0 -1px
-                        var(--lemon-button-frame-bg-color) !important;
+                    box-shadow: calc(var(--button-chrome-depth) - var(--button-depth)) 0 0 -1px
+                        var(--button-frame-bg-color) !important;
                 }
 
                 &::before {
-                    right: calc(var(--lemon-button-depth) - 1px) !important;
+                    right: calc(var(--button-depth) - 1px) !important;
                     bottom: -1px !important;
                 }
             }

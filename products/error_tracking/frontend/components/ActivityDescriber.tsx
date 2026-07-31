@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { useEffect } from 'react'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {

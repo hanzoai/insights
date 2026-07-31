@@ -5,12 +5,12 @@ import { useActions, useValues } from 'kea'
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { IconClock, IconCopy, IconGear, IconHome, IconLaptop } from '@hanzo/icons'
-import { LemonButton, LemonDropdown, LemonDropdownProps } from '@hanzo/lemon-ui'
+import { Button, Dropdown, DropdownProps } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { IconLinux, IconWeb } from 'lib/lemon-ui/icons'
+import { IconLinux, IconWeb } from 'lib/elements/icons'
 import { humanFriendlyDetailedTime, shortTimeZone } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -21,7 +21,7 @@ import { teamLogic } from '../../../scenes/teamLogic'
 const BASE_OUTPUT_FORMAT = 'ddd, MMM D, YYYY h:mm A'
 const BASE_OUTPUT_FORMAT_WITH_SECONDS = 'ddd, MMM D, YYYY h:mm:ss A'
 
-export type TZLabelProps = Omit<LemonDropdownProps, 'overlay' | 'trigger' | 'children'> & {
+export type TZLabelProps = Omit<DropdownProps, 'overlay' | 'trigger' | 'children'> & {
     time: string | dayjs.Dayjs
     showSeconds?: boolean
     formatDate?: string
@@ -75,7 +75,7 @@ const TZLabelPopoverContent = React.memo(function TZLabelPopoverContent({
         <div className={clsx('TZLabelPopover', showSeconds && 'TZLabelPopover--seconds')}>
             <div className="flex justify-between items-center border-b-1 p-1">
                 <h4 className="mb-0 px-1">{title || 'Timezone conversion'}</h4>
-                <LemonButton
+                <Button
                     icon={<IconGear />}
                     size="xsmall"
                     to={urls.settings('environment-customization', 'date-and-time')}
@@ -239,7 +239,7 @@ const TZLabelRaw = forwardRef<HTMLElement, TZLabelProps>(function TZLabelRaw(
 
     if (showPopover) {
         return (
-            <LemonDropdown
+            <Dropdown
                 placement="top"
                 showArrow
                 {...dropdownProps}
@@ -255,7 +255,7 @@ const TZLabelRaw = forwardRef<HTMLElement, TZLabelProps>(function TZLabelRaw(
                 }
             >
                 {innerContent}
-            </LemonDropdown>
+            </Dropdown>
         )
     }
 

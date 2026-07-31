@@ -17,7 +17,7 @@ import {
     IconServer,
     IconTrash,
 } from '@hanzo/icons'
-import { LemonDialog, LemonSegmentedButton, LemonSkeleton, LemonSwitch } from '@hanzo/lemon-ui'
+import { Dialog, SegmentedButton, Skeleton, Switch } from '@hanzo/elements'
 
 import { approvalsGateLogic } from 'lib/approvals/approvalsGateLogic'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
@@ -32,18 +32,18 @@ import { SceneTags } from 'lib/components/Scenes/SceneTags'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
-import 'lib/lemon-ui/Lettermark'
-import { Link } from 'lib/lemon-ui/Link'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Divider } from 'lib/elements/Divider'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input/Input'
+import { Tab, Tabs } from 'lib/elements/Tabs'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
+import 'lib/elements/Lettermark'
+import { Link } from 'lib/elements/Link'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { featureFlagLogic as enabledFeaturesLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { Label } from 'lib/ui/Label/Label'
@@ -208,10 +208,10 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
     if (featureFlagLoading) {
         return (
             <div className="deprecated-space-y-2">
-                <LemonSkeleton active className="h-4 w-2/5" />
-                <LemonSkeleton active className="h-4 w-full" />
-                <LemonSkeleton active className="h-4 w-full" />
-                <LemonSkeleton active className="h-4 w-3/5" />
+                <Skeleton active className="h-4 w-2/5" />
+                <Skeleton active className="h-4 w-full" />
+                <Skeleton active className="h-4 w-full" />
+                <Skeleton active className="h-4 w-3/5" />
             </div>
         )
     }
@@ -260,7 +260,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                 </>
             ),
         },
-    ] as LemonTab<FeatureFlagsTab>[]
+    ] as Tab<FeatureFlagsTab>[]
 
     if (featureFlag.key && id) {
         tabs.push({
@@ -309,9 +309,9 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
             label: (
                 <div className="flex flex-row">
                     <div>Experiments</div>
-                    <LemonTag className="ml-2 float-right uppercase" type="primary">
+                    <Tag className="ml-2 float-right uppercase" type="primary">
                         New
-                    </LemonTag>
+                    </Tag>
                 </div>
             ),
             key: FeatureFlagsTab.EXPERIMENTS,
@@ -338,7 +338,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                             }}
                             actions={
                                 <>
-                                    <LemonButton
+                                    <Button
                                         data-attr="cancel-feature-flag"
                                         type="secondary"
                                         size="small"
@@ -352,8 +352,8 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                         }}
                                     >
                                         Cancel
-                                    </LemonButton>
-                                    <LemonButton
+                                    </Button>
+                                    <Button
                                         type="primary"
                                         data-attr="save-feature-flag"
                                         htmlType="submit"
@@ -361,7 +361,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                         size="small"
                                     >
                                         Save
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             }
                         />
@@ -372,16 +372,16 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                             )}
 
                             {featureFlag.experiment_set && featureFlag.experiment_set.length > 0 && (
-                                <LemonBanner type="warning">
+                                <Banner type="warning">
                                     This feature flag is linked to{' '}
                                     <Link target="_blank" to={urls.experiment(featureFlag.experiment_set[0])}>
                                         {experiment?.name || `experiment ${featureFlag.experiment_set[0]}`}
                                     </Link>
                                     . Make changes from the experiment page unless you need advanced flag settings.
-                                </LemonBanner>
+                                </Banner>
                             )}
                             <div className="max-w-1/2 deprecated-space-y-4">
-                                <LemonField
+                                <Field
                                     name="key"
                                     label="Key"
                                     help={
@@ -402,7 +402,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                 >
                                     {({ value, onChange }) => (
                                         <>
-                                            <LemonInput
+                                            <Input
                                                 value={value}
                                                 onChange={(v) => {
                                                     if (v !== value) {
@@ -424,15 +424,15 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                             </span>
                                         </>
                                     )}
-                                </LemonField>
+                                </Field>
 
-                                <LemonField name="name" label="Description">
-                                    <LemonTextArea
+                                <Field name="name" label="Description">
+                                    <TextArea
                                         className="ph-ignore-input"
                                         data-attr="feature-flag-description"
                                         defaultValue={featureFlag.name || ''}
                                     />
-                                </LemonField>
+                                </Field>
                             </div>
                             <SceneDivider />
                             <FeatureFlagRollout onGetFeedback={handleGetFeedback} />
@@ -448,7 +448,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                     <SceneDivider />
                                 </>
                             )}
-                            <LemonField name="active">
+                            <Field name="active">
                                 {({ value, onChange }) => {
                                     const requiresApprovalToEnable =
                                         isNewFeatureFlag && isApprovalRequired(ApprovalActionKey.FEATURE_FLAG_ENABLE)
@@ -460,7 +460,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
 
                                     return (
                                         <div className="border rounded p-4">
-                                            <LemonCheckbox
+                                            <Checkbox
                                                 id="flag-enabled-checkbox"
                                                 label="Enable feature flag"
                                                 onChange={() => onChange(!value)}
@@ -480,12 +480,12 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                         </div>
                                     )
                                 }}
-                            </LemonField>
+                            </Field>
                             {isNewFeatureFlag && featureFlags[FEATURE_FLAGS.FEATURE_FLAG_USAGE_DASHBOARD_CHECKBOX] && (
-                                <LemonField name="_should_create_usage_dashboard">
+                                <Field name="_should_create_usage_dashboard">
                                     {({ value, onChange }) => (
                                         <div className="border rounded p-4">
-                                            <LemonCheckbox
+                                            <Checkbox
                                                 id="create-usage-dashboard-checkbox"
                                                 label="Create usage dashboard"
                                                 onChange={() => onChange(!value)}
@@ -499,13 +499,13 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                             </div>
                                         </div>
                                     )}
-                                </LemonField>
+                                </Field>
                             )}
                             {!featureFlag.is_remote_configuration && (
-                                <LemonField name="ensure_experience_continuity">
+                                <Field name="ensure_experience_continuity">
                                     {({ value, onChange }) => (
                                         <div className="border rounded p-4">
-                                            <LemonCheckbox
+                                            <Checkbox
                                                 id="continuity-checkbox"
                                                 label="Persist flag across authentication steps"
                                                 onChange={() => onChange(!value)}
@@ -526,7 +526,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                             </div>
                                         </div>
                                     )}
-                                </LemonField>
+                                </Field>
                             )}
                             {featureFlags[FEATURE_FLAGS.FLAG_EVALUATION_RUNTIMES] && (
                                 <>
@@ -544,7 +544,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                                 Learn more about using evaluation runtimes
                                             </Link>
                                         </div>
-                                        <LemonField name="evaluation_runtime">
+                                        <Field name="evaluation_runtime">
                                             {({ value, onChange }) => (
                                                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                                                     {[
@@ -598,7 +598,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                                     ))}
                                                 </div>
                                             )}
-                                        </LemonField>
+                                        </Field>
                                     </SceneSection>
                                 </>
                             )}
@@ -624,11 +624,11 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                         </Link>
                                     </div>
                                 )}
-                                <LemonField name="tags">
+                                <Field name="tags">
                                     {({ value: formTags, onChange: onChangeTags }) => (
                                         <>
                                             {featureFlags[FEATURE_FLAGS.FLAG_EVALUATION_TAGS] ? (
-                                                <LemonField name="evaluation_tags">
+                                                <Field name="evaluation_tags">
                                                     {({ value: formEvalTags, onChange: onChangeEvalTags }) => (
                                                         <FeatureFlagEvaluationTags
                                                             tags={formTags}
@@ -645,7 +645,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                                             context="form"
                                                         />
                                                     )}
-                                                </LemonField>
+                                                </Field>
                                             ) : (
                                                 <ObjectTags
                                                     tags={formTags}
@@ -659,16 +659,16 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                             )}
                                         </>
                                     )}
-                                </LemonField>
+                                </Field>
                             </SceneSection>
                             <SceneDivider />
 
                             <FeatureFlagCodeExample featureFlag={featureFlag} />
-                            <LemonDivider />
+                            <Divider />
                             {isNewFeatureFlag && (
                                 <>
                                     <div>
-                                        <LemonButton
+                                        <Button
                                             fullWidth
                                             onClick={() => setAdvancedSettingsExpanded(!advancedSettingsExpanded)}
                                             sideIcon={advancedSettingsExpanded ? <IconCollapse /> : <IconExpand />}
@@ -679,24 +679,24 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                                     Define who can modify this flag.
                                                 </div>
                                             </div>
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                     {advancedSettingsExpanded && (
                                         <>
                                             <div className="border rounded bg-surface-primary">
                                                 <h3 className="p-2 mb-0">Permissions</h3>
-                                                <LemonDivider className="my-0" />
+                                                <Divider className="my-0" />
                                                 <div className="p-3">
                                                     <FeatureFlagPermissions featureFlag={featureFlag} />
                                                 </div>
                                             </div>
                                         </>
                                     )}
-                                    <LemonDivider />
+                                    <Divider />
                                 </>
                             )}
                             <div className="flex items-center gap-2 justify-end">
-                                <LemonButton
+                                <Button
                                     data-attr="cancel-feature-flag"
                                     type="secondary"
                                     onClick={() => {
@@ -709,15 +709,15 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                     }}
                                 >
                                     Cancel
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     type="primary"
                                     data-attr="save-feature-flag"
                                     htmlType="submit"
                                     form="feature-flag"
                                 >
                                     Save
-                                </LemonButton>
+                                </Button>
                             </div>
                         </SceneContent>
                     </Form>
@@ -809,7 +809,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                                 if (featureFlag.deleted) {
                                                     restoreFeatureFlag(featureFlag)
                                                 } else {
-                                                    LemonDialog.open({
+                                                    Dialog.open({
                                                         title: 'Delete feature flag?',
                                                         description: `Are you sure you want to delete "${featureFlag.key}"?`,
                                                         primaryButton: {
@@ -852,16 +852,16 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                             )}
 
                             {earlyAccessFeature && earlyAccessFeature.stage === EarlyAccessFeatureStage.Concept && (
-                                <LemonBanner type="info">
+                                <Banner type="info">
                                     This feature flag is assigned to an early access feature in the{' '}
-                                    <LemonTag type="default" className="uppercase">
+                                    <Tag type="default" className="uppercase">
                                         Concept
-                                    </LemonTag>{' '}
+                                    </Tag>{' '}
                                     stage. All users who register interest will be assigned this feature flag. Gate your
                                     code behind a different feature flag if you'd like to keep it hidden, and then
                                     switch your code to this feature flag when you're ready to release to your early
                                     access users.
-                                </LemonBanner>
+                                </Banner>
                             )}
                             <SceneTitleSection
                                 name={featureFlag.key}
@@ -876,19 +876,19 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                         userAccessLevel={featureFlag.user_access_level}
                                     >
                                         {({ disabledReason }) => (
-                                            <LemonButton
+                                            <Button
                                                 type="secondary"
                                                 size="small"
                                                 disabledReason={disabledReason}
                                                 onClick={() => editFeatureFlag(true)}
                                             >
                                                 Edit
-                                            </LemonButton>
+                                            </Button>
                                         )}
                                     </AccessControlAction>
                                 }
                             />
-                            <LemonTabs
+                            <Tabs
                                 activeKey={activeTab}
                                 onChange={(tab) => tab !== activeTab && setActiveTab(tab)}
                                 tabs={tabs}
@@ -958,7 +958,7 @@ function UsageTab({ featureFlag }: { featureFlag: FeatureFlagType }): JSX.Elemen
     if (featureFlag.deleted) {
         return (
             <div data-attr="feature-flag-usage-deleted-banner">
-                <LemonBanner type="error">This feature flag has been deleted.</LemonBanner>
+                <Banner type="error">This feature flag has been deleted.</Banner>
             </div>
         )
     }
@@ -968,7 +968,7 @@ function UsageTab({ featureFlag }: { featureFlag: FeatureFlagType }): JSX.Elemen
             {dashboard ? (
                 <>
                     {!hasEnrichedAnalytics && !enrichAnalyticsNoticeAcknowledged && (
-                        <LemonBanner type="info" className="mb-3" onClose={() => closeEnrichAnalyticsNotice()}>
+                        <Banner type="info" className="mb-3" onClose={() => closeEnrichAnalyticsNotice()}>
                             Get richer insights automatically by{' '}
                             <Link
                                 to="https://hanzo.ai/docs/libraries/js/features#enriched-flag-analytics"
@@ -976,7 +976,7 @@ function UsageTab({ featureFlag }: { featureFlag: FeatureFlagType }): JSX.Elemen
                             >
                                 enabling enriched analytics for flags{' '}
                             </Link>
-                        </LemonBanner>
+                        </Banner>
                     )}
                     <Dashboard id={dashboardId!.toString()} placement={DashboardPlacement.FeatureFlag} />
                 </>
@@ -990,9 +990,9 @@ function UsageTab({ featureFlag }: { featureFlag: FeatureFlagType }): JSX.Elemen
                     {featureFlagLoading ? (
                         <EmptyDashboardComponent loading={true} canEdit={false} />
                     ) : (
-                        <LemonButton type="primary" onClick={() => generateUsageDashboard()}>
+                        <Button type="primary" onClick={() => generateUsageDashboard()}>
                             Generate Usage Dashboard
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
             )}
@@ -1061,7 +1061,7 @@ function FeatureFlagRollout({
     const filterGroups: FeatureFlagGroupType[] = featureFlag.filters.groups || []
 
     const confirmRevertMultivariateEnabled = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Change value type?',
             description: 'The existing variants will be lost',
             primaryButton: {
@@ -1079,7 +1079,7 @@ function FeatureFlagRollout({
     }
 
     const confirmEncryptedPayloadReset = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Reset payload?',
             description: 'The existing payload will not be reset until the feature flag is saved.',
             primaryButton: {
@@ -1130,9 +1130,9 @@ function FeatureFlagRollout({
                             <div className="card-secondary">Type</div>
                             <div>
                                 {featureFlag.deleted ? (
-                                    <LemonTag size="medium" type="danger" className="uppercase">
+                                    <Tag size="medium" type="danger" className="uppercase">
                                         Deleted
-                                    </LemonTag>
+                                    </Tag>
                                 ) : (
                                     <div className="flex gap-2">
                                         <AccessControlAction
@@ -1140,7 +1140,7 @@ function FeatureFlagRollout({
                                             minAccessLevel={AccessControlLevel.Editor}
                                             userAccessLevel={featureFlag.user_access_level}
                                         >
-                                            <LemonSwitch
+                                            <Switch
                                                 onChange={(newValue) => {
                                                     toggleFeatureFlagActive(newValue)
                                                 }}
@@ -1182,7 +1182,7 @@ function FeatureFlagRollout({
                                         <Label intent="menu">Linked experiment</Label>
                                         <div className="flex gap-1 items-center">
                                             <CopyToClipboardInline
-                                                iconStyle={{ color: 'var(--lemon-button-icon-opacity)' }}
+                                                iconStyle={{ color: 'var(--button-icon-opacity)' }}
                                                 className="font-normal text-sm"
                                                 description="experiment name"
                                             >
@@ -1209,25 +1209,25 @@ function FeatureFlagRollout({
                                             <>
                                                 <IconGlobe className="text-lg text-muted" />
                                                 <span className="font-medium">Both client and server</span>
-                                                <LemonTag type="primary" size="small">
+                                                <Tag type="primary" size="small">
                                                     Single + multi-user
-                                                </LemonTag>
+                                                </Tag>
                                             </>
                                         ) : featureFlag.evaluation_runtime === FeatureFlagEvaluationRuntime.CLIENT ? (
                                             <>
                                                 <IconLaptop className="text-lg text-muted" />
                                                 <span className="font-medium">Client-side only</span>
-                                                <LemonTag type="completion" size="small">
+                                                <Tag type="completion" size="small">
                                                     Single-user apps
-                                                </LemonTag>
+                                                </Tag>
                                             </>
                                         ) : (
                                             <>
                                                 <IconServer className="text-lg text-muted" />
                                                 <span className="font-medium">Server-side only</span>
-                                                <LemonTag type="caution" size="small">
+                                                <Tag type="caution" size="small">
                                                     Multi-user systems
-                                                </LemonTag>
+                                                </Tag>
                                             </>
                                         )}
                                     </div>
@@ -1284,7 +1284,7 @@ function FeatureFlagRollout({
                 <>
                     <SceneSection title="Served value">
                         <div data-attr="feature-flag-served-value-segmented-button">
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 size="small"
                                 options={[
                                     {
@@ -1398,10 +1398,10 @@ function FeatureFlagRollout({
                                             )}
                                         </div>
                                         {featureFlag.is_remote_configuration && (
-                                            <LemonField name="has_encrypted_payloads">
+                                            <Field name="has_encrypted_payloads">
                                                 {({ value, onChange }) => (
                                                     <div className="border rounded mb-4 p-4">
-                                                        <LemonCheckbox
+                                                        <Checkbox
                                                             id="flag-payload-encrypted-checkbox"
                                                             label="Encrypt remote configuration payload"
                                                             onChange={() => onChange(!value)}
@@ -1414,11 +1414,11 @@ function FeatureFlagRollout({
                                                         />
                                                     </div>
                                                 )}
-                                            </LemonField>
+                                            </Field>
                                         )}
                                         <div className="flex gap-2">
                                             <Group name={['filters', 'payloads']}>
-                                                <LemonField name="true" className="grow">
+                                                <Field name="true" className="grow">
                                                     <JSONEditorInput
                                                         readOnly={
                                                             readOnly ||
@@ -1427,10 +1427,10 @@ function FeatureFlagRollout({
                                                         }
                                                         placeholder={'Examples: "A string", 2500, {"key": "value"}'}
                                                     />
-                                                </LemonField>
+                                                </Field>
                                             </Group>
                                             {featureFlag.has_encrypted_payloads && (
-                                                <LemonButton
+                                                <Button
                                                     className="grow-0"
                                                     icon={<IconTrash />}
                                                     type="secondary"
@@ -1439,7 +1439,7 @@ function FeatureFlagRollout({
                                                     onClick={confirmEncryptedPayloadReset}
                                                 >
                                                     Reset
-                                                </LemonButton>
+                                                </Button>
                                             )}
                                         </div>
                                         {featureFlag.is_remote_configuration && (
@@ -1501,7 +1501,7 @@ function FeatureFlagRollout({
                     )}
                     {!readOnly && multivariateEnabled && (
                         <>
-                            <LemonDivider className="my-0" />
+                            <Divider className="my-0" />
                             <SceneSection
                                 title="Variant keys"
                                 description="The rollout percentage of feature flag variants must add up to 100%"
@@ -1593,10 +1593,10 @@ function FeatureFlagRollout({
                                     )}
                                 </div>
                                 {featureFlag.is_remote_configuration && (
-                                    <LemonField name="has_encrypted_payloads">
+                                    <Field name="has_encrypted_payloads">
                                         {({ value, onChange }) => (
                                             <div className="border rounded mb-4 p-4">
-                                                <LemonCheckbox
+                                                <Checkbox
                                                     id="flag-payload-encrypted-checkbox"
                                                     label="Encrypt remote configuration payload"
                                                     onChange={() => onChange(!value)}
@@ -1609,11 +1609,11 @@ function FeatureFlagRollout({
                                                 />
                                             </div>
                                         )}
-                                    </LemonField>
+                                    </Field>
                                 )}
                                 <div className="flex gap-2">
                                     <Group name={['filters', 'payloads']}>
-                                        <LemonField name="true" className="grow">
+                                        <Field name="true" className="grow">
                                             <JSONEditorInput
                                                 readOnly={
                                                     readOnly ||
@@ -1622,10 +1622,10 @@ function FeatureFlagRollout({
                                                 }
                                                 placeholder='Examples: "A string", 2500, {"key": "value"}'
                                             />
-                                        </LemonField>
+                                        </Field>
                                     </Group>
                                     {featureFlag.has_encrypted_payloads && (
-                                        <LemonButton
+                                        <Button
                                             className="grow-0"
                                             icon={<IconTrash />}
                                             type="secondary"
@@ -1634,7 +1634,7 @@ function FeatureFlagRollout({
                                             onClick={confirmEncryptedPayloadReset}
                                         >
                                             Reset
-                                        </LemonButton>
+                                        </Button>
                                     )}
                                 </div>
                                 {featureFlag.is_remote_configuration && (

@@ -1,4 +1,4 @@
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { DropdownMenuItem } from 'lib/ui/DropdownMenu/DropdownMenu'
 import { newInternalTab } from 'lib/utils/newInternalTab'
@@ -47,7 +47,7 @@ export function BrowserLikeMenuItems({
                 onClick={(e) => {
                     e.stopPropagation()
                     void navigator.clipboard.writeText(document.location.origin + href)
-                    lemonToast.success('Link copied to clipboard')
+                    toast.success('Link copied to clipboard')
                 }}
                 data-attr="tree-item-menu-copy-link-button"
             >

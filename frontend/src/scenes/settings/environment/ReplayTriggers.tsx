@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonDivider, LemonLabel, LemonTab, LemonTabs, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Divider, Label, Tab, Tabs, Link, Tooltip } from '@hanzo/elements'
 
 import IngestionControls from 'lib/components/IngestionControls'
 import { IngestionControlsSummary } from 'lib/components/IngestionControls/Summary'
@@ -28,7 +28,7 @@ function LinkedFlagSelector(): JSX.Element | null {
             >
                 <div className="flex flex-col deprecated-space-y-2 mt-2">
                     <div className="flex justify-between">
-                        <LemonLabel className="text-base">
+                        <Label className="text-base">
                             {selectedPlatform === 'mobile' ? null : <IngestionControls.MatchTypeTag />} Enable
                             recordings using feature flag
                             <Since
@@ -38,7 +38,7 @@ function LinkedFlagSelector(): JSX.Element | null {
                                 reactNative={{ version: '3.6.3' }}
                                 flutter={{ version: '4.7.0' }}
                             />
-                        </LemonLabel>
+                        </Label>
                         <IngestionControls.FlagSelector />
                     </div>
 
@@ -152,9 +152,9 @@ function EventTriggerOptions(): JSX.Element | null {
     return (
         <div className="flex flex-col deprecated-space-y-2 mt-2">
             <div className="flex items-center gap-2 justify-between">
-                <LemonLabel className="text-base">
+                <Label className="text-base">
                     <IngestionControls.MatchTypeTag /> Event emitted <Since web={{ version: '1.186.0' }} />
-                </LemonLabel>
+                </Label>
                 <IngestionControls.EventTriggerSelect events={eventTriggerConfig} onChange={updateEventTriggerConfig} />
             </div>
             <p>Start recording when an Insights event is queued.</p>
@@ -179,9 +179,9 @@ function Sampling(): JSX.Element {
     return (
         <PayGateMini feature={AvailableFeature.SESSION_REPLAY_SAMPLING}>
             <div className="flex flex-row justify-between mt-2">
-                <LemonLabel className="text-base">
+                <Label className="text-base">
                     <IngestionControls.MatchTypeTag /> Sampling <Since web={{ version: '1.85.0' }} />
-                </LemonLabel>
+                </Label>
                 <IngestionControls.SamplingTrigger
                     initialSampleRate={
                         typeof currentTeam?.session_recording_sample_rate === 'string'
@@ -203,9 +203,9 @@ function MinimumDurationSetting(): JSX.Element | null {
     return (
         <PayGateMini feature={AvailableFeature.REPLAY_RECORDING_DURATION_MINIMUM}>
             <div className="flex flex-row justify-between">
-                <LemonLabel className="text-base">
+                <Label className="text-base">
                     Minimum session duration (seconds) <Since web={{ version: '1.85.0' }} />
-                </LemonLabel>
+                </Label>
                 <IngestionControls.MinDuration
                     value={currentTeam?.session_recording_minimum_duration_milliseconds}
                     onChange={(v) => updateCurrentTeam({ session_recording_minimum_duration_milliseconds: v })}
@@ -236,7 +236,7 @@ export function ReplayTriggers(): JSX.Element {
     const { updateCurrentTeam } = useActions(teamLogic)
     const { currentTeam } = useValues(teamLogic)
 
-    const tabs: LemonTab<'web' | 'mobile'>[] = [
+    const tabs: Tab<'web' | 'mobile'>[] = [
         {
             key: 'web',
             label: 'Web',
@@ -247,14 +247,14 @@ export function ReplayTriggers(): JSX.Element {
                     )}
                     <div className="flex flex-col gap-y-2 border rounded py-2 px-4 mb-2">
                         <IngestionControls.MatchTypeSelect />
-                        <LemonDivider />
+                        <Divider />
                         <UrlTriggerOptions />
                         <EventTriggerOptions />
                         <LinkedFlagSelector />
                         <Sampling />
                     </div>
                     <MinimumDurationSetting />
-                    <LemonDivider />
+                    <Divider />
                     <UrlBlocklistOptions />
                 </div>
             ),
@@ -281,7 +281,7 @@ export function ReplayTriggers(): JSX.Element {
             onChangeMatchType={(value) => updateCurrentTeam({ session_recording_trigger_match_type_config: value })}
         >
             <div className="flex flex-col gap-y-2">
-                <LemonTabs activeKey={selectedPlatform} onChange={selectPlatform} tabs={tabs} />
+                <Tabs activeKey={selectedPlatform} onChange={selectPlatform} tabs={tabs} />
             </div>
         </IngestionControls>
     )
@@ -298,9 +298,9 @@ const RecordingTriggersSummary = ({
 
     if (!currentTeam?.session_recording_opt_in) {
         return (
-            <LemonBanner type="warning">
+            <Banner type="warning">
                 <strong>Recording is disabled.</strong> Enable it in General settings.
-            </LemonBanner>
+            </Banner>
         )
     }
 

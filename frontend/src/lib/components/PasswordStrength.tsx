@@ -1,9 +1,9 @@
 import zxcvbn from 'zxcvbn'
 
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Progress } from 'lib/elements/Progress'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 export type ValidatedPasswordResult = {
     score: number // 0 is no passsword - otherwise 1-5,
@@ -48,7 +48,7 @@ export default function PasswordStrength({
                     </strong>
                     {feedback ? (
                         <>
-                            <LemonDivider />
+                            <Divider />
                             {feedback}
                         </>
                     ) : (
@@ -58,7 +58,7 @@ export default function PasswordStrength({
             }
         >
             <span className="w-20">
-                <LemonProgress
+                <Progress
                     percent={score * 20}
                     strokeColor={score <= 2 ? 'var(--danger)' : score <= 3 ? 'var(--warning)' : 'var(--success)'}
                 />

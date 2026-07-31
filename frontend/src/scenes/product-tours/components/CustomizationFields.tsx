@@ -1,8 +1,8 @@
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Select } from '@hanzo/elements'
 
-import { LemonColorPicker } from 'lib/lemon-ui/LemonColor/LemonColorPicker'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { ColorPicker } from 'lib/elements/Color/ColorPicker'
+import { Field } from 'lib/elements/Field'
 import { WEB_SAFE_FONTS } from 'scenes/surveys/constants'
 
 export const COLOR_PRESETS = [
@@ -41,9 +41,9 @@ export function ColorPickerField({
     const displayValue = isNone ? 'None' : value
 
     return (
-        <LemonField.Pure label={label} className="flex-1">
+        <Field.Pure label={label} className="flex-1">
             <div className="flex items-center gap-2">
-                <LemonColorPicker
+                <ColorPicker
                     colors={COLOR_PRESETS}
                     selectedColor={isNone ? null : value}
                     onSelectColor={onChange}
@@ -51,7 +51,7 @@ export function ColorPickerField({
                 />
                 <span className="text-xs text-secondary font-mono">{displayValue}</span>
                 {showNone && (
-                    <LemonButton
+                    <Button
                         type="tertiary"
                         size="xsmall"
                         icon={<IconX />}
@@ -59,7 +59,7 @@ export function ColorPickerField({
                     />
                 )}
             </div>
-        </LemonField.Pure>
+        </Field.Pure>
     )
 }
 
@@ -71,8 +71,8 @@ export function FontSelector({
     onChange: (font: string) => void
 }): JSX.Element {
     return (
-        <LemonField.Pure label="Font">
-            <LemonSelect
+        <Field.Pure label="Font">
+            <Select
                 value={value}
                 onChange={(font) => onChange(font || 'system-ui')}
                 options={WEB_SAFE_FONTS.map((font) => ({
@@ -84,7 +84,7 @@ export function FontSelector({
                     value: font.value,
                 }))}
             />
-        </LemonField.Pure>
+        </Field.Pure>
     )
 }
 
@@ -96,12 +96,12 @@ export function BoxShadowSelector({
     onChange: (shadow: string) => void
 }): JSX.Element {
     return (
-        <LemonField.Pure label="Drop shadow">
-            <LemonSelect
+        <Field.Pure label="Drop shadow">
+            <Select
                 value={value}
                 onChange={(shadow) => onChange(shadow || '0 4px 12px rgba(0, 0, 0, 0.15)')}
                 options={BOX_SHADOW_PRESETS}
             />
-        </LemonField.Pure>
+        </Field.Pure>
     )
 }

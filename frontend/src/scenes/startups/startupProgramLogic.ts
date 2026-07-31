@@ -2,7 +2,7 @@ import { actions, connect, kea, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { Dayjs, dayjs } from 'lib/dayjs'
@@ -206,7 +206,7 @@ export const startupProgramLogic = kea<startupProgramLogicType>([
                     actions.setFormSubmitted(true)
                     insights.capture('startup program application submitted', valuesToSubmit)
                 } catch (error: any) {
-                    lemonToast.error(error.detail || 'Failed to submit application')
+                    toast.error(error.detail || 'Failed to submit application')
                     throw error
                 }
             },

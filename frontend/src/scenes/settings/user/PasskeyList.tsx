@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheckCircle, IconChip, IconClock, IconLaptop, IconLock, IconPencil, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonTable, Spinner } from '@hanzo/lemon-ui'
+import { Button, Table, Spinner } from '@hanzo/elements'
 
-import { IconLink, IconSync } from 'lib/lemon-ui/icons'
+import { IconLink, IconSync } from 'lib/elements/icons'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 
 import { PasskeyCredential, passkeySettingsLogic } from './passkeySettingsLogic'
@@ -67,7 +67,7 @@ export function PasskeyList(): JSX.Element {
     }
 
     return (
-        <LemonTable
+        <Table
             dataSource={passkeys}
             columns={[
                 {
@@ -104,13 +104,13 @@ export function PasskeyList(): JSX.Element {
                                 <VerificationStatusIcon verified={record.verified} verifying={verifying} />
                                 <span className="text-sm">{statusText}</span>
                                 {!record.verified && !verifying && (
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         onClick={() => verifyPasskey(record.id)}
                                         tooltip="Verify this passkey"
                                     >
                                         Verify
-                                    </LemonButton>
+                                    </Button>
                                 )}
                             </div>
                         )
@@ -128,13 +128,13 @@ export function PasskeyList(): JSX.Element {
                     width: 100,
                     render: (_: any, record: PasskeyCredential) => (
                         <div className="flex gap-1">
-                            <LemonButton
+                            <Button
                                 icon={<IconPencil />}
                                 size="small"
                                 tooltip="Rename"
                                 onClick={() => openRenameModal(record.id, record.label)}
                             />
-                            <LemonButton
+                            <Button
                                 icon={<IconTrash />}
                                 size="small"
                                 status="danger"

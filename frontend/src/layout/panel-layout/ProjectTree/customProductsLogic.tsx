@@ -1,7 +1,7 @@
 import { kea, path } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { getAppContext } from 'lib/utils/getAppContext'
@@ -26,7 +26,7 @@ export const customProductsLogic = kea<customProductsLogicType>([
 
                     const { results = [] } = response
                     if (results.length === 0) {
-                        lemonToast.error('No recommended products found')
+                        toast.error('No recommended products found')
                     }
 
                     return results

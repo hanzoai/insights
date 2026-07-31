@@ -34,15 +34,15 @@ import { DatabaseTablePreview } from 'lib/components/TablePreview/DatabaseTableP
 import { TerraformExportModal } from 'lib/components/TerraformExporter/TerraformExportModal'
 import { TitleWithIcon } from 'lib/components/TitleWithIcon'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Dialog } from 'lib/elements/Dialog'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
+import { Modal } from 'lib/elements/Modal'
+import { Select } from 'lib/elements/Select'
+import { Switch } from 'lib/elements/Switch'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { deleteInsightWithUndo } from 'lib/utils/deleteWithUndo'
@@ -272,7 +272,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                 onClose={() => setTerraformModalOpen(false)}
                 resource={{ type: 'insight', data: { ...insight, query, derived_name: derivedName } }}
             />
-            <LemonModal
+            <Modal
                 isOpen={tablePreviewModalOpen}
                 onClose={() => setTablePreviewModalOpen(false)}
                 width={1000}
@@ -280,7 +280,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                 description="Showcasing the DatabaseTablePreview component on insights."
             >
                 <div className="mb-2 w-80">
-                    <LemonSelect
+                    <Select
                         fullWidth
                         value={selectedPreviewColumn}
                         onChange={(newValue) => setSelectedPreviewColumn(newValue)}
@@ -296,7 +296,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                     selectedKey={selectedPreviewColumn}
                     bordered
                 />
-            </LemonModal>
+            </Modal>
 
             <ScenePanel>
                 <>
@@ -374,7 +374,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                             <ButtonPrimitive
                                 onClick={() => {
                                     const templateLink = getInsightDefinitionUrl({ query }, siteUrl)
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: (
                                             <span className="flex items-center gap-2">
                                                 <TitleWithIcon
@@ -480,7 +480,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                             <ButtonPrimitive
                                 data-attr={`${RESOURCE_TYPE}-save-as-cohort`}
                                 onClick={() => {
-                                    LemonDialog.openForm({
+                                    Dialog.openForm({
                                         title: 'Save as static cohort',
                                         description: (
                                             <>
@@ -498,13 +498,13 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                                             name: '',
                                         },
                                         content: (
-                                            <LemonField name="name">
-                                                <LemonInput
+                                            <Field name="name">
+                                                <Input
                                                     data-attr={`${RESOURCE_TYPE}-save-as-cohort-name`}
                                                     placeholder="Name of the new cohort"
                                                     autoFocus
                                                 />
-                                            </LemonField>
+                                            </Field>
                                         ),
                                         errors: {
                                             name: (name) => (!name ? 'You must enter a name' : undefined),
@@ -528,7 +528,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                     </ScenePanelActionsSection>
                     <ScenePanelDivider />
                     <ScenePanelActionsSection>
-                        <LemonSwitch
+                        <Switch
                             data-attr={`${RESOURCE_TYPE}-${showQueryEditor ? 'hide' : 'show'}-source`}
                             className="px-2 py-1"
                             checked={showQueryEditor}
@@ -550,7 +550,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                         />
 
                         {hasDashboardItemId && (user?.is_staff || user?.is_impersonated || !preflight?.cloud) ? (
-                            <LemonSwitch
+                            <Switch
                                 data-attr={`${RESOURCE_TYPE}-toggle-debug-panel`}
                                 className="px-2 py-1"
                                 checked={showDebugPanel}
@@ -630,7 +630,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                 actions={
                     <>
                         {insightMode === ItemMode.Edit && hasDashboardItemId && (
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 onClick={() => {
                                     cancelChanges()
@@ -640,7 +640,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                                 size="small"
                             >
                                 Cancel
-                            </LemonButton>
+                            </Button>
                         )}
 
                         {insightMode !== ItemMode.Edit ? (
@@ -650,7 +650,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                                     minAccessLevel={AccessControlLevel.Editor}
                                     userAccessLevel={insight.user_access_level}
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         size="small"
                                         tooltipPlacement="bottom"
@@ -674,7 +674,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                                         data-attr="insight-edit-button"
                                     >
                                         Edit
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             )
                         ) : (

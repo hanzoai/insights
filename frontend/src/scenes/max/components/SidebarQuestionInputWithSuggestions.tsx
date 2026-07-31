@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { cn } from 'lib/utils/css-classes'
@@ -64,7 +64,7 @@ export function SidebarQuestionInputWithSuggestions({
                     type="secondary"
                     dataProcessingAccepted={dataProcessingAccepted}
                     additionalSuggestions={[
-                        <LemonButton
+                        <Button
                             key="edit-max-memory"
                             onClick={handleSettingsClick}
                             size="xsmall"
@@ -76,14 +76,14 @@ export function SidebarQuestionInputWithSuggestions({
                 />
             </div>
             {isRemovingSidePanelFlag && (
-                <LemonModal
+                <Modal
                     title="Insights AI memory"
                     isOpen={settingsModalOpen}
                     onClose={() => setSettingsModalOpen(false)}
                     width="40rem"
                 >
                     <MaxMemorySettings />
-                </LemonModal>
+                </Modal>
             )}
         </DismissableLayer>
     )

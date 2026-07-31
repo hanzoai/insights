@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from 'react'
 
 import { IconThumbsDown, IconThumbsDownFilled, IconThumbsUp, IconThumbsUpFilled } from '@hanzo/icons'
 
-import { UploadedLogo } from 'lib/lemon-ui/UploadedLogo/UploadedLogo'
+import { UploadedLogo } from 'lib/elements/UploadedLogo/UploadedLogo'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { teamLogic } from 'scenes/teamLogic'
 

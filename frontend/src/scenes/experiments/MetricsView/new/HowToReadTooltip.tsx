@@ -1,10 +1,10 @@
 import { useValues } from 'kea'
 
 import { IconTrending } from '@hanzo/icons'
-import { LemonDivider, Tooltip } from '@hanzo/lemon-ui'
+import { Divider, Tooltip } from '@hanzo/elements'
 
-import { Link } from 'lib/lemon-ui/Link'
-import { IconTrendingDown } from 'lib/lemon-ui/icons'
+import { Link } from 'lib/elements/Link'
+import { IconTrendingDown } from 'lib/elements/icons'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import { ExperimentStatsMethod } from '~/types'
@@ -17,7 +17,7 @@ export function HowToReadTooltip(): JSX.Element {
 
     return (
         <>
-            <LemonDivider vertical className="mx-2" />
+            <Divider vertical className="mx-2" />
             <Tooltip
                 title={
                     <div className="p-2">

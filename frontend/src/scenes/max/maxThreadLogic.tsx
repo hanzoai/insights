@@ -22,7 +22,7 @@ import api, { ApiError } from 'lib/api'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { uuid } from 'lib/utils'
 import { maxContextLogic } from 'scenes/max/maxContextLogic'
@@ -522,7 +522,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                         if (error instanceof ApiError && error.status === 404) {
                             return { messages: [], limit: 0 }
                         }
-                        lemonToast.error(error?.data?.detail || 'Failed to load queued messages.')
+                        toast.error(error?.data?.detail || 'Failed to load queued messages.')
                         return { messages: [], limit: 0 }
                     }
                 },
@@ -767,10 +767,10 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.setQueueLimit(queue.max_queue_messages)
             } catch (error: any) {
                 if (error instanceof ApiError && error.status === 409) {
-                    lemonToast.error('You can only queue two messages at a time.')
+                    toast.error('You can only queue two messages at a time.')
                     return
                 }
-                lemonToast.error(error?.data?.detail || 'Failed to queue the message.')
+                toast.error(error?.data?.detail || 'Failed to queue the message.')
             }
         },
         updateQueuedMessage: async ({ queueId, content }) => {
@@ -784,7 +784,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.setQueuedMessages(queue.messages)
                 actions.setQueueLimit(queue.max_queue_messages)
             } catch (error: any) {
-                lemonToast.error(error?.data?.detail || 'Failed to update the queued message.')
+                toast.error(error?.data?.detail || 'Failed to update the queued message.')
             }
         },
         deleteQueuedMessage: async ({ queueId }) => {
@@ -843,7 +843,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 actions.setQueuedMessages(queue.messages)
                 actions.setQueueLimit(queue.max_queue_messages)
             } catch (error: any) {
-                lemonToast.error(error?.data?.detail || 'Failed to clear queued messages.')
+                toast.error(error?.data?.detail || 'Failed to clear queued messages.')
             }
         },
         setPendingApproval: () => {
@@ -873,7 +873,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 prompt.trim() !== ''
             ) {
                 if (values.queueIsFull) {
-                    lemonToast.error('You can only queue two messages at a time.')
+                    toast.error('You can only queue two messages at a time.')
                     return
                 }
                 actions.enqueueQueuedMessage({
@@ -972,7 +972,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                 cache.generationController?.abort()
                 actions.resetThread()
             } catch (e: any) {
-                lemonToast.error(e?.data?.detail || 'Failed to cancel the generation.')
+                toast.error(e?.data?.detail || 'Failed to cancel the generation.')
             }
 
             try {

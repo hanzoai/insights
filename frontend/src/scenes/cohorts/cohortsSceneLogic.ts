@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 import insights from '@hanzo/insights'
 
-import { PaginationManual, Sorting } from '@hanzo/lemon-ui'
+import { PaginationManual, Sorting } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'

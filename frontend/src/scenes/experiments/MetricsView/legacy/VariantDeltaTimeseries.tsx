@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
 import { useChart } from 'lib/hooks/useChart'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
 import { modalsLogic } from 'scenes/experiments/modalsLogic'
 
 const DELTA = [0.16, 0.17, 0.15, 0.16, 0.14, 0.15, 0.145, 0.15, 0.155, 0.148, 0.15, 0.147, 0.152, 0.15]
@@ -115,7 +115,7 @@ export const VariantDeltaTimeseries = (): JSX.Element => {
     })
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isVariantDeltaTimeseriesModalOpen}
             onClose={() => {
                 closeVariantDeltaTimeseriesModal()
@@ -123,14 +123,14 @@ export const VariantDeltaTimeseries = (): JSX.Element => {
             width={800}
             title="Variant performance over time"
             footer={
-                <LemonButton form="secondary-metric-modal-form" type="secondary" onClick={() => {}}>
+                <Button form="secondary-metric-modal-form" type="secondary" onClick={() => {}}>
                     Close
-                </LemonButton>
+                </Button>
             }
         >
             <div className="relative h-[400px]">
                 <canvas ref={canvasRef} />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

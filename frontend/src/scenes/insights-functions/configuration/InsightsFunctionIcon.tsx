@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 
 import { IconUpload } from '@hanzo/icons'
-import { LemonButton, LemonFileInput, LemonInput, LemonSkeleton, Popover, Spinner, lemonToast } from '@hanzo/lemon-ui'
+import { Button, FileInput, Input, Skeleton, Popover, Spinner, toast } from '@hanzo/elements'
 
 import { InsightsFunctionIconLogicProps, insightsFunctionIconLogic } from './insightsFunctionIconLogic'
 
@@ -68,7 +68,7 @@ export function InsightsFunctionIconEditable({
                     <div className="flex gap-2 justify-between items-center">
                         <h2 className="m-0">Choose an icon</h2>
 
-                        <LemonFileInput
+                        <FileInput
                             multiple={false}
                             accept={'image/*'}
                             showUploadedFiles={false}
@@ -78,18 +78,18 @@ export function InsightsFunctionIconEditable({
                                         props.onChange?.(dataURI)
                                     })
                                     .catch(() => {
-                                        lemonToast.error('Error uploading image')
+                                        toast.error('Error uploading image')
                                     })
                             }}
                             callToAction={
-                                <LemonButton size="small" type="secondary" icon={<IconUpload />}>
+                                <Button size="small" type="secondary" icon={<IconUpload />}>
                                     Upload image
-                                </LemonButton>
+                                </Button>
                             }
                         />
                     </div>
 
-                    <LemonInput
+                    <Input
                         size="small"
                         type="search"
                         placeholder="Search for company logos"
@@ -114,7 +114,7 @@ export function InsightsFunctionIconEditable({
                             </span>
                         )) ??
                             (possibleIconsLoading ? (
-                                <LemonSkeleton className="w-14 h-14" repeat={4} />
+                                <Skeleton className="w-14 h-14" repeat={4} />
                             ) : (
                                 'No icons found'
                             ))}
@@ -167,7 +167,7 @@ export function InsightsFunctionIcon({
                         alt="Custom function icon"
                         onLoad={() => setLoaded(true)}
                     />
-                    {!loaded && <LemonSkeleton className="absolute w-full h-full" />}
+                    {!loaded && <Skeleton className="absolute w-full h-full" />}
                 </>
             ) : (
                 <span>🦔</span>

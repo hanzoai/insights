@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
+import { Banner, Tag, Link, Spinner } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -444,9 +444,9 @@ const WorkflowsInstallHeader = (): JSX.Element => {
             </p>
             {isCloudOrDev && (
                 <>
-                    <LemonBanner type="info" hideIcon>
+                    <Banner type="info" hideIcon>
                         <h3 className="flex items-center gap-2 pb-1">
-                            <LemonTag type="warning">BETA</LemonTag> AI setup wizard
+                            <Tag type="warning">BETA</Tag> AI setup wizard
                         </h3>
                         <div className="flex flex-col p-2">
                             <p className="font-normal pb-1">
@@ -455,7 +455,7 @@ const WorkflowsInstallHeader = (): JSX.Element => {
                             </p>
                             <CodeSnippet language={Language.Bash}>{wizardCommand}</CodeSnippet>
                         </div>
-                    </LemonBanner>
+                    </Banner>
                     <p className="text-sm">
                         After the wizard finishes, <Link to="/workflows/channels">configure a channel</Link> then head
                         to the <Link to="/workflows">workflow builder</Link> to create your first automation.

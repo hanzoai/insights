@@ -3,7 +3,7 @@ import { actions, kea, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { urls } from 'scenes/urls'
@@ -70,7 +70,7 @@ export const workflowsLogic = kea<workflowsLogicType>([
                     return [duplicatedWorkflow, ...values.workflows]
                 },
                 archiveWorkflow: async ({ workflow }) => {
-                    LemonDialog.open({
+                    Dialog.open({
                         width: 500,
                         title: 'Archive workflow?',
                         description: `Are you sure you want to archive "${workflow.name}"?${
@@ -87,11 +87,11 @@ export const workflowsLogic = kea<workflowsLogicType>([
                                     await api.insightsFlows.updateInsightsFlow(workflow.id, {
                                         status: 'archived',
                                     })
-                                    lemonToast.success(`Workflow "${workflow.name}" archived`)
+                                    toast.success(`Workflow "${workflow.name}" archived`)
                                     router.actions.push(urls.workflows())
                                     actions.loadWorkflows()
                                 } catch (error: any) {
-                                    lemonToast.error(
+                                    toast.error(
                                         `Failed to archive workflow: ${error.detail || error.message || 'Unknown error'}`
                                     )
                                 }
@@ -109,17 +109,17 @@ export const workflowsLogic = kea<workflowsLogicType>([
                         const updatedWorkflow = await api.insightsFlows.updateInsightsFlow(workflow.id, {
                             status: 'draft',
                         })
-                        lemonToast.success(`Workflow "${workflow.name}" restored to draft status`)
+                        toast.success(`Workflow "${workflow.name}" restored to draft status`)
                         return values.workflows.map((c) => (c.id === updatedWorkflow.id ? updatedWorkflow : c))
                     } catch (error: any) {
-                        lemonToast.error(
+                        toast.error(
                             `Failed to restore workflow: ${error?.detail || error?.message || 'Unknown error'}`
                         )
                         return values.workflows
                     }
                 },
                 deleteWorkflow: async ({ workflow }) => {
-                    LemonDialog.open({
+                    Dialog.open({
                         width: 500,
                         title: 'Delete workflow?',
                         description: `Are you sure you want to permanently delete "${workflow.name}"? This action cannot be undone.`,
@@ -130,11 +130,11 @@ export const workflowsLogic = kea<workflowsLogicType>([
                             onClick: async () => {
                                 try {
                                     await api.insightsFlows.deleteInsightsFlow(workflow.id)
-                                    lemonToast.success(`Workflow "${workflow.name}" deleted`)
+                                    toast.success(`Workflow "${workflow.name}" deleted`)
                                     deleteFromTree('insights_flow/', workflow.id)
                                     actions.loadWorkflows()
                                 } catch (error: any) {
-                                    lemonToast.error(
+                                    toast.error(
                                         `Failed to delete workflow: ${error.detail || error.message || 'Unknown error'}`
                                     )
                                 }

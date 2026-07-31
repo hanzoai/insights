@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { insightsFunctionConfigurationLogic } from '../insightsFunctionConfigurationLogic'
 
@@ -23,25 +23,25 @@ export function InsightsFunctionTemplateOptions(): JSX.Element {
 
             <div className="flex flex-1 gap-2 items-center pt-2 border-t">
                 <div className="flex-1">
-                    <LemonButton>Close</LemonButton>
+                    <Button>Close</Button>
                 </div>
 
-                <LemonButton
+                <Button
                     type="secondary"
                     onClick={() => duplicateFromTemplate()}
                     tooltip="Create a new destination using the latest template version"
                 >
                     New function from template
-                </LemonButton>
+                </Button>
 
                 {templateHasChanged ? (
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => resetToTemplate()}
                         tooltip="Replace your current code with the latest template version"
                     >
                         Reset to template
-                    </LemonButton>
+                    </Button>
                 ) : null}
             </div>
         </div>

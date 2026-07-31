@@ -1,6 +1,6 @@
 import equal from 'fast-deep-equal'
 
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Tag } from 'lib/elements/Tag'
 
 import {
     isExperimentFunnelMetric,
@@ -137,8 +137,8 @@ export const getMetricChanges = (
     if (metricAfter.metric_type !== metricBefore.metric_type) {
         changes.push(
             <span>
-                changed the type from <LemonTag>{metricBefore.metric_type}</LemonTag> to{' '}
-                <LemonTag>{metricAfter.metric_type}</LemonTag>
+                changed the type from <Tag>{metricBefore.metric_type}</Tag> to{' '}
+                <Tag>{metricAfter.metric_type}</Tag>
             </span>
         )
     }
@@ -211,7 +211,7 @@ export const getMetricChanges = (
         <>
             {changes.at(-1)}&nbsp;
             <span>
-                for the metric <LemonTag>{metricBefore.name || getDefaultMetricTitle(metricBefore)}</LemonTag>
+                for the metric <Tag>{metricBefore.name || getDefaultMetricTitle(metricBefore)}</Tag>
             </span>
         </>,
     ]

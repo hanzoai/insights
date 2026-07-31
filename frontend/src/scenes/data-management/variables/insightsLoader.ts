@@ -1,4 +1,4 @@
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 
@@ -51,7 +51,7 @@ export async function fetchInsightsUsingVariable(
 
         return matchingInsights
     } catch (error) {
-        lemonToast.error('Failed to load insights using this variable')
+        toast.error('Failed to load insights using this variable')
         throw error
     }
 }

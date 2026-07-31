@@ -3,8 +3,8 @@ import { IconCursorClick, IconPencil } from '@hanzo/icons'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Link } from 'lib/lemon-ui/Link'
+import { Button } from 'lib/elements/Button'
+import { Link } from 'lib/elements/Link'
 import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -20,7 +20,7 @@ export function NewActionButton({ onSelectOption }: { onSelectOption?: () => voi
                 interaction="click"
                 scope={Scene.Actions}
             >
-                <LemonButton
+                <Button
                     type="primary"
                     size="small"
                     to={urls.createAction()}
@@ -33,7 +33,7 @@ export function NewActionButton({ onSelectOption }: { onSelectOption?: () => voi
                             className: 'w-80',
                             overlay: (
                                 <div className="space-y-1 p-1">
-                                    <LemonButton
+                                    <Button
                                         fullWidth
                                         icon={<IconPencil />}
                                         to={urls.createAction()}
@@ -53,8 +53,8 @@ export function NewActionButton({ onSelectOption }: { onSelectOption?: () => voi
                                                 </Link>
                                             </span>
                                         </div>
-                                    </LemonButton>
-                                    <LemonButton
+                                    </Button>
+                                    <Button
                                         fullWidth
                                         icon={<IconCursorClick />}
                                         to={urls.toolbarLaunch()}
@@ -73,14 +73,14 @@ export function NewActionButton({ onSelectOption }: { onSelectOption?: () => voi
                                                 </Link>
                                             </span>
                                         </div>
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             ),
                         },
                     }}
                 >
                     New action
-                </LemonButton>
+                </Button>
             </AppShortcut>
         </AccessControlAction>
     )

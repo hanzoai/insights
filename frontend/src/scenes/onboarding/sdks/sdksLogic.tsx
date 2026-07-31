@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { urlToAction } from 'kea-router'
 
 import api from 'lib/api'
-import { LemonSelectOptions } from 'lib/lemon-ui/LemonSelect/LemonSelect'
+import { SelectOptions } from 'lib/elements/Select/Select'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { liveEventsLogic } from 'scenes/activity/live/liveEventsLogic'
@@ -26,7 +26,7 @@ To add SDK instructions for your product:
     6. Add the SDK component to your product onboarding component
 */
 
-const getSourceOptions = (sdks: SDK[]): LemonSelectOptions<string> => {
+const getSourceOptions = (sdks: SDK[]): SelectOptions<string> => {
     const allTags = sdks.flatMap((sdk) => sdk.tags)
     const uniqueTags = allTags.filter((item, index) => allTags.indexOf(item) === index)
     return uniqueTags.map((tag) => ({
@@ -62,7 +62,7 @@ export const sdksLogic = kea<sdksLogicType>([
         setSelectedSDK: (sdk: SDK | null) => ({ sdk }),
         setSearchTerm: (searchTerm: string) => ({ searchTerm }),
         setSelectedTag: (selectedTag: SDKTag | null) => ({ selectedTag }),
-        setSourceOptions: (sourceOptions: LemonSelectOptions<string>) => ({ sourceOptions }),
+        setSourceOptions: (sourceOptions: SelectOptions<string>) => ({ sourceOptions }),
         resetSDKs: true,
         setAvailableSDKInstructionsMap: (sdkInstructionMap: SDKInstructionsMap) => ({ sdkInstructionMap }),
         setSDKTagOverrides: (sdkTagOverrides: SDKTagOverrides) => ({ sdkTagOverrides }),
@@ -92,7 +92,7 @@ export const sdksLogic = kea<sdksLogicType>([
             },
         ],
         sourceOptions: [
-            [] as LemonSelectOptions<string>,
+            [] as SelectOptions<string>,
             {
                 setSourceOptions: (_, { sourceOptions }) => sourceOptions,
             },
@@ -146,7 +146,7 @@ export const sdksLogic = kea<sdksLogicType>([
     selectors({
         showSourceOptionsSelect: [
             (selectors) => [selectors.sourceOptions, selectors.availableSDKInstructionsMap],
-            (sourceOptions: LemonSelectOptions<string>, availableSDKInstructionsMap: SDKInstructionsMap): boolean => {
+            (sourceOptions: SelectOptions<string>, availableSDKInstructionsMap: SDKInstructionsMap): boolean => {
                 // more than two source options since one will almost always be "recommended"
                 // more than 5 sdks since with fewer you don't really need to filter
                 return Object.keys(availableSDKInstructionsMap).length > 5 && sourceOptions.length > 2

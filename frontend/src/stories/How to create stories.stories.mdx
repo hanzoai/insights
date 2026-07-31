@@ -39,15 +39,15 @@ There are a few differences between component and scene stories:
 - Add any changes to arguments in [`argTypes`](https://storybook.js.org/docs/react/api/argtypes)
 
 ```tsx
-// frontend/src/lib/lemon-ui/LemonSwitch/LemonSwitch.stories.tsx
+// frontend/src/lib/elements/Switch/Switch.stories.tsx
 import { Meta, StoryObj } from '@storybook/react'
 
-import { LemonSwitch, LemonSwitchProps } from './LemonSwitch'
+import { Switch, SwitchProps } from './Switch'
 
-type Story = StoryObj<typeof LemonSwitch>
-const meta: Meta<typeof LemonSwitch> = {
-  title: 'Lemon UI/Lemon Switch',
-  component: LemonSwitch,
+type Story = StoryObj<typeof Switch>
+const meta: Meta<typeof Switch> = {
+  title: 'Elements/Switch',
+  component: Switch,
   argTypes: {
     loading: {
       control: {
@@ -72,11 +72,11 @@ const meta: Meta<typeof LemonSwitch> = {
 }
 export default meta
 
-export function LemonSwitch_(props: LemonSwitchProps): JSX.Element {
+export function Switch_(props: SwitchProps): JSX.Element {
   const [isChecked, setIsChecked] = useState(false)
 
   return (
-    <LemonSwitch {...props} checked={props.checked !== undefined ? props.checked : isChecked} onChange={setIsChecked} />
+    <Switch {...props} checked={props.checked !== undefined ? props.checked : isChecked} onChange={setIsChecked} />
   )
 }
 ```

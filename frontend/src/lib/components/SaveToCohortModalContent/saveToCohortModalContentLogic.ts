@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { PaginationManual, lemonToast } from '@hanzo/lemon-ui'
+import { PaginationManual, toast } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { delay } from 'lib/utils'
@@ -94,7 +94,7 @@ export const saveToCohortModalContentLogic = kea<saveToCohortModalContentLogicTy
         saveQueryToCohort: async ({ cohort, query }) => {
             const toastId = `save-cohort-${cohort.id}-${Date.now()}`
             try {
-                lemonToast.info('Saving cohort...', { toastId, autoClose: false })
+                toast.info('Saving cohort...', { toastId, autoClose: false })
                 await api.update(`api/projects/${values.currentProjectId}/cohorts/${cohort.id}`, {
                     query: query,
                 })
@@ -103,8 +103,8 @@ export const saveToCohortModalContentLogic = kea<saveToCohortModalContentLogicTy
                 await mountedCohortEditLogic?.actions.updateCohortCount()
 
                 await delay(500) // just in case the toast is too fast
-                lemonToast.dismiss(toastId)
-                lemonToast.success('Cohort saved', {
+                toast.dismiss(toastId)
+                toast.success('Cohort saved', {
                     toastId: `${toastId}-success`,
                     button: {
                         label: 'View cohort',
@@ -113,8 +113,8 @@ export const saveToCohortModalContentLogic = kea<saveToCohortModalContentLogicTy
                 })
             } catch (error) {
                 console.error('Save to cohort failed:', error)
-                lemonToast.dismiss(toastId)
-                lemonToast.error('Save to cohort failed')
+                toast.dismiss(toastId)
+                toast.error('Save to cohort failed')
             }
         },
     })),

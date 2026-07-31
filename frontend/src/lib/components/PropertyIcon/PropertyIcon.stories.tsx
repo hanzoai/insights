@@ -1,12 +1,12 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 
 import { PROPERTIES_ICON_MAP, PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
+import { Table } from 'lib/elements/Table'
 import { COUNTRY_CODE_TO_LONG_NAME } from 'lib/utils/geography/country'
 
 type Story = StoryObj<typeof PropertyIcon>
 const meta: Meta<typeof PropertyIcon> = {
-    title: 'Lemon UI/Icons/Property Icon',
+    title: 'Elements/Icons/Property Icon',
     component: PropertyIcon,
     tags: ['autodocs', 'test-skip'], // There are too many icons, the snapshots are huge in table form
 }
@@ -28,7 +28,7 @@ const Template: StoryFn<typeof PropertyIcon> = (args) => {
     return (
         <>
             <code className="font-bold">{args.property}</code>
-            <LemonTable
+            <Table
                 className="mt-4"
                 dataSource={data}
                 columns={[

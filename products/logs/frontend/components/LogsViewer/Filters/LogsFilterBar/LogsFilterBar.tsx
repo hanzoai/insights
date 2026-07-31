@@ -4,7 +4,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
 import { IconMinusSquare, IconPlusSquare, IconRefresh } from '@hanzo/icons'
-import { LemonButton, LemonDropdown } from '@hanzo/lemon-ui'
+import { Button, Dropdown } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -18,7 +18,7 @@ import { isUniversalGroupFilterLike } from 'lib/components/UniversalFilters/util
 import { dayjs } from 'lib/dayjs'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { IconPauseCircle, IconPlayCircle } from 'lib/lemon-ui/icons'
+import { IconPauseCircle, IconPlayCircle } from 'lib/elements/icons'
 import { Scene } from 'scenes/sceneTypes'
 
 import {
@@ -68,7 +68,7 @@ export const LogsFilterBar = (): JSX.Element => {
                     </div>
                     <div className="flex shrink-0 gap-1.5">
                         <div className="LogsDateButtonGroup">
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconMinusSquare />}
                                 type="secondary"
@@ -81,7 +81,7 @@ export const LogsFilterBar = (): JSX.Element => {
                                 <LogsDateRangePicker dateRange={dateRange} setDateRange={setDateRange} />
                             )}
 
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconPlusSquare />}
                                 type="secondary"
@@ -90,7 +90,7 @@ export const LogsFilterBar = (): JSX.Element => {
                             />
                         </div>
 
-                        <LemonButton
+                        <Button
                             size="small"
                             icon={<IconRefresh />}
                             type="secondary"
@@ -105,7 +105,7 @@ export const LogsFilterBar = (): JSX.Element => {
                             interaction="click"
                             scope={Scene.Logs}
                         >
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type={liveTailRunning ? 'primary' : 'secondary'}
                                 icon={liveTailRunning ? <IconPauseCircle /> : <IconPlayCircle />}
@@ -113,7 +113,7 @@ export const LogsFilterBar = (): JSX.Element => {
                                 disabledReason={liveTailRunning ? undefined : liveTailDisabledReason}
                             >
                                 Live tail
-                            </LemonButton>
+                            </Button>
                         </AppShortcut>
                     </div>
                 </div>
@@ -195,7 +195,7 @@ const LogsFilterSearch = (): JSX.Element => {
 
     return (
         <BindLogic logic={taxonomicFilterLogic} props={taxonomicFilterLogicProps}>
-            <LemonDropdown
+            <Dropdown
                 overlay={
                     <div className="w-[400px] md:w-[600px]">
                         <InfiniteSelectResults
@@ -218,7 +218,7 @@ const LogsFilterSearch = (): JSX.Element => {
                     onClose={() => onClose()}
                     onChange={() => setVisible(true)}
                 />
-            </LemonDropdown>
+            </Dropdown>
         </BindLogic>
     )
 }

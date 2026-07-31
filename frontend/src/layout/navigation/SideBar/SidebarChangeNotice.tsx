@@ -3,7 +3,7 @@ import insights from '@hanzo/insights'
 import React, { Fragment, useState } from 'react'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonDivider, TooltipProps } from '@hanzo/lemon-ui'
+import { Button, Divider, TooltipProps } from '@hanzo/elements'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { Scene } from 'scenes/sceneTypes'
@@ -68,12 +68,12 @@ export function SidebarChangeNoticeContent({
                 {notices.map((notice, i) => (
                     <Fragment key={i}>
                         {notice.description}
-                        {i < notices.length - 1 && <LemonDivider />}
+                        {i < notices.length - 1 && <Divider />}
                     </Fragment>
                 ))}
             </div>
 
-            <LemonButton size="small" onClick={onAcknowledged} icon={<IconX />} />
+            <Button size="small" onClick={onAcknowledged} icon={<IconX />} />
         </div>
     )
 }

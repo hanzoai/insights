@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { EitherMembershipLevel, OrganizationMembershipLevel } from 'lib/constants'
-import { LemonSelect, LemonSelectOption } from 'lib/lemon-ui/LemonSelect'
+import { Select, SelectOption } from 'lib/elements/Select'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { TeamType } from '~/types'
@@ -14,7 +14,7 @@ export function TeamSettingSelect<T extends string | number>({
     minimumAccessLevel = OrganizationMembershipLevel.Member,
 }: {
     field: keyof TeamType
-    options: LemonSelectOption<T>[]
+    options: SelectOption<T>[]
     defaultValue: T
     minimumAccessLevel?: EitherMembershipLevel
 }): JSX.Element {
@@ -33,7 +33,7 @@ export function TeamSettingSelect<T extends string | number>({
     }
 
     return (
-        <LemonSelect
+        <Select
             value={currentValue}
             onChange={handleChange}
             options={options}

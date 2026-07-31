@@ -1,6 +1,6 @@
 import { IconInfo } from '@hanzo/icons'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 export function DuplicateStepIndicator(): JSX.Element {
     return (

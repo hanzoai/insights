@@ -4,10 +4,10 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonCheckbox, LemonSelect, Link } from '@hanzo/lemon-ui'
+import { Checkbox, Select, Link } from '@hanzo/elements'
 
 import { INSTANTLY_AVAILABLE_PROPERTIES } from 'lib/constants'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
 import { groupsModel } from '~/models/groupsModel'
@@ -218,7 +218,7 @@ export function CodeInstructions({
             {showAdvancedOptions && (
                 <div className="flex items-center gap-6">
                     <div>
-                        <LemonSelect
+                        <Select
                             data-attr={'feature-flag-instructions-select' + (dataAttr ? `-${dataAttr}` : '')}
                             options={supportedLibraries}
                             onChange={(val) => {
@@ -236,7 +236,7 @@ export function CodeInstructions({
                         )}`}
                     >
                         <div className="flex items-center gap-1">
-                            <LemonCheckbox
+                            <Checkbox
                                 label="Show payload option"
                                 onChange={() => {
                                     setShowPayloadCode(!showPayloadCode)
@@ -255,7 +255,7 @@ export function CodeInstructions({
                                 libraries and only works for flags that don't persist across authentication steps"
                         >
                             <div className="flex items-center gap-1">
-                                <LemonCheckbox
+                                <Checkbox
                                     label="Show bootstrap option"
                                     data-attr="flags-code-example-bootstrap-option"
                                     checked={showBootstrapCode}
@@ -273,7 +273,7 @@ export function CodeInstructions({
                         </Tooltip>
                         <Tooltip title="Local evaluation is only available in server side libraries and only works for flags that don't persist across authentication steps">
                             <div className="flex items-center gap-1">
-                                <LemonCheckbox
+                                <Checkbox
                                     label="Show local evaluation option"
                                     data-attr="flags-code-example-local-eval-option"
                                     checked={showLocalEvalCode}

@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Link } from 'lib/lemon-ui/Link'
+import { Button } from 'lib/elements/Button'
+import { Link } from 'lib/elements/Link'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { urls } from 'scenes/urls'
 
@@ -67,7 +67,7 @@ export function QueryEditor(props: QueryEditorProps): JSX.Element {
                     </div>
                 ) : null}
                 {props.aboveButton}
-                <LemonButton
+                <Button
                     onClick={saveQuery}
                     type="primary"
                     status={error ? 'danger' : 'default'}
@@ -77,7 +77,7 @@ export function QueryEditor(props: QueryEditorProps): JSX.Element {
                     data-attr="query-editor-save"
                 >
                     {!props.setQuery ? 'No permission to update' : 'Update and run'}
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

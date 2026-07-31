@@ -2,7 +2,7 @@ import { offset } from '@floating-ui/react'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonMenu, LemonMenuItem } from 'lib/lemon-ui/LemonMenu'
+import { Menu, MenuItem } from 'lib/elements/Menu'
 
 import { maxThreadLogic } from '../maxThreadLogic'
 import { MAX_SLASH_COMMANDS, SlashCommand } from '../slash-commands'
@@ -17,7 +17,7 @@ const convertSlashCommandToMenuItem = (
     command: SlashCommand,
     onActivate: (command: SlashCommand) => void,
     active: boolean
-): LemonMenuItem => ({
+): MenuItem => ({
     key: command.name,
     label: (
         <div>
@@ -67,12 +67,12 @@ export function SlashCommandAutocomplete({ onClose, visible, children }: SlashCo
                 activateCommand(filteredCommands[activeItemIndex])
             }
         }
-        document.addEventListener('keydown', handleKeyDown, { capture: true }) // Capture phase to run this before LemonTextArea's onEnter
+        document.addEventListener('keydown', handleKeyDown, { capture: true }) // Capture phase to run this before TextArea's onEnter
         return () => document.removeEventListener('keydown', handleKeyDown, { capture: true })
     }, [visible, filteredCommands, activeItemIndex, activateCommand, selectCommand, onClose])
 
     return (
-        <LemonMenu
+        <Menu
             matchWidth
             items={filteredCommands
                 .map((command: SlashCommand, index: number) =>
@@ -105,7 +105,7 @@ export function SlashCommandAutocomplete({ onClose, visible, children }: SlashCo
             focusBasedKeyboardNavigation={false}
         >
             {children}
-        </LemonMenu>
+        </Menu>
     )
 }
 

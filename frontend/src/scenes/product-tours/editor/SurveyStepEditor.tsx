@@ -1,6 +1,6 @@
-import { LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { SegmentedButton } from '@hanzo/elements'
 
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
+import { Input } from 'lib/elements/Input'
 
 import { ProductTourSurveyQuestion, ProductTourSurveyQuestionType } from '~/types'
 
@@ -65,7 +65,7 @@ export function SurveyStepEditor({ survey, onChange }: SurveyStepEditorProps): J
     return (
         <div className="space-y-3">
             {/* Question type toggle */}
-            <LemonSegmentedButton
+            <SegmentedButton
                 size="small"
                 fullWidth
                 value={currentSurvey.type}
@@ -79,7 +79,7 @@ export function SurveyStepEditor({ survey, onChange }: SurveyStepEditorProps): J
             {/* Question text */}
             <div className="space-y-1">
                 <label className="text-xs font-medium">Question</label>
-                <LemonInput
+                <Input
                     value={currentSurvey.questionText}
                     onChange={(value) => updateSurvey({ questionText: value })}
                     placeholder={currentSurvey.type === 'rating' ? DEFAULT_RATING_QUESTION : DEFAULT_OPEN_QUESTION}
@@ -94,7 +94,7 @@ export function SurveyStepEditor({ survey, onChange }: SurveyStepEditorProps): J
                     <div className="flex gap-3 items-center">
                         <div className="flex gap-1.5 items-center">
                             <span className="text-xs text-muted">Type:</span>
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 size="xsmall"
                                 value={currentSurvey.display ?? 'emoji'}
                                 onChange={(value) => handleDisplayChange(value as 'emoji' | 'number')}
@@ -106,7 +106,7 @@ export function SurveyStepEditor({ survey, onChange }: SurveyStepEditorProps): J
                         </div>
                         <div className="flex gap-1.5 items-center">
                             <span className="text-xs text-muted">Scale:</span>
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 size="xsmall"
                                 value={currentSurvey.scale ?? 5}
                                 onChange={(value) => updateSurvey({ scale: value as 3 | 5 | 10 })}
@@ -127,7 +127,7 @@ export function SurveyStepEditor({ survey, onChange }: SurveyStepEditorProps): J
                     <div className="flex gap-2">
                         <div className="flex-1 space-y-1">
                             <label className="text-xs text-muted">Low label</label>
-                            <LemonInput
+                            <Input
                                 size="small"
                                 value={currentSurvey.lowerBoundLabel ?? ''}
                                 onChange={(value) => updateSurvey({ lowerBoundLabel: value })}
@@ -136,7 +136,7 @@ export function SurveyStepEditor({ survey, onChange }: SurveyStepEditorProps): J
                         </div>
                         <div className="flex-1 space-y-1">
                             <label className="text-xs text-muted">High label</label>
-                            <LemonInput
+                            <Input
                                 size="small"
                                 value={currentSurvey.upperBoundLabel ?? ''}
                                 onChange={(value) => updateSurvey({ upperBoundLabel: value })}

@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 
 import { IconPlus } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import { METRIC_CONTEXTS } from '~/scenes/experiments/Metrics/experimentMetricModalLogic'
 import { metricSourceModalLogic } from '~/scenes/experiments/Metrics/metricSourceModalLogic'
@@ -13,7 +13,7 @@ export const EmptyMetricsPanel = (): JSX.Element => {
     return (
         <div className="border border-dashed rounded p-8 flex flex-col items-center gap-4">
             <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-start w-full sm:w-auto">
-                <LemonButton
+                <Button
                     type="secondary"
                     onClick={() => openMetricSourceModal(METRIC_CONTEXTS.primary)}
                     className="!h-[80px] flex-1 sm:w-[280px] sm:flex-none"
@@ -25,8 +25,8 @@ export const EmptyMetricsPanel = (): JSX.Element => {
                             <span className="text-xs text-muted block min-h-[2.5rem]">Tracks your main hypothesis</span>
                         </div>
                     </div>
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="secondary"
                     onClick={() => openMetricSourceModal(METRIC_CONTEXTS.secondary)}
                     className="!h-[80px] flex-1 sm:w-[280px] sm:flex-none"
@@ -40,7 +40,7 @@ export const EmptyMetricsPanel = (): JSX.Element => {
                             </span>
                         </div>
                     </div>
-                </LemonButton>
+                </Button>
             </div>
             <div className="max-w-md">
                 <p className="text-xs text-muted">

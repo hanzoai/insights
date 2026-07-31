@@ -1,11 +1,11 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { AnyPropertyFilter, CyclotronJobFiltersType, InsightsFunctionConfigurationContextId } from '~/types'
 
@@ -122,11 +122,11 @@ export function InsightsFunctionFiltersInternal(): JSX.Element {
 
     return (
         <div className="p-3 rounded border deprecated-space-y-2 bg-surface-primary">
-            <LemonField name="filters" label="Trigger">
+            <Field name="filters" label="Trigger">
                 {({ value, onChange }) => (
                     <>
                         <div className="text-xs text-secondary">Choose what event should trigger this destination</div>
-                        <LemonSelect
+                        <Select
                             options={options}
                             value={getSimpleFilterValue(value)}
                             onChange={(value) => onChange(setSimpleFilterValue(options, value))}
@@ -150,7 +150,7 @@ export function InsightsFunctionFiltersInternal(): JSX.Element {
                         ) : null}
                     </>
                 )}
-            </LemonField>
+            </Field>
         </div>
     )
 }

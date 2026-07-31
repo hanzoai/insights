@@ -5,7 +5,7 @@ import {
     defaultDescriber,
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'
 

@@ -2,10 +2,10 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconFlag, IconFlask } from '@hanzo/icons'
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { Info } from 'scenes/experiments/ExperimentView/Info'
 import { SummaryTable } from 'scenes/experiments/ExperimentView/SummaryTable'
 import { LegacyResultsQuery, ResultsTag, StatusTag } from 'scenes/experiments/ExperimentView/components'
@@ -55,7 +55,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeExperimentAttri
                 <div className="flex items-center gap-2 p-3">
                     <IconFlask className="text-lg" />
                     {experimentLoading ? (
-                        <LemonSkeleton className="h-6 flex-1" />
+                        <Skeleton className="h-6 flex-1" />
                     ) : (
                         <>
                             <span className="flex-1 font-semibold truncate">{experiment.name}</span>
@@ -69,13 +69,13 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeExperimentAttri
                     <>
                         {experiment.description && (
                             <>
-                                <LemonDivider className="my-0" />
+                                <Divider className="my-0" />
                                 <span className="p-2">{experiment.description}</span>
                             </>
                         )}
                         {!experiment.start_date && (
                             <>
-                                <LemonDivider className="my-0" />
+                                <Divider className="my-0" />
                                 <div className="p-2">
                                     <Info />
                                 </div>
@@ -83,7 +83,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeExperimentAttri
                         )}
                         {isExperimentRunning && (
                             <>
-                                <LemonDivider className="my-0" />
+                                <Divider className="my-0" />
                                 <div className="p-2">
                                     <SummaryTable metric={experiment.metrics[0]} />
                                     {/* TODO: Only show results if the metric is a trends or funnels query. Not supported yet with new query runner */}

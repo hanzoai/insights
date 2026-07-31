@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconInfo, IconPinFilled } from '@hanzo/icons'
-import { LemonButton, Popover, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Popover, Tooltip } from '@hanzo/elements'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
@@ -96,7 +96,7 @@ export function ReplayTaxonomicFilters({ onChange, infiniteListLogicProps }: Rep
                 <ul className="gap-y-px">
                     {propsToShow.map(({ key, name, propertyFilterType }) => {
                         return (
-                            <LemonButton
+                            <Button
                                 key={key}
                                 data-attr="custom-replay-property"
                                 size="small"
@@ -105,7 +105,7 @@ export function ReplayTaxonomicFilters({ onChange, infiniteListLogicProps }: Rep
                                 disabledReason={hasFilter(key) ? `${name} filter already added` : undefined}
                             >
                                 {name}
-                            </LemonButton>
+                            </Button>
                         )
                     })}
                 </ul>
@@ -132,7 +132,7 @@ const PersonProperties = ({ onChange }: { onChange: ReplayTaxonomicFiltersProps[
             </Tooltip>
             <ul className="gap-y-px">
                 {properties.map((property) => (
-                    <LemonButton
+                    <Button
                         key={property}
                         data-attr="pinned-person-property"
                         size="small"
@@ -148,7 +148,7 @@ const PersonProperties = ({ onChange }: { onChange: ReplayTaxonomicFiltersProps[
                         onClick={() => onChange(property, { propertyFilterType: PropertyFilterType.Person })}
                     >
                         <PropertyKeyInfo value={property} />
-                    </LemonButton>
+                    </Button>
                 ))}
                 <Popover
                     visible={showPropertySelector}
@@ -166,9 +166,9 @@ const PersonProperties = ({ onChange }: { onChange: ReplayTaxonomicFiltersProps[
                         />
                     }
                 >
-                    <LemonButton size="small" onClick={() => setShowPropertySelector(!showPropertySelector)} fullWidth>
+                    <Button size="small" onClick={() => setShowPropertySelector(!showPropertySelector)} fullWidth>
                         Add property
-                    </LemonButton>
+                    </Button>
                 </Popover>
             </ul>
         </section>

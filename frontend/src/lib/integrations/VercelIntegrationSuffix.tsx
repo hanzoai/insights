@@ -1,6 +1,6 @@
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 
 import { IntegrationType } from '~/types'
 
@@ -13,7 +13,7 @@ export function VercelIntegrationSuffix({ integration }: { integration: Integrat
     }
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             to={accountUrl}
             targetBlank
@@ -21,6 +21,6 @@ export function VercelIntegrationSuffix({ integration }: { integration: Integrat
             tooltip={accountName ? `Open ${accountName} in Vercel` : 'Open in Vercel'}
         >
             View in Vercel
-        </LemonButton>
+        </Button>
     )
 }

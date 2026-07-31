@@ -13,7 +13,7 @@ import {
     IconTerminal,
     IconVideoCamera,
 } from '@hanzo/icons'
-import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tooltip } from '@hanzo/elements'
 
 import { getExceptionAttributes } from 'lib/components/Errors/utils'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -203,7 +203,7 @@ export function SessionEventItem({
                 <div className="flex items-center gap-1">
                     {hasRecording && (
                         <Tooltip title="Jump to this event in recording">
-                            <LemonButton
+                            <Button
                                 icon={<IconVideoCamera />}
                                 size="small"
                                 noPadding
@@ -211,7 +211,7 @@ export function SessionEventItem({
                             />
                         </Tooltip>
                     )}
-                    <LemonButton
+                    <Button
                         icon={isExpanded ? <IconCollapse /> : <IconExpand />}
                         size="small"
                         noPadding

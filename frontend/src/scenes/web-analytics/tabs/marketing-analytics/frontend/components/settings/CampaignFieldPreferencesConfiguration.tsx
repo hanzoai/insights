@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { SegmentedButton } from '@hanzo/elements'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
@@ -67,7 +67,7 @@ export function CampaignFieldPreferencesConfiguration({
                                     <td className="p-2 text-sm align-middle font-medium">{integration}</td>
                                 )}
                                 <td className="p-2 align-middle">
-                                    <LemonSegmentedButton
+                                    <SegmentedButton
                                         size="small"
                                         value={getMatchField(integration)}
                                         onChange={(value) =>

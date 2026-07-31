@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconUpload, IconX } from '@hanzo/icons'
-import { LemonButton, LemonFileInput, LemonInput, lemonToast } from '@hanzo/lemon-ui'
+import { Button, FileInput, Input, toast } from '@hanzo/elements'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
-import { UploadedLogo } from 'lib/lemon-ui/UploadedLogo/UploadedLogo'
+import { UploadedLogo } from 'lib/elements/UploadedLogo/UploadedLogo'
 import { organizationLogic } from 'scenes/organizationLogic'
 
 export function OrganizationDisplayName(): JSX.Element {
@@ -28,7 +28,7 @@ export function OrganizationDisplayName(): JSX.Element {
             setLogoMediaId(id)
         },
         onError: (detail) => {
-            lemonToast.error(`Error uploading image: ${detail}`)
+            toast.error(`Error uploading image: ${detail}`)
         },
     })
 
@@ -40,7 +40,7 @@ export function OrganizationDisplayName(): JSX.Element {
 
     return (
         <div className="flex gap-6 items-start">
-            <LemonFileInput
+            <FileInput
                 accept="image/*"
                 multiple={false}
                 onChange={setFilesToUpload}
@@ -57,7 +57,7 @@ export function OrganizationDisplayName(): JSX.Element {
                         />
                         {logoMediaId && (
                             <div className="absolute -inset-2 group">
-                                <LemonButton
+                                <Button
                                     icon={<IconX />}
                                     onClick={(e) => {
                                         setLogoMediaId(null)
@@ -79,14 +79,14 @@ export function OrganizationDisplayName(): JSX.Element {
                 }
             />
             <div className="flex-1 max-w-120 space-y-3">
-                <LemonInput
+                <Input
                     value={name}
                     onChange={setName}
                     disabled={!!restrictionReason}
                     data-attr="organization-name-input-settings"
                     placeholder="Organization name"
                 />
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={(e) => {
                         e.preventDefault()
@@ -113,7 +113,7 @@ export function OrganizationDisplayName(): JSX.Element {
                     loading={currentOrganizationLoading || uploading}
                 >
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

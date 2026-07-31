@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
-import { LemonButton, LemonSelect, Spinner, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Select, Spinner, toast } from '@hanzo/elements'
 
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { LemonTag, LemonTagType } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Link } from 'lib/lemon-ui/Link'
+import { More } from 'lib/elements/Button/More'
+import { Table } from 'lib/elements/Table'
+import { Tag, TagType } from 'lib/elements/Tag/Tag'
+import { Link } from 'lib/elements/Link'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { dataWarehouseJoinsLogic } from 'scenes/data-warehouse/external/dataWarehouseJoinsLogic'
 import { dataWarehouseSettingsSceneLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsSceneLogic'
@@ -68,10 +68,10 @@ const JoinsMoreMenu = ({ tableName, fieldName }: { tableName: string; fieldName:
                 <Spinner />
             ) : (
                 <>
-                    <LemonButton fullWidth onClick={() => void toggleEditJoinModal(join)}>
+                    <Button fullWidth onClick={() => void toggleEditJoinModal(join)}>
                         Edit
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         status="danger"
                         fullWidth
                         onClick={() => {
@@ -86,12 +86,12 @@ const JoinsMoreMenu = ({ tableName, fieldName }: { tableName: string; fieldName:
                                     loadJoins()
                                 },
                             }).catch((e) => {
-                                lemonToast.error(`Failed to delete warehouse view link: ${e.detail}`)
+                                toast.error(`Failed to delete warehouse view link: ${e.detail}`)
                             })
                         }}
                     >
                         Delete
-                    </LemonButton>
+                    </Button>
                 </>
             ),
         [joinsLoading, join] // oxlint-disable-line react-hooks/exhaustive-deps
@@ -105,7 +105,7 @@ export function DatabaseTable({ table, tables, inEditSchemaMode, schemaOnChange 
     const { dataWarehouseTables, databaseLoading } = useValues(dataWarehouseSettingsSceneLogic)
 
     return (
-        <LemonTable
+        <Table
             dataSource={dataSource}
             loading={databaseLoading}
             disableTableWhileLoading={false}
@@ -125,7 +125,7 @@ export function DatabaseTable({ table, tables, inEditSchemaMode, schemaOnChange 
                     render: function RenderType(_, { name, type, schema_valid }) {
                         if (inEditSchemaMode && !isNonEditableSchemaType(type)) {
                             return (
-                                <LemonSelect
+                                <Select
                                     options={editSchemaOptionsAsArray}
                                     value={type}
                                     onChange={(newValue) => {
@@ -139,30 +139,30 @@ export function DatabaseTable({ table, tables, inEditSchemaMode, schemaOnChange 
 
                         if (type === 'virtual_table') {
                             return (
-                                <LemonTag type="default" className="uppercase">
+                                <Tag type="default" className="uppercase">
                                     Virtual Table
-                                </LemonTag>
+                                </Tag>
                             )
                         } else if (type === 'lazy_table') {
                             return (
-                                <LemonTag type="default" className="uppercase">
+                                <Tag type="default" className="uppercase">
                                     Reference
-                                </LemonTag>
+                                </Tag>
                             )
                         } else if (type === 'field_traverser') {
                             return (
-                                <LemonTag type="default" className="uppercase">
+                                <Tag type="default" className="uppercase">
                                     Expression
-                                </LemonTag>
+                                </Tag>
                             )
                         }
 
-                        const tagType: LemonTagType = schema_valid ? 'default' : 'danger'
+                        const tagType: TagType = schema_valid ? 'default' : 'danger'
 
                         return (
-                            <LemonTag type={tagType} className="uppercase">
+                            <Tag type={tagType} className="uppercase">
                                 {type}
-                            </LemonTag>
+                            </Tag>
                         )
                     },
                 },

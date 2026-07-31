@@ -2,7 +2,7 @@ import './UserActivityIndicator.scss'
 
 import clsx from 'clsx'
 
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 
 import { UserBasicType } from '~/types'
 

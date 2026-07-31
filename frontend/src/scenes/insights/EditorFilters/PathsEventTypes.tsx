@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonButtonWithDropdown } from 'lib/lemon-ui/LemonButton'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
+import { Button, ButtonWithDropdown } from 'lib/elements/Button'
+import { Checkbox } from 'lib/elements/Checkbox'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { pathsDataLogic } from 'scenes/paths/pathsDataLogic'
 
@@ -57,14 +57,14 @@ export function PathsEventsTypes({ insightProps }: EditorFilterProps): JSX.Eleme
     const summary = capitalizeFirstLetter(humanizePathsEventTypes(includeEventTypes).join(' & '))
 
     return (
-        <LemonButtonWithDropdown
+        <ButtonWithDropdown
             fullWidth
             type="secondary"
             dropdown={{
                 matchWidth: true,
                 closeOnClickInside: false,
                 overlay: options.map((option) => (
-                    <LemonButton
+                    <Button
                         key={option.type}
                         onClick={() => onClickPathtype(option.type)}
                         disabledReason={
@@ -76,15 +76,15 @@ export function PathsEventsTypes({ insightProps }: EditorFilterProps): JSX.Eleme
                         data-attr={option['data-attr']}
                     >
                         <span className="pointer-events-none mr-2">
-                            <LemonCheckbox checked={option.selected} />
+                            <Checkbox checked={option.selected} />
                         </span>
                         {option.label}
-                    </LemonButton>
+                    </Button>
                 )),
                 actionable: true,
             }}
         >
             {summary}
-        </LemonButtonWithDropdown>
+        </ButtonWithDropdown>
     )
 }

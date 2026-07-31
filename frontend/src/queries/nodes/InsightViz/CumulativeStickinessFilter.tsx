@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
@@ -12,7 +12,7 @@ export function CumulativeStickinessFilter({ insightProps }: EditorFilterProps):
     const { updateInsightFilter } = useActions(insightVizDataLogic(insightProps))
 
     return (
-        <LemonSelect
+        <Select
             className="w-48"
             data-attr="stickiness-mode-select"
             value={stickinessFilter?.computedAs || StickinessComputationModes.NonCumulative}

@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -934,20 +934,20 @@ export const surveyLogic = kea<surveyLogicType>([
 
         return {
             createSurveySuccess: ({ survey }) => {
-                lemonToast.success(<>Survey {survey.name} created</>)
+                toast.success(<>Survey {survey.name} created</>)
                 actions.loadSurveys()
                 router.actions.replace(urls.survey(survey.id))
                 actions.reportSurveyCreated(survey)
                 globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.CreateSurvey)
             },
             updateSurveySuccess: ({ survey }) => {
-                lemonToast.success(<>Survey {survey.name} updated</>)
+                toast.success(<>Survey {survey.name} updated</>)
                 actions.editingSurvey(false)
                 actions.reportSurveyEdited(survey)
                 actions.loadSurveys()
             },
             launchSurveySuccess: ({ survey }) => {
-                lemonToast.success(<>Survey {survey.name} launched</>)
+                toast.success(<>Survey {survey.name} launched</>)
                 globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.LaunchSurvey)
 
                 actions.loadSurveys()
@@ -1075,9 +1075,9 @@ export const surveyLogic = kea<surveyLogicType>([
                     updatedUuids.add(responseUuid)
                     actions.loadArchivedResponseUuidsSuccess(updatedUuids)
 
-                    lemonToast.success('Response archived')
+                    toast.success('Response archived')
                 } catch (error) {
-                    lemonToast.error('Failed to archive response')
+                    toast.error('Failed to archive response')
                     insights.captureException(error, {
                         action: 'archive-survey-response',
                         survey: values.survey.id,
@@ -1094,9 +1094,9 @@ export const surveyLogic = kea<surveyLogicType>([
                     updatedUuids.delete(responseUuid)
                     actions.loadArchivedResponseUuidsSuccess(updatedUuids)
 
-                    lemonToast.success('Response unarchived')
+                    toast.success('Response unarchived')
                 } catch (error) {
-                    lemonToast.error('Failed to unarchive response')
+                    toast.error('Failed to unarchive response')
                     insights.captureException(error, {
                         action: 'unarchive-survey-response',
                         survey: values.survey.id,
@@ -1114,7 +1114,7 @@ export const surveyLogic = kea<surveyLogicType>([
                 try {
                     await api.insightsFunctions.update(notificationId, { enabled })
                 } catch (error) {
-                    lemonToast.error('Failed to update notification')
+                    toast.error('Failed to update notification')
                     actions.loadSurveyNotifications()
                     insights.captureException(error, {
                         action: 'toggle-survey-notification',
@@ -1221,7 +1221,7 @@ export const surveyLogic = kea<surveyLogicType>([
                         !canQuestionHaveResponseBasedBranching(question)
                     ) {
                         question.branching = undefined
-                        lemonToast.error(
+                        toast.error(
                             <>
                                 Response-based branching is not supported for {question.type} questions. Removing
                                 branching logic from this question.
@@ -2159,7 +2159,7 @@ export const surveyLogic = kea<surveyLogicType>([
                 if (values.hasCycle) {
                     actions.reportSurveyCycleDetected(values.survey)
 
-                    return lemonToast.error(
+                    return toast.error(
                         'Your survey contains an endless cycle. Please revisit your branching rules.'
                     )
                 }

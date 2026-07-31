@@ -1,5 +1,5 @@
 import { IconPin, IconPinFilled } from '@hanzo/icons'
-import { Link, Tooltip } from '@hanzo/lemon-ui'
+import { Link, Tooltip } from '@hanzo/elements'
 
 import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'

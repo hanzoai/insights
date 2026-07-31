@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect, LemonSelectOption, LemonSelectOptions } from '@hanzo/lemon-ui'
+import { Select, SelectOption, SelectOptions } from '@hanzo/elements'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -24,9 +24,9 @@ export function FunnelStepsPicker(): JSX.Element | null {
         ? Array.from(Array(Math.max(numberOfSeries)).keys()).slice((funnelsFilter?.funnelFromStep ?? 0) + 1)
         : [1]
 
-    const optionsForRange = (range: number[]): LemonSelectOptions<number> => {
+    const optionsForRange = (range: number[]): SelectOptions<number> => {
         return range
-            .map((stepIndex): LemonSelectOption<number> | null => {
+            .map((stepIndex): SelectOption<number> | null => {
                 return filterSteps[stepIndex]
                     ? {
                           value: stepIndex,
@@ -40,13 +40,13 @@ export function FunnelStepsPicker(): JSX.Element | null {
                       }
                     : null
             })
-            .filter((option): option is LemonSelectOption<number> => option !== null)
+            .filter((option): option is SelectOption<number> => option !== null)
     }
 
     return (
         <div className="flex items-center">
             <span className="text-secondary">&nbsp;from</span>
-            <LemonSelect
+            <Select
                 size="small"
                 className="mx-1"
                 dropdownMatchSelectWidth={false}
@@ -60,7 +60,7 @@ export function FunnelStepsPicker(): JSX.Element | null {
                 disabledReason={editingDisabledReason}
             />
             <span className="text-secondary">to</span>
-            <LemonSelect
+            <Select
                 size="small"
                 className="mx-1"
                 dropdownMatchSelectWidth={false}

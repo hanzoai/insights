@@ -1,5 +1,5 @@
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import type { CachedNewExperimentQueryResponse, ExperimentMetric } from '~/queries/schema/schema-general'
 import {
@@ -69,7 +69,7 @@ export function calculateVarianceFromResults(
         // Retention: variance of (completions / starters)
         // Ratio: variance of (numerator / denominator)
         if (!baseline || !baseline.denominator_sum || baseline.denominator_sum === 0) {
-            lemonToast.error('Ratio/retention metric missing denominator statistics')
+            toast.error('Ratio/retention metric missing denominator statistics')
             return null
         }
 
@@ -211,7 +211,7 @@ export function calculateBaselineValue(
             if (baseline.number_of_samples > 0) {
                 return baseline.sum / baseline.number_of_samples
             }
-            lemonToast.error('Funnel metric missing step_counts and sample data')
+            toast.error('Funnel metric missing step_counts and sample data')
             return null
         }
         // For experiments, conversion rate is: (completed final step) / (total exposed)

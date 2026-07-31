@@ -1,12 +1,12 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import { CodeSnippet, CodeSnippetProps, Language } from './CodeSnippet'
 
 type Story = StoryObj<typeof CodeSnippet>
 const meta: Meta<typeof CodeSnippet> = {
-    title: 'Lemon UI/Code Snippet',
+    title: 'Elements/Code Snippet',
     component: CodeSnippet,
     tags: ['autodocs'],
 }
@@ -47,12 +47,12 @@ WithoutWrappingWithAction.args = {
         'This is some really long text.This is some really long text.This is some really long text.This is some really long text.This is some really long text.This is some really long text.This is some really long text.This is some really long text.',
     actions: (
         <>
-            <LemonButton size="small" type="primary">
+            <Button size="small" type="primary">
                 one button
-            </LemonButton>
-            <LemonButton size="small" type="secondary">
+            </Button>
+            <Button size="small" type="secondary">
                 two button
-            </LemonButton>
+            </Button>
         </>
     ),
 }
@@ -71,12 +71,12 @@ WithWrappingAndAction.args = {
         'This is some really long text.This is some really long text.This is some really long text.This is some really long text.This is some really long text.This is some really long text.This is some really long text.This is some really long text.',
     actions: (
         <>
-            <LemonButton size="small" type="primary">
+            <Button size="small" type="primary">
                 one button
-            </LemonButton>
-            <LemonButton size="small" type="secondary">
+            </Button>
+            <Button size="small" type="secondary">
                 two button
-            </LemonButton>
+            </Button>
         </>
     ),
 }

@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
 import { IconComment, IconEmoji } from '@hanzo/icons'
-import { LemonButton, LemonDropdown } from '@hanzo/lemon-ui'
+import { Button, Dropdown } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
-import { emojiUsageLogic } from 'lib/lemon-ui/LemonTextArea/emojiUsageLogic'
+import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
 import { cn } from 'lib/utils/css-classes'
 import { playerCommentOverlayLogic } from 'scenes/session-recordings/player/commenting/playerFrameCommentOverlayLogic'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
@@ -34,9 +34,9 @@ export function EmojiCommentRow({ onSelectEmoji }: { onSelectEmoji?: () => void 
     return (
         <div className="flex flex-row items-center justify-around">
             {favouriteEmojis.map((emoji) => (
-                <LemonButton key={emoji} onClick={() => onSelectedEmoji(emoji)} data-attr="emoji-quick-comment-button">
+                <Button key={emoji} onClick={() => onSelectedEmoji(emoji)} data-attr="emoji-quick-comment-button">
                     <span className="text-lg">{emoji}</span>
-                </LemonButton>
+                </Button>
             ))}
             <EmojiPickerPopover onSelect={onSelectedEmoji} data-attr="quick-comment-emoji-popover" />
         </div>
@@ -52,7 +52,7 @@ export function CommentOnRecordingButton({ className }: { className?: string }):
             resourceType={AccessControlResourceType.SessionRecording}
             minAccessLevel={AccessControlLevel.Editor}
         >
-            <LemonButton
+            <Button
                 size="xsmall"
                 onClick={(e) => {
                     e.stopPropagation()
@@ -89,7 +89,7 @@ export function EmojiCommentOnRecordingButton({ className }: { className?: strin
     const { isLoading } = useValues(theBuiltOverlayLogic)
 
     return (
-        <LemonDropdown
+        <Dropdown
             overlay={
                 <EmojiCommentRow
                     onSelectEmoji={() => {
@@ -107,7 +107,7 @@ export function EmojiCommentOnRecordingButton({ className }: { className?: strin
                 setQuickEmojiIsOpen(visible)
             }}
         >
-            <LemonButton
+            <Button
                 size="xsmall"
                 onClick={(e) => {
                     e.stopPropagation()
@@ -129,6 +129,6 @@ export function EmojiCommentOnRecordingButton({ className }: { className?: strin
                 disabledReason={isLoading ? 'Loading...' : undefined}
                 icon={<IconEmoji className={cn('text-lg', className)} />}
             />
-        </LemonDropdown>
+        </Dropdown>
     )
 }

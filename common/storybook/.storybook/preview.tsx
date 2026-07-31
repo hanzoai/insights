@@ -61,7 +61,7 @@ export const parameters: Parameters = {
         storySort: {
             method: 'alphabetical',
             order: [
-                'Lemon UI',
+                'Elements',
                 ['Overview', 'Utilities', 'Icons'],
                 'Components',
                 'Forms',

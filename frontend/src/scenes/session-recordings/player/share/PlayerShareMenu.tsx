@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconExternal, IconGlobe, IconShare, IconShield } from '@hanzo/icons'
-import { LemonButton, LemonMenu } from '@hanzo/lemon-ui'
+import { Button, Menu } from '@hanzo/elements'
 
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { sessionPlayerModalLogic } from 'scenes/session-recordings/player/modal/sessionPlayerModalLogic'
@@ -42,7 +42,7 @@ export function PlayerShareMenu(): JSX.Element {
     }
 
     return (
-        <LemonMenu
+        <Menu
             items={[
                 {
                     label: 'Open in new tab',
@@ -78,9 +78,9 @@ export function PlayerShareMenu(): JSX.Element {
             ]}
             buttonSize="xsmall"
         >
-            <LemonButton size="xsmall" icon={<IconShare />} data-attr="session-recording-share-button">
+            <Button size="xsmall" icon={<IconShare />} data-attr="session-recording-share-button">
                 Share
-            </LemonButton>
-        </LemonMenu>
+            </Button>
+        </Menu>
     )
 }

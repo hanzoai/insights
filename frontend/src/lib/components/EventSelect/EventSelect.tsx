@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonSnack } from 'lib/lemon-ui/LemonSnack/LemonSnack'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Snack } from 'lib/elements/Snack/Snack'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { Popover } from 'lib/elements/Popover/Popover'
 
 interface EventSelectProps {
     onItemChange?: (values: any[]) => void
@@ -61,16 +61,16 @@ export const EventSelect = ({
     return (
         <div className="flex items-center flex-wrap gap-2">
             {selectedEvents.map((name) => (
-                <LemonSnack key={name} onClose={() => handleRemove(name)}>
+                <Snack key={name} onClose={() => handleRemove(name)}>
                     <div className="flex items-center gap-1">
                         <span>{name}</span>
                         {isNonCapturedEvent(name) && (
-                            <LemonTag type="warning" size="small">
+                            <Tag type="warning" size="small">
                                 Not captured yet
-                            </LemonTag>
+                            </Tag>
                         )}
                     </div>
-                </LemonSnack>
+                </Snack>
             ))}
 
             <Popover

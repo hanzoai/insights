@@ -34,7 +34,7 @@ import { SharingModal } from 'lib/components/Sharing/SharingModal'
 import { SubscriptionsModal } from 'lib/components/Subscriptions/SubscriptionsModal'
 import { TerraformExportModal } from 'lib/components/TerraformExporter/TerraformExportModal'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { slugify } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
@@ -481,7 +481,7 @@ export function DashboardHeader(): JSX.Element | null {
                     <>
                         {dashboardMode === DashboardMode.Edit ? (
                             <>
-                                <LemonButton
+                                <Button
                                     data-attr="dashboard-edit-mode-discard"
                                     type="secondary"
                                     onClick={() =>
@@ -490,7 +490,7 @@ export function DashboardHeader(): JSX.Element | null {
                                     size="small"
                                 >
                                     Cancel
-                                </LemonButton>
+                                </Button>
                                 <AppShortcut
                                     name="SaveDashboard"
                                     keybind={[keyBinds.save]}
@@ -498,7 +498,7 @@ export function DashboardHeader(): JSX.Element | null {
                                     interaction="click"
                                     scope={Scene.Dashboard}
                                 >
-                                    <LemonButton
+                                    <Button
                                         data-attr="dashboard-edit-mode-save"
                                         type="primary"
                                         onClick={() =>
@@ -514,11 +514,11 @@ export function DashboardHeader(): JSX.Element | null {
                                         }
                                     >
                                         Save
-                                    </LemonButton>
+                                    </Button>
                                 </AppShortcut>
                             </>
                         ) : dashboardMode === DashboardMode.Fullscreen ? (
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 onClick={() =>
                                     setDashboardMode(null, DashboardEventSource.DashboardHeaderExitFullscreen)
@@ -528,12 +528,12 @@ export function DashboardHeader(): JSX.Element | null {
                                 size="small"
                             >
                                 Exit full screen
-                            </LemonButton>
+                            </Button>
                         ) : (
                             <>
                                 {dashboard && (
                                     <>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             data-attr="dashboard-share-button"
                                             onClick={() => push(urls.dashboardSharing(dashboard.id))}
@@ -558,7 +558,7 @@ export function DashboardHeader(): JSX.Element | null {
                                                 intent="Add text card"
                                                 interaction="click"
                                             >
-                                                <LemonButton
+                                                <Button
                                                     onClick={() => {
                                                         push(urls.dashboardTextTile(dashboard.id, 'new'))
                                                     }}
@@ -570,7 +570,7 @@ export function DashboardHeader(): JSX.Element | null {
                                                     icon={<IconPlusSmall />}
                                                 >
                                                     Text card
-                                                </LemonButton>
+                                                </Button>
                                             </AppShortcut>
                                         </AccessControlAction>
                                         <MaxTool
@@ -602,7 +602,7 @@ export function DashboardHeader(): JSX.Element | null {
                                                 minAccessLevel={AccessControlLevel.Editor}
                                                 userAccessLevel={dashboard.user_access_level}
                                             >
-                                                <LemonButton
+                                                <Button
                                                     onClick={showAddInsightToDashboardModal}
                                                     type="primary"
                                                     data-attr="dashboard-add-graph-header"
@@ -611,7 +611,7 @@ export function DashboardHeader(): JSX.Element | null {
                                                     <span className={cn('pr-3', isRemovingSidePanelFlag && 'pr-0')}>
                                                         Add insight
                                                     </span>
-                                                </LemonButton>
+                                                </Button>
                                             </AccessControlAction>
                                         </MaxTool>
                                     </>

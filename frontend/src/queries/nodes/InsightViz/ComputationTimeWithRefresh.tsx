@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { Link, Tooltip } from '@hanzo/lemon-ui'
+import { Link, Tooltip } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'

@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 
-import { LemonTable } from '@hanzo/lemon-ui'
+import { Table } from '@hanzo/elements'
 
-import { Link } from 'lib/lemon-ui/Link'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Link } from 'lib/elements/Link'
+import { IconOpenInNew } from 'lib/elements/icons'
 
 import { SystemStatusRow, SystemStatusSubrows } from '~/types'
 
@@ -31,7 +31,7 @@ export function OverviewTab(): JSX.Element {
     const { overview, systemStatusLoading } = useValues(systemStatusLogic)
 
     return (
-        <LemonTable
+        <Table
             className="system-status-table"
             rowKey="metric"
             dataSource={overview}
@@ -59,7 +59,7 @@ export function OverviewTab(): JSX.Element {
 
 function Subrows(props: SystemStatusSubrows): JSX.Element {
     return (
-        <LemonTable
+        <Table
             dataSource={props.rows}
             columns={props.columns.map((title, dataIndex) => ({ title, dataIndex }))}
             embedded

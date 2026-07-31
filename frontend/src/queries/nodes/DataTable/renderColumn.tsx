@@ -6,10 +6,10 @@ import { Property } from 'lib/components/Property'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TZLabel } from 'lib/components/TZLabel'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { autoCaptureEventToDescription, isURL } from 'lib/utils'
 import { COUNTRY_CODE_TO_LONG_NAME, countryCodeToFlag } from 'lib/utils/geography/country'
 import { formatCurrency } from 'lib/utils/geography/currency'
@@ -86,7 +86,7 @@ export function renderColumn(
     if (value === loadingColumn) {
         return <Spinner />
     } else if (value === errorColumn) {
-        return <LemonTag className="text-danger">Error</LemonTag>
+        return <Tag className="text-danger">Error</Tag>
     } else if (queryContextColumnName && queryContextColumn?.render) {
         const Component = queryContextColumn?.render
         return (

@@ -3,11 +3,11 @@ import { PropertyMatchType } from '@hanzo/insights'
 import { useMemo } from 'react'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonCard, LemonCheckbox, LemonCollapse } from '@hanzo/lemon-ui'
+import { Button, Card, Checkbox, Collapse } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import {
@@ -142,13 +142,13 @@ function SurveyEventSelector({
     }
 
     return (
-        <LemonField.Pure label={label} info={info}>
+        <Field.Pure label={label} info={info}>
             <>
                 {events.length === 0 ? (
-                    <LemonCard className="border-dashed" hoverEffect={false}>
+                    <Card className="border-dashed" hoverEffect={false}>
                         <div className="text-muted-alt text-sm mb-1">{emptyTitle}</div>
                         <div className="text-xs text-muted">{emptyDescription}</div>
-                    </LemonCard>
+                    </Card>
                 ) : (
                     <div className="space-y-2">
                         {events.map((event, index) => {
@@ -156,7 +156,7 @@ function SurveyEventSelector({
                                 event.propertyFilters && Object.keys(event.propertyFilters).length > 0
 
                             return (
-                                <LemonCollapse
+                                <Collapse
                                     key={`${conditionField}-${event.name}-${index}`}
                                     panels={[
                                         {
@@ -174,7 +174,7 @@ function SurveyEventSelector({
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <LemonButton
+                                                    <Button
                                                         size="xsmall"
                                                         icon={<IconX />}
                                                         onClick={(e) => {
@@ -226,7 +226,7 @@ function SurveyEventSelector({
                 )}
 
                 {showRepeatedActivation && surveyRepeatedActivationAvailable && (
-                    <LemonCheckbox
+                    <Checkbox
                         label="Display the survey every time events occur, instead of only once per user"
                         checked={survey.conditions?.events?.repeatedActivation || false}
                         onChange={(checked) => {
@@ -247,7 +247,7 @@ function SurveyEventSelector({
                     addButtonText={addButtonText}
                 />
             </>
-        </LemonField.Pure>
+        </Field.Pure>
     )
 }
 

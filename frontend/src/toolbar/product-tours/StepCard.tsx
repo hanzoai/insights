@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconArrowRight, IconChevronDown, IconCursorClick, IconTrash, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSegmentedButton, LemonSlider, LemonSwitch, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Input, SegmentedButton, Slider, Switch, Tooltip } from '@hanzo/elements'
 
-import { IconDragHandle } from 'lib/lemon-ui/icons'
+import { IconDragHandle } from 'lib/elements/icons'
 import { getStepIcon, getStepTitle, hasElementTarget, hasIncompleteTargeting } from 'scenes/product-tours/stepUtils'
 
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
@@ -163,14 +163,14 @@ export function StepCard({
                                 </div>
                             )}
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <LemonButton
+                                <Button
                                     size="xsmall"
                                     type="primary"
                                     icon={<IconCursorClick />}
                                     onClick={handleReselectElement}
                                 >
                                     Change element
-                                </LemonButton>
+                                </Button>
                             </div>
                         </div>
                     )}
@@ -183,7 +183,7 @@ export function StepCard({
                                 </div>
                             )}
 
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 type="primary"
                                 status="danger"
@@ -201,13 +201,13 @@ export function StepCard({
                                 icon={<IconTrash />}
                             >
                                 Remove element
-                            </LemonButton>
+                            </Button>
 
                             <div>
                                 <label className="block text-[11px] font-medium text-muted-3000 mb-1.5">
                                     Targeting
                                 </label>
-                                <LemonSegmentedButton
+                                <SegmentedButton
                                     size="xsmall"
                                     fullWidth
                                     value={step.elementTargeting ?? 'auto'}
@@ -224,7 +224,7 @@ export function StepCard({
                                     <label className="block text-[11px] font-medium text-muted-3000 mb-1.5">
                                         CSS selector
                                     </label>
-                                    <LemonInput
+                                    <Input
                                         size="small"
                                         value={step.selector || ''}
                                         onChange={(value) => updateStep(index, { selector: value, element: undefined })}
@@ -236,7 +236,7 @@ export function StepCard({
                             ) : (
                                 <>
                                     {!step.inferenceData && (
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             type="secondary"
                                             fullWidth
@@ -245,7 +245,7 @@ export function StepCard({
                                             disabledReason={isSelecting ? 'Click your element' : undefined}
                                         >
                                             {isSelecting ? 'Click your element' : 'Select element'}
-                                        </LemonButton>
+                                        </Button>
                                     )}
                                     <div>
                                         <Tooltip title="How strictly we should identify the target element">
@@ -253,7 +253,7 @@ export function StepCard({
                                                 Precision
                                             </label>
                                         </Tooltip>
-                                        <LemonSlider
+                                        <Slider
                                             min={0}
                                             max={1}
                                             step={0.1}
@@ -272,7 +272,7 @@ export function StepCard({
                                         </div>
                                     </div>
                                     {step.inferenceData?.text && (
-                                        <LemonSwitch
+                                        <Switch
                                             checked={step.inferenceData?.excludeText ?? false}
                                             onChange={(value) =>
                                                 step.inferenceData &&
@@ -294,7 +294,7 @@ export function StepCard({
                                         Advance on
                                     </label>
                                 </Tooltip>
-                                <LemonSegmentedButton
+                                <SegmentedButton
                                     size="xsmall"
                                     fullWidth
                                     value={step.progressionTrigger || 'button'}
@@ -308,7 +308,7 @@ export function StepCard({
                         </>
                     ) : (
                         <>
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="secondary"
                                 fullWidth
@@ -317,9 +317,9 @@ export function StepCard({
                                 disabledReason={isSelecting ? 'Click your element' : undefined}
                             >
                                 {isSelecting ? 'Click your element' : 'Attach to element'}
-                            </LemonButton>
+                            </Button>
                             {isSelecting && (
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="tertiary"
                                     fullWidth
@@ -330,12 +330,12 @@ export function StepCard({
                                     }}
                                 >
                                     or use CSS selector
-                                </LemonButton>
+                                </Button>
                             )}
                         </>
                     )}
 
-                    <LemonButton
+                    <Button
                         size="small"
                         type="tertiary"
                         status="danger"
@@ -344,7 +344,7 @@ export function StepCard({
                         onClick={() => removeStep(index)}
                     >
                         Delete step
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </div>

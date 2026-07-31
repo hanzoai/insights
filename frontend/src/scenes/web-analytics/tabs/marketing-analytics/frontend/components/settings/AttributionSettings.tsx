@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Input, Select } from '@hanzo/elements'
 
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Spinner } from 'lib/elements/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { debounce } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -131,14 +131,14 @@ export function AttributionSettings(): JSX.Element {
                         </Tooltip>
                     </label>
                     <div className="max-w-md flex items-center gap-2">
-                        <LemonSelect
+                        <Select
                             value={isCustomValue ? 'custom' : localDays}
                             onChange={handleDaysChange}
                             options={ATTRIBUTION_WINDOW_OPTIONS}
                             data-attr="attribution-window-select"
                             className="w-50"
                         />
-                        <LemonInput
+                        <Input
                             type="number"
                             value={localDays}
                             onChange={handleCustomInputChange}
@@ -150,7 +150,7 @@ export function AttributionSettings(): JSX.Element {
                             status={hasError ? 'danger' : undefined}
                             data-attr="attribution-window-custom-input"
                         />
-                        <LemonButton
+                        <Button
                             type="primary"
                             size="small"
                             onClick={saveCustomInput}
@@ -164,7 +164,7 @@ export function AttributionSettings(): JSX.Element {
                             data-attr="attribution-window-save-button"
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </div>
                     <p className={`text-xs text-muted-foreground mt-1 ${hasError ? 'text-danger' : ''}`}>
                         {hasError
@@ -183,7 +183,7 @@ export function AttributionSettings(): JSX.Element {
                     <div className="max-w-md">
                         <div className="flex items-center gap-1 bg-border rounded p-1">
                             {ATTRIBUTION_MODE_OPTIONS.map((option) => (
-                                <LemonButton
+                                <Button
                                     key={option.value}
                                     type={localAttributionMode === option.value ? 'primary' : 'tertiary'}
                                     size="small"
@@ -192,7 +192,7 @@ export function AttributionSettings(): JSX.Element {
                                     className="flex-1"
                                 >
                                     {option.label}
-                                </LemonButton>
+                                </Button>
                             ))}
                         </div>
                     </div>

@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 
 import { IconSparkles } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import MaxTool from 'scenes/max/MaxTool'
 import { useOpenAi } from 'scenes/max/useOpenAi'
@@ -167,18 +167,18 @@ export function SurveysEmptyState({ numOfSurveys }: Props): JSX.Element {
                                         router.actions.push(urls.survey(toolOutput.survey_id))
                                     }}
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         icon={<IconSparkles />}
                                         onClick={() => openAi('Create a survey to collect ')}
                                     >
                                         Create your own custom survey with Insights AI
-                                    </LemonButton>
+                                    </Button>
                                 </MaxTool>
                             )}
-                            <LemonButton type="secondary" onClick={() => router.actions.push(urls.surveyTemplates())}>
+                            <Button type="secondary" onClick={() => router.actions.push(urls.surveyTemplates())}>
                                 See all other templates
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 </div>

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconDay, IconLaptop, IconNight, IconPalette } from '@hanzo/icons'
-import { LemonSelect, LemonSelectOptions, LemonSelectProps } from '@hanzo/lemon-ui'
+import { Select, SelectOptions, SelectProps } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
@@ -12,12 +12,12 @@ import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 export function ThemeSwitcher({
     onlyLabel,
     ...props
-}: Partial<LemonSelectProps<any>> & { onlyLabel?: boolean }): JSX.Element {
+}: Partial<SelectProps<any>> & { onlyLabel?: boolean }): JSX.Element {
     const { themeMode } = useValues(userLogic)
     const { updateUser } = useActions(userLogic)
     const { customCssEnabled } = useValues(themeLogic)
 
-    const themeOptions: LemonSelectOptions<string> = [
+    const themeOptions: SelectOptions<string> = [
         {
             options: [
                 { icon: <IconDay />, value: 'light', label: 'Light mode' },
@@ -34,7 +34,7 @@ export function ThemeSwitcher({
     }
 
     return (
-        <LemonSelect
+        <Select
             options={themeOptions}
             value={themeMode}
             renderButtonContent={(leaf) => {

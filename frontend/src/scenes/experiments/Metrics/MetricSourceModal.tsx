@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
 
 import { experimentMetricModalLogic } from './experimentMetricModalLogic'
 import { metricSourceModalLogic } from './metricSourceModalLogic'
@@ -14,7 +14,7 @@ export const MetricSourceModal = (): JSX.Element | null => {
     const { openSharedMetricModal } = useActions(sharedMetricModalLogic)
 
     return (
-        <LemonModal isOpen={isModalOpen} onClose={closeMetricSourceModal} width={1000} title="Choose metric source">
+        <Modal isOpen={isModalOpen} onClose={closeMetricSourceModal} width={1000} title="Choose metric source">
             <div className="flex gap-4 mb-4">
                 <div
                     className="flex-1 cursor-pointer p-4 rounded border hover:border-accent"
@@ -45,6 +45,6 @@ export const MetricSourceModal = (): JSX.Element | null => {
                     </div>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

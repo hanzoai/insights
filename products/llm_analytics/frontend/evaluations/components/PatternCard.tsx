@@ -3,7 +3,7 @@ import { combineUrl, router } from 'kea-router'
 import insights from '@hanzo/insights'
 
 import { IconCheck, IconMinus, IconX } from '@hanzo/icons'
-import { Link, Tooltip } from '@hanzo/lemon-ui'
+import { Link, Tooltip } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 

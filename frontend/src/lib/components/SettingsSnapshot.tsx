@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { settingsLogic } from 'scenes/settings/settingsLogic'
 
 type Props = {
@@ -49,7 +49,7 @@ export function SettingsSnapshot({
             <div className={className}>
                 {header}
                 <div className="flex flex-col deprecated-space-y-1 w-full">
-                    <LemonSkeleton.Row repeat={2} className="h-4" />
+                    <Skeleton.Row repeat={2} className="h-4" />
                 </div>
             </div>
         )

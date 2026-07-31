@@ -2,21 +2,21 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconChevronLeft } from '@hanzo/icons'
-import { LemonInput, LemonTextArea, Link } from '@hanzo/lemon-ui'
+import { Input, TextArea, Link } from '@hanzo/elements'
 
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
-import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
+import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { dayjs } from 'lib/dayjs'
 import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { Label } from 'lib/elements/Label/Label'
+import { Modal } from 'lib/elements/Modal'
+import { Select } from 'lib/elements/Select'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { membersLogic } from 'scenes/organization/membersLogic'
 
@@ -85,26 +85,26 @@ export function EditSubscription({
             props={logicProps}
             formKey="subscription"
             enableFormOnSubmit
-            className="LemonModal__layout"
+            className="Modal__layout"
         >
-            <LemonModal.Header>
+            <Modal.Header>
                 <div className="flex items-center gap-2">
-                    <LemonButton icon={<IconChevronLeft />} onClick={onCancel} size="xsmall" />
+                    <Button icon={<IconChevronLeft />} onClick={onCancel} size="xsmall" />
 
                     <h3>{id === 'new' ? 'New' : 'Edit '} Subscription</h3>
                 </div>
-            </LemonModal.Header>
+            </Modal.Header>
 
-            <LemonModal.Content className="deprecated-space-y-2">
+            <Modal.Content className="deprecated-space-y-2">
                 {!subscription ? (
                     subscriptionLoading ? (
                         <div className="deprecated-space-y-4">
-                            <LemonSkeleton className="w-1/2 h-4" />
-                            <LemonSkeleton.Row />
-                            <LemonSkeleton className="w-1/2 h-4" />
-                            <LemonSkeleton.Row />
-                            <LemonSkeleton className="w-1/2 h-4" />
-                            <LemonSkeleton.Row />
+                            <Skeleton className="w-1/2 h-4" />
+                            <Skeleton.Row />
+                            <Skeleton className="w-1/2 h-4" />
+                            <Skeleton.Row />
+                            <Skeleton className="w-1/2 h-4" />
+                            <Skeleton.Row />
                         </div>
                     ) : (
                         <div className="p-4 text-center">
@@ -124,7 +124,7 @@ export function EditSubscription({
                         ) : null}
 
                         {siteUrlMisconfigured && (
-                            <LemonBanner type="warning">
+                            <Banner type="warning">
                                 <>
                                     Your <code>SITE_URL</code> environment variable seems misconfigured. Your{' '}
                                     <code>SITE_URL</code> is set to{' '}
@@ -146,21 +146,21 @@ export function EditSubscription({
                                         Learn more
                                     </Link>
                                 </>
-                            </LemonBanner>
+                            </Banner>
                         )}
 
-                        <LemonField name="title" label="Name">
-                            <LemonInput placeholder="e.g. Weekly team report" />
-                        </LemonField>
+                        <Field name="title" label="Name">
+                            <Input placeholder="e.g. Weekly team report" />
+                        </Field>
 
-                        <LemonField name="target_type" label="Destination">
-                            <LemonSelect options={targetTypeOptions} />
-                        </LemonField>
+                        <Field name="target_type" label="Destination">
+                            <Select options={targetTypeOptions} />
+                        </Field>
 
                         {subscription.target_type === 'email' ? (
                             <>
                                 {emailDisabled && (
-                                    <LemonBanner type="error">
+                                    <Banner type="error">
                                         <>
                                             Email subscriptions are not currently possible as this Insights instance
                                             isn't{' '}
@@ -173,32 +173,32 @@ export function EditSubscription({
                                             </Link>
                                             .
                                         </>
-                                    </LemonBanner>
+                                    </Banner>
                                 )}
 
-                                <LemonField
+                                <Field
                                     name="target_value"
                                     label="Who do you want to subscribe"
                                     help="Enter the email addresses of the users you want to share with"
                                 >
                                     {({ value, onChange }) => (
-                                        <LemonInputSelect
+                                        <InputSelect
                                             onChange={(val) => onChange(val.join(','))}
                                             value={value?.split(',').filter(Boolean)}
                                             disabled={emailDisabled}
                                             mode="multiple"
                                             allowCustomValues
                                             data-attr="subscribed-emails"
-                                            options={usersLemonSelectOptions(meFirstMembers.map((x) => x.user))}
+                                            options={usersSelectOptions(meFirstMembers.map((x) => x.user))}
                                             loading={membersLoading}
                                             placeholder="Enter an email address"
                                         />
                                     )}
-                                </LemonField>
+                                </Field>
 
-                                <LemonField name="invite_message" label="Message" showOptional>
-                                    <LemonTextArea placeholder="Your message to new subscribers (optional)" />
-                                </LemonField>
+                                <Field name="invite_message" label="Message" showOptional>
+                                    <TextArea placeholder="Your message to new subscribers (optional)" />
+                                </Field>
                             </>
                         ) : null}
 
@@ -208,7 +208,7 @@ export function EditSubscription({
                                     <SlackNotConfiguredBanner />
                                 ) : (
                                     <>
-                                        <LemonField
+                                        <Field
                                             name="target_value"
                                             label="Which Slack channel to send reports to"
                                             help={
@@ -229,7 +229,7 @@ export function EditSubscription({
                                                     integration={firstSlackIntegration}
                                                 />
                                             )}
-                                        </LemonField>
+                                        </Field>
                                     </>
                                 )}
                             </>
@@ -237,9 +237,9 @@ export function EditSubscription({
 
                         {subscription.target_type === 'webhook' ? (
                             <>
-                                <LemonField name="target_value" label="Webhook URL">
-                                    <LemonInput placeholder="https://example.com/webhooks/1234" />
-                                </LemonField>
+                                <Field name="target_value" label="Webhook URL">
+                                    <Input placeholder="https://example.com/webhooks/1234" />
+                                </Field>
                                 <div className="text-xs text-secondary mt-2">
                                     Webhooks will be called with a HTTP POST request. The webhook endpoint should
                                     respond with a healthy HTTP code (2xx).
@@ -249,45 +249,45 @@ export function EditSubscription({
 
                         <div>
                             <div className="flex items-baseline justify-between w-full">
-                                <LemonLabel className="mb-2">Recurrence</LemonLabel>
+                                <Label className="mb-2">Recurrence</Label>
                                 <div className="text-xs text-secondary text-right">{currentTimezone}</div>
                             </div>
                             <div className="flex gap-2 items-center rounded border p-2 flex-wrap">
                                 <span>Send every</span>
-                                <LemonField name="interval">
-                                    <LemonSelect options={intervalOptions} />
-                                </LemonField>
-                                <LemonField name="frequency">
-                                    <LemonSelect
+                                <Field name="interval">
+                                    <Select options={intervalOptions} />
+                                </Field>
+                                <Field name="frequency">
+                                    <Select
                                         options={
                                             subscription.interval === 1
                                                 ? frequencyOptionsSingular
                                                 : frequencyOptionsPlural
                                         }
                                     />
-                                </LemonField>
+                                </Field>
 
                                 {subscription.frequency === 'weekly' && (
                                     <>
                                         <span>on</span>
-                                        <LemonField name="byweekday">
+                                        <Field name="byweekday">
                                             {({ value, onChange }) => (
-                                                <LemonSelect
+                                                <Select
                                                     options={weekdayOptions}
                                                     value={value ? value[0] : null}
                                                     onChange={(val) => onChange([val])}
                                                 />
                                             )}
-                                        </LemonField>
+                                        </Field>
                                     </>
                                 )}
 
                                 {subscription.frequency === 'monthly' && (
                                     <>
                                         <span>on the</span>
-                                        <LemonField name="bysetpos">
+                                        <Field name="bysetpos">
                                             {({ value, onChange }) => (
-                                                <LemonSelect
+                                                <Select
                                                     options={bysetposOptions}
                                                     value={value ? String(value) : null}
                                                     onChange={(val) => {
@@ -295,10 +295,10 @@ export function EditSubscription({
                                                     }}
                                                 />
                                             )}
-                                        </LemonField>
-                                        <LemonField name="byweekday">
+                                        </Field>
+                                        <Field name="byweekday">
                                             {({ value, onChange }) => (
-                                                <LemonSelect
+                                                <Select
                                                     dropdownMatchSelectWidth={false}
                                                     options={monthlyWeekdayOptions}
                                                     // "day" is a special case where it is a list of all available days
@@ -312,13 +312,13 @@ export function EditSubscription({
                                                     }
                                                 />
                                             )}
-                                        </LemonField>
+                                        </Field>
                                     </>
                                 )}
                                 <span>by</span>
-                                <LemonField name="start_date">
+                                <Field name="start_date">
                                     {({ value, onChange }) => (
-                                        <LemonSelect
+                                        <Select
                                             options={timeOptions}
                                             value={dayjs(value).hour().toString()}
                                             onChange={(val) => {
@@ -332,38 +332,38 @@ export function EditSubscription({
                                             }}
                                         />
                                     )}
-                                </LemonField>
+                                </Field>
                             </div>
                         </div>
                     </>
                 )}
-            </LemonModal.Content>
+            </Modal.Content>
 
-            <LemonModal.Footer>
+            <Modal.Footer>
                 <div className="flex-1">
                     {subscription && id !== 'new' && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             status="danger"
                             onClick={_onDelete}
                             disabled={subscriptionLoading}
                         >
                             Delete subscription
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
-                <LemonButton type="secondary" onClick={onCancel}>
+                <Button type="secondary" onClick={onCancel}>
                     Cancel
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="primary"
                     htmlType="submit"
                     loading={isSubscriptionSubmitting}
                     disabled={!subscriptionChanged || subscriptionLoading}
                 >
                     {id === 'new' ? 'Create subscription' : 'Save'}
-                </LemonButton>
-            </LemonModal.Footer>
+                </Button>
+            </Modal.Footer>
         </Form>
     )
 }

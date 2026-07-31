@@ -7,7 +7,7 @@ import { useEffect, useMemo } from 'react'
 import { TextMorph } from 'torph/react'
 
 import { IconCopy } from '@hanzo/icons'
-import { LemonButton, Spinner } from '@hanzo/lemon-ui'
+import { Button, Spinner } from '@hanzo/elements'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { teamLogic } from 'scenes/teamLogic'
@@ -130,16 +130,16 @@ export function TextViewDisplay({
         <div className="relative flex flex-col flex-1 min-h-0">
             <div className="absolute top-2 right-2 z-10 flex gap-2">
                 {allExpandableIndices.length > 0 && (
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="xsmall"
                         onClick={toggleExpandAll}
                         tooltip={allExpanded ? 'Collapse all expandable sections' : 'Expand all expandable sections'}
                     >
                         {allExpanded ? 'Collapse all' : 'Expand all'}
-                    </LemonButton>
+                    </Button>
                 )}
-                <LemonButton
+                <Button
                     type="secondary"
                     size="xsmall"
                     icon={<IconCopy />}
@@ -147,7 +147,7 @@ export function TextViewDisplay({
                     tooltip={copied ? 'Copied!' : 'Copy text representation'}
                 >
                     <TextMorph as="span">{copied ? 'Copied!' : 'Copy text'}</TextMorph>
-                </LemonButton>
+                </Button>
             </div>
             <pre className="font-mono text-xs whitespace-pre-wrap p-4 bg-bg-light rounded border border-border overflow-auto flex-1 min-h-0 max-h-[200vh]">
                 {segments.map((segment, index) => {

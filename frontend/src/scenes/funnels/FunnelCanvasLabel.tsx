@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import React from 'react'
 
 import { IconInfo, IconTestTube } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { humanFriendlyDuration, percentage } from 'lib/utils'
 import { getExperimentMetricFromInsight } from 'scenes/experiments/utils'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
@@ -75,7 +75,7 @@ export function FunnelCanvasLabel(): JSX.Element | null {
 
         ...(supportsCreatingExperiment
             ? [
-                  <LemonButton
+                  <Button
                       key="run-experiment"
                       icon={<IconTestTube />}
                       type="secondary"
@@ -95,7 +95,7 @@ export function FunnelCanvasLabel(): JSX.Element | null {
                       })}
                   >
                       Run experiment
-                  </LemonButton>,
+                  </Button>,
               ]
             : []),
     ]

@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 import { IconCheckCircle } from '@hanzo/icons'
 
 import { CLOUD_HOSTNAMES, FEATURE_FLAGS } from 'lib/constants'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'

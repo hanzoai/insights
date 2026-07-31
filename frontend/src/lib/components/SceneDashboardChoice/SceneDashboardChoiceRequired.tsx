@@ -3,7 +3,7 @@ import {
     DashboardCompatibleScenes,
     sceneDescription,
 } from 'lib/components/SceneDashboardChoice/sceneDashboardChoiceModalLogic'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { Scene } from 'scenes/sceneTypes'
 
 export function SceneDashboardChoiceRequired(props: {
@@ -22,9 +22,9 @@ export function SceneDashboardChoiceRequired(props: {
                     Default dashboards are shown to everyone in the project. When you set a default, it’ll show up here.
                 </p>
             ) : null}
-            <LemonButton type="primary" data-attr={`${props.scene}-choose-dashboard-from-empty`} onClick={props.open}>
+            <Button type="primary" data-attr={`${props.scene}-choose-dashboard-from-empty`} onClick={props.open}>
                 Select a dashboard
-            </LemonButton>
+            </Button>
         </div>
     )
 }

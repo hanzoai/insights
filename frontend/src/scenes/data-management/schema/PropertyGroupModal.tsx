@@ -3,17 +3,17 @@ import { Form } from 'kea-forms'
 
 import { IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonCheckbox,
-    LemonInput,
-    LemonModal,
-    LemonSelect,
-    LemonTextArea,
+    Button,
+    Checkbox,
+    Input,
+    Modal,
+    Select,
+    TextArea,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Field } from 'lib/elements/Field'
+import { Table, TableColumns } from 'lib/elements/Table'
 
 import {
     MAX_PROPERTY_NAME_LENGTH,
@@ -68,13 +68,13 @@ export function PropertyGroupModal({ logicKey, onAfterSave }: PropertyGroupModal
         await onAfterSave?.()
     }
 
-    const columns: LemonTableColumns<SchemaPropertyGroupProperty> = [
+    const columns: TableColumns<SchemaPropertyGroupProperty> = [
         {
             title: 'Name',
             key: 'name',
             render: (_, property, index) => (
                 <div className="flex items-center gap-1.5">
-                    <LemonInput
+                    <Input
                         value={property.name}
                         onChange={(value) => updatePropertyInForm(index, { name: value })}
                         placeholder="Property name"
@@ -98,7 +98,7 @@ export function PropertyGroupModal({ logicKey, onAfterSave }: PropertyGroupModal
             key: 'property_type',
             width: 150,
             render: (_, property, index) => (
-                <LemonSelect
+                <Select
                     value={property.property_type}
                     onChange={(value) => updatePropertyInForm(index, { property_type: value as PropertyType })}
                     options={PROPERTY_TYPE_OPTIONS}
@@ -116,7 +116,7 @@ export function PropertyGroupModal({ logicKey, onAfterSave }: PropertyGroupModal
                     className="flex justify-center items-center cursor-pointer h-full py-2 -my-2"
                     onClick={() => updatePropertyInForm(index, { is_required: !property.is_required })}
                 >
-                    <LemonCheckbox
+                    <Checkbox
                         checked={property.is_required}
                         onChange={(checked) => updatePropertyInForm(index, { is_required: checked })}
                     />
@@ -127,7 +127,7 @@ export function PropertyGroupModal({ logicKey, onAfterSave }: PropertyGroupModal
             title: 'Description',
             key: 'description',
             render: (_, property, index) => (
-                <LemonInput
+                <Input
                     value={property.description}
                     onChange={(value) => updatePropertyInForm(index, { description: value })}
                     placeholder="Optional description"
@@ -139,13 +139,13 @@ export function PropertyGroupModal({ logicKey, onAfterSave }: PropertyGroupModal
             key: 'actions',
             width: 50,
             render: (_, _property, index) => (
-                <LemonButton icon={<IconTrash />} size="small" onClick={() => removePropertyFromForm(index)} />
+                <Button icon={<IconTrash />} size="small" onClick={() => removePropertyFromForm(index)} />
             ),
         },
     ]
 
     return (
-        <LemonModal
+        <Modal
             isOpen={propertyGroupModalOpen}
             onClose={handleClose}
             title={editingPropertyGroup ? 'Edit Property Group' : 'New Property Group'}
@@ -158,25 +158,25 @@ export function PropertyGroupModal({ logicKey, onAfterSave }: PropertyGroupModal
                 enableFormOnSubmit
                 className="space-y-4"
             >
-                <LemonField name="name" label="Name">
-                    <LemonInput placeholder="e.g., Order, Product, User" autoFocus />
-                </LemonField>
+                <Field name="name" label="Name">
+                    <Input placeholder="e.g., Order, Product, User" autoFocus />
+                </Field>
 
-                <LemonField name="description" label="Description">
-                    <LemonTextArea placeholder="Describe what this property group represents" rows={2} />
-                </LemonField>
+                <Field name="description" label="Description">
+                    <TextArea placeholder="Describe what this property group represents" rows={2} />
+                </Field>
 
                 <div className="border-t pt-4">
                     <div className="flex items-center justify-between mb-2">
                         <h3 className="text-base font-semibold mb-0">Properties</h3>
-                        <LemonButton type="secondary" icon={<IconPlus />} size="small" onClick={addPropertyToForm}>
+                        <Button type="secondary" icon={<IconPlus />} size="small" onClick={addPropertyToForm}>
                             Add property
-                        </LemonButton>
+                        </Button>
                     </div>
 
                     {propertyGroupForm.properties.length > 0 ? (
                         <>
-                            <LemonTable
+                            <Table
                                 columns={columns}
                                 dataSource={propertyGroupForm.properties}
                                 pagination={undefined}
@@ -193,10 +193,10 @@ export function PropertyGroupModal({ logicKey, onAfterSave }: PropertyGroupModal
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4 border-t">
-                    <LemonButton type="secondary" onClick={handleClose}>
+                    <Button type="secondary" onClick={handleClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         htmlType="submit"
                         loading={isPropertyGroupFormSubmitting}
@@ -207,9 +207,9 @@ export function PropertyGroupModal({ logicKey, onAfterSave }: PropertyGroupModal
                         }}
                     >
                         {editingPropertyGroup ? 'Update' : 'Create'}
-                    </LemonButton>
+                    </Button>
                 </div>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

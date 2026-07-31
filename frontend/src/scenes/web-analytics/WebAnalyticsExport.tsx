@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconCopy } from '@hanzo/icons'
-import { LemonButton, LemonMenu } from '@hanzo/lemon-ui'
+import { Button, Menu } from '@hanzo/elements'
 
 import { QuerySchema, TrendsQueryResponse, WebStatsTableQueryResponse } from '~/queries/schema/schema-general'
 import { ExporterFormat, InsightLogicProps } from '~/types'
@@ -47,7 +47,7 @@ export function WebAnalyticsExport({ query, insightProps }: WebAnalyticsExportPr
     }
 
     return (
-        <LemonMenu
+        <Menu
             items={[
                 {
                     label: 'CSV',
@@ -64,9 +64,9 @@ export function WebAnalyticsExport({ query, insightProps }: WebAnalyticsExportPr
             ]}
             placement="bottom-end"
         >
-            <LemonButton type="secondary" icon={<IconCopy />} size="small" data-attr="web-analytics-copy-dropdown">
+            <Button type="secondary" icon={<IconCopy />} size="small" data-attr="web-analytics-copy-dropdown">
                 Copy
-            </LemonButton>
-        </LemonMenu>
+            </Button>
+        </Menu>
     )
 }

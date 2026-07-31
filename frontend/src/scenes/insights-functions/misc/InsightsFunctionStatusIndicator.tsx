@@ -1,8 +1,8 @@
-import { LemonDropdown, LemonTag, LemonTagProps } from '@hanzo/lemon-ui'
+import { Dropdown, Tag, TagProps } from '@hanzo/elements'
 
 import { InsightsFunctionType, InsightsWatcherState } from '~/types'
 
-type DisplayOptions = { tagType: LemonTagProps['type']; display: string; description: JSX.Element }
+type DisplayOptions = { tagType: TagProps['type']; display: string; description: JSX.Element }
 const displayMap: Record<InsightsWatcherState, DisplayOptions> = {
     [InsightsWatcherState.healthy]: {
         tagType: 'success',
@@ -83,12 +83,12 @@ export function InsightsFunctionStatusIndicator({
           : DEFAULT_DISPLAY
 
     return (
-        <LemonDropdown
+        <Dropdown
             overlay={
                 <>
                     <div className="p-2 deprecated-space-y-2 max-w-120">
                         <h2 className="flex gap-2 items-center m-0">
-                            Function status - <LemonTag type={tagType}>{display}</LemonTag>
+                            Function status - <Tag type={tagType}>{display}</Tag>
                         </h2>
 
                         <p>{description}</p>
@@ -96,7 +96,7 @@ export function InsightsFunctionStatusIndicator({
                 </>
             }
         >
-            <LemonTag type={tagType}>{display}</LemonTag>
-        </LemonDropdown>
+            <Tag type={tagType}>{display}</Tag>
+        </Dropdown>
     )
 }

@@ -2,15 +2,15 @@ import { useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonTable, LemonTableColumn, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Table, TableColumn, Link } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { More } from 'lib/elements/Button/More'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -41,7 +41,7 @@ export function LinksScene(): JSX.Element {
             width: '40%',
             render: function Render(_: any, record: LinkType) {
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={record.id ? urls.link(record.id) : undefined}
                         title={
                             <>
@@ -55,8 +55,8 @@ export function LinksScene(): JSX.Element {
                 )
             },
         },
-        createdByColumn<LinkType>() as LemonTableColumn<LinkType, keyof LinkType | undefined>,
-        createdAtColumn<LinkType>() as LemonTableColumn<LinkType, keyof LinkType | undefined>,
+        createdByColumn<LinkType>() as TableColumn<LinkType, keyof LinkType | undefined>,
+        createdAtColumn<LinkType>() as TableColumn<LinkType, keyof LinkType | undefined>,
         {
             title: 'Last 7 days',
             render: function RenderLinkMetricSparkline(_: any, link: LinkType) {
@@ -75,7 +75,7 @@ export function LinksScene(): JSX.Element {
                 return (
                     <More
                         overlay={
-                            <LemonMenuOverlay
+                            <MenuOverlay
                                 items={[
                                     {
                                         label: 'Edit link',
@@ -112,7 +112,7 @@ export function LinksScene(): JSX.Element {
                         interaction="click"
                         scope={Scene.Links}
                     >
-                        <LemonButton
+                        <Button
                             type="primary"
                             icon={<IconPlus />}
                             onClick={() => router.actions.push(urls.link('new'))}
@@ -122,15 +122,15 @@ export function LinksScene(): JSX.Element {
                                 dropdown: {
                                     overlay: (
                                         <>
-                                            <LemonButton disabledReason="Coming soon" fullWidth>
+                                            <Button disabledReason="Coming soon" fullWidth>
                                                 Import from Bit.ly
-                                            </LemonButton>
-                                            <LemonButton disabledReason="Coming soon" fullWidth>
+                                            </Button>
+                                            <Button disabledReason="Coming soon" fullWidth>
                                                 Import from Dub.co
-                                            </LemonButton>
-                                            <LemonButton disabledReason="Coming soon" fullWidth>
+                                            </Button>
+                                            <Button disabledReason="Coming soon" fullWidth>
                                                 Import from CSV
-                                            </LemonButton>
+                                            </Button>
                                         </>
                                     ),
                                     placement: 'bottom-end',
@@ -138,12 +138,12 @@ export function LinksScene(): JSX.Element {
                             }}
                         >
                             Create link
-                        </LemonButton>
+                        </Button>
                     </AppShortcut>
                 }
             />
 
-            <LemonBanner type="error">
+            <Banner type="error">
                 <h2>Links are extremely WIP</h2>
                 <p>
                     Links were started on the Tulum 2025 hackathon, and are not currently in use. The UI and Django
@@ -151,7 +151,7 @@ export function LinksScene(): JSX.Element {
                     be implemented in the future, probably part of our NodeJS infrastructure - we've initially built it
                     in Rust.
                 </p>
-            </LemonBanner>
+            </Banner>
 
             <ProductIntroduction
                 isEmpty={shouldShowEmptyState}
@@ -164,7 +164,7 @@ export function LinksScene(): JSX.Element {
                 className="my-0"
             />
 
-            {!shouldShowEmptyState && <LemonTable loading={linksLoading} columns={columns} dataSource={links} />}
+            {!shouldShowEmptyState && <Table loading={linksLoading} columns={columns} dataSource={links} />}
         </SceneContent>
     )
 }

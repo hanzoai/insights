@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconLogomark } from '@hanzo/icons'
-import { LemonButton, ProfilePicture } from '@hanzo/lemon-ui'
+import { Button, ProfilePicture } from '@hanzo/elements'
 
 import { AccountMenu } from 'lib/components/Account/AccountMenu'
 import { ProjectMenu } from 'lib/components/Account/ProjectMenu'
@@ -33,7 +33,7 @@ export function MinimalNavigation(): JSX.Element {
 
     return (
         <nav className="flex items-center gap-2 p-2 border-b">
-            <LemonButton noPadding icon={<IconLogomark className="text-3xl mx-2" />} to={logoUrl} />
+            <Button noPadding icon={<IconLogomark className="text-3xl mx-2" />} to={logoUrl} />
             {zenMode && (
                 <span className="font-semibold text-base flex items-center gap-2">
                     {iconType ? iconForType(iconType) : null}
@@ -55,9 +55,9 @@ export function MinimalNavigation(): JSX.Element {
                     side="bottom"
                     alignOffset={10}
                     trigger={
-                        <LemonButton type="tertiary" icon={<ProfilePicture user={user} size="md" />}>
+                        <Button type="tertiary" icon={<ProfilePicture user={user} size="md" />}>
                             {user?.first_name || user?.email}
-                        </LemonButton>
+                        </Button>
                     }
                 />
             </div>

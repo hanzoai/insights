@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import api from 'lib/api'
 import { unifiedHealthMenuLogic } from 'lib/components/HealthMenu/unifiedHealthMenuLogic'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { tabAwareScene } from 'lib/logic/scenes/tabAwareScene'
 import { Scene } from 'scenes/sceneTypes'
@@ -137,7 +137,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
         },
         loadHealthIssuesSuccess: () => {
             if (values.isManualRefresh) {
-                lemonToast.success('Health data refreshed', { autoClose: 1500 })
+                toast.success('Health data refreshed', { autoClose: 1500 })
                 actions.resetManualRefresh()
             }
         },
@@ -150,7 +150,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
                 actions.loadHealthIssues()
                 unifiedHealthMenuLogic.actions.loadHealthSummary()
             } catch {
-                lemonToast.error('Failed to dismiss issue')
+                toast.error('Failed to dismiss issue')
             }
         },
         undismissIssue: async ({ id }) => {
@@ -159,7 +159,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
                 actions.loadHealthIssues()
                 unifiedHealthMenuLogic.actions.loadHealthSummary()
             } catch {
-                lemonToast.error('Failed to undismiss issue')
+                toast.error('Failed to undismiss issue')
             }
         },
     })),

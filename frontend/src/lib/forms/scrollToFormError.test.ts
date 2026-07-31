@@ -1,9 +1,9 @@
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { scrollToFormError } from './scrollToFormError'
 
-jest.mock('lib/lemon-ui/LemonToast/LemonToast', () => ({
-    lemonToast: {
+jest.mock('lib/elements/Toast/Toast', () => ({
+    toast: {
         error: jest.fn(),
     },
 }))
@@ -41,7 +41,7 @@ describe('scrollToFormError', () => {
             block: 'center',
             behavior: 'smooth',
         })
-        expect(lemonToast.error).not.toHaveBeenCalled()
+        expect(toast.error).not.toHaveBeenCalled()
     })
 
     it('searches extra selectors when primary selector not found', () => {
@@ -63,7 +63,7 @@ describe('scrollToFormError', () => {
             block: 'center',
             behavior: 'smooth',
         })
-        expect(lemonToast.error).not.toHaveBeenCalled()
+        expect(toast.error).not.toHaveBeenCalled()
     })
 
     it('shows fallback toast when no error element is found', () => {
@@ -77,7 +77,7 @@ describe('scrollToFormError', () => {
 
         expect(mockQuerySelector).toHaveBeenCalledWith('.Field--error')
         expect(mockScrollIntoView).not.toHaveBeenCalled()
-        expect(lemonToast.error).toHaveBeenCalledWith(fallbackMessage)
+        expect(toast.error).toHaveBeenCalledWith(fallbackMessage)
     })
 
     it('does not show toast when no error element is found and no fallback message provided', () => {
@@ -87,7 +87,7 @@ describe('scrollToFormError', () => {
 
         expect(mockQuerySelector).toHaveBeenCalledWith('.Field--error')
         expect(mockScrollIntoView).not.toHaveBeenCalled()
-        expect(lemonToast.error).not.toHaveBeenCalled()
+        expect(toast.error).not.toHaveBeenCalled()
     })
 
     it('searches all selectors including extra ones before showing fallback', () => {
@@ -104,6 +104,6 @@ describe('scrollToFormError', () => {
         expect(mockQuerySelector).toHaveBeenCalledWith('.custom-error')
         expect(mockQuerySelector).toHaveBeenCalledWith('.another-error')
         expect(mockScrollIntoView).not.toHaveBeenCalled()
-        expect(lemonToast.error).toHaveBeenCalledWith(fallbackMessage)
+        expect(toast.error).toHaveBeenCalledWith(fallbackMessage)
     })
 })

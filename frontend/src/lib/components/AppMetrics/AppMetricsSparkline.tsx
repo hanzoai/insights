@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 import { useInView } from 'react-intersection-observer'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { Sparkline, SparklineTimeSeries } from 'lib/components/Sparkline'
 import { inStorybookTestRunner } from 'lib/utils'
@@ -52,7 +52,7 @@ export function AppMetricsSparkline(props: AppMetricsLogicProps): JSX.Element {
             {!inView ? (
                 <div className="h-8 max-w-24" />
             ) : !appMetricsTrends || appMetricsTrendsLoading ? (
-                <LemonSkeleton className="h-8 max-w-24" />
+                <Skeleton className="h-8 max-w-24" />
             ) : (
                 <Sparkline labels={labels} data={displayData} className="h-8 max-w-24" maximumIndicator={false} />
             )}

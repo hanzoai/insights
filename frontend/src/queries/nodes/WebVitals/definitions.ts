@@ -1,6 +1,6 @@
 import { IconCheckCircle, IconWarning } from '@hanzo/icons'
 
-import { IconExclamation } from 'lib/lemon-ui/icons'
+import { IconExclamation } from 'lib/elements/icons'
 import { WebVitalsPercentile } from 'scenes/web-analytics/common'
 
 import { WebVitalsItem, WebVitalsMetric, WebVitalsMetricBand } from '~/queries/schema/schema-general'

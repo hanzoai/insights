@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconPauseFilled, IconPlayFilled, IconRefresh, IconTerminal } from '@hanzo/icons'
-import { LemonButton, Link, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Link, Spinner, Tooltip } from '@hanzo/elements'
 
 import { LiveRecordingsCount, LiveUserCount } from 'lib/components/LiveUserCount'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -10,9 +10,9 @@ import { TZLabel } from 'lib/components/TZLabel'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Banner } from 'lib/elements/Banner'
+import { More } from 'lib/elements/Button/More'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ActivitySceneTabs } from 'scenes/activity/ActivitySceneTabs'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
@@ -32,7 +32,7 @@ import { liveEventsTableSceneLogic } from './liveEventsTableSceneLogic'
 
 const LIVE_EVENTS_POLL_INTERVAL_MS = 1500
 
-const columns: LemonTableColumns<LiveEvent> = [
+const columns: TableColumns<LiveEvent> = [
     {
         title: 'Event',
         key: 'event',
@@ -108,12 +108,12 @@ export function LiveEventsTable(): JSX.Element {
         <SceneContent data-attr="manage-events-table">
             <ActivitySceneTabs activeKey={ActivityTab.LiveEvents} />
             {featureFlags[FEATURE_FLAGS.LIVESTREAM_TUI] && (
-                <LemonBanner type="info" className="mb-4" icon={<IconTerminal />} dismissKey="livestream-tui-banner">
+                <Banner type="info" className="mb-4" icon={<IconTerminal />} dismissKey="livestream-tui-banner">
                     Stream live events directly in your terminal with <code>insights-live</code>.{' '}
                     <Link to="https://hanzo.ai/docs/live-events/cli" target="_blank">
                         Learn more
                     </Link>
-                </LemonBanner>
+                </Banner>
             )}
             <SceneTitleSection
                 name={sceneConfigurations[Scene.EventExplorer].name}
@@ -129,7 +129,7 @@ export function LiveEventsTable(): JSX.Element {
                 </div>
 
                 <div className="flex gap-2">
-                    <LemonButton
+                    <Button
                         icon={<IconRefresh className="w-4 h-4" />}
                         type="secondary"
                         onClick={clearEvents}
@@ -142,7 +142,7 @@ export function LiveEventsTable(): JSX.Element {
                         placeholder="Filter by event"
                         allEventsOption="clear"
                     />
-                    <LemonButton
+                    <Button
                         icon={
                             streamPaused ? (
                                 <IconPlayFilled className="w-4 h-4" />
@@ -155,10 +155,10 @@ export function LiveEventsTable(): JSX.Element {
                         size="small"
                     >
                         {streamPaused ? 'Play' : 'Pause'}
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
-            <LemonTable
+            <Table
                 columns={columns}
                 data-attr="live-events-table"
                 rowKey="uuid"

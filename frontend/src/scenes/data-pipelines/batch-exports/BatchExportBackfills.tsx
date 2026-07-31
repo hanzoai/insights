@@ -2,12 +2,12 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonTable } from '@hanzo/lemon-ui'
+import { Button, Dialog, Table } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
-import { IconCancel } from 'lib/lemon-ui/icons'
+import { Progress } from 'lib/elements/Progress'
+import { IconCancel } from 'lib/elements/icons'
 
 import { BatchExportBackfill } from '~/types'
 
@@ -38,13 +38,13 @@ function BatchExportBackfillsControls({ id }: BatchExportBackfillsLogicProps): J
 
     return (
         <div className="flex gap-2 items-center justify-between">
-            <LemonButton onClick={loadBackfills} loading={loading} type="secondary" icon={<IconRefresh />} size="small">
+            <Button onClick={loadBackfills} loading={loading} type="secondary" icon={<IconRefresh />} size="small">
                 Refresh
-            </LemonButton>
+            </Button>
 
-            <LemonButton type="primary" onClick={() => openBackfillModal()}>
+            <Button type="primary" onClick={() => openBackfillModal()}>
                 Start backfill
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -60,16 +60,16 @@ function BatchExportLatestBackfills({ id }: BatchExportBackfillsLogicProps): JSX
 
     return (
         <>
-            <LemonTable
+            <Table
                 dataSource={latestBackfills}
                 loading={loading}
                 loadingSkeletonRows={5}
                 footer={
                     hasMoreBackfillsToLoad && (
                         <div className="flex items-center m-2">
-                            <LemonButton center fullWidth onClick={loadOlderBackfills} loading={loading}>
+                            <Button center fullWidth onClick={loadOlderBackfills} loading={loading}>
                                 Load more rows
-                            </LemonButton>
+                            </Button>
                         </div>
                     )
                 }
@@ -120,7 +120,7 @@ function BatchExportLatestBackfills({ id }: BatchExportBackfillsLogicProps): JSX
 
                                 return (
                                     <span className="flex gap-2 items-center">
-                                        <LemonProgress
+                                        <Progress
                                             percent={progress.progress * 100}
                                             strokeColor={`var(--${color})`}
                                             className="min-w-[80px]"
@@ -190,9 +190,9 @@ function BatchExportLatestBackfills({ id }: BatchExportBackfillsLogicProps): JSX
                 emptyState={
                     <div className="deprecated-space-y-2">
                         <div>No backfills in this time range.</div>
-                        <LemonButton type="primary" onClick={() => openBackfillModal()}>
+                        <Button type="primary" onClick={() => openBackfillModal()}>
                             Start backfill
-                        </LemonButton>
+                        </Button>
                     </div>
                 }
             />
@@ -209,13 +209,13 @@ function BackfillCancelButton({
 }): JSX.Element {
     return (
         <span className="flex gap-1 items-center">
-            <LemonButton
+            <Button
                 size="small"
                 type="secondary"
                 icon={<IconCancel />}
                 tooltip="Cancel backfill"
                 onClick={() =>
-                    LemonDialog.open({
+                    Dialog.open({
                         title: 'Cancel backfill?',
                         description: (
                             <>

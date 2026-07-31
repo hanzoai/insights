@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Banner, Button, Skeleton } from '@hanzo/elements'
 
 import { DetectiveMascot } from 'lib/components/mascots'
 import { heatmapLogic } from 'scenes/heatmaps/scenes/heatmap/heatmapLogic'
@@ -40,17 +40,17 @@ export function HeatmapsUrlsList(): JSX.Element {
             <div className=" w-full">
                 <div className="gap-y-px p-2 border bg-surface-primary rounded">
                     {topUrlsLoading ? (
-                        <LemonSkeleton className="h-10" repeat={10} />
+                        <Skeleton className="h-10" repeat={10} />
                     ) : noPageviews ? (
-                        <LemonBanner type="info">
+                        <Banner type="info">
                             No pageview events have been received yet. Once you have some data, you'll see the most
                             viewed pages here.
-                        </LemonBanner>
+                        </Banner>
                     ) : (
                         <>
                             <span className="text-sm font-medium text-muted ml-2">Most viewed pages:</span>
                             {topUrls?.map(({ url }) => (
-                                <LemonButton
+                                <Button
                                     key={url}
                                     fullWidth
                                     onClick={() => {
@@ -58,7 +58,7 @@ export function HeatmapsUrlsList(): JSX.Element {
                                     }}
                                 >
                                     {url}
-                                </LemonButton>
+                                </Button>
                             ))}
                         </>
                     )}

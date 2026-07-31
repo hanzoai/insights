@@ -1,7 +1,7 @@
 import { connect, kea, key, listeners, path, props } from 'kea'
 import { forms } from 'kea-forms'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { dashboardsModel } from '~/models/dashboardsModel'
 import { DashboardTile, DashboardType, QueryBasedInsightModel } from '~/types'
@@ -32,7 +32,7 @@ export const textCardModalLogic = kea<textCardModalLogicType>([
     listeners(({ props, actions }) => ({
         submitTextTileFailure: (error) => {
             if (props.dashboard && props.textTileId) {
-                lemonToast.error(`Could not save text: ${error.error} (${JSON.stringify(error.errors)})`)
+                toast.error(`Could not save text: ${error.error} (${JSON.stringify(error.errors)})`)
             }
             actions.resetTextTile()
             props?.onClose?.()

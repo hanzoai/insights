@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonSnack } from '@hanzo/lemon-ui'
+import { Snack } from '@hanzo/elements'
 
 import { FolderSelect } from 'lib/components/FileSystem/FolderSelect/FolderSelect'
 import { linkToLogic } from 'lib/components/FileSystem/LinkTo/linkToLogic'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Modal } from 'lib/elements/Modal'
 import { pluralize } from 'lib/utils'
 
 import { splitPath } from '~/layout/panel-layout/ProjectTree/utils'
@@ -23,14 +23,14 @@ export function LinkToModal(): JSX.Element {
     const s = pluralize(linkingItems.length, 'shortcut', 'shortcuts', false)
 
     return (
-        <LemonModal
+        <Modal
             onClose={closeLinkToModal}
             isOpen={isOpen}
             title={`Select a folder to create ${s} in`}
             description={
                 <>
                     You are creating {pluralize(linkingItems.length, 'shortcut')} in{' '}
-                    <LemonSnack>{destinationFolder}</LemonSnack>
+                    <Snack>{destinationFolder}</Snack>
                 </>
             }
             // This is a bit of a hack. Without it, the flow "insight" -> "add to dashboard button" ->
@@ -40,24 +40,24 @@ export function LinkToModal(): JSX.Element {
             footer={
                 <>
                     <div className="flex-1" />
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={submitForm}
                         data-attr="link-to-modal-move-button"
                         disabledReason={typeof lastFolder !== 'string' ? 'Please select a folder' : undefined}
                     >
                         Create {s} in {lastFolder}
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="w-192 max-w-full">
                 <Form logic={linkToLogic} formKey="form">
-                    <LemonField name="folder">
+                    <Field name="folder">
                         <FolderSelect root="project://" includeRoot className="h-[60vh] min-h-[200px]" />
-                    </LemonField>
+                    </Field>
                 </Form>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

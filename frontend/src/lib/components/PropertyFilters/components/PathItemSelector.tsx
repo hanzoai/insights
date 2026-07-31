@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { SimpleOption, TaxonomicFilterGroupType, TaxonomicFilterValue } from 'lib/components/TaxonomicFilter/types'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Popover } from 'lib/elements/Popover/Popover'
 
 interface PathItemSelectorProps {
     pathItem: TaxonomicFilterValue | undefined

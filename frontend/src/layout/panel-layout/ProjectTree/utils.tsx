@@ -1,7 +1,7 @@
 import { IconPlus, IconShortcut } from '@hanzo/icons'
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
-import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { TreeDataItem } from 'lib/elements/Tree/Tree'
 
 import { SearchHighlightMultiple } from '~/layout/navigation-3000/components/SearchHighlight'
 import { RecentResults, SearchResults } from '~/layout/panel-layout/ProjectTree/projectTreeLogic'

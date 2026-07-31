@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 
@@ -21,7 +21,7 @@ export function TaxonomicBreakdownButton({ disabledReason, size }: TaxonomicBrea
 
     return (
         <TaxonomicBreakdownPopover open={open} setOpen={setOpen}>
-            <LemonButton
+            <Button
                 type="secondary"
                 icon={<IconPlusSmall />}
                 data-attr="add-breakdown-button"
@@ -36,7 +36,7 @@ export function TaxonomicBreakdownButton({ disabledReason, size }: TaxonomicBrea
                 }
             >
                 {taxonomicBreakdownType === TaxonomicFilterGroupType.CohortsWithAllUsers ? 'Cohort' : 'Breakdown'}
-            </LemonButton>
+            </Button>
         </TaxonomicBreakdownPopover>
     )
 }
