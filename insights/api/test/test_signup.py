@@ -259,7 +259,7 @@ class TestSignupAPI(APIBaseTest):
     def test_signup_disallowed_on_case_insensitive_email_collision(self):
         """Test that signup is prevented when a user exists with a case variation of the email."""
         base_email = f"test.collision.{uuid.uuid4().hex[:8]}@example.com"
-        existing_user = User.objects.create(email=base_email.upper(), first_name="Hoggy")
+        existing_user = User.objects.create(email=base_email.upper(), first_name="Alex")
 
         test_email_variations = [
             base_email.lower(),
@@ -292,7 +292,7 @@ class TestSignupAPI(APIBaseTest):
 
         self.assertEqual(User.objects.count(), initial_user_count)
         existing_user.refresh_from_db()
-        self.assertEqual(existing_user.first_name, "Hoggy")
+        self.assertEqual(existing_user.first_name, "Alex")
 
     @pytest.mark.skip_on_multitenancy
     def test_signup_normalizes_email_to_lowercase(self):
