@@ -2,19 +2,19 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconDatabase, IconRefresh } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
-import { LemonTable, LemonTableColumn } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { LemonTag, LemonTagType } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconPlayCircle, IconReplay } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Progress } from 'lib/elements/Progress'
+import { Table, TableColumn } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { Tabs } from 'lib/elements/Tabs'
+import { Tag, TagType } from 'lib/elements/Tag/Tag'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconPlayCircle, IconReplay } from 'lib/elements/icons'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { AsyncMigrationParametersModal } from 'scenes/instance/AsyncMigrations/AsyncMigrationParametersModal'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -39,7 +39,7 @@ export const scene: SceneExport = {
     logic: asyncMigrationsLogic,
 }
 
-type AsyncMigrationColumnType = LemonTableColumn<AsyncMigration, keyof AsyncMigration | undefined>
+type AsyncMigrationColumnType = TableColumn<AsyncMigration, keyof AsyncMigration | undefined>
 
 const STATUS_RELOAD_INTERVAL_MS = 3000
 
@@ -81,7 +81,7 @@ export function AsyncMigrations(): JSX.Element {
                 'https://github.com/hanzoai/insights/blob/main/insights/async_migrations/migrations/' +
                 asyncMigration.name +
                 '.py'
-            return <LemonTableLink to={link} title={asyncMigration.name} description={asyncMigration.description} />
+            return <TableLink to={link} title={asyncMigration.name} description={asyncMigration.description} />
         },
     }
     const progressColumn: AsyncMigrationColumnType = {
@@ -90,7 +90,7 @@ export function AsyncMigrations(): JSX.Element {
             const progress = asyncMigration.progress
             return (
                 <div>
-                    <LemonProgress percent={progress} />
+                    <Progress percent={progress} />
                 </div>
             )
         },
@@ -99,7 +99,7 @@ export function AsyncMigrations(): JSX.Element {
         title: 'Status',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
             const status = asyncMigration.status
-            const type: LemonTagType =
+            const type: TagType =
                 status === AsyncMigrationStatus.Running
                     ? 'success'
                     : status === AsyncMigrationStatus.Errored || status === AsyncMigrationStatus.FailedAtStartup
@@ -110,9 +110,9 @@ export function AsyncMigrations(): JSX.Element {
                           ? 'warning'
                           : 'default'
             return (
-                <LemonTag type={type} className="uppercase">
+                <Tag type={type} className="uppercase">
                     {migrationStatusNumberToMessage[status]}
-                </LemonTag>
+                </Tag>
             )
         },
     }
@@ -154,27 +154,27 @@ export function AsyncMigrations(): JSX.Element {
                 <div>
                     {status === AsyncMigrationStatus.NotStarted || status === AsyncMigrationStatus.FailedAtStartup ? (
                         <Tooltip title="Start">
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconPlayCircle />}
                                 onClick={() => triggerMigration(asyncMigration)}
                             >
                                 Run
-                            </LemonButton>
+                            </Button>
                         </Tooltip>
                     ) : status === AsyncMigrationStatus.Starting || status === AsyncMigrationStatus.Running ? (
                         <More
                             overlay={
                                 <>
-                                    <LemonButton onClick={() => forceStopMigration(asyncMigration)} fullWidth>
+                                    <Button onClick={() => forceStopMigration(asyncMigration)} fullWidth>
                                         Stop and rollback
-                                    </LemonButton>
-                                    <LemonButton
+                                    </Button>
+                                    <Button
                                         onClick={() => forceStopMigrationWithoutRollback(asyncMigration)}
                                         fullWidth
                                     >
                                         Stop
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             }
                         />
@@ -184,18 +184,18 @@ export function AsyncMigrations(): JSX.Element {
                         <More
                             overlay={
                                 <>
-                                    <LemonButton onClick={() => resumeMigration(asyncMigration)} fullWidth>
+                                    <Button onClick={() => resumeMigration(asyncMigration)} fullWidth>
                                         Resume
-                                    </LemonButton>
-                                    <LemonButton onClick={() => rollbackMigration(asyncMigration)} fullWidth>
+                                    </Button>
+                                    <Button onClick={() => rollbackMigration(asyncMigration)} fullWidth>
                                         Rollback
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             }
                         />
                     ) : status === AsyncMigrationStatus.RolledBack ? (
                         <Tooltip title="Restart">
-                            <LemonButton
+                            <Button
                                 icon={<IconReplay />}
                                 onClick={() => triggerMigration(asyncMigration)}
                                 fullWidth
@@ -285,21 +285,21 @@ export function AsyncMigrations(): JSX.Element {
                         .
                     </p>
 
-                    <LemonTabs sceneInset activeKey={activeTab} onChange={setActiveTab} tabs={tabs} />
+                    <Tabs sceneInset activeKey={activeTab} onChange={setActiveTab} tabs={tabs} />
 
                     {[AsyncMigrationsTab.Management, AsyncMigrationsTab.FutureMigrations].includes(activeTab) ? (
                         <>
                             <div className="mb-4 float-right">
-                                <LemonButton
+                                <Button
                                     icon={asyncMigrationsLoading ? <Spinner /> : <IconRefresh />}
                                     onClick={loadAsyncMigrations}
                                     type="secondary"
                                     size="small"
                                 >
                                     Refresh
-                                </LemonButton>
+                                </Button>
                             </div>
-                            <LemonTable
+                            <Table
                                 pagination={{ pageSize: 10 }}
                                 loading={asyncMigrationsLoading}
                                 columns={columns[activeTab]}

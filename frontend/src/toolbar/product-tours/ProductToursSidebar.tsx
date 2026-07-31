@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconCheck, IconCursorClick, IconPlay, IconPlus, IconSidebarClose, IconX } from '@hanzo/icons'
-import { LemonButton, LemonInput, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Link } from '@hanzo/elements'
 
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Modal } from 'lib/elements/Modal'
 import { hasIncompleteTargeting } from 'scenes/product-tours/stepUtils'
 
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
@@ -186,7 +186,7 @@ export function ProductToursSidebar(): JSX.Element | null {
                         </div>
                     </div>
 
-                    <LemonInput
+                    <Input
                         placeholder="Tour name"
                         value={tourForm?.name || ''}
                         onChange={(value) => setTourFormValue('name', value)}
@@ -195,7 +195,7 @@ export function ProductToursSidebar(): JSX.Element | null {
                     />
 
                     <div className="mt-3 flex gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             icon={<IconPlay />}
                             onClick={previewTour}
@@ -204,8 +204,8 @@ export function ProductToursSidebar(): JSX.Element | null {
                             className="flex-1"
                         >
                             Preview
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             icon={<IconCheck />}
                             onClick={saveTour}
@@ -215,7 +215,7 @@ export function ProductToursSidebar(): JSX.Element | null {
                             className="flex-1"
                         >
                             {launchedFromMainApp && tourForm?.id ? 'Done' : 'Save'}
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
 
@@ -260,7 +260,7 @@ export function ProductToursSidebar(): JSX.Element | null {
                     )}
 
                     <div className="mt-3 flex gap-2">
-                        <LemonButton
+                        <Button
                             type="primary"
                             center
                             fullWidth
@@ -269,7 +269,7 @@ export function ProductToursSidebar(): JSX.Element | null {
                             disabledReason={isAddingStep ? 'Already adding step' : undefined}
                         >
                             Add step
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -336,7 +336,7 @@ export function ProductToursSidebar(): JSX.Element | null {
                 `}
             </style>
 
-            <LemonModal
+            <Modal
                 isOpen={showConsentModal}
                 onClose={() => setSessionRecordingConsent(false)}
                 title="Help us improve Product Tours"
@@ -345,12 +345,12 @@ export function ProductToursSidebar(): JSX.Element | null {
                 maxWidth="42rem"
                 footer={
                     <>
-                        <LemonButton type="secondary" onClick={() => setSessionRecordingConsent(false)}>
+                        <Button type="secondary" onClick={() => setSessionRecordingConsent(false)}>
                             No thanks
-                        </LemonButton>
-                        <LemonButton type="primary" onClick={() => setSessionRecordingConsent(true)}>
+                        </Button>
+                        <Button type="primary" onClick={() => setSessionRecordingConsent(true)}>
                             Allow recording
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
@@ -369,7 +369,7 @@ export function ProductToursSidebar(): JSX.Element | null {
                     All inputs will be masked, and we'll respect any <pre className="inline-block">.ph-no-capture</pre>{' '}
                     marks on your site.
                 </p>
-            </LemonModal>
+            </Modal>
         </>
     )
 }

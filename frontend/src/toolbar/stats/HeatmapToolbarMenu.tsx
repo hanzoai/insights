@@ -3,17 +3,17 @@ import insights from '@hanzo/insights'
 import React from 'react'
 
 import { IconMagicWand } from '@hanzo/icons'
-import { LemonButton, LemonSwitch, Link } from '@hanzo/lemon-ui'
+import { Button, Switch, Link } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { heatmapDateOptions } from 'lib/components/IframedToolbarBrowser/utils'
 import { HeatmapsSettings } from 'lib/components/heatmaps/HeatMapsSettings'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
-import { LemonSegmentedButton } from 'lib/lemon-ui/LemonSegmentedButton'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconSync } from 'lib/lemon-ui/icons'
+import { Input } from 'lib/elements/Input'
+import { Label } from 'lib/elements/Label'
+import { SegmentedButton } from 'lib/elements/SegmentedButton'
+import { Spinner } from 'lib/elements/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconSync } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { ToolbarMenu } from '~/toolbar/bar/ToolbarMenu'
@@ -64,18 +64,18 @@ const SectionButton = ({
 }): JSX.Element => {
     return (
         <div className="flex items-center">
-            <LemonButton
+            <Button
                 className="flex-1 -mx-2 p-2"
                 noPadding
                 onClick={() => onChange(!checked)}
-                sideIcon={<LemonSwitch checked={checked} />}
+                sideIcon={<Switch checked={checked} />}
             >
                 <span className="flex items-center gap-2">
                     {children}
 
                     {loading ? <Spinner /> : null}
                 </span>
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -117,8 +117,8 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
         <ToolbarMenu>
             <ToolbarMenu.Header>
                 <div className="flex gap-1">
-                    <LemonInput className="flex-1" value={wildcardHref} onChange={setWildcardHref} />
-                    <LemonButton
+                    <Input className="flex-1" value={wildcardHref} onChange={setWildcardHref} />
+                    <Button
                         type={autoWildcardEnabled ? 'primary' : 'secondary'}
                         icon={<IconMagicWand />}
                         size="medium"
@@ -139,7 +139,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                 closeOnClickInside: false,
                                 overlay: (
                                     <div className="p-2 flex flex-col gap-2 min-w-80">
-                                        <LemonSwitch
+                                        <Switch
                                             checked={autoWildcardEnabled}
                                             onChange={setAutoWildcardEnabled}
                                             label="Auto-wildcard on navigation"
@@ -226,13 +226,13 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                             </p>
                             <div className="flex items-center justify-between pb-2">
                                 <div className="flex items-center gap-1">
-                                    <LemonLabel
+                                    <Label
                                         info="Sampling computes the result on a proportion of data of the users in the dataset, making click maps load significantly faster."
                                         infoLink="https://hanzo.ai/docs/product-analytics/sampling"
                                     >
                                         Sampling
-                                    </LemonLabel>
-                                    <LemonSwitch
+                                    </Label>
+                                    <Switch
                                         className="m-2"
                                         onChange={(checked) => {
                                             if (checked) {
@@ -248,7 +248,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                 </div>
                                 {samplingFactor !== 1 && (
                                     <div className="flex items-center gap-2">
-                                        <LemonSegmentedButton
+                                        <SegmentedButton
                                             options={[0.1, 1, 10, 25, 50].map((percentage) => ({
                                                 value: percentage / 100,
                                                 label: `${percentage}%`,
@@ -265,7 +265,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                 )}
                             </div>
                             <div className="flex items-center gap-2">
-                                <LemonButton
+                                <Button
                                     icon={<IconSync />}
                                     type="secondary"
                                     size="small"
@@ -275,7 +275,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                     }
                                 >
                                     Load more
-                                </LemonButton>
+                                </Button>
                                 <Tooltip
                                     title={
                                         <span>
@@ -284,7 +284,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                         </span>
                                     }
                                 >
-                                    <LemonSwitch
+                                    <Switch
                                         className="flex-1"
                                         checked={matchLinksByHref}
                                         label="Match links by their target URL"
@@ -315,7 +315,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                         const text = element.innerText?.trim().substring(0, 255)
                                         const tagName = element.tagName.toLowerCase()
                                         return (
-                                            <LemonButton
+                                            <Button
                                                 key={index}
                                                 size="small"
                                                 fullWidth
@@ -333,7 +333,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                                     </div>
                                                     <div>{count} clicks</div>
                                                 </div>
-                                            </LemonButton>
+                                            </Button>
                                         )
                                     })
                                 ) : (

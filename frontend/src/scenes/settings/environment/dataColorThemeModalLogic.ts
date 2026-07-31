@@ -1,7 +1,7 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
 import { forms } from 'kea-forms'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -62,16 +62,16 @@ export const dataColorThemesModalLogic = kea<dataColorThemesModalLogicType>([
                         ? await api.dataColorThemes.update(id, payload)
                         : await api.dataColorThemes.create(payload)
 
-                    lemonToast.success(updatedTheme ? 'Theme saved.' : 'Theme created.')
+                    toast.success(updatedTheme ? 'Theme saved.' : 'Theme created.')
                     actions.closeModal()
 
                     return updatedTheme
                 } catch (error: any) {
                     if (error.data?.attr && error.data?.detail) {
                         const field = error.data?.attr?.replace(/_/g, ' ')
-                        lemonToast.error(`Error saving data color theme: ${field}: ${error.data.detail}`)
+                        toast.error(`Error saving data color theme: ${field}: ${error.data.detail}`)
                     } else {
-                        lemonToast.error(`Error saving data color theme`)
+                        toast.error(`Error saving data color theme`)
                     }
                 }
 

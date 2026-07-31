@@ -170,15 +170,15 @@
             border: 1px solid rgb(0 0 0 / 6%);
         }
 
-        .LemonButton--primary,
-        .LemonButton--primary.LemonButton--status-alt {
+        .Button--primary,
+        .Button--primary.Button--status-alt {
             color: #f4efe6 !important;
             background: #2f2a26 !important;
             border-color: transparent !important;
         }
 
-        .LemonButton--primary:hover,
-        .LemonButton--primary.LemonButton--status-alt:hover {
+        .Button--primary:hover,
+        .Button--primary.Button--status-alt:hover {
             background: #241f1c !important;
         }
     }

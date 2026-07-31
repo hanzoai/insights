@@ -6,14 +6,14 @@ import { useEffect } from 'react'
 import { useRef } from 'react'
 
 import { IconFilter, IconList, IconSearch } from '@hanzo/icons'
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { IconRobot } from 'lib/lemon-ui/icons'
+import { IconRobot } from 'lib/elements/icons'
 import {
     TabsPrimitive,
     TabsPrimitiveContent,
@@ -259,7 +259,7 @@ const ExceptionsTab = (): JSX.Element => {
                     <ErrorFilters.FilterGroup />
                 </ErrorFilters.Root>
             </div>
-            <LemonDivider className="my-0 shrink-0" />
+            <Divider className="my-0 shrink-0" />
             <Metadata className="flex flex-col flex-1 min-h-0 overflow-y-auto">
                 <EventsTable
                     query={eventsQuery}

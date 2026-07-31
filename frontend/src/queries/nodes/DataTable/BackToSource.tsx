@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 
 import { IconArrowLeft } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { summarizeInsightQuery } from 'scenes/insights/summarizeInsight'
 import { mathsLogic } from 'scenes/trends/mathsLogic'
 import { urls } from 'scenes/urls'
@@ -31,7 +31,7 @@ export function BackToSource(): JSX.Element | null {
     const summary = `Viewing actors query based on insight: ${insightSummary}`
 
     return (
-        <LemonButton
+        <Button
             tooltip={summary}
             type="primary"
             onClick={() => router.actions.push(urls.insightNew({ query: backToSourceQuery }))}
@@ -39,6 +39,6 @@ export function BackToSource(): JSX.Element | null {
             className="mr-2"
         >
             <IconArrowLeft aria-hidden="true" className="size-3 text-tertiary mr-1" /> View source insight
-        </LemonButton>
+        </Button>
     )
 }

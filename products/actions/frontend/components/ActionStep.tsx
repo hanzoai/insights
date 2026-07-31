@@ -1,16 +1,16 @@
 import { useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSegmentedButton, Link } from '@hanzo/lemon-ui'
+import { Button, Input, SegmentedButton, Link } from '@hanzo/elements'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { OperandTag } from 'lib/components/PropertyFilters/components/OperandTag'
 import { DEFAULT_TAXONOMIC_GROUP_TYPES } from 'lib/components/PropertyFilters/components/TaxonomicPropertyFilter'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
-import { IconOpenInApp } from 'lib/lemon-ui/icons'
+import { Dialog } from 'lib/elements/Dialog'
+import { Label } from 'lib/elements/Label/Label'
+import { IconOpenInApp } from 'lib/elements/icons'
 
 import { groupsModel } from '~/models/groupsModel'
 import {
@@ -67,7 +67,7 @@ export function ActionStep({
                     <b>Match Group #{index + 1}</b>
 
                     {!isOnlyStep && (
-                        <LemonButton
+                        <Button
                             className="absolute top-2 right-2"
                             icon={<IconX />}
                             size="small"
@@ -92,7 +92,7 @@ export function ActionStep({
                     step.event !== '$pageview' &&
                     step.event !== '$screen' && (
                         <div className="deprecated-space-y-1">
-                            <LemonLabel>Event name</LemonLabel>
+                            <Label>Event name</Label>
                             <EventName
                                 value={step.event}
                                 onChange={(value) =>
@@ -141,7 +141,7 @@ export function ActionStep({
                 )}
 
                 <div className="mt-4 deprecated-space-y-2">
-                    <LemonLabel>Filters</LemonLabel>
+                    <Label>Filters</Label>
                     <PropertyFilters
                         propertyFilters={
                             step.event === '$screen'
@@ -199,11 +199,11 @@ function Option({
     return (
         <div className="deprecated-space-y-1">
             <div className="flex flex-wrap gap-1">
-                <LemonLabel>{label}</LemonLabel>
+                <Label>{label}</Label>
                 {labelExtra}
             </div>
             {caption && <div className="action-step-caption">{caption}</div>}
-            <LemonInput
+            <Input
                 data-attr="edit-action-url-input"
                 allowClear
                 onChange={onOptionChange}
@@ -235,7 +235,7 @@ function AutocaptureFields({
     disabledReason?: string
 }): JSX.Element {
     const onSelectElement = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Select an element',
             description: actionId
                 ? 'Choose the domain on which to edit this action'
@@ -254,7 +254,7 @@ function AutocaptureFields({
     return (
         <div className="deprecated-space-y-4">
             <div className="flex items-center gap-2">
-                <LemonButton
+                <Button
                     size="small"
                     type="secondary"
                     onClick={onSelectElement}
@@ -262,7 +262,7 @@ function AutocaptureFields({
                     disabledReason={disabledReason}
                 >
                     Select element on site
-                </LemonButton>
+                </Button>
                 <Link to={`${learnMoreLink}#1-autocapture`} target="_blank">
                     See documentation.
                 </Link>
@@ -385,7 +385,7 @@ function TypeSwitcher({
 
     return (
         <div data-attr="action-type-switcher">
-            <LemonSegmentedButton
+            <SegmentedButton
                 onChange={handleChange}
                 value={
                     step.event === '$autocapture' ||
@@ -467,9 +467,9 @@ function ScreenNameField({
     return (
         <div className="deprecated-space-y-1">
             <div className="flex flex-wrap gap-1">
-                <LemonLabel>Screen name</LemonLabel>
+                <Label>Screen name</Label>
                 <div className="flex flex-1 justify-end">
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         onChange={(value) => setFilter(screenName, value as ScreenNameMatching)}
                         value={operator}
                         options={Object.entries(SCREEN_NAME_MATCHING_LABEL).map(([value, label]) => ({
@@ -481,7 +481,7 @@ function ScreenNameField({
                     />
                 </div>
             </div>
-            <LemonInput
+            <Input
                 data-attr="edit-action-screen-name-input"
                 allowClear
                 onChange={(val) => (val ? setFilter(val, operator) : clearFilter())}
@@ -512,7 +512,7 @@ function StringMatchingSelection({
 
     return (
         <div className="flex flex-1 justify-end">
-            <LemonSegmentedButton
+            <SegmentedButton
                 onChange={handleURLMatchChange}
                 value={(step[key] as ActionStepStringMatching) || defaultValue}
                 options={[

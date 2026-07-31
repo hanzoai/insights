@@ -1,6 +1,6 @@
 import { capitalizeFirstLetter } from 'kea-forms'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { pluralizeResource } from 'lib/utils/accessControlUtils'
 
@@ -22,12 +22,12 @@ export function SummarizeAccessLevels({ accessControlByResource }: SummarizeAcce
     return (
         <div className="flex gap-2 flex-wrap">
             {entries.map(({ resource, level }) => (
-                <LemonTag key={resource} type="default">
+                <Tag key={resource} type="default">
                     {capitalizeFirstLetter(
                         resource === 'project' ? resource : pluralizeResource(resource as APIScopeObject)
                     )}
                     : {capitalizeFirstLetter(level!)}
-                </LemonTag>
+                </Tag>
             ))}
         </div>
     )

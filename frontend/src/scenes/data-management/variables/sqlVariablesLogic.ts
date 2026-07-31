@@ -1,7 +1,7 @@
 import { actions, afterMount, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -34,10 +34,10 @@ export const sqlVariablesLogic = kea<sqlVariablesLogicType>([
                 deleteVariableSuccess: async ({ variableId }: { variableId: string }) => {
                     try {
                         await api.insightVariables.delete(variableId)
-                        lemonToast.success('Variable deleted')
+                        toast.success('Variable deleted')
                         return values.variables.filter((variable: Variable) => variable.id !== variableId)
                     } catch {
-                        lemonToast.error('Failed to delete variable')
+                        toast.error('Failed to delete variable')
                         return values.variables
                     }
                 },

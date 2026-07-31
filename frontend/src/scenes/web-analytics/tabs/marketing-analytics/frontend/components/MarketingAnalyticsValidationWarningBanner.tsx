@@ -1,6 +1,6 @@
 import { IconExternal } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
+import { Banner } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 
@@ -66,9 +66,9 @@ export function MarketingAnalyticsValidationWarningBanner({
     return (
         <>
             {warnings.map((warning, index) => (
-                <LemonBanner key={index} type="warning" className="mb-2">
+                <Banner key={index} type="warning" className="mb-2">
                     {warning.message} {warning.link ? getLinkUrl(warning.link) : null}
-                </LemonBanner>
+                </Banner>
             ))}
         </>
     )

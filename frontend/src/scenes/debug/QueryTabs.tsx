@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { LemonTabs, LemonTabsProps } from 'lib/lemon-ui/LemonTabs'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Table } from 'lib/elements/Table'
+import { Tabs, TabsProps } from 'lib/elements/Tabs'
+import { Tag } from 'lib/elements/Tag'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
@@ -55,7 +55,7 @@ export function QueryTabs<Q extends Node>({
     const explainTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === './explain')?.t ?? 0
     const totalTime = (response?.timings as QueryTiming[])?.find(({ k }) => k === '.')?.t ?? 0
     const insightsQLTime = totalTime - explainTime - clickHouseTime
-    const tabs: LemonTabsProps<string>['tabs'] = query
+    const tabs: TabsProps<string>['tabs'] = query
         ? [
               response?.error && {
                   key: 'error',
@@ -124,7 +124,7 @@ export function QueryTabs<Q extends Node>({
                   label: (
                       <>
                           SQL
-                          {insightsQLTime && <LemonTag className="ml-2">{Math.floor(insightsQLTime * 10) / 10}s</LemonTag>}
+                          {insightsQLTime && <Tag className="ml-2">{Math.floor(insightsQLTime * 10) / 10}s</Tag>}
                       </>
                   ),
                   content: (
@@ -143,7 +143,7 @@ export function QueryTabs<Q extends Node>({
                       <>
                           Datastore
                           {clickHouseTime && (
-                              <LemonTag className="ml-2">{Math.floor(clickHouseTime * 10) / 10}s</LemonTag>
+                              <Tag className="ml-2">{Math.floor(clickHouseTime * 10) / 10}s</Tag>
                           )}
                       </>
                   ),
@@ -184,7 +184,7 @@ export function QueryTabs<Q extends Node>({
                   key: 'metadata',
                   label: 'Metadata',
                   content: (
-                      <LemonTable
+                      <Table
                           dataSource={[
                               ...(response.metadata as InsightsQLMetadataResponse).errors.map((error) => ({
                                   type: 'error',
@@ -226,7 +226,7 @@ export function QueryTabs<Q extends Node>({
 
     return (
         <ErrorBoundary>
-            <LemonTabs
+            <Tabs
                 activeKey={tab && tabs.find((t) => t && t.key === tab) ? tab : (tabs[0] && tabs[0].key) || 'response'}
                 onChange={(t) => setTab(t)}
                 tabs={tabs}

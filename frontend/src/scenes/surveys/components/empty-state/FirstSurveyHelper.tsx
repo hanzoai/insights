@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconBell, IconGraph, IconRocket, IconTarget } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { ProfessorMascot } from 'lib/components/mascots'
 import { LaunchSurveyButton } from 'scenes/surveys/components/LaunchSurveyButton'
@@ -84,7 +84,7 @@ export function FirstSurveyHelper({ onTabChange }: FirstSurveyHelperProps): JSX.
                                                 Docs
                                             </Link>
                                         </p>
-                                        <LemonButton
+                                        <Button
                                             type="tertiary"
                                             size="xsmall"
                                             onClick={() => {
@@ -96,7 +96,7 @@ export function FirstSurveyHelper({ onTabChange }: FirstSurveyHelperProps): JSX.
                                             }}
                                         >
                                             Configure
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -116,13 +116,13 @@ export function FirstSurveyHelper({ onTabChange }: FirstSurveyHelperProps): JSX.
                                                 Docs
                                             </Link>
                                         </p>
-                                        <LemonButton
+                                        <Button
                                             type="tertiary"
                                             size="xsmall"
                                             onClick={() => onTabChange?.('results')}
                                         >
                                             View demo
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -144,13 +144,13 @@ export function FirstSurveyHelper({ onTabChange }: FirstSurveyHelperProps): JSX.
                                                 Tutorial
                                             </Link>
                                         </p>
-                                        <LemonButton
+                                        <Button
                                             type="tertiary"
                                             size="xsmall"
                                             onClick={() => onTabChange?.('notifications')}
                                         >
                                             Set up
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>

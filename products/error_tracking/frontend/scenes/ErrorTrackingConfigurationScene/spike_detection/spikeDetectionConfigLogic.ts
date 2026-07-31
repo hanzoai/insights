@@ -5,7 +5,7 @@ import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { ErrorTrackingSpikeDetectionConfig } from 'lib/components/Errors/types'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import type { spikeDetectionConfigLogicType } from './spikeDetectionConfigLogicType'
 
@@ -73,9 +73,9 @@ export const spikeDetectionConfigLogic = kea<spikeDetectionConfigLogicType>([
                         multiplier: formValues.multiplier,
                         threshold: formValues.threshold,
                     })
-                    lemonToast.success('Spike detection settings saved')
+                    toast.success('Spike detection settings saved')
                 } catch (e) {
-                    lemonToast.error('Failed to save spike detection settings')
+                    toast.error('Failed to save spike detection settings')
                     throw e
                 }
             },

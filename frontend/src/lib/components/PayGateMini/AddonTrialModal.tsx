@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonButton, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Button, Modal, Link } from '@hanzo/elements'
 
 import { BigLeaguesMascot } from 'lib/components/mascots'
 import { BillingAddonFeaturesList } from 'scenes/billing/BillingAddonFeaturesList'
@@ -27,7 +27,7 @@ export function AddonTrialModal({ product, isOpen, onClose }: AddonTrialModalPro
         product.features?.filter((f) => f.name !== product.name)
 
     return (
-        <LemonModal isOpen={isOpen} onClose={onClose} title={product.name} description={product.description}>
+        <Modal isOpen={isOpen} onClose={onClose} title={product.name} description={product.description}>
             <div className="flex flex-col">
                 <div className="bg-surface-secondary rounded p-6 flex flex-col">
                     <div className="hidden sm:flex [@media(max-height:850px)]:hidden justify-center my-2">
@@ -46,7 +46,7 @@ export function AddonTrialModal({ product, isOpen, onClose }: AddonTrialModalPro
                     </p>
                 </div>
                 <div className="flex justify-between mt-2 items-start">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="medium"
                         className="mt-2 mb-2"
@@ -54,10 +54,10 @@ export function AddonTrialModal({ product, isOpen, onClose }: AddonTrialModalPro
                         onClick={onClose}
                     >
                         Compare plans
-                    </LemonButton>
+                    </Button>
                     <BillingProductAddonActions addon={product} buttonSize="medium" ctaTextOverride="Confirm" />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

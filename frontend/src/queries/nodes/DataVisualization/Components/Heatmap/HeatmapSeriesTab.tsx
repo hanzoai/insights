@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 
 import { IconPlusSmall, IconTrash } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonCheckbox,
-    LemonColorPicker,
-    LemonInput,
-    LemonLabel,
-    LemonSelect,
-    LemonTag,
-} from '@hanzo/lemon-ui'
+    Button,
+    Checkbox,
+    ColorPicker,
+    Input,
+    Label,
+    Select,
+    Tag,
+} from '@hanzo/elements'
 
 import { getSeriesColorPalette } from 'lib/colors'
 
@@ -60,9 +60,9 @@ export const HeatmapSeriesTab = (): JSX.Element => {
         label: (
             <div className="items-center flex-1">
                 {name}
-                <LemonTag className="ml-2" type="default">
+                <Tag className="ml-2" type="default">
                     {type.name}
-                </LemonTag>
+                </Tag>
             </div>
         ),
     }))
@@ -72,9 +72,9 @@ export const HeatmapSeriesTab = (): JSX.Element => {
         label: (
             <div className="items-center flex-1">
                 {name}
-                <LemonTag className="ml-2" type="default">
+                <Tag className="ml-2" type="default">
                     {type.name}
-                </LemonTag>
+                </Tag>
             </div>
         ),
     }))
@@ -82,16 +82,16 @@ export const HeatmapSeriesTab = (): JSX.Element => {
     return (
         <div className="flex flex-col w-full p-3 gap-4">
             <div>
-                <LemonLabel className="mb-1">X-axis</LemonLabel>
-                <LemonSelect
+                <Label className="mb-1">X-axis</Label>
+                <Select
                     className="w-full"
                     value={heatmapSettings.xAxisColumn ?? 'None'}
                     options={columnOptions}
                     disabledReason={responseLoading ? 'Query loading...' : undefined}
                     onChange={(value) => updateHeatmapSettings({ xAxisColumn: value ?? undefined })}
                 />
-                <LemonLabel className="mt-2 mb-1">X-axis label</LemonLabel>
-                <LemonInput
+                <Label className="mt-2 mb-1">X-axis label</Label>
+                <Input
                     value={heatmapSettings.xAxisLabel ?? ''}
                     placeholder={heatmapSettings.xAxisColumn ?? 'X-axis label'}
                     onChange={(value) => updateHeatmapSettings({ xAxisLabel: value })}
@@ -99,16 +99,16 @@ export const HeatmapSeriesTab = (): JSX.Element => {
             </div>
 
             <div>
-                <LemonLabel className="mb-1">Y-axis</LemonLabel>
-                <LemonSelect
+                <Label className="mb-1">Y-axis</Label>
+                <Select
                     className="w-full"
                     value={heatmapSettings.yAxisColumn ?? 'None'}
                     options={columnOptions}
                     disabledReason={responseLoading ? 'Query loading...' : undefined}
                     onChange={(value) => updateHeatmapSettings({ yAxisColumn: value ?? undefined })}
                 />
-                <LemonLabel className="mt-2 mb-1">Y-axis label</LemonLabel>
-                <LemonInput
+                <Label className="mt-2 mb-1">Y-axis label</Label>
+                <Input
                     value={heatmapSettings.yAxisLabel ?? ''}
                     placeholder={heatmapSettings.yAxisColumn ?? 'Y-axis label'}
                     onChange={(value) => updateHeatmapSettings({ yAxisLabel: value })}
@@ -116,8 +116,8 @@ export const HeatmapSeriesTab = (): JSX.Element => {
             </div>
 
             <div>
-                <LemonLabel className="mb-1">Value</LemonLabel>
-                <LemonSelect
+                <Label className="mb-1">Value</Label>
+                <Select
                     className="w-full"
                     value={heatmapSettings.valueColumn ?? 'None'}
                     options={numericalOptions}
@@ -127,8 +127,8 @@ export const HeatmapSeriesTab = (): JSX.Element => {
             </div>
 
             <div>
-                <LemonLabel className="mb-1">Gradient preset</LemonLabel>
-                <LemonSelect
+                <Label className="mb-1">Gradient preset</Label>
+                <Select
                     className="w-full"
                     value={heatmapSettings.gradientPreset ?? 'custom'}
                     options={[
@@ -156,7 +156,7 @@ export const HeatmapSeriesTab = (): JSX.Element => {
                         })
                     }}
                 />
-                <LemonCheckbox
+                <Checkbox
                     className="mt-2"
                     label="Scale gradient to data range"
                     checked={heatmapSettings.gradientScaleMode === 'relative'}
@@ -164,11 +164,11 @@ export const HeatmapSeriesTab = (): JSX.Element => {
                         updateHeatmapSettings({ gradientScaleMode: checked ? 'relative' : 'absolute' })
                     }
                 />
-                <LemonLabel className="mt-4 mb-2">Gradient</LemonLabel>
+                <Label className="mt-4 mb-2">Gradient</Label>
                 <div className="flex flex-col gap-2">
                     {gradientStops.map((stop, index) => (
                         <div key={`${stop.color}-${index}`} className="flex items-center gap-2">
-                            <LemonColorPicker
+                            <ColorPicker
                                 selectedColor={stop.color}
                                 onSelectColor={(color) => {
                                     const nextStops = [...gradientStops]
@@ -181,7 +181,7 @@ export const HeatmapSeriesTab = (): JSX.Element => {
                                 preventPopoverClose
                                 customColorValue={stop.color}
                             />
-                            <LemonInput
+                            <Input
                                 className="flex-1"
                                 type="number"
                                 value={stop.value ?? 0}
@@ -194,7 +194,7 @@ export const HeatmapSeriesTab = (): JSX.Element => {
                                     updateGradientStops(nextStops)
                                 }}
                             />
-                            <LemonButton
+                            <Button
                                 icon={<IconTrash />}
                                 status="danger"
                                 title="Remove gradient stop"
@@ -207,7 +207,7 @@ export const HeatmapSeriesTab = (): JSX.Element => {
                         </div>
                     ))}
                 </div>
-                <LemonButton
+                <Button
                     className="mt-2"
                     type="tertiary"
                     onClick={() => {
@@ -221,7 +221,7 @@ export const HeatmapSeriesTab = (): JSX.Element => {
                     fullWidth
                 >
                     Add gradient stop
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

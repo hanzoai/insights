@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { LemonModal, LemonTable, Link } from '@hanzo/lemon-ui'
+import { Modal, Table, Link } from '@hanzo/elements'
 
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import { Dayjs, dayjs, dayjsLocalToTimezone } from 'lib/dayjs'
-import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { TableColumns } from 'lib/elements/Table'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { getDefaultEventsSceneQuery } from 'scenes/activity/explore/defaults'
 import { sceneLogic } from 'scenes/sceneLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -71,7 +71,7 @@ export function SampledSessionsModal(): JSX.Element {
 
     const { sessionData, stepName, variant } = modalData
 
-    const columns: LemonTableColumns<SessionData> = [
+    const columns: TableColumns<SessionData> = [
         {
             title: 'Person',
             key: 'personId',
@@ -126,13 +126,13 @@ export function SampledSessionsModal(): JSX.Element {
     ]
 
     return (
-        <LemonModal isOpen={isOpen} onClose={closeModal} title={`Sampled persons - ${variant}`} width={720}>
+        <Modal isOpen={isOpen} onClose={closeModal} title={`Sampled persons - ${variant}`} width={720}>
             <div className="space-y-4">
                 <div className="text">
                     Persons in <strong>{variant}</strong> with <strong>{stepName}</strong> as their last funnel step.
                 </div>
                 <div className="mt-2">
-                    <LemonTable
+                    <Table
                         columns={columns}
                         dataSource={sessionData}
                         size="small"
@@ -146,6 +146,6 @@ export function SampledSessionsModal(): JSX.Element {
                     only available for sessions that have been captured and not deleted.
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

@@ -121,7 +121,7 @@ const config: Config = {
         '^.+\\.(css|less|scss|svg|png|lottie)$': '<rootDir>/src/test/mocks/styleMock.js',
         '^.+\\.sql\\?raw$': '<rootDir>/src/test/mocks/rawFileMock.js',
         '^~/(.*)$': '<rootDir>/src/$1',
-        '^@hanzo/lemon-ui(|/.*)$': '<rootDir>/@hanzo/lemon-ui/src/$1',
+        '^@hanzo/elements(|/.*)$': '<rootDir>/@hanzo/elements/src/$1',
         '^lib/(.*)$': '<rootDir>/src/lib/$1',
         'monaco-editor': '<rootDir>/node_modules/monaco-editor/esm/vs/editor/editor.api.d.ts',
         '^scenes/(.*)$': '<rootDir>/src/scenes/$1',

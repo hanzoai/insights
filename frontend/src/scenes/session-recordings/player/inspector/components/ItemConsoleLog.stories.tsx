@@ -2,7 +2,7 @@ import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import { BindLogic } from 'kea'
 
 import { dayjs } from 'lib/dayjs'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 import {
     ItemConsoleLog,
     ItemConsoleLogDetail,
@@ -32,7 +32,7 @@ const BasicTemplate: StoryFn<typeof ItemConsoleLog> = (props: Partial<ItemConsol
             <div className="flex flex-col gap-2 min-w-96">
                 <h3>Collapsed</h3>
                 <ItemConsoleLog {...propsToUse} />
-                <LemonDivider />
+                <Divider />
                 <h3>Expanded</h3>
                 <ItemConsoleLogDetail {...propsToUse} />
             </div>

@@ -1,10 +1,10 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { LemonDialog } from '@hanzo/lemon-ui'
+import { Dialog } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import {
     DataWarehouseSavedQuery,
@@ -222,7 +222,7 @@ export const viewsTabLogic = kea<viewsTabLogicType>([
     }),
     listeners(({ actions, values }) => ({
         deleteView: ({ viewId }) => {
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Delete view?',
                 description: 'Are you sure you want to delete this view? This action cannot be undone.',
                 primaryButton: {
@@ -230,7 +230,7 @@ export const viewsTabLogic = kea<viewsTabLogicType>([
                     status: 'danger',
                     onClick: () => {
                         actions.deleteDataWarehouseSavedQuery(viewId)
-                        lemonToast.success('View deleted successfully')
+                        toast.success('View deleted successfully')
                     },
                 },
                 secondaryButton: {

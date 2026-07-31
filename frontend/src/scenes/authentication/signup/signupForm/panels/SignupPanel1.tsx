@@ -2,12 +2,12 @@ import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect, useRef } from 'react'
 
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
 import PasswordStrength from 'lib/components/PasswordStrength'
 import { SocialLoginButtons } from 'lib/components/SocialLoginButton/SocialLoginButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Link } from 'lib/lemon-ui/Link'
+import { Field } from 'lib/elements/Field'
+import { Link } from 'lib/elements/Link'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import RegionSelect from 'scenes/authentication/RegionSelect'
 
@@ -33,12 +33,12 @@ export function SignupPanel1(): JSX.Element | null {
                 </>
             )}
             <Form logic={signupLogic} formKey="signupPanel1" className="deprecated-space-y-4" enableFormOnSubmit>
-                <LemonField
+                <Field
                     name="email"
                     label="Email"
                     help={emailCaseNotice && <span className="text-warning">{emailCaseNotice}</span>}
                 >
-                    <LemonInput
+                    <Input
                         className="ph-ignore-input"
                         autoFocus
                         data-attr="signup-email"
@@ -47,9 +47,9 @@ export function SignupPanel1(): JSX.Element | null {
                         inputRef={emailInputRef}
                         disabled={isSignupPanel1Submitting}
                     />
-                </LemonField>
+                </Field>
                 {!preflight?.demo && (
-                    <LemonField
+                    <Field
                         name="password"
                         label={
                             <div className="flex flex-1 items-center justify-between">
@@ -58,7 +58,7 @@ export function SignupPanel1(): JSX.Element | null {
                             </div>
                         }
                     >
-                        <LemonInput
+                        <Input
                             type="password"
                             autoComplete="new-password"
                             className="ph-ignore-input"
@@ -66,9 +66,9 @@ export function SignupPanel1(): JSX.Element | null {
                             placeholder="••••••••••"
                             disabled={isSignupPanel1Submitting}
                         />
-                    </LemonField>
+                    </Field>
                 )}
-                <LemonButton
+                <Button
                     fullWidth
                     type="primary"
                     status="alt"
@@ -80,7 +80,7 @@ export function SignupPanel1(): JSX.Element | null {
                     size="large"
                 >
                     Continue
-                </LemonButton>
+                </Button>
             </Form>
             {!preflight?.demo && (preflight?.cloud || preflight?.initiated) && (
                 // If we're in the demo environment, login is unified with signup and it's passwordless

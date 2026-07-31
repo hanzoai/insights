@@ -2,9 +2,9 @@ import { useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconArchive } from '@hanzo/icons'
-import { LemonTag, Link } from '@hanzo/lemon-ui'
+import { Tag, Link } from '@hanzo/elements'
 
-import { IconLink } from 'lib/lemon-ui/icons'
+import { IconLink } from 'lib/elements/icons'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
 import { getSurveyResponseValue } from 'scenes/surveys/utils'
 import { urls } from 'scenes/urls'
@@ -53,9 +53,9 @@ export function SurveyResponseDisplay({ eventProperties, eventUuid }: SurveyResp
 
             {isArchived && (
                 <div>
-                    <LemonTag type="muted" icon={<IconArchive />}>
+                    <Tag type="muted" icon={<IconArchive />}>
                         Response archived
-                    </LemonTag>
+                    </Tag>
                 </div>
             )}
 

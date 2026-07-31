@@ -3,19 +3,19 @@ import { Form } from 'kea-forms'
 
 import { IconCheckCircle, IconCopy, IconQuestion, IconRefresh, IconWarning } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInput,
-    LemonModal,
-    LemonSelect,
-    LemonSkeleton,
+    Button,
+    Input,
+    Modal,
+    Select,
+    Skeleton,
     Spinner,
     Tooltip,
-    lemonToast,
-} from '@hanzo/lemon-ui'
+    toast,
+} from '@hanzo/elements'
 
 import { DomainConnectBanner } from 'lib/components/DomainConnect'
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { DnsRecord, EmailSetupModalLogicProps, emailSetupModalLogic } from './emailSetupModalLogic'
 
@@ -29,31 +29,31 @@ export const EmailSetupModal = (props: EmailSetupModalLogicProps): JSX.Element =
 
     return (
         <>
-            <LemonModal title="Configure email sender" width="auto" onClose={props.onClose}>
+            <Modal title="Configure email sender" width="auto" onClose={props.onClose}>
                 <Form logic={emailSetupModalLogic} props={props} formKey="emailSender">
                     <div className="space-y-4">
                         <FlaggedFeature flag="messaging-ses">
                             {/* NOTE: We probably dont want to actually give the options - this is just for our own testing */}
-                            <LemonField name="provider" label="Provider">
-                                <LemonSelect
+                            <Field name="provider" label="Provider">
+                                <Select
                                     options={[
                                         { value: 'ses', label: 'AWS SES' },
                                         { value: 'maildev', label: 'Maildev' },
                                     ]}
                                 />
-                            </LemonField>
+                            </Field>
                         </FlaggedFeature>
-                        <LemonField name="name" label="Name">
-                            <LemonInput
+                        <Field name="name" label="Name">
+                            <Input
                                 type="text"
                                 placeholder="John Doe"
                                 disabledReason={
                                     verificationLoading || isEmailSenderSubmitting ? 'Creating sender...' : undefined
                                 }
                             />
-                        </LemonField>
-                        <LemonField name="email" label="Email address">
-                            <LemonInput
+                        </Field>
+                        <Field name="email" label="Email address">
+                            <Input
                                 type="text"
                                 placeholder="example@example.com"
                                 disabledReason={
@@ -64,13 +64,13 @@ export const EmailSetupModal = (props: EmailSetupModalLogicProps): JSX.Element =
                                           : undefined
                                 }
                             />
-                        </LemonField>
-                        <LemonField
+                        </Field>
+                        <Field
                             name="mail_from_subdomain"
                             label="MAIL FROM subdomain"
                             help="The subdomain used for your emails' Return-Path header. Setting a MAIL FROM domain helps improve email deliverability."
                         >
-                            <LemonInput
+                            <Input
                                 className="w-fit"
                                 type="text"
                                 placeholder="feedback"
@@ -79,17 +79,17 @@ export const EmailSetupModal = (props: EmailSetupModalLogicProps): JSX.Element =
                                     verificationLoading || isEmailSenderSubmitting ? 'Creating sender...' : undefined
                                 }
                             />
-                        </LemonField>
+                        </Field>
                         {!savedIntegration && (
                             <div className="flex justify-end">
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     htmlType="submit"
                                     loading={verificationLoading || isEmailSenderSubmitting}
                                     onClick={submitEmailSender}
                                 >
                                     Continue
-                                </LemonButton>
+                                </Button>
                             </div>
                         )}
                     </div>
@@ -138,12 +138,12 @@ export const EmailSetupModal = (props: EmailSetupModalLogicProps): JSX.Element =
                                                         <div className="flex gap-0 items-center bg-bg-light border border-border rounded px-1.5 py-0.5">
                                                             <span className="font-mono text-sm">{subdomain}</span>
                                                             {subdomain !== '@' && (
-                                                                <LemonButton
+                                                                <Button
                                                                     size="small"
                                                                     icon={<IconCopy />}
                                                                     onClick={() => {
                                                                         void navigator.clipboard.writeText(subdomain)
-                                                                        lemonToast.success('Target copied to clipboard')
+                                                                        toast.success('Target copied to clipboard')
                                                                     }}
                                                                     tooltip="Copy target"
                                                                     className="ml-0.5 -mr-0.5"
@@ -167,12 +167,12 @@ export const EmailSetupModal = (props: EmailSetupModalLogicProps): JSX.Element =
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <LemonButton
+                                                        <Button
                                                             size="small"
                                                             icon={<IconCopy />}
                                                             onClick={() => {
                                                                 void navigator.clipboard.writeText(record.recordValue)
-                                                                lemonToast.success('Value copied to clipboard')
+                                                                toast.success('Value copied to clipboard')
                                                             }}
                                                             tooltip="Copy value"
                                                         />
@@ -204,14 +204,14 @@ export const EmailSetupModal = (props: EmailSetupModalLogicProps): JSX.Element =
                             </table>
                             {verificationLoading && dnsRecords.length === 0 && (
                                 <div className="flex flex-col gap-2 py-2">
-                                    <LemonSkeleton className="h-12" />
-                                    <LemonSkeleton className="h-12" />
-                                    <LemonSkeleton className="h-12" />
+                                    <Skeleton className="h-12" />
+                                    <Skeleton className="h-12" />
+                                    <Skeleton className="h-12" />
                                 </div>
                             )}
                         </div>
                         <div className="flex gap-2 justify-end">
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 onClick={verifyDomain}
                                 disabledReason={verificationLoading ? 'Verifying...' : undefined}
@@ -219,8 +219,8 @@ export const EmailSetupModal = (props: EmailSetupModalLogicProps): JSX.Element =
                                 icon={<IconRefresh />}
                             >
                                 Re-check DNS records
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 type="primary"
                                 onClick={async () => {
                                     await submitEmailSender()
@@ -229,11 +229,11 @@ export const EmailSetupModal = (props: EmailSetupModalLogicProps): JSX.Element =
                                 tooltip="You will not be able to send emails until you verify the DNS records"
                             >
                                 {isDomainVerified ? 'Save' : 'Save & finish later'}
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 )}
-            </LemonModal>
+            </Modal>
         </>
     )
 }

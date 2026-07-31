@@ -1,13 +1,13 @@
 import './ToolbarLaunch.scss'
 
 import { IconFlag, IconFlask, IconPieChart, IconSearch } from '@hanzo/icons'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { Link } from 'lib/lemon-ui/Link'
-import { IconGroupedEvents, IconHeatmap } from 'lib/lemon-ui/icons'
+import { Link } from 'lib/elements/Link'
+import { IconGroupedEvents, IconHeatmap } from 'lib/elements/icons'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -73,10 +73,10 @@ export function ToolbarLaunch(): JSX.Element {
 
             <SceneSection title="Authorized URLs for Site Inspector" description="Click on the URL to launch the Site Inspector.">
                 <AuthorizedUrlList type={AuthorizedUrlListType.TOOLBAR_URLS} addText="Add authorized URL" />
-                <LemonBanner type="info">
+                <Banner type="info">
                     Make sure you're using the <Link to={`${urls.settings('project')}#snippet`}>HTML snippet</Link> or
                     the latest <code>insights-js</code> version.
-                </LemonBanner>
+                </Banner>
             </SceneSection>
 
             <SceneSection>

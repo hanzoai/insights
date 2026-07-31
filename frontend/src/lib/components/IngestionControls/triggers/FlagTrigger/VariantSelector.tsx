@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonLabel, LemonSegmentedButton, LemonSegmentedButtonOption, Tooltip } from '@hanzo/lemon-ui'
+import { Label, SegmentedButton, SegmentedButtonOption, Tooltip } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 
@@ -15,7 +15,7 @@ export const ANY_VARIANT = 'any'
 export function variantOptions(
     multivariate: MultivariateFlagOptions | undefined,
     disabledReason?: string | null
-): LemonSegmentedButtonOption<string>[] {
+): SegmentedButtonOption<string>[] {
     if (!multivariate) {
         return []
     }
@@ -46,15 +46,15 @@ export const FlagTriggerVariantSelector = ({ tooltip }: { tooltip: JSX.Element }
 
     return (
         <>
-            <LemonLabel className="text-base">
+            <Label className="text-base">
                 Link to a specific flag variant{' '}
                 <Tooltip delayMs={200} title={tooltip}>
                     <IconInfo className="text-muted-alt cursor-help" />
                 </Tooltip>
-            </LemonLabel>
+            </Label>
             <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
                 {({ disabledReason }) => (
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         className="min-w-1/3"
                         value={flag?.variant ?? ANY_VARIANT}
                         options={variantOptions(

@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 import { useMemo } from 'react'
 
 import { IconBadge, IconEye, IconHide, IconInfo } from '@hanzo/icons'
-import { LemonTag, LemonTagType, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, TagType, Spinner, Tooltip } from '@hanzo/elements'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { ImageCarousel } from 'lib/components/ImageCarousel/ImageCarousel'
@@ -14,9 +14,9 @@ import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Dialog } from 'lib/elements/Dialog'
+import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { DefinitionLogicProps, definitionLogic } from 'scenes/data-management/definition/definitionLogic'
 import { EventDefinitionInsights } from 'scenes/data-management/events/EventDefinitionInsights'
 import { EventDefinitionProperties } from 'scenes/data-management/events/EventDefinitionProperties'
@@ -49,7 +49,7 @@ export const scene: SceneExport<DefinitionLogicProps> = {
 }
 
 type StatusProps = {
-    tagType: LemonTagType
+    tagType: TagType
     label: string
     icon: React.ReactNode
     tooltip: string
@@ -165,13 +165,13 @@ export function DefinitionView(props: DefinitionLogicProps): JSX.Element {
                                 data-attr="event-definition-view-recordings"
                             />
                         )}
-                        <LemonButton
+                        <Button
                             data-attr="delete-definition"
                             type="secondary"
                             status="danger"
                             size="small"
                             onClick={() =>
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: `Delete this ${singular} definition?`,
                                     description: (
                                         <>
@@ -207,8 +207,8 @@ export function DefinitionView(props: DefinitionLogicProps): JSX.Element {
                             tooltip="Delete this definition. Associated data will remain."
                         >
                             Delete
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             data-attr="edit-definition"
                             type="secondary"
                             size="small"
@@ -221,7 +221,7 @@ export function DefinitionView(props: DefinitionLogicProps): JSX.Element {
                             }}
                         >
                             Edit
-                        </LemonButton>
+                        </Button>
                     </>
                 }
                 forceBackTo={
@@ -307,10 +307,10 @@ export function DefinitionView(props: DefinitionLogicProps): JSX.Element {
                         <h5>Verification status</h5>
                         <div>
                             <Tooltip title={statusProps[definitionStatus].tooltip}>
-                                <LemonTag type={statusProps[definitionStatus].tagType}>
+                                <Tag type={statusProps[definitionStatus].tagType}>
                                     {statusProps[definitionStatus].icon}
                                     {statusProps[definitionStatus].label}
-                                </LemonTag>
+                                </Tag>
                             </Tooltip>
                         </div>
                     </div>

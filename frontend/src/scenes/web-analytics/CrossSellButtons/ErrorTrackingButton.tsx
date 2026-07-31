@@ -1,5 +1,5 @@
 import { IconWarning } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { urls } from 'scenes/urls'
@@ -23,7 +23,7 @@ export const ErrorTrackingButton = ({ breakdownBy, value }: ErrorTrackingButtonP
     }
 
     return (
-        <LemonButton
+        <Button
             to={urls.errorTracking({
                 filterGroup: {
                     type: FilterLogicalOperator.And,

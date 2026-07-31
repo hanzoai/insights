@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { actionToUrl, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { systemStatusLogic } from 'scenes/instance/SystemStatus/systemStatusLogic'
 import { userLogic } from 'scenes/userLogic'
@@ -213,10 +213,10 @@ export const asyncMigrationsLogic = kea<asyncMigrationsLogicType>([
                 parameters: migration.parameters,
             })
             if (res.success) {
-                lemonToast.success(message)
+                toast.success(message)
                 actions.loadAsyncMigrations()
             } else {
-                lemonToast.error(res.error)
+                toast.error(res.error)
             }
         },
         updateSetting: async ({ settingKey, newValue }) => {
@@ -225,12 +225,12 @@ export const asyncMigrationsLogic = kea<asyncMigrationsLogicType>([
                 await api.update(`/api/instance_settings/${settingKey}`, {
                     value: newValue,
                 })
-                lemonToast.success(`Instance setting ${settingKey} updated`)
+                toast.success(`Instance setting ${settingKey} updated`)
                 actions.loadAsyncMigrationSettings()
                 actions.loadAsyncMigrations()
                 systemStatusLogic.actions.loadSystemStatus()
             } catch {
-                lemonToast.error('Failed to trigger migration')
+                toast.error('Failed to trigger migration')
             }
         },
         loadAsyncMigrationErrors: async ({ migrationId }) => {

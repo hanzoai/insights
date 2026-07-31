@@ -4,8 +4,8 @@ import { createPortal } from 'react-dom'
 
 import { IconArrowRight } from '@hanzo/icons'
 
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { IconAction } from 'lib/lemon-ui/icons'
+import { Switch } from 'lib/elements/Switch'
+import { IconAction } from 'lib/elements/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { DropdownMenuSeparator } from 'lib/ui/DropdownMenu/DropdownMenu'
 import { Label } from 'lib/ui/Label/Label'
@@ -315,7 +315,7 @@ export function AppShortcutMenu(): JSX.Element | null {
                                                                 e.stopPropagation()
                                                             }}
                                                         >
-                                                            <LemonSwitch
+                                                            <Switch
                                                                 size="xxsmall"
                                                                 checked={!isDisabled}
                                                                 onChange={() => toggleShortcutDisabled(shortcut.name)}

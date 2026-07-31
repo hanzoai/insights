@@ -16,12 +16,12 @@ import {
     IconSparkles,
     IconSupport,
 } from '@hanzo/icons'
-import { ProfilePicture } from '@hanzo/lemon-ui'
+import { ProfilePicture } from '@hanzo/elements'
 
 import { AI_AVAILABLE } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { Link } from 'lib/lemon-ui/Link/Link'
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { Link } from 'lib/elements/Link/Link'
+import { IconBlank } from 'lib/elements/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { DropdownMenuSeparator } from 'lib/ui/DropdownMenu/DropdownMenu'
 import { Label } from 'lib/ui/Label/Label'

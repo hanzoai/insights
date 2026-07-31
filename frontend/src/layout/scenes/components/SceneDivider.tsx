@@ -1,4 +1,4 @@
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { cn } from 'lib/utils/css-classes'
 
@@ -7,5 +7,5 @@ export interface SceneDividerProps {
 }
 
 export function SceneDivider({ className }: SceneDividerProps): JSX.Element {
-    return <LemonDivider className={cn('scene-divider -mx-4 w-[calc(100%+var(--spacing)*8)]', className)} />
+    return <Divider className={cn('scene-divider -mx-4 w-[calc(100%+var(--spacing)*8)]', className)} />
 }

@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 
 import { IconRefresh } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import { ExperimentIdType } from '~/types'
 
@@ -102,7 +102,7 @@ export function EmptyState({
 
                 {displaySuggestions && (
                     <div className="flex flex-col items-end gap-2">
-                        <LemonButton
+                        <Button
                             onClick={loadSuggestions}
                             disabled={suggestionsLoading}
                             type="secondary"
@@ -110,7 +110,7 @@ export function EmptyState({
                             data-attr="authorized-url-list-fetch-suggestions"
                         >
                             {suggestionsLoading ? 'Fetching...' : 'Fetch suggestions'}
-                        </LemonButton>
+                        </Button>
                         <span className="text-small text-secondary">Sent an event? Refetch suggestions.</span>
                     </div>
                 )}

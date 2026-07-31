@@ -5,10 +5,10 @@ import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 import { useEffect, useState } from 'react'
 
 import { IconArrowLeft, IconChevronLeft, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonDialog } from '@hanzo/lemon-ui'
+import { Button, Dialog } from '@hanzo/elements'
 
 import { EditableField } from 'lib/components/EditableField/EditableField'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -80,8 +80,8 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
         return (
             <div className="min-h-screen bg-bg-light">
                 <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
-                    <LemonSkeleton className="h-10 w-full" />
-                    <LemonSkeleton className="h-64 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-64 w-full" />
                 </div>
             </div>
         )
@@ -93,9 +93,9 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
             <div className="min-h-screen bg-bg-light">
                 <div className="max-w-3xl mx-auto p-8">
                     <div className="mb-6">
-                        <LemonButton type="tertiary" size="small" icon={<IconArrowLeft />} to={urls.surveys()}>
+                        <Button type="tertiary" size="small" icon={<IconArrowLeft />} to={urls.surveys()}>
                             Surveys
-                        </LemonButton>
+                        </Button>
                     </div>
                     <TemplateStep />
                 </div>
@@ -140,7 +140,7 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
         const hasConditions = doesSurveyHaveDisplayConditions(survey)
         const conditionsSummary = getConditionsSummary()
 
-        LemonDialog.open({
+        Dialog.open({
             title: 'Launch this survey?',
             content: (
                 <div className="space-y-2">
@@ -174,7 +174,7 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
 
     const handleLaunchClick = (): void => {
         if (!currentTeam?.surveys_opt_in) {
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Enable surveys?',
                 content: (
                     <p className="text-secondary">
@@ -220,13 +220,13 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
 
     // Navigation back button
     const backButton = isEditing ? (
-        <LemonButton type="tertiary" size="small" icon={<IconArrowLeft />} to={urls.survey(id)}>
+        <Button type="tertiary" size="small" icon={<IconArrowLeft />} to={urls.survey(id)}>
             Survey
-        </LemonButton>
+        </Button>
     ) : (
-        <LemonButton type="tertiary" size="small" icon={<IconArrowLeft />} onClick={() => setStep('template')}>
+        <Button type="tertiary" size="small" icon={<IconArrowLeft />} onClick={() => setStep('template')}>
             Templates
-        </LemonButton>
+        </Button>
     )
 
     // Shared header for all main steps
@@ -268,16 +268,16 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
 
                     <div className="flex items-center justify-end pt-4 border-t border-border">
                         <div className="flex items-center gap-2">
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 loading={surveySaving}
                                 disabled={surveyLaunching}
                                 onClick={handleSaveClick}
                             >
                                 {isEditing ? 'Save changes' : 'Save as draft'}
-                            </LemonButton>
+                            </Button>
                             {!isEditing && (
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     loading={surveyLaunching}
                                     disabled={surveySaving}
@@ -285,7 +285,7 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
                                     onClick={handleLaunchClick}
                                 >
                                     Launch survey
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -313,21 +313,21 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
                         <div className="flex items-center justify-end pt-4 border-t border-border">
                             <div className="flex items-center gap-2">
                                 {currentStep === 'when' && (
-                                    <LemonButton type="secondary" onClick={() => setStep('appearance')}>
+                                    <Button type="secondary" onClick={() => setStep('appearance')}>
                                         Customize appearance
-                                    </LemonButton>
+                                    </Button>
                                 )}
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     loading={surveySaving}
                                     disabled={surveyLaunching}
                                     onClick={handleSaveClick}
                                 >
                                     {isEditing ? 'Save changes' : 'Save as draft'}
-                                </LemonButton>
+                                </Button>
                                 {currentStep === 'when' ? (
                                     !isEditing && (
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             loading={surveyLaunching}
                                             disabled={surveySaving}
@@ -337,10 +337,10 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
                                             onClick={handleLaunchClick}
                                         >
                                             Launch survey
-                                        </LemonButton>
+                                        </Button>
                                     )
                                 ) : (
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         onClick={nextStep}
                                         disabledReason={
@@ -348,7 +348,7 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
                                         }
                                     >
                                         Continue
-                                    </LemonButton>
+                                    </Button>
                                 )}
                             </div>
                         </div>
@@ -392,7 +392,7 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
                             {(previewSurvey.questions.length > 1 ||
                                 previewSurvey.appearance?.displayThankYouMessage) && (
                                 <div className="flex items-center justify-center gap-2 mt-2">
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         icon={<IconChevronLeft />}
@@ -402,7 +402,7 @@ function SurveyWizard({ id }: SurveyWizardLogicProps): JSX.Element {
                                     <span className="text-muted text-xs min-w-[60px] text-center">
                                         {`${previewPageIndex + 1} / ${maxPreviewIndex + 1}`}
                                     </span>
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         icon={<IconChevronRight />}

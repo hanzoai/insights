@@ -3,23 +3,23 @@ import { useEffect, useState } from 'react'
 
 import { IconInfo, IconX } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInput,
-    LemonInputSelect,
-    LemonSelect,
-    LemonSwitch,
-    LemonTable,
+    Button,
+    Input,
+    InputSelect,
+    Select,
+    Switch,
+    Table,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonTableColumn } from 'lib/lemon-ui/LemonTable'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { More } from 'lib/elements/Button/More'
+import { Dialog } from 'lib/elements/Dialog'
+import { Modal } from 'lib/elements/Modal'
+import { TableColumn } from 'lib/elements/Table'
+import { toast } from 'lib/elements/Toast/Toast'
 import { APPROVAL_ACTIONS, ApprovalActionKey, getApprovalActionLabel } from 'scenes/approvals/utils'
 import { membersLogic } from 'scenes/organization/membersLogic'
 import { rolesLogic } from 'scenes/settings/organization/Permissions/Roles/rolesLogic'
@@ -70,7 +70,7 @@ export function ApprovalPolicies(): JSX.Element {
         loadPolicies()
     }, [loadPolicies])
 
-    const columns: LemonTableColumn<ApprovalPolicy, keyof ApprovalPolicy | undefined>[] = [
+    const columns: TableColumn<ApprovalPolicy, keyof ApprovalPolicy | undefined>[] = [
         {
             title: 'Action',
             dataIndex: 'action_key',
@@ -111,7 +111,7 @@ export function ApprovalPolicies(): JSX.Element {
                 <More
                     overlay={
                         <>
-                            <LemonButton
+                            <Button
                                 fullWidth
                                 onClick={() => {
                                     setEditingPolicy(policy)
@@ -119,12 +119,12 @@ export function ApprovalPolicies(): JSX.Element {
                                 disabledReason={restrictionReason}
                             >
                                 Edit
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 fullWidth
                                 status="danger"
                                 onClick={() => {
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: 'Delete approval policy?',
                                         content:
                                             'This will immediately remove the approval requirement for this action.',
@@ -145,7 +145,7 @@ export function ApprovalPolicies(): JSX.Element {
                                 disabledReason={restrictionReason}
                             >
                                 Delete
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                 />
@@ -157,12 +157,12 @@ export function ApprovalPolicies(): JSX.Element {
         <PayGateMini feature={AvailableFeature.APPROVALS}>
             <div className="space-y-4">
                 <div className="flex justify-end items-center">
-                    <LemonButton type="primary" onClick={() => setIsCreating(true)} disabledReason={restrictionReason}>
+                    <Button type="primary" onClick={() => setIsCreating(true)} disabledReason={restrictionReason}>
                         Add policy
-                    </LemonButton>
+                    </Button>
                 </div>
 
-                <LemonTable
+                <Table
                     dataSource={policies}
                     columns={columns}
                     loading={policiesLoading}
@@ -235,7 +235,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
 
     const handleSave = (): void => {
         if (approverUserIds.length === 0 && approverRoleIds.length === 0) {
-            lemonToast.error('Please select at least one user or role')
+            toast.error('Please select at least one user or role')
             return
         }
 
@@ -244,7 +244,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
         if (actionKey === ApprovalActionKey.FEATURE_FLAG_UPDATE && rules.length > 0) {
             const rule = rules[0]
             if (rule.type !== 'any_change' && rule.value === undefined) {
-                lemonToast.error('Please specify a threshold value')
+                toast.error('Please specify a threshold value')
                 return
             }
             conditions = {
@@ -298,26 +298,26 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
         })) || []
 
     return (
-        <LemonModal
+        <Modal
             isOpen
             onClose={onClose}
             width={600}
             title={policy ? 'Edit approval policy' : 'Create approval policy'}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={onClose}>
+                    <Button type="secondary" onClick={onClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={handleSave}>
+                    </Button>
+                    <Button type="primary" onClick={handleSave}>
                         Save
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium mb-1">Action type</label>
-                    <LemonSelect
+                    <Select
                         fullWidth
                         value={actionKey}
                         onChange={(value) => {
@@ -360,7 +360,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
                         )}
 
                         {availableFields.length > 0 && (
-                            <LemonSelect
+                            <Select
                                 placeholder="+ Add field"
                                 value={null}
                                 onChange={(value) => value && addRule(value)}
@@ -380,7 +380,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
 
                 <div>
                     <label className="block text-sm font-medium mb-1">Approver users</label>
-                    <LemonInputSelect
+                    <InputSelect
                         mode="multiple"
                         value={approverUserIds.map(String)}
                         onChange={(values) => setApproverUserIds(values.map(Number))}
@@ -392,7 +392,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
 
                 <div>
                     <label className="block text-sm font-medium mb-1">Approver roles</label>
-                    <LemonInputSelect
+                    <InputSelect
                         mode="multiple"
                         value={approverRoleIds}
                         onChange={setApproverRoleIds}
@@ -406,7 +406,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
 
                 <div>
                     <label className="block text-sm font-medium mb-1">Approvals required</label>
-                    <LemonSelect
+                    <Select
                         fullWidth
                         value={quorum}
                         onChange={setQuorum}
@@ -419,7 +419,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
                 </div>
 
                 <div>
-                    <LemonSwitch
+                    <Switch
                         checked={allowSelfApprove}
                         onChange={setAllowSelfApprove}
                         label={
@@ -440,7 +440,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
                     </p>
 
                     <div className="space-y-3">
-                        <LemonSwitch
+                        <Switch
                             checked={bypassAdminsOwners}
                             onChange={setBypassAdminsOwners}
                             label={
@@ -455,7 +455,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
 
                         <div>
                             <label className="block text-sm font-medium mb-1">Bypass roles</label>
-                            <LemonInputSelect
+                            <InputSelect
                                 mode="multiple"
                                 value={bypassRoleIds}
                                 onChange={setBypassRoleIds}
@@ -469,7 +469,7 @@ function ApprovalPolicyModal({ policy, onClose }: { policy?: ApprovalPolicy; onC
                     </div>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -489,7 +489,7 @@ function RuleRow({
         <div className="flex items-center gap-2 p-2 bg-bg-light border rounded">
             <span className="font-medium text-sm whitespace-nowrap">{fieldConfig?.label || rule.field}</span>
 
-            <LemonSelect
+            <Select
                 size="small"
                 value={rule.type}
                 onChange={(value) => onChange({ type: value })}
@@ -498,13 +498,13 @@ function RuleRow({
 
             {rule.type !== 'any_change' && isNumeric && (
                 <>
-                    <LemonSelect
+                    <Select
                         size="small"
                         value={rule.operator || '>'}
                         onChange={(value) => onChange({ operator: value })}
                         options={OPERATORS}
                     />
-                    <LemonInput
+                    <Input
                         size="small"
                         type="number"
                         min={rule.type === 'change_amount' ? -100 : 0}
@@ -520,7 +520,7 @@ function RuleRow({
 
             <div className="flex-1" />
 
-            <LemonButton size="small" icon={<IconX />} onClick={onRemove} tooltip="Remove rule" />
+            <Button size="small" icon={<IconX />} onClick={onRemove} tooltip="Remove rule" />
         </div>
     )
 }

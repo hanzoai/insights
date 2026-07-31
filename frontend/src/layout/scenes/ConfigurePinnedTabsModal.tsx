@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonSelect, LemonSelectOptions, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Select, SelectOptions, Tag } from '@hanzo/elements'
 
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Modal } from 'lib/elements/Modal'
 
 import { iconForType } from '~/layout/panel-layout/ProjectTree/defaultTree'
 import { dashboardsModel } from '~/models/dashboardsModel'
@@ -42,7 +42,7 @@ export function ConfigurePinnedTabsModal({ isOpen, onClose }: ConfigurePinnedTab
         : "Project's default dashboard"
     const homepageSubtitle = isUsingProjectDefault ? projectDefaultSubtitle : isUsingNewTabHomepage ? 'Search' : null
 
-    const projectDefaultDashboardOptions: LemonSelectOptions<number | null> = [
+    const projectDefaultDashboardOptions: SelectOptions<number | null> = [
         { value: null, label: 'No default dashboard / show the "new tab" page' },
         ...nameSortedDashboards.map((dashboard) => ({
             value: dashboard.id,
@@ -100,14 +100,14 @@ export function ConfigurePinnedTabsModal({ isOpen, onClose }: ConfigurePinnedTab
                 </span>
                 <div className="flex items-center gap-2 truncate">
                     <div className="truncate font-medium text-primary">{tab.customTitle || tab.title}</div>
-                    {isHomepage && <LemonTag size="small">Homepage</LemonTag>}
+                    {isHomepage && <Tag size="small">Homepage</Tag>}
                 </div>
             </div>
             <div className="flex flex-wrap gap-2">
                 {actions.map(({ label, onClick }) => (
-                    <LemonButton key={label} size="small" type="secondary" onClick={onClick}>
+                    <Button key={label} size="small" type="secondary" onClick={onClick}>
                         {label}
-                    </LemonButton>
+                    </Button>
                 ))}
             </div>
         </div>
@@ -139,7 +139,7 @@ export function ConfigurePinnedTabsModal({ isOpen, onClose }: ConfigurePinnedTab
     )
 
     return (
-        <LemonModal isOpen={isOpen} onClose={onClose} title="Configure tabs & home" width="48rem">
+        <Modal isOpen={isOpen} onClose={onClose} title="Configure tabs & home" width="48rem">
             <div className="space-y-6">
                 {renderSection(
                     'Pinned tabs',
@@ -173,22 +173,22 @@ export function ConfigurePinnedTabsModal({ isOpen, onClose }: ConfigurePinnedTab
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="secondary"
                                 onClick={() => setHomepage(null)}
                                 disabled={isUsingProjectDefault}
                             >
                                 Use default dashboard
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 size="small"
                                 type="secondary"
                                 onClick={() => setHomepage(newTabHomepage)}
                                 disabled={isUsingNewTabHomepage}
                             >
                                 Use new tab page
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 </section>
@@ -199,7 +199,7 @@ export function ConfigurePinnedTabsModal({ isOpen, onClose }: ConfigurePinnedTab
                             This dashboard opens by default for everyone who has not set a custom homepage.
                         </p>
                     </div>
-                    <LemonSelect<number | null>
+                    <Select<number | null>
                         className="w-full"
                         fullWidth
                         options={projectDefaultDashboardOptions}
@@ -209,6 +209,6 @@ export function ConfigurePinnedTabsModal({ isOpen, onClose }: ConfigurePinnedTab
                     />
                 </section>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

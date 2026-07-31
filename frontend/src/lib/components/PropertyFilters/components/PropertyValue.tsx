@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { IconFeatures } from '@hanzo/icons'
-import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tooltip } from '@hanzo/elements'
 import {
     AssigneeIconDisplay,
     AssigneeLabelDisplay,
@@ -16,7 +16,7 @@ import { PropertyFilterBetween } from 'lib/components/PropertyFilters/components
 import { PropertyFilterDatePicker } from 'lib/components/PropertyFilters/components/PropertyFilterDatePicker'
 import { propertyFilterTypeToPropertyDefinitionType } from 'lib/components/PropertyFilters/utils'
 import { dayjs } from 'lib/dayjs'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 import { formatDate, isOperatorBetween, isOperatorDate, isOperatorFlag, isOperatorMulti, toString } from 'lib/utils'
 
 import {
@@ -200,9 +200,9 @@ export function PropertyValue({
         return editable ? (
             <AssigneeSelect assignee={assignee} onChange={(value) => setValue(JSON.stringify(value))}>
                 {(displayAssignee) => (
-                    <LemonButton fullWidth type="secondary" size={size}>
+                    <Button fullWidth type="secondary" size={size}>
                         <AssigneeLabelDisplay assignee={displayAssignee} placeholder="Choose user" />
-                    </LemonButton>
+                    </Button>
                 )}
             </AssigneeSelect>
         ) : (
@@ -297,7 +297,7 @@ export function PropertyValue({
     const isUserAgentProperty = ['$raw_user_agent', '$initial_raw_user_agent', '$user_agent'].includes(propertyKey)
 
     return (
-        <LemonInputSelect
+        <InputSelect
             className={inputClassName}
             data-attr="prop-val"
             loading={propertyOptions?.status === 'loading'}

@@ -1,10 +1,10 @@
 import { useValues } from 'kea'
 
-import { Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Spinner, Tooltip } from '@hanzo/elements'
 
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
 import { metalyticsLogic } from 'lib/components/Metalytics/metalyticsLogic'
-import { ProfileBubbles } from 'lib/lemon-ui/ProfilePicture/ProfileBubbles'
+import { ProfileBubbles } from 'lib/elements/ProfilePicture/ProfileBubbles'
 
 export function SidePanelActivityMetalytics(): JSX.Element {
     const { scope, instanceId, viewCount, recentUserMembers, viewCountLoading, recentUsersLoading } =

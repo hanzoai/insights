@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonBanner, LemonButton, LemonCheckbox, LemonDivider, LemonInput, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Checkbox, Divider, Input, Modal, Link } from '@hanzo/elements'
 
 import { personDeleteModalLogic } from 'scenes/persons/personDeleteModalLogic'
 
@@ -25,20 +25,20 @@ export function PersonDeleteModal(): JSX.Element | null {
     }
 
     return (
-        <LemonModal isOpen={!!personDeleteModal} onClose={handleClose} title="Confirm deletion" maxWidth="500px">
+        <Modal isOpen={!!personDeleteModal} onClose={handleClose} title="Confirm deletion" maxWidth="500px">
             <div className="space-y-4">
                 <h4>Are you sure you want to delete "{asDisplay(personDeleteModal)}"?</h4>
 
                 <p>This action cannot be undone.</p>
                 <div className="space-y-2">
-                    <LemonCheckbox
+                    <Checkbox
                         onChange={setAlsoDeleteEvents}
                         checked={alsoDeleteEvents}
                         className="mt-3"
                         label="Also delete all corresponding events."
                         data-attr="delete-person-with-events"
                     />
-                    <LemonCheckbox
+                    <Checkbox
                         onChange={setAlsoDeleteRecordings}
                         checked={alsoDeleteRecordings}
                         className="mt-3"
@@ -47,20 +47,20 @@ export function PersonDeleteModal(): JSX.Element | null {
                     />
                 </div>
                 {(alsoDeleteEvents || alsoDeleteRecordings) && (
-                    <LemonBanner type="warning">
+                    <Banner type="warning">
                         If you opt to delete events and/or recordings, they will not be immediately removed. Instead
                         they are deleted on a set schedule during non-peak usage times.{' '}
                         <Link to="https://hanzo.ai/docs/privacy/data-deletion" target="_blank" className="font-bold">
                             Learn more
                         </Link>
-                    </LemonBanner>
+                    </Banner>
                 )}
-                <LemonDivider />
+                <Divider />
                 <div className="space-y-2">
                     <label className="text-sm">
                         To confirm, please type <strong>{DELETE_CONFIRMATION_TEXT}</strong> below:
                     </label>
-                    <LemonInput
+                    <Input
                         value={deleteConfirmationText}
                         onChange={setDeleteConfirmationText}
                         placeholder={DELETE_CONFIRMATION_TEXT}
@@ -69,17 +69,17 @@ export function PersonDeleteModal(): JSX.Element | null {
                     />
                 </div>
                 {deleteConfirmationText == DELETE_CONFIRMATION_TEXT && (
-                    <LemonBanner type="warning">
+                    <Banner type="warning">
                         Do NOT delete this user if you want to re-use the distinct IDs. Instead use split ID. Re-using
                         the distinct ID of a deleted user is not supported and will result in a bad application state.
-                    </LemonBanner>
+                    </Banner>
                 )}
             </div>
             <div className="flex justify-end gap-2 mt-4">
-                <LemonButton type="secondary" onClick={handleClose} data-attr="delete-person-cancel">
+                <Button type="secondary" onClick={handleClose} data-attr="delete-person-cancel">
                     Cancel
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="primary"
                     status="danger"
                     disabledReason={
@@ -93,8 +93,8 @@ export function PersonDeleteModal(): JSX.Element | null {
                     data-attr="delete-person"
                 >
                     Delete user
-                </LemonButton>
+                </Button>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

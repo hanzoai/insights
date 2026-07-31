@@ -3,7 +3,7 @@ import { combineUrl } from 'kea-router'
 
 import { IconChevronRight } from '@hanzo/icons'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     DropdownMenuGroup,

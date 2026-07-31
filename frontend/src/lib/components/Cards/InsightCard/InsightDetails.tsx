@@ -2,17 +2,17 @@ import { useValues } from 'kea'
 import React from 'react'
 
 import { IconCalculator, IconCalendar, IconCode2, IconFilter, IconPencil, IconSort, IconUser } from '@hanzo/icons'
-import { Lettermark, LettermarkColor } from '@hanzo/lemon-ui'
+import { Lettermark, LettermarkColor } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { convertPropertiesToPropertyGroup } from 'lib/components/PropertyFilters/utils'
 import { SeriesLetter } from 'lib/components/SeriesGlyph'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Link } from 'lib/lemon-ui/Link'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { IconCalculate } from 'lib/lemon-ui/icons'
+import { Divider } from 'lib/elements/Divider'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { Link } from 'lib/elements/Link'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { IconCalculate } from 'lib/elements/icons'
 import { capitalizeFirstLetter, dateFilterToText } from 'lib/utils'
 import { BreakdownTag } from 'scenes/insights/filters/BreakdownFilter/BreakdownTag'
 import { humanizePathsEventTypes } from 'scenes/insights/utils'
@@ -321,7 +321,7 @@ export function FormulaSummary({ query }: { query: TrendsQuery }): JSX.Element |
                     </span>
                 </div>
             ))}
-            <LemonDivider className="mt-1 mb-2" />
+            <Divider className="mt-1 mb-2" />
         </>
     )
 }
@@ -361,9 +361,9 @@ export function VariablesSummary({
                             {variable.code_name}: {variable.value ? <strong>{variable.value}</strong> : <em>null</em>}
                         </span>
                         {hasOverride && (
-                            <LemonTag type="highlight">
+                            <Tag type="highlight">
                                 Overridden: {overrideValue ? <strong>{overrideValue}</strong> : <em>null</em>}
-                            </LemonTag>
+                            </Tag>
                         )}
                     </div>
                 )

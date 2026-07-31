@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 
 import { IconRefresh } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 
 import { AsyncMigration, AsyncMigrationError, asyncMigrationsLogic } from './asyncMigrationsLogic'
@@ -13,21 +13,21 @@ export function AsyncMigrationDetails({ asyncMigration }: { asyncMigration: Asyn
     const { asyncMigrationErrorsLoading, asyncMigrationErrors } = useValues(asyncMigrationsLogic)
     const { loadAsyncMigrationErrors } = useActions(asyncMigrationsLogic)
 
-    const columns: LemonTableColumns<AsyncMigrationError> = [
+    const columns: TableColumns<AsyncMigrationError> = [
         {
             title: 'Error',
             dataIndex: 'description',
         },
         {
             title: (
-                <LemonButton
+                <Button
                     icon={asyncMigrationErrorsLoading[asyncMigration.id] ? <Spinner /> : <IconRefresh />}
                     onClick={() => loadAsyncMigrationErrors(asyncMigration.id)}
                     type="secondary"
                     size="small"
                 >
                     Refresh errors
-                </LemonButton>
+                </Button>
             ),
             render: function Render(_, asyncMigrationError: AsyncMigrationError): JSX.Element {
                 return <div>{humanFriendlyDetailedTime(asyncMigrationError.created_at)}</div>
@@ -35,7 +35,7 @@ export function AsyncMigrationDetails({ asyncMigration }: { asyncMigration: Asyn
         },
     ]
     return (
-        <LemonTable
+        <Table
             columns={columns}
             dataSource={asyncMigrationErrors[asyncMigration.id]}
             loading={asyncMigrationErrorsLoading[asyncMigration.id]}

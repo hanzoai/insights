@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { LemonInput, Tooltip } from '@hanzo/lemon-ui'
+import { Input, Tooltip } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -38,7 +38,7 @@ export function MovingAverageIntervalsInput(): JSX.Element {
             <div className="flex items-center justify-between w-full px-2 pb-2 pl-4 gap-1">
                 <span>Intervals</span>
 
-                <LemonInput
+                <Input
                     type="number"
                     className="w-30"
                     value={localValue}

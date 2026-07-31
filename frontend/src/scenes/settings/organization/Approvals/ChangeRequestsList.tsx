@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, LemonDialog, LemonInput, LemonSelect, LemonTable, LemonTag, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Select, Table, Tag, toast } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTableColumn } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { More } from 'lib/elements/Button/More'
+import { TableColumn } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { cn } from 'lib/utils/css-classes'
 import { approvalsLogic } from 'scenes/approvals/approvalsLogic'
 import { getChangeRequestButtonVisibility } from 'scenes/approvals/changeRequestsLogic'
@@ -22,13 +22,13 @@ export function ChangeRequestsList(): JSX.Element {
     const { changeRequests, changeRequestsDataLoading, filters, hasMore } = useValues(approvalsLogic)
     const { setFilters, loadMore, approveChangeRequest, rejectChangeRequest } = useActions(approvalsLogic)
 
-    const columns: LemonTableColumn<ChangeRequest, keyof ChangeRequest | undefined>[] = [
+    const columns: TableColumn<ChangeRequest, keyof ChangeRequest | undefined>[] = [
         {
             title: 'Action',
             dataIndex: 'action_key',
             render: function RenderAction(_, changeRequest) {
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={urls.approval(changeRequest.id)}
                         title={getApprovalActionLabel(changeRequest.action_key)}
                     />
@@ -40,7 +40,7 @@ export function ChangeRequestsList(): JSX.Element {
             render: function RenderResource(_, changeRequest) {
                 const resourceUrl = getApprovalResourceUrl(changeRequest.action_key, changeRequest.resource_id)
                 const name = getApprovalResourceName(changeRequest.resource_type, changeRequest.intent)
-                return resourceUrl && name ? <LemonTableLink to={resourceUrl} title={name} /> : name
+                return resourceUrl && name ? <TableLink to={resourceUrl} title={name} /> : name
             },
         },
         {
@@ -124,7 +124,7 @@ export function ChangeRequestsList(): JSX.Element {
                         <span>
                             <b>Status</b>
                         </span>
-                        <LemonSelect
+                        <Select
                             dropdownMatchSelectWidth={false}
                             onChange={(value) => {
                                 setFilters({ state: value || undefined })
@@ -144,7 +144,7 @@ export function ChangeRequestsList(): JSX.Element {
                     </div>
                 </div>
 
-                <LemonTable
+                <Table
                     dataSource={changeRequests}
                     columns={columns}
                     rowKey="id"
@@ -155,7 +155,7 @@ export function ChangeRequestsList(): JSX.Element {
                     footer={
                         hasMore && (
                             <div className="flex justify-center p-1">
-                                <LemonButton
+                                <Button
                                     onClick={loadMore}
                                     className="min-w-full text-center"
                                     disabledReason={changeRequestsDataLoading ? 'Loading change requests' : ''}
@@ -163,7 +163,7 @@ export function ChangeRequestsList(): JSX.Element {
                                     <span className="flex-1 text-center">
                                         {changeRequestsDataLoading ? 'Loading...' : 'Load more'}
                                     </span>
-                                </LemonButton>
+                                </Button>
                             </div>
                         )
                     }
@@ -188,15 +188,15 @@ function ChangeRequestTableActions({
         <More
             overlay={
                 <>
-                    <LemonButton fullWidth onClick={() => router.actions.push(urls.approval(changeRequest.id))}>
+                    <Button fullWidth onClick={() => router.actions.push(urls.approval(changeRequest.id))}>
                         View details
-                    </LemonButton>
+                    </Button>
                     {showApproveButton && (
-                        <LemonButton
+                        <Button
                             fullWidth
                             type="primary"
                             onClick={() => {
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: 'Approve this change request?',
                                     content: (
                                         <div className="text-sm text-secondary">
@@ -221,21 +221,21 @@ function ChangeRequestTableActions({
                             }}
                         >
                             Approve
-                        </LemonButton>
+                        </Button>
                     )}
                     {showRejectButton && (
-                        <LemonButton
+                        <Button
                             fullWidth
                             status="danger"
                             onClick={() => {
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: 'Reject this change request?',
                                     content: (
                                         <div>
                                             <div className="text-sm text-secondary mb-2">
                                                 This will reject the change request and prevent it from being applied.
                                             </div>
-                                            <LemonInput
+                                            <Input
                                                 id="reject-reason"
                                                 placeholder="Reason for rejection (required)"
                                             />
@@ -250,7 +250,7 @@ function ChangeRequestTableActions({
                                                 document.getElementById('reject-reason') as HTMLInputElement
                                             )?.value
                                             if (!reason) {
-                                                lemonToast.error('Please provide a reason for rejection')
+                                                toast.error('Please provide a reason for rejection')
                                                 return
                                             }
                                             onReject(changeRequest.id, reason)
@@ -266,7 +266,7 @@ function ChangeRequestTableActions({
                             }}
                         >
                             Reject
-                        </LemonButton>
+                        </Button>
                     )}
                 </>
             }
@@ -285,8 +285,8 @@ function StatusTag({ state }: { state: ChangeRequestState }): JSX.Element {
     } as const
 
     return (
-        <LemonTag type={tagTypes[state]} className="uppercase">
+        <Tag type={tagTypes[state]} className="uppercase">
             {state}
-        </LemonTag>
+        </Tag>
     )
 }

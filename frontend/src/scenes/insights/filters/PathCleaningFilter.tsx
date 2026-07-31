@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton, LemonSwitch } from '@hanzo/lemon-ui'
+import { Button, Switch } from '@hanzo/elements'
 
 import { PathCleanFilters } from 'lib/components/PathCleanFilters/PathCleanFilters'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { pathsDataLogic } from 'scenes/paths/pathsDataLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -35,7 +35,7 @@ export function PathCleaningFilter({ insightProps }: EditorFilterProps): JSX.Ele
             >
                 {/* This div is necessary for the tooltip to work. */}
                 <div className="inline-block mt-4 w-full">
-                    <LemonSwitch
+                    <Switch
                         disabled={!hasFilters}
                         checked={hasFilters ? pathReplacements || false : false}
                         onChange={(checked: boolean) => {
@@ -44,7 +44,7 @@ export function PathCleaningFilter({ insightProps }: EditorFilterProps): JSX.Ele
                         label={
                             <div className="flex items-center">
                                 <span>Apply global path URL cleaning</span>
-                                <LemonButton
+                                <Button
                                     icon={<IconGear />}
                                     to={urls.settings('project-product-analytics', 'path-cleaning')}
                                     size="small"

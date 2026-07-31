@@ -1,7 +1,7 @@
 import { actions, connect, defaults, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
@@ -95,7 +95,7 @@ export const funnelPropertyCorrelationLogic = kea<funnelPropertyCorrelationLogic
                             })) as FunnelCorrelation[],
                         }
                     } catch {
-                        lemonToast.error('Failed to load correlation results', { toastId: 'funnel-correlation-error' })
+                        toast.error('Failed to load correlation results', { toastId: 'funnel-correlation-error' })
                         return { events: [] }
                     }
                 },

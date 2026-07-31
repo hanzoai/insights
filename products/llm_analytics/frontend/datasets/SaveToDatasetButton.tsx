@@ -4,10 +4,10 @@ import { Form } from 'kea-forms'
 import React, { useMemo } from 'react'
 
 import { IconDatabase, IconExternal, IconPencil } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonDropdown, LemonInput, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Divider, Dropdown, Input, Skeleton } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { isObject } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -52,7 +52,7 @@ export const SaveToDatasetButton = React.memo(function SaveToDatasetButton({
 
     return (
         <>
-            <LemonDropdown
+            <Dropdown
                 overlay={<OverlayMenu />}
                 visible={dropdownVisible}
                 onVisibilityChange={setDropdownVisible}
@@ -62,7 +62,7 @@ export const SaveToDatasetButton = React.memo(function SaveToDatasetButton({
                     resourceType={AccessControlResourceType.LlmAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="xsmall"
                         icon={<IconDatabase />}
@@ -81,9 +81,9 @@ export const SaveToDatasetButton = React.memo(function SaveToDatasetButton({
                         }}
                     >
                         Add to dataset
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
-            </LemonDropdown>
+            </Dropdown>
             {isModalMounted && selectedDataset && (
                 <DatasetItemModal
                     isOpen={isModalOpen}
@@ -111,21 +111,21 @@ function OverlayMenu(): JSX.Element {
 
     return (
         <Form logic={saveToDatasetButtonLogic} formKey="searchForm" className="w-xs" enableFormOnSubmit>
-            <LemonField name="search" label="Search" labelClassName="sr-only">
-                <LemonInput placeholder="Find a dataset" autoFocus />
-            </LemonField>
-            <LemonDivider className="my-0 mt-2" />
+            <Field name="search" label="Search" labelClassName="sr-only">
+                <Input placeholder="Find a dataset" autoFocus />
+            </Field>
+            <Divider className="my-0 mt-2" />
             <div
                 className={clsx('overflow-y-auto max-h-64 py-2', isLoadingDatasets ? 'space-y-4' : 'space-y-2')}
                 ref={referenceRef}
             >
                 {isLoadingDatasets ? (
                     <>
-                        <LemonSkeleton active className="h-4 w-full" />
-                        <LemonSkeleton active className="h-4 w-full" />
-                        <LemonSkeleton active className="h-4 w-full" />
-                        <LemonSkeleton active className="h-4 w-full" />
-                        <LemonSkeleton active className="h-4 w-full" />
+                        <Skeleton active className="h-4 w-full" />
+                        <Skeleton active className="h-4 w-full" />
+                        <Skeleton active className="h-4 w-full" />
+                        <Skeleton active className="h-4 w-full" />
+                        <Skeleton active className="h-4 w-full" />
                     </>
                 ) : datasets && datasets.length > 0 ? (
                     <>
@@ -133,7 +133,7 @@ function OverlayMenu(): JSX.Element {
                             <>
                                 <p className="text-muted text-xs px-2">Recent datasets</p>
                                 {recentDatasets.map((dataset, index) => (
-                                    <LemonButton
+                                    <Button
                                         key={dataset.id}
                                         ref={itemsRef?.current?.[index]}
                                         fullWidth
@@ -146,13 +146,13 @@ function OverlayMenu(): JSX.Element {
                                         data-attr="save-to-dataset-select"
                                     >
                                         <span className="line-clamp-1">{dataset.name}</span>
-                                    </LemonButton>
+                                    </Button>
                                 ))}
-                                <LemonDivider className="my-0 mb-2" />
+                                <Divider className="my-0 mb-2" />
                             </>
                         )}
                         {datasets.map((dataset, index) => (
-                            <LemonButton
+                            <Button
                                 key={dataset.id}
                                 ref={itemsRef?.current?.[recentDatasetsLength + index]}
                                 fullWidth
@@ -165,15 +165,15 @@ function OverlayMenu(): JSX.Element {
                                 data-attr="save-to-dataset-select"
                             >
                                 <span className="line-clamp-1">{dataset.name}</span>
-                            </LemonButton>
+                            </Button>
                         ))}
                     </>
                 ) : (
                     <p className="text-muted text-sm px-2">No datasets found</p>
                 )}
             </div>
-            <LemonDivider className="my-0 mb-2" />
-            <LemonButton
+            <Divider className="my-0 mb-2" />
+            <Button
                 fullWidth
                 size="small"
                 to={urls.llmAnalyticsDataset('new')}
@@ -184,7 +184,7 @@ function OverlayMenu(): JSX.Element {
                 }}
             >
                 Create new dataset
-            </LemonButton>
+            </Button>
         </Form>
     )
 }

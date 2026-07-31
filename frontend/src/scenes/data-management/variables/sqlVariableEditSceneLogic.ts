@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { teamLogic } from 'scenes/teamLogic'
@@ -103,19 +103,19 @@ export const sqlVariableEditSceneLogic = kea<sqlVariableEditSceneLogicType>([
                 try {
                     if (props.id === 'new') {
                         const created = await api.insightVariables.create(data)
-                        lemonToast.success('Variable created')
+                        toast.success('Variable created')
                         router.actions.push(urls.variableEdit(created.id))
                     } else {
                         await api.insightVariables.update(props.id, data)
-                        lemonToast.success('Variable updated')
+                        toast.success('Variable updated')
                         actions.loadVariable()
                     }
                 } catch (error: unknown) {
                     const apiError = error as { data?: { detail?: string } }
                     if (apiError.data?.detail) {
-                        lemonToast.error(apiError.data.detail)
+                        toast.error(apiError.data.detail)
                     } else {
-                        lemonToast.error('Failed to save variable')
+                        toast.error('Failed to save variable')
                     }
                     throw error
                 }

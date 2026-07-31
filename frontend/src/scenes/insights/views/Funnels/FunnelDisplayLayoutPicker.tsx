@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { FunnelLayout } from 'lib/constants'
-import { IconFunnelHorizontal, IconFunnelVertical } from 'lib/lemon-ui/icons'
+import { IconFunnelHorizontal, IconFunnelVertical } from 'lib/elements/icons'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
 
@@ -31,7 +31,7 @@ export function FunnelDisplayLayoutPicker(): JSX.Element {
     ]
 
     return (
-        <LemonSelect
+        <Select
             value={funnelsFilter?.layout || FunnelLayout.vertical}
             onChange={(layout: FunnelLayout | null) => layout && updateInsightFilter({ layout })}
             dropdownMatchSelectWidth={false}

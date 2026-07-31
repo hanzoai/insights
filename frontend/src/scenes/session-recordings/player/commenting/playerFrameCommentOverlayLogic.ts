@@ -5,7 +5,7 @@ import { subscriptions } from 'kea-subscriptions'
 import api from 'lib/api'
 import { JSONContent, RichContentEditorType } from 'lib/components/RichContentEditor/types'
 import { Dayjs, dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { colonDelimitedDuration } from 'lib/utils'
 import { playerCommentModel } from 'scenes/session-recordings/player/commenting/playerCommentModel'
 import { isSingleEmoji } from 'scenes/session-recordings/utils'
@@ -124,7 +124,7 @@ export const playerCommentOverlayLogic = kea<playerCommentOverlayLogicType>([
         },
         addEmojiComment: async ({ emoji }) => {
             if (!isSingleEmoji(emoji)) {
-                lemonToast.error(`Emoji comments must be emojis 🙈, this string was too long: "${emoji}"`)
+                toast.error(`Emoji comments must be emojis 🙈, this string was too long: "${emoji}"`)
                 return
             }
             const loadingTimeout = setTimeout(() => {

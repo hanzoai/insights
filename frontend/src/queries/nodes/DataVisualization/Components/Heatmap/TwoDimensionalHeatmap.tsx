@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { InsightEmptyState } from 'scenes/insights/EmptyStates'
 
@@ -192,11 +192,11 @@ export const TwoDimensionalHeatmap = (): JSX.Element => {
     return (
         <div className="flex flex-col gap-2 p-2">
             {heatmapData.duplicateCellCount > 0 && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     {`Some rows share the same X/Y combination. Only the latest value is shown for ${heatmapData.duplicateCellCount} duplicate cell${
                         heatmapData.duplicateCellCount === 1 ? '' : 's'
                     }.`}
-                </LemonBanner>
+                </Banner>
             )}
             <div className="text-center text-sm font-medium">{xAxisLabel}</div>
             <div className="overflow-auto">

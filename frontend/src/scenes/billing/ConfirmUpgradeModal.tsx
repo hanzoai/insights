@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
+import { Button, Modal, Table, TableColumns } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { billingLogic } from 'scenes/billing/billingLogic'
@@ -58,7 +58,7 @@ export function ConfirmUpgradeModal({ product }: { product: BillingProductV2Addo
         isBold: true,
     })
 
-    const columns: LemonTableColumns<BillingInvoiceItemRow> = [
+    const columns: TableColumns<BillingInvoiceItemRow> = [
         {
             title: 'Description',
             dataIndex: 'description',
@@ -78,23 +78,23 @@ export function ConfirmUpgradeModal({ product }: { product: BillingProductV2Addo
     ]
 
     return (
-        <LemonModal
+        <Modal
             onClose={hideConfirmUpgradeModal}
             isOpen={confirmUpgradeModalOpen}
             closable={false}
             title={`Ready to subscribe to ${targetPlan.name}?`}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={hideConfirmUpgradeModal}
                         disabledReason={isLoading ? 'Subscription update in progress, do not close this modal' : ''}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={confirmProductUpgrade} loading={isLoading}>
+                    </Button>
+                    <Button type="primary" onClick={confirmProductUpgrade} loading={isLoading}>
                         Confirm
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -104,8 +104,8 @@ export function ConfirmUpgradeModal({ product }: { product: BillingProductV2Addo
                     now for the remaining period until {billing?.billing_period?.current_period_end?.format('MMM D')},
                     and ${targetPlan.unit_amount_usd} every {targetPlan.unit} thereafter.
                 </p>
-                <LemonTable dataSource={rows} columns={columns} className="mt-4" uppercaseHeader={false} />
+                <Table dataSource={rows} columns={columns} className="mt-4" uppercaseHeader={false} />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

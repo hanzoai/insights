@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { optOutCategoriesLogic } from './optOutCategoriesLogic'
 
@@ -14,7 +14,7 @@ export const CategorySelect = ({
     const { categories, categoriesLoading } = useValues(optOutCategoriesLogic())
 
     return (
-        <LemonSelect
+        <Select
             size="small"
             type="tertiary"
             onChange={onChange}

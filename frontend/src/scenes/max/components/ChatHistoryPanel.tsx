@@ -4,7 +4,7 @@ import { combineUrl } from 'kea-router'
 import { memo, useRef } from 'react'
 
 import { IconEllipsis, IconPlusSmall, IconSearch, IconShare, IconSidebarClose } from '@hanzo/icons'
-import { LemonSkeleton, Link, Spinner } from '@hanzo/lemon-ui'
+import { Skeleton, Link, Spinner } from '@hanzo/elements'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps } from 'lib/components/Resizer/resizerLogic'
@@ -130,9 +130,9 @@ export const ChatHistoryPanel = memo(function ChatHistoryPanel({ tabId }: ChatHi
                         >
                             {conversationHistoryLoading && conversationHistory.length === 0 ? (
                                 <div className="flex flex-col gap-1">
-                                    <LemonSkeleton className="h-8" />
-                                    <LemonSkeleton className="h-8 opacity-60" />
-                                    <LemonSkeleton className="h-8 opacity-30" />
+                                    <Skeleton className="h-8" />
+                                    <Skeleton className="h-8 opacity-60" />
+                                    <Skeleton className="h-8 opacity-30" />
                                 </div>
                             ) : (
                                 <>

@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { DragEventHandler, useState } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { notebookLogicType } from '../Notebook/notebookLogicType'
 import { NotebookSelectList } from '../NotebookSelectButton/NotebookSelectButton'
@@ -65,9 +65,9 @@ export function NotebookPanelDropzone(): JSX.Element | null {
                 <div className="NotebookPanelDropzone__dropped">
                     <div className="flex items-start justify-between">
                         <h2>Add dropped resource to...</h2>
-                        <LemonButton size="small" onClick={() => setDroppedResource(null)}>
+                        <Button size="small" onClick={() => setDroppedResource(null)}>
                             Cancel
-                        </LemonButton>
+                        </Button>
                     </div>
                     <NotebookSelectList onNotebookOpened={onNotebookOpened} resource />
                 </div>

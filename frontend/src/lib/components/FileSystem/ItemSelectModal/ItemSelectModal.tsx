@@ -6,12 +6,12 @@ import { IconFolder, IconFolderOpen } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { LemonTree, LemonTreeRef, TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
+import { Modal } from 'lib/elements/Modal'
+import { Tag } from 'lib/elements/Tag'
+import { Tree, TreeRef, TreeDataItem } from 'lib/elements/Tree/Tree'
 import { ButtonPrimitive, ButtonPrimitiveProps } from 'lib/ui/Button/ButtonPrimitives'
 import { cn } from 'lib/utils/css-classes'
 
@@ -86,7 +86,7 @@ export function ItemSelectModal({ className, includeProtocol, includeRoot }: Ite
     const { setSearchTerm, setExpandedSearchFolders, setExpandedFolders, setEditingItemId, rename, toggleFolderOpen } =
         useActions(projectTreeLogic(props))
 
-    const treeRef = useRef<LemonTreeRef>(null)
+    const treeRef = useRef<TreeRef>(null)
 
     useOnMountEffect(() => {
         const timeout = setTimeout(() => {
@@ -105,7 +105,7 @@ export function ItemSelectModal({ className, includeProtocol, includeRoot }: Ite
 
     return (
         <>
-            <LemonModal
+            <Modal
                 onClose={() => {
                     closeItemSelectModal()
                     setSelectedItem(null)
@@ -123,7 +123,7 @@ export function ItemSelectModal({ className, includeProtocol, includeRoot }: Ite
                 footer={
                     <>
                         <div className="flex-1" />
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={submitForm}
                             data-attr="item-select-modal-add-button"
@@ -137,13 +137,13 @@ export function ItemSelectModal({ className, includeProtocol, includeRoot }: Ite
                             }
                         >
                             Add {selectedItem?.name.toLowerCase() || selectedItem?.displayName} shortcut
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
                 <div className="w-192 max-w-full">
                     <Form logic={itemSelectModalLogic} formKey="form">
-                        <LemonField name="item">
+                        <Field name="item">
                             <div className="flex flex-col gap-2">
                                 <div className="flex gap-2 overflow-auto">
                                     <RootFolderButton
@@ -178,7 +178,7 @@ export function ItemSelectModal({ className, includeProtocol, includeRoot }: Ite
                                     </RootFolderButton>
                                 </div>
 
-                                <LemonInput
+                                <Input
                                     type="search"
                                     placeholder="Search"
                                     fullWidth
@@ -207,7 +207,7 @@ export function ItemSelectModal({ className, includeProtocol, includeRoot }: Ite
                                         className
                                     )}
                                 >
-                                    <LemonTree
+                                    <Tree
                                         ref={treeRef}
                                         selectMode="all"
                                         className="px-0 py-1"
@@ -261,13 +261,13 @@ export function ItemSelectModal({ className, includeProtocol, includeRoot }: Ite
                                                     >
                                                         {item.displayName}{' '}
                                                         {isNew ? (
-                                                            <LemonTag
+                                                            <Tag
                                                                 type="highlight"
                                                                 size="small"
                                                                 className="ml-1 relative top-[-1px]"
                                                             >
                                                                 New
-                                                            </LemonTag>
+                                                            </Tag>
                                                         ) : null}
                                                     </span>
                                                 </span>
@@ -276,10 +276,10 @@ export function ItemSelectModal({ className, includeProtocol, includeRoot }: Ite
                                     />
                                 </ScrollableShadows>
                             </div>
-                        </LemonField>
+                        </Field>
                     </Form>
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }

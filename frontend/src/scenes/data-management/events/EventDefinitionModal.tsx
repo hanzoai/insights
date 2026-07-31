@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput, LemonInputSelect, LemonModal, LemonTextArea, Link } from '@hanzo/lemon-ui'
+import { Button, Input, InputSelect, Modal, TextArea, Link } from '@hanzo/elements'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Banner } from 'lib/elements/Banner'
+import { Field } from 'lib/elements/Field'
 import { urls } from 'scenes/urls'
 
 import { tagsModel } from '~/models/tagsModel'
@@ -25,69 +25,69 @@ export function EventDefinitionModal({ isOpen, onClose }: EventDefinitionModalPr
     const { tags } = useValues(tagsModel)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             title="Create event"
             description="Create a new event definition before any events are captured. First seen and last seen will be set when the first event is ingested."
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={onClose}>
+                    <Button type="secondary" onClick={onClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={submitEventDefinitionForm}
                         loading={isEventDefinitionFormSubmitting}
                         disabled={!eventDefinitionForm.name || !!existingEvent}
                     >
                         Create event
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <Form logic={eventDefinitionModalLogic} formKey="eventDefinitionForm" className="space-y-4">
-                <LemonBanner type="info">
+                <Banner type="info">
                     <strong>Note:</strong> Event names cannot be changed after creation. Choose your name carefully.
-                </LemonBanner>
+                </Banner>
 
                 {existingEvent && (
-                    <LemonBanner type="warning">
+                    <Banner type="warning">
                         An event with the name "{existingEvent.name}" already exists.{' '}
                         <Link to={urls.eventDefinition(existingEvent.id)}>View existing event</Link>
-                    </LemonBanner>
+                    </Banner>
                 )}
 
-                <LemonField name="name" label="Event name">
-                    <LemonInput
+                <Field name="name" label="Event name">
+                    <Input
                         value={eventDefinitionForm.name}
                         onChange={(value) => setFormValue('name', value)}
                         placeholder="e.g., user_signed_up"
                         autoFocus
                         data-attr="event-definition-name-input"
                     />
-                </LemonField>
+                </Field>
 
-                <LemonField name="description" label="Description" showOptional>
-                    <LemonTextArea
+                <Field name="description" label="Description" showOptional>
+                    <TextArea
                         value={eventDefinitionForm.description}
                         onChange={(value) => setFormValue('description', value)}
                         placeholder="What does this event represent?"
                         data-attr="event-definition-description-input"
                     />
-                </LemonField>
+                </Field>
 
                 <div className="flex items-center gap-4">
-                    <LemonField name="owner" label="Owner" showOptional className="w-60">
+                    <Field name="owner" label="Owner" showOptional className="w-60">
                         <MemberSelect
                             value={eventDefinitionForm.owner ?? null}
                             onChange={(user: UserBasicType | null) => setFormValue('owner', user?.id ?? null)}
                             data-attr="event-definition-owner-select"
                         />
-                    </LemonField>
+                    </Field>
 
-                    <LemonField name="tags" label="Tags" showOptional className="flex-1">
-                        <LemonInputSelect
+                    <Field name="tags" label="Tags" showOptional className="flex-1">
+                        <InputSelect
                             mode="multiple"
                             allowCustomValues
                             value={eventDefinitionForm.tags || []}
@@ -96,9 +96,9 @@ export function EventDefinitionModal({ isOpen, onClose }: EventDefinitionModalPr
                             placeholder="Add tags..."
                             data-attr="event-definition-tags-input"
                         />
-                    </LemonField>
+                    </Field>
                 </div>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

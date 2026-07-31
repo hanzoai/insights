@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch, Link } from '@hanzo/lemon-ui'
+import { Switch, Link } from '@hanzo/elements'
 
-import { IconBranch, IconClipboardEdit, IconLink, IconTextSize } from 'lib/lemon-ui/icons'
+import { IconBranch, IconClipboardEdit, IconLink, IconTextSize } from 'lib/elements/icons'
 
 import { SelectorQualityBadge } from '~/toolbar/elements/SelectorQualityWarning'
 
@@ -65,7 +65,7 @@ export function ActionAttribute({
     return (
         <div key={attribute} className="flex flex-row gap-2 justify-between items-center">
             {automaticActionCreationEnabled && (
-                <LemonSwitch
+                <Switch
                     size="small"
                     checked={automaticCreationIncludedPropertyKeys.includes(attribute)}
                     onChange={(checked) =>

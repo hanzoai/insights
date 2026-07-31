@@ -1,4 +1,4 @@
-import { LemonSelectOptions } from '@hanzo/lemon-ui'
+import { SelectOptions } from '@hanzo/elements'
 
 import { ChartDisplayCategory, ChartDisplayType, Region, SDKKey, SSOProvider } from '../types'
 
@@ -505,7 +505,7 @@ export const PROPERTY_DEFINITIONS_PER_EVENT = 5
 export const EVENT_PROPERTY_DEFINITIONS_PER_PAGE = 50
 export const LOGS_PORTION_LIMIT = 50
 
-export const SESSION_REPLAY_MINIMUM_DURATION_OPTIONS: LemonSelectOptions<number | null> = [
+export const SESSION_REPLAY_MINIMUM_DURATION_OPTIONS: SelectOptions<number | null> = [
     {
         label: 'no minimum',
         value: null,

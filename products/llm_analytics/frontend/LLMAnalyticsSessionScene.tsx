@@ -3,12 +3,12 @@ import { combineUrl, router } from 'kea-router'
 import { Suspense, lazy } from 'react'
 
 import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonTag, Spinner, SpinnerOverlay, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tag, Spinner, SpinnerOverlay, Tooltip } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { InsightEmptyState, InsightErrorState } from 'scenes/insights/EmptyStates'
@@ -103,22 +103,22 @@ function SessionSceneWrapper(): JSX.Element {
                     <SceneBreadcrumbBackButton />
                     <div className="flex items-start justify-between">
                         <header className="flex gap-1.5 flex-wrap">
-                            <LemonTag size="medium" className="bg-surface-primary">
+                            <Tag size="medium" className="bg-surface-primary">
                                 <span className="font-mono">{sessionId}</span>
-                            </LemonTag>
-                            <LemonTag size="medium" className="bg-surface-primary">
+                            </Tag>
+                            <Tag size="medium" className="bg-surface-primary">
                                 {sessionStats.traceCount}
                                 {hasMoreData ? '+' : ''} {sessionStats.traceCount === 1 ? 'trace' : 'traces'}
-                            </LemonTag>
+                            </Tag>
                             {sessionStats.totalCost > 0 && (
-                                <LemonTag size="medium" className="bg-surface-primary">
+                                <Tag size="medium" className="bg-surface-primary">
                                     Total: {formatLLMCost(sessionStats.totalCost)}
-                                </LemonTag>
+                                </Tag>
                             )}
                             {sessionStats.totalLatency > 0 && (
-                                <LemonTag size="medium" className="bg-surface-primary">
+                                <Tag size="medium" className="bg-surface-primary">
                                     {sessionStats.totalLatency.toFixed(2)}s
-                                </LemonTag>
+                                </Tag>
                             )}
                             {/* This is an internal component, it's lazy loaded and behind feature flag. */}
                             {showFeedback && (
@@ -139,7 +139,7 @@ function SessionSceneWrapper(): JSX.Element {
                                             resourceType={AccessControlResourceType.LlmAnalytics}
                                             minAccessLevel={AccessControlLevel.Editor}
                                         >
-                                            <LemonButton
+                                            <Button
                                                 type="primary"
                                                 size="small"
                                                 loading={summariesLoading}
@@ -147,7 +147,7 @@ function SessionSceneWrapper(): JSX.Element {
                                                 data-attr="llm-session-summarize-all"
                                             >
                                                 Summarize all traces
-                                            </LemonButton>
+                                            </Button>
                                         </AccessControlAction>
                                     </AIConsentPopoverWrapper>
                                 ) : (
@@ -155,7 +155,7 @@ function SessionSceneWrapper(): JSX.Element {
                                         resourceType={AccessControlResourceType.LlmAnalytics}
                                         minAccessLevel={AccessControlLevel.Editor}
                                     >
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             size="small"
                                             onClick={summarizeAllTraces}
@@ -163,7 +163,7 @@ function SessionSceneWrapper(): JSX.Element {
                                             data-attr="llm-session-summarize-all"
                                         >
                                             Summarize all traces
-                                        </LemonButton>
+                                        </Button>
                                     </AccessControlAction>
                                 )}
                             </div>
@@ -202,21 +202,21 @@ function SessionSceneWrapper(): JSX.Element {
                                                         <span className="text-sm">{trace.traceName}</span>
                                                     )}
                                                     {(trace.errorCount ?? 0) > 0 && (
-                                                        <LemonTag type="danger" size="small">
+                                                        <Tag type="danger" size="small">
                                                             {trace.errorCount === 1
                                                                 ? '1 error'
                                                                 : `${trace.errorCount} errors`}
-                                                        </LemonTag>
+                                                        </Tag>
                                                     )}
                                                     {typeof trace.totalLatency === 'number' && (
-                                                        <LemonTag type="muted">
+                                                        <Tag type="muted">
                                                             {trace.totalLatency.toFixed(2)}s
-                                                        </LemonTag>
+                                                        </Tag>
                                                     )}
                                                     {typeof trace.totalCost === 'number' && (
-                                                        <LemonTag type="muted">
+                                                        <Tag type="muted">
                                                             {formatLLMCost(trace.totalCost)}
-                                                        </LemonTag>
+                                                        </Tag>
                                                     )}
                                                     <Link
                                                         to={
@@ -283,14 +283,14 @@ function SessionSceneWrapper(): JSX.Element {
                             })}
                             {hasMoreData && (
                                 <div className="flex justify-center pt-2">
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         loading={nextDataLoading}
                                         onClick={loadNextData}
                                         data-attr="llm-session-load-more-traces"
                                     >
                                         Load more traces
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             )}
                         </div>

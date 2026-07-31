@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useCallback, useState } from 'react'
 
 import { IconChevronDown, IconClock, IconEllipsis } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonMenuItem, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Menu, MenuItem, Spinner, Tooltip } from '@hanzo/elements'
 
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -16,7 +16,7 @@ export interface TreeRowProps {
     depth: number
     onClick?: (row: DatabaseSchemaTable) => void
     selected?: boolean
-    menuItems?: LemonMenuItem[]
+    menuItems?: MenuItem[]
 }
 
 export function TreeRow({ item, menuItems }: TreeRowProps): JSX.Element {
@@ -24,7 +24,7 @@ export function TreeRow({ item, menuItems }: TreeRowProps): JSX.Element {
 
     return (
         <li className={clsx('relative flex items-center', isMenuOpen && 'bg-surface-primary')}>
-            <LemonButton
+            <Button
                 onClick={() => {
                     void copyToClipboard(item.name, item.name)
                 }}
@@ -37,13 +37,13 @@ export function TreeRow({ item, menuItems }: TreeRowProps): JSX.Element {
                     <span className="truncate">{item.name}</span>
                     <span className="italic text-secondary">{item.type}</span>
                 </span>
-            </LemonButton>
+            </Button>
             {menuItems && menuItems.length > 0 && (
-                <LemonMenu items={menuItems} onVisibilityChange={setIsMenuOpen}>
+                <Menu items={menuItems} onVisibilityChange={setIsMenuOpen}>
                     <div className="absolute right-1 flex">
-                        <LemonButton size="small" noPadding icon={<IconEllipsis />} />
+                        <Button size="small" noPadding icon={<IconEllipsis />} />
                     </div>
-                </LemonMenu>
+                </Menu>
             )}
         </li>
     )
@@ -63,7 +63,7 @@ export function TreeTableRow({ item, onClick, selected }: TreeTableRowProps): JS
 
     return (
         <li>
-            <LemonButton
+            <Button
                 size="xsmall"
                 className="font-mono"
                 fullWidth
@@ -72,7 +72,7 @@ export function TreeTableRow({ item, onClick, selected }: TreeTableRowProps): JS
                 icon={item.icon ? <>{item.icon}</> : null}
             >
                 <span className="truncate">{item.table.name}</span>
-            </LemonButton>
+            </Button>
         </li>
     )
 }
@@ -131,7 +131,7 @@ export function TreeFolderRow({ item, depth, onClick, selectedRow, dropdownOverl
 
     return (
         <li className="overflow-hidden">
-            <LemonButton
+            <Button
                 size="small"
                 className="font-mono"
                 fullWidth
@@ -158,7 +158,7 @@ export function TreeFolderRow({ item, depth, onClick, selectedRow, dropdownOverl
                         </Tooltip>
                     )}
                 </div>
-            </LemonButton>
+            </Button>
             {!collapsed &&
                 (items.length > 0 && !item.isLoading ? (
                     <DatabaseTableTree

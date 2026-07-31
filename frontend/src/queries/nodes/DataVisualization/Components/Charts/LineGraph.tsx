@@ -10,7 +10,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonTable, lemonToast } from '@hanzo/lemon-ui'
+import { Table, toast } from '@hanzo/elements'
 
 import {
     ActiveElement,
@@ -153,7 +153,7 @@ export const LineGraph = ({
         }
         if (yData.length > MAX_SERIES) {
             if (!dashboardId) {
-                lemonToast.warning(
+                toast.warning(
                     `This breakdown has too many series (${yData.length}). Only showing top ${MAX_SERIES} series in the chart. All series are still available in the table below.`
                 )
             }
@@ -464,7 +464,7 @@ export const LineGraph = ({
 
                                 tooltipRoot.render(
                                     <div className="InsightTooltip">
-                                        <LemonTable
+                                        <Table
                                             dataSource={tooltipData}
                                             columns={[
                                                 {

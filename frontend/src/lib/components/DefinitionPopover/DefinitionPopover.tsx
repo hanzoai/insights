@@ -3,14 +3,14 @@ import './DefinitionPopover.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { LemonDivider, ProfilePicture } from '@hanzo/lemon-ui'
+import { Divider, ProfilePicture } from '@hanzo/elements'
 
 import { DefinitionPopoverState, definitionPopoverLogic } from 'lib/components/DefinitionPopover/definitionPopoverLogic'
 import { ImageCarousel } from 'lib/components/ImageCarousel/ImageCarousel'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { dayjs } from 'lib/dayjs'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
-import { Link } from 'lib/lemon-ui/Link'
+import { Markdown } from 'lib/elements/Markdown'
+import { Link } from 'lib/elements/Link'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'
@@ -90,9 +90,9 @@ function Header({
 
 function Description({ description }: { description: React.ReactNode }): JSX.Element {
     return typeof description === 'string' ? (
-        <LemonMarkdown className="definition-popover-description" lowKeyHeadings>
+        <Markdown className="definition-popover-description" lowKeyHeadings>
             {description}
-        </LemonMarkdown>
+        </Markdown>
     ) : (
         <div className="definition-popover-description">{description}</div>
     )
@@ -198,7 +198,7 @@ function Owner({ user }: { user?: UserBasicType | null }): JSX.Element {
 
 function HorizontalLine({ className, label }: { className?: string; label?: string }): JSX.Element {
     return (
-        <LemonDivider
+        <Divider
             className={clsx('DefinitionPopover items-start my-4', className)}
             label={label && <span className="DefinitionPopover__label">{label}</span>}
         />

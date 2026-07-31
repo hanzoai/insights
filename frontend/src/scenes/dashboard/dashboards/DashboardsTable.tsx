@@ -1,20 +1,20 @@
 import { useActions, useValues } from 'kea'
 
 import { IconChevronDown, IconHome, IconLock, IconPin, IconPinFilled, IconShare } from '@hanzo/icons'
-import { LemonInput, Popover } from '@hanzo/lemon-ui'
+import { Input, Popover } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonRow } from 'lib/lemon-ui/LemonRow'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { atColumn, createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Divider } from 'lib/elements/Divider'
+import { Row } from 'lib/elements/Row'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { atColumn, createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { accessLevelSatisfied } from 'lib/utils/accessControlUtils'
 import { DashboardEventSource } from 'lib/utils/eventUsageLogic'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
@@ -74,13 +74,13 @@ export function DashboardsTable({
         setFilters({ tags: Array.from(selected) })
     }
 
-    const columns: LemonTableColumns<DashboardType> = [
+    const columns: TableColumns<DashboardType> = [
         {
             width: 0,
             dataIndex: 'pinned',
             render: function Render(pinned, { id }) {
                 return (
-                    <LemonButton
+                    <Button
                         size="small"
                         onClick={
                             pinned
@@ -105,7 +105,7 @@ export function DashboardsTable({
                     AccessControlLevel.Editor
                 )
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={urls.dashboard(id)}
                         title={
                             <>
@@ -141,10 +141,10 @@ export function DashboardsTable({
             render: function Render(tags: DashboardType['tags']) {
                 return tags ? <ObjectTags tags={[...tags].sort()} staticOnly /> : null
             },
-        } as LemonTableColumn<DashboardType, keyof DashboardType | undefined>,
-        createdByColumn<DashboardType>() as LemonTableColumn<DashboardType, keyof DashboardType | undefined>,
-        createdAtColumn<DashboardType>() as LemonTableColumn<DashboardType, keyof DashboardType | undefined>,
-        atColumn<DashboardType>('last_accessed_at', 'Last accessed at') as LemonTableColumn<
+        } as TableColumn<DashboardType, keyof DashboardType | undefined>,
+        createdByColumn<DashboardType>() as TableColumn<DashboardType, keyof DashboardType | undefined>,
+        createdAtColumn<DashboardType>() as TableColumn<DashboardType, keyof DashboardType | undefined>,
+        atColumn<DashboardType>('last_accessed_at', 'Last accessed at') as TableColumn<
             DashboardType,
             keyof DashboardType | undefined
         >,
@@ -157,7 +157,7 @@ export function DashboardsTable({
                           <More
                               overlay={
                                   <>
-                                      <LemonButton
+                                      <Button
                                           to={urls.dashboard(id)}
                                           onClick={() => {
                                               dashboardLogic({ id }).mount()
@@ -169,14 +169,14 @@ export function DashboardsTable({
                                           fullWidth
                                       >
                                           View
-                                      </LemonButton>
+                                      </Button>
 
                                       <AccessControlAction
                                           resourceType={AccessControlResourceType.Dashboard}
                                           minAccessLevel={AccessControlLevel.Editor}
                                           userAccessLevel={user_access_level}
                                       >
-                                          <LemonButton
+                                          <Button
                                               to={urls.dashboard(id)}
                                               onClick={() => {
                                                   dashboardLogic({ id }).mount()
@@ -188,42 +188,42 @@ export function DashboardsTable({
                                               fullWidth
                                           >
                                               Edit
-                                          </LemonButton>
+                                          </Button>
                                       </AccessControlAction>
 
-                                      <LemonButton
+                                      <Button
                                           onClick={() => {
                                               showDuplicateDashboardModal(id, name)
                                           }}
                                           fullWidth
                                       >
                                           Duplicate
-                                      </LemonButton>
+                                      </Button>
 
-                                      <LemonDivider />
+                                      <Divider />
 
-                                      <LemonRow icon={<IconHome className="text-warning" />} fullWidth status="warning">
+                                      <Row icon={<IconHome className="text-warning" />} fullWidth status="warning">
                                           <span className="text-secondary">
                                               Change the default dashboard
                                               <br />
                                               from the <Link to={urls.projectHomepage()}>project home page</Link>.
                                           </span>
-                                      </LemonRow>
+                                      </Row>
 
-                                      <LemonDivider />
+                                      <Divider />
 
                                       <AccessControlAction
                                           resourceType={AccessControlResourceType.Dashboard}
                                           minAccessLevel={AccessControlLevel.Editor}
                                           userAccessLevel={user_access_level}
                                       >
-                                          <LemonButton
+                                          <Button
                                               onClick={() => showDeleteDashboardModal(id)}
                                               fullWidth
                                               status="danger"
                                           >
                                               Delete dashboard
-                                          </LemonButton>
+                                          </Button>
                                       </AccessControlAction>
                                   </>
                               }
@@ -236,7 +236,7 @@ export function DashboardsTable({
     return (
         <>
             <div className="flex justify-between gap-2 flex-wrap mb-4">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search for dashboards"
                     onChange={(x) => setFilters({ search: x })}
@@ -247,7 +247,7 @@ export function DashboardsTable({
                         <span>Filter to:</span>
                         {currentTab !== DashboardsTab.Pinned && (
                             <div className="flex items-center gap-2">
-                                <LemonButton
+                                <Button
                                     active={filters.pinned}
                                     type="secondary"
                                     size="small"
@@ -255,7 +255,7 @@ export function DashboardsTable({
                                     icon={<IconPin />}
                                 >
                                     Pinned
-                                </LemonButton>
+                                </Button>
                             </div>
                         )}
                         <Popover
@@ -263,7 +263,7 @@ export function DashboardsTable({
                             onClickOutside={() => setShowTagPopover(false)}
                             overlay={
                                 <div className="max-w-100 deprecated-space-y-2">
-                                    <LemonInput
+                                    <Input
                                         type="search"
                                         placeholder="Search tags"
                                         autoFocus
@@ -275,7 +275,7 @@ export function DashboardsTable({
                                     <ul className="deprecated-space-y-px">
                                         {filteredTags.map((tag: string) => (
                                             <li key={tag}>
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     role="menuitem"
                                                     size="small"
@@ -292,7 +292,7 @@ export function DashboardsTable({
                                                             <span>{tag}</span>
                                                         </span>
                                                     </span>
-                                                </LemonButton>
+                                                </Button>
                                             </li>
                                         ))}
                                         {filteredTags.length === 0 ? (
@@ -304,7 +304,7 @@ export function DashboardsTable({
                                             <>
                                                 <div className="my-1 border-t" />
                                                 <li>
-                                                    <LemonButton
+                                                    <Button
                                                         fullWidth
                                                         role="menuitem"
                                                         size="small"
@@ -312,7 +312,7 @@ export function DashboardsTable({
                                                         type="tertiary"
                                                     >
                                                         Clear selection
-                                                    </LemonButton>
+                                                    </Button>
                                                 </li>
                                             </>
                                         )}
@@ -320,7 +320,7 @@ export function DashboardsTable({
                                 </div>
                             }
                         >
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 icon={<IconChevronDown />}
@@ -332,10 +332,10 @@ export function DashboardsTable({
                                 {(filters.tags?.length || 0) > 0 && (
                                     <span className="ml-1 text-xs">({filters.tags?.length})</span>
                                 )}
-                            </LemonButton>
+                            </Button>
                         </Popover>
                         <div className="flex items-center gap-2">
-                            <LemonButton
+                            <Button
                                 active={filters.shared}
                                 type="secondary"
                                 size="small"
@@ -343,7 +343,7 @@ export function DashboardsTable({
                                 icon={<IconShare />}
                             >
                                 Shared
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                     {currentTab !== DashboardsTab.Yours && (
@@ -358,7 +358,7 @@ export function DashboardsTable({
                     {extraActions}
                 </div>
             </div>
-            <LemonTable
+            <Table
                 data-attr="dashboards-table"
                 pagination={{ pageSize: 100 }}
                 dataSource={dashboards as DashboardType[]}

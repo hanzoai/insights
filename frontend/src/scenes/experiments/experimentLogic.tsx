@@ -6,7 +6,7 @@ import { router } from 'kea-router'
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { hasFormErrors, toParams } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -1101,7 +1101,7 @@ export const experimentLogic = kea<experimentLogicType>([
         },
         setFeatureFlagActive: async ({ isActive }) => {
             if (!values.experiment.feature_flag) {
-                lemonToast.error('Experiment does not have a feature flag linked')
+                toast.error('Experiment does not have a feature flag linked')
                 return
             }
 
@@ -1133,7 +1133,7 @@ export const experimentLogic = kea<experimentLogicType>([
             if (!minimumDetectableEffect) {
                 eventUsageLogic.actions.reportExperimentInsightLoadFailed()
                 actions.setCreateExperimentLoading(false)
-                return lemonToast.error(
+                return toast.error(
                     'Failed to load insight. Experiment cannot be saved without this value. Try changing the experiment goal.'
                 )
             }
@@ -1211,7 +1211,7 @@ export const experimentLogic = kea<experimentLogicType>([
                     }
                 }
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to create experiment')
+                toast.error(error.detail || 'Failed to create experiment')
                 actions.setCreateExperimentLoading(false)
                 return
             }
@@ -1231,7 +1231,7 @@ export const experimentLogic = kea<experimentLogicType>([
 
                 navigateToExperiment()
                 actions.addToExperiments(response)
-                lemonToast.success(`Experiment ${isUpdate ? 'updated' : 'created'}`, {
+                toast.success(`Experiment ${isUpdate ? 'updated' : 'created'}`, {
                     button: {
                         label: 'View it',
                         action: navigateToExperiment,
@@ -1288,7 +1288,7 @@ export const experimentLogic = kea<experimentLogicType>([
         endExperimentWithoutShipping: async () => {
             actions.endExperiment()
             actions.closeFinishExperimentModal()
-            lemonToast.success('Experiment ended successfully')
+            toast.success('Experiment ended successfully')
 
             const trigger = values.confettiTrigger
             if (trigger) {
@@ -1298,13 +1298,13 @@ export const experimentLogic = kea<experimentLogicType>([
         pauseExperiment: async () => {
             await actions.setFeatureFlagActive(false)
             actions.closePauseExperimentModal()
-            lemonToast.success('The feature flag has been disabled')
+            toast.success('The feature flag has been disabled')
             values.experiment && eventUsageLogic.actions.reportExperimentPaused(values.experiment)
         },
         resumeExperiment: async () => {
             await actions.setFeatureFlagActive(true)
             actions.closeResumeExperimentModal()
-            lemonToast.success('The feature flag has been enabled')
+            toast.success('The feature flag has been enabled')
             values.experiment && eventUsageLogic.actions.reportExperimentResumed(values.experiment)
         },
         archiveExperiment: async () => {
@@ -1384,7 +1384,7 @@ export const experimentLogic = kea<experimentLogicType>([
                 cohortsModel.actions.cohortCreated(exposureCohort)
                 actions.reportExperimentExposureCohortCreated(values.experiment, exposureCohort)
                 actions.setExperiment({ exposure_cohort: exposureCohort.id })
-                lemonToast.success('Exposure cohort created successfully', {
+                toast.success('Exposure cohort created successfully', {
                     button: {
                         label: 'View cohort',
                         action: () => router.actions.push(urls.cohort(exposureCohort.id)),
@@ -1393,7 +1393,7 @@ export const experimentLogic = kea<experimentLogicType>([
             }
         },
         finishExperimentSuccess: () => {
-            lemonToast.success('Experiment ended. The selected variant has been rolled out to all users.')
+            toast.success('Experiment ended. The selected variant has been rolled out to all users.')
             actions.closeFinishExperimentModal()
             if (!values.isExperimentStopped) {
                 actions.endExperiment()
@@ -1407,7 +1407,7 @@ export const experimentLogic = kea<experimentLogicType>([
             }
         },
         finishExperimentFailure: ({ error }) => {
-            lemonToast.error(error)
+            toast.error(error)
             actions.closeFinishExperimentModal()
         },
         updateExperimentVariantImages: async ({ variantPreviewMediaIds }) => {
@@ -1423,7 +1423,7 @@ export const experimentLogic = kea<experimentLogicType>([
                     parameters: updatedParameters,
                 })
             } catch {
-                lemonToast.error('Failed to update experiment variant images')
+                toast.error('Failed to update experiment variant images')
             }
         },
         updateDistribution: async ({ featureFlag }) => {
@@ -1574,7 +1574,7 @@ export const experimentLogic = kea<experimentLogicType>([
                         `Dashboard: [${dashboardUrl}](${dashboardUrl})`,
                 })
 
-                lemonToast.success('Dashboard created successfully', {
+                toast.success('Dashboard created successfully', {
                     button: {
                         label: 'View dashboard',
                         action: () => router.actions.push(`/dashboard/${dashboard.id}`),
@@ -1583,7 +1583,7 @@ export const experimentLogic = kea<experimentLogicType>([
             } catch (error: any) {
                 if (!isBreakpoint(error)) {
                     const message = error.code && error.detail ? `${error.code}: ${error.detail}` : error
-                    lemonToast.error(`Could not create dashboard: ${message}`)
+                    toast.error(`Could not create dashboard: ${message}`)
                 }
             }
             actions.setIsCreatingExperimentDashboard(false)

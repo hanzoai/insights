@@ -1,6 +1,6 @@
 import Papa from 'papaparse'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { asDisplay } from 'scenes/persons/person-utils'
@@ -213,7 +213,7 @@ export function copyTableToCsv(dataTableRows: DataTableRow[], columns: string[],
 
         void copyToClipboard(csv, 'table')
     } catch {
-        lemonToast.error('Copy failed!')
+        toast.error('Copy failed!')
     }
 }
 
@@ -225,7 +225,7 @@ export function copyTableToJson(dataTableRows: DataTableRow[], columns: string[]
 
         void copyToClipboard(json, 'table')
     } catch {
-        lemonToast.error('Copy failed!')
+        toast.error('Copy failed!')
     }
 }
 
@@ -237,6 +237,6 @@ export function copyTableToExcel(dataTableRows: DataTableRow[], columns: string[
 
         void copyToClipboard(tsv, 'table')
     } catch {
-        lemonToast.error('Copy failed!')
+        toast.error('Copy failed!')
     }
 }

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -22,7 +22,7 @@ export function ExceptionAutocaptureToggle(): JSX.Element {
 
     return (
         <>
-            <LemonSwitch
+            <Switch
                 id="insights-autocapture-exceptions-switch"
                 onChange={(checked) => {
                     if (checked) {

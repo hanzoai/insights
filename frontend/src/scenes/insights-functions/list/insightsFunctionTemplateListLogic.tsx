@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import { actionToUrl, combineUrl, router, urlToAction } from 'kea-router'
 
 import insights from '@hanzo/insights'
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS, FeatureFlagKey } from 'lib/constants'
@@ -290,7 +290,7 @@ export const insightsFunctionTemplateListLogic = kea<insightsFunctionTemplateLis
                 email: values.user?.email,
             })
 
-            lemonToast.success('Thank you for your interest! We will notify you when this feature is available.')
+            toast.success('Thank you for your interest! We will notify you when this feature is available.')
         },
     })),
 

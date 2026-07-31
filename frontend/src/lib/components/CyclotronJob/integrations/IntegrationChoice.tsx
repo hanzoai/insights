@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconExternal, IconX } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Menu, Skeleton } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { IntegrationView } from 'lib/integrations/IntegrationView'
@@ -44,7 +44,7 @@ export function IntegrationChoice({
     }
 
     if (integrationsLoading) {
-        return <LemonSkeleton className="h-10" />
+        return <Skeleton className="h-10" />
     }
 
     const kindName = getIntegrationNameFromKind(kind)
@@ -83,7 +83,7 @@ export function IntegrationChoice({
           }
 
     const button = (
-        <LemonMenu
+        <Menu
             items={[
                 integrationsOfKind?.length
                     ? {
@@ -123,11 +123,11 @@ export function IntegrationChoice({
             ]}
         >
             {integrationKind ? (
-                <LemonButton type="secondary">Change</LemonButton>
+                <Button type="secondary">Change</Button>
             ) : (
-                <LemonButton type="secondary">Choose {kindName} connection</LemonButton>
+                <Button type="secondary">Choose {kindName} connection</Button>
             )}
-        </LemonMenu>
+        </Menu>
     )
 
     return (

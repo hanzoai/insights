@@ -1,4 +1,4 @@
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -21,7 +21,7 @@ export async function deleteWithUndo<T extends Record<string, any>>({
             deleted: !undo,
         })
         props.callback?.(undo, props.object)
-        lemonToast[undo ? 'success' : 'info'](
+        toast[undo ? 'success' : 'info'](
             <>
                 <b>{props.object.name || <i>{props.object.derived_name || 'Unnamed'}</i>}</b> has been{' '}
                 {undo ? 'restored' : 'deleted'}
@@ -39,7 +39,7 @@ export async function deleteWithUndo<T extends Record<string, any>>({
     } catch (error: any) {
         // Show error toast with the error message from the API
         const errorMessage = error.detail || error.message || 'Failed to delete'
-        lemonToast.error(errorMessage)
+        toast.error(errorMessage)
     }
 }
 
@@ -68,7 +68,7 @@ export async function deleteInsightWithUndo({
                 deleteFromTree('insight', String(props.object.short_id))
             }
         }
-        lemonToast[undo ? 'success' : 'info'](
+        toast[undo ? 'success' : 'info'](
             <>
                 <b>{props.object.name || <i>{props.object.derived_name || 'Unnamed'}</i>}</b> has been{' '}
                 {undo ? 'restored' : 'deleted'}
@@ -86,6 +86,6 @@ export async function deleteInsightWithUndo({
     } catch (error: any) {
         // Show error toast with the error message from the API
         const errorMessage = error.detail || error.message || 'Failed to delete'
-        lemonToast.error(errorMessage)
+        toast.error(errorMessage)
     }
 }

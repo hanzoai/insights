@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconArchive, IconExternal, IconGithub, IconPlay } from '@hanzo/icons'
-import { LemonButton, Spinner } from '@hanzo/lemon-ui'
+import { Button, Spinner } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { urls } from 'scenes/urls'
 
@@ -111,28 +111,28 @@ export function TaskDetailPage({ taskId }: TaskDetailPageProps): JSX.Element {
                 }}
                 actions={
                     <div className="flex items-center gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             icon={<IconExternal />}
                             onClick={() => window.open(`twig://task/${task.id}`, '_blank')}
                         >
                             Open in Twig
-                        </LemonButton>
+                        </Button>
                         {prUrl && (
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 icon={<IconGithub />}
                                 onClick={() => window.open(prUrl, '_blank')}
                             >
                                 View PR
-                            </LemonButton>
+                            </Button>
                         )}
                         {!isLatestRunInProgress && (
-                            <LemonButton type="primary" size="small" icon={<IconPlay />} onClick={runTask}>
+                            <Button type="primary" size="small" icon={<IconPlay />} onClick={runTask}>
                                 {runButtonText}
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 }
@@ -141,9 +141,9 @@ export function TaskDetailPage({ taskId }: TaskDetailPageProps): JSX.Element {
             {task.description && (
                 <div className="relative -mt-2 mb-2 px-2">
                     <CollapsibleContent>
-                        <LemonMarkdown lowKeyHeadings className="text-sm">
+                        <Markdown lowKeyHeadings className="text-sm">
                             {task.description}
-                        </LemonMarkdown>
+                        </Markdown>
                     </CollapsibleContent>
                 </div>
             )}

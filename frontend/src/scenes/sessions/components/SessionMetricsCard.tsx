@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonCard, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Card, Skeleton } from '@hanzo/elements'
 
 import { humanFriendlyDuration } from 'lib/utils'
 
@@ -15,11 +15,11 @@ interface MetricCardProps {
 
 function MetricCard({ title, value, isLoading, subtitle }: MetricCardProps): JSX.Element {
     return (
-        <LemonCard hoverEffect={false} className="p-4 flex flex-col flex-1 justify-between max-w-80 min-h-36">
+        <Card hoverEffect={false} className="p-4 flex flex-col flex-1 justify-between max-w-80 min-h-36">
             <div>
                 <div className="text-sm font-semibold text-muted-alt mb-1">{title}</div>
                 {isLoading ? (
-                    <LemonSkeleton className="h-8 w-24" />
+                    <Skeleton className="h-8 w-24" />
                 ) : (
                     <>
                         <div className="text-3xl font-bold text-primary my-2 truncate">{value ?? '-'}</div>
@@ -27,7 +27,7 @@ function MetricCard({ title, value, isLoading, subtitle }: MetricCardProps): JSX
                     </>
                 )}
             </div>
-        </LemonCard>
+        </Card>
     )
 }
 

@@ -1,6 +1,6 @@
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
-import { LemonSelect, LemonSelectOption } from 'lib/lemon-ui/LemonSelect'
+import { Input } from 'lib/elements/Input'
+import { Radio } from 'lib/elements/Radio'
+import { Select, SelectOption } from 'lib/elements/Select'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils'
 import { TIME_INTERVAL_BOUNDS } from 'scenes/funnels/funnelUtils'
 
@@ -15,7 +15,7 @@ export function ExperimentMetricConversionWindowFilter({
     metric: ExperimentMetric
     handleSetMetric: (newMetric: ExperimentMetric) => void
 }): JSX.Element {
-    const options: LemonSelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
+    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
         (unit) => ({
             label: capitalizeFirstLetter(pluralize(metric.conversion_window ?? 72, unit, `${unit}s`, false)),
             value: unit as FunnelConversionWindowTimeUnit,
@@ -43,7 +43,7 @@ export function ExperimentMetricConversionWindowFilter({
             }
         >
             <div className="flex flex-col gap-2">
-                <LemonRadio
+                <Radio
                     className="my-1.5"
                     value={metric.conversion_window_unit === undefined ? 'experiment_duration' : 'time_window'}
                     orientation="horizontal"
@@ -69,7 +69,7 @@ export function ExperimentMetricConversionWindowFilter({
                 {metric.conversion_window_unit !== undefined && (
                     <div className="flex items-center gap-2">
                         <div className="flex items-center gap-2">
-                            <LemonInput
+                            <Input
                                 type="number"
                                 className="max-w-20"
                                 fullWidth={false}
@@ -80,7 +80,7 @@ export function ExperimentMetricConversionWindowFilter({
                                     handleSetMetric({ ...metric, conversion_window: value || undefined })
                                 }}
                             />
-                            <LemonSelect
+                            <Select
                                 dropdownMatchSelectWidth={false}
                                 value={metric.conversion_window_unit}
                                 onChange={(value) =>

@@ -2,15 +2,15 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconGear, IconLaptop, IconPhone, IconTabletLandscape, IconTabletPortrait } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonSelect } from '@hanzo/lemon-ui'
+import { Banner, Button, Select } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { heatmapDateOptions } from 'lib/components/IframedToolbarBrowser/utils'
 import { HeatmapsSettings } from 'lib/components/heatmaps/HeatMapsSettings'
 import { SectionSetting } from 'lib/components/heatmaps/HeatMapsSettings'
 import { heatmapDataLogic } from 'lib/components/heatmaps/heatmapDataLogic'
-import { LoadingBar } from 'lib/lemon-ui/LoadingBar'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { LoadingBar } from 'lib/elements/LoadingBar'
+import { Popover } from 'lib/elements/Popover'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
 import { TestAccountFilter } from 'scenes/insights/filters/TestAccountFilter'
 
@@ -75,7 +75,7 @@ export function ViewportChooser(): JSX.Element {
     return (
         <div className="flex justify-center items-center gap-2">
             <span>Screen width:</span>
-            <LemonSelect
+            <Select
                 size="small"
                 onChange={setWindowWidthOverride}
                 value={widthOverride}
@@ -173,7 +173,7 @@ export function FilterPanel(): JSX.Element {
                             }}
                             placement="bottom"
                         >
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 onClick={() => setIsSettingsOpen(!isSettingsOpen)}
@@ -182,16 +182,16 @@ export function FilterPanel(): JSX.Element {
                                 data-attr="heatmap-settings"
                             >
                                 Heatmap settings
-                            </LemonButton>
+                            </Button>
                         </Popover>
                     </div>
                 </div>
                 <ViewportChooser />
             </div>
             {heatmapEmpty ? (
-                <LemonBanner type="info" className="mb-2">
+                <Banner type="info" className="mb-2">
                     No data found. Try changing your filters or the URL above.
-                </LemonBanner>
+                </Banner>
             ) : null}
         </>
     )

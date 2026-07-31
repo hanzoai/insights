@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconBalance, IconCheckCircle, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDialog, Spinner } from '@hanzo/lemon-ui'
+import { Button, Dialog, Spinner } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SceneTags } from 'lib/components/Scenes/SceneTags'
@@ -133,7 +133,7 @@ export function SharedMetric(): JSX.Element {
                                 variant="danger"
                                 menuItem
                                 onClick={() => {
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: 'Delete this metric?',
                                         content: (
                                             <div className="text-sm text-secondary">This action cannot be undone.</div>
@@ -186,7 +186,7 @@ export function SharedMetric(): JSX.Element {
                         minAccessLevel={AccessControlLevel.Editor}
                         userAccessLevel={sharedMetric.user_access_level}
                     >
-                        <LemonButton
+                        <Button
                             disabledReason={sharedMetric.name ? undefined : 'You must give your metric a name'}
                             size="small"
                             type="primary"
@@ -200,7 +200,7 @@ export function SharedMetric(): JSX.Element {
                             }}
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </AccessControlAction>
                 }
             />
@@ -224,12 +224,12 @@ export function SharedMetric(): JSX.Element {
             )}
             <div className="flex justify-between">
                 {/* {action === 'update' && (
-                    <LemonButton
+                    <Button
                         size="medium"
                         type="primary"
                         status="danger"
                         onClick={() => {
-                            LemonDialog.open({
+                            Dialog.open({
                                 title: 'Delete this metric?',
                                 content: <div className="text-sm text-secondary">This action cannot be undone.</div>,
                                 primaryButton: {
@@ -247,14 +247,14 @@ export function SharedMetric(): JSX.Element {
                         }}
                     >
                         Delete
-                    </LemonButton>
+                    </Button>
                 )} */}
                 <AccessControlAction
                     resourceType={AccessControlResourceType.ExperimentSavedMetric}
                     minAccessLevel={AccessControlLevel.Editor}
                     userAccessLevel={sharedMetric.user_access_level}
                 >
-                    <LemonButton
+                    <Button
                         disabledReason={sharedMetric.name ? undefined : 'You must give your metric a name'}
                         size="medium"
                         type="primary"
@@ -268,7 +268,7 @@ export function SharedMetric(): JSX.Element {
                         }}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
         </SceneContent>

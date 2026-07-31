@@ -7,7 +7,7 @@ import insights from '@hanzo/insights'
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
 import { IconArrowRight, IconCheck, IconPencil, IconStopFilled, IconTrash, IconX } from '@hanzo/icons'
-import { LemonButton, LemonSwitch, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, Switch, TextArea } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
@@ -70,7 +70,7 @@ function QueuedMessageItem({
     if (isEditing) {
         return (
             <div className="space-y-2">
-                <LemonTextArea
+                <TextArea
                     ref={textAreaRef}
                     value={draft}
                     onChange={setDraft}
@@ -85,17 +85,17 @@ function QueuedMessageItem({
                     }}
                 />
                 <div className="flex gap-1">
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         icon={<IconCheck />}
                         onClick={() => onSave(message.id, draft)}
                         disabledReason={canSave ? undefined : 'Message cannot be empty'}
                     >
                         Save
-                    </LemonButton>
-                    <LemonButton size="xsmall" type="secondary" icon={<IconX />} onClick={onCancel}>
+                    </Button>
+                    <Button size="xsmall" type="secondary" icon={<IconX />} onClick={onCancel}>
                         Cancel
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         )
@@ -105,14 +105,14 @@ function QueuedMessageItem({
         <div className="group flex items-center gap-2 py-1 px-2 rounded-md hover:bg-bg-light">
             <p className="flex-1 text-sm text-secondary truncate">{message.content}</p>
             <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <LemonButton
+                <Button
                     size="xsmall"
                     type="tertiary"
                     icon={<IconPencil className="text-muted" />}
                     onClick={onEdit}
                     tooltip="Edit message"
                 />
-                <LemonButton
+                <Button
                     size="xsmall"
                     type="tertiary"
                     icon={<IconTrash className="text-muted" />}
@@ -293,7 +293,7 @@ export const QuestionInput = React.forwardRef<HTMLDivElement, QuestionInputProps
                                         )}
                                     </div>
                                 )}
-                                <LemonTextArea
+                                <TextArea
                                     aria-describedby={!question ? 'textarea-hint' : undefined}
                                     id="question-input"
                                     ref={textAreaRef}
@@ -371,7 +371,7 @@ export const QuestionInput = React.forwardRef<HTMLDivElement, QuestionInputProps
                             ]}
                             hidden={!isAdmin || (!threadLoading && !pendingPrompt)}
                         >
-                            <LemonButton
+                            <Button
                                 type={(isThreadVisible && !hasQuestion) || showStopButton ? 'secondary' : 'primary'}
                                 onClick={() => {
                                     if (threadLoading) {
@@ -434,7 +434,7 @@ export const QuestionInput = React.forwardRef<HTMLDivElement, QuestionInputProps
                 {/* Override checkbox - shown when impersonating and viewing existing customer conversation (not internal) */}
                 {!conversation?.is_internal && (isImpersonatingExistingConversation || supportOverrideEnabled) && (
                     <div className="flex justify-start gap-1 w-full p-1 bg-warning-highlight rounded-b-lg">
-                        <LemonSwitch
+                        <Switch
                             checked={supportOverrideEnabled}
                             label="I understand this will add to the customer's conversation"
                             onChange={(checked: boolean) => setSupportOverrideEnabled(checked)}

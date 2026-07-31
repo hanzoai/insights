@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCalculator } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
 import { SINGLE_SERIES_DISPLAY_TYPES } from '~/lib/constants'
@@ -29,7 +29,7 @@ export function TrendsSeriesLabel({ insightProps }: EditorFilterProps): JSX.Elem
                 }
             >
                 <div className="-my-1">
-                    <LemonButton
+                    <Button
                         size="small"
                         onClick={() => toggleFormulaMode()}
                         disabled={formulaModeButtonDisabled}
@@ -37,7 +37,7 @@ export function TrendsSeriesLabel({ insightProps }: EditorFilterProps): JSX.Elem
                         id="trends-formula-switch"
                     >
                         {hasFormula ? 'Disable' : 'Enable'} formula mode
-                    </LemonButton>
+                    </Button>
                 </div>
             </Tooltip>
         </div>

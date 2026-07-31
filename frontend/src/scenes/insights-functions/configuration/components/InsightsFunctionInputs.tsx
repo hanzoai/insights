@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
 import { IconCheck, IconPlus, IconX } from '@hanzo/icons'
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { CyclotronJobInputs } from 'lib/components/CyclotronJob/CyclotronJobInputs'
 import { PayGateButton } from 'lib/components/PayGateMini/PayGateButton'
@@ -41,13 +41,13 @@ export function InsightsFunctionInputs(): JSX.Element {
         <div className={clsx('p-3 rounded border deprecated-space-y-2 bg-surface-primary')}>
             <div className="deprecated-space-y-2">
                 {usesGroups && !hasGroupsAddon ? (
-                    <LemonBanner type="warning">
+                    <Banner type="warning">
                         <span className="flex gap-2 items-center">
                             This function appears to use Groups but you do not have the Groups Analytics addon. Without
                             it, you may see empty values where you use templates like {'"{groups.kind.properties}"'}
                             <PayGateButton feature={AvailableFeature.GROUP_ANALYTICS} type="secondary" />
                         </span>
-                    </LemonBanner>
+                    </Banner>
                 ) : null}
 
                 <CyclotronJobInputs
@@ -75,7 +75,7 @@ export function InsightsFunctionInputs(): JSX.Element {
                             <span className="text-sm font-medium">Suggested by Max</span>
                         </div>
                         <div className="flex gap-2">
-                            <LemonButton
+                            <Button
                                 status="danger"
                                 icon={<IconX />}
                                 onClick={() => {
@@ -86,8 +86,8 @@ export function InsightsFunctionInputs(): JSX.Element {
                                 size="small"
                             >
                                 Reject
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 type="tertiary"
                                 icon={<IconCheck color="var(--success)" />}
                                 onClick={() => {
@@ -101,12 +101,12 @@ export function InsightsFunctionInputs(): JSX.Element {
                                 size="small"
                             >
                                 Accept
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 )}
                 {showSource && canEditSource ? (
-                    <LemonButton
+                    <Button
                         icon={<IconPlus />}
                         size="small"
                         type="secondary"
@@ -124,7 +124,7 @@ export function InsightsFunctionInputs(): JSX.Element {
                         }}
                     >
                         Add input variable
-                    </LemonButton>
+                    </Button>
                 ) : null}
             </div>
         </div>

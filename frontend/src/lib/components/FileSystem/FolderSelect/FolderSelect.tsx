@@ -3,9 +3,9 @@ import { ReactNode, useEffect, useRef, useState } from 'react'
 
 import { dayjs } from 'lib/dayjs'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { LemonTree, LemonTreeRef, TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { Input } from 'lib/elements/Input'
+import { Tag } from 'lib/elements/Tag'
+import { Tree, TreeRef, TreeDataItem } from 'lib/elements/Tree/Tree'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { ContextMenuGroup, ContextMenuItem } from 'lib/ui/ContextMenu/ContextMenu'
 import { DropdownMenuGroup, DropdownMenuItem } from 'lib/ui/DropdownMenu/DropdownMenu'
@@ -60,7 +60,7 @@ export function FolderSelect({
         deleteItem,
     } = useActions(projectTreeLogic(props))
 
-    const treeRef = useRef<LemonTreeRef>(null)
+    const treeRef = useRef<TreeRef>(null)
 
     useEffect(() => {
         if (includeProtocol) {
@@ -139,7 +139,7 @@ export function FolderSelect({
 
     return (
         <div className="flex flex-col gap-2">
-            <LemonInput
+            <Input
                 type="search"
                 placeholder="Search"
                 fullWidth
@@ -161,7 +161,7 @@ export function FolderSelect({
                 }}
             />
             <ScrollableShadows direction="vertical" className={cn('bg-surface-primary border rounded', className)}>
-                <LemonTree
+                <Tree
                     ref={treeRef}
                     selectMode="folder-only"
                     className="px-0 py-1"
@@ -228,9 +228,9 @@ export function FolderSelect({
                                 >
                                     {item.displayName}{' '}
                                     {isNew ? (
-                                        <LemonTag type="highlight" size="small" className="ml-1 relative top-[-1px]">
+                                        <Tag type="highlight" size="small" className="ml-1 relative top-[-1px]">
                                             New
-                                        </LemonTag>
+                                        </Tag>
                                     ) : null}
                                 </span>
                             </span>

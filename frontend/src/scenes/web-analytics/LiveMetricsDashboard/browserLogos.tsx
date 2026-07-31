@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { IconWeb } from 'lib/lemon-ui/icons'
+import { IconWeb } from 'lib/elements/icons'
 
 import chromeSvg from 'public/browser_logos/chrome.svg'
 import edgeSvg from 'public/browser_logos/edge.svg'

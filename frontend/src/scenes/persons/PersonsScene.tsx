@@ -1,11 +1,11 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 
 import { IconEllipsis, IconRewind } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Menu } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Link } from 'lib/lemon-ui/Link'
+import { Field } from 'lib/elements/Field'
+import { Link } from 'lib/elements/Link'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { PersonsManagementSceneTabs } from 'scenes/persons-management/PersonsManagementSceneTabs'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
@@ -74,7 +74,7 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                                         menuItem
                                         variant="danger"
                                         onClick={() => {
-                                            LemonDialog.openForm({
+                                            Dialog.openForm({
                                                 width: '30rem',
                                                 title: 'Reset deleted user',
                                                 description: `Once a user is deleted, the "distinct_id" associated with them can no longer be used.
@@ -83,9 +83,9 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                                                     distinct_id: '',
                                                 },
                                                 content: (
-                                                    <LemonField name="distinct_id" label="Distinct ID to reset">
-                                                        <LemonInput type="text" autoFocus />
-                                                    </LemonField>
+                                                    <Field name="distinct_id" label="Distinct ID to reset">
+                                                        <Input type="text" autoFocus />
+                                                    </Field>
                                                 ),
                                                 errors: {
                                                     distinct_id: (distinct_id) =>
@@ -102,12 +102,12 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                                 </ScenePanelActionsSection>
                             </ScenePanel>
                         ) : (
-                            <LemonMenu
+                            <Menu
                                 items={[
                                     {
                                         label: 'Reset a deleted user...',
                                         onClick: () =>
-                                            LemonDialog.openForm({
+                                            Dialog.openForm({
                                                 width: '30rem',
                                                 title: 'Reset deleted user',
                                                 description: `Once a user is deleted, the "distinct_id" associated with them can no longer be used.
@@ -116,9 +116,9 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                                                     distinct_id: '',
                                                 },
                                                 content: (
-                                                    <LemonField name="distinct_id" label="Distinct ID to reset">
-                                                        <LemonInput type="text" autoFocus />
-                                                    </LemonField>
+                                                    <Field name="distinct_id" label="Distinct ID to reset">
+                                                        <Input type="text" autoFocus />
+                                                    </Field>
                                                 ),
                                                 errors: {
                                                     distinct_id: (distinct_id) =>
@@ -130,8 +130,8 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                                     },
                                 ]}
                             >
-                                <LemonButton aria-label="more" icon={<IconEllipsis />} size="small" />
-                            </LemonMenu>
+                                <Button aria-label="more" icon={<IconEllipsis />} size="small" />
+                            </Menu>
                         )}
                     </>
                 }

@@ -4,7 +4,7 @@ import { router, urlToAction } from 'kea-router'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 import { externalDataSourcesLogic } from 'scenes/data-warehouse/externalDataSourcesLogic'
@@ -171,9 +171,9 @@ export const dataWarehouseSettingsLogic = kea<dataWarehouseSettingsLogicType>([
             actions.loadDatabase()
         },
         refreshSelfManagedTableSchema: async ({ tableId }) => {
-            lemonToast.info('Updating schema...')
+            toast.info('Updating schema...')
             await api.dataWarehouseTables.refreshSchema(tableId)
-            lemonToast.success('Schema updated')
+            toast.success('Schema updated')
             actions.loadDatabase()
         },
         deleteSource: async ({ source }) => {
@@ -213,9 +213,9 @@ export const dataWarehouseSettingsLogic = kea<dataWarehouseSettingsLogicType>([
                 insights.capture('source reloaded', { sourceType: source.source_type })
             } catch (e: any) {
                 if (e.message) {
-                    lemonToast.error(e.message)
+                    toast.error(e.message)
                 } else {
-                    lemonToast.error('Cant refresh source at this time')
+                    toast.error('Cant refresh source at this time')
                 }
             }
             actions.sourceLoadingFinished(source)
@@ -255,7 +255,7 @@ export const dataWarehouseSettingsLogic = kea<dataWarehouseSettingsLogicType>([
                     actions.loadJoins()
                 },
             }).catch((e) => {
-                lemonToast.error(`Failed to delete warehouse view link: ${e.detail}`)
+                toast.error(`Failed to delete warehouse view link: ${e.detail}`)
             })
         },
     })),

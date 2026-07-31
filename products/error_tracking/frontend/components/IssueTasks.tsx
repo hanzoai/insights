@@ -1,14 +1,14 @@
 import { useValues } from 'kea'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonDialog, LemonInput, LemonTextArea } from '@hanzo/lemon-ui'
+import { Dialog, Input, TextArea } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { ErrorEventType, ErrorTrackingException } from 'lib/components/Errors/types'
 import { formatExceptionDisplay, formatResolvedName } from 'lib/components/Errors/utils'
 import { GitHubRepositorySelectField } from 'lib/integrations/GitHubIntegrationHelpers'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
 import { ErrorTrackingRelationalIssue } from '~/queries/schema/schema-general'
@@ -142,7 +142,7 @@ const createTaskForm = (
 
     const defaultIntegration = githubIntegrations[0]
 
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create Insights task',
         initialValues: {
             title: issue.name ?? '',
@@ -152,12 +152,12 @@ const createTaskForm = (
         content: (
             <div className="flex flex-col gap-y-4">
                 {githubIntegrations.length > 0 && <GitHubRepositorySelectField integrationId={defaultIntegration.id} />}
-                <LemonField name="title" label="Title">
-                    <LemonInput data-attr="task-title" placeholder="Task title" size="small" />
-                </LemonField>
-                <LemonField name="description" label="Description">
-                    <LemonTextArea data-attr="task-description" placeholder="Start typing..." rows={8} />
-                </LemonField>
+                <Field name="title" label="Title">
+                    <Input data-attr="task-title" placeholder="Task title" size="small" />
+                </Field>
+                <Field name="description" label="Description">
+                    <TextArea data-attr="task-description" placeholder="Start typing..." rows={8} />
+                </Field>
             </div>
         ),
         errors: {

@@ -14,13 +14,13 @@ import {
     IconStopFilled,
     IconTrash,
 } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonDivider, LemonInput, LemonTable, LemonTag, Spinner } from '@hanzo/lemon-ui'
+import { Button, Dialog, Divider, Input, Table, Tag, Spinner } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTableColumn } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { More } from 'lib/elements/Button/More'
+import { TableColumn } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn } from 'lib/elements/Table/columnUtils'
 import { cn } from 'lib/utils/css-classes'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { urls } from 'scenes/urls'
@@ -57,7 +57,7 @@ export function ProductTourStatusTag({
 
     const config = statusConfig[status]
     return (
-        <LemonTag type={config.type}>
+        <Tag type={config.type}>
             {isEditing && (
                 <>
                     {draftSaveStatus === 'unsaved' && <IconCircleDashed />}
@@ -66,7 +66,7 @@ export function ProductTourStatusTag({
                 </>
             )}
             {config.label}
-        </LemonTag>
+        </Tag>
     )
 }
 
@@ -77,14 +77,14 @@ export function ProductToursTable(): JSX.Element {
     return (
         <>
             <div className={cn('flex flex-wrap gap-2 justify-between mb-0')}>
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search for product tours"
                     onChange={setSearchTerm}
                     value={searchTerm || ''}
                 />
             </div>
-            <LemonTable
+            <Table
                 dataSource={filteredProductTours}
                 defaultSorting={{
                     columnKey: 'created_at',
@@ -106,13 +106,13 @@ export function ProductToursTable(): JSX.Element {
                         render: function RenderName(_, tour) {
                             return (
                                 <div className="flex gap-2 items-center justify-start">
-                                    <LemonTag
+                                    <Tag
                                         type="option"
                                         icon={isAnnouncement(tour) ? <IconMegaphone /> : <IconCursorClick />}
                                     >
                                         {isAnnouncement(tour) ? 'Announcement' : 'Tour'}
-                                    </LemonTag>
-                                    <LemonTableLink
+                                    </Tag>
+                                    <TableLink
                                         to={urls.productTour(tour.id)}
                                         title={stringWithWBR(tour.name, 17)}
                                     />
@@ -128,7 +128,7 @@ export function ProductToursTable(): JSX.Element {
                     },
                     ...(tab === ProductToursTabs.Active
                         ? [
-                              createdAtColumn<ProductTour>() as LemonTableColumn<
+                              createdAtColumn<ProductTour>() as TableColumn<
                                   ProductTour,
                                   keyof ProductTour | undefined
                               >,
@@ -138,7 +138,7 @@ export function ProductToursTable(): JSX.Element {
                                   render: function Render(_: any, tour: ProductTour) {
                                       return <ProductTourStatusTag tour={tour} />
                                   },
-                              } as LemonTableColumn<ProductTour, keyof ProductTour | undefined>,
+                              } as TableColumn<ProductTour, keyof ProductTour | undefined>,
                           ]
                         : []),
                     {
@@ -148,22 +148,22 @@ export function ProductToursTable(): JSX.Element {
                                 <More
                                     overlay={
                                         <>
-                                            <LemonButton
+                                            <Button
                                                 fullWidth
                                                 icon={<IconEye className="w-4" />}
                                                 onClick={() => router.actions.push(urls.productTour(tour.id))}
                                             >
                                                 View
-                                            </LemonButton>
-                                            <LemonButton
+                                            </Button>
+                                            <Button
                                                 fullWidth
                                                 icon={<IconCopy className="w-4" />}
                                                 onClick={() => duplicateProductTour(tour)}
                                             >
                                                 Duplicate
-                                            </LemonButton>
+                                            </Button>
                                             {!tour.start_date && (
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     icon={<IconRocket className="w-4" />}
                                                     disabledReason={
@@ -172,7 +172,7 @@ export function ProductToursTable(): JSX.Element {
                                                             : undefined
                                                     }
                                                     onClick={() => {
-                                                        LemonDialog.open({
+                                                        Dialog.open({
                                                             title: 'Launch this product tour?',
                                                             content: (
                                                                 <div className="text-sm text-secondary">
@@ -202,14 +202,14 @@ export function ProductToursTable(): JSX.Element {
                                                     }}
                                                 >
                                                     Launch tour
-                                                </LemonButton>
+                                                </Button>
                                             )}
                                             {isProductTourRunning(tour) && (
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     icon={<IconStopFilled className="w-4" />}
                                                     onClick={() => {
-                                                        LemonDialog.open({
+                                                        Dialog.open({
                                                             title: 'Stop this product tour?',
                                                             content: (
                                                                 <div className="text-sm text-secondary">
@@ -238,14 +238,14 @@ export function ProductToursTable(): JSX.Element {
                                                     }}
                                                 >
                                                     Stop tour
-                                                </LemonButton>
+                                                </Button>
                                             )}
                                             {tour.end_date && !tour.archived && (
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     icon={<IconRefresh className="w-4" />}
                                                     onClick={() => {
-                                                        LemonDialog.open({
+                                                        Dialog.open({
                                                             title: 'Resume this product tour?',
                                                             content: (
                                                                 <div className="text-sm text-secondary">
@@ -275,11 +275,11 @@ export function ProductToursTable(): JSX.Element {
                                                     }}
                                                 >
                                                     Resume tour
-                                                </LemonButton>
+                                                </Button>
                                             )}
-                                            <LemonDivider />
+                                            <Divider />
                                             {tour.archived && (
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     icon={<IconArchive className="w-4" />}
                                                     onClick={() => {
@@ -290,10 +290,10 @@ export function ProductToursTable(): JSX.Element {
                                                     }}
                                                 >
                                                     Restore
-                                                </LemonButton>
+                                                </Button>
                                             )}
                                             {!tour.archived && (
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     icon={<IconArchive className="w-4" />}
                                                     disabledReason={
@@ -302,7 +302,7 @@ export function ProductToursTable(): JSX.Element {
                                                             : undefined
                                                     }
                                                     onClick={() => {
-                                                        LemonDialog.open({
+                                                        Dialog.open({
                                                             title: `Archive tour ${tour.name}?`,
                                                             content: (
                                                                 <div className="text-sm text-secondary">
@@ -332,9 +332,9 @@ export function ProductToursTable(): JSX.Element {
                                                     }}
                                                 >
                                                     Archive
-                                                </LemonButton>
+                                                </Button>
                                             )}
-                                            <LemonButton
+                                            <Button
                                                 status="danger"
                                                 icon={<IconTrash className="w-4" />}
                                                 disabledReason={
@@ -343,7 +343,7 @@ export function ProductToursTable(): JSX.Element {
                                                         : undefined
                                                 }
                                                 onClick={() => {
-                                                    LemonDialog.open({
+                                                    Dialog.open({
                                                         title: `Delete tour ${tour.name}?`,
                                                         content: (
                                                             <div className="text-sm text-secondary">
@@ -367,7 +367,7 @@ export function ProductToursTable(): JSX.Element {
                                                 fullWidth
                                             >
                                                 Delete
-                                            </LemonButton>
+                                            </Button>
                                         </>
                                     }
                                 />

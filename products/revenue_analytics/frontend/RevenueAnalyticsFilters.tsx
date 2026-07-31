@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconFilter, IconGear, IconGraph, IconLineGraph, IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonSelect, LemonSelectOptions, Popover, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Select, SelectOptions, Popover, Tooltip } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -14,7 +14,7 @@ import { isRevenueAnalyticsPropertyFilter } from 'lib/components/PropertyFilters
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { dayjs } from 'lib/dayjs'
-import { IconAreaChart, IconWithCount } from 'lib/lemon-ui/icons'
+import { IconAreaChart, IconWithCount } from 'lib/elements/icons'
 import { DATE_FORMAT, formatDateRange } from 'lib/utils'
 import { BreakdownTag } from 'scenes/insights/filters/BreakdownFilter/BreakdownTag'
 import MaxTool from 'scenes/max/MaxTool'
@@ -75,7 +75,7 @@ const DATE_FILTER_DATE_OPTIONS: DateMappingOption[] = [
 ]
 
 // Simple mapping for the display mode options and their icons
-const DISPLAY_MODE_OPTIONS: LemonSelectOptions<DisplayMode> = [
+const DISPLAY_MODE_OPTIONS: SelectOptions<DisplayMode> = [
     { value: 'line', label: 'Line chart', icon: <IconLineGraph /> },
     { value: 'area', label: 'Area chart', icon: <IconAreaChart /> },
     { value: 'bar', label: 'Bar chart', icon: <IconGraph /> },
@@ -110,7 +110,7 @@ export const RevenueAnalyticsFilters = (): JSX.Element => {
                         scope={Scene.RevenueAnalytics}
                     >
                         <Tooltip title="Update revenue analytics settings">
-                            <LemonButton
+                            <Button
                                 to={urls.revenueSettings()}
                                 icon={<IconGear />}
                                 type="secondary"
@@ -132,7 +132,7 @@ export const RevenueAnalyticsFilters = (): JSX.Element => {
                         </Tooltip>
                     </AppShortcut>
 
-                    <LemonSelect
+                    <Select
                         value={insightsDisplayMode}
                         onChange={setInsightsDisplayMode}
                         options={DISPLAY_MODE_OPTIONS}
@@ -213,7 +213,7 @@ const RevenueAnalyticsPropertyFilters = (): JSX.Element => {
                         interaction="click"
                         scope={Scene.RevenueAnalytics}
                     >
-                        <LemonButton
+                        <Button
                             data-attr="show-revenue-analytics-filters"
                             icon={
                                 <IconWithCount count={revenueAnalyticsFilter.length} showZero={false}>
@@ -225,7 +225,7 @@ const RevenueAnalyticsPropertyFilters = (): JSX.Element => {
                             onClick={() => setDisplayFilters((displayFilters) => !displayFilters)}
                         >
                             Filters
-                        </LemonButton>
+                        </Button>
                     </AppShortcut>
                 </Popover>
             </MaxTool>
@@ -248,7 +248,7 @@ const AddBreakdownButton = (): JSX.Element => {
 
     return (
         <BreakdownPopover open={open} setOpen={setOpen} onSelect={(breakdown) => addBreakdown(breakdown)}>
-            <LemonButton
+            <Button
                 type="secondary"
                 icon={<IconPlusSmall />}
                 data-attr="add-breakdown-button"
@@ -258,7 +258,7 @@ const AddBreakdownButton = (): JSX.Element => {
                 size="small"
             >
                 Breakdown
-            </LemonButton>
+            </Button>
         </BreakdownPopover>
     )
 }

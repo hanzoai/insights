@@ -13,7 +13,7 @@
     },
     "peerDependencies": {
         "@hanzo/icons": "*",
-        "@hanzo/lemon-ui": "*",
+        "@hanzo/elements": "*",
         "@tiptap/core": "*",
         "@tiptap/extension-document": "*",
         "@tiptap/extension-image": "*",

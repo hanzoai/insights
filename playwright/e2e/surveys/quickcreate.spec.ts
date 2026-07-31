@@ -22,10 +22,10 @@ const expectFlagEnabled = async (page: Page, name: string): Promise<void> => {
 
 const expectVariant = async (page: Page, variant?: string): Promise<void> => {
     if (!variant) {
-        return await expect(page.locator('.LemonTag').getByText('variant:')).not.toBeVisible()
+        return await expect(page.locator('.Tag').getByText('variant:')).not.toBeVisible()
     }
 
-    await expect(page.locator('.LemonTag').getByText(`variant: ${variant}`)).toBeVisible()
+    await expect(page.locator('.Tag').getByText(`variant: ${variant}`)).toBeVisible()
 }
 
 const expectEvents = async (page: Page, events: string[]): Promise<void> => {
@@ -38,7 +38,7 @@ const expectEvents = async (page: Page, events: string[]): Promise<void> => {
 
     await expect(eventsSpan).toBeVisible()
     for (const event of events) {
-        await expect(eventsSection.locator('.LemonTag').getByText(event)).toBeVisible()
+        await expect(eventsSection.locator('.Tag').getByText(event)).toBeVisible()
     }
 }
 
@@ -57,7 +57,7 @@ const clickCreateSurvey = async (page: Page, name: string): Promise<void> => {
 }
 
 const goToSurveyOverview = async (page: Page): Promise<void> => {
-    await page.locator('.LemonTabs__tab').getByText('Overview').click()
+    await page.locator('.Tabs__tab').getByText('Overview').click()
 }
 
 const launchSurvey = async (page: Page, name: string): Promise<void> => {
@@ -150,7 +150,7 @@ test.describe('Quick create survey from feature flag', () => {
         await clickCreateSurvey(page, name)
 
         // add event
-        await page.locator('.LemonButton').getByText('Add event').click()
+        await page.locator('.Button').getByText('Add event').click()
         const autocaptureOption = page.locator('span[aria-label="Autocapture"]').getByText('Autocapture')
         await expect(autocaptureOption).toBeVisible()
         await autocaptureOption.click()
@@ -174,7 +174,7 @@ test.describe('Quick create survey from feature flag', () => {
         await page.waitForLoadState('networkidle')
         await page.goto(ffUrl!)
 
-        await page.locator('.LemonTabs__tab').getByText('User feedback').click()
+        await page.locator('.Tabs__tab').getByText('User feedback').click()
         await expect(page.getByText('Filter survey results')).toBeVisible()
     })
 
@@ -200,7 +200,7 @@ test.describe('Quick create survey from feature flag', () => {
         await page.waitForLoadState('networkidle')
         await page.goto(ffUrl!)
 
-        await page.locator('.LemonTabs__tab').getByText('User feedback').click()
+        await page.locator('.Tabs__tab').getByText('User feedback').click()
         await expect(page.locator('[data-attr="surveys-table"]')).toBeVisible()
     })
 
@@ -211,7 +211,7 @@ test.describe('Quick create survey from feature flag', () => {
         await page
             .getByTestId('quick-survey-create')
             .locator('..')
-            .locator('.LemonButtonWithSideAction__side-button button')
+            .locator('.ButtonWithSideAction__side-button button')
             .click()
 
         const saveAsDraftButton = page.getByText('Save as draft')

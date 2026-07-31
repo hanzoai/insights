@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconGlobe, IconGraph, IconPieChart, IconRetentionHeatmap, IconTrends } from '@hanzo/icons'
-import { LemonSelect, LemonSelectOptions } from '@hanzo/lemon-ui'
+import { Select, SelectOptions } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Icon123, IconAreaChart, IconCumulativeChart, IconTableChart } from 'lib/lemon-ui/icons'
+import { Icon123, IconAreaChart, IconCumulativeChart, IconTableChart } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -33,7 +33,7 @@ export function ChartFilter(): JSX.Element {
         ? 'This type currently only supports insights with one series, and this insight has multiple series.'
         : undefined
 
-    const options: LemonSelectOptions<ChartDisplayType> = [
+    const options: SelectOptions<ChartDisplayType> = [
         {
             title: 'Time series',
             options: [
@@ -179,7 +179,7 @@ export function ChartFilter(): JSX.Element {
     ]
 
     return (
-        <LemonSelect
+        <Select
             key="2"
             value={display || ChartDisplayType.ActionsLineGraph}
             onChange={(value) => {

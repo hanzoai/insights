@@ -5,8 +5,8 @@ import { useState } from 'react'
 
 import { IconPlay } from '@hanzo/icons'
 
-import { LemonCard } from 'lib/lemon-ui/LemonCard'
-import { Link } from 'lib/lemon-ui/Link'
+import { Card } from 'lib/elements/Card'
+import { Link } from 'lib/elements/Link'
 import { INSIGHT_TYPE_URLS } from 'scenes/insights/utils'
 import { INSIGHT_TYPES_METADATA } from 'scenes/saved-insights/SavedInsights'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -81,7 +81,7 @@ function InsightOptionCard({ insightType, metadata, index }: InsightOptionCardPr
             onMouseLeave={() => setIsHovered(false)}
             data-attr={`insight-option-${insightType.toLowerCase()}`}
         >
-            <LemonCard
+            <Card
                 className="cursor-pointer h-full overflow-hidden"
                 hoverEffect
                 onClick={() => router.actions.push(url)}
@@ -125,7 +125,7 @@ function InsightOptionCard({ insightType, metadata, index }: InsightOptionCardPr
                         </Link>
                     )}
                 </div>
-            </LemonCard>
+            </Card>
         </div>
     )
 }

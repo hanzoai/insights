@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconRefresh, IconSparkles } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Skeleton } from '@hanzo/elements'
 
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 
@@ -16,7 +16,7 @@ export function SurveyHeadline(): JSX.Element | null {
     }
 
     const refreshButton = (
-        <LemonButton
+        <Button
             type="tertiary"
             size="xsmall"
             icon={<IconRefresh />}
@@ -45,7 +45,7 @@ export function SurveyHeadline(): JSX.Element | null {
                     ))}
             </div>
             {surveyHeadlineLoading ? (
-                <LemonSkeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
             ) : (
                 <div className="text-base">{survey.headline_summary}</div>
             )}

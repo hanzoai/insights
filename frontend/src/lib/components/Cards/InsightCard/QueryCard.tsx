@@ -3,7 +3,7 @@ import { BuiltLogic, LogicWrapper, useValues } from 'kea'
 import React, { useState } from 'react'
 
 import { CardMeta } from 'lib/components/Cards/CardMeta'
-import { LemonMenuItemList } from 'lib/lemon-ui/LemonMenu/LemonMenu'
+import { MenuItemList } from 'lib/elements/Menu/Menu'
 import { urls } from 'scenes/urls'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
@@ -76,7 +76,7 @@ export const QueryCard = React.forwardRef<HTMLDivElement, QueryCardProps>(functi
                             : undefined
                     }
                     moreButtons={
-                        <LemonMenuItemList
+                        <MenuItemList
                             items={[
                                 {
                                     label: 'Open as new insight',

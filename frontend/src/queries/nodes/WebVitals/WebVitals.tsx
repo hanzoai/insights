@@ -1,10 +1,10 @@
 import { BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { urls } from 'scenes/urls'
@@ -122,7 +122,7 @@ export function WebVitals(props: {
                     />
 
                     <div className="flex w-full justify-end">
-                        <LemonButton
+                        <Button
                             to={urls.insightNew({ query: webVitalsMetricQuery })}
                             icon={<IconOpenInNew />}
                             size="small"
@@ -136,7 +136,7 @@ export function WebVitals(props: {
                             }}
                         >
                             Open as new Insight
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </div>

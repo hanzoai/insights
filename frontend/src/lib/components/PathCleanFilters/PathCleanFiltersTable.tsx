@@ -15,9 +15,9 @@ import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 
 import { IconPencil, IconTrash } from '@hanzo/icons'
-import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tooltip } from '@hanzo/elements'
 
-import { SortableDragIcon } from 'lib/lemon-ui/icons'
+import { SortableDragIcon } from 'lib/elements/icons'
 import { isValidRegexp } from 'lib/utils/regexp'
 
 import { PathCleaningFilter } from '~/types'
@@ -109,13 +109,13 @@ function SortableRow({ filter, index, onEdit, onRemove }: SortableRowProps): JSX
                 </td>
                 <td className="py-1 px-2 w-20">
                     <div className="flex items-center gap-1">
-                        <LemonButton
+                        <Button
                             icon={<IconPencil />}
                             size="xsmall"
                             onClick={() => setIsModalVisible(true)}
                             tooltip="Edit rule"
                         />
-                        <LemonButton
+                        <Button
                             icon={<IconTrash />}
                             size="xsmall"
                             status="danger"

@@ -1,5 +1,5 @@
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Divider } from 'lib/elements/Divider'
+import { Tooltip } from 'lib/elements/Tooltip'
 import {
     PerformanceMeasures,
     TimingBar,
@@ -68,7 +68,7 @@ export const TimeLineView = ({ performanceEvent }: { performanceEvent: Performan
                 })}
             {performanceMeasures['serverTimings'].length > 0 ? (
                 <>
-                    <LemonDivider dashed={true} />
+                    <Divider dashed={true} />
                     <Tooltip title={perfDescriptions['server_timing']}>
                         <h3 className="text-sm text-secondary">Server timings</h3>
                     </Tooltip>

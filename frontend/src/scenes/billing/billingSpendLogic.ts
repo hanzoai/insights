@@ -5,7 +5,7 @@ import { actionToUrl, router, urlToAction } from 'kea-router'
 import difference from 'lodash.difference'
 import sortBy from 'lodash.sortby'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -121,7 +121,7 @@ export const billingSpendLogic = kea<billingSpendLogicType>([
                     try {
                         return await api.get(`api/billing/spend/?${toParams(params)}`)
                     } catch (error) {
-                        lemonToast.error('Failed to load billing spend, please try again or contact support.')
+                        toast.error('Failed to load billing spend, please try again or contact support.')
                         throw error
                     }
                 },

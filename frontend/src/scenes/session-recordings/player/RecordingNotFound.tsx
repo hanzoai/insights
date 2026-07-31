@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 
 import { NotFound } from 'lib/components/NotFound'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Link } from 'lib/elements/Link'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
@@ -24,33 +24,33 @@ export function RecordingNotFound(): JSX.Element {
                     </Link>{' '}
                     for more information.
                     {currentTeam?.session_recording_opt_in ? (
-                        <LemonBanner type="info" className="mt-4 max-w-xl mx-auto">
+                        <Banner type="info" className="mt-4 max-w-xl mx-auto">
                             <div className="flex justify-between items-center">
                                 <div>Session replay is enabled for this project</div>
-                                <LemonButton
+                                <Button
                                     data-attr="recording-404-edit-settings"
                                     type="secondary"
                                     size="small"
                                     to={urls.settings('project-replay')}
                                 >
                                     Edit settings
-                                </LemonButton>
+                                </Button>
                             </div>
-                        </LemonBanner>
+                        </Banner>
                     ) : (
-                        <LemonBanner type="warning" className="mt-4 max-w-xl mx-auto">
+                        <Banner type="warning" className="mt-4 max-w-xl mx-auto">
                             <div className="flex justify-between items-center">
                                 <div>Session replay is disabled for this project</div>
-                                <LemonButton
+                                <Button
                                     data-attr="recording-404-edit-settings"
                                     type="secondary"
                                     size="small"
                                     to={urls.settings('project-replay')}
                                 >
                                     Edit settings
-                                </LemonButton>
+                                </Button>
                             </div>
-                        </LemonBanner>
+                        </Banner>
                     )}
                 </>
             }

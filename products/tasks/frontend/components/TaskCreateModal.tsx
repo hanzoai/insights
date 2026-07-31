@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, Modal, TextArea } from '@hanzo/elements'
 
 import { taskTrackerSceneLogic } from '../logics/taskTrackerSceneLogic'
 import { RepositorySelector } from './RepositorySelector'
@@ -20,26 +20,26 @@ export function TaskCreateModal({ isOpen, onClose }: TaskCreateModalProps): JSX.
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={handleCancel}
             title="Create new task"
             width={800}
             footer={
                 <div className="flex gap-2">
-                    <LemonButton type="secondary" onClick={handleCancel}>
+                    <Button type="secondary" onClick={handleCancel}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={submitNewTask} loading={isSubmittingTask}>
+                    </Button>
+                    <Button type="primary" onClick={submitNewTask} loading={isSubmittingTask}>
                         Create task
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
             <div className="space-y-6">
                 <div>
                     <label className="block text-sm font-medium mb-2">Description</label>
-                    <LemonTextArea
+                    <TextArea
                         value={newTaskData.description}
                         onChange={(value) => setNewTaskData({ description: value })}
                         placeholder="Describe the task in detail..."
@@ -55,6 +55,6 @@ export function TaskCreateModal({ isOpen, onClose }: TaskCreateModalProps): JSX.
                     />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

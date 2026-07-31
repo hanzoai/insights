@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconFlag } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonModal, LemonTable, LemonTableColumns, LemonTag } from '@hanzo/lemon-ui'
+import { Banner, Button, Modal, Table, TableColumns, Tag } from '@hanzo/elements'
 
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
@@ -23,17 +23,17 @@ export function ReleaseConditionsModal(): JSX.Element {
     const { setFeatureFlagFilters, saveSidebarExperimentFeatureFlag } = useActions(_featureFlagLogic)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isReleaseConditionsModalOpen}
             onClose={closeReleaseConditionsModal}
             width={600}
             title="Change release conditions"
             footer={
                 <div className="flex items-center gap-2">
-                    <LemonButton type="secondary" onClick={closeReleaseConditionsModal}>
+                    <Button type="secondary" onClick={closeReleaseConditionsModal}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         onClick={async () => {
                             await saveSidebarExperimentFeatureFlag(featureFlag)
 
@@ -54,15 +54,15 @@ export function ReleaseConditionsModal(): JSX.Element {
                         type="primary"
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
             <div className="deprecated-space-y-4">
-                <LemonBanner type="info">
+                <Banner type="info">
                     Adjusting user targeting may impact the validity of your results. Adjust only if you're aware of how
                     changes will affect your experiment.
-                </LemonBanner>
+                </Banner>
 
                 <FeatureFlagReleaseConditions
                     id={`${experiment.feature_flag?.id}`}
@@ -71,7 +71,7 @@ export function ReleaseConditionsModal(): JSX.Element {
                     nonEmptyFeatureFlagVariants={nonEmptyVariants}
                 />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -81,7 +81,7 @@ export function ReleaseConditionsTable(): JSX.Element {
     const { openReleaseConditionsModal } = useActions(modalsLogic)
     const { aggregationLabel } = useValues(groupsModel)
 
-    const columns: LemonTableColumns<FeatureFlagGroupType> = [
+    const columns: TableColumns<FeatureFlagGroupType> = [
         {
             key: 'key',
             title: '',
@@ -103,7 +103,7 @@ export function ReleaseConditionsTable(): JSX.Element {
                 return (
                     <div>
                         {releaseText.startsWith('100% of') ? (
-                            <LemonTag type="highlight">{releaseText}</LemonTag>
+                            <Tag type="highlight">{releaseText}</Tag>
                         ) : (
                             releaseText
                         )}
@@ -129,7 +129,7 @@ export function ReleaseConditionsTable(): JSX.Element {
 
                 <div className="w-1/2 flex flex-col justify-end">
                     <div className="ml-auto mb-2">
-                        <LemonButton
+                        <Button
                             icon={<IconFlag />}
                             onClick={() => {
                                 openReleaseConditionsModal()
@@ -140,11 +140,11 @@ export function ReleaseConditionsTable(): JSX.Element {
                             className="font-semibold"
                         >
                             Manage release conditions
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </div>
-            <LemonTable loading={false} columns={columns} dataSource={experiment.feature_flag?.filters.groups || []} />
+            <Table loading={false} columns={columns} dataSource={experiment.feature_flag?.filters.groups || []} />
         </div>
     )
 }

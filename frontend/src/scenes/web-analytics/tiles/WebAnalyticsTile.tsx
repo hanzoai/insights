@@ -3,7 +3,7 @@ import { BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { useCallback, useMemo } from 'react'
 
 import { IconChevronDown, IconExternal, IconTrending, IconWarning } from '@hanzo/icons'
-import { LemonSegmentedButton, LemonSelect, Link, Tooltip } from '@hanzo/lemon-ui'
+import { SegmentedButton, Select, Link, Tooltip } from '@hanzo/elements'
 
 import { getColorVar } from 'lib/colors'
 import { IntervalFilterStandalone } from 'lib/components/IntervalFilter'
@@ -12,10 +12,10 @@ import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductI
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
 import { StarMascot } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
-import { IconOpenInNew, IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Switch } from 'lib/elements/Switch'
+import { toast } from 'lib/elements/Toast/Toast'
+import { IconOpenInNew, IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { UnexpectedNeverError, humanFriendlyDuration, percentage, tryDecodeURIComponent } from 'lib/utils'
 import {
@@ -745,7 +745,7 @@ export const MarketingAnalyticsTrendTile = ({
         <div className="border rounded bg-surface-primary flex-1 flex flex-col">
             {showIntervalTile && (
                 <div className="flex flex-row items-center justify-between m-2 mr-4">
-                    <LemonSelect
+                    <Select
                         value={tileColumnSelection}
                         onChange={setTileColumnSelection}
                         options={MARKETING_COLUMN_OPTIONS}
@@ -759,7 +759,7 @@ export const MarketingAnalyticsTrendTile = ({
                                 onIntervalChange={setDateInterval}
                             />
                         </div>
-                        <LemonSegmentedButton
+                        <SegmentedButton
                             value={chartDisplayType}
                             onChange={setChartDisplayType}
                             options={DISPLAY_MODE_OPTIONS}
@@ -801,7 +801,7 @@ export const WebStatsTableTile = ({
             }
 
             if (productTab === ProductTab.PAGE_REPORTS) {
-                lemonToast.info('Filters are not yet supported in this tile')
+                toast.info('Filters are not yet supported in this tile')
                 return
             }
 
@@ -929,7 +929,7 @@ export const WebGoalsTile = ({
     return (
         <div className="border rounded bg-surface-primary flex-1">
             <div className="flex flex-row-reverse p-2">
-                <LemonButton
+                <Button
                     to={urls.actions()}
                     onClick={() => {
                         addProductIntentForCrossSell({
@@ -943,7 +943,7 @@ export const WebGoalsTile = ({
                     size="small"
                 >
                     Manage actions
-                </LemonButton>
+                </Button>
             </div>
             <Query
                 attachTo={attachTo}
@@ -970,7 +970,7 @@ export const WebExternalClicksTile = ({
             {!isPageReportsPage && (
                 <div className="flex flex-row items-center justify-end m-2 mr-4">
                     <div className="flex flex-row items-center deprecated-space-x-2">
-                        <LemonSwitch
+                        <Switch
                             label="Strip query parameters"
                             checked={shouldStripQueryParams}
                             onChange={setShouldStripQueryParams}

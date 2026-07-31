@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox } from '@hanzo/lemon-ui'
+import { Checkbox } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 
@@ -16,7 +16,7 @@ export function ShowMultipleYAxesFilter(): JSX.Element {
     }
 
     return (
-        <LemonCheckbox
+        <Checkbox
             className="p-1 px-2"
             onChange={toggleShowMultipleYAxes}
             checked={!!showMultipleYAxes}

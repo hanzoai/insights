@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
 import { IconArchive, IconGraph, IconLlmAnalytics, IconThumbsDown, IconThumbsUp, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonDivider, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Dialog, Divider, Tooltip } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
@@ -12,8 +12,8 @@ import { SceneDuplicate } from 'lib/components/Scenes/SceneDuplicate'
 import { SceneFile } from 'lib/components/Scenes/SceneFile'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tabs } from 'lib/elements/Tabs'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
@@ -120,7 +120,7 @@ function SurveyViewLegacy({ id }: { id: string }): JSX.Element {
     return (
         <div>
             {surveyLoading ? (
-                <LemonSkeleton />
+                <Skeleton />
             ) : (
                 <SceneContent>
                     <ScenePanel>
@@ -206,7 +206,7 @@ function SurveyViewLegacy({ id }: { id: string }): JSX.Element {
                                     minAccessLevel={AccessControlLevel.Editor}
                                     userAccessLevel={survey.user_access_level}
                                 >
-                                    <LemonButton
+                                    <Button
                                         data-attr="edit-survey"
                                         onClick={
                                             guidedEditorEnabled && survey.type === SurveyType.Popover
@@ -222,7 +222,7 @@ function SurveyViewLegacy({ id }: { id: string }): JSX.Element {
                                         size="small"
                                     >
                                         Edit
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                                 {!survey.start_date ? (
                                     <LaunchSurveyButton />
@@ -232,11 +232,11 @@ function SurveyViewLegacy({ id }: { id: string }): JSX.Element {
                                         minAccessLevel={AccessControlLevel.Editor}
                                         userAccessLevel={survey.user_access_level}
                                     >
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             size="small"
                                             onClick={() => {
-                                                LemonDialog.open({
+                                                Dialog.open({
                                                     title: 'Resume this survey?',
                                                     content: (
                                                         <div className="text-sm text-secondary">
@@ -259,7 +259,7 @@ function SurveyViewLegacy({ id }: { id: string }): JSX.Element {
                                             }}
                                         >
                                             Resume
-                                        </LemonButton>
+                                        </Button>
                                     </AccessControlAction>
                                 ) : (
                                     !survey.archived && (
@@ -268,13 +268,13 @@ function SurveyViewLegacy({ id }: { id: string }): JSX.Element {
                                             minAccessLevel={AccessControlLevel.Editor}
                                             userAccessLevel={survey.user_access_level}
                                         >
-                                            <LemonButton
+                                            <Button
                                                 data-attr="stop-survey"
                                                 type="secondary"
                                                 status="danger"
                                                 size="small"
                                                 onClick={() => {
-                                                    LemonDialog.open({
+                                                    Dialog.open({
                                                         title: 'Stop this survey?',
                                                         content: (
                                                             <div className="text-sm text-secondary">
@@ -296,14 +296,14 @@ function SurveyViewLegacy({ id }: { id: string }): JSX.Element {
                                                 }}
                                             >
                                                 Stop
-                                            </LemonButton>
+                                            </Button>
                                         </AccessControlAction>
                                     )
                                 )}
                             </>
                         }
                     />
-                    <LemonTabs
+                    <Tabs
                         activeKey={tabKey}
                         onChange={(key) => setTabKey(key)}
                         sceneInset
@@ -385,7 +385,7 @@ function SurveyResponsesByQuestionV2(): JSX.Element {
                 return (
                     <div key={question.id} className="flex flex-col gap-2">
                         <SurveyQuestionVisualization question={question} questionIndex={i} />
-                        <LemonDivider />
+                        <Divider />
                     </div>
                 )
             })}
@@ -431,7 +431,7 @@ export function SurveyResult({ disableEventsTable }: { disableEventsTable?: bool
                             {/* show LLM trace button on the first question if we have $ai_trace_id */}
                             {traceId && (
                                 <Tooltip title="View LLM trace">
-                                    <LemonButton
+                                    <Button
                                         size="xsmall"
                                         icon={
                                             <IconLlmAnalytics className="text-[var(--color-product-llm-analytics-light)]" />
@@ -468,7 +468,7 @@ export function SurveyResult({ disableEventsTable }: { disableEventsTable?: bool
             {isAnyResultsLoading || atLeastOneResponse ? (
                 <>
                     <SurveyResponsesByQuestionV2 />
-                    <LemonButton
+                    <Button
                         type="primary"
                         data-attr="survey-results-explore"
                         icon={<IconGraph />}
@@ -476,10 +476,10 @@ export function SurveyResult({ disableEventsTable }: { disableEventsTable?: bool
                         className="max-w-40"
                     >
                         Explore results
-                    </LemonButton>
+                    </Button>
                     {!disableEventsTable &&
                         (surveyLoading ? (
-                            <LemonSkeleton />
+                            <Skeleton />
                         ) : (
                             <div className="survey-table-results">
                                 <Query

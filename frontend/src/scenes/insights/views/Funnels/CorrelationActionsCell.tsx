@@ -3,8 +3,8 @@ import { useState } from 'react'
 
 import { IconEllipsis } from '@hanzo/icons'
 
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Button, ButtonProps } from 'lib/elements/Button'
+import { Popover } from 'lib/elements/Popover/Popover'
 import { funnelCorrelationDetailsLogic } from 'scenes/funnels/funnelCorrelationDetailsLogic'
 import { funnelCorrelationLogic } from 'scenes/funnels/funnelCorrelationLogic'
 import { funnelPropertyCorrelationLogic } from 'scenes/funnels/funnelPropertyCorrelationLogic'
@@ -12,7 +12,7 @@ import { insightLogic } from 'scenes/insights/insightLogic'
 
 import { FunnelCorrelation, FunnelCorrelationResultsType } from '~/types'
 
-type CorrelationActionsCellComponentButtonProps = Pick<LemonButtonProps, 'onClick' | 'children' | 'title' | 'disabled'>
+type CorrelationActionsCellComponentButtonProps = Pick<ButtonProps, 'onClick' | 'children' | 'title' | 'disabled'>
 
 type CorrelationActionsCellComponentProps = {
     buttons: CorrelationActionsCellComponentButtonProps[]
@@ -85,7 +85,7 @@ const CorrelationActionsCellComponent = ({ buttons }: CorrelationActionsCellComp
             actionable
             onClickOutside={() => setPopoverOpen(false)}
             overlay={buttons.map(({ onClick, ...props }, index) => (
-                <LemonButton
+                <Button
                     key={index}
                     fullWidth
                     onClick={(e) => {
@@ -96,7 +96,7 @@ const CorrelationActionsCellComponent = ({ buttons }: CorrelationActionsCellComp
                 />
             ))}
         >
-            <LemonButton icon={<IconEllipsis />} onClick={() => setPopoverOpen(!popoverOpen)} />
+            <Button icon={<IconEllipsis />} onClick={() => setPopoverOpen(!popoverOpen)} />
         </Popover>
     )
 }

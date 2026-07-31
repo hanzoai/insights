@@ -6,7 +6,7 @@ import api from 'lib/api'
 import { describerFor } from 'lib/components/ActivityLog/activityLogLogic'
 import { HumanizedActivityLogItem, humanize } from 'lib/components/ActivityLog/humanizeActivity'
 import { dayjs } from 'lib/dayjs'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 import { toParams } from 'lib/utils'
 import { projectLogic } from 'scenes/projectLogic'
 
@@ -22,7 +22,7 @@ export interface ChangelogFlagPayload {
     notificationDate: dayjs.Dayjs
 
     // Images can be embedded directly in the markdown using ![alt text](url) syntax.
-    // LemonMarkdown will render them.
+    // Markdown will render them.
     // For optimal display, ensure images are reasonably sized (e.g., width < 800px)
     // and optimized for web (e.g., < 500KB).
     // We suggest you upload it to a CDN to reduce load times/server load.
@@ -157,7 +157,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                                         email: changelogNotification.email || 'joe@hanzo.ai',
                                         name: changelogNotification.name || 'Joe',
                                         isSystem: true,
-                                        description: <LemonMarkdown>{changelogNotification.markdown}</LemonMarkdown>,
+                                        description: <Markdown>{changelogNotification.markdown}</Markdown>,
                                         created_at: changelogNotification.notificationDate,
                                         unread: lastRead?.isSameOrBefore(changelogNotification.notificationDate),
                                     }) as HumanizedActivityLogItem

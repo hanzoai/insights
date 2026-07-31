@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { urls } from 'scenes/urls'
 import { WebQuery } from 'scenes/web-analytics/tiles/WebAnalyticsTile'
@@ -31,7 +31,7 @@ export const WebAnalyticsModal = (): JSX.Element | null => {
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={!!modal}
             onClose={closeModal}
             simple={false}
@@ -48,7 +48,7 @@ export const WebAnalyticsModal = (): JSX.Element | null => {
                         <WebAnalyticsExport query={modal.query} insightProps={modal.insightProps} />
                     </div>
                 </div>
-                <LemonModal.Content embedded>
+                <Modal.Content embedded>
                     <WebQuery
                         attachTo={webAnalyticsLogic}
                         uniqueKey="WebAnalyticsModal.Query"
@@ -58,10 +58,10 @@ export const WebAnalyticsModal = (): JSX.Element | null => {
                         control={modal.control}
                         tileId={modal.tileId}
                     />
-                </LemonModal.Content>
+                </Modal.Content>
                 <div className="flex flex-row justify-end">
                     {modal.canOpenInsight ? (
-                        <LemonButton
+                        <Button
                             to={urls.insightNew({ query: modal.query, sceneSource: 'web-analytics' })}
                             icon={<IconOpenInNew />}
                             size="small"
@@ -75,10 +75,10 @@ export const WebAnalyticsModal = (): JSX.Element | null => {
                             }}
                         >
                             Open as new Insight
-                        </LemonButton>
+                        </Button>
                     ) : null}
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

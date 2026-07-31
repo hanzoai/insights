@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { userLogic } from 'scenes/userLogic'
 
@@ -29,7 +29,7 @@ export function SupportTracesFilters({ query, setQuery }: SupportTracesFiltersPr
     const showSupportTraces = !(query.filterSupportTraces ?? false)
 
     return (
-        <LemonSwitch
+        <Switch
             id="support-traces-filter"
             bordered
             checked={showSupportTraces}

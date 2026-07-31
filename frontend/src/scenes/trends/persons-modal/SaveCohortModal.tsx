@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
 interface Props {
     onSave: (title: string) => void
@@ -11,14 +11,14 @@ interface Props {
 export function SaveCohortModal({ onSave, onCancel, isOpen }: Props): JSX.Element {
     const [cohortTitle, setCohortTitle] = useState('')
     return (
-        <LemonModal
+        <Modal
             title="New cohort"
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={onCancel}>
+                    <Button type="secondary" onClick={onCancel}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         disabledReason={!cohortTitle && 'Please add a title to your cohort'}
                         onClick={() => {
@@ -27,14 +27,14 @@ export function SaveCohortModal({ onSave, onCancel, isOpen }: Props): JSX.Elemen
                         }}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </>
             }
             onClose={onCancel}
             isOpen={isOpen}
         >
             <div className="mb-4">
-                <LemonInput
+                <Input
                     autoFocus
                     placeholder="Cohort name..."
                     value={cohortTitle}
@@ -42,6 +42,6 @@ export function SaveCohortModal({ onSave, onCancel, isOpen }: Props): JSX.Elemen
                     onChange={setCohortTitle}
                 />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

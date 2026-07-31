@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonRadio, LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
+import { Button } from 'lib/elements/Button'
+import { Radio, RadioOption } from 'lib/elements/Radio'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { TeamType } from '~/types'
@@ -42,7 +42,7 @@ export function TeamSettingRadio<T extends string>({
 }: {
     /** Dot-path to team field (e.g. "modifiers.personsJoinMode") */
     field: string
-    options: LemonRadioOption<T>[]
+    options: RadioOption<T>[]
     defaultValue: T
     /** Optional callback after save */
     onSave?: (value: T) => void
@@ -79,15 +79,15 @@ export function TeamSettingRadio<T extends string>({
 
     return (
         <>
-            <LemonRadio value={value} onChange={setValue} options={options} />
+            <Radio value={value} onChange={setValue} options={options} />
             <div className="mt-4">
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={handleSave}
                     disabledReason={value === savedValue ? 'No changes to save' : undefined}
                 >
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

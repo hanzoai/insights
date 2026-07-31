@@ -2,15 +2,15 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconRefresh } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch/LemonSwitch'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Dialog } from 'lib/elements/Dialog'
+import { Label } from 'lib/elements/Label/Label'
+import { Modal } from 'lib/elements/Modal'
+import { Switch } from 'lib/elements/Switch/Switch'
 
 import { verifiedDomainsLogic } from './verifiedDomainsLogic'
 
@@ -30,7 +30,7 @@ export function ConfigureSCIMModal(): JSX.Element {
         }
 
         if (scimConfig.scim_enabled) {
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Disable SCIM?',
                 description:
                     'Your identity provider will no longer be able to manage users. SAML authentication will continue to work.',
@@ -56,7 +56,7 @@ export function ConfigureSCIMModal(): JSX.Element {
             return
         }
 
-        LemonDialog.open({
+        Dialog.open({
             title: 'Regenerate SCIM token?',
             description:
                 'This will invalidate the current token. You will need to update your identity provider with the new token.',
@@ -77,12 +77,12 @@ export function ConfigureSCIMModal(): JSX.Element {
     const showToken = tokenJustRevealed && scimConfig.scim_bearer_token
 
     return (
-        <LemonModal onClose={handleClose} isOpen={!!configureSCIMModalId} title="" simple>
-            <div className="LemonModal__layout">
-                <LemonModal.Header>
+        <Modal onClose={handleClose} isOpen={!!configureSCIMModalId} title="" simple>
+            <div className="Modal__layout">
+                <Modal.Header>
                     <h3>Configure SCIM provisioning</h3>
-                </LemonModal.Header>
-                <LemonModal.Content className="space-y-2">
+                </Modal.Header>
+                <Modal.Content className="space-y-2">
                     <p>
                         <Link to="https://hanzo.ai/docs/data/sso#setting-up-scim" target="_blank" targetBlankIcon>
                             Read the docs
@@ -90,8 +90,8 @@ export function ConfigureSCIMModal(): JSX.Element {
                     </p>
 
                     <div className="space-y-1">
-                        <LemonLabel>Enable SCIM</LemonLabel>
-                        <LemonSwitch
+                        <Label>Enable SCIM</Label>
+                        <Switch
                             checked={scimConfig.scim_enabled ?? false}
                             onChange={handleToggleScim}
                             disabled={scimConfigLoading}
@@ -104,48 +104,48 @@ export function ConfigureSCIMModal(): JSX.Element {
                     {scimConfig.scim_enabled && (
                         <>
                             <div>
-                                <LemonLabel className="block mb-1">SCIM Base URL</LemonLabel>
+                                <Label className="block mb-1">SCIM Base URL</Label>
                                 <CopyToClipboardInline description="SCIM base URL">
                                     {scimConfig.scim_base_url || ''}
                                 </CopyToClipboardInline>
                             </div>
 
                             <div>
-                                <LemonLabel className="block mb-1">Bearer Token</LemonLabel>
+                                <Label className="block mb-1">Bearer Token</Label>
                                 {showToken ? (
                                     <>
                                         <CopyToClipboardInline description="Bearer token">
                                             {scimConfig.scim_bearer_token || ''}
                                         </CopyToClipboardInline>
-                                        <LemonBanner type="warning" className="my-2">
+                                        <Banner type="warning" className="my-2">
                                             Save this token, it will only be shown once.
-                                        </LemonBanner>
+                                        </Banner>
                                     </>
                                 ) : (
                                     <>
                                         <p className="text-muted">
                                             The bearer token is only displayed once when generated.
                                         </p>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             onClick={handleRegenerateToken}
                                             icon={<IconRefresh />}
                                             loading={scimConfigLoading}
                                         >
                                             Regenerate token
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 )}
                             </div>
                         </>
                     )}
-                </LemonModal.Content>
-                <LemonModal.Footer>
-                    <LemonButton type="secondary" onClick={handleClose}>
+                </Modal.Content>
+                <Modal.Footer>
+                    <Button type="secondary" onClick={handleClose}>
                         Close
-                    </LemonButton>
-                </LemonModal.Footer>
+                    </Button>
+                </Modal.Footer>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

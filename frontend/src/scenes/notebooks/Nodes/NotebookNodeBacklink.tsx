@@ -19,7 +19,7 @@ import {
     IconPlaylist,
     IconRewindPlay,
 } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { urls } from 'scenes/urls'

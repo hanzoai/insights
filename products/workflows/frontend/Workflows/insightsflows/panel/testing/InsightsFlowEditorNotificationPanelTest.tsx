@@ -4,20 +4,20 @@ import { useEffect } from 'react'
 
 import { IconInfo, IconPlayFilled, IconTestTube } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonDialog,
-    LemonDivider,
-    LemonInput,
-    LemonLabel,
-    LemonSwitch,
+    Banner,
+    Button,
+    Dialog,
+    Divider,
+    Input,
+    Label,
+    Switch,
     Popover,
     ProfilePicture,
     Spinner,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { isEmail } from 'lib/utils'
 import { InsightsFunctionTestEditor } from 'scenes/insights-functions/configuration/InsightsFunctionTest'
 import { LogsViewerTable } from 'scenes/insights-functions/logs/LogsViewer'
@@ -90,9 +90,9 @@ export function EmailActionTestContent(): JSX.Element | null {
 
                 <p>Step through each action in your workflow and see how it behaves.</p>
 
-                <LemonButton type="primary" onClick={() => setSelectedNodeId(TRIGGER_NODE_ID)}>
+                <Button type="primary" onClick={() => setSelectedNodeId(TRIGGER_NODE_ID)}>
                     Start testing
-                </LemonButton>
+                </Button>
             </div>
         )
     }
@@ -106,9 +106,9 @@ export function EmailActionTestContent(): JSX.Element | null {
             className="flex overflow-hidden flex-col flex-1"
         >
             <div className="flex gap-2 items-center p-2">
-                <LemonField name="mock_async_functions" className="flex-1">
+                <Field name="mock_async_functions" className="flex-1">
                     {({ value, onChange }) => (
-                        <LemonSwitch
+                        <Switch
                             onChange={(v) => onChange(!v)}
                             checked={!value}
                             data-attr="toggle-workflow-test-panel-new-mocking"
@@ -132,11 +132,11 @@ export function EmailActionTestContent(): JSX.Element | null {
                             }
                         />
                     )}
-                </LemonField>
+                </Field>
                 {testResult ? (
                     <>
                         <div className="flex-1" />
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={() => setTestResult(null)}
                             loading={isTestInvocationSubmitting}
@@ -144,10 +144,10 @@ export function EmailActionTestContent(): JSX.Element | null {
                             data-attr="clear-workflow-test-panel-new-result"
                         >
                             Clear test result
-                        </LemonButton>
+                        </Button>
 
                         {nextActionId ? (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 onClick={() => setSelectedNodeId(nextActionId)}
                                 icon={<IconPlayFilled />}
@@ -156,21 +156,21 @@ export function EmailActionTestContent(): JSX.Element | null {
                                 data-attr="continue-workflow-test-panel-new"
                             >
                                 Go to next step
-                            </LemonButton>
+                            </Button>
                         ) : null}
                     </>
                 ) : (
                     <>
                         <div className="flex-1" />
 
-                        <LemonButton
+                        <Button
                             type="primary"
                             data-attr="test-workflow-panel-new"
                             onClick={() => {
                                 const shouldShowConfirmation = !testInvocation?.mock_async_functions
 
                                 if (shouldShowConfirmation) {
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: 'Confirm email test',
                                         description: `This will send an email to ${emailInput}, do you want to proceed?`,
                                         primaryButton: {
@@ -199,28 +199,28 @@ export function EmailActionTestContent(): JSX.Element | null {
                             size="small"
                         >
                             Run test
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
             </div>
-            <LemonDivider className="my-0" />
+            <Divider className="my-0" />
             <div className="flex flex-col flex-1 overflow-y-auto">
                 <div className="flex-0 bg-surface-secondary p-2">
                     {sampleGlobalsError ? (
                         <div>
-                            <LemonBanner type="info" className="mb-2">
+                            <Banner type="info" className="mb-2">
                                 {sampleGlobalsError}
-                            </LemonBanner>
+                            </Banner>
                         </div>
                     ) : null}
 
                     {/* Select person dropdown at the top */}
                     <div className="mb-4">
-                        <LemonLabel>Select person</LemonLabel>
+                        <Label>Select person</Label>
                         <Popover
                             overlay={
                                 <div className="p-2 min-w-80">
-                                    <LemonInput
+                                    <Input
                                         type="search"
                                         placeholder="Search by name, email, or distinct ID"
                                         value={personSearchTerm}
@@ -238,7 +238,7 @@ export function EmailActionTestContent(): JSX.Element | null {
                                             {!personSearchTerm.trim() && samplePersons.length > 0 ? (
                                                 <>
                                                     {samplePersons.map((person: PersonType) => (
-                                                        <LemonButton
+                                                        <Button
                                                             key={person.id}
                                                             fullWidth
                                                             size="small"
@@ -258,7 +258,7 @@ export function EmailActionTestContent(): JSX.Element | null {
                                                                     </div>
                                                                 ) : null}
                                                             </div>
-                                                        </LemonButton>
+                                                        </Button>
                                                     ))}
                                                 </>
                                             ) : null}
@@ -269,7 +269,7 @@ export function EmailActionTestContent(): JSX.Element | null {
                                                 </div>
                                             ) : (
                                                 personSearchResults.map((person: PersonType) => (
-                                                    <LemonButton
+                                                    <Button
                                                         key={person.id}
                                                         fullWidth
                                                         size="small"
@@ -289,7 +289,7 @@ export function EmailActionTestContent(): JSX.Element | null {
                                                                 </div>
                                                             ) : null}
                                                         </div>
-                                                    </LemonButton>
+                                                    </Button>
                                                 ))
                                             )}
                                         </div>
@@ -300,7 +300,7 @@ export function EmailActionTestContent(): JSX.Element | null {
                             onClickOutside={() => setPersonSelectorOpen(false)}
                             placement="bottom-start"
                         >
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 onClick={() => setPersonSelectorOpen(!personSelectorOpen)}
                                 tooltip="Select a person to load test data"
@@ -309,7 +309,7 @@ export function EmailActionTestContent(): JSX.Element | null {
                                 className="mt-1"
                             >
                                 {sampleGlobals?.person?.name ? asDisplay(sampleGlobals.person) : 'Select person'}
-                            </LemonButton>
+                            </Button>
                         </Popover>
                     </div>
 
@@ -324,8 +324,8 @@ export function EmailActionTestContent(): JSX.Element | null {
                             <ProfilePicture name={asDisplay(sampleGlobals.person)} />
                             <div className="flex-1">
                                 <div className="font-semibold mb-2">{sampleGlobals.person.name || 'Sample Person'}</div>
-                                <LemonLabel>Email address</LemonLabel>
-                                <LemonInput
+                                <Label>Email address</Label>
+                                <Input
                                     value={emailInput}
                                     onChange={setEmailAddressOverride}
                                     placeholder="Enter email address"
@@ -351,14 +351,14 @@ export function EmailActionTestContent(): JSX.Element | null {
                         </>
                     ) : null}
                 </div>
-                <LemonDivider className="my-0" />
+                <Divider className="my-0" />
                 <div className="flex flex-col flex-1 gap-2 p-2">
                     <h3 className="mb-0">Test results</h3>
                     {!testResult ? (
                         <div className="text-muted text-sm">No tests run yet</div>
                     ) : (
                         <>
-                            <LemonBanner
+                            <Banner
                                 type={
                                     testResult.status === 'success'
                                         ? 'success'
@@ -372,10 +372,10 @@ export function EmailActionTestContent(): JSX.Element | null {
                                     : testResult.status === 'skipped'
                                       ? 'Workflow was skipped because the event did not match the filter criteria'
                                       : 'Error: ' + testResult.errors?.join(', ')}
-                            </LemonBanner>
+                            </Banner>
 
                             <div className="flex flex-col gap-2">
-                                <LemonLabel>Logs</LemonLabel>
+                                <Label>Logs</Label>
 
                                 <LogsViewerTable
                                     instanceLabel="workflow run"

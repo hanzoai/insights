@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
 import { IconMessage } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -60,9 +60,9 @@ export function UserFeedbackSection({
     return (
         <SceneSection title="User feedback" description={description}>
             <div className="inline-block">
-                <LemonButton onClick={handleClick} type="secondary" size="small" icon={<IconMessage />}>
+                <Button onClick={handleClick} type="secondary" size="small" icon={<IconMessage />}>
                     {buttonText}
-                </LemonButton>
+                </Button>
             </div>
         </SceneSection>
     )

@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { objectsEqual } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -46,22 +46,22 @@ export function ConversionGoalModal(): JSX.Element {
     const hasAppliedGoal = !!draftConversionGoal
 
     return (
-        <LemonModal
+        <Modal
             isOpen={conversionGoalModalVisible}
             onClose={hideConversionGoalModal}
             title="Conversion goal"
             width={600}
             footer={
                 <div className="flex justify-between items-center w-full">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={clearConversionGoal}
                         disabledReason={!hasAppliedGoal ? 'No active goal to clear' : undefined}
                     >
                         Clear
-                    </LemonButton>
+                    </Button>
                     <div className="flex items-center gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={saveConversionGoal}
                             disabledReason={
@@ -71,14 +71,14 @@ export function ConversionGoalModal(): JSX.Element {
                             }
                         >
                             Save
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             onClick={applyConversionGoal}
                             disabledReason={!hasChanges ? 'No changes to apply' : undefined}
                         >
                             Apply
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             }
@@ -94,7 +94,7 @@ export function ConversionGoalModal(): JSX.Element {
 
                 <div>
                     <label className="text-sm font-medium mb-1 block">Conversion goal name</label>
-                    <LemonInput
+                    <Input
                         value={conversionGoalInput?.conversion_goal_name || ''}
                         onChange={(value) => {
                             setConversionGoalInput({
@@ -118,7 +118,7 @@ export function ConversionGoalModal(): JSX.Element {
 
                 {conversion_goals.length > 0 && (
                     <div className="border rounded">
-                        <LemonButton
+                        <Button
                             fullWidth
                             type="tertiary"
                             icon={configuredGoalsExpanded ? <IconChevronDown /> : <IconChevronRight />}
@@ -126,7 +126,7 @@ export function ConversionGoalModal(): JSX.Element {
                             className="justify-start"
                         >
                             {getConfiguredConversionGoalsLabel(conversion_goals.length)}
-                        </LemonButton>
+                        </Button>
                         {configuredGoalsExpanded && (
                             <div className="border-t">
                                 {conversion_goals.map((goal) => (
@@ -146,6 +146,6 @@ export function ConversionGoalModal(): JSX.Element {
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

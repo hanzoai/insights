@@ -1,6 +1,6 @@
 import insights from '@hanzo/insights'
 
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect'
+import { InputSelect } from 'lib/elements/InputSelect'
 import { NotebooksListFilters } from 'scenes/notebooks/NotebooksTable/notebooksTableLogic'
 
 import { NotebookNodeType } from '../types'
@@ -50,7 +50,7 @@ export function ContainsTypeFilters({
     return (
         <div className="flex items-center gap-2">
             <span>Containing:</span>
-            <LemonInputSelect
+            <InputSelect
                 mode="multiple"
                 placeholder="Any content"
                 options={Object.entries(fromNodeTypeToLabel)

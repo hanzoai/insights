@@ -3,7 +3,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
 import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
-import { LemonDivider, LemonTabs, Spinner } from '@hanzo/lemon-ui'
+import { Divider, Tabs, Spinner } from '@hanzo/elements'
 
 import { DangerousOperationResponse, MultiQuestionForm } from '~/queries/schema/schema-assistant-messages'
 
@@ -102,7 +102,7 @@ function MultiQuestionFormInput({ form, initialAnswers = {} }: MultiQuestionForm
         <div className="flex flex-col gap-2 p-3">
             {questions.length > 1 && (
                 <div className="w-full">
-                    <LemonTabs
+                    <Tabs
                         size="xsmall"
                         activeKey={currentQuestionIndex}
                         onChange={handleTabClick}
@@ -184,11 +184,11 @@ function DangerousOperationInput({ operation }: DangerousOperationInputProps): J
             {operation.toolName !== 'finalize_plan' && (
                 <p className="text-xs text-secondary m-0">Review the changes below before approving:</p>
             )}
-            <LemonDivider className="my-0 -mx-3 w-[calc(100%+var(--spacing)*6)]" />
+            <Divider className="my-0 -mx-3 w-[calc(100%+var(--spacing)*6)]" />
             <div className="max-h-60 overflow-y-auto">
                 <MarkdownMessage content={operation.preview} id={`approval-${operation.proposalId}`} />
             </div>
-            <LemonDivider className="my-0 -mx-3 w-[calc(100%+var(--spacing)*6)]" />
+            <Divider className="my-0 -mx-3 w-[calc(100%+var(--spacing)*6)]" />
             <OptionSelector
                 options={options}
                 onSelect={handleSelect}

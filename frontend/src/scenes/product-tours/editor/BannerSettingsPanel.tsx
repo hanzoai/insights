@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput, LemonSegmentedButton, LemonSelect, LemonSwitch, Tooltip } from '@hanzo/lemon-ui'
+import { Input, SegmentedButton, Select, Switch, Tooltip } from '@hanzo/elements'
 
 import { ProductTourBannerConfig } from '~/types'
 
@@ -57,7 +57,7 @@ export function BannerSettingsPanel({ tourId }: BannerSettingsPanelProps): JSX.E
                                       : 'Injected into your container element'}
                             </div>
                         </div>
-                        <LemonSegmentedButton
+                        <SegmentedButton
                             size="small"
                             value={behavior}
                             onChange={(value) =>
@@ -74,7 +74,7 @@ export function BannerSettingsPanel({ tourId }: BannerSettingsPanelProps): JSX.E
                         />
                     </div>
                     {behavior === 'custom' && (
-                        <LemonInput
+                        <Input
                             value={step.bannerConfig?.selector ?? ''}
                             onChange={(selector) => updateBannerConfig({ selector })}
                             placeholder="#my-banner-container"
@@ -86,7 +86,7 @@ export function BannerSettingsPanel({ tourId }: BannerSettingsPanelProps): JSX.E
                         <Tooltip title="Banner slides in from the top of the page with a brief animation. When disabled, the banner will appear suddenly after page load, potentially causing a layout shift.">
                             <div className="font-medium text-sm">Animate in</div>
                         </Tooltip>
-                        <LemonSwitch
+                        <Switch
                             data-attr="product-tours-banner-animation-toggle"
                             checked={animateIn}
                             onChange={(checked) =>
@@ -100,7 +100,7 @@ export function BannerSettingsPanel({ tourId }: BannerSettingsPanelProps): JSX.E
 
                 <div className="flex-1 min-w-0 space-y-3">
                     <div className="font-medium text-sm">Click action</div>
-                    <LemonSelect
+                    <Select
                         value={actionType}
                         onChange={(value) =>
                             updateAction({
@@ -118,7 +118,7 @@ export function BannerSettingsPanel({ tourId }: BannerSettingsPanelProps): JSX.E
                         fullWidth
                     />
                     {actionType === 'link' && (
-                        <LemonInput
+                        <Input
                             value={step.bannerConfig?.action?.link ?? ''}
                             onChange={(link) => updateAction({ link })}
                             placeholder="https://example.com"

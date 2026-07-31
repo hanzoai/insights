@@ -1,4 +1,4 @@
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { identifierToHuman } from 'lib/utils'
@@ -32,7 +32,7 @@ export function MetricTag({ properties }: MetricTagProps): JSX.Element {
     )
 
     return (
-        <LemonTag className="bg-surface-primary cursor-default">
+        <Tag className="bg-surface-primary cursor-default">
             <CopyToClipboardInline
                 iconSize="xsmall"
                 description="metric"
@@ -41,6 +41,6 @@ export function MetricTag({ properties }: MetricTagProps): JSX.Element {
             >
                 {title}
             </CopyToClipboardInline>
-        </LemonTag>
+        </Tag>
     )
 }

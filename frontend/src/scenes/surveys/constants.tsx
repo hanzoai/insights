@@ -1,6 +1,6 @@
 import { IconComment } from '@hanzo/icons'
 
-import { IconAreaChart, IconGridView, IconLink, IconListView } from 'lib/lemon-ui/icons'
+import { IconAreaChart, IconGridView, IconLink, IconListView } from 'lib/elements/icons'
 import { allOperatorsMapping } from 'lib/utils'
 
 import {

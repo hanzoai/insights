@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonInputSelect, LemonInputSelectOption } from '@hanzo/lemon-ui'
+import { InputSelect, InputSelectOption } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { githubIntegrationLogic } from './githubIntegrationLogic'
 
@@ -21,7 +21,7 @@ export const GitHubRepositoryPicker = ({
     const { options, loading } = useRepositories(integrationId)
 
     return (
-        <LemonInputSelect
+        <InputSelect
             onChange={(val) => onChange?.(val[0] ?? null)}
             value={value ? [value] : []}
             mode="single"
@@ -37,19 +37,19 @@ export const GitHubRepositorySelectField = ({ integrationId }: { integrationId: 
     const { options, loading } = useRepositories(integrationId)
 
     return (
-        <LemonField name="repositories" label="Repository">
-            <LemonInputSelect
+        <Field name="repositories" label="Repository">
+            <InputSelect
                 mode="single"
                 data-attr="select-github-repository"
                 placeholder="Select a repository..."
                 options={options}
                 loading={loading}
             />
-        </LemonField>
+        </Field>
     )
 }
 
-export function useRepositories(integrationId: number): { options: LemonInputSelectOption[]; loading: boolean } {
+export function useRepositories(integrationId: number): { options: InputSelectOption[]; loading: boolean } {
     const logic = githubIntegrationLogic({ id: integrationId })
     const { repositories, repositoriesLoading } = useValues(logic)
     const { loadRepositories } = useActions(logic)

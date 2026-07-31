@@ -5,8 +5,8 @@ import { IconPeople } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Link } from 'lib/lemon-ui/Link'
+import { Button } from 'lib/elements/Button'
+import { Link } from 'lib/elements/Link'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { GroupsIntroduction } from 'scenes/groups/GroupsIntroduction'
 import { PersonsManagementSceneTabs } from 'scenes/persons-management/PersonsManagementSceneTabs'
@@ -92,14 +92,14 @@ export function GroupsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                 }}
                 actions={
                     hasCustomerAnalyticsEnabled ? (
-                        <LemonButton
+                        <Button
                             type="primary"
                             size="small"
                             data-attr={`new-group-${groupTypeIndex}`}
                             onClick={() => router.actions.push(urls.group(groupTypeIndex, 'new', false))}
                         >
                             New {aggregationLabel(groupTypeIndex).singular}
-                        </LemonButton>
+                        </Button>
                     ) : undefined
                 }
             />

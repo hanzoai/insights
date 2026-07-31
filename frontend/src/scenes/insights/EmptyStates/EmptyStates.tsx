@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { TextMorph } from 'torph/react'
 
 import { IconArchive, IconFunnels, IconInfo, IconPlusSmall, IconWarning } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -14,10 +14,10 @@ import { BuilderMascot3 } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { holidaysMatcher, isChristmas } from 'lib/holidays'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { Link } from 'lib/lemon-ui/Link'
-import { LoadingBar } from 'lib/lemon-ui/LoadingBar'
-import { IconChristmasOrnament, IconErrorOutline, IconOpenInNew } from 'lib/lemon-ui/icons'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { Link } from 'lib/elements/Link'
+import { LoadingBar } from 'lib/elements/LoadingBar'
+import { IconChristmasOrnament, IconErrorOutline, IconOpenInNew } from 'lib/elements/icons'
 import { humanFriendlyNumber, humanizeBytes, inStorybook, inStorybookTestRunner } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
@@ -89,7 +89,7 @@ function QueryDebuggerButton({ query }: { query?: Record<string, any> | null }):
     }
 
     return (
-        <LemonButton
+        <Button
             data-attr="insight-error-query"
             targetBlank
             size="small"
@@ -99,7 +99,7 @@ function QueryDebuggerButton({ query }: { query?: Record<string, any> | null }):
             className="max-w-80"
         >
             Open in query debugger
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -115,7 +115,7 @@ const RetryButton = ({
         sideAction = {
             dropdown: {
                 overlay: (
-                    <LemonMenuOverlay
+                    <MenuOverlay
                         items={[
                             {
                                 label: 'Open in query debugger',
@@ -130,7 +130,7 @@ const RetryButton = ({
     }
 
     return (
-        <LemonButton
+        <Button
             data-attr="insight-retry-button"
             size="small"
             type="primary"
@@ -138,7 +138,7 @@ const RetryButton = ({
             sideAction={sideAction}
         >
             Try again
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -621,7 +621,7 @@ export function FunnelSingleStepState({ actionable = true }: FunnelSingleStepSta
             </p>
             {actionable && (
                 <div className="flex justify-center">
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="small"
                         onClick={addFilter}
@@ -629,7 +629,7 @@ export function FunnelSingleStepState({ actionable = true }: FunnelSingleStepSta
                         icon={<IconPlusSmall />}
                     >
                         Add funnel step
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
             <div className="mt-3">
@@ -692,14 +692,14 @@ export function SavedInsightsEmptyState({
             )}
             <div className="flex justify-center gap-2">
                 {onClearSearch && searchString && (
-                    <LemonButton type="secondary" size="small" onClick={onClearSearch}>
+                    <Button type="secondary" size="small" onClick={onClearSearch}>
                         Clear search
-                    </LemonButton>
+                    </Button>
                 )}
                 {onClearFilters && (
-                    <LemonButton type="secondary" size="small" onClick={onClearFilters}>
+                    <Button type="secondary" size="small" onClick={onClearFilters}>
                         Clear filters
-                    </LemonButton>
+                    </Button>
                 )}
                 {!usingFilters && (
                     <Link to={urls.insightNew()}>
@@ -707,14 +707,14 @@ export function SavedInsightsEmptyState({
                             resourceType={AccessControlResourceType.Insight}
                             minAccessLevel={AccessControlLevel.Editor}
                         >
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 data-attr="add-insight-button-empty-state"
                                 icon={<IconPlusSmall />}
                                 className="add-insight-button"
                             >
                                 New insight
-                            </LemonButton>
+                            </Button>
                         </AccessControlAction>
                     </Link>
                 )}

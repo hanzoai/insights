@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 import { teamLogic } from 'scenes/teamLogic'
@@ -203,7 +203,7 @@ export const newDashboardLogic = kea<newDashboardLogicType>([
                 } catch (e: any) {
                     if (!isBreakpoint(e)) {
                         const message = e.code && e.detail ? `${e.code}: ${e.detail}` : e
-                        lemonToast.error(`Could not create dashboard: ${message}`)
+                        toast.error(`Could not create dashboard: ${message}`)
                     }
                 }
                 actions.setIsLoading(false)
@@ -260,7 +260,7 @@ export const newDashboardLogic = kea<newDashboardLogicType>([
             } catch (e: any) {
                 if (!isBreakpoint(e)) {
                     const message = e.code && e.detail ? `${e.code}: ${e.detail}` : e
-                    lemonToast.error(`Could not create dashboard: ${message}`)
+                    toast.error(`Could not create dashboard: ${message}`)
                 }
             }
             actions.setIsLoading(false)

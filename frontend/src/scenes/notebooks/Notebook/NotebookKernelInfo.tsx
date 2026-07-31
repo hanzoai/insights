@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonSelect, LemonTag, Popover } from '@hanzo/lemon-ui'
+import { Button, Select, Tag, Popover } from '@hanzo/elements'
 
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea'
-import { LemonWidget } from 'lib/lemon-ui/LemonWidget'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Slider } from 'lib/elements/Slider'
+import { TextArea } from 'lib/elements/TextArea'
+import { Widget } from 'lib/elements/Widget'
+import { Spinner } from 'lib/elements/Spinner'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 
 import { cpuCoreOptions, idleTimeoutOptions, memoryGbOptions, notebookKernelInfoLogic } from './notebookKernelInfoLogic'
@@ -104,14 +104,14 @@ export const NotebookKernelInfo = (): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-        <LemonWidget
+        <Widget
             className="NotebookColumn__widget"
             title={
                 <div className="flex gap-1">
                     Kernel info
                     {kernelInfoDetails ? (
                         <Popover overlay={kernelInfoDetails} visible={isOpen} placement="bottom">
-                            <LemonButton
+                            <Button
                                 icon={<IconInfo className="text-base" />}
                                 size="xsmall"
                                 type="tertiary"
@@ -126,7 +126,7 @@ export const NotebookKernelInfo = (): JSX.Element => {
             }
             onClose={() => setShowKernelInfo(false)}
             actions={
-                <LemonButton
+                <Button
                     size="xsmall"
                     type="secondary"
                     onClick={() => loadKernelInfo()}
@@ -134,7 +134,7 @@ export const NotebookKernelInfo = (): JSX.Element => {
                     disabled={hasActionInFlight && !actionInFlight.refresh}
                 >
                     Refresh
-                </LemonButton>
+                </Button>
             }
         >
             {showLoadingState ? (
@@ -146,18 +146,18 @@ export const NotebookKernelInfo = (): JSX.Element => {
                 <div className="space-y-3 p-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
-                            {statusInfo ? <LemonTag type={statusInfo.tone}>{statusInfo.label}</LemonTag> : null}
-                            <LemonTag type="default">
+                            {statusInfo ? <Tag type={statusInfo.tone}>{statusInfo.label}</Tag> : null}
+                            <Tag type="default">
                                 {kernelInfo.backend === 'modal' ? 'Modal' : 'Local - Docker'}
-                            </LemonTag>
+                            </Tag>
                             {kernelInfo.cpu_cores && !isDockerKernel ? (
-                                <LemonTag type="default">{formatCores(kernelInfo.cpu_cores)}</LemonTag>
+                                <Tag type="default">{formatCores(kernelInfo.cpu_cores)}</Tag>
                             ) : null}
                             {kernelInfo.memory_gb && !isDockerKernel ? (
-                                <LemonTag type="default">{formatMemory(kernelInfo.memory_gb)} RAM</LemonTag>
+                                <Tag type="default">{formatMemory(kernelInfo.memory_gb)} RAM</Tag>
                             ) : null}
                             {kernelInfo.disk_size_gb && !isDockerKernel ? (
-                                <LemonTag type="default">{kernelInfo.disk_size_gb} GB disk</LemonTag>
+                                <Tag type="default">{kernelInfo.disk_size_gb} GB disk</Tag>
                             ) : null}
                         </div>
                         <div className="flex items-center gap-2 text-xs">
@@ -182,7 +182,7 @@ export const NotebookKernelInfo = (): JSX.Element => {
                                         <span className="font-semibold text-muted">CPU </span>
                                         <span className="font-semibold">{formatCores(selectedCpu)} </span>
                                     </div>
-                                    <LemonSlider
+                                    <Slider
                                         value={cpuIndex}
                                         min={0}
                                         max={cpuCoreOptions.length - 1}
@@ -195,7 +195,7 @@ export const NotebookKernelInfo = (): JSX.Element => {
                                         <span className="font-semibold text-muted">RAM</span>
                                         <span className="font-semibold">{formatMemory(selectedMemory)}</span>
                                     </div>
-                                    <LemonSlider
+                                    <Slider
                                         value={memoryIndex}
                                         min={0}
                                         max={memoryGbOptions.length - 1}
@@ -213,7 +213,7 @@ export const NotebookKernelInfo = (): JSX.Element => {
                                         Automatically stop after this period of inactivity.
                                     </div>
                                 </div>
-                                <LemonSelect
+                                <Select
                                     value={idleTimeoutSeconds}
                                     options={idleTimeoutOptions}
                                     onChange={(value) => setIdleTimeoutSeconds(value)}
@@ -227,7 +227,7 @@ export const NotebookKernelInfo = (): JSX.Element => {
                         </div>
                     )}
                     <div className="flex flex-wrap gap-2">
-                        <LemonButton
+                        <Button
                             size="small"
                             type="primary"
                             onClick={startOrRestartKernel}
@@ -235,8 +235,8 @@ export const NotebookKernelInfo = (): JSX.Element => {
                             disabled={hasActionInFlight && !startActionInFlight}
                         >
                             {startActionLabel}
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             size="small"
                             type="secondary"
                             onClick={() => stopKernel()}
@@ -245,9 +245,9 @@ export const NotebookKernelInfo = (): JSX.Element => {
                             disabledReason={!isRunning ? 'Kernel is not running' : undefined}
                         >
                             Stop
-                        </LemonButton>
+                        </Button>
                         {isModalKernel && hasConfigChanges ? (
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="secondary"
                                 onClick={() => {
@@ -256,12 +256,12 @@ export const NotebookKernelInfo = (): JSX.Element => {
                                 disabled={hasActionInFlight}
                             >
                                 Discard changes
-                            </LemonButton>
+                            </Button>
                         ) : null}
                     </div>
                     <div className="space-y-3 border-t border-border pt-3">
                         <div className="text-xs font-semibold text-muted uppercase tracking-wide">Execute code</div>
-                        <LemonTextArea
+                        <TextArea
                             value={code}
                             onChange={setCode}
                             placeholder="Enter Python code"
@@ -269,7 +269,7 @@ export const NotebookKernelInfo = (): JSX.Element => {
                             rows={4}
                         />
                         <div className="flex gap-2">
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="primary"
                                 onClick={() => executeKernel(code)}
@@ -278,11 +278,11 @@ export const NotebookKernelInfo = (): JSX.Element => {
                                 disabled={hasActionInFlight && !actionInFlight.execute}
                             >
                                 Execute
-                            </LemonButton>
+                            </Button>
                             {executionResult ? (
-                                <LemonButton size="small" type="secondary" onClick={() => clearExecution()}>
+                                <Button size="small" type="secondary" onClick={() => clearExecution()}>
                                     Clear output
-                                </LemonButton>
+                                </Button>
                             ) : null}
                         </div>
                         {executionResult ? (
@@ -317,6 +317,6 @@ export const NotebookKernelInfo = (): JSX.Element => {
             ) : (
                 <div className="text-sm text-muted">Kernel status is unavailable.</div>
             )}
-        </LemonWidget>
+        </Widget>
     )
 }

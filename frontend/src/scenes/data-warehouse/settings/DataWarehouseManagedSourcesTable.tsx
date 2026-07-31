@@ -2,20 +2,20 @@ import { useActions, useValues } from 'kea'
 
 import { IconPlusSmall } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonDialog,
-    LemonInput,
-    LemonSkeleton,
-    LemonTable,
-    LemonTag,
+    Button,
+    Dialog,
+    Input,
+    Skeleton,
+    Table,
+    Tag,
     Spinner,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { TZLabel } from 'lib/components/TZLabel'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { More } from 'lib/elements/Button/More'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 import { StatusTagSetting } from 'scenes/data-warehouse/utils'
 import { urls } from 'scenes/urls'
@@ -33,20 +33,20 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
     const { availableSources, availableSourcesLoading } = useValues(availableSourcesDataLogic)
 
     if (availableSourcesLoading) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
         <div>
             <div className="flex gap-2 justify-between items-center mb-4">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search..."
                     onChange={setManagedSearchTerm}
                     value={managedSearchTerm}
                 />
             </div>
-            <LemonTable
+            <Table
                 id="managed-sources"
                 dataSource={filteredManagedSources}
                 loading={dataWarehouseSourcesLoading}
@@ -55,7 +55,7 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
                 emptyState={
                     <div className="flex flex-col items-center gap-2 py-2">
                         <span>{managedSearchTerm ? 'No sources matching your search' : 'No managed sources'}</span>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             icon={<IconPlusSmall />}
                             to={urls.dataWarehouseSourceNew()}
@@ -63,7 +63,7 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
                             data-attr="managed-sources-empty-new-source"
                         >
                             New source
-                        </LemonButton>
+                        </Button>
                     </div>
                 }
                 columns={[
@@ -75,7 +75,7 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
                         title: 'Source',
                         key: 'name',
                         render: (_, source) => (
-                            <LemonTableLink
+                            <TableLink
                                 to={urls.dataWarehouseSource(`managed-${source.id}`)}
                                 title={availableSources?.[source.source_type]?.label ?? source.source_type}
                                 description={source.description}
@@ -116,7 +116,7 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
                                 return null
                             }
                             const tagContent = (
-                                <LemonTag type={StatusTagSetting[source.status] || 'default'}>{source.status}</LemonTag>
+                                <Tag type={StatusTagSetting[source.status] || 'default'}>{source.status}</Tag>
                             )
                             return source.latest_error && source.status === 'Error' ? (
                                 <Tooltip title={source.latest_error}>{tagContent}</Tooltip>
@@ -146,7 +146,7 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
                                                     >
                                                         {({ disabledReason }) => (
                                                             <Tooltip title="Start the data import for this schema again">
-                                                                <LemonButton
+                                                                <Button
                                                                     type="tertiary"
                                                                     data-attr={`reload-data-warehouse-${source.source_type}`}
                                                                     key={`reload-data-warehouse-${source.source_type}`}
@@ -156,7 +156,7 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
                                                                     disabledReason={disabledReason}
                                                                 >
                                                                     Reload
-                                                                </LemonButton>
+                                                                </Button>
                                                             </Tooltip>
                                                         )}
                                                     </AccessControlAction>
@@ -167,12 +167,12 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
                                                         userAccessLevel={source.user_access_level}
                                                     >
                                                         {({ disabledReason }) => (
-                                                            <LemonButton
+                                                            <Button
                                                                 status="danger"
                                                                 data-attr={`delete-data-warehouse-${source.source_type}`}
                                                                 key={`delete-data-warehouse-${source.source_type}`}
                                                                 onClick={() => {
-                                                                    LemonDialog.open({
+                                                                    Dialog.open({
                                                                         title: 'Delete data source?',
                                                                         description:
                                                                             'Are you sure you want to delete this data source? All related tables will be deleted.',
@@ -190,7 +190,7 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
                                                                 disabledReason={disabledReason}
                                                             >
                                                                 Delete
-                                                            </LemonButton>
+                                                            </Button>
                                                         )}
                                                     </AccessControlAction>
                                                 </>

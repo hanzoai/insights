@@ -1,11 +1,11 @@
 import { IconDownload, IconWarning } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from '~/lib/components/CodeSnippet/CodeSnippet'
-import { LemonBanner } from '~/lib/lemon-ui/LemonBanner'
-import { LemonButton } from '~/lib/lemon-ui/LemonButton'
-import { LemonModal } from '~/lib/lemon-ui/LemonModal'
-import { LemonSkeleton } from '~/lib/lemon-ui/LemonSkeleton'
-import { Link } from '~/lib/lemon-ui/Link'
+import { Banner } from '~/lib/elements/Banner'
+import { Button } from '~/lib/elements/Button'
+import { Modal } from '~/lib/elements/Modal'
+import { Skeleton } from '~/lib/elements/Skeleton'
+import { Link } from '~/lib/elements/Link'
 
 import {
     TerraformExportResource,
@@ -73,50 +73,50 @@ export function TerraformExportModal({ isOpen, onClose, resource }: TerraformExp
     const displayFilename = baseName.length > 30 ? `${baseName.slice(0, 30)}….tf` : filename
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             title="Manage with Terraform"
             description={getDescription(resource, state.result)}
             footer={
                 <div className="flex justify-between w-full">
-                    <LemonButton type="secondary" onClick={onClose}>
+                    <Button type="secondary" onClick={onClose}>
                         Close
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         icon={<IconDownload />}
                         onClick={handleDownload}
                         disabledReason={state.loading ? 'Loading...' : state.error ? 'Export failed' : undefined}
                     >
                         Download {displayFilename}
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
             <div className="space-y-4">
                 {state.loading && (
                     <div className="space-y-2">
-                        <LemonSkeleton className="h-4 w-1/2" />
-                        <LemonSkeleton className="h-32" />
+                        <Skeleton className="h-4 w-1/2" />
+                        <Skeleton className="h-32" />
                     </div>
                 )}
 
                 {state.error && (
-                    <LemonBanner type="error">
+                    <Banner type="error">
                         <div className="flex items-start gap-2">
                             <IconWarning className="text-danger shrink-0 mt-0.5" />
                             <div>
                                 <strong>Error:</strong> {state.error}
                             </div>
                         </div>
-                    </LemonBanner>
+                    </Banner>
                 )}
 
                 {state.result && (
                     <>
                         {state.result.warnings.length > 0 && (
-                            <LemonBanner type="warning">
+                            <Banner type="warning">
                                 <div className="flex items-start gap-2">
                                     <IconWarning className="text-warning shrink-0 mt-0.5" />
                                     <div>
@@ -128,7 +128,7 @@ export function TerraformExportModal({ isOpen, onClose, resource }: TerraformExp
                                         </ul>
                                     </div>
                                 </div>
-                            </LemonBanner>
+                            </Banner>
                         )}
 
                         <CodeSnippet language={Language.HCL} wrap thing="Terraform configuration">
@@ -137,6 +137,6 @@ export function TerraformExportModal({ isOpen, onClose, resource }: TerraformExp
                     </>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

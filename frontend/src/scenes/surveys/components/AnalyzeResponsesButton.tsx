@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 
 import { IconAI } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { addProductIntent } from 'lib/utils/product-intents'
 import { useMaxTool } from 'scenes/max/useMaxTool'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
@@ -71,8 +71,8 @@ export function AnalyzeResponsesButton(): JSX.Element | null {
     }
 
     return (
-        <LemonButton onClick={openMax} type="secondary" icon={<IconAI />}>
+        <Button onClick={openMax} type="secondary" icon={<IconAI />}>
             Analyze responses
-        </LemonButton>
+        </Button>
     )
 }

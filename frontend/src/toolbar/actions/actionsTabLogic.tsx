@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { subscriptions } from 'kea-subscriptions'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { urls } from 'scenes/urls'
 
 import { actionsLogic } from '~/toolbar/actions/actionsLogic'
@@ -244,7 +244,7 @@ export const actionsTabLogic = kea<actionsTabLogicType>([
                 actionsLogic.actions.updateAction({ action: response })
 
                 if (!values.automaticActionCreationEnabled) {
-                    lemonToast.success('Action saved', {
+                    toast.success('Action saved', {
                         button: {
                             label: 'Open in Insights',
                             action: () =>

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconCollapse, IconExpand, IconRewindPlay } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { humanFriendlyDetailedTime, humanFriendlyDuration } from 'lib/utils'
@@ -55,7 +55,7 @@ export const Session = ({ session }: SessionProps): JSX.Element => {
         <div className="flex flex-col rounded bg-primary border overflow-hidden mb-3" title={session.sessionId}>
             <div className="flex items-center justify-between bg-surface-primary p-0.5 pr-2 text-xs">
                 <div className="flex items-center">
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={isFolded ? <IconExpand /> : <IconCollapse />}
                         onClick={() => setIsFolded((state) => !state)}
@@ -67,7 +67,7 @@ export const Session = ({ session }: SessionProps): JSX.Element => {
                         <b>{session.events.length} events</b> in <b>{humanFriendlyDuration(durationSeconds)}</b>
                     </span>
                     {session.recording_duration_s ? (
-                        <LemonButton
+                        <Button
                             className="ml-1"
                             size="small"
                             icon={<IconRewindPlay />}

@@ -5,7 +5,7 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { Editor, ReactRenderer } from '@tiptap/react'
 
 import { IconEye, IconTriangleDownFilled, IconTriangleRightFilled } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { humanList, identifierToHuman, pluralize } from 'lib/utils'
 
@@ -148,7 +148,7 @@ function createDecorations(doc: PMNode, editor: Editor): DecorationSet {
 
 function HeadingToggle({ collapsed, onClick }: { collapsed: boolean; onClick?: () => void }): JSX.Element {
     return (
-        <LemonButton
+        <Button
             type="tertiary"
             size="xxsmall"
             tooltip={collapsed ? 'Click to expand' : 'Click to collapse'}
@@ -184,7 +184,7 @@ const createCollapsedContentDecoration = (
 
 function CollapsedContentSummary({ summary, onClick }: { summary: string; onClick: () => void }): JSX.Element {
     return (
-        <LemonButton
+        <Button
             type="tertiary"
             size="xxsmall"
             onClick={onClick}
@@ -192,7 +192,7 @@ function CollapsedContentSummary({ summary, onClick }: { summary: string; onClic
             className="italic -ml-1 opacity-80"
         >
             Expand for {summary}
-        </LemonButton>
+        </Button>
     )
 }
 

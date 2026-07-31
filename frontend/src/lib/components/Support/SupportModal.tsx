@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { LemonModal } from 'lib/lemon-ui/LemonModal/LemonModal'
+import { Modal } from 'lib/elements/Modal/Modal'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
@@ -29,13 +29,13 @@ function SupportModal({ onAfterClose }: { onAfterClose: () => void }): JSX.Eleme
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isSupportFormOpen}
             onClose={closeSupportForm}
             title={title}
             footer={
                 <div className="flex items-center gap-2">
-                    <LemonButton
+                    <Button
                         form="support-modal-form"
                         type="secondary"
                         onClick={() => {
@@ -44,17 +44,17 @@ function SupportModal({ onAfterClose }: { onAfterClose: () => void }): JSX.Eleme
                         }}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton form="support-modal-form" htmlType="submit" type="primary" data-attr="submit">
+                    </Button>
+                    <Button form="support-modal-form" htmlType="submit" type="primary" data-attr="submit">
                         Submit
-                    </LemonButton>
+                    </Button>
                 </div>
             }
             hasUnsavedInput={!!sendSupportRequest.message}
             onAfterClose={onAfterClose}
         >
             <SupportForm />
-        </LemonModal>
+        </Modal>
     )
 }
 

@@ -2,15 +2,15 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconPin, IconPlus } from '@hanzo/icons'
-import { LemonCheckbox, LemonDivider } from '@hanzo/lemon-ui'
+import { Checkbox, Divider } from '@hanzo/elements'
 
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { Popover } from 'lib/lemon-ui/Popover'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconOpenInNew, IconWithCount } from 'lib/lemon-ui/icons'
+import { Button, ButtonProps } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input/Input'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Popover } from 'lib/elements/Popover'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconOpenInNew, IconWithCount } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { sessionRecordingsPlaylistLogic } from '../../playlist/sessionRecordingsPlaylistLogic'
@@ -20,7 +20,7 @@ import { playlistPopoverLogic } from './playlistPopoverLogic'
 export function PlaylistPopoverButton({
     setPinnedInCurrentPlaylist,
     ...buttonProps
-}: { setPinnedInCurrentPlaylist?: (pinned: boolean) => void } & LemonButtonProps): JSX.Element {
+}: { setPinnedInCurrentPlaylist?: (pinned: boolean) => void } & ButtonProps): JSX.Element {
     const { sessionRecordingId, logicProps } = useValues(sessionRecordingPlayerLogic)
     const {
         logicProps: { logicKey: currentPlaylistId },
@@ -56,52 +56,52 @@ export function PlaylistPopoverButton({
                                     enableFormOnSubmit
                                     className="deprecated-space-y-1"
                                 >
-                                    <LemonField name="name">
-                                        <LemonInput placeholder="Collection name" fullWidth />
-                                    </LemonField>
+                                    <Field name="name">
+                                        <Input placeholder="Collection name" fullWidth />
+                                    </Field>
                                     <div className="flex items-center gap-2 justify-end">
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             status="danger"
                                             onClick={() => setNewFormShowing(false)}
                                         >
                                             Cancel
-                                        </LemonButton>
-                                        <LemonButton type="primary" htmlType="submit" icon={<IconPlus />}>
+                                        </Button>
+                                        <Button type="primary" htmlType="submit" icon={<IconPlus />}>
                                             Create and add to list
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 </Form>
                             ) : (
                                 <>
-                                    <LemonInput
+                                    <Input
                                         type="search"
                                         placeholder="Search collections..."
                                         value={searchQuery}
                                         onChange={setSearchQuery}
                                         fullWidth
                                     />
-                                    <LemonButton fullWidth icon={<IconPlus />} onClick={() => setNewFormShowing(true)}>
+                                    <Button fullWidth icon={<IconPlus />} onClick={() => setNewFormShowing(true)}>
                                         New collection
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             )}
                         </div>
 
-                        <LemonDivider className="my-1" />
+                        <Divider className="my-1" />
 
                         {allPlaylists.length ? (
                             <div className="max-h-60 overflow-auto">
                                 {allPlaylists?.map(({ selected, playlist }) => (
                                     <div key={playlist.short_id} className="flex items-center gap-1">
-                                        <LemonButton
+                                        <Button
                                             className="flex-1"
                                             icon={
                                                 currentPlaylistsLoading &&
                                                 modifyingPlaylist?.short_id === playlist.short_id ? (
                                                     <Spinner className="text-sm" />
                                                 ) : (
-                                                    <LemonCheckbox className="pointer-events-none" checked={selected} />
+                                                    <Checkbox className="pointer-events-none" checked={selected} />
                                                 )
                                             }
                                             onClick={() => {
@@ -116,9 +116,9 @@ export function PlaylistPopoverButton({
                                             }}
                                         >
                                             {playlist.name || playlist.derived_name}
-                                        </LemonButton>
+                                        </Button>
 
-                                        <LemonButton
+                                        <Button
                                             icon={<IconOpenInNew />}
                                             to={urls.replayPlaylist(playlist.short_id)}
                                             targetBlank
@@ -127,14 +127,14 @@ export function PlaylistPopoverButton({
                                 ))}
                             </div>
                         ) : playlistsLoading ? (
-                            <LemonSkeleton className="my-2 h-4" repeat={3} />
+                            <Skeleton className="my-2 h-4" repeat={3} />
                         ) : (
                             <div className="p-2 text-center text-secondary">No collections found</div>
                         )}
                     </div>
                 }
             >
-                <LemonButton
+                <Button
                     icon={<IconPin />}
                     active={showPlaylistPopover}
                     onClick={() => setShowPlaylistPopover(!showPlaylistPopover)}

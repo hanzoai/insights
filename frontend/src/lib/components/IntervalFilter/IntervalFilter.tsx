@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPin } from '@hanzo/icons'
-import { LemonButton, LemonSelect, LemonSelectOption } from '@hanzo/lemon-ui'
+import { Button, Select, SelectOption } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -24,7 +24,7 @@ export function IntervalFilter({ disabled }: IntervalFilterProps): JSX.Element {
                 <span className="hidden md:inline">grouped </span>by
             </span>
             {isIntervalManuallySet ? (
-                <LemonButton
+                <Button
                     type="secondary"
                     onClick={() => {
                         setIsIntervalManuallySet(false)
@@ -37,7 +37,7 @@ export function IntervalFilter({ disabled }: IntervalFilterProps): JSX.Element {
                     disabledReason={editingDisabledReason}
                 >
                     {interval || 'day'}
-                </LemonButton>
+                </Button>
             ) : (
                 <IntervalFilterStandalone
                     disabled={disabled}
@@ -63,10 +63,10 @@ interface IntervalFilterStandaloneProps {
     disabledReason?: string | null
     interval: IntervalType | undefined
     onIntervalChange: (interval: IntervalType) => void
-    options?: LemonSelectOption<IntervalType>[]
+    options?: SelectOption<IntervalType>[]
 }
 
-const DEFAULT_OPTIONS: LemonSelectOption<IntervalType>[] = [
+const DEFAULT_OPTIONS: SelectOption<IntervalType>[] = [
     { value: 'hour', label: 'Hour' },
     { value: 'day', label: 'Day' },
     { value: 'week', label: 'Week' },
@@ -81,7 +81,7 @@ export function IntervalFilterStandalone({
     options = DEFAULT_OPTIONS,
 }: IntervalFilterStandaloneProps): JSX.Element {
     return (
-        <LemonSelect
+        <Select
             size="small"
             disabled={disabled}
             disabledReason={disabledReason}

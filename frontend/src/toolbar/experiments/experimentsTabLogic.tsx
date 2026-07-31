@@ -4,7 +4,7 @@ import { subscriptions } from 'kea-subscriptions'
 
 import { EXPERIMENT_TARGET_SELECTOR } from 'lib/actionUtils'
 import api, { ApiError } from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { urls } from 'scenes/urls'
 
 import { percentageDistribution } from '~/scenes/experiments/utils'
@@ -212,7 +212,7 @@ export const experimentsTabLogic = kea<experimentsTabLogicType>([
                     experimentsLogic.actions.updateExperiment({ experiment: response })
                     actions.selectExperiment(null)
 
-                    lemonToast.success('Experiment saved', {
+                    toast.success('Experiment saved', {
                         button: {
                             label: 'Open in Insights',
                             action: () => window.open(joinWithUiHost(uiHost, urls.experiment(response.id)), '_blank'),
@@ -222,7 +222,7 @@ export const experimentsTabLogic = kea<experimentsTabLogicType>([
                 } catch (e) {
                     const apiError = e as ApiError
                     if (apiError) {
-                        lemonToast.error(`Experiment save failed: ${apiError.data.detail}`)
+                        toast.error(`Experiment save failed: ${apiError.data.detail}`)
                     }
                 }
             },

@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 import { useState } from 'react'
 
 import { IconArrowRight, IconCheckCircle, IconDatabase, IconPieChart, IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonCard, Link } from '@hanzo/lemon-ui'
+import { Button, Card, Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -105,7 +105,7 @@ export function InlineSetup({ completeOnboarding, initialSetupView }: InlineSetu
         <div className="space-y-6">
             {/* Step 1: Enable Managed Viewset (only if FF is enabled and viewset is not enabled) */}
             {shouldShowViewsetStep ? (
-                <LemonCard hoverEffect={false}>
+                <Card hoverEffect={false}>
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-3000 font-bold text-lg">
@@ -133,11 +133,11 @@ export function InlineSetup({ completeOnboarding, initialSetupView }: InlineSetu
                             events in the next step.
                         </div>
                     </div>
-                </LemonCard>
+                </Card>
             ) : (
                 <>
                     {/* Main Setup Card */}
-                    <LemonCard hoverEffect={false}>
+                    <Card hoverEffect={false}>
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -214,7 +214,7 @@ export function InlineSetup({ completeOnboarding, initialSetupView }: InlineSetu
 
                             {/* Action Buttons */}
                             <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-primary">
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     icon={<IconPlus />}
                                     onClick={() => setShowEventModal(true)}
@@ -222,8 +222,8 @@ export function InlineSetup({ completeOnboarding, initialSetupView }: InlineSetu
                                     data-attr="add-revenue-event"
                                 >
                                     Add Revenue Event
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     type="primary"
                                     icon={<IconPlus />}
                                     onClick={() => {
@@ -234,9 +234,9 @@ export function InlineSetup({ completeOnboarding, initialSetupView }: InlineSetu
                                     data-attr="add-revenue-source"
                                 >
                                     Connect Revenue Source
-                                </LemonButton>
+                                </Button>
                                 {hasConnectedButDisabledStripeSources && (
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         icon={<IconArrowRight />}
                                         onClick={() => {
@@ -246,10 +246,10 @@ export function InlineSetup({ completeOnboarding, initialSetupView }: InlineSetu
                                         data-attr="enable-existing-stripe-source"
                                     >
                                         Enable Existing Stripe Source
-                                    </LemonButton>
+                                    </Button>
                                 )}
                                 {(hasEvents || hasSources) && (
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         size="small"
                                         onClick={() => {
@@ -266,17 +266,17 @@ export function InlineSetup({ completeOnboarding, initialSetupView }: InlineSetu
                                         className="ml-auto"
                                     >
                                         You're all set! View Dashboard
-                                    </LemonButton>
+                                    </Button>
                                 )}
                             </div>
                         </div>
-                    </LemonCard>
+                    </Card>
                 </>
             )}
 
             {/* Source Selection */}
             {currentView === 'add-source' && !selectedSource && (
-                <LemonCard hoverEffect={false}>
+                <Card hoverEffect={false}>
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-primary">
@@ -329,23 +329,23 @@ export function InlineSetup({ completeOnboarding, initialSetupView }: InlineSetu
                         </div>
 
                         <div className="flex justify-end">
-                            <LemonButton type="secondary" onClick={() => setCurrentView('overview')}>
+                            <Button type="secondary" onClick={() => setCurrentView('overview')}>
                                 Cancel
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
-                </LemonCard>
+                </Card>
             )}
 
             {/* Source Connection Wizard */}
             {currentView === 'add-source' && selectedSource && (
-                <LemonCard hoverEffect={false}>
+                <Card hoverEffect={false}>
                     <NewSourcesWizard
                         onComplete={handleFormSuccess}
                         allowedSources={revenueSources.map((source) => source.id)} // Only show revenue-related sources
                         initialSource={selectedSource}
                     />
-                </LemonCard>
+                </Card>
             )}
 
             {/* Help Footer */}

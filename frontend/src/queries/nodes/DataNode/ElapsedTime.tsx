@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 
 import { IconChevronRight } from '@hanzo/icons'
 
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Popover } from 'lib/elements/Popover'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { QueryTiming } from '~/queries/schema/schema-general'

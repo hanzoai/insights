@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu'
+import { MenuOverlay } from 'lib/elements/Menu'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { NativeMarketingSource } from '~/queries/schema/schema-general'
@@ -106,5 +106,5 @@ export function NonIntegratedConversionsRowActions({
         },
     })
 
-    return menuItems ? <LemonMenuOverlay items={menuItems} /> : null
+    return menuItems ? <MenuOverlay items={menuItems} /> : null
 }

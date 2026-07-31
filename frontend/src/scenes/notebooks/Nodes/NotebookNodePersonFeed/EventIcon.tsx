@@ -1,7 +1,7 @@
 import { IconCode, IconEye } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
-import { IconAdsClick, IconExclamation, IconEyeHidden } from 'lib/lemon-ui/icons'
+import { IconAdsClick, IconExclamation, IconEyeHidden } from 'lib/elements/icons'
 
 import { CORE_FILTER_DEFINITIONS_BY_GROUP } from '~/taxonomy/taxonomy'
 import { EventType } from '~/types'

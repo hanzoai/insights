@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconCopy, IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
+import { Dialog } from 'lib/elements/Dialog'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
@@ -67,14 +67,14 @@ export function SharePasswordsTable({ dashboardId, insightId, recordingId }: Sha
                                     ? 'No passwords'
                                     : `${sharePasswords.length} active ${sharePasswords.length === 1 ? 'password' : 'passwords'}`}
                             </span>
-                            <LemonButton
+                            <Button
                                 type="tertiary"
                                 size="xsmall"
                                 icon={<IconPlus />}
                                 onClick={() => setNewPasswordModalOpen(true)}
                             >
                                 Add
-                            </LemonButton>
+                            </Button>
                         </div>
 
                         {sharePasswords.length === 0 ? (
@@ -100,11 +100,11 @@ export function SharePasswordsTable({ dashboardId, insightId, recordingId }: Sha
                                             </div>
                                         </div>
                                         <div className="flex-shrink-0">
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconTrash />}
                                                 size="xsmall"
                                                 onClick={() => {
-                                                    LemonDialog.open({
+                                                    Dialog.open({
                                                         title: 'Remove password?',
                                                         description: password.note
                                                             ? `Remove the password "${password.note}"? Anyone using this password will lose access immediately.`
@@ -131,7 +131,7 @@ export function SharePasswordsTable({ dashboardId, insightId, recordingId }: Sha
                 </div>
             )}
 
-            <LemonModal
+            <Modal
                 isOpen={newPasswordModalOpen}
                 onClose={handleCloseModal}
                 title="Create new share password"
@@ -139,17 +139,17 @@ export function SharePasswordsTable({ dashboardId, insightId, recordingId }: Sha
                 zIndex="1166"
                 footer={
                     createdPasswordResult ? (
-                        <LemonButton type="primary" onClick={handleCloseModal}>
+                        <Button type="primary" onClick={handleCloseModal}>
                             Done
-                        </LemonButton>
+                        </Button>
                     ) : (
                         <>
-                            <LemonButton type="secondary" onClick={handleCloseModal}>
+                            <Button type="secondary" onClick={handleCloseModal}>
                                 Cancel
-                            </LemonButton>
-                            <LemonButton type="primary" onClick={handleCreatePassword} loading={isCreatingPassword}>
+                            </Button>
+                            <Button type="primary" onClick={handleCreatePassword} loading={isCreatingPassword}>
                                 Create password
-                            </LemonButton>
+                            </Button>
                         </>
                     )
                 }
@@ -171,7 +171,7 @@ export function SharePasswordsTable({ dashboardId, insightId, recordingId }: Sha
                                         </div>
                                     </div>
                                     <div className="flex-shrink-0">
-                                        <LemonButton
+                                        <Button
                                             icon={<IconCopy />}
                                             type="secondary"
                                             size="small"
@@ -205,7 +205,7 @@ export function SharePasswordsTable({ dashboardId, insightId, recordingId }: Sha
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-2">Password (optional)</label>
-                            <LemonInput
+                            <Input
                                 type="password"
                                 placeholder="Leave empty to generate a random password"
                                 value={newPasswordData.password}
@@ -217,7 +217,7 @@ export function SharePasswordsTable({ dashboardId, insightId, recordingId }: Sha
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-2">Note (optional)</label>
-                            <LemonInput
+                            <Input
                                 placeholder="e.g., For marketing team, External client access..."
                                 value={newPasswordData.note}
                                 onChange={(value) => setNewPasswordData((prev) => ({ ...prev, note: value }))}
@@ -229,7 +229,7 @@ export function SharePasswordsTable({ dashboardId, insightId, recordingId }: Sha
                         </div>
                     </div>
                 )}
-            </LemonModal>
+            </Modal>
         </>
     )
 }

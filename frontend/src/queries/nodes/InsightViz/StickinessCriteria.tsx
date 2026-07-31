@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput } from '@hanzo/lemon-ui'
+import { Input } from '@hanzo/elements'
 
 import { OperatorSelect } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -34,7 +34,7 @@ export function StickinessCriteria({ insightProps }: EditorFilterProps): JSX.Ele
                     })
                 }}
             />
-            <LemonInput
+            <Input
                 type="number"
                 className="ml-2 w-20"
                 defaultValue={currentValue}

@@ -1,4 +1,4 @@
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { cn } from 'lib/utils/css-classes'
 
@@ -37,9 +37,9 @@ export function PaginationControls({
             )}
             <div className="flex items-center gap-2 ml-auto">
                 {hasMoreItems && (
-                    <LemonButton type="secondary" size="small" onClick={onToggleShowAll}>
+                    <Button type="secondary" size="small" onClick={onToggleShowAll}>
                         {showAll ? 'Show less' : `Show all (${totalCount})`}
-                    </LemonButton>
+                    </Button>
                 )}
                 {additionalControls}
             </div>

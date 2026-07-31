@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -13,7 +13,7 @@ export function RetentionReferencePicker(): JSX.Element {
     const { retentionReference } = retentionFilter || {}
 
     return (
-        <LemonSelect
+        <Select
             className="w-60"
             size="small"
             value={retentionReference || 'total'}

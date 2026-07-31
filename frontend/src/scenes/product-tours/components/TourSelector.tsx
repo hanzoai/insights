@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { ProductTour, ProgressStatus } from '~/types'
 
@@ -46,7 +46,7 @@ export function TourSelector({
         }))
 
     return (
-        <LemonSelect
+        <Select
             value={value}
             onChange={onChange}
             options={options}

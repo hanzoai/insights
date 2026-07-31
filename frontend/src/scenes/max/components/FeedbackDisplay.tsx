@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { feedbackPromptLogic } from '../feedbackPromptLogic'
 import { FeedbackRating } from '../utils'
@@ -42,18 +42,18 @@ export function FeedbackDisplay({ conversationId }: FeedbackDisplayProps): JSX.E
 
     return (
         <div className="flex items-center gap-1">
-            <LemonButton size="xsmall" type="secondary" onClick={() => submitRating('good')}>
+            <Button size="xsmall" type="secondary" onClick={() => submitRating('good')}>
                 Good <span className="text-muted ml-0.5">1</span>
-            </LemonButton>
-            <LemonButton size="xsmall" type="secondary" onClick={() => submitRating('okay')}>
+            </Button>
+            <Button size="xsmall" type="secondary" onClick={() => submitRating('okay')}>
                 Okay <span className="text-muted ml-0.5">2</span>
-            </LemonButton>
-            <LemonButton size="xsmall" type="secondary" onClick={() => submitRating('bad')}>
+            </Button>
+            <Button size="xsmall" type="secondary" onClick={() => submitRating('bad')}>
                 Bad <span className="text-muted ml-0.5">3</span>
-            </LemonButton>
-            <LemonButton size="xsmall" type="secondary" onClick={() => submitRating('dismissed')}>
+            </Button>
+            <Button size="xsmall" type="secondary" onClick={() => submitRating('dismissed')}>
                 Dismiss <span className="text-muted ml-0.5">x</span>
-            </LemonButton>
+            </Button>
         </div>
     )
 }

@@ -2,7 +2,7 @@ import { actions, afterMount, kea, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { EmailTemplate } from 'scenes/insights-functions/email-templater/emailTemplaterLogic'
 
@@ -59,10 +59,10 @@ export const messageTemplatesLogic = kea<messageTemplatesLogicType>([
                 createTemplate: async ({ template }: { template: Partial<MessageTemplate> }) => {
                     try {
                         const newTemplate = await api.messaging.createTemplate(template)
-                        lemonToast.success('Template created successfully')
+                        toast.success('Template created successfully')
                         return [...values.templates, newTemplate]
                     } catch {
-                        lemonToast.error('Failed to create template')
+                        toast.error('Failed to create template')
                         return values.templates
                     }
                 },
@@ -75,10 +75,10 @@ export const messageTemplatesLogic = kea<messageTemplatesLogicType>([
                 }) => {
                     try {
                         const updatedTemplate = await api.messaging.updateTemplate(templateId, template)
-                        lemonToast.success('Template updated successfully')
+                        toast.success('Template updated successfully')
                         return values.templates.map((t: MessageTemplate) => (t.id === templateId ? updatedTemplate : t))
                     } catch {
-                        lemonToast.error('Failed to update template')
+                        toast.error('Failed to update template')
                         return values.templates
                     }
                 },
@@ -89,10 +89,10 @@ export const messageTemplatesLogic = kea<messageTemplatesLogicType>([
                             description: template.description,
                             content: template.content,
                         })
-                        lemonToast.success('Template duplicated successfully')
+                        toast.success('Template duplicated successfully')
                         return [...values.templates, duplicatedTemplate]
                     } catch {
-                        lemonToast.error('Failed to duplicate template')
+                        toast.error('Failed to duplicate template')
                         return values.templates
                     }
                 },

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconClock, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonMenuSection } from '@hanzo/lemon-ui'
+import { Button, Menu, MenuSection } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { capitalizeFirstLetter } from 'lib/utils'
@@ -109,7 +109,7 @@ export const FilterHistoryDropdown = (): JSX.Element | null => {
         return null
     }
 
-    const sections: LemonMenuSection[] = [
+    const sections: MenuSection[] = [
         {
             title: 'Recent filters',
             items: filterHistory.map((entry, index) => ({
@@ -129,8 +129,8 @@ export const FilterHistoryDropdown = (): JSX.Element | null => {
     ]
 
     return (
-        <LemonMenu items={sections}>
-            <LemonButton icon={<IconClock />} size="small" type="secondary" tooltip="Filter history" />
-        </LemonMenu>
+        <Menu items={sections}>
+            <Button icon={<IconClock />} size="small" type="secondary" tooltip="Filter history" />
+        </Menu>
     )
 }

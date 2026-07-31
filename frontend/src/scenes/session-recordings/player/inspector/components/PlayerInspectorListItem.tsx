@@ -19,11 +19,11 @@ import {
     IconRedux,
     IconTerminal,
 } from '@hanzo/icons'
-import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
+import { Button, Divider } from '@hanzo/elements'
 
 import { Dayjs } from 'lib/dayjs'
 import useIsHovering from 'lib/hooks/useIsHovering'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { ceilMsToClosestSecond, objectsEqual } from 'lib/utils'
 import { ItemTimeDisplay } from 'scenes/session-recordings/components/ItemTimeDisplay'
 import {
@@ -142,7 +142,7 @@ function IconWithOptionalBadge({
         return <BaseIcon className="min-w-4" />
     }
 
-    // If TypeIcon is already a JSX element (like the LemonBadge case), return as-is
+    // If TypeIcon is already a JSX element (like the Badge case), return as-is
     const iconElement = isValidElement(TypeIcon) ? TypeIcon : <TypeIcon />
     return showBadge ? (
         <div className="text-white bg-brand-blue rounded-full flex items-center p-0.5">{iconElement}</div>
@@ -309,7 +309,7 @@ const ListItemTitle = memo(function ListItemTitle({
             </div>
             {isExpanded && <RowItemMenu item={item} />}
             {!notExpandable.includes(item.type) && (
-                <LemonButton
+                <Button
                     icon={isExpanded ? <IconCollapse /> : <IconExpand />}
                     size="small"
                     noPadding
@@ -341,7 +341,7 @@ const ListItemDetail = memo(function ListItemDetail({ item, index }: { item: Ins
         >
             <div className="text-xs">
                 <RowItemDetail item={item} finalTimestamp={end} />
-                <LemonDivider dashed />
+                <Divider dashed />
 
                 <div
                     className="flex justify-end cursor-pointer mx-2 my-1"

@@ -1,4 +1,4 @@
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 /**
  * Handle 409 Approval Required errors from API calls.
@@ -11,7 +11,7 @@ export function handleApprovalRequired(
     resourceId: string | number
 ): boolean {
     if (error?.status === 409) {
-        lemonToast.warning(error.detail || 'This action requires approval.')
+        toast.warning(error.detail || 'This action requires approval.')
 
         import('scenes/approvals/changeRequestsLogic').then(({ changeRequestsLogic }) => {
             changeRequestsLogic({

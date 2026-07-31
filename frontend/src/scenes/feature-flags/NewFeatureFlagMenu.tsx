@@ -3,8 +3,8 @@ import React from 'react'
 
 import { IconCode, IconFlask, IconPeople, IconSparkles, IconTestTube, IconToggle, IconWrench } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { getToolDefinition } from 'scenes/max/max-constants'
 import { maxLogic } from 'scenes/max/maxLogic'
@@ -70,7 +70,7 @@ export function OverlayForNewFeatureFlagMenu(): JSX.Element {
             {TEMPLATES.map((template) => {
                 const metadata = TEMPLATE_METADATA[template]
                 return (
-                    <LemonButton
+                    <Button
                         key={template}
                         icon={<metadata.icon />}
                         to={metadata.url}
@@ -82,11 +82,11 @@ export function OverlayForNewFeatureFlagMenu(): JSX.Element {
                             <strong>{metadata.name}</strong>
                             <span className="text-xs font-sans font-normal">{metadata.description}</span>
                         </div>
-                    </LemonButton>
+                    </Button>
                 )
             })}
-            <LemonDivider className="my-1" />
-            <LemonButton
+            <Divider className="my-1" />
+            <Button
                 icon={<IconCode />}
                 to={urls.featureFlagNew({ type: 'remote_config' })}
                 data-attr="new-feature-flag-menu-item"
@@ -97,9 +97,9 @@ export function OverlayForNewFeatureFlagMenu(): JSX.Element {
                     <strong>Remote config</strong>
                     <span className="text-xs font-sans font-normal">Deliver configuration values to your app</span>
                 </div>
-            </LemonButton>
-            <LemonDivider className="my-1" />
-            <LemonButton
+            </Button>
+            <Divider className="my-1" />
+            <Button
                 icon={<IconFlask />}
                 to={urls.experiment('new')}
                 data-attr="new-experiment-menu-item"
@@ -117,9 +117,9 @@ export function OverlayForNewFeatureFlagMenu(): JSX.Element {
                     <strong>Experiment</strong>
                     <span className="text-xs font-sans font-normal">Run A/B tests with statistical analysis</span>
                 </div>
-            </LemonButton>
-            <LemonDivider />
-            <LemonButton
+            </Button>
+            <Divider />
+            <Button
                 icon={<IconSparkles />}
                 data-attr="new-feature-flag-ai-menu-item"
                 data-attr-flag-type="ai"
@@ -136,7 +136,7 @@ export function OverlayForNewFeatureFlagMenu(): JSX.Element {
                     <strong>Ask AI</strong>
                     <span className="text-xs font-sans font-normal">Not sure? Ask AI to do it for you</span>
                 </div>
-            </LemonButton>
+            </Button>
         </>
     )
 }

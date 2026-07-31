@@ -1,7 +1,7 @@
 import { Meta } from '@storybook/react'
 import { useRef, useState } from 'react'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { uuid } from 'lib/utils'
 
 import { useStorybookMocks } from '~/mocks/browser'
@@ -84,9 +84,9 @@ const Template = (
             </div>
 
             <div className="flex justify-center mt-4">
-                <LemonButton onClick={() => setModalOpen(true)} type="primary">
+                <Button onClick={() => setModalOpen(true)} type="primary">
                     Open as Modal
-                </LemonButton>
+                </Button>
             </div>
 
             <SubscriptionsModal

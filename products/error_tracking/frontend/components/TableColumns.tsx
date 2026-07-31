@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconChevronDown, IconChevronRight, IconMinus } from '@hanzo/icons'
-import { LemonCheckbox, LemonSkeleton, Link } from '@hanzo/lemon-ui'
+import { Checkbox, Skeleton, Link } from '@hanzo/elements'
 
 import { getRuntimeFromLib } from 'lib/components/Errors/utils'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -32,7 +32,7 @@ export const IssueListTitleHeader = ({
 
     return (
         <div className="flex gap-2 items-center">
-            <LemonCheckbox
+            <Checkbox
                 checked={allSelected}
                 onChange={() => (allSelected ? setSelectedIssueIds([]) : setSelectedIssueIds(results.map((r) => r.id)))}
             />
@@ -87,7 +87,7 @@ export const IssueListTitleColumn = <T extends ErrorTrackingIssue | ErrorTrackin
 
     return (
         <div className="flex items-start gap-x-2 group my-1">
-            <LemonCheckbox className="h-[1rem]" checked={checked} onChange={onChange} />
+            <Checkbox className="h-[1rem]" checked={checked} onChange={onChange} />
 
             <div className="flex flex-col gap-[3px]">
                 <Link
@@ -144,7 +144,7 @@ export const IssueListTitleColumn = <T extends ErrorTrackingIssue | ErrorTrackin
                     {record.last_seen ? (
                         <TZLabel time={record.last_seen} className="border-dotted border-b text-xs" delayMs={750} />
                     ) : (
-                        <LemonSkeleton />
+                        <Skeleton />
                     )}
                 </div>
             </div>

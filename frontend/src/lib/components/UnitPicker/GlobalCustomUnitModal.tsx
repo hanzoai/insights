@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input/Input'
+import { Modal } from 'lib/elements/Modal'
 import { capitalizeFirstLetter } from 'lib/utils'
 
 import { unitPickerModalLogic } from './unitPickerModalLogic'
@@ -28,23 +28,23 @@ export function GlobalCustomUnitModal(): JSX.Element | null {
     const { type } = customUnitModalData
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isCustomUnitModalOpen}
             onClose={hideCustomUnitModal}
             forceAbovePopovers={true}
             title={`Custom ${type}`}
             footer={
                 <>
-                    <LemonButton type="secondary" data-attr={`custom-${type}-cancel`} onClick={hideCustomUnitModal}>
+                    <Button type="secondary" data-attr={`custom-${type}-cancel`} onClick={hideCustomUnitModal}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={() => applyCustomUnit(localValue)}>
+                    </Button>
+                    <Button type="primary" onClick={() => applyCustomUnit(localValue)}>
                         Apply
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
-            <LemonField.Pure
+            <Field.Pure
                 label={`${capitalizeFirstLetter(type)}:`}
                 help={
                     <>
@@ -57,8 +57,8 @@ export function GlobalCustomUnitModal(): JSX.Element | null {
                     </>
                 }
             >
-                <LemonInput value={localValue} onChange={setLocalValue} autoFocus />
-            </LemonField.Pure>
-        </LemonModal>
+                <Input value={localValue} onChange={setLocalValue} autoFocus />
+            </Field.Pure>
+        </Modal>
     )
 }

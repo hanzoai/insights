@@ -2,10 +2,10 @@ import { useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconWrench } from '@hanzo/icons'
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { getDataWarehouseSourceUrl } from 'scenes/data-warehouse/settings/DataWarehouseManagedSourcesTable'
 
 import IconInsights from 'public/insights-icon.svg'
@@ -99,7 +99,7 @@ export function DataWarehouseSourceIcon({
     }, [availableSources, type])
 
     if (availableSourcesLoading || !availableSources) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     if (!icon) {

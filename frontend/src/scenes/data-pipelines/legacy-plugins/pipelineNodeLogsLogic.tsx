@@ -1,7 +1,7 @@
 import { actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { LemonTableColumns, Link } from '@hanzo/lemon-ui'
+import { TableColumns, Link } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { LOGS_PORTION_LIMIT } from 'lib/constants'
@@ -233,7 +233,7 @@ export const pipelineNodeLogsLogic = kea<pipelineNodeLogsLogicType>([
         ],
         columns: [
             (s) => [s.node],
-            (node): LemonTableColumns<LogEntry> => {
+            (node): TableColumns<LogEntry> => {
                 return [
                     {
                         title: 'Timestamp',
@@ -282,7 +282,7 @@ export const pipelineNodeLogsLogic = kea<pipelineNodeLogsLogicType>([
                         dataIndex: 'message',
                         render: (message: string) => <code className="whitespace-pre-wrap">{message}</code>,
                     },
-                ] as LemonTableColumns<LogEntry>
+                ] as TableColumns<LogEntry>
             },
         ],
 

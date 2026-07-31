@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { SegmentedButton } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -18,7 +18,7 @@ export function RetentionCumulativeButton(): JSX.Element | null {
     }
 
     return (
-        <LemonSegmentedButton
+        <SegmentedButton
             value={cumulativeRetention ? 1 : 0}
             onChange={(value: number) => {
                 updateInsightFilter({ cumulative: value === 1 })

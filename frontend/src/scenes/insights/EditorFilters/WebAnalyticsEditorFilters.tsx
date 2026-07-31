@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
 import { IconFilter } from '@hanzo/icons'
-import { LemonButton, LemonSwitch, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Switch, Tooltip } from '@hanzo/elements'
 
 import { FilterBar } from 'lib/components/FilterBar'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -79,15 +79,15 @@ function FilterTestAccountsToggle({
 
     return (
         <Tooltip title="Filter out events from test accounts">
-            <LemonButton
+            <Button
                 icon={<IconFilter />}
                 onClick={() => updateQuerySource({ filterTestAccounts: !isFilterTestAccountsEnabled })}
                 type="secondary"
                 size="small"
             >
                 Filter out internal and test users:{' '}
-                <LemonSwitch checked={isFilterTestAccountsEnabled} className="ml-1" />
-            </LemonButton>
+                <Switch checked={isFilterTestAccountsEnabled} className="ml-1" />
+            </Button>
         </Tooltip>
     )
 }

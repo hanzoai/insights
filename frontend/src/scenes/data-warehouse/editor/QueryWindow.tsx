@@ -4,16 +4,16 @@ import type { editor as importedEditor } from 'monaco-editor'
 import { memo, useMemo } from 'react'
 
 import { IconBook, IconDownload, IconInfo, IconPlayFilled } from '@hanzo/icons'
-import { LemonDivider, Spinner } from '@hanzo/lemon-ui'
+import { Divider, Spinner } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { Link } from 'lib/lemon-ui/Link'
-import { IconCancel } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Switch } from 'lib/elements/Switch'
+import { Link } from 'lib/elements/Link'
+import { IconCancel } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { userPreferencesLogic } from 'lib/logic/userPreferencesLogic'
 import { Scene } from 'scenes/sceneTypes'
@@ -119,10 +119,10 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
             )}
             <div className="flex flex-row justify-start align-center w-full pl-2 pr-2 bg-white dark:bg-black border-b">
                 <RunButton />
-                <LemonDivider vertical />
+                <Divider vertical />
                 {isDraft && featureFlags[FEATURE_FLAGS.EDITOR_DRAFTS] && (
                     <>
-                        <LemonButton
+                        <Button
                             type="tertiary"
                             size="xsmall"
                             id="sql-editor-query-window-save-as-draft"
@@ -151,8 +151,8 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                             }}
                         >
                             Save
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="tertiary"
                             size="xsmall"
                             id="sql-editor-query-window-publish-draft"
@@ -185,13 +185,13 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                         >
                             {!editingView && <IconInfo className="mr-1" color="var(--warning)" />}
                             Publish
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
                 {editingView && !isDraft && activeTab && (
                     <>
                         {featureFlags[FEATURE_FLAGS.EDITOR_DRAFTS] && (
-                            <LemonButton
+                            <Button
                                 type="tertiary"
                                 size="xsmall"
                                 id="sql-editor-query-window-save-draft"
@@ -200,9 +200,9 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                                 }}
                             >
                                 Save draft
-                            </LemonButton>
+                            </Button>
                         )}
-                        <LemonButton
+                        <Button
                             onClick={() =>
                                 updateView({
                                     id: editingView.id,
@@ -222,12 +222,12 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                             id={`sql-editor-query-window-update-${isMaterializedView ? 'materialize' : 'view'}`}
                         >
                             {isMaterializedView ? 'Update and re-materialize view' : 'Update view'}
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
                 {editingView && (
                     <>
-                        <LemonButton
+                        <Button
                             onClick={() => openHistoryModal()}
                             icon={<IconBook />}
                             type="tertiary"
@@ -235,7 +235,7 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                             id="sql-editor-query-window-history"
                         >
                             History
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
                 {!editingInsight && !editingView && !insightLoading && (
@@ -247,7 +247,7 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                             interaction="click"
                             scope={Scene.SQLEditor}
                         >
-                            <LemonButton
+                            <Button
                                 onClick={() => saveAsView()}
                                 icon={<IconDownload />}
                                 type="tertiary"
@@ -256,7 +256,7 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                                 id="sql-editor-query-window-save-as-view"
                             >
                                 Save as view
-                            </LemonButton>
+                            </Button>
                         </AppShortcut>
                     </>
                 )}
@@ -266,7 +266,7 @@ export function QueryWindow({ onSetMonacoAndEditor, tabId }: QueryWindowProps): 
                         disabledReason={editingView ? 'Variables are not allowed in views.' : undefined}
                     />
                     {vimModeFeatureEnabled && (
-                        <LemonSwitch
+                        <Switch
                             checked={editorVimModeEnabled}
                             onChange={setEditorVimModeEnabled}
                             label="Vim"
@@ -373,7 +373,7 @@ function RunButton(): JSX.Element {
             interaction="click"
             scope={Scene.SQLEditor}
         >
-            <LemonButton
+            <Button
                 data-attr="sql-editor-run-button"
                 onClick={() => {
                     if (responseLoading) {
@@ -388,7 +388,7 @@ function RunButton(): JSX.Element {
                 tooltip={tooltipContent}
             >
                 {responseLoading ? 'Cancel' : 'Run'}
-            </LemonButton>
+            </Button>
         </AppShortcut>
     )
 }

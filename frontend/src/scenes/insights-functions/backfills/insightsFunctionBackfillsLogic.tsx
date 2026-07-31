@@ -1,6 +1,6 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -50,9 +50,9 @@ export const insightsFunctionBackfillsLogic = kea<insightsFunctionBackfillsLogic
                 // Reload page to get the updated config and render <BatchExportBackfills />
                 actions.loadInsightsFunction()
 
-                lemonToast.success('Backfills enabled for this destination.')
+                toast.success('Backfills enabled for this destination.')
             } catch {
-                lemonToast.error('Failed to enable backfills for this destination.')
+                toast.error('Failed to enable backfills for this destination.')
             } finally {
                 actions.setLoading(false)
             }

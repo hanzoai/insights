@@ -3,7 +3,7 @@ import { combineUrl, router } from 'kea-router'
 import { useEffect, useState } from 'react'
 
 import { IconMessage } from '@hanzo/icons'
-import { Link, Spinner } from '@hanzo/lemon-ui'
+import { Link, Spinner } from '@hanzo/elements'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { WrappingLoadingSkeleton } from 'lib/ui/WrappingLoadingSkeleton/WrappingLoadingSkeleton'

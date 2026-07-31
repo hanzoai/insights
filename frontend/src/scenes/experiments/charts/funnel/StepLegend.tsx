@@ -1,9 +1,9 @@
 import { IconClock } from '@hanzo/icons'
 
-import { LemonRow } from 'lib/lemon-ui/LemonRow'
-import { Lettermark, LettermarkColor } from 'lib/lemon-ui/Lettermark'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/lemon-ui/icons'
+import { Row } from 'lib/elements/Row'
+import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/elements/icons'
 import { capitalizeFirstLetter, humanFriendlyDuration, percentage, pluralize } from 'lib/utils'
 
 import { isExperimentFunnelMetric } from '~/queries/schema/schema-general'
@@ -53,10 +53,10 @@ export function StepLegend({ step, stepIndex, showTime }: StepLegendProps): JSX.
 
     return (
         <div className="StepLegend">
-            <LemonRow icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />}>
+            <Row icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />}>
                 <span title={stepLabel}>{stepLabel}</span>
-            </LemonRow>
-            <LemonRow icon={<IconTrendingFlat />} status="success" style={{ color: 'unset' }}>
+            </Row>
+            <Row icon={<IconTrendingFlat />} status="success" style={{ color: 'unset' }}>
                 <Tooltip
                     title={
                         <>
@@ -69,10 +69,10 @@ export function StepLegend({ step, stepIndex, showTime }: StepLegendProps): JSX.
                 >
                     <span>{convertedCountPresentationWithPercentage}</span>
                 </Tooltip>
-            </LemonRow>
+            </Row>
             {stepIndex > 0 && (
                 <>
-                    <LemonRow icon={<IconTrendingFlatDown />} status="danger" style={{ color: 'unset' }}>
+                    <Row icon={<IconTrendingFlatDown />} status="danger" style={{ color: 'unset' }}>
                         <Tooltip
                             title={
                                 <>
@@ -86,11 +86,11 @@ export function StepLegend({ step, stepIndex, showTime }: StepLegendProps): JSX.
                         >
                             <span>{droppedOffCountPresentationWithPercentage}</span>
                         </Tooltip>
-                    </LemonRow>
+                    </Row>
                     {showTime && (
-                        <LemonRow icon={<IconClock />} title="Median time of conversion from previous step">
+                        <Row icon={<IconClock />} title="Median time of conversion from previous step">
                             {humanFriendlyDuration(step.median_conversion_time, { maxUnits: 3 }) || '–'}
-                        </LemonRow>
+                        </Row>
                     )}
                 </>
             )}

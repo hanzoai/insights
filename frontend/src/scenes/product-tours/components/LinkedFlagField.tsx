@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo, IconX } from '@hanzo/icons'
-import { LemonButton, LemonSegmentedButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, SegmentedButton, Tooltip } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { FlagSelector } from 'lib/components/FlagSelector'
 import { ANY_VARIANT, variantOptions } from 'lib/components/IngestionControls/triggers/FlagTrigger/VariantSelector'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { FeatureFlagBasicType, FeatureFlagType } from '~/types'
 
@@ -38,7 +38,7 @@ export function LinkedFlagField({ id }: { id: string }): JSX.Element {
                     setProductTourFormValue('linked_flag', fetchedFlag)
                 })
                 .catch(() => {
-                    lemonToast.error('Failed to load feature flag')
+                    toast.error('Failed to load feature flag')
                     setProductTourFormValue('linked_flag_id', null)
                     setProductTourFormValue('linked_flag', null)
                 })
@@ -84,7 +84,7 @@ export function LinkedFlagField({ id }: { id: string }): JSX.Element {
                     initialButtonLabel="Link feature flag"
                 />
                 {flagId && (
-                    <LemonButton
+                    <Button
                         icon={<IconX />}
                         size="small"
                         type="tertiary"
@@ -102,7 +102,7 @@ export function LinkedFlagField({ id }: { id: string }): JSX.Element {
             {flag?.filters.multivariate && (
                 <div className="mt-2">
                     <div className="text-sm text-secondary mb-1">Variant</div>
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         size="small"
                         value={variant ?? ANY_VARIANT}
                         options={variantOptions(flag.filters.multivariate || undefined)}

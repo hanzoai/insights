@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { LemonButton, LemonInput, Spinner } from '@hanzo/lemon-ui'
+import { Button, Input, Spinner } from '@hanzo/elements'
 
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
+import { Radio } from 'lib/elements/Radio'
 import { cn } from 'lib/utils/css-classes'
 
 export interface Option {
@@ -116,7 +116,7 @@ export function OptionSelector({
                 'gap-0.5': noDescriptions,
             })}
         >
-            <LemonRadio
+            <Radio
                 value={selectedOption}
                 onChange={(value) => {
                     setSelectedOption(String(value))
@@ -144,7 +144,7 @@ export function OptionSelector({
                     />
                     {showCustomInput ? (
                         <div className="flex gap-2 items-center">
-                            <LemonInput
+                            <Input
                                 placeholder={customPlaceholder}
                                 fullWidth
                                 size="small"
@@ -157,14 +157,14 @@ export function OptionSelector({
                                 autoFocus={true}
                                 className="flex-grow"
                             />
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 size="small"
                                 disabledReason={!customInput.trim() ? 'Please type a response' : undefined}
                                 onClick={handleCustomSubmit}
                             >
                                 {submitLabel}
-                            </LemonButton>
+                            </Button>
                         </div>
                     ) : (
                         <span className="my-1.5">Explain what you'd like instead..</span>

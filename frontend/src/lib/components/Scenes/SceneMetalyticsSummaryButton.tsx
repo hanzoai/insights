@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPulse } from '@hanzo/icons'
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 

@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import insights from '@hanzo/insights'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { JudgeMascot } from 'lib/components/mascots'
-import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
+import { Button } from 'lib/elements/Button'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
@@ -18,7 +18,7 @@ const DISMISS_KEY = 'feature-flags-approvals-promo'
 export function ApprovalsPromoBanner(): JSX.Element | null {
     const { hasAvailableFeature } = useValues(userLogic)
     const { isAdminOrOwner } = useValues(organizationLogic)
-    const bannerLogic = lemonBannerLogic({ dismissKey: DISMISS_KEY })
+    const bannerLogic = bannerLogic({ dismissKey: DISMISS_KEY })
     const { isDismissed } = useValues(bannerLogic)
     const { dismiss } = useActions(bannerLogic)
 
@@ -35,7 +35,7 @@ export function ApprovalsPromoBanner(): JSX.Element | null {
     }
 
     return (
-        <LemonBanner type="info" hideIcon>
+        <Banner type="info" hideIcon>
             <div className="flex flex-row gap-8 px-8 py-3 items-center justify-evenly">
                 <div>
                     <h3 className="mb-1 text-lg font-semibold">Stop yolo-shipping flag changes</h3>
@@ -44,15 +44,15 @@ export function ApprovalsPromoBanner(): JSX.Element | null {
                         condition" is not a rollback strategy.
                     </p>
                     <div className="flex flex-row gap-2">
-                        <LemonButton
+                        <Button
                             type="primary"
                             className="w-fit"
                             to={urls.approvals()}
                             onClick={() => insights.capture('feature flags approvals promo cta clicked')}
                         >
                             Set up approvals
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="tertiary"
                             onClick={() => {
                                 insights.capture('feature flags approvals promo dismissed')
@@ -60,11 +60,11 @@ export function ApprovalsPromoBanner(): JSX.Element | null {
                             }}
                         >
                             I'm not interested
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
                 <JudgeMascot className="h-30 w-fit shrink-0" alt="Illustration" />
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

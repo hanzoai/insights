@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 
 import api from 'lib/api'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { Link } from 'lib/elements/Link'
 
 import { CyclotronJobInputSchemaType, IntegrationType } from '~/types'
 
@@ -39,7 +39,7 @@ export function IntegrationScopesWarning({
     }
     return (
         <div className="p-2">
-            <LemonBanner
+            <Banner
                 type="error"
                 action={{
                     children: 'Reconnect',
@@ -60,7 +60,7 @@ export function IntegrationScopesWarning({
                         for more details.
                     </span>
                 ) : null}
-            </LemonBanner>
+            </Banner>
         </div>
     )
 }

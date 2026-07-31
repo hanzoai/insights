@@ -2,9 +2,9 @@ import { useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconEllipsis, IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonMenu, PopoverReferenceContext, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Menu, PopoverReferenceContext, Tooltip } from '@hanzo/elements'
 
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { userLogic } from 'scenes/userLogic'
 
@@ -71,10 +71,10 @@ export function PathNodeCardButton({
             {/* TRICKY: We don't want the popover to affect the buttons */}
             <PopoverReferenceContext.Provider value={null}>
                 <div className="flex flex-nowrap">
-                    <LemonButton size="small" onClick={openModal}>
+                    <Button size="small" onClick={openModal}>
                         <span className="text-link text-xs px-1 font-medium">{count}</span>
-                    </LemonButton>
-                    <LemonMenu
+                    </Button>
+                    <Menu
                         items={[
                             { label: 'Set as path start', onClick: setAsPathStart },
                             ...(hasAdvancedPaths
@@ -96,7 +96,7 @@ export function PathNodeCardButton({
                         ]}
                         placement="bottom-end"
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             icon={<IconEllipsis />}
                             disabledReason={
@@ -105,7 +105,7 @@ export function PathNodeCardButton({
                                     : undefined
                             }
                         />
-                    </LemonMenu>
+                    </Menu>
                 </div>
             </PopoverReferenceContext.Provider>
         </div>

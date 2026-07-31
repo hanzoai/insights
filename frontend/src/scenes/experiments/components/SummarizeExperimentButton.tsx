@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 
 import { IconAI } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { addProductIntent } from 'lib/utils/product-intents'
 import { useMaxTool } from 'scenes/max/useMaxTool'
 
@@ -96,7 +96,7 @@ export function SummarizeExperimentButton({ disabledReason }: { disabledReason?:
     }
 
     return (
-        <LemonButton
+        <Button
             size="small"
             onClick={() => {
                 reportExperimentAiSummaryRequested(experiment)
@@ -107,6 +107,6 @@ export function SummarizeExperimentButton({ disabledReason }: { disabledReason?:
             disabledReason={disabledReason}
         >
             Summarize
-        </LemonButton>
+        </Button>
     )
 }

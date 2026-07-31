@@ -13,27 +13,27 @@ import {
     IconWebhooks,
 } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonCalendarSelectInput,
-    LemonCheckbox,
-    LemonCollapse,
-    LemonDivider,
-    LemonLabel,
-    LemonSelect,
-    LemonTag,
+    Button,
+    CalendarSelectInput,
+    Checkbox,
+    Collapse,
+    Divider,
+    Label,
+    Select,
+    Tag,
     Spinner,
     Tooltip,
-    lemonToast,
-} from '@hanzo/lemon-ui'
+    toast,
+} from '@hanzo/elements'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
-import { IconAdsClick } from 'lib/lemon-ui/icons'
+import { Field } from 'lib/elements/Field'
+import { Radio } from 'lib/elements/Radio'
+import { IconAdsClick } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { humanFriendlyNumber } from 'lib/utils'
 import { publicWebhooksHostOrigin } from 'lib/utils/apiHost'
@@ -178,8 +178,8 @@ export function StepTriggerConfiguration({ node }: { node: Node<TriggerAction> }
                 <span className="text-md font-semibold">Trigger type</span>
             </span>
             <span>What causes this workflow to begin?</span>
-            <LemonField.Pure error={validationResult?.errors?.type}>
-                <LemonSelect
+            <Field.Pure error={validationResult?.errors?.type}>
+                <Select
                     options={triggerOptions}
                     value={displayType}
                     placeholder="Select trigger type"
@@ -231,7 +231,7 @@ export function StepTriggerConfiguration({ node }: { node: Node<TriggerAction> }
                         }
                     }}
                 />
-            </LemonField.Pure>
+            </Field.Pure>
             {node.data.config.type === 'event' ? (
                 (() => {
                     const match = getRegisteredTriggerTypes().find((t) => t.matchConfig?.(node.data.config))
@@ -273,7 +273,7 @@ function StepTriggerConfigurationEvents({
                 <p className="mb-0">Choose which events or actions will enter a user into the workflow.</p>
             </div>
 
-            <LemonField.Pure error={validationResult?.errors?.filters}>
+            <Field.Pure error={validationResult?.errors?.filters}>
                 <InsightsFlowEventFilters
                     filters={config.filters ?? {}}
                     setFilters={(filters) =>
@@ -286,7 +286,7 @@ function StepTriggerConfigurationEvents({
                     typeKey="workflow-trigger"
                     buttonCopy="Add trigger event"
                 />
-            </LemonField.Pure>
+            </Field.Pure>
 
             <TestAccountFilter
                 filters={{ filter_test_accounts: filterTestAccounts }}
@@ -298,11 +298,11 @@ function StepTriggerConfigurationEvents({
                 }
             />
 
-            <LemonDivider />
+            <Divider />
             <FrequencySection />
-            <LemonDivider />
+            <Divider />
             <ConversionGoalSection />
-            <LemonDivider />
+            <Divider />
             <ExitConditionSection />
         </>
     )
@@ -323,7 +323,7 @@ function StepTriggerConfigurationWebhook({
 
     return (
         <div className="w-full">
-            <LemonCollapse
+            <Collapse
                 className="shrink-0"
                 defaultActiveKey="instructions"
                 panels={[
@@ -401,9 +401,9 @@ function StepTriggerConfigurationSchedule({
         <>
             <div className="flex flex-col gap-2">
                 <p className="mb-0">Schedule this workflow to run at a specific time in the future.</p>
-                <LemonField.Pure label="Scheduled time" error={validationResult?.errors?.scheduled_at}>
+                <Field.Pure label="Scheduled time" error={validationResult?.errors?.scheduled_at}>
                     <div className="flex flex-col gap-2">
-                        <LemonCalendarSelectInput
+                        <CalendarSelectInput
                             value={scheduledDateTime}
                             onChange={(date) => {
                                 setWorkflowActionConfig(action.id, {
@@ -425,7 +425,7 @@ function StepTriggerConfigurationSchedule({
                             </div>
                         )}
                     </div>
-                </LemonField.Pure>
+                </Field.Pure>
             </div>
         </>
     )
@@ -507,10 +507,10 @@ function StepTriggerConfigurationBatch({
                     hasRowOperator={false}
                 />
             </div>
-            <LemonDivider />
+            <Divider />
             <div className="flex gap-2">
                 <span className="font-semibold">Schedule for later?</span>
-                <LemonCheckbox
+                <Checkbox
                     checked={Boolean(config.scheduled_at)}
                     onChange={(checked) =>
                         partialSetWorkflowActionConfig(action.id, {
@@ -520,9 +520,9 @@ function StepTriggerConfigurationBatch({
                 />
             </div>
             {config.scheduled_at && (
-                <LemonField.Pure label="Scheduled time" error={validationResult?.errors?.scheduled_at}>
+                <Field.Pure label="Scheduled time" error={validationResult?.errors?.scheduled_at}>
                     <div className="flex flex-col gap-2">
-                        <LemonCalendarSelectInput
+                        <CalendarSelectInput
                             value={scheduledDateTime}
                             onChange={(date) => {
                                 partialSetWorkflowActionConfig(action.id, {
@@ -540,7 +540,7 @@ function StepTriggerConfigurationBatch({
                             </div>
                         )}
                     </div>
-                </LemonField.Pure>
+                </Field.Pure>
             )}
         </div>
     )
@@ -569,7 +569,7 @@ function StepTriggerConfigurationTrackingPixel({
 
     return (
         <>
-            <LemonCollapse
+            <Collapse
                 className="shrink-0"
                 defaultActiveKey="instructions"
                 panels={[
@@ -657,7 +657,7 @@ function TTLSelect({
     return (
         <div className="flex flex-wrap gap-1 items-center">
             <span>per</span>
-            <LemonSelect value={value} onChange={onChange} options={TTL_OPTIONS} />
+            <Select value={value} onChange={onChange} options={TTL_OPTIONS} />
         </div>
     )
 }
@@ -674,9 +674,9 @@ function FrequencySection(): JSX.Element {
             </span>
             <p>Limit how often users can enter this workflow</p>
 
-            <LemonField.Pure>
+            <Field.Pure>
                 <div className="flex flex-wrap gap-1 items-center">
-                    <LemonSelect
+                    <Select
                         options={FREQUENCY_OPTIONS}
                         value={workflow.trigger_masking?.hash ?? null}
                         onChange={(val) =>
@@ -700,7 +700,7 @@ function FrequencySection(): JSX.Element {
                         />
                     ) : null}
                 </div>
-            </LemonField.Pure>
+            </Field.Pure>
         </div>
     )
 }
@@ -719,7 +719,7 @@ function ConversionGoalSection(): JSX.Element {
 
             <div className="flex gap-1 max-w-240">
                 <div className="flex flex-col flex-2 gap-4">
-                    <LemonField.Pure label="Detect conversion from property changes">
+                    <Field.Pure label="Detect conversion from property changes">
                         <PropertyFilters
                             buttonText="Add property conversion"
                             propertyFilters={workflow.conversion?.filters ?? []}
@@ -732,32 +732,32 @@ function ConversionGoalSection(): JSX.Element {
                             pageKey="workflow-conversion-properties"
                             hideBehavioralCohorts
                         />
-                    </LemonField.Pure>
+                    </Field.Pure>
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>
+                        <Label>
                             Detect conversion from events
-                            <LemonTag>Coming soon</LemonTag>
-                        </LemonLabel>
-                        <LemonButton
+                            <Tag>Coming soon</Tag>
+                        </Label>
+                        <Button
                             type="secondary"
                             size="small"
                             icon={<IconPlusSmall />}
                             onClick={() => {
                                 insights.capture('workflows workflow event conversion clicked')
-                                lemonToast.info('Event targeting coming soon!')
+                                toast.info('Event targeting coming soon!')
                             }}
                         >
                             Add event conversion
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
-                <LemonDivider vertical />
+                <Divider vertical />
                 <div className="flex-1">
-                    <LemonField.Pure
+                    <Field.Pure
                         label="Conversion window"
                         info="How long after entering the workflow should we check for conversion? After this window, users will be considered for conversion."
                     >
-                        <LemonSelect
+                        <Select
                             value={workflow.conversion?.window_minutes}
                             onChange={(value) =>
                                 setWorkflowValue('conversion', {
@@ -774,7 +774,7 @@ function ConversionGoalSection(): JSX.Element {
                                 { value: 30 * 24 * 60 * 60, label: '30 days' },
                             ]}
                         />
-                    </LemonField.Pure>
+                    </Field.Pure>
                 </div>
             </div>
         </div>
@@ -793,8 +793,8 @@ function ExitConditionSection(): JSX.Element {
             </span>
             <p>Choose how your users move through the workflow.</p>
 
-            <LemonField.Pure>
-                <LemonRadio
+            <Field.Pure>
+                <Radio
                     value={workflow.exit_condition ?? 'exit_only_at_end'}
                     onChange={(value) => setWorkflowValue('exit_condition', value)}
                     options={[
@@ -816,7 +816,7 @@ function ExitConditionSection(): JSX.Element {
                         },
                     ]}
                 />
-            </LemonField.Pure>
+            </Field.Pure>
         </div>
     )
 }

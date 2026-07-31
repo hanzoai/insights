@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconFilter } from '@hanzo/icons'
-import { LemonButton, LemonMenu } from '@hanzo/lemon-ui'
+import { Button, Menu } from '@hanzo/elements'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 
@@ -45,7 +45,7 @@ export const SeverityLevelsFilter = (): JSX.Element => {
             : 'All levels'
 
     return (
-        <LemonMenu
+        <Menu
             closeOnClickInside={false}
             items={Object.entries(options).map(([key, label]) => ({
                 label,
@@ -54,7 +54,7 @@ export const SeverityLevelsFilter = (): JSX.Element => {
                 'data-attr': `logs-severity-option-${key}`,
             }))}
         >
-            <LemonButton
+            <Button
                 data-attr="logs-severity-filter"
                 icon={<IconFilter />}
                 size="small"
@@ -62,7 +62,7 @@ export const SeverityLevelsFilter = (): JSX.Element => {
                 className="whitespace-nowrap"
             >
                 {displayLevels}
-            </LemonButton>
-        </LemonMenu>
+            </Button>
+        </Menu>
     )
 }

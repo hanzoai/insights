@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner, LemonCollapse, LemonSkeleton, LemonTag } from '@hanzo/lemon-ui'
+import { Banner, Collapse, Skeleton, Tag } from '@hanzo/elements'
 
 import { CATEGORY_ORDER, HEALTH_CATEGORY_CONFIG, categoryForKind } from '../healthCategories'
 import type { HealthIssueCategory } from '../healthCategories'
@@ -25,25 +25,25 @@ export const HealthIssueList = (): JSX.Element => {
     if (healthIssuesLoading && !healthIssues) {
         return (
             <div className="flex flex-col gap-3">
-                <LemonSkeleton className="h-16 rounded" />
-                <LemonSkeleton className="h-16 rounded" />
-                <LemonSkeleton className="h-16 rounded" />
+                <Skeleton className="h-16 rounded" />
+                <Skeleton className="h-16 rounded" />
+                <Skeleton className="h-16 rounded" />
             </div>
         )
     }
 
     if (!healthIssuesLoading && healthIssues === null) {
         return (
-            <LemonBanner type="warning">Error loading health information. Please try refreshing the page.</LemonBanner>
+            <Banner type="warning">Error loading health information. Please try refreshing the page.</Banner>
         )
     }
 
     if (issues.length === 0) {
         return (
-            <LemonBanner type="success">
+            <Banner type="success">
                 <p className="font-semibold mb-0">All systems healthy</p>
                 <p className="text-sm mt-1 mb-0">No active health issues found for your project.</p>
-            </LemonBanner>
+            </Banner>
         )
     }
 
@@ -65,7 +65,7 @@ export const HealthIssueList = (): JSX.Element => {
                 const config = HEALTH_CATEGORY_CONFIG[category]
                 const worst = worstSeverity(categoryIssues)
                 return (
-                    <LemonCollapse
+                    <Collapse
                         key={category}
                         defaultActiveKey={category}
                         panels={[
@@ -78,9 +78,9 @@ export const HealthIssueList = (): JSX.Element => {
                                             <span className="font-medium">{config.label}</span>
                                             <span className="text-xs text-muted">({categoryIssues.length})</span>
                                         </div>
-                                        <LemonTag type={severityToTagType(worst)} size="small">
+                                        <Tag type={severityToTagType(worst)} size="small">
                                             {worst}
-                                        </LemonTag>
+                                        </Tag>
                                     </div>
                                 ),
                                 content: (

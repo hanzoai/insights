@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { PROPERTY_FILTER_TYPE_TO_TAXONOMIC_FILTER_GROUP_TYPE } from 'lib/components/PropertyFilters/utils'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -76,13 +76,13 @@ function TestAccountFiltersConfig(): JSX.Element {
     return (
         <div className="mb-4 flex flex-col gap-2">
             <div className="mb-4 flex flex-col gap-2">
-                <LemonBanner type="info">
+                <Banner type="info">
                     When filtering out internal users by user properties, like email, we recommend creating a Cohort
                     with those properties, and then adding that cohort with a "not in" operator in your ‘Filter out
                     internal and test users’ settings.
-                </LemonBanner>
+                </Banner>
                 {!!testAccountFilterWarningLabels && testAccountFilterWarningLabels.length > 0 && (
-                    <LemonBanner type="warning" className="m-2">
+                    <Banner type="warning" className="m-2">
                         <p>
                             You've added an <strong>inclusive</strong> filter, which means only matching events will be
                             included. Filters are normally <strong>exclusive</strong>, such as <i>does not contain</i>,
@@ -96,10 +96,10 @@ function TestAccountFiltersConfig(): JSX.Element {
                                 </li>
                             ))}
                         </ul>
-                    </LemonBanner>
+                    </Banner>
                 )}
                 {!!testAccountFilterFrequentMistakes && testAccountFilterFrequentMistakes.length > 0 && (
-                    <LemonBanner type="warning" className="m-2">
+                    <Banner type="warning" className="m-2">
                         <p>Your filter contains a setting that is likely to exclude or include unexpected users.</p>
                         <ul className="list-disc">
                             {testAccountFilterFrequentMistakes.map(({ key, type, fix }, i) => (
@@ -108,7 +108,7 @@ function TestAccountFiltersConfig(): JSX.Element {
                                 </li>
                             ))}
                         </ul>
-                    </LemonBanner>
+                    </Banner>
                 )}
                 {currentTeam && (
                     <PropertyFilters
@@ -126,7 +126,7 @@ function TestAccountFiltersConfig(): JSX.Element {
                     />
                 )}
             </div>
-            <LemonSwitch
+            <Switch
                 onChange={(checked) => {
                     updateCurrentTeam({ test_account_filters_default_checked: checked })
                     setTeamDefault(checked)
@@ -136,7 +136,7 @@ function TestAccountFiltersConfig(): JSX.Element {
                 label="Enable this filter on all new insights"
                 bordered
             />
-            <LemonSwitch
+            <Switch
                 onChange={updateFilterTestAccounts}
                 checked={filterTestAccounts}
                 disabled={currentTeamLoading}

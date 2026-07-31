@@ -29,7 +29,7 @@ import yaml from 'react-syntax-highlighter/dist/esm/languages/prism/yaml'
 
 import { IconCollapse, IconCopy, IconExpand } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
@@ -193,7 +193,7 @@ export const CodeSnippet = React.memo(function CodeSnippet({
         <div className={clsx('CodeSnippet', compact && 'CodeSnippet--compact', className)}>
             <div className="CodeSnippet__actions">
                 {actions}
-                <LemonButton
+                <Button
                     data-attr="copy-code-button"
                     icon={<IconCopy />}
                     onClick={(e) => {
@@ -209,7 +209,7 @@ export const CodeSnippet = React.memo(function CodeSnippet({
             </div>
             <CodeLine text={displayedText} language={language} wrapLines={wrap} />
             {indexOfLimitNewline !== -1 && (
-                <LemonButton
+                <Button
                     onClick={() => setExpanded(!expanded)}
                     fullWidth
                     center
@@ -221,7 +221,7 @@ export const CodeSnippet = React.memo(function CodeSnippet({
                     {expanded
                         ? `Collapse to ${maxLinesWithoutExpansion!} lines`
                         : `Show ${lineCount - maxLinesWithoutExpansion!} more lines`}
-                </LemonButton>
+                </Button>
             )}
         </div>
     )

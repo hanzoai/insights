@@ -4,7 +4,7 @@ import { BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { IconGear, IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonInput, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Input, Tooltip } from '@hanzo/elements'
 
 import { Query } from '~/queries/Query/Query'
 import { ColumnFeature } from '~/queries/nodes/DataTable/DataTable'
@@ -88,7 +88,7 @@ export const MarketingAnalyticsTable = ({
             <div className="p-4 border-b border-border bg-bg-light">
                 <div className="flex gap-4 justify-between items-center">
                     <div className="flex items-center gap-2">
-                        <LemonInput
+                        <Input
                             type="search"
                             placeholder="Search campaigns..."
                             value={searchTerm}
@@ -100,9 +100,9 @@ export const MarketingAnalyticsTable = ({
                             <IconInfo className="text-xl text-secondary" />
                         </Tooltip>
                     </div>
-                    <LemonButton type="secondary" icon={<IconGear />} onClick={showColumnConfigModal}>
+                    <Button type="secondary" icon={<IconGear />} onClick={showColumnConfigModal}>
                         Configure columns
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
             {validationWarnings && validationWarnings.length > 0 && (

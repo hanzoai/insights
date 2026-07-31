@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner, LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Button, Tooltip } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { urls } from 'scenes/urls'
@@ -25,19 +25,19 @@ export function ActiveUsersInsights(): JSX.Element {
     return (
         <div className="space-y-2">
             {isOnlyPageview && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     What makes a user active in your product? Choose an event that signals real engagement, like
                     completing a core action, rather than generic pageviews.
                     <div className="flex flex-row items-center gap-4 mt-2 max-w-160">
-                        <LemonButton
+                        <Button
                             data-attr="customer-analytics-configure-activity-event"
                             to={urls.customerAnalyticsConfiguration()}
                             type="primary"
                         >
                             Configure activity event
-                        </LemonButton>
+                        </Button>
                     </div>
-                </LemonBanner>
+                </Banner>
             )}
             <h2 className="ml-1">Active {customerLabel.plural}</h2>
             <div className="grid grid-cols-[3fr_1fr] gap-2">
@@ -109,7 +109,7 @@ function PowerUsersTable(): JSX.Element {
                 >
                     <h2 className="mb-0 ml-1">Power {customerLabel.plural}</h2>
                 </Tooltip>
-                <LemonButton size="small" noPadding targetBlank to={buttonTo} tooltip={tooltip} />
+                <Button size="small" noPadding targetBlank to={buttonTo} tooltip={tooltip} />
             </div>
             <Query
                 uniqueKey={uniqueKey}

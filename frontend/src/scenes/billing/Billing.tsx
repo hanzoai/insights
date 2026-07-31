@@ -6,7 +6,7 @@ import { Field, Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { LemonButton, LemonDivider, LemonInput, Link } from '@hanzo/lemon-ui'
+import { Button, Divider, Input, Link } from '@hanzo/elements'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -14,8 +14,8 @@ import { JudgeMascot, StarMascot } from 'lib/components/mascots'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
+import { Banner } from 'lib/elements/Banner'
+import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { toSentenceCase } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -95,7 +95,7 @@ export function Billing(): JSX.Element {
     if (!billing && !billingLoading) {
         return (
             <div className="deprecated-space-y-4">
-                <LemonBanner type="error">
+                <Banner type="error">
                     {
                         'There was an issue retrieving your current billing information. If this message persists, please '
                     }
@@ -107,7 +107,7 @@ export function Billing(): JSX.Element {
                         <Link to="mailto:sales@hanzo.ai">contact sales@hanzo.ai</Link>
                     )}
                     .
-                </LemonBanner>
+                </Banner>
             </div>
         )
     }
@@ -126,10 +126,10 @@ export function Billing(): JSX.Element {
                         className="deprecated-space-y-4"
                     >
                         <Field name="license" label="Activate license key">
-                            <LemonInput fullWidth autoFocus />
+                            <Input fullWidth autoFocus />
                         </Field>
 
-                        <LemonButton
+                        <Button
                             type="primary"
                             htmlType="submit"
                             loading={isActivateLicenseSubmitting}
@@ -137,19 +137,19 @@ export function Billing(): JSX.Element {
                             center
                         >
                             Activate license key
-                        </LemonButton>
+                        </Button>
                     </Form>
                 </>
             )}
 
             {billingError && (
-                <LemonBanner type={billingError.status} className="mb-2" action={billingError.action}>
+                <Banner type={billingError.status} className="mb-2" action={billingError.action}>
                     {billingError.message}
-                </LemonBanner>
+                </Banner>
             )}
 
             {billing?.trial ? (
-                <LemonBanner type="info" hideIcon className="max-w-300 mb-2">
+                <Banner type="info" hideIcon className="max-w-300 mb-2">
                     <div className="flex items-center gap-4">
                         <JudgeMascot className="w-20 h-20 flex-shrink-0" />
                         <div>
@@ -162,7 +162,7 @@ export function Billing(): JSX.Element {
                             </p>
                         </div>
                     </div>
-                </LemonBanner>
+                </Banner>
             ) : null}
 
             {(showBillingSummary || showCreditCTAHero || showBillingHero) && (
@@ -193,7 +193,7 @@ export function Billing(): JSX.Element {
 
             {!couponsOverviewLoading && activeCoupons.length > 0 && (
                 <div className="mt-6 max-w-300">
-                    <LemonBanner type="info" hideIcon>
+                    <Banner type="info" hideIcon>
                         <div className="flex items-center gap-4">
                             <StarMascot className="w-16 h-16 flex-shrink-0" />
                             <div>
@@ -212,18 +212,18 @@ export function Billing(): JSX.Element {
                                 </ul>
                             </div>
                         </div>
-                    </LemonBanner>
+                    </Banner>
                 </div>
             )}
 
-            <LemonDivider className="mt-6 mb-8" />
+            <Divider className="mt-6 mb-8" />
 
             {featureFlags[FEATURE_FLAGS.BILLING_FORECASTING_ISSUES] && (
                 <div className="flex mt-6 gap-6 max-w-300 flex-col-reverse">
-                    <LemonBanner type="warning">
+                    <Banner type="warning">
                         <strong>Note:</strong> Our forecasting engine is experiencing an issue. The projected amounts
                         may appear incorrect. We're working on a fix and it should be resolved soon.
-                    </LemonBanner>
+                    </Banner>
                 </div>
             )}
 
@@ -250,7 +250,7 @@ export function Billing(): JSX.Element {
             <div>
                 {billing?.subscription_level == 'paid' && !!platformAndSupportProduct ? (
                     <>
-                        <LemonDivider />
+                        <Divider />
                         <UnsubscribeCard product={platformAndSupportProduct} />
                     </>
                 ) : null}

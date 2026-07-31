@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonModal, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Input, Modal, Tag } from '@hanzo/elements'
 
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Table, TableColumns } from 'lib/elements/Table'
 
 import { PropertyGroupModal } from './PropertyGroupModal'
 import { SchemaPropertyGroup, SchemaPropertyGroupProperty, schemaManagementLogic } from './schemaManagementLogic'
@@ -16,13 +16,13 @@ function PropertyRow({ property }: { property: SchemaPropertyGroupProperty }): J
                 <span className="font-semibold">{property.name}</span>
             </div>
             <div className="w-32">
-                <LemonTag type="muted">{property.property_type}</LemonTag>
+                <Tag type="muted">{property.property_type}</Tag>
             </div>
             <div className="w-24">
                 {property.is_required ? (
-                    <LemonTag type="danger">Required</LemonTag>
+                    <Tag type="danger">Required</Tag>
                 ) : (
-                    <LemonTag type="muted">Optional</LemonTag>
+                    <Tag type="muted">Optional</Tag>
                 )}
             </div>
             <div className="flex-1 text-muted">{property.description || '—'}</div>
@@ -65,7 +65,7 @@ export function SelectPropertyGroupModal({
         onPropertyGroupCreated?.()
     }
 
-    const columns: LemonTableColumns<SchemaPropertyGroup> = [
+    const columns: TableColumns<SchemaPropertyGroup> = [
         {
             key: 'expander',
             width: 0,
@@ -89,17 +89,17 @@ export function SelectPropertyGroupModal({
             key: 'property_count',
             width: 120,
             render: (_, propertyGroup) => (
-                <LemonTag type="default">
+                <Tag type="default">
                     {propertyGroup.properties?.length || 0}{' '}
                     {propertyGroup.properties?.length === 1 ? 'property' : 'properties'}
-                </LemonTag>
+                </Tag>
             ),
         },
         {
             key: 'actions',
             width: 100,
             render: (_, propertyGroup) => (
-                <LemonButton
+                <Button
                     type="primary"
                     size="small"
                     icon={<IconPlusSmall />}
@@ -109,17 +109,17 @@ export function SelectPropertyGroupModal({
                     }}
                 >
                     Add
-                </LemonButton>
+                </Button>
             ),
         },
     ]
 
     return (
         <>
-            <LemonModal isOpen={isOpen} onClose={onClose} title="Add property group" width={900}>
+            <Modal isOpen={isOpen} onClose={onClose} title="Add property group" width={900}>
                 <div className="space-y-4">
                     <div className="flex gap-2">
-                        <LemonInput
+                        <Input
                             type="search"
                             placeholder="Search property groups..."
                             value={searchTerm}
@@ -127,12 +127,12 @@ export function SelectPropertyGroupModal({
                             className="flex-1"
                             autoFocus
                         />
-                        <LemonButton type="primary" icon={<IconPlusSmall />} onClick={handleCreateNewGroup}>
+                        <Button type="primary" icon={<IconPlusSmall />} onClick={handleCreateNewGroup}>
                             New Property Group
-                        </LemonButton>
+                        </Button>
                     </div>
 
-                    <LemonTable
+                    <Table
                         columns={columns}
                         dataSource={filteredPropertyGroups}
                         expandable={{
@@ -164,7 +164,7 @@ export function SelectPropertyGroupModal({
                         }
                     />
                 </div>
-            </LemonModal>
+            </Modal>
             <PropertyGroupModal logicKey="select-property-group-modal" onAfterSave={handleAfterPropertyGroupSave} />
         </>
     )

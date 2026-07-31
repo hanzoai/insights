@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AnyPropertyFilter, PropertyFilterType, PropertyOperator } from '~/types'
 
@@ -55,7 +55,7 @@ export function PathItemFilters({
                             wildcardOptions={wildcardOptions}
                         >
                             {!filter.value ? (
-                                <LemonButton
+                                <Button
                                     className="new-prop-filter"
                                     data-attr={'new-prop-filter-' + pageKey}
                                     type="secondary"
@@ -63,7 +63,7 @@ export function PathItemFilters({
                                     sideIcon={null}
                                 >
                                     Add exclusion
-                                </LemonButton>
+                                </Button>
                             ) : (
                                 <PropertyFilterButton item={filter} onClose={() => remove(index)}>
                                     {filter.value.toString()}

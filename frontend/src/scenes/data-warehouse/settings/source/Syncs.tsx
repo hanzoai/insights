@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDivider, LemonTable, LemonTag, LemonTagType, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Divider, Table, Tag, TagType, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjsUtcToTimezone } from 'lib/dayjs'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { Label } from 'lib/elements/Label'
 import { LogsViewer } from 'scenes/insights-functions/logs/LogsViewer'
 import { teamLogic } from 'scenes/teamLogic'
 import { userLogic } from 'scenes/userLogic'
@@ -14,7 +14,7 @@ import { ExternalDataJob, ExternalDataJobStatus, LogEntryLevel } from '~/types'
 
 import { dataWarehouseSourceSettingsLogic } from './dataWarehouseSourceSettingsLogic'
 
-const StatusTagSetting: Record<ExternalDataJob['status'], LemonTagType> = {
+const StatusTagSetting: Record<ExternalDataJob['status'], TagType> = {
     Running: 'primary',
     Completed: 'success',
     Failed: 'danger',
@@ -54,8 +54,8 @@ export const Syncs = ({ id }: SyncsProps): JSX.Element => {
             {schemaOptions.length > 1 && (
                 <>
                     <div className="flex items-center gap-2 mb-2">
-                        <LemonLabel>Schema</LemonLabel>
-                        <LemonInputSelect
+                        <Label>Schema</Label>
+                        <InputSelect
                             mode="multiple"
                             bulkActions="select-and-clear-all"
                             displayMode="count"
@@ -67,10 +67,10 @@ export const Syncs = ({ id }: SyncsProps): JSX.Element => {
                             allowCustomValues={false}
                         />
                     </div>
-                    <LemonDivider className="my-4" />
+                    <Divider className="my-4" />
                 </>
             )}
-            <LemonTable
+            <Table
                 hideScrollbar
                 dataSource={filteredJobs}
                 rowKey="id"
@@ -87,7 +87,7 @@ export const Syncs = ({ id }: SyncsProps): JSX.Element => {
                         title: 'Status',
                         render: (_, job) => {
                             const tagContent = (
-                                <LemonTag type={StatusTagSetting[job.status] || 'default'}>{job.status}</LemonTag>
+                                <Tag type={StatusTagSetting[job.status] || 'default'}>{job.status}</Tag>
                             )
                             return job.latest_error && job.status === ExternalDataJobStatus.Failed ? (
                                 <Tooltip title={job.latest_error}>{tagContent}</Tooltip>
@@ -143,7 +143,7 @@ export const Syncs = ({ id }: SyncsProps): JSX.Element => {
                         : undefined
                 }
                 footer={
-                    <LemonButton
+                    <Button
                         onClick={loadMoreJobs}
                         type="tertiary"
                         fullWidth
@@ -151,7 +151,7 @@ export const Syncs = ({ id }: SyncsProps): JSX.Element => {
                         disabledReason={!canLoadMoreJobs ? "There's nothing more to load" : undefined}
                     >
                         {canLoadMoreJobs ? `Load older jobs` : 'No older jobs'}
-                    </LemonButton>
+                    </Button>
                 }
             />
         </>

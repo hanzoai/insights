@@ -7,7 +7,7 @@ import React from 'react'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { notebookLogic } from 'scenes/notebooks/Notebook/notebookLogic'
 import { NotebookTarget } from 'scenes/notebooks/types'
@@ -592,7 +592,7 @@ describe('maxThreadLogic', () => {
         })
 
         it('shows an error toast when the queue is full', async () => {
-            const toastSpy = jest.spyOn(lemonToast, 'error').mockImplementation(jest.fn())
+            const toastSpy = jest.spyOn(toast, 'error').mockImplementation(jest.fn())
             const enqueueSpy = jest.spyOn(api.conversations.queue, 'enqueue')
 
             logic.actions.setQueuedMessages([

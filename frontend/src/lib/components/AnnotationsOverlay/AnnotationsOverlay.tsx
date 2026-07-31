@@ -9,11 +9,11 @@ import { IconPencil, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import { Chart } from 'lib/Chart'
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { dayjs } from 'lib/dayjs'
-import { LemonBadge } from 'lib/lemon-ui/LemonBadge/LemonBadge'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { Badge } from 'lib/elements/Badge/Badge'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
+import { Popover } from 'lib/elements/Popover/Popover'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { humanFriendlyDetailedTime, pluralize, shortTimeZone } from 'lib/utils'
 import { AnnotationModal } from 'scenes/annotations/AnnotationModal'
 import { annotationModalLogic, annotationScopeToName } from 'scenes/annotations/annotationModalLogic'
@@ -192,14 +192,14 @@ const AnnotationsBadge = React.memo(function AnnotationsBadgeRaw({
             onClick={!isDateLocked ? lockDate : active ? unlockDate : () => activateDate(date)}
         >
             {annotations.length ? (
-                <LemonBadge.Number
+                <Badge.Number
                     count={annotations.length}
                     status="data"
                     size="small"
                     active={active && isDateLocked}
                 />
             ) : (
-                <LemonBadge content={<IconPlusSmall />} status="data" size="small" active={active && isDateLocked} />
+                <Badge content={<IconPlusSmall />} status="data" size="small" active={active && isDateLocked} />
             )}
         </button>
     )
@@ -249,13 +249,13 @@ function AnnotationsPopover({
             showArrow
             padded={false}
             overlay={
-                <LemonModal
+                <Modal
                     inline
                     title={`${pluralize(popoverAnnotations.length, 'annotation')} • ${activeDate?.format(
                         INTERVAL_UNIT_TO_HUMAN_DAYJS_FORMAT[intervalUnit]
                     )}`}
                     footer={
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={() =>
                                 openModalToCreateAnnotation(activeDate, insightId, annotationsOverlayProps.dashboardId)
@@ -263,7 +263,7 @@ function AnnotationsPopover({
                             disabled={!isDateLocked}
                         >
                             Add annotation
-                        </LemonButton>
+                        </Button>
                     }
                     closable={isDateLocked}
                     onClose={closePopover}
@@ -278,7 +278,7 @@ function AnnotationsPopover({
                     ) : (
                         'There are no annotations in this period.'
                     )}
-                </LemonModal>
+                </Modal>
             }
         />
     )
@@ -305,7 +305,7 @@ function AnnotationCard({ annotation }: { annotation: AnnotationType }): JSX.Ele
                 </h5>
                 {!isSystemAnnotation && (
                     <>
-                        <LemonButton
+                        <Button
                             size="small"
                             icon={<IconPencil />}
                             tooltip="Edit this annotation"
@@ -314,7 +314,7 @@ function AnnotationCard({ annotation }: { annotation: AnnotationType }): JSX.Ele
                             }
                             noPadding
                         />
-                        <LemonButton
+                        <Button
                             size="small"
                             icon={<IconTrash />}
                             tooltip="Delete this annotation"
@@ -326,7 +326,7 @@ function AnnotationCard({ annotation }: { annotation: AnnotationType }): JSX.Ele
             </div>
             <div className="mt-1 flex items-center gap-3">
                 {isSystemAnnotation && (
-                    <LemonBadge status="primary" size="small" className="flex-shrink-0" content="Insights" />
+                    <Badge status="primary" size="small" className="flex-shrink-0" content="Insights" />
                 )}
                 <TextContent text={annotation.content ?? ''} data-attr="annotation-overlay-rendered-content" />
             </div>

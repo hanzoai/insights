@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonSkeleton, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, Skeleton, TextArea } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { projectLogic } from 'scenes/projectLogic'
 
 import { maxSettingsLogic } from './maxSettingsLogic'
@@ -21,12 +21,12 @@ export function MaxMemorySettings(): JSX.Element {
         >
             {currentProjectLoading || isLoading ? (
                 <div className="gap-2 flex flex-col">
-                    <LemonSkeleton className="h-6 w-32" />
-                    <LemonSkeleton className="h-16" />
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-16" />
                 </div>
             ) : (
-                <LemonField name="text" label="Insights AI's memory">
-                    <LemonTextArea
+                <Field name="text" label="Insights AI's memory">
+                    <TextArea
                         id="product-description-textarea" // Slightly dirty ID for .focus() elsewhere
                         placeholder={`What should Insights AI know about ${
                             currentProject ? currentProject.name : 'your company or this product'
@@ -34,16 +34,16 @@ export function MaxMemorySettings(): JSX.Element {
                         maxLength={10000}
                         maxRows={5}
                     />
-                </LemonField>
+                </Field>
             )}
-            <LemonButton
+            <Button
                 type="primary"
                 htmlType="submit"
                 disabledReason={!currentProject || isLoading ? 'Loading project and memory...' : undefined}
                 loading={isUpdating}
             >
                 Save memory
-            </LemonButton>
+            </Button>
         </Form>
     )
 }

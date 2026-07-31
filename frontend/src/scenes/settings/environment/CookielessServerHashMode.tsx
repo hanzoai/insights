@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonRadio, LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
+import { Button } from 'lib/elements/Button'
+import { Radio, RadioOption } from 'lib/elements/Radio'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { AccessControlLevel, AccessControlResourceType, CookielessServerHashMode } from '~/types'
 
-const options: LemonRadioOption<CookielessServerHashMode>[] = [
+const options: RadioOption<CookielessServerHashMode>[] = [
     {
         value: CookielessServerHashMode.Stateful,
         label: (
@@ -58,20 +58,20 @@ export function CookielessServerHashModeSetting(): JSX.Element {
                 resourceType={AccessControlResourceType.WebAnalytics}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonRadio value={setting} onChange={setSetting} options={optionsToShow} />
+                <Radio value={setting} onChange={setSetting} options={optionsToShow} />
             </AccessControlAction>
             <div className="mt-4">
                 <AccessControlAction
                     resourceType={AccessControlResourceType.WebAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => handleChange(setting)}
                         disabledReason={setting === savedSetting ? 'No changes to save' : undefined}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
         </>

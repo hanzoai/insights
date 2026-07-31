@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
 import { IconRevert, IconX } from '@hanzo/icons'
-import { LemonButton, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Tag } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 
@@ -19,14 +19,14 @@ export const HealthIssueCard = ({ issue }: { issue: HealthIssue }): JSX.Element 
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                     <span className="text-sm font-medium">{kindToLabel(issue.kind)}</span>
-                    <LemonTag type={severityToTagType(issue.severity)} size="small" className="shrink-0">
+                    <Tag type={severityToTagType(issue.severity)} size="small" className="shrink-0">
                         {severityLabel(issue.severity)}
-                    </LemonTag>
+                    </Tag>
                     <span className="text-xs text-muted shrink-0">
                         <TZLabel time={issue.created_at} />
                     </span>
                 </div>
-                <LemonButton
+                <Button
                     size="xsmall"
                     type="tertiary"
                     icon={issue.dismissed ? <IconRevert /> : <IconX />}

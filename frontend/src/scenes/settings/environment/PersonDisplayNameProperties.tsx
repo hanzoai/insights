@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { PropertySelect } from 'lib/components/PropertySelect/PropertySelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES } from 'lib/constants'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { teamLogic } from 'scenes/teamLogic'
 
 export function PersonDisplayNameProperties(): JSX.Element {
@@ -20,7 +20,7 @@ export function PersonDisplayNameProperties(): JSX.Element {
     )
 
     if (!currentTeam) {
-        return <LemonSkeleton className="w-1/2 h-4" />
+        return <Skeleton className="w-1/2 h-4" />
     }
 
     return (
@@ -33,7 +33,7 @@ export function PersonDisplayNameProperties(): JSX.Element {
                     addText="Add"
                     sortable
                 />
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={() =>
                         updateCurrentTeam({
@@ -42,7 +42,7 @@ export function PersonDisplayNameProperties(): JSX.Element {
                     }
                 >
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

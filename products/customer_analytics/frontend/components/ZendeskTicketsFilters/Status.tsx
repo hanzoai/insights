@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 
@@ -23,7 +23,7 @@ export const StatusFilter = (): JSX.Element => {
     const options = ['all', 'new', 'open', 'hold', 'pending', 'solved', 'closed', 'deleted']
 
     return (
-        <LemonSelect
+        <Select
             placeholder="Status"
             options={options.map((key) => ({ value: key, label: label(key) }))}
             value={status}

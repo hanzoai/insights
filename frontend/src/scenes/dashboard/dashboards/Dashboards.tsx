@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tab, Tabs } from 'lib/elements/Tabs'
 import { DeleteDashboardModal } from 'scenes/dashboard/DeleteDashboardModal'
 import { DuplicateDashboardModal } from 'scenes/dashboard/DuplicateDashboardModal'
 import { NewDashboardModal } from 'scenes/dashboard/NewDashboardModal'
@@ -36,7 +36,7 @@ export function Dashboards(): JSX.Element {
     const { dashboards, currentTab, isFiltering } = useValues(dashboardsLogic)
     const { showNewDashboardModal } = useActions(newDashboardLogic)
 
-    const enabledTabs: LemonTab<DashboardsTab>[] = [
+    const enabledTabs: Tab<DashboardsTab>[] = [
         {
             key: DashboardsTab.All,
             label: 'All dashboards',
@@ -74,20 +74,20 @@ export function Dashboards(): JSX.Element {
                                 interaction="click"
                                 scope={Scene.Dashboards}
                             >
-                                <LemonButton
+                                <Button
                                     size="small"
                                     data-attr="new-dashboard"
                                     onClick={showNewDashboardModal}
                                     type="primary"
                                 >
                                     New dashboard
-                                </LemonButton>
+                                </Button>
                             </AppShortcut>
                         </AccessControlAction>
                     </>
                 }
             />
-            <LemonTabs
+            <Tabs
                 activeKey={currentTab}
                 onChange={(newKey) => setCurrentTab(newKey)}
                 tabs={enabledTabs}

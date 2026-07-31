@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { ProfileBubbles } from 'lib/lemon-ui/ProfilePicture'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
+import { Tag } from 'lib/elements/Tag'
+import { ProfileBubbles } from 'lib/elements/ProfilePicture'
 import { pluralize } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -19,13 +19,13 @@ import { AlertType } from '../types'
 export function AlertStateIndicator({ alert }: { alert: AlertType }): JSX.Element {
     switch (alert.state) {
         case AlertState.FIRING:
-            return <LemonTag type="danger">FIRING</LemonTag>
+            return <Tag type="danger">FIRING</Tag>
         case AlertState.ERRORED:
-            return <LemonTag type="danger">ERRORED</LemonTag>
+            return <Tag type="danger">ERRORED</Tag>
         case AlertState.SNOOZED:
-            return <LemonTag type="muted">SNOOZED</LemonTag>
+            return <Tag type="muted">SNOOZED</Tag>
         case AlertState.NOT_FIRING:
-            return <LemonTag type="success">NOT FIRING</LemonTag>
+            return <Tag type="success">NOT FIRING</Tag>
     }
 }
 
@@ -39,7 +39,7 @@ export function AlertListItem({ alert, onClick }: AlertListItemProps): JSX.Eleme
     const isPercentage = alert.threshold?.configuration.type === InsightThresholdType.PERCENTAGE
 
     return (
-        <LemonButton type="secondary" onClick={onClick} data-attr="alert-list-item" fullWidth>
+        <Button type="secondary" onClick={onClick} data-attr="alert-list-item" fullWidth>
             <div className="flex justify-between flex-auto items-center p-2">
                 <div className="flex flex-row gap-3 items-center">
                     <span>{alert.name}</span>
@@ -60,7 +60,7 @@ export function AlertListItem({ alert, onClick }: AlertListItemProps): JSX.Eleme
 
                 <ProfileBubbles limit={4} people={alert.subscribed_users?.map(({ email }) => ({ email }))} />
             </div>
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -78,11 +78,11 @@ export function ManageAlertsModal(props: ManageAlertsModalProps): JSX.Element {
     const { alerts } = useValues(logic)
 
     return (
-        <LemonModal onClose={props.onClose} isOpen={props.isOpen} width={600} simple title="">
-            <LemonModal.Header>
+        <Modal onClose={props.onClose} isOpen={props.isOpen} width={600} simple title="">
+            <Modal.Header>
                 <h3 className="!m-0">Manage Alerts</h3>
-            </LemonModal.Header>
-            <LemonModal.Content>
+            </Modal.Header>
+            <Modal.Content>
                 <div className="mb-4">
                     With alerts, Insights will monitor your insight and notify you when certain conditions are met. We do
                     not evaluate alerts in real-time, but rather on a schedule (hourly, daily...).
@@ -113,10 +113,10 @@ export function ManageAlertsModal(props: ManageAlertsModalProps): JSX.Element {
                         <p>Once alerts are created they will display here. </p>
                     </div>
                 )}
-            </LemonModal.Content>
+            </Modal.Content>
 
-            <LemonModal.Footer>
-                <LemonButton
+            <Modal.Footer>
+                <Button
                     type="primary"
                     onClick={() => push(urls.insightAlert(props.insightShortId, 'new'))}
                     disabledReason={
@@ -126,11 +126,11 @@ export function ManageAlertsModal(props: ManageAlertsModalProps): JSX.Element {
                     }
                 >
                     New alert
-                </LemonButton>
-                <LemonButton type="secondary" onClick={props.onClose}>
+                </Button>
+                <Button type="secondary" onClick={props.onClose}>
                     Close
-                </LemonButton>
-            </LemonModal.Footer>
-        </LemonModal>
+                </Button>
+            </Modal.Footer>
+        </Modal>
     )
 }

@@ -2,7 +2,7 @@ import { actions, afterMount, kea, listeners, path, reducers, selectors } from '
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { ApiError, RateLimitError } from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -356,7 +356,7 @@ export const llmAnalyticsPlaygroundLogic = kea<llmAnalyticsPlaygroundLogicType>(
             const requestMessages = messagesToSend
 
             if (messagesToSend.length === 0) {
-                lemonToast.error('Please add some messages before running the prompt')
+                toast.error('Please add some messages before running the prompt')
                 actions.finalizeAssistantMessage()
                 return
             }
@@ -381,7 +381,7 @@ export const llmAnalyticsPlaygroundLogic = kea<llmAnalyticsPlaygroundLogicType>(
 
                 const selectedModel = values.modelOptions.find((m) => m.id === requestModel)
                 if (!selectedModel?.provider) {
-                    lemonToast.error('Selected model not found in available models')
+                    toast.error('Selected model not found in available models')
                     actions.finalizeAssistantMessage()
                     return
                 }
@@ -481,7 +481,7 @@ export const llmAnalyticsPlaygroundLogic = kea<llmAnalyticsPlaygroundLogicType>(
                 }
                 actions.addAssistantMessageChunk(`\n\n**Error:** Failed to initiate prompt submission.`)
                 actions.setResponseError(true)
-                lemonToast.error('Failed to connect to LLM service. Please try again.')
+                toast.error('Failed to connect to LLM service. Please try again.')
                 actions.finalizeAssistantMessage()
             } finally {
                 if (startTime) {

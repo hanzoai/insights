@@ -2,14 +2,14 @@ import './SupportMarkdown.scss'
 
 import clsx from 'clsx'
 
-import { LemonMarkdown, LemonMarkdownProps } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown, MarkdownProps } from 'lib/elements/Markdown'
 
-export interface SupportMarkdownProps extends LemonMarkdownProps {}
+export interface SupportMarkdownProps extends MarkdownProps {}
 
 /**
  * Markdown renderer for support messages.
- * Wraps LemonMarkdown with support-specific styling.
+ * Wraps Markdown with support-specific styling.
  */
 export function SupportMarkdown({ className, ...props }: SupportMarkdownProps): JSX.Element {
-    return <LemonMarkdown {...props} className={clsx('SupportMarkdown', className)} />
+    return <Markdown {...props} className={clsx('SupportMarkdown', className)} />
 }

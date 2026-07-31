@@ -48,7 +48,7 @@ export const featureFlagLogic = kea<featureFlagLogicType<FeatureFlagLogicProps>>
           : await api.create(`api/projects/${values.currentProjectId}/feature_flags`, flag)
         breakpoint()
         actions.setFeatureFlagValues(newFeatureFlag)
-        lemonToast.success('Feature flag saved')
+        toast.success('Feature flag saved')
         featureFlagsLogic.findMounted()?.actions.updateFlag(featureFlag)
         router.actions.replace(urls.featureFlag(featureFlag.id))
       },
@@ -124,7 +124,7 @@ export function FeatureFlag({ id }: { id?: string } = {}): JSX.Element {
             <Field name="active">
                 {/* value, onChange, onChangeEvent, name, label, id */}
                 {({ value, onChange }) => (
-                    <LemonSwitch
+                    <Switch
                         checked={value}
                         onChange={onChange}
                         label={
@@ -139,8 +139,8 @@ export function FeatureFlag({ id }: { id?: string } = {}): JSX.Element {
             </Field>
 
             <Field name="name" label="Description">
-                <LemonTextArea
-                    // value and onChange added automatically to Lemon components
+                <TextArea
+                    // value and onChange added automatically to Elements components
                     className="ph-ignore-input"
                     data-attr="feature-flag-description"
                     placeholder="Adding a helpful description can ensure others know what this feature is for."
@@ -153,7 +153,7 @@ export function FeatureFlag({ id }: { id?: string } = {}): JSX.Element {
                     <Field name="name">
                         {/* This will update featureFlag.filters.multivariate.variants[index].name */}
                         {/* If you don't specify ({ value, onChange }) => (), we add these two props automatically */}
-                        <LemonInput
+                        <Input
                             data-attr="feature-flag-variant-name"
                             className="ph-ignore-input"
                             placeholder="Description"
@@ -162,7 +162,7 @@ export function FeatureFlag({ id }: { id?: string } = {}): JSX.Element {
                 </Group>
             )}
 
-            <LemonButton
+            <Button
                 loading={isFeatureFlagSubmitting}
                 icon={<SaveOutlined />}
                 htmlType="submit"
@@ -170,7 +170,7 @@ export function FeatureFlag({ id }: { id?: string } = {}): JSX.Element {
                 data-attr="feature-flag-submit-bottom"
             >
                 Save changes
-            </LemonButton>
+            </Button>
         </Form>
     )
 }

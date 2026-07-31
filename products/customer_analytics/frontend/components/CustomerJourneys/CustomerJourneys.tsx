@@ -1,7 +1,7 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
 import { IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonSelect, Spinner } from '@hanzo/lemon-ui'
+import { Button, Select, Spinner } from '@hanzo/elements'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
@@ -51,17 +51,17 @@ export function CustomerJourneys(): JSX.Element {
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-2">
-                <LemonSelect
+                <Select
                     value={activeJourneyId}
                     onChange={setActiveJourneyId}
                     options={journeyOptions}
                     size="small"
                 />
-                <LemonButton type="secondary" icon={<IconPlus />} size="small" onClick={showAddJourneyModal}>
+                <Button type="secondary" icon={<IconPlus />} size="small" onClick={showAddJourneyModal}>
                     Add journey
-                </LemonButton>
+                </Button>
                 {activeJourney && (
-                    <LemonButton
+                    <Button
                         icon={<IconTrash />}
                         size="small"
                         type="secondary"

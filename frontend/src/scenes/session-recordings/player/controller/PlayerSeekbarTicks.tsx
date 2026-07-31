@@ -7,9 +7,9 @@ import { IconComment } from '@hanzo/icons'
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { RichContentPreview } from 'lib/lemon-ui/LemonRichContent/LemonRichContentEditor'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { RichContentPreview } from 'lib/elements/RichContent/RichContentEditor'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { autoCaptureEventToDescription } from 'lib/utils'
 import {
     InspectorListItem,

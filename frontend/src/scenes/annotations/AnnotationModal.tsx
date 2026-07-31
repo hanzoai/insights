@@ -2,17 +2,17 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import {
-    LemonButton,
-    LemonCalendarSelectInput,
-    LemonModal,
-    LemonModalProps,
-    LemonSelect,
-    LemonSelectOptions,
-    LemonTextAreaMarkdown,
+    Button,
+    CalendarSelectInput,
+    Modal,
+    ModalProps,
+    Select,
+    SelectOptions,
+    TextAreaMarkdown,
     Link,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { shortTimeZone } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -23,16 +23,16 @@ import { annotationModalLogic, annotationScopeToName } from './annotationModalLo
 export function NewAnnotationButton(): JSX.Element {
     const { openModalToCreateAnnotation } = useActions(annotationModalLogic)
     return (
-        <LemonButton type="primary" data-attr="create-annotation" onClick={() => openModalToCreateAnnotation()}>
+        <Button type="primary" data-attr="create-annotation" onClick={() => openModalToCreateAnnotation()}>
             New annotation
-        </LemonButton>
+        </Button>
     )
 }
 
 export function AnnotationModal({
     overlayRef,
     contentRef,
-}: Pick<LemonModalProps, 'overlayRef' | 'contentRef'>): JSX.Element {
+}: Pick<ModalProps, 'overlayRef' | 'contentRef'>): JSX.Element {
     const {
         isModalOpen,
         existingModalAnnotation,
@@ -43,7 +43,7 @@ export function AnnotationModal({
     } = useValues(annotationModalLogic)
     const { closeModal, deleteAnnotation, submitAnnotationModal } = useActions(annotationModalLogic)
 
-    const scopeOptions: LemonSelectOptions<AnnotationType['scope'] | null> = [
+    const scopeOptions: SelectOptions<AnnotationType['scope'] | null> = [
         {
             value: AnnotationScope.Insight,
             label: annotationScopeToName[AnnotationScope.Insight],
@@ -98,7 +98,7 @@ export function AnnotationModal({
     ]
 
     return (
-        <LemonModal
+        <Modal
             overlayRef={overlayRef}
             contentRef={contentRef}
             isOpen={isModalOpen}
@@ -109,7 +109,7 @@ export function AnnotationModal({
                 <div className="flex-1 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         {existingModalAnnotation && (
-                            <LemonButton
+                            <Button
                                 form="annotation-modal-form"
                                 type="secondary"
                                 status="danger"
@@ -120,14 +120,14 @@ export function AnnotationModal({
                                 data-attr="delete-annotation"
                             >
                                 Delete annotation
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                     <div className="flex items-center gap-2">
-                        <LemonButton form="annotation-modal-form" type="secondary" onClick={closeModal}>
+                        <Button form="annotation-modal-form" type="secondary" onClick={closeModal}>
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             form="annotation-modal-form"
                             htmlType="submit"
                             type="primary"
@@ -135,7 +135,7 @@ export function AnnotationModal({
                             data-attr="create-annotation-submit"
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             }
@@ -149,7 +149,7 @@ export function AnnotationModal({
                 className="deprecated-space-y-4"
             >
                 <div className="flex gap-2">
-                    <LemonField
+                    <Field
                         name="dateMarker"
                         label={
                             <span>
@@ -162,21 +162,21 @@ export function AnnotationModal({
                         }
                         className="flex-1"
                     >
-                        <LemonCalendarSelectInput granularity="minute" />
-                    </LemonField>
-                    <LemonField name="scope" label="Scope" className="flex-1">
-                        <LemonSelect options={scopeOptions} fullWidth />
-                    </LemonField>
+                        <CalendarSelectInput granularity="minute" />
+                    </Field>
+                    <Field name="scope" label="Scope" className="flex-1">
+                        <Select options={scopeOptions} fullWidth />
+                    </Field>
                 </div>
-                <LemonField name="content" label="Content">
-                    <LemonTextAreaMarkdown
+                <Field name="content" label="Content">
+                    <TextAreaMarkdown
                         placeholder="What's this annotation about?"
                         onPressCmdEnter={submitAnnotationModal}
                         data-attr="create-annotation-input"
                         maxLength={400}
                     />
-                </LemonField>
+                </Field>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

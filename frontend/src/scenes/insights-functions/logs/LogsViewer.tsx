@@ -2,21 +2,21 @@ import { useActions, useValues } from 'kea'
 
 import { IconCalendar, IconEye, IconList, IconRefresh, IconSearch, IconTableOfContents } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInput,
-    LemonSelect,
-    LemonTable,
-    LemonTableColumn,
-    LemonTableProps,
-    LemonTag,
-    LemonTagProps,
+    Button,
+    Input,
+    Select,
+    Table,
+    TableColumn,
+    TableProps,
+    Tag,
+    TagProps,
     Link,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { TZLabel } from 'lib/components/TZLabel'
-import { IconWithCount } from 'lib/lemon-ui/icons'
+import { IconWithCount } from 'lib/elements/icons'
 import { pluralize } from 'lib/utils'
 
 import { LogEntryLevel } from '~/types'
@@ -24,7 +24,7 @@ import { LogEntryLevel } from '~/types'
 import { LogLevelsPicker } from './LogLevelsPicker'
 import { GroupedLogEntry, LOG_VIEWER_LIMIT, LogEntry, LogsViewerLogicProps, logsViewerLogic } from './logsViewerLogic'
 
-export const tagTypeForLevel = (level: LogEntryLevel): LemonTagProps['type'] => {
+export const tagTypeForLevel = (level: LogEntryLevel): TagProps['type'] => {
     switch (level.toLowerCase()) {
         case 'debug':
             return 'muted'
@@ -52,8 +52,8 @@ const shortInstanceId = (instanceId: string): string => {
 export type LogsViewerProps = LogsViewerLogicProps & {
     instanceLabel?: string
     renderColumns?: (
-        columns: LemonTableColumn<GroupedLogEntry, keyof GroupedLogEntry | undefined>[]
-    ) => LemonTableColumn<GroupedLogEntry, keyof GroupedLogEntry | undefined>[]
+        columns: TableColumn<GroupedLogEntry, keyof GroupedLogEntry | undefined>[]
+    ) => TableColumn<GroupedLogEntry, keyof GroupedLogEntry | undefined>[]
     renderMessage?: (message: string) => JSX.Element | string
     hideDateFilter?: boolean
     hideLevelsFilter?: boolean
@@ -88,7 +88,7 @@ export function LogsViewer({
     } = useValues(logic)
     const { revealHiddenLogs, loadOlderLogs, setFilters, setRowExpanded, setIsGrouped } = useActions(logic)
 
-    const groupedLogColumns: LemonTableColumn<GroupedLogEntry, keyof GroupedLogEntry | undefined>[] = renderColumns([
+    const groupedLogColumns: TableColumn<GroupedLogEntry, keyof GroupedLogEntry | undefined>[] = renderColumns([
         {
             title: 'Timestamp',
             key: 'timestamp',
@@ -131,7 +131,7 @@ export function LogsViewer({
                             setRowExpanded(instanceId, !expandedRows[instanceId])
                         }}
                     >
-                        <LemonTag type={tagTypeForLevel(logLevel)}>{logLevel.toUpperCase()}</LemonTag>
+                        <Tag type={tagTypeForLevel(logLevel)}>{logLevel.toUpperCase()}</Tag>
                     </Link>
                 )
             },
@@ -165,7 +165,7 @@ export function LogsViewer({
     ])
 
     const footer = (
-        <LemonButton
+        <Button
             onClick={loadOlderLogs}
             loading={logsLoading}
             fullWidth
@@ -173,14 +173,14 @@ export function LogsViewer({
             disabledReason={!isThereMoreToLoad ? "There's nothing more to load" : undefined}
         >
             {isThereMoreToLoad ? `Load up to ${LOG_VIEWER_LIMIT} older entries` : 'No older entries'}
-        </LemonButton>
+        </Button>
     )
 
     return (
         <div className="flex-1 deprecated-space-y-2 ph-no-capture flex flex-col">
             <div className="flex flex-wrap flex-row-reverse items-center gap-2">
                 <div className="flex items-center gap-2 flex-1 min-w-100">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search messages or invocation ID…"
                         fullWidth
@@ -216,7 +216,7 @@ export function LogsViewer({
                     )}
 
                     {typeof props.groupByInstanceId !== 'boolean' && (
-                        <LemonSelect
+                        <Select
                             size="small"
                             value={isGrouped}
                             onChange={(checked) => setIsGrouped(checked)}
@@ -242,7 +242,7 @@ export function LogsViewer({
                             ]}
                         />
                     )}
-                    <LemonButton
+                    <Button
                         size="small"
                         onClick={revealHiddenLogs}
                         loading={hiddenLogsLoading}
@@ -261,7 +261,7 @@ export function LogsViewer({
             </div>
 
             {isGrouped ? (
-                <LemonTable
+                <Table
                     key="grouped"
                     dataSource={groupedLogs}
                     loading={logsLoading}
@@ -319,15 +319,15 @@ export function LogsViewerTable({
     renderColumns = (c) => c,
     hideInstanceIdColumn,
     ...props
-}: Omit<LemonTableProps<LogEntry>, 'columns'> & {
+}: Omit<TableProps<LogEntry>, 'columns'> & {
     instanceLabel: string
     renderMessage: (message: string) => JSX.Element | string
     renderColumns?: (
-        columns: LemonTableColumn<LogEntry, keyof LogEntry | undefined>[]
-    ) => LemonTableColumn<LogEntry, keyof LogEntry | undefined>[]
+        columns: TableColumn<LogEntry, keyof LogEntry | undefined>[]
+    ) => TableColumn<LogEntry, keyof LogEntry | undefined>[]
     hideInstanceIdColumn?: boolean
 }): JSX.Element {
-    let logColumns: LemonTableColumn<LogEntry, keyof LogEntry | undefined>[] = [
+    let logColumns: TableColumn<LogEntry, keyof LogEntry | undefined>[] = [
         {
             title: 'Timestamp',
             key: 'timestamp',
@@ -340,7 +340,7 @@ export function LogsViewerTable({
             key: 'level',
             dataIndex: 'level',
             width: 0,
-            render: (_, { level }) => <LemonTag type={tagTypeForLevel(level)}>{level.toUpperCase()}</LemonTag>,
+            render: (_, { level }) => <Tag type={tagTypeForLevel(level)}>{level.toUpperCase()}</Tag>,
         },
         {
             width: 0,
@@ -367,7 +367,7 @@ export function LogsViewerTable({
     ]
 
     return (
-        <LemonTable
+        <Table
             {...props}
             rowKey={(record, index) => `${record.timestamp.toISOString()}-${index}`}
             columns={renderColumns(logColumns)}

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Checkbox, Input, Select } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
 
 import {
@@ -40,7 +40,7 @@ export function SurveyWidgetCustomization(): JSX.Element {
 
     return (
         <div className="flex flex-col gap-2">
-            <LemonField name="appearance" label="">
+            <Field name="appearance" label="">
                 {({
                     value: appearance,
                     onChange: onAppearanceChange,
@@ -49,8 +49,8 @@ export function SurveyWidgetCustomization(): JSX.Element {
                     onChange: (appearance: SurveyAppearance) => void
                 }) => (
                     <>
-                        <LemonField.Pure label="Feedback button type">
-                            <LemonSelect
+                        <Field.Pure label="Feedback button type">
+                            <Select
                                 value={appearance.widgetType}
                                 onChange={(widgetType) => {
                                     // NextToTrigger is only available for Selector widget type
@@ -67,37 +67,37 @@ export function SurveyWidgetCustomization(): JSX.Element {
                                     { label: 'Custom', value: SurveyWidgetType.Selector },
                                 ]}
                             />
-                        </LemonField.Pure>
+                        </Field.Pure>
                         {survey.appearance?.widgetType === 'selector' ? (
-                            <LemonField.Pure
+                            <Field.Pure
                                 label="CSS selector"
                                 info="Enter a class or ID selector for the feedback button, like .feedback-button or #feedback-button. If you're using a custom theme, you can use the theme's class name."
                             >
-                                <LemonInput
+                                <Input
                                     value={appearance.widgetSelector}
                                     onChange={(widgetSelector) => onAppearanceChange({ ...appearance, widgetSelector })}
                                     placeholder="ex: .feedback-button, #feedback-button"
                                 />
                                 {validationErrors?.widgetSelector && (
-                                    <LemonField.Error error={validationErrors?.widgetSelector} />
+                                    <Field.Error error={validationErrors?.widgetSelector} />
                                 )}
-                            </LemonField.Pure>
+                            </Field.Pure>
                         ) : (
                             <>
-                                <LemonField.Pure label="Button label">
-                                    <LemonInput
+                                <Field.Pure label="Button label">
+                                    <Input
                                         value={appearance.widgetLabel}
                                         onChange={(widgetLabel) => onAppearanceChange({ ...appearance, widgetLabel })}
                                     />
-                                </LemonField.Pure>
-                                <LemonField.Pure label="Background color">
-                                    <LemonInput
+                                </Field.Pure>
+                                <Field.Pure label="Background color">
+                                    <Input
                                         value={appearance.widgetColor}
                                         onChange={(widgetColor) => onAppearanceChange({ ...appearance, widgetColor })}
                                         placeholder="#e0a045"
                                     />
-                                </LemonField.Pure>
-                                <LemonField.Pure
+                                </Field.Pure>
+                                <Field.Pure
                                     label="Button position"
                                     className="gap-1 col-span-2"
                                     premiumFeature={AvailableFeature.SURVEYS_STYLING}
@@ -111,7 +111,7 @@ export function SurveyWidgetCustomization(): JSX.Element {
                                             }
                                             disabled={!surveysStylingAvailable}
                                         />
-                                        <LemonSelect
+                                        <Select
                                             value={appearance.tabPosition ?? SurveyTabPosition.Right}
                                             onChange={(tabPosition) =>
                                                 onAppearanceChange({ ...appearance, tabPosition })
@@ -123,13 +123,13 @@ export function SurveyWidgetCustomization(): JSX.Element {
                                             disabled={!surveysStylingAvailable}
                                         />
                                     </div>
-                                </LemonField.Pure>
+                                </Field.Pure>
                             </>
                         )}
                     </>
                 )}
-            </LemonField>
-            <LemonCheckbox
+            </Field>
+            <Checkbox
                 label="Allow survey to be displayed every time the button is clicked"
                 className="mt-2"
                 checked={survey.schedule === SurveySchedule.Always}

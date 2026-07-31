@@ -3,7 +3,7 @@ import insights from '@hanzo/insights'
 import { useState } from 'react'
 
 import { IconCopy } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonDivider, LemonModal } from '@hanzo/lemon-ui'
+import { Banner, Button, Divider, Modal } from '@hanzo/elements'
 
 import { SHARING_MODAL_WIDTH } from 'lib/components/Sharing/SharingModal'
 import { base64Encode } from 'lib/utils'
@@ -33,15 +33,15 @@ export function NotebookShareModal({ shortId }: NotebookShareModalProps): JSX.El
     }
 
     return (
-        <LemonModal
+        <Modal
             title="Share notebook"
             onClose={() => closeShareModal()}
             isOpen={isShareModalOpen}
             width={SHARING_MODAL_WIDTH}
             footer={
-                <LemonButton type="secondary" onClick={closeShareModal}>
+                <Button type="secondary" onClick={closeShareModal}>
                     Done
-                </LemonButton>
+                </Button>
             }
         >
             <div className="deprecated-space-y-4">
@@ -51,7 +51,7 @@ export function NotebookShareModal({ shortId }: NotebookShareModalProps): JSX.El
                         closeShareModal()
                     }}
                 />
-                <LemonDivider />
+                <Divider />
                 <h3>Internal Link</h3>
                 {!isLocalOnly ? (
                     <>
@@ -59,7 +59,7 @@ export function NotebookShareModal({ shortId }: NotebookShareModalProps): JSX.El
                             <b>Click the button below</b> to copy a direct link to this Notebook. Make sure the person
                             you share it with has access to this Insights project.
                         </p>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             fullWidth
                             center
@@ -69,14 +69,14 @@ export function NotebookShareModal({ shortId }: NotebookShareModalProps): JSX.El
                             title={notebookUrl}
                         >
                             {notebookUrl}
-                        </LemonButton>
+                        </Button>
 
-                        <LemonDivider className="my-4" />
+                        <Divider className="my-4" />
                     </>
                 ) : (
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         <p>This Notebook cannot be shared directly with others as it is only visible to you.</p>
-                    </LemonBanner>
+                    </Banner>
                 )}
 
                 <h3>Template Link</h3>
@@ -84,7 +84,7 @@ export function NotebookShareModal({ shortId }: NotebookShareModalProps): JSX.El
                     The link below will open a Canvas with the contents of this Notebook, allowing the receiver to view
                     it, edit it or create their own Notebook without affecting this one.
                 </p>
-                <LemonButton
+                <Button
                     type="secondary"
                     fullWidth
                     center
@@ -94,13 +94,13 @@ export function NotebookShareModal({ shortId }: NotebookShareModalProps): JSX.El
                     title={canvasUrl}
                 >
                     {canvasUrl}
-                </LemonButton>
+                </Button>
 
-                <LemonDivider className="my-4" />
+                <Divider className="my-4" />
 
                 <h3>External Sharing</h3>
 
-                <LemonBanner
+                <Banner
                     type="warning"
                     action={{
                         children: !interestTracked ? 'I would like this!' : 'Thanks!',
@@ -113,8 +113,8 @@ export function NotebookShareModal({ shortId }: NotebookShareModalProps): JSX.El
                     }}
                 >
                     We don’t currently support sharing notebooks externally, but it’s on our roadmap!
-                </LemonBanner>
+                </Banner>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

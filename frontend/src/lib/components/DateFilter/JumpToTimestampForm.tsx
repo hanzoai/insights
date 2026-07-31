@@ -1,10 +1,10 @@
 import { ReactNode, useState } from 'react'
 
 import { IconCheck, IconWarning } from '@hanzo/icons'
-import { LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Input, Select } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { WindowDirection, WindowSize, computeDateRange, parseTimestampInput } from './jumpToTimestampUtils'
 
@@ -54,7 +54,7 @@ export function JumpToTimestampForm({ onSubmit, children }: JumpToTimestampFormP
             }}
         >
             <div className="space-y-2">
-                <LemonInput
+                <Input
                     className="[&_input]:[color:var(--text-3000)]"
                     value={timestampInput}
                     onChange={setTimestampInput}
@@ -67,7 +67,7 @@ export function JumpToTimestampForm({ onSubmit, children }: JumpToTimestampFormP
                 />
                 <div className="flex items-center gap-2">
                     <span className="text-xs font-medium whitespace-nowrap">Window:</span>
-                    <LemonSelect
+                    <Select
                         size="xsmall"
                         value={windowSize}
                         onChange={setWindowSize}
@@ -77,7 +77,7 @@ export function JumpToTimestampForm({ onSubmit, children }: JumpToTimestampFormP
                             { value: '1h', label: '1 hour' },
                         ]}
                     />
-                    <LemonSelect
+                    <Select
                         size="xsmall"
                         value={windowDirection}
                         onChange={setWindowDirection}

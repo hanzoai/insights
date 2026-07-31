@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconPerson, IconVideoCamera } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { humanFriendlyLargeNumber, humanFriendlyNumber, pluralize } from 'lib/utils'

@@ -2,9 +2,9 @@ import { useState } from 'react'
 
 import { IconServer } from '@hanzo/icons'
 import { IconFlutter, IconGo, IconJavascript, IconPHP, IconPython, IconRuby } from '@hanzo/icons'
-import { LemonSelect, Link } from '@hanzo/lemon-ui'
+import { Select, Link } from '@hanzo/elements'
 
-import { IconAndroidOS, IconAppleIOS, IconNodeJS } from 'lib/lemon-ui/icons'
+import { IconAndroidOS, IconAppleIOS, IconNodeJS } from 'lib/elements/icons'
 
 import { Experiment, MultivariateFlagVariant, SDKKey } from '~/types'
 
@@ -143,7 +143,7 @@ export function CodeLanguageSelect({
     selectOption: (selectedValue: string) => void
 }): JSX.Element {
     return (
-        <LemonSelect
+        <Select
             size="small"
             className="min-w-[7.5rem]"
             onSelect={selectOption}
@@ -201,7 +201,7 @@ export function ExperimentImplementationDetails({ experiment }: ExperimentImplem
                     <div className="flex justify-between">
                         <div className="flex items-center">
                             <span className="mr-2">Variant group</span>
-                            <LemonSelect
+                            <Select
                                 size="small"
                                 className="min-w-[5rem]"
                                 onSelect={setCurrentVariant}

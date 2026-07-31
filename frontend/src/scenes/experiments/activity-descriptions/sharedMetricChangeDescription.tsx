@@ -1,7 +1,7 @@
 import { match } from 'ts-pattern'
 
 import { ActivityChange } from 'lib/components/ActivityLog/humanizeActivity'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { urls } from 'scenes/urls'
 
 import { SharedMetric } from '../SharedMetrics/sharedMetricLogic'

@@ -1,6 +1,6 @@
 import Papa from 'papaparse'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
@@ -17,8 +17,8 @@ import {
 import { DataTableRow } from './dataTableLogic'
 
 jest.mock('lib/utils/copyToClipboard')
-jest.mock('@hanzo/lemon-ui', () => ({
-    lemonToast: {
+jest.mock('@hanzo/elements', () => ({
+    toast: {
         error: jest.fn(),
     },
 }))
@@ -30,7 +30,7 @@ jest.mock('papaparse', () => ({
 }))
 
 const mockCopyToClipboard = copyToClipboard as jest.MockedFunction<typeof copyToClipboard>
-const mockLemonToastError = lemonToast.error as jest.MockedFunction<typeof lemonToast.error>
+const mockToastError = toast.error as jest.MockedFunction<typeof toast.error>
 const mockPapaUnparse = Papa.unparse as jest.MockedFunction<typeof Papa.unparse>
 
 type DataTableSourceKind = DataTableNode['source']['kind']
@@ -278,7 +278,7 @@ describe('clipboardUtils', () => {
 
             copyTableToCsv([{ result: ['pageview'] }], ['event'], query)
 
-            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
         })
     })
 
@@ -302,7 +302,7 @@ describe('clipboardUtils', () => {
 
             copyTableToJson([{ result: ['pageview'] }], ['event'], query)
 
-            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
         })
     })
 
@@ -337,7 +337,7 @@ describe('clipboardUtils', () => {
 
             copyTableToExcel([{ result: ['pageview'] }], ['event'], query)
 
-            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
         })
 
         it('handles Papa.unparse failure', () => {
@@ -348,7 +348,7 @@ describe('clipboardUtils', () => {
 
             copyTableToExcel([{ result: ['pageview'] }], ['event'], query)
 
-            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
         })
     })
 
@@ -369,7 +369,7 @@ describe('clipboardUtils', () => {
 
             copyTableToJson(rows, ['name'], query)
 
-            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
 
             // Restore original
             JSON.stringify = originalStringify

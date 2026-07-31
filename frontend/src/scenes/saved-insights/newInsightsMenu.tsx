@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { INSIGHT_TYPE_URLS } from 'scenes/insights/utils'
@@ -65,7 +65,7 @@ export function OverlayForNewInsightMenu({ dataAttr }: { dataAttr: string }): JS
             {menuEntries.map(
                 ([listedInsightType, listedInsightTypeMetadata]) =>
                     listedInsightTypeMetadata.inMenu && (
-                        <LemonButton
+                        <Button
                             key={listedInsightType}
                             icon={listedInsightTypeMetadata.icon && <listedInsightTypeMetadata.icon />}
                             to={INSIGHT_TYPE_URLS[listedInsightType as InsightType]}
@@ -82,7 +82,7 @@ export function OverlayForNewInsightMenu({ dataAttr }: { dataAttr: string }): JS
                                     {listedInsightTypeMetadata.description}
                                 </span>
                             </div>
-                        </LemonButton>
+                        </Button>
                     )
             )}
         </>

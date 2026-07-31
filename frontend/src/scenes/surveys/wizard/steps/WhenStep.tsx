@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input } from '@hanzo/elements'
 
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
+import { Radio } from 'lib/elements/Radio'
 import { AddEventButton } from 'scenes/surveys/AddEventButton'
 
 import { SurveyAppearance, SurveyDisplayConditions } from '~/types'
@@ -71,7 +71,7 @@ export function WhenStep(): JSX.Element {
                 <p className="text-secondary text-sm">Choose when to show this survey to your users</p>
             </div>
 
-            <LemonRadio
+            <Radio
                 value={triggerMode}
                 onChange={setTriggerMode}
                 options={[
@@ -98,7 +98,7 @@ export function WhenStep(): JSX.Element {
                                     className="flex items-center gap-2 px-3 py-1.5 border border-border rounded-lg bg-bg-light"
                                 >
                                     <code className="text-sm font-mono">{event}</code>
-                                    <LemonButton
+                                    <Button
                                         size="xsmall"
                                         icon={<IconX />}
                                         onClick={() => removeTriggerEvent(event)}
@@ -109,7 +109,7 @@ export function WhenStep(): JSX.Element {
                         </div>
                     )}
                     <AddEventButton onEventSelect={addTriggerEvent} addButtonText="Add event" />
-                    <LemonCheckbox
+                    <Checkbox
                         checked={repeatedActivation}
                         onChange={setRepeatedActivation}
                         label="Show every time the event is captured"
@@ -120,7 +120,7 @@ export function WhenStep(): JSX.Element {
             <div className="border-t border-border pt-6 space-y-2">
                 <label className="text-sm font-medium">Delay before showing</label>
                 <div className="flex items-center gap-2">
-                    <LemonInput
+                    <Input
                         type="number"
                         min={0}
                         value={delaySeconds}

@@ -4,10 +4,10 @@ import insights from '@hanzo/insights'
 
 import { IconFunnels, IconRetention, IconTrends } from '@hanzo/icons'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
+import { Popover } from 'lib/elements/Popover'
 import { AddSavedInsightsToDashboard } from 'scenes/saved-insights/AddSavedInsightsToDashboard'
 import { INSIGHT_TYPES_METADATA } from 'scenes/saved-insights/SavedInsights'
 import { addSavedInsightsModalLogic } from 'scenes/saved-insights/addSavedInsightsModalLogic'
@@ -51,7 +51,7 @@ export function AddInsightToDashboardModal(): JSX.Element {
 
     return (
         <BindLogic logic={addSavedInsightsModalLogic} props={{}}>
-            <LemonModal
+            <Modal
                 title="Add insight to dashboard"
                 onClose={handleClose}
                 isOpen={addInsightToDashboardModalVisible}
@@ -59,7 +59,7 @@ export function AddInsightToDashboardModal(): JSX.Element {
                 className="bg-surface-secondary"
             >
                 <div className="-mt-1 space-y-3">
-                    <LemonBanner type="info" hideIcon className="p-4">
+                    <Banner type="info" hideIcon className="p-4">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <div className="min-w-0">
                                 <div className="font-semibold">Create a new insight</div>
@@ -69,7 +69,7 @@ export function AddInsightToDashboardModal(): JSX.Element {
                             </div>
                             <div className="flex items-center gap-2 sm:ml-auto flex-wrap">
                                 {QUICK_CREATE_TYPES.map(({ type, icon: Icon, label }) => (
-                                    <LemonButton
+                                    <Button
                                         key={type}
                                         type="primary"
                                         size="xsmall"
@@ -80,7 +80,7 @@ export function AddInsightToDashboardModal(): JSX.Element {
                                         onClick={() => handleNewInsightClicked(type)}
                                     >
                                         {label}
-                                    </LemonButton>
+                                    </Button>
                                 ))}
                                 <Popover
                                     visible={showMoreInsightTypes}
@@ -90,7 +90,7 @@ export function AddInsightToDashboardModal(): JSX.Element {
                                             {additionalTypes.map(([type, metadata]) => {
                                                 const Icon = metadata.icon
                                                 return (
-                                                    <LemonButton
+                                                    <Button
                                                         key={type}
                                                         type="tertiary"
                                                         fullWidth
@@ -103,26 +103,26 @@ export function AddInsightToDashboardModal(): JSX.Element {
                                                         onClick={() => handleNewInsightClicked(type)}
                                                     >
                                                         {metadata.name}
-                                                    </LemonButton>
+                                                    </Button>
                                                 )
                                             })}
                                         </div>
                                     }
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="xsmall"
                                         onClick={() => toggleShowMoreInsightTypes()}
                                     >
                                         More
-                                    </LemonButton>
+                                    </Button>
                                 </Popover>
                             </div>
                         </div>
-                    </LemonBanner>
+                    </Banner>
                     <AddSavedInsightsToDashboard />
                 </div>
-            </LemonModal>
+            </Modal>
         </BindLogic>
     )
 }

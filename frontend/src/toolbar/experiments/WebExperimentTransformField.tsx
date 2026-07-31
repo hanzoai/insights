@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCursorClick } from '@hanzo/icons'
-import { LemonLabel, LemonSelect } from '@hanzo/lemon-ui'
+import { Label, Select } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
+import { Button } from 'lib/elements/Button'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
 
 import {
     ElementSelectorButtonTypes,
@@ -31,7 +31,7 @@ export function WebExperimentTransformField({
     return (
         <>
             <div className="inline-flex deprecated-space-x-2">
-                <LemonButton
+                <Button
                     icon={<IconCursorClick />}
                     size="small"
                     type={inspectingElement === transformIndex && selectedVariant === variant ? 'primary' : 'secondary'}
@@ -47,8 +47,8 @@ export function WebExperimentTransformField({
                     {inspectingElement === transformIndex && selectedVariant === variant
                         ? 'Selecting…'
                         : 'Select element'}
-                </LemonButton>
-                <LemonSelect
+                </Button>
+                <Select
                     placeholder="Select element type"
                     value={selectedElementType}
                     options={Object.entries(ElementSelectorButtonTypes).map(([key, value]) => ({
@@ -63,8 +63,8 @@ export function WebExperimentTransformField({
             {transform.selector && (
                 <div>
                     <div className="mt-4">
-                        <LemonLabel>Inner HTML</LemonLabel>
-                        <LemonTextArea
+                        <Label>Inner HTML</Label>
+                        <TextArea
                             onChange={(value) => {
                                 // Update state
                                 const updatedVariants = {
@@ -91,8 +91,8 @@ export function WebExperimentTransformField({
                         />
                     </div>
                     <div className="mt-4">
-                        <LemonLabel>CSS</LemonLabel>
-                        <LemonTextArea
+                        <Label>CSS</Label>
+                        <TextArea
                             onChange={(value) => {
                                 if (experimentForm.variants) {
                                     // Create new variants object with updated CSS

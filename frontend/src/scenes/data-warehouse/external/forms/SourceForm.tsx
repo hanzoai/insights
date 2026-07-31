@@ -3,17 +3,17 @@ import { FieldName, Form, Group } from 'kea-forms'
 import React, { useEffect } from 'react'
 
 import {
-    LemonDivider,
-    LemonFileInput,
-    LemonInput,
-    LemonSelect,
-    LemonSkeleton,
-    LemonSwitch,
-    LemonTextArea,
-} from '@hanzo/lemon-ui'
+    Divider,
+    FileInput,
+    Input,
+    Select,
+    Skeleton,
+    Switch,
+    TextArea,
+} from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Field } from 'lib/elements/Field'
+import { Markdown } from 'lib/elements/Markdown'
 import { availableSourcesDataLogic } from 'scenes/data-warehouse/new/availableSourcesDataLogic'
 
 import { SourceConfig, SourceFieldConfig } from '~/queries/schema/schema-general'
@@ -49,9 +49,9 @@ const sourceFieldToElement = (
         }
         return (
             <React.Fragment key={field.name}>
-                <LemonField name={field.name} label={field.label}>
+                <Field name={field.name} label={field.label}>
                     {({ onChange }) => (
-                        <LemonInput
+                        <Input
                             key={field.name}
                             className="ph-connection-string"
                             data-attr={field.name}
@@ -87,8 +87,8 @@ const sourceFieldToElement = (
                             }}
                         />
                     )}
-                </LemonField>
-                <LemonDivider />
+                </Field>
+                <Divider />
             </React.Fragment>
         )
     }
@@ -96,13 +96,13 @@ const sourceFieldToElement = (
     if (field.type === 'switch-group') {
         const enabled = !!lastValue?.[field.name]?.enabled || lastValue?.[field.name]?.enabled === 'True'
         return (
-            <LemonField key={field.name} name={[field.name, 'enabled']} label={field.label}>
+            <Field key={field.name} name={[field.name, 'enabled']} label={field.label}>
                 {({ value, onChange }) => {
                     const isEnabled = value === undefined || value === null || value === 'False' ? enabled : value
                     return (
                         <>
                             {!!field.caption && <p className="mb-0">{field.caption}</p>}
-                            <LemonSwitch checked={isEnabled} onChange={onChange} />
+                            <Switch checked={isEnabled} onChange={onChange} />
                             {isEnabled && (
                                 <Group name={field.name}>
                                     {field.fields.map((field) =>
@@ -113,7 +113,7 @@ const sourceFieldToElement = (
                         </>
                     )
                 }}
-            </LemonField>
+            </Field>
         )
     }
 
@@ -128,14 +128,14 @@ const sourceFieldToElement = (
                 )
 
         return (
-            <LemonField
+            <Field
                 key={field.name}
                 name={hasOptionFields ? [field.name, 'selection'] : field.name}
                 label={field.label}
             >
                 {({ value, onChange }) => (
                     <>
-                        <LemonSelect
+                        <Select
                             options={field.options}
                             value={
                                 (value === undefined || value === null ? lastValue?.[field.name] : value) ||
@@ -146,15 +146,15 @@ const sourceFieldToElement = (
                         <Group name={field.name}>{getOptions(value)}</Group>
                     </>
                 )}
-            </LemonField>
+            </Field>
         )
     }
 
     if (field.type === 'textarea') {
         return (
-            <LemonField key={field.name} name={field.name} label={field.label}>
+            <Field key={field.name} name={field.name} label={field.label}>
                 {({ value, onChange }) => (
-                    <LemonTextArea
+                    <TextArea
                         className="ph-ignore-input"
                         data-attr={field.name}
                         placeholder={field.placeholder}
@@ -163,13 +163,13 @@ const sourceFieldToElement = (
                         onChange={onChange}
                     />
                 )}
-            </LemonField>
+            </Field>
         )
     }
 
     if (field.type === 'oauth') {
         return (
-            <LemonField key={field.name} name={field.name} label={field.label}>
+            <Field key={field.name} name={field.name} label={field.label}>
                 {({ value, onChange }) => (
                     <DataWarehouseIntegrationChoice
                         key={field.name}
@@ -179,16 +179,16 @@ const sourceFieldToElement = (
                         integration={field.kind}
                     />
                 )}
-            </LemonField>
+            </Field>
         )
     }
 
     if (field.type === 'file-upload') {
         return (
-            <LemonField key={field.name} name={field.name} label={field.label}>
+            <Field key={field.name} name={field.name} label={field.label}>
                 {({ value, onChange }) => (
                     <div className="bg-fill-input p-2 border rounded-[var(--radius)]">
-                        <LemonFileInput
+                        <FileInput
                             value={value}
                             accept={field.fileFormat.format}
                             multiple={false}
@@ -196,7 +196,7 @@ const sourceFieldToElement = (
                         />
                     </div>
                 )}
-            </LemonField>
+            </Field>
         )
     }
 
@@ -210,14 +210,14 @@ const sourceFieldToElement = (
     }
 
     return (
-        <LemonField
+        <Field
             key={field.name}
             name={field.name}
             label={field.label}
-            help={field.caption ? <LemonMarkdown className="text-xs">{field.caption}</LemonMarkdown> : undefined}
+            help={field.caption ? <Markdown className="text-xs">{field.caption}</Markdown> : undefined}
         >
             {({ value, onChange }) => (
-                <LemonInput
+                <Input
                     className="ph-ignore-input"
                     data-attr={field.name}
                     placeholder={field.placeholder}
@@ -226,7 +226,7 @@ const sourceFieldToElement = (
                     onChange={onChange}
                 />
             )}
-        </LemonField>
+        </Field>
     )
 }
 
@@ -261,19 +261,19 @@ export function SourceFormComponent({
     const isUpdateMode = !!setSourceConfigValue
 
     if (availableSourcesLoading || !availableSources) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
         <div className="deprecated-space-y-4">
             {shouldShowDescription && (
-                <LemonField
+                <Field
                     name="description"
                     label="Description (optional)"
                     help="A description to help you identify this source, e.g. 'Production EU database' or 'Billing Stripe account'."
                 >
                     {({ value, onChange }) => (
-                        <LemonInput
+                        <Input
                             className="ph-ignore-input"
                             data-attr="description"
                             placeholder="e.g. Production database"
@@ -281,7 +281,7 @@ export function SourceFormComponent({
                             onChange={onChange}
                         />
                     )}
-                </LemonField>
+                </Field>
             )}
             <Group name="payload">
                 {availableSources[sourceConfig.name].fields.map((field) =>
@@ -289,7 +289,7 @@ export function SourceFormComponent({
                 )}
             </Group>
             {showPrefix && (
-                <LemonField
+                <Field
                     name="prefix"
                     label="Table prefix (optional)"
                     help="Use only letters, numbers, and underscores. Must start with a letter or underscore."
@@ -314,7 +314,7 @@ export function SourceFormComponent({
                             : `${sourceConfig.name.toLowerCase()}.table_name`
                         return (
                             <>
-                                <LemonInput
+                                <Input
                                     className="ph-ignore-input"
                                     data-attr="prefix"
                                     placeholder="internal"
@@ -330,7 +330,7 @@ export function SourceFormComponent({
                             </>
                         )
                     }}
-                </LemonField>
+                </Field>
             )}
         </div>
     )

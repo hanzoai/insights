@@ -9,7 +9,7 @@ import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { ENTITY_MATCH_TYPE } from 'lib/constants'
 import { scrollToFormError } from 'lib/forms/scrollToFormError'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { NEW_COHORT, NEW_CRITERIA, NEW_CRITERIA_GROUP } from 'scenes/cohorts/CohortFilters/constants'
 import {
@@ -294,7 +294,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                 } else {
                     const personIds = Object.keys(values.personsToCreateStaticCohort)
                     if (cohort.is_static && cohort.csv == null && personIds.length === 0) {
-                        lemonToast.error('You need to upload a csv file or add a person manually.')
+                        toast.error('You need to upload a csv file or add a person manually.')
                         return
                     }
                     actions.saveCohort({
@@ -321,7 +321,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                         actions.checkIfFinishedCalculating(cohort)
                         return processCohort(cohort)
                     } catch (error: any) {
-                        lemonToast.error(error.detail || 'Failed to fetch cohort')
+                        toast.error(error.detail || 'Failed to fetch cohort')
 
                         actions.setCohortMissing()
                         return values.cohort
@@ -333,10 +333,10 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                             deleted: false,
                         })
                         actions.setCohort(restoredCohort)
-                        lemonToast.success('Cohort restored successfully.')
+                        toast.success('Cohort restored successfully.')
                         return restoredCohort
                     } catch (error) {
-                        lemonToast.error(`Failed to restore cohort: '${error}'`)
+                        toast.error(`Failed to restore cohort: '${error}'`)
                         return values.cohort
                     }
                 },
@@ -398,7 +398,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                             })
                         }
 
-                        lemonToast.error(error.detail || 'Failed to save cohort')
+                        toast.error(error.detail || 'Failed to save cohort')
                         return values.cohort
                     }
 
@@ -408,7 +408,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                     delete cohort['csv']
                     actions.setCohort(cohort)
                     refreshTreeItem('cohort', cohort.id)
-                    lemonToast.success('Cohort saved. Please wait up to a few minutes for it to be calculated', {
+                    toast.success('Cohort saved. Please wait up to a few minutes for it to be calculated', {
                         toastId: `cohort-saved-${key}`,
                     })
                     actions.checkIfFinishedCalculating(cohort)
@@ -474,7 +474,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                             const cohortFormData = createCohortFormData(data)
                             cohort = await api.cohorts.create(cohortFormData as Partial<CohortType>)
                         }
-                        lemonToast.success(
+                        toast.success(
                             'Cohort duplicated. Please wait up to a few minutes for it to be calculated',
                             {
                                 toastId: `cohort-duplicated-${cohort.id}`,
@@ -488,7 +488,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                         )
                         return cohort
                     } catch (error: any) {
-                        lemonToast.error(error.detail || 'Failed to duplicate cohort')
+                        toast.error(error.detail || 'Failed to duplicate cohort')
                         return null
                     }
                 },
@@ -505,7 +505,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
 
                     try {
                         await api.cohorts.removePersonFromCohort(values.cohort.id, personId)
-                        lemonToast.success('Person removed from cohort')
+                        toast.success('Person removed from cohort')
                     } catch (error: any) {
                         throw error
                     }

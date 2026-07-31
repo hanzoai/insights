@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { IconCommit } from '@hanzo/icons'
-import { LemonTag, Popover } from '@hanzo/lemon-ui'
+import { Tag, Popover } from '@hanzo/elements'
 
 import { ErrorTrackingRelease } from 'lib/components/Errors/types'
 
@@ -19,14 +19,14 @@ export function ReleasePreviewPill({ release }: { release: ErrorTrackingRelease 
             onMouseEnterInside={() => setIsOpen(true)}
             onMouseLeaveInside={() => setIsOpen(false)}
         >
-            <LemonTag
+            <Tag
                 className="bg-fill-primary cursor-default inline-flex items-center"
                 onMouseEnter={() => setIsOpen(true)}
                 onMouseLeave={() => setIsOpen(false)}
             >
                 <IconCommit className="text-sm text-secondary" />
                 <span>{releasePillTitle(release)}</span>
-            </LemonTag>
+            </Tag>
         </Popover>
     )
 }

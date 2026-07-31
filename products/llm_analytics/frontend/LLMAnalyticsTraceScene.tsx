@@ -17,19 +17,19 @@ import {
     IconSearch,
 } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonCheckbox,
-    LemonDivider,
-    LemonInput,
-    LemonSelect,
-    LemonTable,
-    LemonTabs,
-    LemonTag,
-    LemonTagProps,
+    Button,
+    Checkbox,
+    Divider,
+    Input,
+    Select,
+    Table,
+    Tabs,
+    Tag,
+    TagProps,
     Link,
     SpinnerOverlay,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { HighlightedJSONViewer } from 'lib/components/HighlightedJSONViewer'
 import { JSONViewer } from 'lib/components/JSONViewer'
@@ -37,8 +37,8 @@ import { NotFound } from 'lib/components/NotFound'
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
-import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
-import { IconWithCount } from 'lib/lemon-ui/icons/icons'
+import { IconArrowDown, IconArrowUp } from 'lib/elements/icons'
+import { IconWithCount } from 'lib/elements/icons/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { identifierToHuman, isObject, pluralize } from 'lib/utils'
@@ -130,7 +130,7 @@ function TraceNavigation(): JSX.Element {
 
     return (
         <div className="flex items-center gap-1">
-            <LemonButton
+            <Button
                 icon={<IconChevronLeft />}
                 size="xsmall"
                 type="secondary"
@@ -139,7 +139,7 @@ function TraceNavigation(): JSX.Element {
                 tooltip="Newer trace"
                 sideIcon={<KeyboardShortcut p />}
             />
-            <LemonButton
+            <Button
                 icon={<IconChevronRight />}
                 size="xsmall"
                 type="secondary"
@@ -242,7 +242,7 @@ function TraceSceneWrapper(): JSX.Element {
                                 <DisplayOptionsSelect />
                                 {(featureFlags[FEATURE_FLAGS.LLM_ANALYTICS_DISCUSSIONS] ||
                                     featureFlags[FEATURE_FLAGS.LLM_ANALYTICS_EARLY_ADOPTERS]) && (
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="xsmall"
                                         icon={
@@ -255,7 +255,7 @@ function TraceSceneWrapper(): JSX.Element {
                                         data-attr="open-trace-discussion"
                                     >
                                         Discussion
-                                    </LemonButton>
+                                    </Button>
                                 )}
                                 <CopyTraceButton trace={trace} tree={enrichedTree} />
                             </div>
@@ -294,10 +294,10 @@ function Chip({
 }): JSX.Element {
     return (
         <Tooltip title={title}>
-            <LemonTag size="medium" className="bg-surface-primary" icon={icon}>
+            <Tag size="medium" className="bg-surface-primary" icon={icon}>
                 <span className="sr-only">{title}</span>
                 {children}
-            </LemonTag>
+            </Tag>
         </Tooltip>
     )
 }
@@ -472,9 +472,9 @@ function TraceSidebar({
             ref={ref}
         >
             <h3 className="font-medium text-sm px-2 my-2">Tree</h3>
-            <LemonDivider className="m-0" />
+            <Divider className="m-0" />
             <div className="p-2">
-                <LemonInput
+                <Input
                     placeholder="Search trace..."
                     prefix={<IconSearch />}
                     value={searchValue}
@@ -583,14 +583,14 @@ const TreeNode = React.memo(function TraceNode({
 
     const children = [
         isLLMEvent(item) && item.properties.$ai_is_error && (
-            <LemonTag key="error-tag" type="danger">
+            <Tag key="error-tag" type="danger">
                 Error
-            </LemonTag>
+            </Tag>
         ),
         latency >= 0.01 && (
-            <LemonTag key="latency-tag" type="muted">
+            <Tag key="latency-tag" type="muted">
                 {formatLLMLatency(latency)}
-            </LemonTag>
+            </Tag>
         ),
         (usage != null || totalCost != null) && (
             <span key="usage-tag">
@@ -906,20 +906,20 @@ const EventContent = React.memo(
                             {aggregation && (
                                 <div className="flex flex-row flex-wrap items-center gap-2">
                                     {aggregation.totalCost > 0 && (
-                                        <LemonTag type="muted" size="small">
+                                        <Tag type="muted" size="small">
                                             Total Cost: {formatLLMCost(aggregation.totalCost)}
-                                        </LemonTag>
+                                        </Tag>
                                     )}
                                     {aggregation.totalLatency > 0 && (
-                                        <LemonTag type="muted" size="small">
+                                        <Tag type="muted" size="small">
                                             Total Latency: {formatLLMLatency(aggregation.totalLatency)}
-                                        </LemonTag>
+                                        </Tag>
                                     )}
                                     {(aggregation.inputTokens > 0 || aggregation.outputTokens > 0) && (
-                                        <LemonTag type="muted" size="small">
+                                        <Tag type="muted" size="small">
                                             Tokens: {aggregation.inputTokens} → {aggregation.outputTokens} (∑{' '}
                                             {aggregation.inputTokens + aggregation.outputTokens})
-                                        </LemonTag>
+                                        </Tag>
                                     )}
                                 </div>
                             )}
@@ -929,7 +929,7 @@ const EventContent = React.memo(
                                 showSaveToDatasetButton) && (
                                 <div className="flex flex-row items-center gap-2">
                                     {showPromptButton && (
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             size="xsmall"
                                             icon={<IconAIText />}
@@ -938,10 +938,10 @@ const EventContent = React.memo(
                                             data-attr="view-prompt-trace"
                                         >
                                             View prompt
-                                        </LemonButton>
+                                        </Button>
                                     )}
                                     {showPlaygroundButton && (
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             size="xsmall"
                                             icon={<IconChat />}
@@ -950,7 +950,7 @@ const EventContent = React.memo(
                                             data-attr="try-in-playground-trace"
                                         >
                                             Try in Playground
-                                        </LemonButton>
+                                        </Button>
                                     )}
                                     {showSaveToDatasetButton && (
                                         <SaveToDatasetButton
@@ -975,7 +975,7 @@ const EventContent = React.memo(
                                 </div>
                             )}
                         </header>
-                        <LemonTabs
+                        <Tabs
                             activeKey={viewMode}
                             onChange={setViewMode}
                             tabs={[
@@ -1088,9 +1088,9 @@ const EventContent = React.memo(
                                               label: (
                                                   <>
                                                       Summary{' '}
-                                                      <LemonTag className="ml-1" type="completion">
+                                                      <Tag className="ml-1" type="completion">
                                                           Beta
-                                                      </LemonTag>
+                                                      </Tag>
                                                   </>
                                               ),
                                               'data-attr': 'llma-trace-summary-tab',
@@ -1129,9 +1129,9 @@ const EventContent = React.memo(
                                               label: (
                                                   <>
                                                       Clusters{' '}
-                                                      <LemonTag className="ml-1" type="completion">
+                                                      <Tag className="ml-1" type="completion">
                                                           Alpha
-                                                      </LemonTag>
+                                                      </Tag>
                                                   </>
                                               ),
                                               content: <ClustersTabContent />,
@@ -1145,9 +1145,9 @@ const EventContent = React.memo(
                                               label: (
                                                   <>
                                                       Feedback{' '}
-                                                      <LemonTag className="ml-1" type="completion">
+                                                      <Tag className="ml-1" type="completion">
                                                           Beta
-                                                      </LemonTag>
+                                                      </Tag>
                                                   </>
                                               ),
                                               content: <FeedbackViewDisplay />,
@@ -1164,9 +1164,9 @@ const EventContent = React.memo(
 )
 EventContent.displayName = 'EventContent'
 
-function EventTypeTag({ event, size }: { event: LLMTrace | LLMTraceEvent; size?: LemonTagProps['size'] }): JSX.Element {
+function EventTypeTag({ event, size }: { event: LLMTrace | LLMTraceEvent; size?: TagProps['size'] }): JSX.Element {
     const eventType = getEventType(event)
-    let tagType: LemonTagProps['type'] = 'completion'
+    let tagType: TagProps['type'] = 'completion'
 
     switch (eventType) {
         case 'generation':
@@ -1184,9 +1184,9 @@ function EventTypeTag({ event, size }: { event: LLMTrace | LLMTraceEvent; size?:
     }
 
     return (
-        <LemonTag className="uppercase" type={tagType} size={size}>
+        <Tag className="uppercase" type={tagType} size={size}>
             {eventType}
-        </LemonTag>
+        </Tag>
     )
 }
 
@@ -1206,7 +1206,7 @@ function EventTypeFilters(): JSX.Element {
             <legend className="text-xs font-medium text-muted px-1">Expand</legend>
             <div className="flex flex-wrap gap-x-3 gap-y-1">
                 {availableEventTypes.map((eventType: string) => (
-                    <LemonCheckbox
+                    <Checkbox
                         key={eventType}
                         checked={eventTypeExpanded(eventType)}
                         onChange={() => toggleEventTypeExpanded(eventType)}
@@ -1225,7 +1225,7 @@ function CopyTraceButton({ trace, tree }: { trace: LLMTrace; tree: EnrichedTrace
     }
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             size="xsmall"
             icon={<IconCopy />}
@@ -1234,7 +1234,7 @@ function CopyTraceButton({ trace, tree }: { trace: LLMTrace; tree: EnrichedTrace
             data-attr="copy-trace-json"
         >
             Copy trace JSON
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -1271,7 +1271,7 @@ function DisplayOptionsSelect(): JSX.Element {
     ]
 
     return (
-        <LemonSelect
+        <Select
             size="xsmall"
             value={displayOption}
             onChange={setDisplayOption}
@@ -1295,7 +1295,7 @@ function TraceMetricsTable(): JSX.Element | null {
                 <IconMessage className="text-base" />
                 Metrics and user feedback
             </h4>
-            <LemonTable
+            <Table
                 columns={[
                     {
                         title: 'Metric',

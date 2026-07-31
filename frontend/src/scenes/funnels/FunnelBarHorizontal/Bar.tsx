@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonDropdown } from '@hanzo/lemon-ui'
+import { Dropdown } from '@hanzo/elements'
 
 import { capitalizeFirstLetter, percentage } from 'lib/utils'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -55,7 +55,7 @@ export function Bar({
     }
 
     return (
-        <LemonDropdown
+        <Dropdown
             trigger="hover"
             placement="right"
             showArrow
@@ -99,6 +99,6 @@ export function Bar({
                     </div>
                 )}
             </div>
-        </LemonDropdown>
+        </Dropdown>
     )
 }

@@ -5,7 +5,7 @@ import {
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { membershipLevelToName } from 'lib/utils/permissioning'
 import { urls } from 'scenes/urls'
 

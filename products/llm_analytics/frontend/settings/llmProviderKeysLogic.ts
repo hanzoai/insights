@@ -2,7 +2,7 @@ import { actions, afterMount, kea, listeners, path, reducers, selectors } from '
 import { loaders } from 'kea-loaders'
 
 import api, { ApiError } from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import type { llmProviderKeysLogicType } from './llmProviderKeysLogicType'
@@ -273,7 +273,7 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                         {}
                     )
                     if (response.state !== 'ok') {
-                        lemonToast.error(`Key validation failed: ${response.error_message || 'Unknown error'}`)
+                        toast.error(`Key validation failed: ${response.error_message || 'Unknown error'}`)
                     }
                     return values.providerKeys.map((key: LLMProviderKey) => (key.id === id ? response : key))
                 },
@@ -305,19 +305,19 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
 
     listeners(({ actions, values }) => ({
         loadProviderKeysFailure: ({ error }) => {
-            lemonToast.error(`Failed to load API keys: ${error || 'Unknown error'}`)
+            toast.error(`Failed to load API keys: ${error || 'Unknown error'}`)
         },
         loadEvaluationConfigFailure: ({ error }) => {
-            lemonToast.error(`Failed to load evaluation config: ${error || 'Unknown error'}`)
+            toast.error(`Failed to load evaluation config: ${error || 'Unknown error'}`)
         },
         createProviderKeyFailure: ({ error }) => {
-            lemonToast.error(`Failed to create API key: ${error || 'Unknown error'}`)
+            toast.error(`Failed to create API key: ${error || 'Unknown error'}`)
         },
         updateProviderKeyFailure: ({ error }) => {
-            lemonToast.error(`Failed to update API key: ${error || 'Unknown error'}`)
+            toast.error(`Failed to update API key: ${error || 'Unknown error'}`)
         },
         deleteProviderKeyFailure: ({ error }) => {
-            lemonToast.error(`Failed to delete API key: ${error || 'Unknown error'}`)
+            toast.error(`Failed to delete API key: ${error || 'Unknown error'}`)
         },
         setKeyToDelete: ({ key }) => {
             if (key) {

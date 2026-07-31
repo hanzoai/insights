@@ -3,13 +3,13 @@ import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 import insights from '@hanzo/insights'
 
-import { LemonDialog, LemonInput } from '@hanzo/lemon-ui'
+import { Dialog, Input } from '@hanzo/elements'
 
 import { insightAlertsLogic } from 'lib/components/Alerts/insightAlertsLogic'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { Field } from 'lib/elements/Field'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { isEmptyObject, isObject, objectsEqual } from 'lib/utils'
 import { accessLevelSatisfied } from 'lib/utils/accessControlUtils'
@@ -240,7 +240,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
                     actions.loadTags()
 
                     refreshTreeItem('insight', values.insight.short_id)
-                    lemonToast.success(`Updated insight`, {
+                    toast.success(`Updated insight`, {
                         button: {
                             label: 'Undo',
                             dataAttr: 'edit-insight-undo',
@@ -249,7 +249,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
                                 actions.reloadSavedInsights()
                                 dashboardsModel.findMounted()?.actions.updateDashboardInsight(response)
                                 actions.setInsight(response, { overrideQuery: false, fromPersistentApi: true })
-                                lemonToast.success('Insight change reverted')
+                                toast.success('Insight change reverted')
                             },
                         },
                     })
@@ -548,7 +548,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
             const result = savedInsight.result || (values.query ? values.insight.result : null)
             actions.setInsight({ ...savedInsight, result: result }, { fromPersistentApi: true, overrideQuery: true })
             eventUsageLogic.actions.reportInsightSaved(savedInsight, values.query, insightNumericId === undefined)
-            lemonToast.success(`Insight saved${dashboards?.length === 1 ? ' & added to dashboard' : ''}`, {
+            toast.success(`Insight saved${dashboards?.length === 1 ? ' & added to dashboard' : ''}`, {
                 button: {
                     label: 'View Insights list',
                     action: () => router.actions.push(urls.savedInsights()),
@@ -608,7 +608,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
             }
         },
         saveAs: async ({ redirectToViewMode, persist, folder }) => {
-            LemonDialog.openForm({
+            Dialog.openForm({
                 title: 'Save as new insight',
                 initialValues: {
                     name:
@@ -617,9 +617,9 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
                             : '',
                 },
                 content: (
-                    <LemonField name="name">
-                        <LemonInput data-attr="insight-name" placeholder="Please enter the new name" autoFocus />
-                    </LemonField>
+                    <Field name="name">
+                        <Input data-attr="insight-name" placeholder="Please enter the new name" autoFocus />
+                    </Field>
                 ),
                 errors: {
                     name: (name) => (!name ? 'You must enter a name' : undefined),
@@ -636,9 +636,9 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
             })
 
             if (router.values.location.pathname.includes(urls.sqlEditor())) {
-                lemonToast.info(`You're now viewing ${values.insight.name || values.insight.derived_name || name}`)
+                toast.info(`You're now viewing ${values.insight.name || values.insight.derived_name || name}`)
             } else {
-                lemonToast.info(
+                toast.info(
                     `You're now working on a copy of ${values.insight.name || values.insight.derived_name || name}`
                 )
             }
@@ -703,7 +703,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
                 insight_name: values.insight.name,
                 dashboard_id: values.insightProps.dashboardId,
             })
-            lemonToast.success(`Insight ${feedback}`)
+            toast.success(`Insight ${feedback}`)
         },
     })),
     events(({ props, actions }) => ({

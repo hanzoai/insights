@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 
 import { IconGear } from '@hanzo/icons'
 import insights from '@hanzo/insights'
-import { LemonButton, Link, Spinner } from '@hanzo/lemon-ui'
+import { Button, Link, Spinner } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { ListMascot } from 'lib/components/mascots'
@@ -117,7 +117,7 @@ const NoLogsPrompt = ({ className }: { className?: string }): JSX.Element | null
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {FRAMEWORK_LINKS.map(({ name, image, docsLink }) => (
-                            <LemonButton
+                            <Button
                                 key={name}
                                 type="secondary"
                                 size="small"
@@ -130,15 +130,15 @@ const NoLogsPrompt = ({ className }: { className?: string }): JSX.Element | null
                                 }
                             >
                                 {name}
-                            </LemonButton>
+                            </Button>
                         ))}
                     </div>
                     {hasLogsSettings && (
                         <p className="text-sm text-secondary m-0">
                             Already using <code>insights-js</code>?{' '}
-                            <LemonButton type="tertiary" size="xsmall" icon={<IconGear />} onClick={openLogsSettings}>
+                            <Button type="tertiary" size="xsmall" icon={<IconGear />} onClick={openLogsSettings}>
                                 Enable console log capture
-                            </LemonButton>
+                            </Button>
                         </p>
                     )}
                     <div className="flex items-center gap-4">

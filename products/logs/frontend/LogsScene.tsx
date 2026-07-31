@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -47,18 +47,18 @@ const LogsSceneContent = (): JSX.Element => {
                 actions={
                     <>
                         {hasLogs && (
-                            <LemonButton size="small" type="secondary" id="logs-feedback-button">
+                            <Button size="small" type="secondary" id="logs-feedback-button">
                                 Send feedback
-                            </LemonButton>
+                            </Button>
                         )}
-                        <LemonButton size="small" type="secondary" icon={<IconGear />} onClick={openLogsSettings}>
+                        <Button size="small" type="secondary" icon={<IconGear />} onClick={openLogsSettings}>
                             Settings
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             />
             {teamHasLogsCheckFailed && (
-                <LemonBanner
+                <Banner
                     type="info"
                     dismissKey="logs-setup-hint-banner"
                     action={{
@@ -68,7 +68,7 @@ const LogsSceneContent = (): JSX.Element => {
                     }}
                 >
                     Unable to verify logs setup. If you haven't configured logging yet, check out our setup guide.
-                </LemonBanner>
+                </Banner>
             )}
             <LogsSetupPrompt>
                 <div className="flex flex-col gap-2 py-2 h-[calc(100vh_-_var(--breadcrumbs-height-compact,_0px)_-_var(--scene-title-section-height,_0px)_-_5px_+_10rem)]">

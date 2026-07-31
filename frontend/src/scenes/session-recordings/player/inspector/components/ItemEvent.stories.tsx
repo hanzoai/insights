@@ -1,7 +1,7 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 
 import { dayjs } from 'lib/dayjs'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 import { uuid } from 'lib/utils'
 import {
     ItemEvent,
@@ -68,10 +68,10 @@ const BasicTemplate: StoryFn<typeof ItemEvent> = (props: Partial<ItemEventProps>
         <div className="flex flex-col gap-2 min-w-96">
             <h3>Collapsed</h3>
             <ItemEvent {...propsToUse} />
-            <LemonDivider />
+            <Divider />
             <h3>Expanded</h3>
             <ItemEventDetail {...propsToUse} />
-            <LemonDivider />
+            <Divider />
             <h3>Collapsed with overflowing text</h3>
             <div className="w-20">
                 <ItemEvent {...propsToUse} />

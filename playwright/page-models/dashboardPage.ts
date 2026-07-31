@@ -35,7 +35,7 @@ export class DashboardPage {
 
     async addInsightToNewDashboard(): Promise<void> {
         await this.page.getByRole('button', { name: 'Add insight' }).first().click()
-        await this.page.locator('.LemonModal .LemonTable tbody tr').first().click()
+        await this.page.locator('.Modal .Table tbody tr').first().click()
         await this.page.getByRole('button', { name: 'Close' }).click()
     }
 
@@ -45,7 +45,7 @@ export class DashboardPage {
         await expect(addButton).toBeVisible()
         await addButton.click()
 
-        const modal = this.page.locator('.LemonModal').filter({ hasText: 'Add to dashboard' })
+        const modal = this.page.locator('.Modal').filter({ hasText: 'Add to dashboard' })
         await expect(modal).toBeVisible()
 
         await modal.getByRole('button', { name: 'Add to a new dashboard' }).click()

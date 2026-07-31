@@ -1,8 +1,8 @@
 import { IconCopy, IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Input, Select } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Field } from 'lib/elements/Field'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { Variable, VariableType } from '../../types'
@@ -27,9 +27,9 @@ function renderField<T extends Variable>(
     label: string
 ): JSX.Element {
     return (
-        <LemonField.Pure label={label} className="gap-1">
+        <Field.Pure label={label} className="gap-1">
             <Field variable={variable as T} updateVariable={updateVariable as (variable: T) => void} onSave={onSave} />
-        </LemonField.Pure>
+        </Field.Pure>
     )
 }
 
@@ -78,8 +78,8 @@ export const VariableForm = ({ variable, updateVariable, onSave, onTypeChange }:
     )
     return (
         <div className="gap-4 flex flex-col">
-            <LemonField.Pure label={nameLabel} className="gap-1">
-                <LemonInput
+            <Field.Pure label={nameLabel} className="gap-1">
+                <Input
                     placeholder="Name"
                     value={variable.name}
                     onChange={(value) => {
@@ -90,7 +90,7 @@ export const VariableForm = ({ variable, updateVariable, onSave, onTypeChange }:
                 {referenceCodeName && (
                     <span className="text-xs">
                         Use this variable by referencing <code>{formatVariableReference(referenceCodeName)}</code>
-                        <LemonButton
+                        <Button
                             className="inline-block align-middle"
                             icon={<IconCopy />}
                             type="tertiary"
@@ -102,16 +102,16 @@ export const VariableForm = ({ variable, updateVariable, onSave, onTypeChange }:
                         />
                     </span>
                 )}
-            </LemonField.Pure>
-            <LemonField.Pure label="Type" className="gap-1">
-                <LemonSelect
+            </Field.Pure>
+            <Field.Pure label="Type" className="gap-1">
+                <Select
                     value={variable.type}
                     onChange={(value) => {
                         onTypeChange(value as VariableType)
                     }}
                     options={VARIABLE_TYPE_OPTIONS}
                 />
-            </LemonField.Pure>
+            </Field.Pure>
             {renderVariableSpecificFields(variable, updateVariable, onSave)}
         </div>
     )

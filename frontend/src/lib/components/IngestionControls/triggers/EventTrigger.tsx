@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonSnack, Popover } from '@hanzo/lemon-ui'
+import { Button, Snack, Popover } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
@@ -44,7 +44,7 @@ export function EventTriggerSelect({
                     />
                 }
             >
-                <LemonButton
+                <Button
                     size="small"
                     type="secondary"
                     icon={<IconPlus />}
@@ -52,7 +52,7 @@ export function EventTriggerSelect({
                     onClick={() => setOpen(!open)}
                 >
                     Add event
-                </LemonButton>
+                </Button>
             </Popover>
         </AccessControlAction>
     )
@@ -64,7 +64,7 @@ export function EventTrigger({ trigger, onClose }: { trigger: string; onClose: (
     return (
         <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
             {({ disabledReason }) => (
-                <LemonSnack onClose={!disabledReason ? () => onClose() : undefined}>{trigger}</LemonSnack>
+                <Snack onClose={!disabledReason ? () => onClose() : undefined}>{trigger}</Snack>
             )}
         </AccessControlAction>
     )

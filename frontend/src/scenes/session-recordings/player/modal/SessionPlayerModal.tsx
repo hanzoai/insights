@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'
 
@@ -42,7 +42,7 @@ export function SessionPlayerModal(): JSX.Element | null {
     const { isFullScreen } = useValues(sessionRecordingPlayerLogic(logicProps))
 
     return (
-        <LemonModal
+        <Modal
             isOpen={!!activeSessionRecording}
             onClose={closeSessionPlayer}
             simple
@@ -55,12 +55,12 @@ export function SessionPlayerModal(): JSX.Element | null {
         >
             {!isFullScreen && (
                 <div className="flex items-center justify-end border-b bg-surface-primary px-1 py-0.5">
-                    <LemonButton icon={<IconX />} size="small" onClick={closeSessionPlayer} tooltip="Close" />
+                    <Button icon={<IconX />} size="small" onClick={closeSessionPlayer} tooltip="Close" />
                 </div>
             )}
-            <LemonModal.Content embedded>
+            <Modal.Content embedded>
                 {activeSessionRecording?.id && <SessionRecordingPlayer {...logicProps} noBorder />}
-            </LemonModal.Content>
-        </LemonModal>
+            </Modal.Content>
+        </Modal>
     )
 }

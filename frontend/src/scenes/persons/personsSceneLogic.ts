@@ -1,7 +1,7 @@
 import equal from 'fast-deep-equal'
 import { actions, kea, listeners, path, reducers, selectors } from 'kea'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
@@ -61,7 +61,7 @@ export const personsSceneLogic = kea<personsSceneLogicType>([
     listeners({
         resetDeletedDistinctId: async ({ distinct_id }) => {
             await api.persons.resetPersonDistinctId(distinct_id)
-            lemonToast.success('Distinct ID reset. It may take a few minutes to process.')
+            toast.success('Distinct ID reset. It may take a few minutes to process.')
         },
     }),
 
@@ -98,7 +98,7 @@ export const personsSceneLogic = kea<personsSceneLogicType>([
                     if (typeof queryParam === 'object') {
                         actions.setQuery(queryParam)
                     } else {
-                        lemonToast.error('Invalid query in URL')
+                        toast.error('Invalid query in URL')
                         console.error({ queryParam })
                     }
                 }

@@ -3,7 +3,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -255,7 +255,7 @@ export const surveysLogic = kea<surveysLogicType>([
                 const payload = duplicateExistingSurvey(survey)
                 const createdSurvey = await api.surveys.create(sanitizeSurvey(payload))
 
-                lemonToast.success('Survey duplicated', {
+                toast.success('Survey duplicated', {
                     toastId: `survey-duplicated-${createdSurvey.id}`,
                     button: {
                         label: 'View survey',
@@ -279,7 +279,7 @@ export const surveysLogic = kea<surveysLogicType>([
             duplicateToProjects: async ({ survey, targetTeamIds }: { survey: Survey; targetTeamIds: number[] }) => {
                 const response = await api.surveys.duplicateToProjects(survey.id, targetTeamIds)
 
-                lemonToast.success(`Survey duplicated to ${pluralize(response.count, 'project')}`, {
+                toast.success(`Survey duplicated to ${pluralize(response.count, 'project')}`, {
                     toastId: `survey-bulk-duplicated-${survey.id}`,
                 })
 
@@ -350,7 +350,7 @@ export const surveysLogic = kea<surveysLogicType>([
     }),
     listeners(({ actions, values }) => ({
         deleteSurveySuccess: (_, __, action) => {
-            lemonToast.success('Survey deleted')
+            toast.success('Survey deleted')
             router.actions.push(urls.surveys())
             actions.addProductIntent({
                 product_type: ProductKey.SURVEYS,
@@ -361,7 +361,7 @@ export const surveysLogic = kea<surveysLogicType>([
             })
         },
         updateSurveySuccess: () => {
-            lemonToast.success('Survey updated')
+            toast.success('Survey updated')
             actions.loadCurrentTeam()
         },
         duplicateSurveySuccess: () => {

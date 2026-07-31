@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import React, { useMemo } from 'react'
 
-import { LemonBanner, LemonButton, LemonTab, LemonTabs, LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
+import { Banner, Button, Tab, Tabs, Tag, Link, Spinner } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -12,7 +12,7 @@ import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { objectsEqual } from 'lib/utils'
@@ -93,9 +93,9 @@ const Filters = ({ hidePropertyFilters = false }: { hidePropertyFilters?: boolea
                     resourceType={AccessControlResourceType.LlmAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton type="secondary" size="small" to={urls.dashboard(selectedDashboardId)}>
+                    <Button type="secondary" size="small" to={urls.dashboard(selectedDashboardId)}>
                         Edit dashboard
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             )}
             <LLMAnalyticsReloadAction />
@@ -447,7 +447,7 @@ function LLMAnalyticsSceneContent(): JSX.Element {
         scope: Scene.LLMAnalytics,
     })
 
-    const tabs: LemonTab<string>[] = [
+    const tabs: Tab<string>[] = [
         {
             key: 'dashboard',
             label: 'Dashboard',
@@ -526,9 +526,9 @@ function LLMAnalyticsSceneContent(): JSX.Element {
         label: (
             <>
                 Playground{' '}
-                <LemonTag className="ml-1" type="warning">
+                <Tag className="ml-1" type="warning">
                     Beta
-                </LemonTag>
+                </Tag>
             </>
         ),
         content: <LLMAnalyticsPlaygroundScene />,
@@ -584,21 +584,21 @@ function LLMAnalyticsSceneContent(): JSX.Element {
                 }}
                 actions={
                     <>
-                        <LemonButton
+                        <Button
                             to={DOCS_URLS_BY_TAB[activeTab] || DEFAULT_DOCS_URL}
                             type="secondary"
                             targetBlank
                             size="small"
                         >
                             Documentation
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             />
 
             {availableItemsInSidebar.length > 0 ? (
                 <>
-                    <LemonBanner type="info" className="mb-2" dismissKey="llm-analytics-sidebar-moved-banner">
+                    <Banner type="info" className="mb-2" dismissKey="llm-analytics-sidebar-moved-banner">
                         We've moved{' '}
                         {availableItemsInSidebar.map((el, i) => (
                             <React.Fragment key={i}>
@@ -609,12 +609,12 @@ function LLMAnalyticsSceneContent(): JSX.Element {
                         out of LLM Analytics and into their own apps. You can access them by clicking in the links
                         above, or by clicking "All apps" in the sidebar. You can also customize your sidebar{' '}
                         <Link onClick={openEditCustomProductsModal}>here</Link>.
-                    </LemonBanner>
+                    </Banner>
                     <EditCustomProductsModal />
                 </>
             ) : null}
 
-            <LemonTabs activeKey={activeTab} data-attr="llm-analytics-tabs" tabs={tabs} sceneInset />
+            <Tabs activeKey={activeTab} data-attr="llm-analytics-tabs" tabs={tabs} sceneInset />
         </SceneContent>
     )
 }

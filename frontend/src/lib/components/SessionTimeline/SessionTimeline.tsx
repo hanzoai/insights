@@ -1,12 +1,12 @@
 import { cva } from 'cva'
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
-import { Link, Spinner } from '@hanzo/lemon-ui'
+import { Link, Spinner } from '@hanzo/elements'
 
 import { Dayjs } from 'lib/dayjs'
 import { useAsyncCallback } from 'lib/hooks/useAsyncCallback'
 import { useScrollObserver } from 'lib/hooks/useScrollObserver'
-import { IconVerticalAlignCenter } from 'lib/lemon-ui/icons'
+import { IconVerticalAlignCenter } from 'lib/elements/icons'
 import { ButtonPrimitive, ButtonPrimitiveProps } from 'lib/ui/Button/ButtonPrimitives'
 import { cn } from 'lib/utils/css-classes'
 

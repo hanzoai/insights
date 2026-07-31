@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconEllipsis } from '@hanzo/icons'
-import { LemonButton, LemonMenu, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Menu, Tooltip } from '@hanzo/elements'
 
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { userLogic } from 'scenes/userLogic'
 
@@ -62,7 +62,7 @@ export function PathNodeLabel({ insightProps, node }: PathNodeLabelProps): JSX.E
                     </div>
                 </Tooltip>
                 {!isTruncatedPath && (
-                    <LemonMenu
+                    <Menu
                         items={[
                             { label: 'Set as path start', onClick: setAsPathStart },
                             ...(hasAdvancedPaths
@@ -84,13 +84,13 @@ export function PathNodeLabel({ insightProps, node }: PathNodeLabelProps): JSX.E
                         ]}
                     >
                         <IconEllipsis className="ml-1 cursor-pointer text-muted hover:text-default" />
-                    </LemonMenu>
+                    </Menu>
                 )}
             </div>
 
-            <LemonButton size="xsmall" onClick={openModal} noPadding>
+            <Button size="xsmall" onClick={openModal} noPadding>
                 <span className="font-normal">{node.value}</span>
-            </LemonButton>
+            </Button>
         </div>
     )
 }

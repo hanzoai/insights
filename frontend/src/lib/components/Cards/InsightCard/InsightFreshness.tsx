@@ -2,7 +2,7 @@ import { IconClock, IconWarning } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 export function InsightFreshness({ lastRefresh }: { lastRefresh: string }): JSX.Element | null {
     if (!lastRefresh) {

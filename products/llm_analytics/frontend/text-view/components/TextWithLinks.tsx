@@ -1,7 +1,7 @@
 /**
  * Component for rendering text with clickable URLs, event links, and line numbers
  */
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 

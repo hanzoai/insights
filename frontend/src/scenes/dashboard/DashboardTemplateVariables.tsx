@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonLabel } from '@hanzo/lemon-ui'
+import { Label } from '@hanzo/elements'
 
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 
@@ -28,9 +28,9 @@ export function DashboardTemplateVariables(): JSX.Element {
             {variables.map((variable, index) => (
                 <div key={index} className="mb-6">
                     <div className="mb-2">
-                        <LemonLabel showOptional={!variable.required} info={<>{variable.description}</>}>
+                        <Label showOptional={!variable.required} info={<>{variable.description}</>}>
                             {variable.name}
-                        </LemonLabel>
+                        </Label>
                         <p className="text-sm text-secondary">{variable.description}</p>
                     </div>
                     <div>

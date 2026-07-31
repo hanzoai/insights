@@ -32,10 +32,10 @@ test.describe('Insights list', () => {
             await page.getByPlaceholder('Search').fill(insightName)
             // Wait for the debounced search to fire (loader appears) then complete (loader gone)
             await page
-                .locator('.LemonTableLoader')
+                .locator('.TableLoader')
                 .waitFor({ state: 'visible' })
                 .catch(() => {})
-            await expect(page.locator('.LemonTableLoader')).toHaveCount(0)
+            await expect(page.locator('.TableLoader')).toHaveCount(0)
             const link = page.locator('table tbody tr').first().getByRole('link', { name: insightName })
             await expect(link).toBeVisible()
             await link.click()

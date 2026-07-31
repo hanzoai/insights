@@ -4,13 +4,13 @@ import { Fragment, useState } from 'react'
 
 import { IconCode, IconGear, IconWarning } from '@hanzo/icons'
 import { IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSegmentedButton, LemonSelect, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Input, SegmentedButton, Select, Link, Tooltip } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { IconErrorOutline } from 'lib/lemon-ui/icons'
+import { Banner } from 'lib/elements/Banner'
+import { Field } from 'lib/elements/Field'
+import { Modal } from 'lib/elements/Modal'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { API_SCOPES } from 'lib/scopes'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -65,7 +65,7 @@ function ScopesList({
                                     </Tooltip>
                                 ) : null}
                             </div>
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 onChange={(value) => setScopeRadioValue(key, value)}
                                 value={formScopeRadioValues[key] ?? 'none'}
                                 options={[
@@ -145,12 +145,12 @@ export function CLIAuthorize(): JSX.Element {
             {isSuccess ? (
                 <div className="text-center space-y-4">
                     <h2>CLI Authorization Complete</h2>
-                    <LemonBanner type="success">
+                    <Banner type="success">
                         <div className="space-y-2">
                             <p className="font-semibold">Your CLI has been authorized successfully!</p>
                             <p>You can now close this window and return to your terminal.</p>
                         </div>
-                    </LemonBanner>
+                    </Banner>
                     <div className="text-muted text-sm mt-4">
                         <p>
                             A Personal API Key has been created for your CLI. You can manage your API keys in{' '}
@@ -168,8 +168,8 @@ export function CLIAuthorize(): JSX.Element {
                         authorize your CLI.
                     </p>
                     <Form logic={cliAuthorizeLogic} formKey="authorize" enableFormOnSubmit className="space-y-4">
-                        <LemonField name="userCode" label="Authorization Code">
-                            <LemonInput
+                        <Field name="userCode" label="Authorization Code">
+                            <Input
                                 className="ph-ignore-input font-mono text-lg tracking-wider"
                                 autoFocus
                                 data-attr="cli-auth-code"
@@ -182,9 +182,9 @@ export function CLIAuthorize(): JSX.Element {
                                 autoCapitalize="characters"
                                 spellCheck={false}
                             />
-                        </LemonField>
-                        <LemonField name="projectId" label="Project">
-                            <LemonSelect
+                        </Field>
+                        <Field name="projectId" label="Project">
+                            <Select
                                 data-attr="cli-project-select"
                                 placeholder="Select a project"
                                 value={authorize.projectId}
@@ -195,26 +195,26 @@ export function CLIAuthorize(): JSX.Element {
                                 }))}
                                 loading={projectsLoading}
                             />
-                        </LemonField>
+                        </Field>
 
                         <div className="mt-4 mb-2">
                             <div className="flex items-center justify-between mb-2">
                                 <h3>Scopes</h3>
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     size="small"
                                     icon={<IconGear />}
                                     onClick={handleOpenModal}
                                 >
                                     Manage scopes
-                                </LemonButton>
+                                </Button>
                             </div>
                             <p className="text-muted text-sm mb-2">
                                 Selected permissions for the CLI. Only grant the scopes you need.
                             </p>
                         </div>
 
-                        <LemonField name="scopes">
+                        <Field name="scopes">
                             {({ error }) => (
                                 <>
                                     {error && (
@@ -232,17 +232,17 @@ export function CLIAuthorize(): JSX.Element {
                                     />
                                 </>
                             )}
-                        </LemonField>
+                        </Field>
 
-                        <LemonModal
+                        <Modal
                             title="Manage CLI Scopes"
                             description="Select which permissions to grant to the CLI. Only select the scopes you need."
                             isOpen={isScopesModalOpen}
                             onClose={handleCloseModal}
                             footer={
-                                <LemonButton type="primary" onClick={handleCloseModal}>
+                                <Button type="primary" onClick={handleCloseModal}>
                                     Done
-                                </LemonButton>
+                                </Button>
                             }
                         >
                             <div className="max-h-96 overflow-y-auto">
@@ -253,33 +253,33 @@ export function CLIAuthorize(): JSX.Element {
                                     showAll={true}
                                 />
                             </div>
-                        </LemonModal>
+                        </Modal>
 
                         {(missingSchemaScopes || missingErrorTrackingScopes || missingEndpointsScopes) && (
                             <div className="space-y-2 mt-2">
                                 {missingSchemaScopes && (
-                                    <LemonBanner type="warning">
+                                    <Banner type="warning">
                                         <b>Schema management unavailable:</b> The CLI needs both{' '}
                                         <code>event_definition</code> and <code>property_definition</code> permissions
                                         (read or write) to manage schemas.
-                                    </LemonBanner>
+                                    </Banner>
                                 )}
                                 {missingErrorTrackingScopes && (
-                                    <LemonBanner type="warning">
+                                    <Banner type="warning">
                                         <b>Error tracking unavailable:</b> The CLI needs <code>error_tracking</code>{' '}
                                         permissions (read or write) to manage error tracking.
-                                    </LemonBanner>
+                                    </Banner>
                                 )}
                                 {missingEndpointsScopes && (
-                                    <LemonBanner type="warning">
+                                    <Banner type="warning">
                                         <b>Endpoints unavailable:</b> The CLI needs <code>endpoint</code> permissions
                                         (read or write) to execute endpoints.
-                                    </LemonBanner>
+                                    </Banner>
                                 )}
                             </div>
                         )}
 
-                        <LemonButton
+                        <Button
                             type="primary"
                             status="alt"
                             htmlType="submit"
@@ -291,7 +291,7 @@ export function CLIAuthorize(): JSX.Element {
                             icon={<IconCode />}
                         >
                             Authorize CLI
-                        </LemonButton>
+                        </Button>
                     </Form>
                 </div>
             )}

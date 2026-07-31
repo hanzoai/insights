@@ -1,4 +1,4 @@
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 
@@ -34,7 +34,7 @@ export function AutoAssignmentRules(): JSX.Element {
                                     />
                                 )}
                             </div>
-                            <LemonDivider className="my-0" />
+                            <Divider className="my-0" />
                             <div className="p-2">
                                 <Rules.Filters
                                     taxonomicGroupTypes={[TaxonomicFilterGroupType.EventProperties]}

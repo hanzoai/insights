@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
 
 import { IconInfo, IconPencil } from '@hanzo/icons'
-import { LemonBanner, LemonInput } from '@hanzo/lemon-ui'
+import { Banner, Input } from '@hanzo/elements'
 
 import { DataWarehousePopoverField } from 'lib/components/TaxonomicFilter/types'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Label } from 'lib/elements/Label'
+import { Radio } from 'lib/elements/Radio'
+import { Select } from 'lib/elements/Select'
+import { Tag } from 'lib/elements/Tag'
+import { toast } from 'lib/elements/Toast'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { urls } from 'scenes/urls'
 
@@ -84,7 +84,7 @@ const loadEventCount = async (
 
         setEventCount(count)
     } catch (error) {
-        lemonToast.error(JSON.stringify(error))
+        toast.error(JSON.stringify(error))
         setEventCount(0)
     } finally {
         setIsLoading(false)
@@ -259,7 +259,7 @@ export function ExperimentMetricForm({
         <SceneContent>
             <SceneSection title={isSharedMetric ? 'Shared metric type' : 'Metric type'} className="max-w-prose">
                 <div>
-                    <LemonRadio
+                    <Radio
                         data-attr="metrics-selector"
                         value={metric.metric_type}
                         onChange={handleMetricTypeChange}
@@ -269,7 +269,7 @@ export function ExperimentMetricForm({
             </SceneSection>
             <SceneDivider />
             <SceneSection title="Metric" className="max-w-prose">
-                <LemonBanner
+                <Banner
                     type="info"
                     action={
                         exposureCriteria && openExposureCriteriaModal
@@ -286,11 +286,11 @@ export function ExperimentMetricForm({
                         {exposureCriteria ? (
                             <>
                                 Counts only after exposure event{' '}
-                                <LemonTag>{getExposureCriteriaLabel(exposureCriteria)}</LemonTag>
+                                <Tag>{getExposureCriteriaLabel(exposureCriteria)}</Tag>
                             </>
                         ) : (
                             <>
-                                Counts only after exposure event (<LemonTag>$feature_flag_called</LemonTag> by default)
+                                Counts only after exposure event (<Tag>$feature_flag_called</Tag> by default)
                             </>
                         )}
                         <Tooltip
@@ -314,7 +314,7 @@ export function ExperimentMetricForm({
                             <IconInfo className="text-muted-alt text-base" />
                         </Tooltip>
                     </span>
-                </LemonBanner>
+                </Banner>
 
                 {isExperimentMeanMetric(metric) && (
                     <>
@@ -375,7 +375,7 @@ export function ExperimentMetricForm({
                 {isExperimentRatioMetric(metric) && (
                     <div className="space-y-4">
                         <div>
-                            <LemonLabel className="mb-1">Numerator (what you're measuring)</LemonLabel>
+                            <Label className="mb-1">Numerator (what you're measuring)</Label>
                             <ActionFilter
                                 bordered
                                 filters={createFilterForSource(metric.numerator)}
@@ -405,7 +405,7 @@ export function ExperimentMetricForm({
                             />
                         </div>
                         <div>
-                            <LemonLabel className="mb-1">Denominator (what you're dividing by)</LemonLabel>
+                            <Label className="mb-1">Denominator (what you're dividing by)</Label>
                             <ActionFilter
                                 bordered
                                 filters={createFilterForSource(metric.denominator)}
@@ -439,12 +439,12 @@ export function ExperimentMetricForm({
                 {isExperimentRetentionMetric(metric) && (
                     <div className="space-y-4">
                         <div>
-                            <LemonLabel className="mb-1">
+                            <Label className="mb-1">
                                 Start event
                                 <Tooltip title="The event that triggers retention tracking. Retention is measured from when users perform this event.">
                                     <IconInfo className="ml-1 text-muted" />
                                 </Tooltip>
-                            </LemonLabel>
+                            </Label>
                             <ActionFilter
                                 bordered
                                 filters={createFilterForSource(metric.start_event)}
@@ -472,12 +472,12 @@ export function ExperimentMetricForm({
                         </div>
 
                         <div>
-                            <LemonLabel className="mb-1">
+                            <Label className="mb-1">
                                 Completion event
                                 <Tooltip title="The event that indicates a user was 'retained'. We check if users who performed the start event also perform this event within the retention window.">
                                     <IconInfo className="ml-1 text-muted" />
                                 </Tooltip>
-                            </LemonLabel>
+                            </Label>
                             <ActionFilter
                                 bordered
                                 filters={createFilterForSource(metric.completion_event)}
@@ -505,7 +505,7 @@ export function ExperimentMetricForm({
                         </div>
 
                         <div>
-                            <LemonLabel className="mb-1">
+                            <Label className="mb-1">
                                 Retention window
                                 <Tooltip
                                     title={
@@ -523,10 +523,10 @@ export function ExperimentMetricForm({
                                 >
                                     <IconInfo className="ml-1 text-muted" />
                                 </Tooltip>
-                            </LemonLabel>
+                            </Label>
                             <div className="flex items-center gap-2">
                                 <span className="text-muted">From</span>
-                                <LemonInput
+                                <Input
                                     type="number"
                                     min={0}
                                     value={metric.retention_window_start}
@@ -539,7 +539,7 @@ export function ExperimentMetricForm({
                                     className="w-20"
                                 />
                                 <span className="text-muted">to</span>
-                                <LemonInput
+                                <Input
                                     type="number"
                                     min={metric.retention_window_start || 0}
                                     value={metric.retention_window_end}
@@ -551,7 +551,7 @@ export function ExperimentMetricForm({
                                     }}
                                     className="w-20"
                                 />
-                                <LemonSelect
+                                <Select
                                     value={metric.retention_window_unit || 'day'}
                                     onChange={(value) => {
                                         handleSetMetric({
@@ -569,13 +569,13 @@ export function ExperimentMetricForm({
                         </div>
 
                         <div>
-                            <LemonLabel className="mb-1">
+                            <Label className="mb-1">
                                 When users have multiple start events
                                 <Tooltip title="Choose how to handle users who perform the start event multiple times during the experiment.">
                                     <IconInfo className="ml-1 text-muted" />
                                 </Tooltip>
-                            </LemonLabel>
-                            <LemonSelect
+                            </Label>
+                            <Select
                                 value={metric.start_handling || 'first_seen'}
                                 onChange={(value) => {
                                     handleSetMetric({
@@ -601,7 +601,7 @@ export function ExperimentMetricForm({
             <SceneDivider />
             <SceneSection title="Goal" className="max-w-prose">
                 <div className="flex flex-col gap-1">
-                    <LemonSelect<ExperimentMetricGoal>
+                    <Select<ExperimentMetricGoal>
                         value={metric.goal || ExperimentMetricGoal.Increase}
                         onChange={(value) => handleSetMetric({ ...metric, goal: value })}
                         options={[

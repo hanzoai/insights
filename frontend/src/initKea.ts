@@ -8,7 +8,7 @@ import { waitForPlugin } from 'kea-waitfor'
 import { windowValuesPlugin } from 'kea-window-values'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { identifierToHuman } from 'lib/utils'
 import { addProjectIdIfMissing, removeProjectIdIfPresent } from 'lib/utils/router-utils'
 import { sceneLogic } from 'scenes/sceneLogic'
@@ -117,7 +117,7 @@ export function initKea({
                         errorMessage = null
                     }
                     if (errorMessage) {
-                        lemonToast.error(`${identifierToHuman(actionKey)} failed: ${errorMessage}`)
+                        toast.error(`${identifierToHuman(actionKey)} failed: ${errorMessage}`)
                     }
                 }
                 if (!errorsSilenced) {

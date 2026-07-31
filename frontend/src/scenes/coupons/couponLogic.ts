@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { billingLogic } from 'scenes/billing/billingLogic'
@@ -99,7 +99,7 @@ export const couponLogic = kea<couponLogicType>([
                         code: formValues.code,
                     })
                 } catch (error: any) {
-                    lemonToast.error(error.detail || 'Failed to claim coupon')
+                    toast.error(error.detail || 'Failed to claim coupon')
                     insights.capture('billing coupon claim failed', {
                         campaign: props.campaign,
                         code: formValues.code,

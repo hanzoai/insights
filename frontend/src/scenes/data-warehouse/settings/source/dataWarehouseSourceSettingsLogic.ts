@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { availableSourcesDataLogic } from 'scenes/data-warehouse/new/availableSourcesDataLogic'
@@ -203,7 +203,7 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                                 })
                                 newJobInputs[field.name] = JSON.parse(loadedFile)
                             } catch {
-                                lemonToast.error('File is not valid')
+                                toast.error('File is not valid')
                                 return
                             }
                         }
@@ -217,12 +217,12 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                         description: description !== '' ? description : (values.source?.description ?? null),
                     })
                     actions.loadSource()
-                    lemonToast.success('Source updated')
+                    toast.success('Source updated')
                 } catch (e: any) {
                     if (e.message) {
-                        lemonToast.error(e.message)
+                        toast.error(e.message)
                     } else {
-                        lemonToast.error('Cant update source at this time')
+                        toast.error('Cant update source at this time')
                     }
                 }
             },
@@ -282,9 +282,9 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                 insights.capture('schema reloaded', { sourceType: clonedSource.source_type })
             } catch (e: any) {
                 if (e.message) {
-                    lemonToast.error(e.message)
+                    toast.error(e.message)
                 } else {
-                    lemonToast.error('Cant reload schema at this time')
+                    toast.error('Cant reload schema at this time')
                 }
             }
         },
@@ -303,9 +303,9 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                 insights.capture('schema resynced', { sourceType: clonedSource.source_type })
             } catch (e: any) {
                 if (e.message) {
-                    lemonToast.error(e.message)
+                    toast.error(e.message)
                 } else {
-                    lemonToast.error('Cant refresh schema at this time')
+                    toast.error('Cant refresh schema at this time')
                 }
             }
         },
@@ -314,7 +314,7 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
             const clonedSource = JSON.parse(JSON.stringify(values.source)) as ExternalDataSource
             const schemaIndex = clonedSource.schemas.findIndex((n) => n.id === schema.id)
             if (schemaIndex === -1) {
-                lemonToast.error('Schema not found')
+                toast.error('Schema not found')
                 return
             }
             clonedSource.schemas[schemaIndex].table = undefined
@@ -326,12 +326,12 @@ export const dataWarehouseSourceSettingsLogic = kea<dataWarehouseSourceSettingsL
                 await api.externalDataSchemas.delete_data(schema.id)
 
                 insights.capture('schema data deleted', { sourceType: clonedSource.source_type })
-                lemonToast.success(`Data for ${schema.name} has been deleted`)
+                toast.success(`Data for ${schema.name} has been deleted`)
             } catch (e: any) {
                 if (e.message) {
-                    lemonToast.error(e.message)
+                    toast.error(e.message)
                 } else {
-                    lemonToast.error("Can't delete data at this time")
+                    toast.error("Can't delete data at this time")
                 }
             }
         },

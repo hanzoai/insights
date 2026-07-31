@@ -9,9 +9,9 @@ import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTable, LemonTableColumn } from 'lib/lemon-ui/LemonTable'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Table, TableColumn } from 'lib/elements/Table'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { EventDetails } from 'scenes/activity/explore/EventDetails'
 import { ViewLinkButton } from 'scenes/data-warehouse/ViewLinkModal'
@@ -117,7 +117,7 @@ interface DataTableProps {
     dataNodeLogicKey?: string
     readOnly?: boolean
     /*
-     Set a data-attr on the LemonTable component
+     Set a data-attr on the Table component
     */
     dataAttr?: string
     /** Attach ourselves to another logic, such as the scene logic */
@@ -239,7 +239,7 @@ export function DataTable({
     const allColumns = sourceFeatures.has(QueryFeature.columnsInResponse)
         ? (columnsInResponse ?? columnsInQuery)
         : columnsInQuery
-    const columnsInLemonTable = allColumns.filter((colName) => {
+    const columnsInTable = allColumns.filter((colName) => {
         const col = getContextColumn(colName, context?.columns)
         return !col?.queryContextColumn?.hidden
     })
@@ -277,8 +277,8 @@ export function DataTable({
 
     const groupTypes = isActorsQuery(query.source) ? personGroupTypes : eventGroupTypes
 
-    const lemonColumns: LemonTableColumn<DataTableRow, any>[] = [
-        ...columnsInLemonTable.map((key, index) => {
+    const columns: TableColumn<DataTableRow, any>[] = [
+        ...columnsInTable.map((key, index) => {
             return {
                 dataIndex: key as any,
                 ...renderColumnMeta(key, query, context),
@@ -292,7 +292,7 @@ export function DataTable({
                         if (index === (expandable ? 1 : 0)) {
                             return {
                                 children: label,
-                                props: { colSpan: columnsInLemonTable.length + (recordingColumnShown ? 1 : 0) },
+                                props: { colSpan: columnsInTable.length + (recordingColumnShown ? 1 : 0) },
                             }
                         }
                         return { props: { colSpan: 0 } }
@@ -330,7 +330,7 @@ export function DataTable({
                             </div>
                             {columnFeatures.includes(ColumnFeature.canEdit) && (
                                 <>
-                                    <LemonDivider />
+                                    <Divider />
                                     <TaxonomicPopover
                                         groupType={TaxonomicFilterGroupType.InsightsQLExpression}
                                         value={key}
@@ -351,7 +351,7 @@ export function DataTable({
                                                 // Typecasting to a query type with select and order_by fields.
                                                 // The actual query may or may not be an events query.
                                                 const source = query.source as EventsQuery
-                                                const columns = columnsInLemonTable ?? getDataNodeDefaultColumns(source)
+                                                const columns = columnsInTable ?? getDataNodeDefaultColumns(source)
                                                 const isAggregation = isInsightsQLAggregation(insightsQl)
                                                 const isOrderBy = source.orderBy?.[0] === key
                                                 const isDescOrderBy = source.orderBy?.[0] === `${key} DESC`
@@ -382,8 +382,8 @@ export function DataTable({
                             key !== 'person' &&
                             columnFeatures.includes(ColumnFeature.canSort) ? (
                                 <>
-                                    <LemonDivider />
-                                    <LemonButton
+                                    <Divider />
+                                    <Button
                                         fullWidth
                                         data-attr="datatable-sort-asc"
                                         onClick={() => {
@@ -402,8 +402,8 @@ export function DataTable({
                                         }}
                                     >
                                         Sort ascending
-                                    </LemonButton>
-                                    <LemonButton
+                                    </Button>
+                                    <Button
                                         fullWidth
                                         data-attr="datatable-sort-desc"
                                         onClick={() => {
@@ -422,8 +422,8 @@ export function DataTable({
                                         }}
                                     >
                                         Sort descending
-                                    </LemonButton>
-                                    <LemonButton
+                                    </Button>
+                                    <Button
                                         fullWidth
                                         data-attr="datatable-reset-sort"
                                         onClick={() => {
@@ -437,13 +437,13 @@ export function DataTable({
                                         }}
                                     >
                                         Reset sorting
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             ) : null}
 
                             {columnFeatures.includes(ColumnFeature.canAddColumns) && (
                                 <>
-                                    <LemonDivider />
+                                    <Divider />
                                     <TaxonomicPopover
                                         groupType={TaxonomicFilterGroupType.InsightsQLExpression}
                                         value=""
@@ -466,7 +466,7 @@ export function DataTable({
                                             ) {
                                                 const isAggregation = isInsightsQLAggregation(insightsQl)
                                                 const source = query.source as EventsQuery
-                                                const columns = columnsInLemonTable ?? getDataNodeDefaultColumns(source)
+                                                const columns = columnsInTable ?? getDataNodeDefaultColumns(source)
                                                 setQuery({
                                                     ...query,
                                                     source: {
@@ -505,7 +505,7 @@ export function DataTable({
                                             ) {
                                                 const isAggregation = isInsightsQLAggregation(insightsQl)
                                                 const source = query.source as EventsQuery
-                                                const columns = columnsInLemonTable ?? getDataNodeDefaultColumns(source)
+                                                const columns = columnsInTable ?? getDataNodeDefaultColumns(source)
                                                 setQuery?.({
                                                     ...query,
                                                     source: {
@@ -527,8 +527,8 @@ export function DataTable({
                             {columnsInQuery.filter((c) => c !== '*').length > 1 &&
                                 columnFeatures.includes(ColumnFeature.canRemove) && (
                                     <>
-                                        <LemonDivider />
-                                        <LemonButton
+                                        <Divider />
+                                        <Button
                                             fullWidth
                                             status="danger"
                                             data-attr="datatable-remove-column"
@@ -570,13 +570,13 @@ export function DataTable({
                                             }}
                                         >
                                             Remove column
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 )}
                             {columnFeatures.includes(ColumnFeature.canPin) && (
                                 <>
-                                    <LemonDivider />
-                                    <LemonButton
+                                    <Divider />
+                                    <Button
                                         fullWidth
                                         data-attr="datatable-pin-column"
                                         onClick={() => {
@@ -593,7 +593,7 @@ export function DataTable({
                                         }}
                                     >
                                         {query.pinnedColumns?.includes(key) ? 'Unpin' : 'Pin column'}
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             )}
                         </>
@@ -766,7 +766,7 @@ export function DataTable({
     const secondRowLeft = [
         showReload ? <Reload key="reload" /> : null,
         showCount && sourceFeatures.has(QueryFeature.showCount) ? <DataTableCount key="count" /> : null,
-        shouldShowCount && showElapsedTime ? <LemonDivider vertical={true} key="divider" /> : null,
+        shouldShowCount && showElapsedTime ? <Divider vertical={true} key="divider" /> : null,
         showElapsedTime ? <ElapsedTime key="elapsed-time" showTimings={showTimings} /> : null,
     ].filter((x) => !!x)
 
@@ -828,7 +828,7 @@ export function DataTable({
                     {showSavedFilters && uniqueKey && (
                         <DataTableSavedFilters uniqueKey={String(uniqueKey)} query={query} setQuery={setQuery} />
                     )}
-                    {showFirstRow && showSecondRow && <LemonDivider className="my-0" />}
+                    {showFirstRow && showSecondRow && <Divider className="my-0" />}
                     {showSecondRow && secondRowLeft.length > 0 && secondRowRight.length > 0 && (
                         <div className="flex gap-2 justify-between flex-wrap DataTable__second-row empty:hidden">
                             <div className="flex gap-2 items-center">{secondRowLeft}</div>
@@ -841,16 +841,16 @@ export function DataTable({
                     {showResultsTable && (
                         <div className="relative">
                             {usedWebAnalyticsPreAggregatedTables && <PreAggregatedBadge />}
-                            <LemonTable
+                            <Table
                                 data-attr={dataAttr}
                                 className="DataTable"
                                 loading={responseLoading && !nextDataLoading && !newDataLoading}
-                                columns={lemonColumns}
+                                columns={columns}
                                 embedded={embedded}
                                 key={
                                     [...(columnsInResponse ?? []), ...columnsInQuery].join(
                                         '::'
-                                    ) /* Bust the LemonTable cache when columns change */
+                                    ) /* Bust the Table cache when columns change */
                                 }
                                 dataSource={dataTableRows ?? []}
                                 rowKey={(_, rowIndex) => {

@@ -5,10 +5,10 @@ import { actions, kea, path, reducers, useValues } from 'kea'
 import { Form, forms } from 'kea-forms'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
 import { ERROR_MESSAGES } from 'scenes/authentication/Login'
 import { SupportModalButton } from 'scenes/authentication/SupportModalButton'
 
@@ -79,7 +79,7 @@ export function ExporterLogin(props: ExporterLoginProps): JSX.Element {
         <div className="space-y-4">
             <h2>Access share</h2>
             {generalError && (
-                <LemonBanner type="error">
+                <Banner type="error">
                     {generalError.detail || ERROR_MESSAGES[generalError.code] || (
                         <>
                             Could not unlock the content.
@@ -87,11 +87,11 @@ export function ExporterLogin(props: ExporterLoginProps): JSX.Element {
                             Please try again.
                         </>
                     )}
-                </LemonBanner>
+                </Banner>
             )}
             <Form logic={loginLogic} formKey="login" enableFormOnSubmit className="space-y-4">
                 <div className={clsx('PasswordWrapper')}>
-                    <LemonField
+                    <Field
                         name="password"
                         label={
                             <div className="flex flex-1 items-center justify-between gap-2">
@@ -99,17 +99,17 @@ export function ExporterLogin(props: ExporterLoginProps): JSX.Element {
                             </div>
                         }
                     >
-                        <LemonInput
+                        <Input
                             type="password"
                             className="ph-ignore-input"
                             data-attr="password"
                             placeholder="••••••••••"
                             autoComplete="current-password"
                         />
-                    </LemonField>
+                    </Field>
                 </div>
 
-                <LemonButton
+                <Button
                     type="primary"
                     status={isSuccess ? 'default' : 'alt'}
                     htmlType="submit"
@@ -120,7 +120,7 @@ export function ExporterLogin(props: ExporterLoginProps): JSX.Element {
                     size="large"
                 >
                     {isSuccess ? 'Access granted!' : 'Unlock'}
-                </LemonButton>
+                </Button>
             </Form>
             <div className="text-center mt-4">Don't have a password? Ask the person who shared this with you!</div>
         </div>

@@ -5,8 +5,8 @@ import { actionToUrl, router, urlToAction } from 'kea-router'
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { ActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'
 import { ADVANCED_ACTIVITY_PAGE_SIZE } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
-import { PaginationManual } from 'lib/lemon-ui/PaginationControl'
+import { toast } from 'lib/elements/Toast'
+import { PaginationManual } from 'lib/elements/PaginationControl'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { dateStringToDayJs, objectClean } from 'lib/utils'
 
@@ -459,11 +459,11 @@ export const advancedActivityLogsLogic = kea<advancedActivityLogsLogicType>([
                     filters: filtersToExport,
                 })
 
-                lemonToast.success(`Export started! Your ${format.toUpperCase()} export is being prepared.`)
+                toast.success(`Export started! Your ${format.toUpperCase()} export is being prepared.`)
                 actions.setActiveTab('exports')
             } catch (error) {
                 console.error('Export failed:', error)
-                lemonToast.error('Failed to start export. Please try again.')
+                toast.error('Failed to start export. Please try again.')
             }
         },
     })),

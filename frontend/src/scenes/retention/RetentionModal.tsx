@@ -3,10 +3,10 @@ import './RetentionTable.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
+import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { capitalizeFirstLetter, isGroupType, percentage } from 'lib/utils'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { groupDisplayId } from 'scenes/persons/GroupActorDisplay'
@@ -76,14 +76,14 @@ export function RetentionModal(): JSX.Element | null {
 
     return (
         <>
-            <LemonModal
+            <Modal
                 isOpen // always open, as we simply don't mount otherwise
                 onClose={closeModal}
                 footer={
                     <div className="flex justify-between gap-2 w-full">
                         <div className="flex gap-2">
                             {!!people.result?.length && !exploreUrl && (
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     onClick={() =>
                                         startExport({
@@ -95,10 +95,10 @@ export function RetentionModal(): JSX.Element | null {
                                     }
                                 >
                                     Download CSV
-                                </LemonButton>
+                                </Button>
                             )}
                             {!!people.result?.length && !!dataTableNodeQuery && (
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     onClick={() => {
                                         dataTableNodeQuery && void startDownload(dataTableNodeQuery, true, startExport)
@@ -106,22 +106,22 @@ export function RetentionModal(): JSX.Element | null {
                                     tooltip={`Up to ${MAX_SELECT_RETURNED_ROWS} persons will be exported`}
                                 >
                                     Export all as CSV
-                                </LemonButton>
+                                </Button>
                             )}
                             {!!people.result?.length && !people.result.some((person) => isGroupType(person.person)) && (
-                                <LemonButton
+                                <Button
                                     onClick={() => setIsCohortModalOpen(true)}
                                     type="secondary"
                                     data-attr="retention-person-modal-save-as-cohort"
                                     disabled={!people.result?.length}
                                 >
                                     Save as cohort
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
                         <div className="flex gap-2">
                             {insightEventsQueryUrl && (
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     to={insightEventsQueryUrl}
                                     data-attr="person-modal-view-events"
@@ -131,10 +131,10 @@ export function RetentionModal(): JSX.Element | null {
                                     targetBlank
                                 >
                                     View events
-                                </LemonButton>
+                                </Button>
                             )}
                             {exploreUrl && (
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     to={exploreUrl}
                                     data-attr="person-modal-new-insight"
@@ -143,7 +143,7 @@ export function RetentionModal(): JSX.Element | null {
                                     }}
                                 >
                                     Open as new insight
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -198,7 +198,7 @@ export function RetentionModal(): JSX.Element | null {
                                             <tr key={personAppearances.person.id}>
                                                 <td className="min-w-[200px]">
                                                     {isGroupType(personAppearances.person) ? (
-                                                        <LemonButton
+                                                        <Button
                                                             size="small"
                                                             to={urls.group(
                                                                 String(personAppearances.person.group_type_index),
@@ -210,9 +210,9 @@ export function RetentionModal(): JSX.Element | null {
                                                                 personAppearances.person.group_key,
                                                                 personAppearances.person.properties
                                                             )}
-                                                        </LemonButton>
+                                                        </Button>
                                                     ) : (
-                                                        <LemonButton
+                                                        <Button
                                                             size="small"
                                                             to={urls.personByDistinctId(
                                                                 personAppearances.person.distinct_ids?.[0]
@@ -220,7 +220,7 @@ export function RetentionModal(): JSX.Element | null {
                                                             data-attr="retention-person-link"
                                                         >
                                                             {asDisplay(personAppearances.person)}
-                                                        </LemonButton>
+                                                        </Button>
                                                     )}
                                                 </td>
 
@@ -246,19 +246,19 @@ export function RetentionModal(): JSX.Element | null {
                             </table>
                             {people.next || people.offset ? (
                                 <div className="m-4 flex justify-center">
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         onClick={() => loadMorePeople(selectedInterval, selectedBreakdownValue)}
                                         loading={peopleLoadingMore}
                                     >
                                         Load more {aggregationTargetLabel.plural}
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             ) : null}
                         </>
                     )}
                 </div>
-            </LemonModal>
+            </Modal>
             <SaveCohortModal
                 onSave={(title) => saveAsCohort(title)}
                 onCancel={() => setIsCohortModalOpen(false)}

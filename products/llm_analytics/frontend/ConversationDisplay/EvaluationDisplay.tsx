@@ -1,5 +1,5 @@
 import { IconCheck, IconMinus, IconX } from '@hanzo/icons'
-import { LemonTag, Link } from '@hanzo/lemon-ui'
+import { Tag, Link } from '@hanzo/elements'
 
 import { lowercaseFirstLetter } from 'lib/utils'
 import { urls } from 'scenes/urls'
@@ -24,22 +24,22 @@ export function EvaluationDisplay({ eventProperties }: { eventProperties: EventT
     const renderResultTag = (): JSX.Element => {
         if (isNA) {
             return (
-                <LemonTag type="muted" icon={<IconMinus />}>
+                <Tag type="muted" icon={<IconMinus />}>
                     N/A
-                </LemonTag>
+                </Tag>
             )
         }
         if (isPass) {
             return (
-                <LemonTag type="success" icon={<IconCheck />}>
+                <Tag type="success" icon={<IconCheck />}>
                     True
-                </LemonTag>
+                </Tag>
             )
         }
         return (
-            <LemonTag type="danger" icon={<IconX />}>
+            <Tag type="danger" icon={<IconX />}>
                 False
-            </LemonTag>
+            </Tag>
         )
     }
 

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconDatabase, IconPlug, IconServer } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import type { DataHealthIssue } from '~/layout/navigation-3000/sidepanel/panels/sidePanelHealthLogic'
 
@@ -29,9 +29,9 @@ export function PipelineStatusSummary(): JSX.Element {
                     <div key={type} className="flex items-center gap-1.5 text-sm">
                         {icon}
                         <span className="text-muted">{label}</span>
-                        <LemonTag type="danger" size="small">
+                        <Tag type="danger" size="small">
                             {count}
-                        </LemonTag>
+                        </Tag>
                     </div>
                 )
             })}

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TZLabel } from 'lib/components/TZLabel/index'
 import { now } from 'lib/dayjs'
 import { useDelayedOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 
 import { mswDecorator } from '~/mocks/browser'
 
@@ -90,11 +90,11 @@ export function WithMoreThanOne(): JSX.Element {
         <div className="flex flex-col gap-2">
             <h1>This is a regression test</h1>
             <p>it checks we don't add a floating portal to the DOM for every TZLabel</p>
-            <LemonDivider />
+            <Divider />
             <TZLabel time={now().subtract(0, 'day')} />
             <TZLabel time={now().subtract(1, 'day')} />
             <TZLabel time={now().subtract(2, 'day')} />
-            <LemonDivider />
+            <Divider />
             <div className="flex flex-row gap-1">
                 <span>there are</span>
                 {portalCount}

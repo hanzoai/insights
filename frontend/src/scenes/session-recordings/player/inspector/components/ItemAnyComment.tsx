@@ -3,10 +3,10 @@ import { useActions, useValues } from 'kea'
 import { IconPencil, IconTrash } from '@hanzo/icons'
 
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { RichContentPreview } from 'lib/lemon-ui/LemonRichContent/LemonRichContentEditor'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { RichContentPreview } from 'lib/elements/RichContent/RichContentEditor'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { notebookPanelLogic } from 'scenes/notebooks/NotebookPanel/notebookPanelLogic'
 import { playerCommentModel } from 'scenes/session-recordings/player/commenting/playerCommentModel'
 import { RecordingCommentForm } from 'scenes/session-recordings/player/commenting/playerFrameCommentOverlayLogic'
@@ -84,7 +84,7 @@ function ItemCommentNotebookDetail({ item }: { item: InspectorListItemNotebookCo
     return (
         <div data-attr="item-notebook-comment" className="font-light w-full">
             <div className="px-2 py-1 text-xs border-t w-full flex justify-end">
-                <LemonButton
+                <Button
                     type="secondary"
                     onClick={(e) => {
                         selectNotebook(item.data.notebookShortId)
@@ -94,7 +94,7 @@ function ItemCommentNotebookDetail({ item }: { item: InspectorListItemNotebookCo
                     size="xsmall"
                 >
                     Continue in {item.data.notebookTitle}
-                </LemonButton>
+                </Button>
             </div>
 
             <div className="px-2 py-1 text-xs border-t text-wrap">{item.data.comment}</div>
@@ -111,7 +111,7 @@ function ItemCommentDetail({ item }: { item: InspectorListItemComment }): JSX.El
     return (
         <div data-attr="item-annotation-comment" className="font-light w-full flex flex-col gap-y-1">
             <div className="px-2 py-1 text-xs border-t w-full flex justify-end items-center gap-x-1">
-                <LemonButton
+                <Button
                     type="secondary"
                     onClick={() => {
                         deleteComment(item.data.id)
@@ -120,8 +120,8 @@ function ItemCommentDetail({ item }: { item: InspectorListItemComment }): JSX.El
                     icon={<IconTrash />}
                 >
                     Delete
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="secondary"
                     onClick={() => {
                         void (async () => {
@@ -142,7 +142,7 @@ function ItemCommentDetail({ item }: { item: InspectorListItemComment }): JSX.El
                     icon={<IconPencil />}
                 >
                     Edit
-                </LemonButton>
+                </Button>
             </div>
 
             <div className="p-2 text-xs border-t cursor-pointer text-wrap">

@@ -4,7 +4,7 @@ import { ObjectTags, ObjectTagsProps } from './ObjectTags'
 
 type Story = StoryObj<typeof ObjectTags>
 const meta: Meta<typeof ObjectTags> = {
-    title: 'Lemon UI/Object Tags',
+    title: 'Elements/Object Tags',
     component: ObjectTags,
     tags: ['autodocs'],
 }

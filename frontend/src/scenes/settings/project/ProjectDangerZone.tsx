@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Dispatch, SetStateAction, useState } from 'react'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -29,26 +29,26 @@ export function DeleteProjectModal({
             : []
 
     return (
-        <LemonModal
+        <Modal
             title="Delete the project and its data?"
             onClose={!isDeletionInProgress ? () => setIsOpen(false) : undefined}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         disabledReason={isDeletionInProgress && 'Deleting...'}
                         type="secondary"
                         onClick={() => setIsOpen(false)}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="secondary"
                         disabled={!isDeletionConfirmed}
                         loading={isDeletionInProgress}
                         data-attr="delete-project-ok"
                         status="danger"
                         onClick={currentProject ? () => deleteProject(currentProject) : undefined}
-                    >{`Delete ${currentProject ? currentProject.name : 'the current project'}`}</LemonButton>
+                    >{`Delete ${currentProject ? currentProject.name : 'the current project'}`}</Button>
                 </>
             }
             isOpen={isOpen}
@@ -69,7 +69,7 @@ export function DeleteProjectModal({
             <p>
                 Please type <strong>{currentProject ? currentProject.name : "this project's name"}</strong> to confirm.
             </p>
-            <LemonInput
+            <Input
                 type="text"
                 onChange={(value) => {
                     if (currentProject) {
@@ -77,7 +77,7 @@ export function DeleteProjectModal({
                     }
                 }}
             />
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -99,7 +99,7 @@ export function ProjectDangerZone(): JSX.Element {
                             This is <b>irreversible</b>. Please be certain.
                         </p>
                     )}
-                    <LemonButton
+                    <Button
                         status="danger"
                         type="secondary"
                         onClick={() => setIsModalVisible(true)}
@@ -108,7 +108,7 @@ export function ProjectDangerZone(): JSX.Element {
                         disabledReason={restrictedReason}
                     >
                         Delete {currentProject?.name || 'the current project'}
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
             <DeleteProjectModal isOpen={isModalVisible} setIsOpen={setIsModalVisible} />

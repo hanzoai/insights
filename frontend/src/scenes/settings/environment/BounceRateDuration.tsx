@@ -4,8 +4,8 @@ import React, { useState } from 'react'
 import { IconX } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
@@ -39,7 +39,7 @@ export function BounceRateDurationSetting(): JSX.Element {
                 resourceType={AccessControlResourceType.WebAnalytics}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonInput
+                <Input
                     type="number"
                     min={MIN_BOUNCE_RATE_DURATION}
                     max={MAX_BOUNCE_RATE_DURATION}
@@ -53,7 +53,7 @@ export function BounceRateDurationSetting(): JSX.Element {
                     }}
                     inputRef={inputRef}
                     suffix={
-                        <LemonButton
+                        <Button
                             size="small"
                             noPadding
                             icon={<IconX />}
@@ -72,7 +72,7 @@ export function BounceRateDurationSetting(): JSX.Element {
                     resourceType={AccessControlResourceType.WebAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => handleChange(bounceRateDuration)}
                         disabledReason={
@@ -90,7 +90,7 @@ export function BounceRateDurationSetting(): JSX.Element {
                         }
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
         </>

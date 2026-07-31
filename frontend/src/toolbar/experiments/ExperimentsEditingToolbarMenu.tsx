@@ -3,11 +3,11 @@ import { Form, Group } from 'kea-forms'
 
 import { IconPlus } from '@hanzo/icons'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Collapse } from 'lib/elements/Collapse'
+import { Input } from 'lib/elements/Input'
+import { Label } from 'lib/elements/Label'
 
 import { ToolbarMenu } from '~/toolbar/bar/ToolbarMenu'
 import { WebExperimentVariant } from '~/toolbar/experiments/WebExperimentVariant'
@@ -32,8 +32,8 @@ export const ExperimentsEditingToolbarMenu = (): JSX.Element => {
                 <ToolbarMenu.Header className="border-b">
                     {selectedExperimentId === 'new' ? (
                         <div className="w-full px-2 pb-4 pt-2">
-                            <LemonLabel>Experiment name</LemonLabel>
-                            <LemonInput
+                            <Label>Experiment name</Label>
+                            <Input
                                 className="w-2/3 mt-1"
                                 placeholder="Example: Pricing page conversion"
                                 onChange={(newName: string) => {
@@ -49,14 +49,14 @@ export const ExperimentsEditingToolbarMenu = (): JSX.Element => {
                     <div id="errorcontainer">
                         {Object.keys(experimentFormErrors).length > 0 &&
                             !Object.values(experimentFormErrors).every((el) => el === undefined) && (
-                                <LemonBanner type="error">
+                                <Banner type="error">
                                     <ol>
                                         {experimentFormErrors.name && <li>{experimentFormErrors.name}</li>}
                                         {experimentFormErrors.variants && (
                                             <li>{String(experimentFormErrors.variants)}</li>
                                         )}
                                     </ol>
-                                </LemonBanner>
+                                </Banner>
                             )}
                     </div>
                 </ToolbarMenu.Header>
@@ -64,21 +64,21 @@ export const ExperimentsEditingToolbarMenu = (): JSX.Element => {
                     <div className="deprecated-space-y-6 p-2">
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <LemonLabel>Variants</LemonLabel>
+                                <Label>Variants</Label>
                                 {addVariantAvailable && (
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="xsmall"
                                         icon={<IconPlus />}
                                         onClick={addNewVariant}
                                     >
                                         Add variant
-                                    </LemonButton>
+                                    </Button>
                                 )}
                             </div>
                             <Group name="variants">
                                 <div>
-                                    <LemonCollapse
+                                    <Collapse
                                         size="medium"
                                         activeKey={selectedVariant}
                                         onChange={(newVariant) => {
@@ -113,13 +113,13 @@ export const ExperimentsEditingToolbarMenu = (): JSX.Element => {
                 </ToolbarMenu.Body>
                 <ToolbarMenu.Footer>
                     <div className="flex justify-between items-center w-full">
-                        <LemonButton type="secondary" size="small" onClick={() => selectExperiment(null)}>
+                        <Button type="secondary" size="small" onClick={() => selectExperiment(null)}>
                             Cancel
-                        </LemonButton>
+                        </Button>
 
-                        <LemonButton type="primary" htmlType="submit" size="small">
+                        <Button type="primary" htmlType="submit" size="small">
                             {selectedExperimentId === 'new' ? 'Save as  draft' : 'Save experiment'}
-                        </LemonButton>
+                        </Button>
                     </div>
                 </ToolbarMenu.Footer>
             </Form>

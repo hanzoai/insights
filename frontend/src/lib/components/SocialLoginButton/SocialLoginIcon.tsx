@@ -1,6 +1,6 @@
 import { IconGithub } from '@hanzo/icons'
 
-import { IconGitlab, IconGoogle, IconKey } from 'lib/lemon-ui/icons'
+import { IconGitlab, IconGoogle, IconKey } from 'lib/elements/icons'
 
 import { SSOProvider } from '~/types'
 

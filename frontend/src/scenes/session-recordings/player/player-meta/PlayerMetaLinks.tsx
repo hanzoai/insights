@@ -10,10 +10,10 @@ import {
     IconPlusSmall,
     IconTrash,
 } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, LemonDialog, LemonMenu, LemonMenuItems, LemonTag } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Dialog, Menu, MenuItems, Tag } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { IconBlank } from 'lib/elements/icons'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { useNotebookNode } from 'scenes/notebooks/Nodes/NotebookNodeContext'
 import { NotebookSelectButton } from 'scenes/notebooks/NotebookSelectButton/NotebookSelectButton'
@@ -40,7 +40,7 @@ function PinToPlaylistButton(): JSX.Element {
     const description = logicProps.pinned ? 'Remove from collection' : 'Add to collection'
 
     return logicProps.setPinned && !logicProps.pinned ? (
-        <LemonButton
+        <Button
             size="xsmall"
             onClick={() => {
                 logicProps.setPinned?.(true)
@@ -85,7 +85,7 @@ export function PlayerMetaLinks({ size }: { size: PlayerMetaBreakpoints }): JSX.
                     <PlayerShareMenu />
 
                     {size === 'normal' && nodeLogic?.props.nodeType === NotebookNodeType.RecordingPlaylist ? (
-                        <LemonButton
+                        <Button
                             size="xsmall"
                             icon={<IconNotebook />}
                             onClick={() => {
@@ -106,7 +106,7 @@ export function PlayerMetaLinks({ size }: { size: PlayerMetaBreakpoints }): JSX.
     )
 }
 
-const AddToNotebookButton = ({ fullWidth = false }: Pick<LemonButtonProps, 'fullWidth'>): JSX.Element => {
+const AddToNotebookButton = ({ fullWidth = false }: Pick<ButtonProps, 'fullWidth'>): JSX.Element => {
     const { sessionRecordingId } = useValues(sessionRecordingPlayerLogic)
     const { setPause } = useActions(sessionRecordingPlayerLogic)
 
@@ -145,7 +145,7 @@ const MenuActions = ({ size }: { size: PlayerMetaBreakpoints }): JSX.Element => 
     const onDelete = useMemo(
         () => () => {
             setIsFullScreen(false)
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Delete recording',
                 description: 'Are you sure you want to delete this recording? This cannot be undone.',
                 secondaryButton: {
@@ -161,8 +161,8 @@ const MenuActions = ({ size }: { size: PlayerMetaBreakpoints }): JSX.Element => 
         [deleteRecording, setIsFullScreen]
     )
 
-    const items: LemonMenuItems = useMemo(() => {
-        const itemsArray: LemonMenuItems = [
+    const items: MenuItems = useMemo(() => {
+        const itemsArray: MenuItems = [
             {
                 label: () => <AddToNotebookButton fullWidth={true} />,
             },
@@ -198,9 +198,9 @@ const MenuActions = ({ size }: { size: PlayerMetaBreakpoints }): JSX.Element => 
                 label: (
                     <div className="flex w-full gap-x-2 justify-between items-center">
                         Export to MP4{' '}
-                        <LemonTag type="warning" size="small">
+                        <Tag type="warning" size="small">
                             BETA
-                        </LemonTag>
+                        </Tag>
                     </div>
                 ),
                 status: hasReachedExportFullVideoLimit ? 'danger' : 'default',
@@ -243,8 +243,8 @@ const MenuActions = ({ size }: { size: PlayerMetaBreakpoints }): JSX.Element => 
     ])
 
     return (
-        <LemonMenu items={items} buttonSize="xsmall">
-            <LemonButton size="xsmall" icon={<IconEllipsis />} />
-        </LemonMenu>
+        <Menu items={items} buttonSize="xsmall">
+            <Button size="xsmall" icon={<IconEllipsis />} />
+        </Menu>
     )
 }

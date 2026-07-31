@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonInput, LemonModal, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Input, Modal, Tag } from '@hanzo/elements'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 
 import { DataWarehouseManagedViewsetSavedQuery } from '~/types'
 
@@ -48,20 +48,20 @@ export function DataWarehouseManagedViewsetImpactModal({
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={closeModal}
             title={title}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={closeModal}
                         disabledReason={isDeleting ? 'Deleting...' : undefined}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         status="danger"
                         loading={isDeleting}
@@ -69,21 +69,21 @@ export function DataWarehouseManagedViewsetImpactModal({
                         onClick={onConfirm}
                     >
                         {confirmButtonText}
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="space-y-4">
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     <strong>This action will:</strong>
                     <ul className="list-disc list-inside space-y-1 mt-2">
                         {warningItems.map((item, index) => (
                             <li key={index}>{item}</li>
                         ))}
                     </ul>
-                </LemonBanner>
+                </Banner>
 
-                <LemonBanner type="info">{infoMessage}</LemonBanner>
+                <Banner type="info">{infoMessage}</Banner>
 
                 <div>
                     <p className="font-semibold mb-2">
@@ -94,9 +94,9 @@ export function DataWarehouseManagedViewsetImpactModal({
                             <div className="text-muted">Loading views...</div>
                         ) : views.length > 0 ? (
                             views.map((view) => (
-                                <LemonTag key={view.id} type="default">
+                                <Tag key={view.id} type="default">
                                     {view.name}
-                                </LemonTag>
+                                </Tag>
                             ))
                         ) : (
                             <p className="text-muted">No existing views found.</p>
@@ -108,7 +108,7 @@ export function DataWarehouseManagedViewsetImpactModal({
                     <p className="font-semibold mb-2">
                         To confirm, type <code className="px-1 py-0.5 bg-bg-light rounded">{confirmText}</code> below:
                     </p>
-                    <LemonInput
+                    <Input
                         value={confirmationInput}
                         onChange={setConfirmationInput}
                         placeholder={`Type "${confirmText}" to confirm`}
@@ -117,6 +117,6 @@ export function DataWarehouseManagedViewsetImpactModal({
                     />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

@@ -3,9 +3,9 @@ import { Form } from 'kea-forms'
 
 import { IconCheck, IconCheckCircle, IconWarning } from '@hanzo/icons'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Spinner } from 'lib/elements/Spinner'
 import ScopeAccessSelector from 'scenes/settings/user/scopes/ScopeAccessSelector'
 
 import { SceneExport } from '../sceneTypes'
@@ -97,10 +97,10 @@ export const OAuthAuthorize = (): JSX.Element => {
                 )}
 
                 {scopesWereDefaulted && isMcpResource && (
-                    <LemonBanner type="info" className="mb-4">
+                    <Banner type="info" className="mb-4">
                         <strong>No permissions requested.</strong> This application didn't request specific permissions.
                         Showing all permissions supported by this resource.
-                    </LemonBanner>
+                    </Banner>
                 )}
 
                 <Form logic={oauthAuthorizeLogic} formKey="oauthAuthorization">
@@ -144,7 +144,7 @@ export const OAuthAuthorize = (): JSX.Element => {
                         )}
 
                         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-                            <LemonButton
+                            <Button
                                 type="tertiary"
                                 status="alt"
                                 htmlType="button"
@@ -162,8 +162,8 @@ export const OAuthAuthorize = (): JSX.Element => {
                                 }}
                             >
                                 Cancel
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 type="primary"
                                 htmlType="submit"
                                 loading={isOauthAuthorizationSubmitting}
@@ -179,7 +179,7 @@ export const OAuthAuthorize = (): JSX.Element => {
                                 onClick={() => submitOauthAuthorization()}
                             >
                                 Authorize {oauthApplication?.name}
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 </Form>

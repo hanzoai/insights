@@ -5,7 +5,7 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconAI, IconCopy, IconPlus } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonModal, LemonTextArea } from '@hanzo/lemon-ui'
+import { Banner, Button, Modal, TextArea } from '@hanzo/elements'
 
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
@@ -37,9 +37,9 @@ export function AiRegexHelper({ onApply }: AiRegexHelperProps): JSX.Element {
 
     return (
         <>
-            <LemonModal isOpen={isOpen} onClose={onClose} title="AI Regex Helper">
+            <Modal isOpen={isOpen} onClose={onClose} title="AI Regex Helper">
                 Explain your regex in natural language:
-                <LemonTextArea
+                <TextArea
                     placeholder="I want a regex that covers all urls that include 'insights.hanzo.ai/auth/*'"
                     className="w-full my-2"
                     maxRows={4}
@@ -52,11 +52,11 @@ export function AiRegexHelper({ onApply }: AiRegexHelperProps): JSX.Element {
                         <div>
                             <h3 className="text-sm font-bold">Your regex is:</h3>
                             <div className="flex flex-row gap-2 justify-between items-center">
-                                <LemonBanner type="info" className="w-full">
+                                <Banner type="info" className="w-full">
                                     {generatedRegex}
-                                </LemonBanner>
+                                </Banner>
                                 <div>
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         onClick={handleCopyToClipboard}
                                         tooltip="Copy to clipboard"
@@ -68,23 +68,23 @@ export function AiRegexHelper({ onApply }: AiRegexHelperProps): JSX.Element {
                     )}
 
                     <div className="flex justify-end gap-2">
-                        <LemonButton type="secondary" onClick={onClose} tooltip="Close">
+                        <Button type="secondary" onClick={onClose} tooltip="Close">
                             Close
-                        </LemonButton>
+                        </Button>
 
                         <AIConsentPopoverWrapper>
-                            <LemonButton
+                            <Button
                                 type={generatedRegex ? 'secondary' : 'primary'}
                                 onClick={handleGenerateRegex}
                                 disabledReason={disabledReason}
                                 loading={isLoading}
                             >
                                 {generatedRegex ? 'Regenerate' : 'Generate Regex'}
-                            </LemonButton>
+                            </Button>
                         </AIConsentPopoverWrapper>
 
                         {generatedRegex && (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 onClick={() => {
                                     insights.capture('path_cleaning_regex_ai_applied', {
@@ -98,13 +98,13 @@ export function AiRegexHelper({ onApply }: AiRegexHelperProps): JSX.Element {
                                 icon={<IconPlus />}
                             >
                                 Apply
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
 
-                    {error && <LemonBanner type="error">{error}</LemonBanner>}
+                    {error && <Banner type="error">{error}</Banner>}
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }
@@ -113,7 +113,7 @@ export function AiRegexHelperButton(): JSX.Element {
     const { setIsOpen } = useActions(aiRegexHelperLogic)
 
     return (
-        <LemonButton
+        <Button
             type="tertiary"
             size="small"
             icon={<IconAI />}
@@ -123,6 +123,6 @@ export function AiRegexHelperButton(): JSX.Element {
             }}
         >
             Help me with Regex
-        </LemonButton>
+        </Button>
     )
 }

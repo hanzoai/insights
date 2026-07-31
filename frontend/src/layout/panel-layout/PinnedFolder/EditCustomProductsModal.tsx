@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Modal } from 'lib/elements/Modal'
+import { Select } from 'lib/elements/Select'
+import { Tag } from 'lib/elements/Tag'
+import { Spinner } from 'lib/elements/Spinner'
 
 import { iconForType } from '~/layout/panel-layout/ProjectTree/defaultTree'
 import { FileSystemIconType, FileSystemImport } from '~/queries/schema/schema-general'
@@ -31,14 +31,14 @@ export function EditCustomProductsModal(): JSX.Element {
         useActions(editCustomProductsModalLogic)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={closeModal}
             title="Edit my sidebar apps"
             footer={
-                <LemonButton type="secondary" onClick={closeModal}>
+                <Button type="secondary" onClick={closeModal}>
                     Close
-                </LemonButton>
+                </Button>
             }
             width={600}
         >
@@ -62,7 +62,7 @@ export function EditCustomProductsModal(): JSX.Element {
                         return (
                             <div key={category} className="mb-6">
                                 <div className="mb-2">
-                                    <LemonCheckbox
+                                    <Checkbox
                                         checked={categoryState}
                                         onChange={() => toggleCategory(category)}
                                         disabledReason={
@@ -86,7 +86,7 @@ export function EditCustomProductsModal(): JSX.Element {
                                         )
                                         const isLoading = productLoading[product.path] || false
                                         return (
-                                            <LemonCheckbox
+                                            <Checkbox
                                                 key={product.path}
                                                 checked={selectedPaths.has(product.path)}
                                                 onChange={() => toggleProduct(product.path)}
@@ -104,7 +104,7 @@ export function EditCustomProductsModal(): JSX.Element {
                                                         {product.tags?.length && (
                                                             <>
                                                                 {product.tags.map((tag: string) => (
-                                                                    <LemonTag
+                                                                    <Tag
                                                                         key={tag}
                                                                         type={
                                                                             tag === 'alpha'
@@ -117,7 +117,7 @@ export function EditCustomProductsModal(): JSX.Element {
                                                                         className="relative top-[1px]"
                                                                     >
                                                                         {tag.toUpperCase()}
-                                                                    </LemonTag>
+                                                                    </Tag>
                                                                 ))}
                                                             </>
                                                         )}
@@ -134,7 +134,7 @@ export function EditCustomProductsModal(): JSX.Element {
                 </div>
 
                 <div className="flex flex-col items-start gap-2 border-t pt-4">
-                    <LemonCheckbox
+                    <Checkbox
                         checked={allowSidebarSuggestions}
                         onChange={toggleSidebarSuggestions}
                         disabledReason={sidebarSuggestionsLoading ? 'Saving...' : undefined}
@@ -156,7 +156,7 @@ export function EditCustomProductsModal(): JSX.Element {
                 <div className="flex flex-col items-start gap-2 border-t pt-4">
                     <div className="flex flex-col gap-2 w-full">
                         <label className="text-sm font-semibold text-tertiary">Shortcut position</label>
-                        <LemonSelect<UserShortcutPosition>
+                        <Select<UserShortcutPosition>
                             value={shortcutPosition}
                             onChange={(value) => setShortcutPosition(value)}
                             options={[
@@ -173,6 +173,6 @@ export function EditCustomProductsModal(): JSX.Element {
                     </div>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

@@ -10,10 +10,10 @@ import { combineUrl } from 'kea-router'
 // re-importing. As for @monaco-editor/react, it does some lazy loading and doesn't have this problem.
 import type { editor } from 'monaco-editor'
 
-import { LemonDialog, LemonInput } from '@hanzo/lemon-ui'
+import { Dialog, Input } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { dataWarehouseViewsLogic } from 'scenes/data-warehouse/saved_queries/dataWarehouseViewsLogic'
@@ -130,13 +130,13 @@ export const insightsQLQueryEditorLogic = kea<insightsQLQueryEditorLogicType>([
             }
         },
         saveAsView: async () => {
-            LemonDialog.openForm({
+            Dialog.openForm({
                 title: 'Save as view',
                 initialValues: { viewName: '' },
                 content: (
-                    <LemonField name="viewName">
-                        <LemonInput placeholder="Please enter the name of the view" autoFocus />
-                    </LemonField>
+                    <Field name="viewName">
+                        <Input placeholder="Please enter the name of the view" autoFocus />
+                    </Field>
                 ),
                 errors: {
                     viewName: (name) => (!name ? 'You must enter a name' : undefined),

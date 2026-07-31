@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Button, Select, Tag } from '@hanzo/elements'
+import { Modal } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
@@ -26,7 +26,7 @@ export function ExposureCriteriaModal(): JSX.Element {
     const { currentTeam } = useValues(teamLogic)
     const hasFilters = (currentTeam?.test_account_filters || []).length > 0
     return (
-        <LemonModal
+        <Modal
             isOpen={isExposureCriteriaModalOpen}
             onClose={closeExposureCriteriaModal}
             width={860}
@@ -34,7 +34,7 @@ export function ExposureCriteriaModal(): JSX.Element {
             zIndex="1169"
             footer={
                 <div className="flex items-center gap-2">
-                    <LemonButton
+                    <Button
                         form="edit-experiment-exposure-form"
                         type="secondary"
                         onClick={() => {
@@ -43,8 +43,8 @@ export function ExposureCriteriaModal(): JSX.Element {
                         }}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         form="edit-experiment-exposure-form"
                         onClick={() => {
                             updateExposureCriteria()
@@ -53,7 +53,7 @@ export function ExposureCriteriaModal(): JSX.Element {
                         type="primary"
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
@@ -66,7 +66,7 @@ export function ExposureCriteriaModal(): JSX.Element {
                     title="Default"
                     description={
                         <>
-                            When a <LemonTag>$feature_flag_called</LemonTag> event is recorded, a user is considered{' '}
+                            When a <Tag>$feature_flag_called</Tag> event is recorded, a user is considered{' '}
                             <strong>exposed</strong> to the experiment and included in the analysis.
                         </>
                     }
@@ -81,7 +81,7 @@ export function ExposureCriteriaModal(): JSX.Element {
                     title="Custom"
                     description={
                         <>
-                            If you can't rely on the <LemonTag>$feature_flag_called</LemonTag> event, you can select a
+                            If you can't rely on the <Tag>$feature_flag_called</Tag> event, you can select a
                             custom event to signal that users reached the part of your app where the experiment runs.
                             You can also filter out users you would like to exclude from the analysis.
                         </>
@@ -126,7 +126,7 @@ export function ExposureCriteriaModal(): JSX.Element {
             <div className="w-[405px]">
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-default mb-2">Multiple variant handling</label>
-                    <LemonSelect
+                    <Select
                         value={experiment.exposure_criteria?.multiple_variant_handling || 'exclude'}
                         onChange={(value) => {
                             setExposureCriteria({
@@ -169,6 +169,6 @@ export function ExposureCriteriaModal(): JSX.Element {
                     fullWidth
                 />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

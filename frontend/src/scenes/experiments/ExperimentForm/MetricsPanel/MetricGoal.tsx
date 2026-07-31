@@ -1,4 +1,4 @@
-import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
+import { IconArrowDown, IconArrowUp } from 'lib/elements/icons'
 
 import type { ExperimentMetric } from '~/queries/schema/schema-general'
 import { ExperimentMetricGoal } from '~/types'

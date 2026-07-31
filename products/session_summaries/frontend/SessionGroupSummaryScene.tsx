@@ -3,18 +3,18 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { IconCheck, IconSearch, IconShare, IconSort } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonCheckbox,
-    LemonCollapse,
-    LemonInput,
-    LemonSkeleton,
-    LemonTag,
+    Banner,
+    Button,
+    Checkbox,
+    Collapse,
+    Input,
+    Skeleton,
+    Tag,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { LemonMenu } from 'lib/lemon-ui/LemonMenu'
-import { IconPlayCircle } from 'lib/lemon-ui/icons'
+import { Menu } from 'lib/elements/Menu'
+import { IconPlayCircle } from 'lib/elements/icons'
 import { debounce } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
@@ -64,9 +64,9 @@ function capitalizeFirst(str: string): string {
 function SessionGroupSummaryLoadingSkeleton(): JSX.Element {
     return (
         <div className="space-y-4">
-            <LemonSkeleton className="h-20" />
-            <LemonSkeleton className="h-32" />
-            <LemonSkeleton className="h-32" />
+            <Skeleton className="h-20" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
         </div>
     )
 }
@@ -141,7 +141,7 @@ function FilterBar({
                     const isActive = issueTypeFilters.has(key)
                     const count = issueTypeCounts[key]
                     return (
-                        <LemonCheckbox
+                        <Checkbox
                             key={key}
                             checked={isActive}
                             onChange={() => onIssueTypeFilterChange(key)}
@@ -157,7 +157,7 @@ function FilterBar({
                 })}
             </div>
             <div className="flex-1 min-w-60">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Filter issues by keyword..."
                     value={searchValue}
@@ -205,8 +205,8 @@ function PatternCard({
                     {/* TODO: Enable thumbs up/down for feedback */}
                     {/* <span className="hidden sm:inline">·</span>
                     <div className="hidden sm:flex items-center gap-2">
-                        <LemonButton size="xsmall" type="tertiary" icon={<IconThumbsUp />} />
-                        <LemonButton size="xsmall" type="tertiary" icon={<IconThumbsDown />} />
+                        <Button size="xsmall" type="tertiary" icon={<IconThumbsUp />} />
+                        <Button size="xsmall" type="tertiary" icon={<IconThumbsDown />} />
                     </div> */}
                 </div>
             </div>
@@ -229,18 +229,18 @@ function PatternCard({
             {pattern.events.length > 3 && (
                 <div className="mt-4 flex justify-center gap-2">
                     {visibleCount > 3 && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             onClick={() => setVisibleCount((prev) => Math.max(prev - 3, 3))}
                         >
                             Show fewer examples
-                        </LemonButton>
+                        </Button>
                     )}
                     {visibleCount < pattern.events.length && (
-                        <LemonButton type="secondary" size="small" onClick={() => setVisibleCount((prev) => prev + 3)}>
+                        <Button type="secondary" size="small" onClick={() => setVisibleCount((prev) => prev + 3)}>
                             Show more examples
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
             )}
@@ -248,7 +248,7 @@ function PatternCard({
     )
 
     return (
-        <LemonCollapse
+        <Collapse
             panels={[
                 {
                     key: pattern.pattern_id,
@@ -422,21 +422,21 @@ export function SessionGroupSummary(): JSX.Element {
     if (accessDeniedToSessionGroupSummary) {
         return (
             <SceneContent>
-                <LemonBanner type="error">You don't have permission to view this session group summary.</LemonBanner>
+                <Banner type="error">You don't have permission to view this session group summary.</Banner>
             </SceneContent>
         )
     }
     if (sessionGroupSummaryMissing) {
         return (
             <SceneContent>
-                <LemonBanner type="error">Session group summary not found.</LemonBanner>
+                <Banner type="error">Session group summary not found.</Banner>
             </SceneContent>
         )
     }
     if (!sessionGroupSummary) {
         return (
             <SceneContent>
-                <LemonBanner type="error">Failed to load session group summary.</LemonBanner>
+                <Banner type="error">Failed to load session group summary.</Banner>
             </SceneContent>
         )
     }
@@ -449,14 +449,14 @@ export function SessionGroupSummary(): JSX.Element {
                     type: sceneConfigurations[Scene.SessionGroupSummary]?.iconType || 'default_icon_type',
                 }}
                 actions={
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         icon={<IconShare />}
                         onClick={() => void copyToClipboard(window.location.href, 'link')}
                     >
                         Share
-                    </LemonButton>
+                    </Button>
                 }
                 forceBackTo={{
                     key: Scene.SessionGroupSummariesTable,
@@ -467,12 +467,12 @@ export function SessionGroupSummary(): JSX.Element {
             />
             <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
                 <div className="flex items-center gap-3">
-                    <LemonTag type="warning">BETA</LemonTag>
+                    <Tag type="warning">BETA</Tag>
                     <span>{totalSessions} sessions analyzed</span>
                     <span className="hidden sm:inline">·</span>
                     <span>{new Date(sessionGroupSummary.created_at).toLocaleString()}</span>
                 </div>
-                <LemonMenu
+                <Menu
                     items={[
                         {
                             label: 'Sort by severity',
@@ -486,10 +486,10 @@ export function SessionGroupSummary(): JSX.Element {
                         },
                     ]}
                 >
-                    <LemonButton type="secondary" size="small" icon={<IconSort />}>
+                    <Button type="secondary" size="small" icon={<IconSort />}>
                         {sortBy === 'severity' ? 'Sort by severity' : 'Sort by session count'}
-                    </LemonButton>
-                </LemonMenu>
+                    </Button>
+                </Menu>
             </div>
             <div className="space-y-4">
                 <FilterBar

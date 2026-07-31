@@ -4,7 +4,7 @@ import { urlToAction } from 'kea-router'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { uuid } from 'lib/utils'
 import { parseExceptionEvent } from 'lib/utils/exceptionUtils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -752,7 +752,7 @@ export const supportLogic = kea<supportLogicType>([
                             browser: isFirefox ? 'firefox' : 'other',
                         }
                         insights.capture('support_ticket', properties)
-                        lemonToast.success(
+                        toast.success(
                             "Got the message! If we have follow-up information for you, we'll reply via email."
                         )
                         // Only close and reset the form on success
@@ -779,7 +779,7 @@ export const supportLogic = kea<supportLogicType>([
                         ...extra,
                         ...contexts,
                     })
-                    lemonToast.error(
+                    toast.error(
                         `Oops, the message couldn't be sent. Please change your browser's privacy level to the standard or default level, then try again. (E.g. In Firefox: Settings > Privacy & Security > Standard)`,
                         { hideButton: true }
                     )
@@ -800,7 +800,7 @@ export const supportLogic = kea<supportLogicType>([
                     zendesk_ticket_link,
                 }
                 insights.capture('support_ticket', properties)
-                lemonToast.success("Got the message! If we have follow-up information for you, we'll reply via email.")
+                toast.success("Got the message! If we have follow-up information for you, we'll reply via email.")
 
                 actions.ensureZendeskOrganization()
                 actions.setLastSubmittedTicketId(zendesk_ticket_id)
@@ -813,7 +813,7 @@ export const supportLogic = kea<supportLogicType>([
 
                 // More helpful error message
                 // Use the same error message regardless of browser
-                lemonToast.error(
+                toast.error(
                     `Oops, the message couldn't be sent. Please change your browser's privacy level to the standard or default level, then try again. (E.g. In Firefox: Settings > Privacy & Security > Standard)`,
                     { hideButton: true }
                 )

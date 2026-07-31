@@ -35,8 +35,8 @@ jest.mock('lib/forms/scrollToFormError', () => ({
     scrollToFormError: jest.fn(),
 }))
 
-jest.mock('lib/lemon-ui/LemonToast/LemonToast', () => ({
-    lemonToast: {
+jest.mock('lib/elements/Toast/Toast', () => ({
+    toast: {
         error: jest.fn(),
         success: jest.fn(),
     },

@@ -7,11 +7,11 @@ import isEqual from 'lodash.isequal'
 import { Uri, editor } from 'monaco-editor'
 import insights from '@hanzo/insights'
 
-import { LemonDialog, LemonInput, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, Input, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareScene } from 'lib/logic/scenes/tabAwareScene'
 import { tabAwareUrlToAction } from 'lib/logic/scenes/tabAwareUrlToAction'
@@ -715,7 +715,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
             globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.RunFirstQuery)
         },
         saveAsView: async ({ fromDraft, materializeAfterSave = false }) => {
-            LemonDialog.openForm({
+            Dialog.openForm({
                 title: 'Save as view',
                 initialValues: { viewName: values.activeTab?.name || '' },
                 description: `View names can only contain letters, numbers, '_', or '$'. Spaces are not allowed.`,
@@ -725,14 +725,14 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                             <ViewEmptyState />
                         </div>
                     ) : (
-                        <LemonField name="viewName">
-                            <LemonInput
+                        <Field name="viewName">
+                            <Input
                                 data-attr="sql-editor-input-save-view-name"
                                 disabled={isLoading}
                                 placeholder="Please enter the name of the view"
                                 autoFocus
                             />
-                        </LemonField>
+                        </Field>
                     ),
                 errors: {
                     viewName: (name) =>
@@ -781,19 +781,19 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                     actions.deleteDraft(fromDraft, savedQuery?.name)
                 }
             } catch {
-                lemonToast.error('Failed to save view')
+                toast.error('Failed to save view')
             }
         },
         saveAsInsight: async () => {
-            LemonDialog.openForm({
+            Dialog.openForm({
                 title: 'Save as new insight',
                 initialValues: {
                     name: '',
                 },
                 content: (
-                    <LemonField name="name">
-                        <LemonInput data-attr="insight-name" placeholder="Please enter the new name" autoFocus />
-                    </LemonField>
+                    <Field name="name">
+                        <Input data-attr="insight-name" placeholder="Please enter the new name" autoFocus />
+                    </Field>
                 ),
                 errors: {
                     name: (name) => (!name ? 'You must enter a name' : undefined),
@@ -817,7 +817,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
             cache.timeouts = cache.timeouts || []
             cache.timeouts.push(timeoutId)
 
-            lemonToast.info(`You're now viewing ${insight.name || insight.derived_name || name}`)
+            toast.info(`You're now viewing ${insight.name || insight.derived_name || name}`)
 
             router.actions.push(urls.insightView(insight.short_id))
         },
@@ -849,7 +849,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                 loadedLogic.actions.setInsight(savedInsight, { overrideQuery: true, fromPersistentApi: true })
             }
 
-            lemonToast.info(`You're now viewing ${savedInsight.name || savedInsight.derived_name || name}`)
+            toast.info(`You're now viewing ${savedInsight.name || savedInsight.derived_name || name}`)
 
             router.actions.push(urls.insightView(savedInsight.short_id))
         },
@@ -905,7 +905,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                     },
                     onReject: () => {},
                 })
-                lemonToast.error('View has been edited by another user. Review changes to update.')
+                toast.error('View has been edited by another user. Review changes to update.')
             } else {
                 await dataWarehouseViewsLogic.asyncActions.updateDataWarehouseSavedQuery(view)
                 actions.updateViewSuccess(view, draftId)
@@ -1189,7 +1189,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                     })
 
                     if (!draft) {
-                        lemonToast.error('Draft not found')
+                        toast.error('Draft not found')
                         return
                     }
 
@@ -1213,7 +1213,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
 
                     let view = values.dataWarehouseSavedQueries.find((n) => n.id === viewId)
                     if (!view) {
-                        lemonToast.error('View not found')
+                        toast.error('View not found')
                         return
                     }
 
@@ -1222,7 +1222,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                         try {
                             view = await api.dataWarehouseSavedQueries.get(viewId)
                         } catch {
-                            lemonToast.error('Failed to load view details')
+                            toast.error('Failed to load view details')
                             return
                         }
                     }
@@ -1255,12 +1255,12 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                         insight = await insightsApi.getByShortId(shortId, undefined, 'async')
                     } catch {
                         actions.setInsightLoading(false)
-                        lemonToast.error('Insight not found')
+                        toast.error('Insight not found')
                         return
                     }
                     actions.setInsightLoading(false)
                     if (!insight) {
-                        lemonToast.error('Insight not found')
+                        toast.error('Insight not found')
                         return
                     }
 

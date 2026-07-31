@@ -3,16 +3,16 @@ import { SurveyQuestionType } from '@hanzo/insights'
 import { useMemo, useRef } from 'react'
 
 import {
-    LemonBanner,
-    LemonButton,
-    LemonInput,
-    LemonLabel,
-    LemonModal,
-    LemonSwitch,
-    LemonTextArea,
-} from '@hanzo/lemon-ui'
+    Banner,
+    Button,
+    Input,
+    Label,
+    Modal,
+    Switch,
+    TextArea,
+} from '@hanzo/elements'
 
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { SurveyAppearancePreview } from 'scenes/surveys/SurveyAppearancePreview'
 import { SurveyEnableToggle } from 'scenes/surveys/SurveySettings'
 import { SdkVersionWarnings } from 'scenes/surveys/components/SdkVersionWarnings'
@@ -65,14 +65,14 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
 
     return (
         <BindLogic logic={quickSurveyFormLogic} props={logicProps}>
-            {info && <LemonBanner type="info">{info}</LemonBanner>}
+            {info && <Banner type="info">{info}</Banner>}
 
             <div className="grid grid-cols-2 gap-6 mt-2">
                 <div className="space-y-4">
                     {context.type !== QuickSurveyType.ANNOUNCEMENT && (
                         <div>
-                            <LemonLabel className="mb-2">Ask your users</LemonLabel>
-                            <LemonTextArea
+                            <Label className="mb-2">Ask your users</Label>
+                            <TextArea
                                 value={surveyForm.question}
                                 onChange={(value) => setSurveyFormValue('question', value)}
                                 placeholder="What do you think?"
@@ -86,8 +86,8 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                     {context.type === QuickSurveyType.ANNOUNCEMENT && (
                         <>
                             <div>
-                                <LemonLabel className="mb-2">Title</LemonLabel>
-                                <LemonInput
+                                <Label className="mb-2">Title</Label>
+                                <Input
                                     value={surveyForm.question}
                                     onChange={(value) => setSurveyFormValue('question', value)}
                                     placeholder="Custom mode is now available!"
@@ -97,8 +97,8 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                             </div>
 
                             <div>
-                                <LemonLabel className="mb-2">Description</LemonLabel>
-                                <LemonTextArea
+                                <Label className="mb-2">Description</Label>
+                                <TextArea
                                     value={surveyForm.description}
                                     onChange={(value) => setSurveyFormValue('description', value)}
                                     placeholder="Add a description for your survey."
@@ -110,8 +110,8 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <LemonLabel className="mb-2">Button text</LemonLabel>
-                                    <LemonInput
+                                    <Label className="mb-2">Button text</Label>
+                                    <Input
                                         value={surveyForm.buttonText}
                                         onChange={(value) => setSurveyFormValue('buttonText', value)}
                                         placeholder="Check it out 👉"
@@ -120,8 +120,8 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                                     />
                                 </div>
                                 <div>
-                                    <LemonLabel className="mb-2">Button link</LemonLabel>
-                                    <LemonInput
+                                    <Label className="mb-2">Button link</Label>
+                                    <Input
                                         value={surveyForm.link}
                                         placeholder="Optional"
                                         onChange={(value) => setSurveyFormValue('link', value)}
@@ -135,8 +135,8 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                     {surveyForm.questionType === SurveyQuestionType.Rating && (
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <LemonLabel className="mb-2">Low rating label</LemonLabel>
-                                <LemonInput
+                                <Label className="mb-2">Low rating label</Label>
+                                <Input
                                     value={surveyForm.ratingLowerBound || ''}
                                     onChange={(value) => setSurveyFormValue('ratingLowerBound', value)}
                                     placeholder={DEFAULT_RATING_LOWER_LABEL}
@@ -144,8 +144,8 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                                 />
                             </div>
                             <div>
-                                <LemonLabel className="mb-2">High rating label</LemonLabel>
-                                <LemonInput
+                                <Label className="mb-2">High rating label</Label>
+                                <Input
                                     value={surveyForm.ratingUpperBound || ''}
                                     onChange={(value) => setSurveyFormValue('ratingUpperBound', value)}
                                     placeholder={DEFAULT_RATING_UPPER_LABEL}
@@ -158,7 +158,7 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                     {showFollowupToggle && (
                         <>
                             <div className="flex items-center gap-2">
-                                <LemonSwitch
+                                <Switch
                                     checked={!!surveyForm.followUpEnabled}
                                     onChange={(checked) => setSurveyFormValue('followUpEnabled', checked)}
                                     label="Ask a follow-up question"
@@ -166,7 +166,7 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                             </div>
                             {surveyForm.followUpEnabled && (
                                 <div className="mt-2">
-                                    <LemonTextArea
+                                    <TextArea
                                         value={surveyForm.followUpQuestion || ''}
                                         onChange={(value) => setSurveyFormValue('followUpQuestion', value)}
                                         placeholder="Tell us more (optional)"
@@ -220,13 +220,13 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                 <SdkVersionWarnings warnings={warnings} />
 
                 {submitDisabledReason && (
-                    <LemonBanner type="error" className="mb-4">
+                    <Banner type="error" className="mb-4">
                         {submitDisabledReason}
-                    </LemonBanner>
+                    </Banner>
                 )}
 
                 <div className="flex justify-between items-end">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         onClick={() => handleSubmit('edit')}
@@ -235,14 +235,14 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                         data-attr="quick-survey-advanced"
                     >
                         Open in advanced editor
-                    </LemonButton>
+                    </Button>
                     <div className="flex gap-2">
                         {onCancel && (
-                            <LemonButton onClick={onCancel} type="secondary" data-attr="quick-survey-cancel">
+                            <Button onClick={onCancel} type="secondary" data-attr="quick-survey-cancel">
                                 Cancel
-                            </LemonButton>
+                            </Button>
                         )}
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={() => handleSubmit('launch')}
                             loading={isSurveyFormSubmitting}
@@ -252,7 +252,7 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                                 dropdown: {
                                     placement: 'bottom-end',
                                     overlay: (
-                                        <LemonMenuOverlay
+                                        <MenuOverlay
                                             items={[
                                                 {
                                                     label: 'Save as draft',
@@ -265,7 +265,7 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                             }}
                         >
                             Create & launch
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -289,7 +289,7 @@ export function QuickSurveyModal({
     showFollowupToggle?: boolean
 }): JSX.Element {
     return (
-        <LemonModal title={modalTitle || 'Quick feedback survey'} isOpen={isOpen} onClose={onCancel} width={900}>
+        <Modal title={modalTitle || 'Quick feedback survey'} isOpen={isOpen} onClose={onCancel} width={900}>
             {context && (
                 <QuickSurveyForm
                     context={context}
@@ -298,6 +298,6 @@ export function QuickSurveyModal({
                     showFollowupToggle={showFollowupToggle}
                 />
             )}
-        </LemonModal>
+        </Modal>
     )
 }

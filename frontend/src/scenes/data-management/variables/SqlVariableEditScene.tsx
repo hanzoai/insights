@@ -3,17 +3,17 @@ import { Form } from 'kea-forms'
 
 import { IconCopy, IconInfo } from '@hanzo/icons'
 import {
-    LemonInput,
-    LemonInputSelect,
-    LemonSegmentedButton,
-    LemonSelect,
-    LemonSkeleton,
-    LemonTable,
-} from '@hanzo/lemon-ui'
+    Input,
+    InputSelect,
+    SegmentedButton,
+    Select,
+    Skeleton,
+    Table,
+} from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -37,25 +37,25 @@ function VariableTypeFields(): JSX.Element {
 
     if (variableType === 'String') {
         return (
-            <LemonField name="default_value" label="Default value">
-                <LemonInput placeholder="Enter default value" />
-            </LemonField>
+            <Field name="default_value" label="Default value">
+                <Input placeholder="Enter default value" />
+            </Field>
         )
     }
 
     if (variableType === 'Number') {
         return (
-            <LemonField name="default_value" label="Default value">
-                <LemonInput type="number" placeholder="Enter default value" />
-            </LemonField>
+            <Field name="default_value" label="Default value">
+                <Input type="number" placeholder="Enter default value" />
+            </Field>
         )
     }
 
     if (variableType === 'Boolean') {
         return (
-            <LemonField name="default_value" label="Default value">
+            <Field name="default_value" label="Default value">
                 {({ value, onChange }) => (
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         className="w-full"
                         value={value ? 'true' : 'false'}
                         onChange={(val) => onChange(val === 'true')}
@@ -65,16 +65,16 @@ function VariableTypeFields(): JSX.Element {
                         ]}
                     />
                 )}
-            </LemonField>
+            </Field>
         )
     }
 
     if (variableType === 'List') {
         return (
             <>
-                <LemonField name="values" label="Options">
+                <Field name="values" label="Options">
                     {({ value, onChange }) => (
-                        <LemonInputSelect
+                        <InputSelect
                             value={value || []}
                             onChange={onChange}
                             placeholder="Add options..."
@@ -84,10 +84,10 @@ function VariableTypeFields(): JSX.Element {
                             sortable={true}
                         />
                     )}
-                </LemonField>
-                <LemonField name="default_value" label="Default value">
+                </Field>
+                <Field name="default_value" label="Default value">
                     {({ value, onChange }) => (
-                        <LemonSelect
+                        <Select
                             className="w-full"
                             placeholder="Select default value"
                             value={value}
@@ -100,16 +100,16 @@ function VariableTypeFields(): JSX.Element {
                             dropdownMaxContentWidth
                         />
                     )}
-                </LemonField>
+                </Field>
             </>
         )
     }
 
     if (variableType === 'Date') {
         return (
-            <LemonField name="default_value" label="Default value (YYYY-MM-DD)">
-                <LemonInput placeholder="e.g., 2024-01-15" />
-            </LemonField>
+            <Field name="default_value" label="Default value (YYYY-MM-DD)">
+                <Input placeholder="e.g., 2024-01-15" />
+            </Field>
         )
     }
 
@@ -156,7 +156,7 @@ export function SqlVariableEditScene(): JSX.Element {
                     }}
                     actions={
                         <>
-                            <LemonButton
+                            <Button
                                 data-attr="discard-variable-changes"
                                 type="secondary"
                                 size="small"
@@ -175,8 +175,8 @@ export function SqlVariableEditScene(): JSX.Element {
                                 }}
                             >
                                 Discard changes
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 data-attr="save-variable"
                                 type="primary"
                                 size="small"
@@ -185,23 +185,23 @@ export function SqlVariableEditScene(): JSX.Element {
                                 disabledReason={!isNew && !hasChanges ? 'No changes to save' : undefined}
                             >
                                 Save
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                 />
 
                 {variableLoading ? (
                     <div className="space-y-4">
-                        <LemonSkeleton className="h-10 w-1/3" />
-                        <LemonSkeleton className="h-6 w-1/2" />
-                        <LemonSkeleton className="h-30 w-1/2" />
+                        <Skeleton className="h-10 w-1/3" />
+                        <Skeleton className="h-6 w-1/2" />
+                        <Skeleton className="h-30 w-1/2" />
                     </div>
                 ) : (
                     <>
                         <div className="space-y-4 max-w-xl">
-                            <LemonField name="name" label={nameLabel}>
+                            <Field name="name" label={nameLabel}>
                                 {({ value }) => (
-                                    <LemonInput
+                                    <Input
                                         placeholder="e.g., Start Date"
                                         value={value}
                                         onChange={(newValue) => {
@@ -222,7 +222,7 @@ export function SqlVariableEditScene(): JSX.Element {
                                         }}
                                     />
                                 )}
-                            </LemonField>
+                            </Field>
 
                             {referenceCodeName && (
                                 <div className="text-sm text-secondary">
@@ -230,7 +230,7 @@ export function SqlVariableEditScene(): JSX.Element {
                                     <code className="bg-bg-3000 px-1 py-0.5 rounded">
                                         {formatVariableReference(referenceCodeName)}
                                     </code>
-                                    <LemonButton
+                                    <Button
                                         className="inline-block align-middle"
                                         icon={<IconCopy />}
                                         type="tertiary"
@@ -243,13 +243,13 @@ export function SqlVariableEditScene(): JSX.Element {
                                 </div>
                             )}
 
-                            <LemonField.Pure label="Type">
-                                <LemonSelect<VariableType>
+                            <Field.Pure label="Type">
+                                <Select<VariableType>
                                     value={variableType}
                                     onChange={(value) => value && setVariableType(value)}
                                     options={VARIABLE_TYPE_OPTIONS}
                                 />
-                            </LemonField.Pure>
+                            </Field.Pure>
 
                             <VariableTypeFields />
                         </div>
@@ -257,7 +257,7 @@ export function SqlVariableEditScene(): JSX.Element {
                         {!isNew && (
                             <div className="mt-8">
                                 <h3 className="text-base font-semibold mb-4">Insights using this variable</h3>
-                                <LemonTable
+                                <Table
                                     loading={insightsUsingVariableLoading}
                                     dataSource={insightsUsingVariable}
                                     columns={VARIABLE_INSIGHT_COLUMNS}

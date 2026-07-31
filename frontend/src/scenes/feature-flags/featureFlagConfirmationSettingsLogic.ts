@@ -2,7 +2,7 @@ import { afterMount, connect, kea, listeners, path } from 'kea'
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import type { featureFlagConfirmationSettingsLogicType } from './featureFlagConfirmationSettingsLogicType'
@@ -26,7 +26,7 @@ export const featureFlagConfirmationSettingsLogic = kea<featureFlagConfirmationS
                 await teamLogic.asyncActions.updateCurrentTeam({
                     feature_flag_confirmation_message: data.message,
                 })
-                lemonToast.success('Confirmation message saved')
+                toast.success('Confirmation message saved')
                 return data.message
             },
         },

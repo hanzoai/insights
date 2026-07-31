@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconArrowRight } from '@hanzo/icons'
-import { Link, Spinner } from '@hanzo/lemon-ui'
+import { Link, Spinner } from '@hanzo/elements'
 
 import { FeedbackTabContent } from 'scenes/surveys/FeedbackTabContent'
 import { QuickSurveyType } from 'scenes/surveys/quick-create/types'

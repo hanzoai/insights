@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Divider, Skeleton } from '@hanzo/elements'
 
 import { BurningMoneyMascot } from 'lib/components/mascots'
 
@@ -47,7 +47,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
     return (
         <div className="relative rounded-lg bg-surface-primary border mb-2">
             <div className="absolute top-2 right-2 z-10">
-                <LemonButton
+                <Button
                     icon={<IconX className="w-4 h-4" />}
                     size="small"
                     onClick={() => toggleCreditCTAHeroDismissed(true)}
@@ -85,7 +85,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                                         {computedDiscount !== null ? (
                                             computedDiscount * 100
                                         ) : (
-                                            <LemonSkeleton className="inline-block h-5 w-18 rounded align-text-bottom" />
+                                            <Skeleton className="inline-block h-5 w-18 rounded align-text-bottom" />
                                         )}
                                         %
                                     </span>{' '}
@@ -94,7 +94,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                                 <p className="mt-2 mb-0">
                                     Based on your usage, your monthly bill is forecasted to be an average of{' '}
                                     {estimatedMonthlyCreditAmountUsd === null ? (
-                                        <LemonSkeleton className="inline-block h-4 w-18 rounded align-text-bottom" />
+                                        <Skeleton className="inline-block h-4 w-18 rounded align-text-bottom" />
                                     ) : (
                                         <strong>{estimatedMonthlyCreditAmountUsd.toFixed(0)}/month</strong>
                                     )}{' '}
@@ -103,13 +103,13 @@ export const CreditCTAHero = (): JSX.Element | null => {
                                 <p className="mt-2 mb-0">
                                     This qualifies you for a{' '}
                                     {estimatedMonthlyCreditAmountUsd === null ? (
-                                        <LemonSkeleton className="inline-block h-4 w-18 rounded align-text-bottom" />
+                                        <Skeleton className="inline-block h-4 w-18 rounded align-text-bottom" />
                                     ) : (
                                         <strong>{computedDiscount! * 100}% discount</strong>
                                     )}{' '}
                                     by pre-purchasing usage credits. Which gives you a net savings of{' '}
                                     {estimatedMonthlyCreditAmountUsd === null ? (
-                                        <LemonSkeleton className="inline-block h-4 w-18 rounded align-text-bottom" />
+                                        <Skeleton className="inline-block h-4 w-18 rounded align-text-bottom" />
                                     ) : (
                                         <strong>
                                             $
@@ -130,7 +130,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                     <div className="flex flex-col justify-center items-end w-30">
                         <BurningMoneyMascot className="w-full h-auto" />
                         {creditOverview.status === 'pending' && creditOverview.invoice_url && (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 onClick={() =>
                                     creditOverview.invoice_url && window.open(creditOverview.invoice_url, '_blank')
@@ -138,36 +138,36 @@ export const CreditCTAHero = (): JSX.Element | null => {
                                 className="w-30 mt-4"
                             >
                                 View invoice
-                            </LemonButton>
+                            </Button>
                         )}
                         {creditOverview.status === 'none' && (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 status="alt"
                                 onClick={() => showPurchaseCreditsModal(true)}
                                 className="w-30 mt-4"
                             >
                                 Learn more
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 </div>
 
                 {creditOverview.status === 'none' && (
                     <>
-                        <LemonDivider className="my-3" />
+                        <Divider className="my-3" />
                         <div className="flex items-center justify-between gap-6">
                             <p className="mb-0 flex-1">
                                 <strong>Also available:</strong> Our Enterprise tier offers dedicated support in a
                                 private Slack channel, personalized training, and most importantly, free merch.
                             </p>
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 to="mailto:sales@hanzo.ai?subject=Let's talk enterprise!"
                                 className="w-30"
                             >
                                 Talk to sales
-                            </LemonButton>
+                            </Button>
                         </div>
                     </>
                 )}

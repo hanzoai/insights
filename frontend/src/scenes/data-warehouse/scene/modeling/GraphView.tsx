@@ -13,9 +13,9 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
 import { IconArrowRight, IconCollapse, IconDatabase, IconExpand } from '@hanzo/icons'
-import { LemonButton, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Button, SegmentedButton } from '@hanzo/elements'
 
-import { IconArrowDown } from 'lib/lemon-ui/icons'
+import { IconArrowDown } from 'lib/elements/icons'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import { DataModelingNodeType } from '~/types'
@@ -61,7 +61,7 @@ function NodeTypeButton({
 
     return (
         <div draggable>
-            <LemonButton
+            <Button
                 icon={
                     <span style={{ color }}>
                         <IconDatabase />
@@ -75,7 +75,7 @@ function NodeTypeButton({
                     <span>{node.name}</span>
                     {node.description && <span className="text-xs text-muted font-normal">{node.description}</span>}
                 </div>
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -97,7 +97,7 @@ export function NodeTypePanel(): JSX.Element {
     if (nodeTypePanelCollapsed) {
         return (
             <div className="absolute right-1.5 bottom-1.5 z-10 bg-transparent p-2">
-                <LemonButton
+                <Button
                     className="dark:bg-primary bg-white"
                     icon={<IconExpand />}
                     type="secondary"
@@ -123,7 +123,7 @@ export function NodeTypePanel(): JSX.Element {
                 ))}
             </div>
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                <LemonSegmentedButton
+                <SegmentedButton
                     value={layoutDirection}
                     onChange={(value) => setLayoutDirection(value as ElkDirection)}
                     options={[
@@ -140,7 +140,7 @@ export function NodeTypePanel(): JSX.Element {
                     ]}
                     size="small"
                 />
-                <LemonButton
+                <Button
                     className="dark:bg-primary bg-white"
                     icon={<IconCollapse />}
                     type="secondary"

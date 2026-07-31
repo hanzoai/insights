@@ -6,9 +6,9 @@ import { useActions, useValues } from 'kea'
 import { Group } from 'kea-forms'
 
 import { IconPlusSmall, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonDialog, LemonInput, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Dialog, Input, Select, Tag } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { QuestionBranchingInput } from 'scenes/surveys/components/question-branching/QuestionBranchingInput'
 
 import {
@@ -69,7 +69,7 @@ export function SurveyEditQuestionHeader({
                 </b>
             </div>
             {survey.questions.length > 1 && (
-                <LemonButton
+                <Button
                     icon={<IconTrash />}
                     size="xsmall"
                     data-attr={`delete-survey-question-${index}`}
@@ -84,7 +84,7 @@ export function SurveyEditQuestionHeader({
                         }
 
                         if (hasBranchingLogic) {
-                            LemonDialog.open({
+                            Dialog.open({
                                 title: 'Your survey has active branching logic',
                                 description: (
                                     <p className="py-2">
@@ -160,7 +160,7 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
         // Reset to current type first (because onSelect has already changed it)
         setMultipleSurveyQuestion(index, question, question.type)
 
-        LemonDialog.open({
+        Dialog.open({
             title: 'Changing question type',
             description: (
                 <p className="py-2">The choices you have configured will be removed. Would you like to proceed?</p>
@@ -182,8 +182,8 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
     return (
         <Group name={`questions.${index}`} key={index}>
             <div className="flex flex-col gap-2">
-                <LemonField name="type" label="Question type" className="max-w-60">
-                    <LemonSelect
+                <Field name="type" label="Question type" className="max-w-60">
+                    <Select
                         data-attr={`survey-question-type-${index}`}
                         onSelect={(newType) => {
                             const isCurrentMultipleChoice =
@@ -234,11 +234,11 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                             },
                         ]}
                     />
-                </LemonField>
-                <LemonField name="question" label="Label">
-                    <LemonInput data-attr={`survey-question-label-${index}`} value={question.question} />
-                </LemonField>
-                <LemonField name="description" label="Description (optional)">
+                </Field>
+                <Field name="question" label="Label">
+                    <Input data-attr={`survey-question-label-${index}`} value={question.question} />
+                </Field>
+                <Field name="description" label="Description (optional)">
                     {({ value, onChange }) => (
                         <HTMLEditor
                             value={value}
@@ -250,32 +250,32 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                             activeTab={initialDescriptionContentType}
                         />
                     )}
-                </LemonField>
+                </Field>
                 {survey.questions.length > 1 && (
-                    <LemonField name="optional">
-                        <LemonCheckbox label="Optional" checked={!!question.optional} />
-                    </LemonField>
+                    <Field name="optional">
+                        <Checkbox label="Optional" checked={!!question.optional} />
+                    </Field>
                 )}
                 {question.type === SurveyQuestionType.Open && (
-                    <LemonField name="validation">
+                    <Field name="validation">
                         {({ value, onChange }) => (
                             <ValidationRulesEditor
                                 value={(question as BasicSurveyQuestion).validation ?? value}
                                 onChange={onChange}
                             />
                         )}
-                    </LemonField>
+                    </Field>
                 )}
                 {question.type === SurveyQuestionType.Link && (
-                    <LemonField name="link" label="Link" info="Only https:// or mailto: links are supported.">
-                        <LemonInput value={question.link || ''} placeholder="https://hanzo.ai" />
-                    </LemonField>
+                    <Field name="link" label="Link" info="Only https:// or mailto: links are supported.">
+                        <Input value={question.link || ''} placeholder="https://hanzo.ai" />
+                    </Field>
                 )}
                 {question.type === SurveyQuestionType.Rating && (
                     <div className="flex flex-col gap-2">
                         <div className="flex flex-row gap-4">
-                            <LemonField name="display" label="Display type" className="w-1/2">
-                                <LemonSelect
+                            <Field name="display" label="Display type" className="w-1/2">
+                                <Select
                                     options={[
                                         { label: 'Number', value: 'number' },
                                         { label: 'Emoji', value: 'emoji' },
@@ -296,9 +296,9 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                         resetBranchingForQuestion(index)
                                     }}
                                 />
-                            </LemonField>
-                            <LemonField name="scale" label="Scale" className="w-1/2">
-                                <LemonSelect
+                            </Field>
+                            <Field name="scale" label="Scale" className="w-1/2">
+                                <Select
                                     options={question.display === 'emoji' ? SCALE_OPTIONS.EMOJI : SCALE_OPTIONS.NUMBER}
                                     onChange={(val) => {
                                         const newQuestion = { ...survey.questions[index], scale: val }
@@ -308,45 +308,45 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                         resetBranchingForQuestion(index)
                                     }}
                                 />
-                            </LemonField>
+                            </Field>
                         </div>
                         {!isThumbQuestion(question) && (
                             <div className="flex flex-row gap-4">
-                                <LemonField name="lowerBoundLabel" label="Lower bound label" className="w-1/2">
-                                    <LemonInput value={question.lowerBoundLabel || ''} />
-                                </LemonField>
-                                <LemonField name="upperBoundLabel" label="Upper bound label" className="w-1/2">
-                                    <LemonInput value={question.upperBoundLabel || ''} />
-                                </LemonField>
+                                <Field name="lowerBoundLabel" label="Lower bound label" className="w-1/2">
+                                    <Input value={question.lowerBoundLabel || ''} />
+                                </Field>
+                                <Field name="upperBoundLabel" label="Upper bound label" className="w-1/2">
+                                    <Input value={question.upperBoundLabel || ''} />
+                                </Field>
                             </div>
                         )}
                         {shouldShowNpsCheckbox && (
-                            <LemonField name="isNpsQuestion">
+                            <Field name="isNpsQuestion">
                                 {({ value: isNpsQuestion, onChange: toggleIsNpsQuestion }) => (
-                                    <LemonCheckbox
+                                    <Checkbox
                                         label="This is an NPS question"
                                         info="If checked, we'll calculate and display NPS on the survey results page."
                                         checked={isNpsQuestion !== false}
                                         onChange={toggleIsNpsQuestion}
                                     />
                                 )}
-                            </LemonField>
+                            </Field>
                         )}
                     </div>
                 )}
                 {(question.type === SurveyQuestionType.SingleChoice ||
                     question.type === SurveyQuestionType.MultipleChoice) && (
                     <div className="flex flex-col gap-2">
-                        <LemonField name="hasOpenChoice">
+                        <Field name="hasOpenChoice">
                             {({ value: hasOpenChoice, onChange: toggleHasOpenChoice }) => (
-                                <LemonField name="choices" label="Choices">
+                                <Field name="choices" label="Choices">
                                     {({ value, onChange }) => (
                                         <div className="flex flex-col gap-2">
                                             {(value || []).map((choice: string, index: number) => {
                                                 const isOpenChoice = hasOpenChoice && index === value?.length - 1
                                                 return (
                                                     <div className="flex flex-row gap-2 relative" key={index}>
-                                                        <LemonInput
+                                                        <Input
                                                             value={choice}
                                                             fullWidth
                                                             onChange={(val) => {
@@ -356,11 +356,11 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                                             }}
                                                             suffix={
                                                                 isOpenChoice && (
-                                                                    <LemonTag type="highlight">open-ended</LemonTag>
+                                                                    <Tag type="highlight">open-ended</Tag>
                                                                 )
                                                             }
                                                         />
-                                                        <LemonButton
+                                                        <Button
                                                             icon={<IconTrash />}
                                                             size="xsmall"
                                                             noPadding
@@ -380,7 +380,7 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                                 {((value || []).length < MAX_NUMBER_OF_OPTIONS ||
                                                     survey.type != SurveyType.Popover) && (
                                                     <>
-                                                        <LemonButton
+                                                        <Button
                                                             icon={<IconPlusSmall />}
                                                             type="secondary"
                                                             fullWidth={false}
@@ -398,9 +398,9 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                                             }}
                                                         >
                                                             Add choice
-                                                        </LemonButton>
+                                                        </Button>
                                                         {!hasOpenChoice && (
-                                                            <LemonButton
+                                                            <Button
                                                                 icon={<IconPlusSmall />}
                                                                 type="secondary"
                                                                 fullWidth={false}
@@ -414,14 +414,14 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                                                 }}
                                                             >
                                                                 Add open-ended choice
-                                                            </LemonButton>
+                                                            </Button>
                                                         )}
-                                                        <LemonField name="shuffleOptions" className="mt-2">
+                                                        <Field name="shuffleOptions" className="mt-2">
                                                             {({
                                                                 value: shuffleOptions,
                                                                 onChange: toggleShuffleOptions,
                                                             }) => (
-                                                                <LemonCheckbox
+                                                                <Checkbox
                                                                     checked={!!shuffleOptions}
                                                                     label="Shuffle options"
                                                                     onChange={(checked) =>
@@ -429,18 +429,18 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                                                     }
                                                                 />
                                                             )}
-                                                        </LemonField>
+                                                        </Field>
                                                     </>
                                                 )}
                                             </div>
                                         </div>
                                     )}
-                                </LemonField>
+                                </Field>
                             )}
-                        </LemonField>
+                        </Field>
                     </div>
                 )}
-                <LemonField
+                <Field
                     name="buttonText"
                     label="Submit button text"
                     className="flex-1 flex gap-1 justify-center"
@@ -452,7 +452,7 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                 >
                     <>
                         {(!canSkipSubmitButton || (canSkipSubmitButton && !question.skipSubmitButton)) && (
-                            <LemonInput
+                            <Input
                                 value={
                                     question.buttonText === undefined
                                         ? (survey.appearance?.submitButtonText ?? 'Submit')
@@ -462,7 +462,7 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                             />
                         )}
                         {canSkipSubmitButton && (
-                            <LemonField
+                            <Field
                                 name="skipSubmitButton"
                                 info={
                                     <>
@@ -473,16 +473,16 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                 }
                             >
                                 {({ value: skipSubmitButtonValue, onChange: onSkipSubmitButtonChange }) => (
-                                    <LemonCheckbox
+                                    <Checkbox
                                         label="Automatically submit on selection"
                                         checked={!!skipSubmitButtonValue}
                                         onChange={onSkipSubmitButtonChange}
                                     />
                                 )}
-                            </LemonField>
+                            </Field>
                         )}
                     </>
-                </LemonField>
+                </Field>
                 <QuestionBranchingInput questionIndex={index} question={question} />
             </div>
         </Group>

@@ -3,11 +3,11 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconCopy, IconDrag, IconEllipsis, IconTrash } from '@hanzo/icons'
-import { LemonInput, LemonTextArea, Tooltip } from '@hanzo/lemon-ui'
+import { Input, TextArea, Tooltip } from '@hanzo/elements'
 
-import { LemonBadge } from 'lib/lemon-ui/LemonBadge'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonMenu } from 'lib/lemon-ui/LemonMenu'
+import { Badge } from 'lib/elements/Badge'
+import { Button } from 'lib/elements/Button'
+import { Menu } from 'lib/elements/Menu'
 
 import { workflowLogic } from '../../../workflowLogic'
 import { insightsFlowEditorLogic } from '../../insightsFlowEditorLogic'
@@ -96,7 +96,7 @@ export function StepView({ action }: { action: InsightsFlowAction }): JSX.Elemen
                     <div className="flex justify-between items-center gap-1">
                         {isEditingName ? (
                             <div onClick={(e) => e.stopPropagation()} className="flex-1 min-w-0">
-                                <LemonInput
+                                <Input
                                     autoFocus
                                     value={editNameValue}
                                     onChange={setEditNameValue}
@@ -138,7 +138,7 @@ export function StepView({ action }: { action: InsightsFlowAction }): JSX.Elemen
 
                     {isEditingDescription ? (
                         <div onClick={(e) => e.stopPropagation()} className="min-w-0">
-                            <LemonTextArea
+                            <TextArea
                                 autoFocus
                                 value={editDescriptionValue}
                                 onChange={setEditDescriptionValue}
@@ -183,7 +183,7 @@ export function StepView({ action }: { action: InsightsFlowAction }): JSX.Elemen
                 </div>
                 {isSelected && node?.deletable && (
                     <div className="absolute top-0.5 right-0.5" onClick={(e) => e.stopPropagation()}>
-                        <LemonMenu
+                        <Menu
                             items={[
                                 selectedNodeCanBeCopiedOrMoved
                                     ? {
@@ -215,14 +215,14 @@ export function StepView({ action }: { action: InsightsFlowAction }): JSX.Elemen
                                 },
                             ]}
                         >
-                            <LemonButton icon={<IconEllipsis />} size="xsmall" noPadding />
-                        </LemonMenu>
+                            <Button icon={<IconEllipsis />} size="xsmall" noPadding />
+                        </Menu>
                     </div>
                 )}
             </div>
             {hasValidationError ? (
                 <div className="absolute top-0 right-0 scale-75">
-                    <LemonBadge status="warning" size="small" content="!" position="top-right" />
+                    <Badge status="warning" size="small" content="!" position="top-right" />
                 </div>
             ) : null}
             {mode === 'metrics' && (

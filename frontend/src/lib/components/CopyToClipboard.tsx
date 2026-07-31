@@ -3,8 +3,8 @@ import React from 'react'
 
 import { IconCopy } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 interface InlinePropsBase {
@@ -56,7 +56,7 @@ export const CopyToClipboardInline = React.forwardRef<HTMLSpanElement, InlinePro
     const copy = (): void => void copyToClipboard((explicitValue ?? children) as string, description)
 
     let content = (
-        <LemonButton
+        <Button
             size={iconSize}
             icon={<IconCopy style={{ ...iconStyle }} />}
             noPadding

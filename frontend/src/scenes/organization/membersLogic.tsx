@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { permanentlyMount } from 'lib/utils/kea-logic-builders'
 import { membershipLevelToName } from 'lib/utils/permissioning'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -70,7 +70,7 @@ export const membersLogic = kea<membersLogicType>([
             },
             removeMember: async (member: OrganizationMemberType) => {
                 await api.organizationMembers.delete(member.user.uuid)
-                lemonToast.success(
+                toast.success(
                     <>
                         Removed <b>{member.user.first_name}</b> from organization
                     </>
@@ -80,7 +80,7 @@ export const membersLogic = kea<membersLogicType>([
             },
             changeMemberAccessLevel: async ({ member, level }) => {
                 const updatedMember = await api.organizationMembers.update(member.user.uuid, { level })
-                lemonToast.success(
+                toast.success(
                     <>
                         Made <b>{member.user.first_name}</b> organization {membershipLevelToName.get(level)}
                     </>

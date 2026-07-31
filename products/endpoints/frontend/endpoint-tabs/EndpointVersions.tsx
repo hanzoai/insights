@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { LemonButton, LemonTable, LemonTag } from '@hanzo/lemon-ui'
-import type { LemonTableColumns } from '@hanzo/lemon-ui'
+import { Button, Table, Tag } from '@hanzo/elements'
+import type { TableColumns } from '@hanzo/elements'
 
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { More } from 'lib/elements/Button/More'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
 import { urls } from 'scenes/urls'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
@@ -44,7 +44,7 @@ export function EndpointVersions({ tabId }: EndpointVersionsProps): JSX.Element 
         return <></>
     }
 
-    const columns: LemonTableColumns<EndpointVersionType> = [
+    const columns: TableColumns<EndpointVersionType> = [
         {
             title: 'Version',
             dataIndex: 'version',
@@ -58,20 +58,20 @@ export function EndpointVersions({ tabId }: EndpointVersionsProps): JSX.Element 
                     ...(isCurrent ? {} : { version: record.version }),
                 }).url
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={versionUrl}
                         title={
                             <>
                                 v{record.version}
                                 {isCurrent && (
-                                    <LemonTag type="completion" className="ml-2">
+                                    <Tag type="completion" className="ml-2">
                                         Latest
-                                    </LemonTag>
+                                    </Tag>
                                 )}
                                 {isViewing && !isCurrent && (
-                                    <LemonTag type="highlight" className="ml-2">
+                                    <Tag type="highlight" className="ml-2">
                                         Viewing
-                                    </LemonTag>
+                                    </Tag>
                                 )}
                             </>
                         }
@@ -87,9 +87,9 @@ export function EndpointVersions({ tabId }: EndpointVersionsProps): JSX.Element 
             align: 'center',
             render: function RenderStatus(_, record) {
                 return record.is_active ? (
-                    <LemonTag type="success">Active</LemonTag>
+                    <Tag type="success">Active</Tag>
                 ) : (
-                    <LemonTag type="danger">Inactive</LemonTag>
+                    <Tag type="danger">Inactive</Tag>
                 )
             },
         },
@@ -103,9 +103,9 @@ export function EndpointVersions({ tabId }: EndpointVersionsProps): JSX.Element 
                 }
                 return (
                     <div className="flex items-center gap-2">
-                        <LemonTag type={getStatusTagType(record.materialization?.status)}>
+                        <Tag type={getStatusTagType(record.materialization?.status)}>
                             {record.materialization?.status || 'Unknown'}
-                        </LemonTag>
+                        </Tag>
                     </div>
                 )
             },
@@ -125,10 +125,10 @@ export function EndpointVersions({ tabId }: EndpointVersionsProps): JSX.Element 
                     <More
                         overlay={
                             <>
-                                <LemonButton fullWidth to={versionUrl}>
+                                <Button fullWidth to={versionUrl}>
                                     View version
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     fullWidth
                                     onClick={() =>
                                         updateEndpoint(
@@ -139,7 +139,7 @@ export function EndpointVersions({ tabId }: EndpointVersionsProps): JSX.Element 
                                     }
                                 >
                                     {record.is_active ? 'Deactivate version' : 'Activate version'}
-                                </LemonButton>
+                                </Button>
                             </>
                         }
                     />
@@ -153,7 +153,7 @@ export function EndpointVersions({ tabId }: EndpointVersionsProps): JSX.Element 
             title="Endpoint versions"
             description="Updating an endpoint's query creates a new version. However, you can manage each endpoint version's configuration separately. You can also either deactivate a single version, or the entire endpoint."
         >
-            <LemonTable
+            <Table
                 data-attr="endpoint-versions-table"
                 dataSource={versions || []}
                 columns={columns}

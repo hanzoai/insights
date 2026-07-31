@@ -2,19 +2,19 @@ import { useActions, useValues } from 'kea'
 
 import { IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonCard,
-    LemonColorPicker,
-    LemonDivider,
-    LemonInput,
-    LemonSelect,
-    LemonSwitch,
+    Banner,
+    Button,
+    Card,
+    ColorPicker,
+    Divider,
+    Input,
+    Select,
+    Switch,
     Link,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { MemberSelectMultiple } from 'lib/components/MemberSelectMultiple'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
+import { Dialog } from 'lib/elements/Dialog'
 import { SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -53,7 +53,7 @@ function AuthorizedDomains(): JSX.Element {
             {(isAddingDomain || editingDomainIndex !== null) && (
                 <div className="border rounded p-2 bg-surface-primary">
                     <div className="gap-2">
-                        <LemonInput
+                        <Input
                             autoFocus
                             value={domainInputValue}
                             onChange={setDomainInputValue}
@@ -68,17 +68,17 @@ function AuthorizedDomains(): JSX.Element {
                             }}
                         />
                         <div className="flex gap-2 mt-2">
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 size="small"
                                 onClick={() => saveDomain(domainInputValue, editingDomainIndex)}
                                 disabledReason={!domainInputValue.trim() ? 'Enter a domain' : undefined}
                             >
                                 Save
-                            </LemonButton>
-                            <LemonButton type="secondary" size="small" onClick={cancelDomainEdit}>
+                            </Button>
+                            <Button type="secondary" size="small" onClick={cancelDomainEdit}>
                                 Cancel
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -91,18 +91,18 @@ function AuthorizedDomains(): JSX.Element {
                             {domain}
                         </span>
                         <div className="flex gap-1 shrink-0">
-                            <LemonButton
+                            <Button
                                 icon={<IconPencil />}
                                 onClick={() => startEditDomain(index)}
                                 tooltip="Edit"
                                 size="small"
                             />
-                            <LemonButton
+                            <Button
                                 icon={<IconTrash />}
                                 tooltip="Remove domain"
                                 size="small"
                                 onClick={() => {
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: <>Remove {domain}?</>,
                                         description: 'Are you sure you want to remove this domain?',
                                         primaryButton: {
@@ -168,12 +168,12 @@ export function SupportSettingsScene(): JSX.Element {
                 title="Conversations API"
                 description="Turn on conversations API to enable access for tickets and messages."
             >
-                <LemonCard hoverEffect={false} className="max-w-[800px] px-4 py-3">
+                <Card hoverEffect={false} className="max-w-[800px] px-4 py-3">
                     <div className="flex items-center gap-4 justify-between">
                         <div>
                             <label className="w-40 shrink-0 font-medium">Enable conversations API</label>
                         </div>
-                        <LemonSwitch
+                        <Switch
                             checked={!!currentTeam?.conversations_enabled}
                             onChange={(checked) => {
                                 setConversationsEnabledLoading(true)
@@ -190,12 +190,12 @@ export function SupportSettingsScene(): JSX.Element {
                             loading={conversationsEnabledLoading}
                         />
                     </div>
-                </LemonCard>
+                </Card>
             </SceneSection>
             {currentTeam?.conversations_enabled && (
                 <>
                     <SceneSection title="Notifications" className="mt-4">
-                        <LemonCard hoverEffect={false} className="flex flex-col gap-y-2 max-w-[800px] px-4 py-3">
+                        <Card hoverEffect={false} className="flex flex-col gap-y-2 max-w-[800px] px-4 py-3">
                             <div className="flex items-center gap-4 justify-between">
                                 <div>
                                     <label className="w-40 shrink-0 font-medium">Email notifications</label>
@@ -209,12 +209,12 @@ export function SupportSettingsScene(): JSX.Element {
                                     onChange={setNotificationRecipients}
                                 />
                             </div>
-                            <LemonDivider />
+                            <Divider />
                             <BrowserNotificationsSection />
-                        </LemonCard>
+                        </Card>
                     </SceneSection>
                     <SceneSection title="In-app widget" className="mt-4">
-                        <LemonCard hoverEffect={false} className="flex flex-col gap-y-2 max-w-[800px] px-4 py-3">
+                        <Card hoverEffect={false} className="flex flex-col gap-y-2 max-w-[800px] px-4 py-3">
                             <div className="flex items-center gap-4 justify-between">
                                 <div>
                                     <label className="w-40 shrink-0 font-medium">Enable in-app widget</label>
@@ -222,7 +222,7 @@ export function SupportSettingsScene(): JSX.Element {
                                         Turn on the in-app support widget to start receiving messages from your users
                                     </p>
                                 </div>
-                                <LemonSwitch
+                                <Switch
                                     checked={!!currentTeam?.conversations_settings?.widget_enabled}
                                     onChange={(checked) => {
                                         setWidgetEnabledLoading(true)
@@ -239,7 +239,7 @@ export function SupportSettingsScene(): JSX.Element {
 
                             {currentTeam?.conversations_settings?.widget_enabled && (
                                 <>
-                                    <LemonDivider />
+                                    <Divider />
                                     <div>
                                         <div className="flex justify-between items-center gap-4">
                                             <div>
@@ -251,23 +251,23 @@ export function SupportSettingsScene(): JSX.Element {
                                                 </p>
                                             </div>
                                             {!isAddingDomain && editingDomainIndex === null && (
-                                                <LemonButton
+                                                <Button
                                                     onClick={() => setIsAddingDomain(true)}
                                                     type="secondary"
                                                     icon={<IconPlus />}
                                                     size="small"
                                                 >
                                                     Add domain
-                                                </LemonButton>
+                                                </Button>
                                             )}
                                         </div>
                                         <AuthorizedDomains />
                                     </div>
                                     <SceneSection title="Visual settings" className="mt-8" titleSize="sm">
-                                        <LemonCard hoverEffect={false} className="px-4 py-3">
+                                        <Card hoverEffect={false} className="px-4 py-3">
                                             <div className="flex items-center gap-4 py-2 justify-between">
                                                 <label className="w-40 shrink-0 font-medium">Button color</label>
-                                                <LemonColorPicker
+                                                <ColorPicker
                                                     colors={[
                                                         '#1d4aff',
                                                         '#00aaff',
@@ -292,10 +292,10 @@ export function SupportSettingsScene(): JSX.Element {
                                                     showCustomColor
                                                 />
                                             </div>
-                                            <LemonDivider />
+                                            <Divider />
                                             <div className="flex items-center gap-4 py-2 justify-between">
                                                 <label className="w-40 shrink-0 font-medium">Widget position</label>
-                                                <LemonSelect
+                                                <Select
                                                     value={
                                                         currentTeam?.conversations_settings?.widget_position ||
                                                         'bottom_right'
@@ -316,11 +316,11 @@ export function SupportSettingsScene(): JSX.Element {
                                                     ]}
                                                 />
                                             </div>
-                                            <LemonDivider />
+                                            <Divider />
                                             <div className="flex items-center gap-4 py-2 justify-between">
                                                 <label className="w-40 shrink-0 font-medium">Greeting message</label>
                                                 <div className="flex gap-2 flex-1">
-                                                    <LemonInput
+                                                    <Input
                                                         value={
                                                             greetingInputValue ??
                                                             currentTeam?.conversations_settings?.widget_greeting_text ??
@@ -330,7 +330,7 @@ export function SupportSettingsScene(): JSX.Element {
                                                         onChange={setGreetingInputValue}
                                                         fullWidth
                                                     />
-                                                    <LemonButton
+                                                    <Button
                                                         type="primary"
                                                         onClick={saveGreetingText}
                                                         disabledReason={
@@ -338,14 +338,14 @@ export function SupportSettingsScene(): JSX.Element {
                                                         }
                                                     >
                                                         Save
-                                                    </LemonButton>
+                                                    </Button>
                                                 </div>
                                             </div>
-                                            <LemonDivider />
+                                            <Divider />
                                             <div className="flex items-center gap-4 py-2 justify-between">
                                                 <label className="w-40 shrink-0 font-medium">Placeholder text</label>
                                                 <div className="flex gap-2 flex-1">
-                                                    <LemonInput
+                                                    <Input
                                                         value={
                                                             placeholderTextValue ??
                                                             currentTeam?.conversations_settings
@@ -356,7 +356,7 @@ export function SupportSettingsScene(): JSX.Element {
                                                         onChange={setPlaceholderTextValue}
                                                         fullWidth
                                                     />
-                                                    <LemonButton
+                                                    <Button
                                                         type="primary"
                                                         onClick={savePlaceholderText}
                                                         disabledReason={
@@ -364,13 +364,13 @@ export function SupportSettingsScene(): JSX.Element {
                                                         }
                                                     >
                                                         Save
-                                                    </LemonButton>
+                                                    </Button>
                                                 </div>
                                             </div>
-                                        </LemonCard>
+                                        </Card>
                                     </SceneSection>
                                     <SceneSection title="Identification form" className="mt-8" titleSize="sm">
-                                        <LemonCard hoverEffect={false} className="px-4 py-3">
+                                        <Card hoverEffect={false} className="px-4 py-3">
                                             <div className="flex items-center gap-4 py-2 justify-between">
                                                 <div>
                                                     <label className="w-40 shrink-0 font-medium">Require email</label>
@@ -378,7 +378,7 @@ export function SupportSettingsScene(): JSX.Element {
                                                         Require user to enter their email address to start the chat.
                                                     </p>
                                                 </div>
-                                                <LemonSwitch
+                                                <Switch
                                                     checked={
                                                         !!currentTeam?.conversations_settings?.widget_require_email
                                                     }
@@ -395,7 +395,7 @@ export function SupportSettingsScene(): JSX.Element {
 
                                             {currentTeam?.conversations_settings?.widget_require_email && (
                                                 <>
-                                                    <LemonDivider />
+                                                    <Divider />
                                                     <div className="flex items-center gap-4 py-2 justify-between">
                                                         <div>
                                                             <label className="w-40 shrink-0 font-medium">
@@ -405,7 +405,7 @@ export function SupportSettingsScene(): JSX.Element {
                                                                 Collect user's name to personalize the chat.
                                                             </p>
                                                         </div>
-                                                        <LemonSwitch
+                                                        <Switch
                                                             checked={
                                                                 !!currentTeam?.conversations_settings
                                                                     ?.widget_collect_name
@@ -420,11 +420,11 @@ export function SupportSettingsScene(): JSX.Element {
                                                             }}
                                                         />
                                                     </div>
-                                                    <LemonDivider />
+                                                    <Divider />
                                                     <div className="flex items-center gap-4 py-2 justify-between">
                                                         <label className="w-40 shrink-0 font-medium">Form title</label>
                                                         <div className="flex gap-2 flex-1">
-                                                            <LemonInput
+                                                            <Input
                                                                 value={
                                                                     identificationFormTitleValue ??
                                                                     currentTeam?.conversations_settings
@@ -435,7 +435,7 @@ export function SupportSettingsScene(): JSX.Element {
                                                                 onChange={setIdentificationFormTitleValue}
                                                                 fullWidth
                                                             />
-                                                            <LemonButton
+                                                            <Button
                                                                 type="primary"
                                                                 onClick={saveIdentificationFormTitle}
                                                                 disabledReason={
@@ -445,16 +445,16 @@ export function SupportSettingsScene(): JSX.Element {
                                                                 }
                                                             >
                                                                 Save
-                                                            </LemonButton>
+                                                            </Button>
                                                         </div>
                                                     </div>
-                                                    <LemonDivider />
+                                                    <Divider />
                                                     <div className="flex items-center gap-4 py-2 justify-between">
                                                         <label className="w-40 shrink-0 font-medium">
                                                             Form description
                                                         </label>
                                                         <div className="flex gap-2 flex-1">
-                                                            <LemonInput
+                                                            <Input
                                                                 value={
                                                                     identificationFormDescriptionValue ??
                                                                     currentTeam?.conversations_settings
@@ -465,7 +465,7 @@ export function SupportSettingsScene(): JSX.Element {
                                                                 onChange={setIdentificationFormDescriptionValue}
                                                                 fullWidth
                                                             />
-                                                            <LemonButton
+                                                            <Button
                                                                 type="primary"
                                                                 onClick={saveIdentificationFormDescription}
                                                                 disabledReason={
@@ -475,12 +475,12 @@ export function SupportSettingsScene(): JSX.Element {
                                                                 }
                                                             >
                                                                 Save
-                                                            </LemonButton>
+                                                            </Button>
                                                         </div>
                                                     </div>
                                                 </>
                                             )}
-                                        </LemonCard>
+                                        </Card>
                                     </SceneSection>
                                     <div className="pt-8">
                                         <div className="flex items-center gap-4 py-2 justify-between">
@@ -491,7 +491,7 @@ export function SupportSettingsScene(): JSX.Element {
                                                 </p>
                                             </div>
                                             <div className="flex gap-2 flex-1">
-                                                <LemonInput
+                                                <Input
                                                     value={
                                                         currentTeam?.conversations_settings?.widget_public_token ||
                                                         'Token will be auto-generated on save'
@@ -500,23 +500,23 @@ export function SupportSettingsScene(): JSX.Element {
                                                     fullWidth
                                                 />
                                                 {currentTeam?.conversations_settings?.widget_public_token && (
-                                                    <LemonButton
+                                                    <Button
                                                         type="secondary"
                                                         status="danger"
                                                         onClick={generateNewToken}
                                                     >
                                                         Regenerate
-                                                    </LemonButton>
+                                                    </Button>
                                                 )}
                                             </div>
                                         </div>
-                                        <LemonBanner type="warning" className="my-2">
+                                        <Banner type="warning" className="my-2">
                                             Only regenerate if you suspect it has been exposed or compromised.
-                                        </LemonBanner>
+                                        </Banner>
                                     </div>
                                 </>
                             )}
-                        </LemonCard>
+                        </Card>
                     </SceneSection>
                     <SceneSection
                         title="Workflows"
@@ -528,7 +528,7 @@ export function SupportSettingsScene(): JSX.Element {
                         }
                         className="mt-4"
                     >
-                        <LemonCard hoverEffect={false} className="max-w-[800px] px-4 py-3">
+                        <Card hoverEffect={false} className="max-w-[800px] px-4 py-3">
                             <div className="flex flex-col gap-4">
                                 <div>
                                     <h4 className="font-semibold mb-1">Trigger events</h4>
@@ -606,7 +606,7 @@ export function SupportSettingsScene(): JSX.Element {
                                     </p>
                                 </div>
                             </div>
-                        </LemonCard>
+                        </Card>
                     </SceneSection>
                 </>
             )}

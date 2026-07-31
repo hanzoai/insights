@@ -1,8 +1,8 @@
 import { IconArrowLeft, IconArrowRight, IconEllipsis, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonMenu } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Menu } from '@hanzo/elements'
 
 import { ResizableElement } from 'lib/components/ResizeElement/ResizeElement'
-import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
+import { IconArrowDown, IconArrowUp } from 'lib/elements/icons'
 
 import {
     CHECKBOX_WIDTH,
@@ -66,7 +66,7 @@ export function LogRowHeader({
             <div className="flex items-center self-stretch">
                 <div style={{ width: SEVERITY_WIDTH, flexShrink: 0 }} />
                 <div className="flex items-center justify-center shrink-0" style={{ width: CHECKBOX_WIDTH }}>
-                    <LemonCheckbox
+                    <Checkbox
                         checked={someSelected ? 'indeterminate' : allSelected}
                         onChange={() => (allSelected ? onClearSelection?.() : onSelectAll?.())}
                         size="small"
@@ -81,7 +81,7 @@ export function LogRowHeader({
                 style={{ width: TIMESTAMP_WIDTH, flexShrink: 0 }}
             >
                 Timestamp
-                <LemonButton
+                <Button
                     size="xsmall"
                     className="h-full"
                     icon={orderBy === 'latest' ? <IconArrowDown /> : <IconArrowUp />}
@@ -120,7 +120,7 @@ export function LogRowHeader({
                                 {attributeKey}
                             </span>
                             {(onRemoveAttributeColumn || onMoveAttributeColumn) && (
-                                <LemonMenu
+                                <Menu
                                     items={[
                                         onMoveAttributeColumn
                                             ? {
@@ -148,13 +148,13 @@ export function LogRowHeader({
                                             : null,
                                     ]}
                                 >
-                                    <LemonButton
+                                    <Button
                                         size="xsmall"
                                         noPadding
                                         icon={<IconEllipsis className="text-muted" />}
                                         className="shrink-0"
                                     />
-                                </LemonMenu>
+                                </Menu>
                             )}
                         </div>
                     </ResizableElement>

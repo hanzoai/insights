@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
 
 import { experimentLogic } from '../experimentLogic'
 import { modalsLogic } from '../modalsLogic'
@@ -32,7 +32,7 @@ export function LegacyMetricSourceModal({ isSecondary }: { isSecondary?: boolean
     const openSharedMetricModal = isSecondary ? openSecondarySharedMetricModal : openPrimarySharedMetricModal
 
     return (
-        <LemonModal isOpen={isOpen} onClose={closeCurrentModal} width={1000} title="Choose metric source">
+        <Modal isOpen={isOpen} onClose={closeCurrentModal} width={1000} title="Choose metric source">
             <div className="flex gap-4 mb-4">
                 <div
                     className="flex-1 cursor-pointer p-4 rounded border hover:border-accent"
@@ -71,6 +71,6 @@ export function LegacyMetricSourceModal({ isSecondary }: { isSecondary?: boolean
                     </div>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

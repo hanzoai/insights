@@ -4,8 +4,8 @@ import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Sorting } from 'lib/lemon-ui/LemonTable'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { Sorting } from 'lib/elements/Table'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { objectsEqual, toParams } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -232,11 +232,11 @@ export const addSavedInsightsModalLogic = kea<addSavedInsightsModalLogicType>([
                     logic.mount()
                     logic.actions.loadDashboard({ action: DashboardLoadAction.Update })
                     logic.unmount()
-                    lemonToast.success('Insight added to dashboard')
+                    toast.success('Insight added to dashboard')
                 }
             } catch (e) {
                 actions.dashboardUpdateFailed(insight.id)
-                lemonToast.error('Failed to add insight to dashboard')
+                toast.error('Failed to add insight to dashboard')
                 throw e
             } finally {
                 eventUsageLogic.actions.reportSavedInsightToDashboard(insight, dashboardId)
@@ -256,11 +256,11 @@ export const addSavedInsightsModalLogic = kea<addSavedInsightsModalLogicType>([
                     logic.mount()
                     logic.actions.loadDashboard({ action: DashboardLoadAction.Update })
                     logic.unmount()
-                    lemonToast.success('Insight removed from dashboard')
+                    toast.success('Insight removed from dashboard')
                 }
             } catch (e) {
                 actions.dashboardUpdateFailed(insight.id)
-                lemonToast.error('Failed to remove insight from dashboard')
+                toast.error('Failed to remove insight from dashboard')
                 throw e
             } finally {
                 eventUsageLogic.actions.reportRemovedInsightFromDashboard(insight, dashboardId)

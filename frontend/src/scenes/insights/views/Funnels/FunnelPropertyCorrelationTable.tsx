@@ -5,15 +5,15 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 
 import { IconArchive, IconTrending } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonTable } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Table } from '@hanzo/elements'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { PropertySelect } from 'lib/components/PropertySelect/PropertySelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { VisibilitySensor } from 'lib/components/VisibilitySensor/VisibilitySensor'
-import { Link } from 'lib/lemon-ui/Link'
-import { Popover } from 'lib/lemon-ui/Popover'
-import { IconSelectProperties, IconTrendingDown } from 'lib/lemon-ui/icons'
+import { Link } from 'lib/elements/Link'
+import { Popover } from 'lib/elements/Popover'
+import { IconSelectProperties, IconTrendingDown } from 'lib/elements/icons'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { ValueInspectorButton } from 'scenes/funnels/ValueInspectorButton'
 import { funnelCorrelationUsageLogic } from 'scenes/funnels/funnelCorrelationUsageLogic'
@@ -164,7 +164,7 @@ export function FunnelPropertyCorrelationTable(): JSX.Element | null {
                                         {propertyNames.length === 1 && propertyNames[0] === '$all' ? (
                                             <>All properties selected</>
                                         ) : (
-                                            <LemonButton
+                                            <Button
                                                 size="small"
                                                 type="primary"
                                                 onClick={() => {
@@ -173,12 +173,12 @@ export function FunnelPropertyCorrelationTable(): JSX.Element | null {
                                                 }}
                                             >
                                                 Select all properties
-                                            </LemonButton>
+                                            </Button>
                                         )}
                                     </div>
                                 }
                             >
-                                <LemonButton size="small" onClick={() => setIsPropertiesOpen(true)}>
+                                <Button size="small" onClick={() => setIsPropertiesOpen(true)}>
                                     {propertyNames.length === 1 && propertyNames[0] === '$all' ? (
                                         <>All properties selected</>
                                     ) : (
@@ -187,7 +187,7 @@ export function FunnelPropertyCorrelationTable(): JSX.Element | null {
                                             selected
                                         </>
                                     )}
-                                </LemonButton>
+                                </Button>
                             </Popover>
                         </div>
                         <div className="flex">
@@ -195,14 +195,14 @@ export function FunnelPropertyCorrelationTable(): JSX.Element | null {
                                 CORRELATION
                             </p>
                             <div className="flex">
-                                <LemonCheckbox
+                                <Checkbox
                                     checked={propertyCorrelationTypes.includes(FunnelCorrelationType.Success)}
                                     onChange={() => onClickCorrelationType(FunnelCorrelationType.Success)}
                                     label="Success"
                                     size="small"
                                     bordered
                                 />
-                                <LemonCheckbox
+                                <Checkbox
                                     checked={propertyCorrelationTypes.includes(FunnelCorrelationType.Failure)}
                                     onChange={() => onClickCorrelationType(FunnelCorrelationType.Failure)}
                                     label="Drop-off"
@@ -214,7 +214,7 @@ export function FunnelPropertyCorrelationTable(): JSX.Element | null {
                     </div>
                 </div>
 
-                <LemonTable
+                <Table
                     id="property-correlation"
                     embedded
                     columns={[
@@ -271,13 +271,13 @@ export function FunnelPropertyCorrelationTable(): JSX.Element | null {
                                                 Learn more about correlation analysis.
                                             </Link>
                                         </p>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             onClick={() => setIsPropertiesOpen(true)}
                                             className="mx-auto !mt-2"
                                         >
                                             Select properties
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 )}
                             </div>

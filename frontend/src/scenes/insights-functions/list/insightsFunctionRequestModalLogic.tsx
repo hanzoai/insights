@@ -1,9 +1,9 @@
 import { actions, connect, kea, listeners, path } from 'kea'
 import insights from '@hanzo/insights'
 
-import { LemonDialog, LemonInput, LemonTextArea, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, Input, TextArea, toast } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -25,7 +25,7 @@ export const insightsFunctionRequestModalLogic = kea<insightsFunctionRequestModa
         openFeedbackDialog: async ({ type, name }, breakpoint) => {
             await breakpoint(100)
             const humanizedType = humanizeInsightsFunctionType(type)
-            LemonDialog.openForm({
+            Dialog.openForm({
                 title: `What ${humanizedType} would you like to see?`,
                 initialValues: { name: name },
                 errors: {
@@ -34,19 +34,19 @@ export const insightsFunctionRequestModalLogic = kea<insightsFunctionRequestModa
                 description: undefined,
                 content: (
                     <div className="deprecated-space-y-2">
-                        <LemonField name="name" label={`Name of the ${humanizedType}`}>
-                            <LemonInput placeholder="e.g. Insights" autoFocus />
-                        </LemonField>
-                        <LemonField name="details" label="Additional information" showOptional>
-                            <LemonTextArea
+                        <Field name="name" label={`Name of the ${humanizedType}`}>
+                            <Input placeholder="e.g. Insights" autoFocus />
+                        </Field>
+                        <Field name="details" label="Additional information" showOptional>
+                            <TextArea
                                 placeholder={`Any extra details about what you would need this ${humanizedType} to do or your overall goal`}
                             />
-                        </LemonField>
+                        </Field>
                     </div>
                 ),
                 onSubmit: async (values) => {
                     insights.capture(`cdp custom function feedback`, { type, ...values })
-                    lemonToast.success('Thank you for your feedback!')
+                    toast.success('Thank you for your feedback!')
                 },
             })
         },

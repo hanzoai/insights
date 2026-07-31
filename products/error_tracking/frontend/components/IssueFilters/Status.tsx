@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 
@@ -26,7 +26,7 @@ export const StatusFilter = (): JSX.Element => {
     const options: Option[] = ['all', 'active', 'resolved', 'suppressed']
 
     return (
-        <LemonSelect
+        <Select
             onChange={(value) => setStatus(value || undefined)}
             value={status || null}
             placeholder="Select status"

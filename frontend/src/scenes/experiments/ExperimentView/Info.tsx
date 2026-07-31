@@ -3,11 +3,11 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconGear, IconPencil, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonModal, LemonTag, Link, ProfilePicture, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Modal, Tag, Link, ProfilePicture, Tooltip } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Label } from 'lib/ui/Label/Label'
 import { cn } from 'lib/utils/css-classes'
 import { urls } from 'scenes/urls'
@@ -97,9 +97,9 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                                     <Tooltip
                                         title={`Variant "${shippedVariantKey}" has been rolled out to 100% of users`}
                                     >
-                                        <LemonTag type="completion" className="cursor-default">
+                                        <Tag type="completion" className="cursor-default">
                                             <b className="uppercase">100% rollout</b>
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )}
                             </div>
@@ -121,7 +121,7 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                                         </Tooltip>
                                     )}
                                     <CopyToClipboardInline
-                                        iconStyle={{ color: 'var(--lemon-button-icon-opacity)' }}
+                                        iconStyle={{ color: 'var(--button-icon-opacity)' }}
                                         className="font-normal text-sm"
                                         description="feature flag key"
                                     >
@@ -153,7 +153,7 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                                 </span>
                                 {usesNewQueryRunner && (
                                     <>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             size="xsmall"
                                             onClick={() => {
@@ -172,7 +172,7 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                     <div className="w-[500px]">
                         <div className="flex items-center gap-2 mt-2">
                             <Label intent="menu">Hypothesis</Label>
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="xsmall"
                                 icon={<IconPencil />}
@@ -185,16 +185,16 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                             <p className={cn('m-0 mt-2 text-secondary italic')}>Add your hypothesis for this test</p>
                         )}
 
-                        <LemonModal
+                        <Modal
                             isOpen={isDescriptionModalOpen}
                             onClose={closeDescriptionModal}
                             title="Edit hypothesis"
                             footer={
                                 <div className="flex items-center gap-2 justify-end">
-                                    <LemonButton type="secondary" onClick={closeDescriptionModal}>
+                                    <Button type="secondary" onClick={closeDescriptionModal}>
                                         Cancel
-                                    </LemonButton>
-                                    <LemonButton
+                                    </Button>
+                                    <Button
                                         type="primary"
                                         onClick={() => {
                                             updateExperiment({ description: tempDescription })
@@ -202,11 +202,11 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                                         }}
                                     >
                                         Save
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             }
                         >
-                            <LemonTextArea
+                            <TextArea
                                 className="w-full"
                                 value={tempDescription}
                                 onChange={(value) => setTempDescription(value)}
@@ -214,7 +214,7 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                                 minRows={6}
                                 maxLength={400}
                             />
-                        </LemonModal>
+                        </Modal>
                     </div>
                 </div>
 
@@ -262,7 +262,7 @@ export function Info({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.E
                     <div className="w-[500px]">
                         <div className="flex items-center gap-2">
                             <Label intent="menu">Conclusion</Label>
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="xsmall"
                                 icon={<IconPencil />}

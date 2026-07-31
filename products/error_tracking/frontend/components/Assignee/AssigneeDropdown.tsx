@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlusSmall, IconX } from '@hanzo/icons'
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 
@@ -21,11 +21,11 @@ export function AssigneeDropdown({ assignee, onChange }: AssigneeDropdownProps):
 
     return (
         <div className="max-w-100 deprecated-space-y-2">
-            <LemonInput type="search" placeholder="Search" autoFocus value={search} onChange={setSearch} fullWidth />
+            <Input type="search" placeholder="Search" autoFocus value={search} onChange={setSearch} fullWidth />
             <ul className="deprecated-space-y-2">
                 {assignee && (
                     <li>
-                        <LemonButton
+                        <Button
                             fullWidth
                             role="menuitem"
                             size="small"
@@ -33,7 +33,7 @@ export function AssigneeDropdown({ assignee, onChange }: AssigneeDropdownProps):
                             onClick={() => onChange(null)}
                         >
                             Remove assignee
-                        </LemonButton>
+                        </Button>
                     </li>
                 )}
 
@@ -50,14 +50,14 @@ export function AssigneeDropdown({ assignee, onChange }: AssigneeDropdownProps):
                     onSelect={onChange}
                     activeId={assignee?.id}
                     emptyState={
-                        <LemonButton
+                        <Button
                             fullWidth
                             size="small"
                             icon={<IconPlusSmall />}
                             to={urls.settings('organization-roles')}
                         >
                             <div className="text-secondary">Create role</div>
-                        </LemonButton>
+                        </Button>
                     }
                 />
 
@@ -104,7 +104,7 @@ const Section = ({
                 <h5 className="mx-2 my-0.5">{title}</h5>
                 {items.map((item) => (
                     <li key={item?.id || 'unassigned'}>
-                        <LemonButton
+                        <Button
                             fullWidth
                             role="menuitem"
                             size="small"
@@ -113,7 +113,7 @@ const Section = ({
                             active={activeId === item?.id}
                         >
                             <AssigneeLabelDisplay assignee={item} />
-                        </LemonButton>
+                        </Button>
                     </li>
                 ))}
 

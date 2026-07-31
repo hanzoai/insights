@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Input, Modal } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { humanFriendlyNumber } from 'lib/utils'
@@ -39,7 +39,7 @@ export function RunningTimeCalculatorModal(): JSX.Element {
     const { closeCalculateRunningTimeModal } = useActions(modalsLogic)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isCalculateRunningTimeModalOpen}
             onClose={closeCalculateRunningTimeModal}
             width={700}
@@ -112,7 +112,7 @@ export function RunningTimeCalculatorModal(): JSX.Element {
                             description="The minimum detectable effect (MDE) is the smallest relative improvement you want to be able to detect with statistical significance. A smaller MDE requires more participants but can detect subtler changes."
                         >
                             <div className="flex items-center gap-2">
-                                <LemonInput
+                                <Input
                                     className="w-[80px]"
                                     min={0}
                                     step={1}
@@ -153,6 +153,6 @@ export function RunningTimeCalculatorModal(): JSX.Element {
                     </>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

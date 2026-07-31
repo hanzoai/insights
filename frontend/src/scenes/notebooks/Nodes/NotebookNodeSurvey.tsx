@@ -1,12 +1,12 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { IconSurveys } from 'lib/lemon-ui/icons'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { IconSurveys } from 'lib/elements/icons'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { SurveyDisplaySummary } from 'scenes/surveys/Survey'
 import { SurveyAppearancePreview } from 'scenes/surveys/SurveyAppearancePreview'
@@ -59,7 +59,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeSurveyAttribute
                 <div className="flex items-center gap-2 p-3">
                     <IconSurveys className="text-lg" />
                     {surveyLoading ? (
-                        <LemonSkeleton className="h-6 flex-1" />
+                        <Skeleton className="h-6 flex-1" />
                     ) : (
                         <>
                             <span className="flex-1 font-semibold truncate">{survey.name}</span>
@@ -73,13 +73,13 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeSurveyAttribute
                     <>
                         {survey.description && (
                             <>
-                                <LemonDivider className="my-0" />
+                                <Divider className="my-0" />
                                 <span className="p-2">{survey.description}</span>
                             </>
                         )}
                         {!survey.start_date ? (
                             <>
-                                <LemonDivider className="my-0" />
+                                <Divider className="my-0" />
                                 <div className="p-2">
                                     <SurveyDisplaySummary
                                         id={id}
@@ -95,7 +95,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeSurveyAttribute
                         ) : (
                             <>
                                 {/* show results when the survey is running */}
-                                <LemonDivider className="my-0" />
+                                <Divider className="my-0" />
                                 <div className="p-2">
                                     <SurveyResult disableEventsTable />
                                 </div>

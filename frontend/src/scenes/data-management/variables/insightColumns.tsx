@@ -1,19 +1,19 @@
-import { LemonTableColumns } from '@hanzo/lemon-ui'
+import { TableColumns } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { urls } from 'scenes/urls'
 
 import { QueryBasedInsightModel } from '~/types'
 
-export const VARIABLE_INSIGHT_COLUMNS: LemonTableColumns<QueryBasedInsightModel> = [
+export const VARIABLE_INSIGHT_COLUMNS: TableColumns<QueryBasedInsightModel> = [
     {
         title: 'Name',
         dataIndex: 'name',
         key: 'name',
         render: function renderName(name: string, insight) {
             return (
-                <LemonTableLink
+                <TableLink
                     to={urls.insightView(insight.short_id)}
                     title={name || <i>Untitled</i>}
                     description={insight.description}

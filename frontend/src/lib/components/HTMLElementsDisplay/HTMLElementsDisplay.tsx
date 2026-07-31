@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { htmlElementsDisplayLogic } from 'lib/components/HTMLElementsDisplay/htmlElementsDisplayLogic'
 import { ParsedCSSSelector } from 'lib/components/HTMLElementsDisplay/preselectWithCSS'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 
 import { ElementType } from '~/types'
 
@@ -164,13 +164,13 @@ export function HTMLElementsDisplay({
             )}
             {checkUniqueness && (
                 // TODO use the SelectorCount element here?
-                <LemonBanner type={messageStatus}>
+                <Banner type={messageStatus}>
                     {chosenSelectorMatchCount === null ? (
                         <>Choose parts of the HTML below to build a selector</>
                     ) : (
                         <>Matches: {chosenSelectorMatchCount} elements in the page</>
                     )}
-                </LemonBanner>
+                </Banner>
             )}
             <div className="px-4 rounded bg-primary">
                 {parsedElements.length ? (

@@ -1,4 +1,4 @@
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { EndpointVersionType } from '~/types'
 
@@ -14,7 +14,7 @@ export function VersionBanner({ version, currentVersion, onGoToLatest }: Version
     }
 
     return (
-        <LemonBanner
+        <Banner
             type="warning"
             action={{
                 children: 'Return to latest',
@@ -23,6 +23,6 @@ export function VersionBanner({ version, currentVersion, onGoToLatest }: Version
         >
             You are viewing version v{version.version}. You can still configure an old version, but to change the
             underlying query you will need to return to the latest version.
-        </LemonBanner>
+        </Banner>
     )
 }

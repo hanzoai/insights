@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useState } from 'react'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 import { cn } from 'lib/utils/css-classes'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { sceneLogic } from 'scenes/sceneLogic'
@@ -52,7 +52,7 @@ export function BillingAlertsV2({ className }: { className?: string }): JSX.Elem
 
     return (
         <div className={cn('my-4', requiresHorizontalMargin && 'mx-4', className)}>
-            <LemonBanner
+            <Banner
                 type={billingAlert.status}
                 action={showButton ? buttonProps : undefined}
                 onClose={
@@ -67,7 +67,7 @@ export function BillingAlertsV2({ className }: { className?: string }): JSX.Elem
                 <b>{billingAlert.title}</b>
                 <br />
                 {billingAlert.message}
-            </LemonBanner>
+            </Banner>
         </div>
     )
 }

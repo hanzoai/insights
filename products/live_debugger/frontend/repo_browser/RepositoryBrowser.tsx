@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonTree } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Tree } from 'lib/elements/Tree/Tree'
 
 import { CodeLine } from '../CodeLine'
 import { liveDebuggerLogic } from '../liveDebuggerLogic'
@@ -27,7 +27,7 @@ export function RepositoryBrowser(): JSX.Element {
                     <span className="font-semibold">Files</span>
                 </div>
                 <div className="p-2 border-b">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search files..."
                         value={fileSearchQuery}
@@ -43,7 +43,7 @@ export function RepositoryBrowser(): JSX.Element {
                             {fileSearchQuery ? 'No files found' : 'No Python files in repository'}
                         </div>
                     ) : (
-                        <LemonTree
+                        <Tree
                             data={treeData}
                             onFolderClick={() => {}}
                             onItemClick={(item) => {
@@ -60,14 +60,14 @@ export function RepositoryBrowser(): JSX.Element {
             <div className="flex-[2] border rounded bg-bg-light overflow-hidden flex flex-col">
                 <div className="flex items-center justify-between p-2 border-b bg-bg-3000">
                     <span className="font-semibold">{selectedFilePath ? selectedFilePath : 'Code'}</span>
-                    <LemonButton
+                    <Button
                         size="small"
                         type="secondary"
                         onClick={clearAllBreakpoints}
                         disabled={!breakpoints || breakpoints.length === 0}
                     >
                         Clear all breakpoints
-                    </LemonButton>
+                    </Button>
                 </div>
                 <div className="flex-1 overflow-auto font-mono text-xs">
                     {!codeLines ? (

@@ -4,7 +4,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import React from 'react'
 
 import { IconCopy, IconPlusSmall, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
+import { Button, Divider } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isPropertyGroupFilterLike } from 'lib/components/PropertyFilters/utils'
@@ -58,7 +58,7 @@ export function PropertyGroupFilters({
                 <BindLogic logic={propertyGroupFilterLogic} props={logicProps}>
                     <div className="flex flex-col gap-2 @lg:flex-row @lg:items-center">
                         <div className="order-2 @lg:order-none">
-                            <LemonButton
+                            <Button
                                 data-attr={`${pageKey}-add-filter-group-inline`}
                                 type="secondary"
                                 onClick={addFilterGroup}
@@ -68,7 +68,7 @@ export function PropertyGroupFilters({
                                 className="PropertyGroupFilters__add-filter-group-inline"
                             >
                                 Add filter group
-                            </LemonButton>
+                            </Button>
                         </div>
                         <div className="order-1 @lg:order-none @lg:flex-1">
                             <InsightTestAccountFilter
@@ -91,7 +91,7 @@ export function PropertyGroupFilters({
                                     />
                                 )}
                             </div>
-                            <LemonDivider className="my-4" />
+                            <Divider className="my-4" />
                         </>
                     ) : null}
                     {propertyGroupFilter.values?.length ? (
@@ -108,14 +108,14 @@ export function PropertyGroupFilters({
                                                         }
                                                         value={group.type}
                                                     />
-                                                    <LemonDivider className="flex-1 mx-2" />
+                                                    <Divider className="flex-1 mx-2" />
                                                     <div className="flex items-center deprecated-space-x-2">
-                                                        <LemonButton
+                                                        <Button
                                                             icon={<IconCopy />}
                                                             onClick={() => duplicateFilterGroup(propertyGroupIndex)}
                                                             size="small"
                                                         />
-                                                        <LemonButton
+                                                        <Button
                                                             icon={<IconTrash />}
                                                             onClick={() => removeFilterGroup(propertyGroupIndex)}
                                                             size="small"
@@ -153,7 +153,7 @@ export function PropertyGroupFilters({
                         </div>
                     ) : null}
 
-                    <LemonButton
+                    <Button
                         data-attr={`${pageKey}-add-filter-group`}
                         type="secondary"
                         onClick={addFilterGroup}
@@ -163,7 +163,7 @@ export function PropertyGroupFilters({
                         className="PropertyGroupFilters__add-filter-group-after"
                     >
                         Add filter group
-                    </LemonButton>
+                    </Button>
                 </BindLogic>
             )}
         </div>

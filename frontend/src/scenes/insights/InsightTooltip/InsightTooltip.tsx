@@ -6,8 +6,8 @@ import { ReactNode } from 'react'
 
 import { InsightLabel } from 'lib/components/InsightLabel'
 import { dayjs } from 'lib/dayjs'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { IconHandClick } from 'lib/lemon-ui/icons'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { IconHandClick } from 'lib/elements/icons'
 import { shortTimeZone } from 'lib/utils'
 import { formatAggregationValue } from 'scenes/insights/utils'
 import { teamLogic } from 'scenes/teamLogic'
@@ -132,7 +132,7 @@ export function InsightTooltip({
     if (itemizeEntitiesAsColumns) {
         hideColorCol = true
         const dataSource = invertDataSource(seriesData, breakdownFilter)
-        const columns: LemonTableColumns<InvertedSeriesDatum> = [
+        const columns: TableColumns<InvertedSeriesDatum> = [
             {
                 key: 'datum',
                 className: 'datum-column',
@@ -152,7 +152,7 @@ export function InsightTooltip({
                 0,
                 colCutoff
             )
-            const dataColumns: LemonTableColumn<InvertedSeriesDatum, keyof InvertedSeriesDatum | undefined>[] = []
+            const dataColumns: TableColumn<InvertedSeriesDatum, keyof InvertedSeriesDatum | undefined>[] = []
             truncatedCols.forEach((seriesColumn) => {
                 const colIdx = seriesColumn.order
                 dataColumns.push({
@@ -201,7 +201,7 @@ export function InsightTooltip({
 
         return (
             <div className={clsx('InsightTooltip', embedded && 'InsightTooltip--embedded')}>
-                <LemonTable
+                <Table
                     dataSource={dataSource.slice(0, rowCutoff)}
                     columns={columns}
                     rowKey="id"
@@ -222,7 +222,7 @@ export function InsightTooltip({
 
     // Itemize tooltip entities as rows
     const dataSource = [...seriesData]
-    const columns: LemonTableColumn<SeriesDatum, keyof SeriesDatum | undefined>[] = []
+    const columns: TableColumn<SeriesDatum, keyof SeriesDatum | undefined>[] = []
     const isTruncated = dataSource?.length > rowCutoff
 
     columns.push({
@@ -265,7 +265,7 @@ export function InsightTooltip({
 
     return (
         <div className={clsx('InsightTooltip', embedded && 'InsightTooltip--embedded')}>
-            <LemonTable
+            <Table
                 dataSource={dataSource.slice(0, rowCutoff)}
                 columns={columns}
                 rowKey="id"

@@ -11,10 +11,10 @@ import {
     IconShare,
     IconSidePanel,
 } from '@hanzo/icons'
-import { LemonBanner, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Link, Tooltip } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
@@ -65,14 +65,14 @@ export function Max({ tabId }: { tabId?: string }): JSX.Element {
                         The chat is currently in the {isRemovingSidePanelFlag ? 'context panel' : 'sidebar'}
                     </h3>
                     <p className="text-sm text-muted mb-2">You can navigate freely around the app with it, or…</p>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="xsmall"
                         onClick={() => closeSidePanel()}
                         sideIcon={<IconArrowLeft />}
                     >
                         Move it here
-                    </LemonButton>
+                    </Button>
                 </div>
             </SceneContent>
         )
@@ -147,14 +147,14 @@ export const MaxInstance = React.memo(function MaxInstance({
                     <ThreadAutoScroller>
                         {conversation?.has_unsupported_content && (
                             <div className="px-4 pt-4">
-                                <LemonBanner type="warning">
+                                <Banner type="warning">
                                     <div className="flex items-center justify-between gap-4">
                                         <span>This thread contains content that is no longer supported.</span>
-                                        <LemonButton type="primary" onClick={() => startNewConversation()}>
+                                        <Button type="primary" onClick={() => startNewConversation()}>
                                             Start a new thread
-                                        </LemonButton>
+                                        </Button>
                                     </div>
-                                </LemonBanner>
+                                </Banner>
                             </div>
                         )}
                         <Thread className={cn('p-3', sidePanel && isRemovingSidePanelFlag && 'p-1')} />
@@ -189,7 +189,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                                 <IconChevronLeft className="text-tertiary size-3 group-hover:text-primary z-10" />
                             </ButtonPrimitive>
                         ) : (
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconChevronLeft />}
                                 onClick={() => goBack()}
@@ -211,7 +211,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                     </Tooltip>
                 </div>
                 {conversationId && !conversationHistoryVisible && !threadVisible && !isAIOnlyMode && (
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={<IconPlus />}
                         onClick={() => startNewConversation()}
@@ -236,7 +236,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                                 <IconShare className="text-tertiary size-3 group-hover:text-primary z-10" />
                             </ButtonPrimitive>
                         ) : (
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconShare />}
                                 onClick={() => {
@@ -275,7 +275,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                         <IconExpand45 className="text-tertiary size-3 group-hover:text-primary z-10" />
                     </Link>
                 ) : (
-                    <LemonButton
+                    <Button
                         size="small"
                         sideIcon={<IconExpand45 />}
                         to={urls.ai(conversationId ?? undefined)}
@@ -308,7 +308,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                 actions={
                     <>
                         {tabId && conversationId ? (
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="secondary"
                                 sideIcon={<IconShare />}
@@ -320,10 +320,10 @@ export const MaxInstance = React.memo(function MaxInstance({
                                 }}
                             >
                                 Copy link to chat
-                            </LemonButton>
+                            </Button>
                         ) : undefined}
                         {tabId ? (
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="secondary"
                                 sideIcon={<IconOpenSidebar />}
@@ -333,7 +333,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                                 }}
                             >
                                 {isRemovingSidePanelFlag ? 'Open in context panel' : 'Open in side panel'}
-                            </LemonButton>
+                            </Button>
                         ) : undefined}
                     </>
                 }

@@ -12,7 +12,7 @@ import { IconPlusSmall } from '@hanzo/icons'
 import { DataWarehousePopoverField, TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopoverProps } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import { DISPLAY_TYPES_TO_CATEGORIES as DISPLAY_TYPES_TO_CATEGORY, FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
+import { Button, ButtonProps } from 'lib/elements/Button'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { verticalSortableListCollisionDetection } from 'lib/sortable'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -42,8 +42,8 @@ export interface ActionFilterProps {
     mathAvailability?: MathAvailability
     /** Text copy for the action button to add more events/actions (graph series) */
     buttonCopy?: string
-    buttonType?: LemonButtonProps['type']
-    buttonProps?: LemonButtonProps
+    buttonType?: ButtonProps['type']
+    buttonProps?: ButtonProps
     /** Whether the full control is enabled or not */
     disabled?: boolean
     /** Bordered view */
@@ -310,7 +310,7 @@ export const ActionFilter = React.forwardRef<HTMLDivElement, ActionFilterProps>(
             {!singleFilter && (
                 <div className="ActionFilter-footer">
                     {!singleFilter && (
-                        <LemonButton
+                        <Button
                             type={buttonType}
                             onClick={() => addFilter()}
                             data-attr="add-action-event-button"
@@ -324,7 +324,7 @@ export const ActionFilter = React.forwardRef<HTMLDivElement, ActionFilterProps>(
                                 : `Reached limit of ${entitiesLimit} ${
                                       filters.insight === InsightType.FUNNELS ? 'steps' : 'series'
                                   }`}
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
             )}

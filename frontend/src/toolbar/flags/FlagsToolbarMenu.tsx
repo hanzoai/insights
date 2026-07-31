@@ -5,14 +5,14 @@ import { IconPerson } from '@hanzo/icons'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Radio } from 'lib/elements/Radio'
+import { Switch } from 'lib/elements/Switch'
+import { TextArea } from 'lib/elements/TextArea'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { ToolbarMenu } from '~/toolbar/bar/ToolbarMenu'
@@ -70,7 +70,7 @@ export const FlagsToolbarMenu = (): JSX.Element => {
         <ToolbarMenu>
             <ToolbarMenu.Header>
                 <div className="flex gap-2 items-center w-full pr-3">
-                    <LemonInput
+                    <Input
                         autoFocus
                         placeholder="Search"
                         fullWidth
@@ -78,7 +78,7 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                         value={searchTerm}
                         onChange={(s) => setSearchTerm(s)}
                     />
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         className="flex-shrink-0"
@@ -86,8 +86,8 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                         disabledReason={countFlagsOverridden === 0 ? 'No overrides to clear' : undefined}
                     >
                         Clear overrides
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         className="flex-shrink-0"
                         size="small"
                         icon={<IconPerson />}
@@ -124,7 +124,7 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                                                 <IconOpenInNew />
                                             </Link>
                                         </div>
-                                        <LemonButton
+                                        <Button
                                             size="xsmall"
                                             type="secondary"
                                             onClick={() => setPayloadEditorOpen(feature_flag.key, true)}
@@ -133,8 +133,8 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                                             }
                                         >
                                             Edit payload
-                                        </LemonButton>
-                                        <LemonSwitch
+                                        </Button>
+                                        <Switch
                                             checked={!!currentValue}
                                             onChange={(checked) => {
                                                 const newValue =
@@ -154,7 +154,7 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                                     <AnimatedCollapsible collapsed={!currentValue}>
                                         <>
                                             {hasVariants ? (
-                                                <LemonRadio
+                                                <Radio
                                                     className={clsx('pt-1 pl-4 w-full', hasOverride && 'bg-mark')}
                                                     value={typeof currentValue === 'string' ? currentValue : undefined}
                                                     options={
@@ -178,7 +178,7 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                                             <div className={clsx(hasVariants && 'py-1 pl-4')}>
                                                 {openPayloadEditors[feature_flag.key] ? (
                                                     <div className="flex gap-2 items-start mt-1">
-                                                        <LemonTextArea
+                                                        <TextArea
                                                             className={clsx(
                                                                 'font-mono text-xs flex-1 !rounded',
                                                                 payloadErrors[feature_flag.key] && 'border-danger'
@@ -194,22 +194,22 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                                                             minRows={2}
                                                         />
                                                         <div className="flex flex-col gap-1">
-                                                            <LemonButton
+                                                            <Button
                                                                 size="xsmall"
                                                                 type="primary"
                                                                 onClick={() => savePayloadOverride(feature_flag.key)}
                                                                 center
                                                             >
                                                                 Save
-                                                            </LemonButton>
-                                                            <LemonButton
+                                                            </Button>
+                                                            <Button
                                                                 size="xsmall"
                                                                 onClick={() =>
                                                                     setPayloadEditorOpen(feature_flag.key, false)
                                                                 }
                                                             >
                                                                 Cancel
-                                                            </LemonButton>
+                                                            </Button>
                                                         </div>
                                                     </div>
                                                 ) : (
@@ -250,13 +250,13 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                                     <span className="text-xs flex-1 truncate">
                                         Viewing as: <strong>{impersonatedDistinctId}</strong>
                                     </span>
-                                    <LemonButton type="secondary" size="xsmall" onClick={clearImpersonation}>
+                                    <Button type="secondary" size="xsmall" onClick={clearImpersonation}>
                                         Clear
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             ) : (
                                 <div className="flex gap-1 items-center">
-                                    <LemonInput
+                                    <Input
                                         placeholder="Distinct ID"
                                         fullWidth
                                         size="small"
@@ -268,7 +268,7 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                                             }
                                         }}
                                     />
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         className="flex-shrink-0"
@@ -280,7 +280,7 @@ export const FlagsToolbarMenu = (): JSX.Element => {
                                         disabledReason={!draftDistinctId.trim() ? 'Enter a distinct ID' : undefined}
                                     >
                                         Load
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             )}
                         </div>

@@ -3,9 +3,9 @@ import './CompactList.scss'
 import clsx from 'clsx'
 import { useValues } from 'kea'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Skeleton } from 'lib/elements/Skeleton'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 
@@ -44,11 +44,11 @@ export function CompactList({
                         <h3 className="px-2 truncate" title={typeof title === 'string' ? title : undefined}>
                             {title}
                         </h3>
-                        {viewAllURL && <LemonButton to={viewAllURL}>View all</LemonButton>}
+                        {viewAllURL && <Button to={viewAllURL}>View all</Button>}
                     </div>
                     <div className="mx-2">
                         {/* This divider has to be within a div, because otherwise horizontal margin ADDS to the width */}
-                        <LemonDivider className="my-0" />
+                        <Divider className="my-0" />
                     </div>
                 </>
             )}
@@ -56,7 +56,7 @@ export function CompactList({
                 {loading ? (
                     <div className="p-2 deprecated-space-y-6">
                         {Array.from({ length: 6 }, (_, index) => (
-                            <LemonSkeleton key={index} />
+                            <Skeleton key={index} />
                         ))}
                     </div>
                 ) : items.length === 0 && emptyMessage ? (

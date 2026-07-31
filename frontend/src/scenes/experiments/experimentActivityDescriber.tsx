@@ -2,7 +2,7 @@ import { match } from 'ts-pattern'
 
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import { ActivityLogItem, HumanizedChange, userNameForLogItem } from 'lib/components/ActivityLog/humanizeActivity'
-import { LemonCard } from 'lib/lemon-ui/LemonCard'
+import { Card } from 'lib/elements/Card'
 
 import { ExperimentProgressStatus } from '~/types'
 
@@ -24,7 +24,7 @@ export const ExperimentDetails = ({
     status: ExperimentProgressStatus
 }): JSX.Element => {
     return (
-        <LemonCard className="flex items-center justify-between gap-3 p-4">
+        <Card className="flex items-center justify-between gap-3 p-4">
             <div className="flex flex-col gap-1">
                 <strong className="text-sm font-semibold">
                     {nameOrLinkToExperiment(logItem.detail.name, logItem.item_id)}
@@ -32,7 +32,7 @@ export const ExperimentDetails = ({
                 <span className="text-xs text-muted">Experiment</span>
             </div>
             <StatusTag status={status} />
-        </LemonCard>
+        </Card>
     )
 }
 

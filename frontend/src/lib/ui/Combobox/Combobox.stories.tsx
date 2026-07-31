@@ -2,7 +2,7 @@ import type { Meta } from '@storybook/react'
 
 import { IconGear, IconPlusSmall } from '@hanzo/icons'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 
 import { ButtonGroupPrimitive, ButtonPrimitive } from '../Button/ButtonPrimitives'
 import { MenuOpenIndicator, MenuSeparator } from '../Menus/Menus'

@@ -1,12 +1,12 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
+import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -54,7 +54,7 @@ export function SessionProfileScene(): JSX.Element {
                     key: 'sessions',
                 }}
                 actions={
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         icon={<IconRefresh />}
@@ -62,7 +62,7 @@ export function SessionProfileScene(): JSX.Element {
                         loading={sessionDataLoading || sessionEventsLoading}
                     >
                         Refresh
-                    </LemonButton>
+                    </Button>
                 }
             />
 

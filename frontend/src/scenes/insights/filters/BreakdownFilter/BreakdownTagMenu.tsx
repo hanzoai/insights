@@ -3,9 +3,9 @@ import './BreakdownTagMenu.scss'
 import { useActions, useValues } from 'kea'
 
 import { IconGear, IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput, LemonSwitch } from '@hanzo/lemon-ui'
+import { Button, Divider, Input, Switch } from '@hanzo/elements'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { urls } from 'scenes/urls'
 
 import { GlobalBreakdownOptionsMenu } from './GlobalBreakdownOptionsMenu'
@@ -37,7 +37,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
     return (
         <>
             {isNormalizeable && (
-                <LemonSwitch
+                <Switch
                     checked={normalizeBreakdownURL} // TODO move global values/actions to taxonomicBreakdownFilterLogic
                     fullWidth={true}
                     onChange={(checked) => setNormalizeBreakdownURL(checked)}
@@ -69,7 +69,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
                 />
             )}
             {isNormalizeable && hasAdvancedPaths && (
-                <LemonSwitch
+                <Switch
                     checked={hasPathCleaningFilters ? pathCleaningEnabled : false}
                     disabled={!hasPathCleaningFilters}
                     fullWidth={true}
@@ -87,7 +87,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
                                                 Apply your team's path cleaning rules to standardize URLs by removing
                                                 unnecessary parameters and fragments.
                                             </p>
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconGear />}
                                                 type="primary"
                                                 size="small"
@@ -96,7 +96,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
                                                 className="w-full mt-2"
                                             >
                                                 Edit path cleaning settings
-                                            </LemonButton>
+                                            </Button>
                                         </>
                                     ) : (
                                         <>
@@ -104,7 +104,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
                                                 You don't have any path cleaning filters configured. Click the button
                                                 below to set up path cleaning rules.
                                             </p>
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconGear />}
                                                 type="primary"
                                                 size="small"
@@ -113,7 +113,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
                                                 className="w-full mt-2"
                                             >
                                                 Configure path cleaning
-                                            </LemonButton>
+                                            </Button>
                                         </>
                                     )
                                 }
@@ -126,7 +126,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
             )}
             {isHistogramable ? (
                 <>
-                    <LemonButton
+                    <Button
                         onClick={() => {
                             setHistogramBinsUsed(true)
                         }}
@@ -134,7 +134,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
                         fullWidth
                     >
                         Use{' '}
-                        <LemonInput
+                        <Input
                             min={1}
                             value={histogramBinCount}
                             onChange={(newValue) => {
@@ -147,8 +147,8 @@ export const BreakdownTagMenu = (): JSX.Element => {
                             className="histogram-bin-input"
                         />
                         bins
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         onClick={() => {
                             setHistogramBinsUsed(false)
                         }}
@@ -157,15 +157,15 @@ export const BreakdownTagMenu = (): JSX.Element => {
                         fullWidth
                     >
                         Do not bin numeric values
-                    </LemonButton>
+                    </Button>
                 </>
             ) : (
                 !isMultipleBreakdownsEnabled && <GlobalBreakdownOptionsMenu />
             )}
-            <LemonDivider />
-            <LemonButton status="danger" onClick={removeBreakdown} fullWidth>
+            <Divider />
+            <Button status="danger" onClick={removeBreakdown} fullWidth>
                 Remove breakdown
-            </LemonButton>
+            </Button>
         </>
     )
 }

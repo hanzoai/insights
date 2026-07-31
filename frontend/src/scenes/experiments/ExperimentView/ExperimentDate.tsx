@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { IconPencil } from '@hanzo/icons'
-import { LemonButton, LemonCalendarSelectInput } from '@hanzo/lemon-ui'
+import { Button, CalendarSelectInput } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
@@ -31,7 +31,7 @@ const ExperimentDate = ({
             <Label intent="menu">{label}</Label>
             <div className="flex">
                 {isDatePickerOpen ? (
-                    <LemonCalendarSelectInput
+                    <CalendarSelectInput
                         granularity="minute"
                         visible
                         value={dayjs(date)}
@@ -50,7 +50,7 @@ const ExperimentDate = ({
                 ) : (
                     <>
                         <TZLabel time={date} />
-                        <LemonButton
+                        <Button
                             title={`Move ${label}`}
                             data-attr={`move-${dataAttr}`}
                             icon={<IconPencil />}

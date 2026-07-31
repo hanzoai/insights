@@ -2,9 +2,9 @@ import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
 
-import { LemonButton } from '~/lib/lemon-ui/LemonButton'
-import { LemonLabel } from '~/lib/lemon-ui/LemonLabel'
-import { Popover } from '~/lib/lemon-ui/Popover'
+import { Button } from '~/lib/elements/Button'
+import { Label } from '~/lib/elements/Label'
+import { Popover } from '~/lib/elements/Popover'
 import { BreakdownFilter } from '~/queries/schema/schema-general'
 import { ChartDisplayType, InsightLogicProps } from '~/types'
 
@@ -78,9 +78,9 @@ export function TaxonomicBreakdownFilter({
             {(showLabel || isMultipleBreakdownsEnabled) && (
                 <div className="flex items-center justify-between gap-2">
                     {showLabel && (
-                        <LemonLabel info="Use breakdown to see the aggregation (total volume, active users, etc.) for each value of that property. For example, breaking down by Current URL with total volume will give you the event volume for each URL your users have visited.">
+                        <Label info="Use breakdown to see the aggregation (total volume, active users, etc.) for each value of that property. For example, breaking down by Current URL with total volume will give you the event volume for each URL your users have visited.">
                             Breakdown by
-                        </LemonLabel>
+                        </Label>
                     )}
                     {isMultipleBreakdownsEnabled && (
                         <Popover
@@ -88,7 +88,7 @@ export function TaxonomicBreakdownFilter({
                             visible={breakdownOptionsOpened}
                             onClickOutside={() => toggleBreakdownOptions(false)}
                         >
-                            <LemonButton
+                            <Button
                                 icon={<IconGear />}
                                 size="small"
                                 noPadding

@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 
 import { HeatmapDataLogicProps, heatmapDataLogic } from 'lib/components/heatmaps/heatmapDataLogic'
 import { HeatmapEvent } from 'lib/components/heatmaps/types'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'
@@ -27,7 +27,7 @@ export function HeatmapEventsPanel({ context, exportToken }: HeatmapDataLogicPro
         clearSelectedArea()
     }
 
-    const columns: LemonTableColumns<HeatmapEvent> = [
+    const columns: TableColumns<HeatmapEvent> = [
         {
             title: 'Time',
             dataIndex: 'timestamp',
@@ -49,20 +49,20 @@ export function HeatmapEventsPanel({ context, exportToken }: HeatmapDataLogicPro
             title: '',
             render: (_, event) =>
                 event.session_id ? (
-                    <LemonButton size="xsmall" to={urls.sessionProfile(event.session_id)} targetBlank>
+                    <Button size="xsmall" to={urls.sessionProfile(event.session_id)} targetBlank>
                         View session
-                    </LemonButton>
+                    </Button>
                 ) : null,
         },
     ]
 
     return (
-        <LemonModal title="Events in this area" onClose={handleClose} isOpen width={700}>
+        <Modal title="Events in this area" onClose={handleClose} isOpen width={700}>
             {areaEventsLoading ? (
                 <div className="space-y-2 p-4">
-                    <LemonSkeleton className="h-8 w-full" />
-                    <LemonSkeleton className="h-8 w-full" />
-                    <LemonSkeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
                 </div>
             ) : areaEvents?.results && areaEvents.results.length > 0 ? (
                 <>
@@ -76,7 +76,7 @@ export function HeatmapEventsPanel({ context, exportToken }: HeatmapDataLogicPro
                             so the count shown on hover may differ.
                         </div>
                     </div>
-                    <LemonTable
+                    <Table
                         dataSource={areaEvents.results}
                         columns={columns}
                         size="small"
@@ -85,19 +85,19 @@ export function HeatmapEventsPanel({ context, exportToken }: HeatmapDataLogicPro
                     />
                     {areaEvents.has_more && (
                         <div className="flex justify-center p-4 border-t">
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 onClick={() => loadMoreAreaEvents()}
                                 loading={areaEventsLoadingMore}
                             >
                                 Load more events
-                            </LemonButton>
+                            </Button>
                         </div>
                     )}
                 </>
             ) : (
                 <div className="p-8 text-center text-muted">No events found in this area</div>
             )}
-        </LemonModal>
+        </Modal>
     )
 }

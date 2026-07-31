@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import {
     ALERT_NOTIFICATION_TYPE_SLACK,
     ALERT_NOTIFICATION_TYPE_WEBHOOK,
@@ -151,13 +151,13 @@ export const alertNotificationLogic = kea<alertNotificationLogicType>([
             const failedNotifications = pending.filter((_, i) => results[i].status === 'rejected')
 
             if (failedNotifications.length > 0) {
-                lemonToast.error(
+                toast.error(
                     `Alert saved, but ${failedNotifications.length} notification(s) failed to create. Reopen the alert to add them again.`
                 )
                 actions.setPendingNotifications(failedNotifications)
             } else {
                 if (results.length > 0) {
-                    lemonToast.success(`${results.length} notification destination(s) created.`)
+                    toast.success(`${results.length} notification destination(s) created.`)
                 }
                 actions.clearPendingNotifications()
             }

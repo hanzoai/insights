@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonInputSelect, LemonInputSelectOption } from '@hanzo/lemon-ui'
+import { InputSelect, InputSelectOption } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { jiraIntegrationLogic } from './jiraIntegrationLogic'
 
@@ -17,7 +17,7 @@ export const JiraProjectPicker = ({ value, onChange, integrationId }: JiraProjec
     const { options, loading } = useJiraProjects(integrationId)
 
     return (
-        <LemonInputSelect
+        <InputSelect
             onChange={(val) => onChange?.(val[0] ?? '')}
             value={value ? [value] : []}
             mode="single"
@@ -33,19 +33,19 @@ export const JiraProjectSelectField = ({ integrationId }: { integrationId: numbe
     const { options, loading } = useJiraProjects(integrationId)
 
     return (
-        <LemonField name="projectKeys" label="Project">
-            <LemonInputSelect
+        <Field name="projectKeys" label="Project">
+            <InputSelect
                 mode="single"
                 data-attr="select-jira-project"
                 placeholder="Select a project..."
                 options={options}
                 loading={loading}
             />
-        </LemonField>
+        </Field>
     )
 }
 
-export function useJiraProjects(integrationId: number): { options: LemonInputSelectOption[]; loading: boolean } {
+export function useJiraProjects(integrationId: number): { options: InputSelectOption[]; loading: boolean } {
     const logic = jiraIntegrationLogic({ id: integrationId })
     const { jiraProjects, jiraProjectsLoading } = useValues(logic)
     const { loadJiraProjects } = useActions(logic)

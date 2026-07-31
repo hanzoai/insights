@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-import { LemonInput, LemonLabel, LemonModal, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Input, Label, Modal, SegmentedButton } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 interface NewPropertyInterface {
     creating: boolean
@@ -28,31 +28,31 @@ export function NewProperty({ onSave }: NewPropertyProps): JSX.Element {
 
     return (
         <>
-            <LemonButton
+            <Button
                 data-attr="add-prop-button"
                 onClick={() => setState({ ...state, creating: true })}
                 type="primary"
             >
                 New property
-            </LemonButton>
-            <LemonModal
+            </Button>
+            <Modal
                 isOpen={state.creating}
                 onClose={() => setState(initialState)}
                 title="Add new property"
                 footer={
-                    <LemonButton
+                    <Button
                         disabledReason={(!state.key || state.value === undefined) && 'Set a key and a value'}
                         type="secondary"
                         onClick={saveProperty}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 }
             >
                 <div className="deprecated-space-y-2">
                     <div>
-                        <LemonLabel>Key</LemonLabel>
-                        <LemonInput
+                        <Label>Key</Label>
+                        <Input
                             id="propertyKey"
                             autoFocus
                             placeholder="try email, first_name, is_verified, membership_level, total_revenue"
@@ -62,8 +62,8 @@ export function NewProperty({ onSave }: NewPropertyProps): JSX.Element {
                         />
                     </div>
                     <div>
-                        <LemonLabel>Type of Property</LemonLabel>
-                        <LemonSegmentedButton
+                        <Label>Type of Property</Label>
+                        <SegmentedButton
                             onChange={(value: 'string' | 'boolean') =>
                                 setState({
                                     ...state,
@@ -86,9 +86,9 @@ export function NewProperty({ onSave }: NewPropertyProps): JSX.Element {
                         />
                     </div>
                     <div>
-                        <LemonLabel>Value</LemonLabel>
+                        <Label>Value</Label>
                         {state.propertyType === 'boolean' ? (
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 onChange={(value) =>
                                     setState({
                                         ...state,
@@ -114,7 +114,7 @@ export function NewProperty({ onSave }: NewPropertyProps): JSX.Element {
                                 size="small"
                             />
                         ) : (
-                            <LemonInput
+                            <Input
                                 id="propertyValue"
                                 placeholder="try email@example.com, gold, 1"
                                 onChange={(value) => setState({ ...state, value: value })}
@@ -125,7 +125,7 @@ export function NewProperty({ onSave }: NewPropertyProps): JSX.Element {
                         )}
                     </div>
                 </div>
-            </LemonModal>
+            </Modal>
         </>
     )
 }

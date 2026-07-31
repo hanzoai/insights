@@ -5,11 +5,11 @@ import { useValues } from 'kea'
 import { useRef } from 'react'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Divider, Input } from '@hanzo/elements'
 
 import { richContentEditorLogic } from 'lib/components/RichContentEditor/richContentEditorLogic'
 import { RichContentEditorType } from 'lib/components/RichContentEditor/types'
-import { IconBold, IconItalic, IconLink, IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconBold, IconItalic, IconLink, IconOpenInNew } from 'lib/elements/icons'
 import { isURL } from 'lib/utils'
 
 import NotebookIconHeading from './NotebookIconHeading'
@@ -76,7 +76,7 @@ export const InlineMenu = ({
             >
                 {isLinkActive ? (
                     <>
-                        <LemonInput
+                        <Input
                             size="small"
                             placeholder="https://hanzo.ai"
                             onChange={setLink}
@@ -84,13 +84,13 @@ export const InlineMenu = ({
                             className="border-0"
                             autoFocus
                         />
-                        <LemonButton
+                        <Button
                             onClick={openLink}
                             icon={<IconOpenInNew />}
                             size="small"
                             disabledReason={!isURL(href) && 'Enter a URL.'}
                         />
-                        <LemonButton
+                        <Button
                             onClick={() => ttEditor.chain().focus().unsetMark('link').run()}
                             icon={<IconTrash />}
                             status="danger"
@@ -99,38 +99,38 @@ export const InlineMenu = ({
                     </>
                 ) : (
                     <>
-                        <LemonButton
+                        <Button
                             onClick={() => ttEditor.chain().focus().toggleHeading({ level: 1 }).run()}
                             active={ttEditor.isActive('heading', { level: 1 })}
                             icon={<NotebookIconHeading level={1} />}
                             size="small"
                         />
-                        <LemonButton
+                        <Button
                             onClick={() => ttEditor.chain().focus().toggleHeading({ level: 2 }).run()}
                             active={ttEditor.isActive('heading', { level: 2 })}
                             icon={<NotebookIconHeading level={2} />}
                             size="small"
                         />
-                        <LemonButton
+                        <Button
                             onClick={() => ttEditor.chain().focus().toggleHeading({ level: 3 }).run()}
                             active={ttEditor.isActive('heading', { level: 3 })}
                             icon={<NotebookIconHeading level={3} />}
                             size="small"
                         />
-                        <LemonDivider vertical />
-                        <LemonButton
+                        <Divider vertical />
+                        <Button
                             onClick={() => ttEditor.chain().focus().toggleMark('italic').run()}
                             active={ttEditor.isActive('italic')}
                             icon={<IconItalic />}
                             size="small"
                         />
-                        <LemonButton
+                        <Button
                             onClick={() => ttEditor.chain().focus().toggleMark('bold').run()}
                             active={ttEditor.isActive('bold')}
                             icon={<IconBold />}
                             size="small"
                         />
-                        <LemonButton
+                        <Button
                             onMouseDown={(e: React.MouseEvent) => e.preventDefault()}
                             onClick={() => ttEditor.chain().focus().setMark('link').run()}
                             icon={<IconLink />}

@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { timeZoneLabel } from 'lib/utils'
@@ -46,14 +46,14 @@ export function TrendsCalendarHeatMap(_props: ChartParams): JSX.Element {
             />
             <div className="flex items-center justify-center gap-2 text-muted text-xs mt-2">
                 <span>Data shown in timezone: {timeZoneLabel(timezone, offset)}</span>
-                <LemonButton
+                <Button
                     size="xsmall"
                     type="tertiary"
                     to={urls.settings('environment-customization', 'date-and-time')}
                     targetBlank={false}
                 >
                     Change
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, key, listeners, path, props, reducer
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { EventDefinition, SchemaEnforcementMode } from '~/types'
 
@@ -132,19 +132,19 @@ export const eventDefinitionSchemaLogic = kea<eventDefinitionSchemaLogicType>([
                     property_group_id: propertyGroupId,
                 })
                 await actions.loadEventSchemas()
-                lemonToast.success('Property group added to event schema')
+                toast.success('Property group added to event schema')
             } catch (error: any) {
                 const errorMessage = getErrorMessage(error, 'Failed to add property group')
-                lemonToast.error(errorMessage)
+                toast.error(errorMessage)
             }
         },
         removePropertyGroup: async ({ eventSchemaId }) => {
             try {
                 await api.eventSchemas.delete(eventSchemaId)
-                lemonToast.success('Property group removed from event schema')
+                toast.success('Property group removed from event schema')
             } catch (error: any) {
                 const errorMessage = getErrorMessage(error, 'Failed to remove property group')
-                lemonToast.error(errorMessage)
+                toast.error(errorMessage)
             }
         },
         updateSchemaEnforcementMode: async ({ mode }) => {
@@ -156,13 +156,13 @@ export const eventDefinitionSchemaLogic = kea<eventDefinitionSchemaLogicType>([
                 })
                 actions.setDefinition({ enforcement_mode: mode }, { merge: true })
                 if (mode === SchemaEnforcementMode.Reject) {
-                    lemonToast.success('Schema enforcement enabled. Events that fail validation will be rejected.')
+                    toast.success('Schema enforcement enabled. Events that fail validation will be rejected.')
                 } else {
-                    lemonToast.success('Schema enforcement disabled. All events will be accepted.')
+                    toast.success('Schema enforcement disabled. All events will be accepted.')
                 }
             } catch (error: any) {
                 const errorMessage = getErrorMessage(error, 'Failed to update schema enforcement mode')
-                lemonToast.error(errorMessage)
+                toast.error(errorMessage)
             } finally {
                 actions.setSchemaEnforcementModeUpdating(false)
             }

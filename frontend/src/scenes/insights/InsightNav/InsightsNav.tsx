@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { AlertDeletionWarning } from 'lib/components/Alerts/AlertDeletionWarning'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tabs } from 'lib/elements/Tabs'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { insightNavLogic } from 'scenes/insights/InsightNav/insightNavLogic'
 import { INSIGHT_TYPE_URLS } from 'scenes/insights/utils'
 import { INSIGHT_TYPES_METADATA } from 'scenes/saved-insights/SavedInsights'
@@ -18,7 +18,7 @@ export function InsightsNav(): JSX.Element {
     return (
         <>
             {insight.short_id && <AlertDeletionWarning />}
-            <LemonTabs
+            <Tabs
                 activeKey={activeView}
                 onChange={(newKey) => setActiveView(newKey)}
                 tabs={tabs.map(({ label, type, dataAttr }) => ({

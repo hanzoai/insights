@@ -3,10 +3,10 @@ import { useActions, useValues } from 'kea'
 import { IconArrowRight } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Table } from 'lib/elements/Table'
+import { Tag } from 'lib/elements/Tag'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { humanFriendlyNumber } from '~/lib/utils'
 
@@ -60,11 +60,11 @@ export function QueryLogTable({ queryKey, onLoadQuery }: QueryLogTableProps): JS
                 <span className="text-sm text-muted">
                     Showing queries from the past 7 days for the current user (100 per page)
                 </span>
-                <LemonButton type="primary" size="small" onClick={loadQueryLogs} loading={queryLogsLoading}>
+                <Button type="primary" size="small" onClick={loadQueryLogs} loading={queryLogsLoading}>
                     Refresh
-                </LemonButton>
+                </Button>
             </div>
-            <LemonTable
+            <Table
                 dataSource={queryLogs}
                 loading={queryLogsLoading}
                 columns={[
@@ -74,7 +74,7 @@ export function QueryLogTable({ queryKey, onLoadQuery }: QueryLogTableProps): JS
                         width: 40,
                         render: (_dataValue, record) => (
                             <Tooltip title="Load query into editor">
-                                <LemonButton
+                                <Button
                                     size="xsmall"
                                     icon={<IconArrowRight />}
                                     onClick={() => {
@@ -129,7 +129,7 @@ export function QueryLogTable({ queryKey, onLoadQuery }: QueryLogTableProps): JS
                         dataIndex: 'status',
                         width: 120,
                         render: (value, record) => (
-                            <LemonTag type={record.exception_code === 0 ? 'success' : 'danger'}>{value}</LemonTag>
+                            <Tag type={record.exception_code === 0 ? 'success' : 'danger'}>{value}</Tag>
                         ),
                     },
                     {
@@ -180,9 +180,9 @@ export function QueryLogTable({ queryKey, onLoadQuery }: QueryLogTableProps): JS
             />
             {hasMore && (
                 <div className="flex justify-center mt-4">
-                    <LemonButton type="secondary" onClick={loadMoreQueryLogs} loading={moreQueryLogsLoading} center>
+                    <Button type="secondary" onClick={loadMoreQueryLogs} loading={moreQueryLogsLoading} center>
                         Load more
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </div>

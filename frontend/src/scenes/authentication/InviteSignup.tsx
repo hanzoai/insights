@@ -4,7 +4,7 @@ import { Form } from 'kea-forms'
 import { useEffect } from 'react'
 
 import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Divider, Input } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import PasswordStrength from 'lib/components/PasswordStrength'
@@ -12,11 +12,11 @@ import SignupRoleSelect from 'lib/components/SignupRoleSelect'
 import { SSOEnforcedLoginButton, SocialLoginButtons } from 'lib/components/SocialLoginButton/SocialLoginButton'
 import passkeyLogo from 'lib/components/SocialLoginButton/passkey.svg'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Link } from 'lib/lemon-ui/Link'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
+import { Banner } from 'lib/elements/Banner'
+import { Field } from 'lib/elements/Field'
+import { Link } from 'lib/elements/Link'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -53,9 +53,9 @@ function HelperLinks(): JSX.Element {
 
 function BackToHanzo(): JSX.Element {
     return (
-        <LemonButton type="secondary" icon={<IconChevronLeft />} center fullWidth to={urls.default()}>
+        <Button type="secondary" icon={<IconChevronLeft />} center fullWidth to={urls.default()}>
             Go back to Hanzo
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -90,13 +90,13 @@ function ErrorView(): JSX.Element | null {
                             <div>
                                 You need to log in with the email address above, or create your own password.
                                 <div className="mt-4">
-                                    <LemonButton
+                                    <Button
                                         icon={<IconChevronLeft />}
                                         to={window.location.pathname}
                                         disableClientSideRouting
                                     >
                                         Try again
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             </div>
                         )}
@@ -122,7 +122,7 @@ function ErrorView(): JSX.Element | null {
         <BridgePage view="signup-error" mascot message="Oops!" footer={<SupportModalButton />}>
             <h2>{ErrorMessages[error.code].title}</h2>
             <div className="error-message">{ErrorMessages[error.code].detail}</div>
-            <LemonDivider dashed className="my-4" />
+            <Divider dashed className="my-4" />
             <div>{ErrorMessages[error.code].actions}</div>
         </BridgePage>
     )
@@ -164,7 +164,7 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
                 <div>
                     {!acceptedInvite ? (
                         <>
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 center
                                 fullWidth
@@ -172,15 +172,15 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
                                 loading={acceptedInviteLoading}
                             >
                                 Accept invite
-                            </LemonButton>
+                            </Button>
                             <div className="mt-2">
-                                <LemonButton type="secondary" center fullWidth icon={<IconChevronLeft />} to="/">
+                                <Button type="secondary" center fullWidth icon={<IconChevronLeft />} to="/">
                                     Go back to Hanzo
-                                </LemonButton>
+                                </Button>
                             </div>
                         </>
                     ) : (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             center
                             fullWidth
@@ -188,7 +188,7 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
                             onClick={() => (window.location.href = '/')}
                         >
                             Go to Insights
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
             </div>
@@ -244,7 +244,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
         >
             <h2 className="text-center">Create your Insights account</h2>
             {signupManualErrors?.generic && (
-                <LemonBanner type="error" className="mb-4">
+                <Banner type="error" className="mb-4">
                     {signupManualErrors.generic.detail || 'Could not complete your signup.'}{' '}
                     {preflight?.cloud && (
                         <Link
@@ -261,17 +261,17 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                             Need help?
                         </Link>
                     )}
-                </LemonBanner>
+                </Banner>
             )}
             {passkeyError && (
-                <LemonBanner type="error" className="mb-4">
+                <Banner type="error" className="mb-4">
                     {passkeyError}
-                </LemonBanner>
+                </Banner>
             )}
             <Form logic={inviteSignupLogic} formKey="signup" className="deprecated-space-y-4" enableFormOnSubmit>
-                <LemonField.Pure label="Email">
-                    <LemonInput type="email" disabled value={invite?.target_email} />
-                </LemonField.Pure>
+                <Field.Pure label="Email">
+                    <Input type="email" disabled value={invite?.target_email} />
+                </Field.Pure>
                 {!areExtraFieldsHidden && (
                     <>
                         {passkeySignupEnabled && (
@@ -285,7 +285,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                                         </p>
                                     </div>
                                 ) : (
-                                    <LemonButton
+                                    <Button
                                         fullWidth
                                         type="secondary"
                                         center
@@ -299,7 +299,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                                         data-attr="invite-signup-passkey"
                                     >
                                         Sign up with passkey
-                                    </LemonButton>
+                                    </Button>
                                 )}
 
                                 {!passkeyRegistered && (
@@ -312,7 +312,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                             </>
                         )}
                         {!passkeyRegistered && (
-                            <LemonField
+                            <Field
                                 name="password"
                                 label={
                                     <div className="flex flex-1 items-center justify-between">
@@ -321,7 +321,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                                     </div>
                                 }
                             >
-                                <LemonInput
+                                <Input
                                     type="password"
                                     className="ph-ignore-input"
                                     data-attr="password"
@@ -330,10 +330,10 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                                     autoFocus={window.screen.width >= 768} // do not autofocus on small-width screens
                                     disabled={isSignupSubmitting || passkeyRegistered}
                                 />
-                            </LemonField>
+                            </Field>
                         )}
 
-                        <LemonField
+                        <Field
                             name="first_name"
                             label="First Name"
                             help={
@@ -342,8 +342,8 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                                     : undefined
                             }
                         >
-                            <LemonInput data-attr="first_name" placeholder="Jane" />
-                        </LemonField>
+                            <Input data-attr="first_name" placeholder="Jane" />
+                        </Field>
 
                         <SignupRoleSelect />
                     </>
@@ -351,7 +351,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
 
                 {/* Show regular login button if SSO is not enforced */}
                 {!precheckResponse.sso_enforcement && (
-                    <LemonButton
+                    <Button
                         type="primary"
                         status="alt"
                         htmlType="submit"
@@ -362,7 +362,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                         size="large"
                     >
                         Continue
-                    </LemonButton>
+                    </Button>
                 )}
 
                 {/* Show enforced SSO button if required */}

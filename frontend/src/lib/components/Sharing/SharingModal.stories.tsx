@@ -2,7 +2,7 @@ import { Meta } from '@storybook/react'
 import { BindLogic } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 
 import { useStorybookMocks } from '~/mocks/browser'
@@ -95,9 +95,9 @@ const Template = (
             </div>
 
             <div className="flex justify-center mt-4">
-                <LemonButton onClick={() => setModalOpen(true)} type="primary">
+                <Button onClick={() => setModalOpen(true)} type="primary">
                     Open as Modal
-                </LemonButton>
+                </Button>
             </div>
 
             <SharingModal {...(props as SharingModalProps)} closeModal={() => setModalOpen(false)} isOpen={modalOpen} />

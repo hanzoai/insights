@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 import { expectLogic, partial } from 'kea-test-utils'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { refreshTreeItem } from '~/layout/panel-layout/ProjectTree/projectTreeLogic'
 import { useMocks } from '~/mocks/jest'
@@ -11,8 +11,8 @@ import type { Experiment } from '~/types'
 import { NEW_EXPERIMENT } from '../constants'
 import { createExperimentLogic } from './createExperimentLogic'
 
-jest.mock('lib/lemon-ui/LemonToast/LemonToast', () => ({
-    lemonToast: {
+jest.mock('lib/elements/Toast/Toast', () => ({
+    toast: {
         success: jest.fn(),
         error: jest.fn(),
     },
@@ -164,7 +164,7 @@ describe('createExperimentLogic', () => {
                 .toDispatchActions(['saveExperiment', 'createExperimentSuccess'])
                 .toFinishAllListeners()
 
-            expect(lemonToast.success).toHaveBeenCalledWith('Experiment created successfully!')
+            expect(toast.success).toHaveBeenCalledWith('Experiment created successfully!')
             expect(routerPushSpy).toHaveBeenCalledTimes(1)
             expect(routerPushSpy).toHaveBeenCalledWith('/experiments/123')
         })

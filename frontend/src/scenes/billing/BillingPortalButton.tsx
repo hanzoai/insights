@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { billingLogic } from './billingLogic'
 
@@ -22,7 +22,7 @@ export const BillingPortalButton = (): JSX.Element | null => {
 
     return (
         <div className="w-fit mt-4">
-            <LemonButton
+            <Button
                 type="primary"
                 htmlType="submit"
                 to={billingUrl}
@@ -32,7 +32,7 @@ export const BillingPortalButton = (): JSX.Element | null => {
                 data-attr="manage-billing"
             >
                 {billing.has_active_subscription ? 'Manage card details and invoices' : 'View past invoices'}
-            </LemonButton>
+            </Button>
         </div>
     )
 }

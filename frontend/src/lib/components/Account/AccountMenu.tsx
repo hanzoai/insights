@@ -21,11 +21,11 @@ import {
 } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Link } from 'lib/lemon-ui/Link/Link'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture/ProfilePicture'
-import { UploadedLogo } from 'lib/lemon-ui/UploadedLogo/UploadedLogo'
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { Link } from 'lib/elements/Link/Link'
+import { ProfilePicture } from 'lib/elements/ProfilePicture/ProfilePicture'
+import { UploadedLogo } from 'lib/elements/UploadedLogo/UploadedLogo'
+import { IconBlank } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
@@ -83,7 +83,7 @@ function ThemeMenu(): JSX.Element {
                     <IconPalette />
                     Color theme
                     <div className="ml-auto flex items-center gap-1">
-                        <LemonTag>{themeMode}</LemonTag>
+                        <Tag>{themeMode}</Tag>
                         <MenuOpenIndicator intent="sub" className="ml-auto" />
                     </div>
                 </ButtonPrimitive>
