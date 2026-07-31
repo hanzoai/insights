@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonTable, LemonTableColumn, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Table, TableColumn, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 
@@ -29,14 +29,14 @@ export function QuickFiltersModalContent({ context }: QuickFiltersLogicProps): J
                         </p>
                     </div>
                     <div className="flex justify-end">
-                        <LemonButton type="primary" icon={<IconPlus />} onClick={startAddNew}>
+                        <Button type="primary" icon={<IconPlus />} onClick={startAddNew}>
                             Add filter
-                        </LemonButton>
+                        </Button>
                     </div>
                 </>
             ) : (
                 <>
-                    <LemonTable
+                    <Table
                         dataSource={quickFilters}
                         loading={quickFiltersLoading}
                         columns={
@@ -85,10 +85,10 @@ export function QuickFiltersModalContent({ context }: QuickFiltersLogicProps): J
                                     width: 0,
                                     render: (_, filter) => (
                                         <div className="flex gap-2">
-                                            <LemonButton size="small" onClick={() => startEdit(filter)}>
+                                            <Button size="small" onClick={() => startEdit(filter)}>
                                                 Edit
-                                            </LemonButton>
-                                            <LemonButton
+                                            </Button>
+                                            <Button
                                                 size="small"
                                                 status="danger"
                                                 icon={<IconTrash />}
@@ -97,13 +97,13 @@ export function QuickFiltersModalContent({ context }: QuickFiltersLogicProps): J
                                         </div>
                                     ),
                                 },
-                            ] as LemonTableColumn<QuickFilter, any>[]
+                            ] as TableColumn<QuickFilter, any>[]
                         }
                     />
                     <div className="flex justify-end mt-4">
-                        <LemonButton type="primary" icon={<IconPlus />} onClick={startAddNew}>
+                        <Button type="primary" icon={<IconPlus />} onClick={startAddNew}>
                             Add filter
-                        </LemonButton>
+                        </Button>
                     </div>
                 </>
             )}

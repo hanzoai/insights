@@ -3,8 +3,8 @@ import { useState } from 'react'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType, TaxonomicFilterLogicProps } from 'lib/components/TaxonomicFilter/types'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Button } from 'lib/elements/Button'
+import { Popover } from 'lib/elements/Popover'
 import { featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
 
 import { FeatureFlagBasicType } from '~/types'
@@ -50,13 +50,13 @@ export function FlagSelector({
             fallbackPlacements={['left-end', 'bottom']}
             onClickOutside={() => setVisible(false)}
         >
-            <LemonButton
+            <Button
                 type="secondary"
                 onClick={() => setVisible(!visible)}
                 disabledReason={readOnly && (disabledReason || "I'm read-only")}
             >
                 {featureFlag.key ? featureFlag.key : (initialButtonLabel ?? 'Select flag')}
-            </LemonButton>
+            </Button>
         </Popover>
     )
 }

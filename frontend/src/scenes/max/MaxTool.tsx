@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import React from 'react'
 
 import { IconPlusSmall, IconSparkles, IconWrench } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 

@@ -13,7 +13,7 @@ import {
 } from 'lib/components/ActivityLog/humanizeActivity'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { PropertyFilterButton } from 'lib/components/PropertyFilters/components/PropertyFilterButton'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { pluralize } from 'lib/utils'
 import { urls } from 'scenes/urls'
 

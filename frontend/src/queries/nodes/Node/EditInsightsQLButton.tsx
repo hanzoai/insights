@@ -1,14 +1,14 @@
-import { LemonButton, LemonButtonWithoutSideActionProps } from 'lib/lemon-ui/LemonButton'
-import { IconQueryEditor } from 'lib/lemon-ui/icons'
+import { Button, ButtonWithoutSideActionProps } from 'lib/elements/Button'
+import { IconQueryEditor } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
-export interface EditInsightsQLButtonProps extends LemonButtonWithoutSideActionProps {
+export interface EditInsightsQLButtonProps extends ButtonWithoutSideActionProps {
     insightsql: string
 }
 
 export function EditInsightsQLButton({ insightsql, ...props }: EditInsightsQLButtonProps): JSX.Element {
     return (
-        <LemonButton
+        <Button
             data-attr="open-json-editor-button"
             type="secondary"
             to={urls.sqlEditor({ query: insightsql })}

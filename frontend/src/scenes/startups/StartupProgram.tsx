@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconArrowRight, IconCheck, IconUpload, IconX } from '@hanzo/icons'
-import { LemonButton, LemonFileInput, LemonInput, LemonSelect, Link, Spinner, lemonToast } from '@hanzo/lemon-ui'
+import { Button, FileInput, Input, Select, Link, Spinner, toast } from '@hanzo/elements'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { ClimberMascot1, ClimberMascot2, YCMascot } from 'lib/components/mascots'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonCalendarSelectInput } from 'lib/lemon-ui/LemonCalendar/LemonCalendarSelect'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Banner } from 'lib/elements/Banner'
+import { CalendarSelectInput } from 'lib/elements/Calendar/CalendarSelect'
+import { Field } from 'lib/elements/Field'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { billingProductLogic } from 'scenes/billing/billingProductLogic'
 import { paymentEntryLogic } from 'scenes/billing/paymentEntryLogic'
@@ -77,7 +77,7 @@ export function StartupProgram(): JSX.Element {
             setStartupProgramValue('yc_proof_screenshot_url', url)
         },
         onError: (detail) => {
-            lemonToast.error(`Error uploading screenshot: ${detail}`)
+            toast.error(`Error uploading screenshot: ${detail}`)
             setStartupProgramValue('yc_proof_screenshot_url', undefined)
         },
     })
@@ -87,7 +87,7 @@ export function StartupProgram(): JSX.Element {
     if (isCurrentlyOnStartupPlan && !isYC) {
         return (
             <div className="mx-auto w-full max-w-200 mt-6 px-4">
-                <LemonBanner type="info">
+                <Banner type="info">
                     <h2 className="mb-2">You are already in the {currentProgramName}</h2>
                     <p>It looks like your organization is already part of our {currentProgramName}.</p>
                     {currentStartupProgramLabel === StartupProgramLabel.YC && (
@@ -97,10 +97,10 @@ export function StartupProgram(): JSX.Element {
                         </p>
                     )}
                     <p>If you have any questions, please contact our support team.</p>
-                    <LemonButton type="primary" to={urls.projectRoot()} className="mt-2">
+                    <Button type="primary" to={urls.projectRoot()} className="mt-2">
                         Return to Insights
-                    </LemonButton>
-                </LemonBanner>
+                    </Button>
+                </Banner>
             </div>
         )
     }
@@ -109,16 +109,16 @@ export function StartupProgram(): JSX.Element {
     if (wasPreviouslyOnStartupPlan && !isYC) {
         return (
             <div className="mx-auto w-full max-w-200 mt-6 px-4">
-                <LemonBanner type="info">
+                <Banner type="info">
                     <h2 className="mb-2">You were already in the Startup Program</h2>
                     <p>
                         It looks like your organization was already part of our Startup Program. If you have any
                         questions, please contact our support team.
                     </p>
-                    <LemonButton type="primary" to={urls.projectRoot()} className="mt-2">
+                    <Button type="primary" to={urls.projectRoot()} className="mt-2">
                         Return to Insights
-                    </LemonButton>
-                </LemonBanner>
+                    </Button>
+                </Banner>
             </div>
         )
     }
@@ -126,7 +126,7 @@ export function StartupProgram(): JSX.Element {
     if (isAnnualPlanCustomer) {
         return (
             <div className="mx-auto w-full max-w-200 mt-6 px-4">
-                <LemonBanner type="info">
+                <Banner type="info">
                     <h2 className="mb-2">You are already on an annual plan</h2>
                     <p>
                         It looks like your organization is already on our annual plan. If you have any questions, please
@@ -135,10 +135,10 @@ export function StartupProgram(): JSX.Element {
                             ? `your Insights human ${accountOwner.name.split(' ')[0]} at ${accountOwner.email}`
                             : 'our support team'}
                     </p>
-                    <LemonButton type="primary" to={urls.projectRoot()} className="mt-2">
+                    <Button type="primary" to={urls.projectRoot()} className="mt-2">
                         Return to Insights
-                    </LemonButton>
-                </LemonBanner>
+                    </Button>
+                </Banner>
             </div>
         )
     }
@@ -146,16 +146,16 @@ export function StartupProgram(): JSX.Element {
     if (!isAdminOrOwner) {
         return (
             <div className="mx-auto w-full max-w-200 mt-6 px-4">
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     <h2 className="mb-2">Admin or owner permission required</h2>
                     <p>
                         You need to be an organization admin or owner to apply for the startup program. Please contact
                         your organization admin for assistance.
                     </p>
-                    <LemonButton type="primary" to={urls.projectRoot()} className="mt-2">
+                    <Button type="primary" to={urls.projectRoot()} className="mt-2">
                         Return to Insights
-                    </LemonButton>
-                </LemonBanner>
+                    </Button>
+                </Banner>
             </div>
         )
     }
@@ -335,9 +335,9 @@ export function StartupProgram(): JSX.Element {
                                 </p>
                             )}
                             <p className="mt-2">If you have any questions, please contact our support team.</p>
-                            <LemonButton type="primary" to={urls.projectRoot()} className="mt-4">
+                            <Button type="primary" to={urls.projectRoot()} className="mt-4">
                                 Return to Insights
-                            </LemonButton>
+                            </Button>
                         </div>
                     ) : (
                         <>
@@ -385,12 +385,12 @@ export function StartupProgram(): JSX.Element {
 
                                 {/* Show reapplication banner for YC users who were previously in a program */}
                                 {wasPreviouslyOnStartupPlan && isYC && (
-                                    <LemonBanner type="info" className="mb-4">
+                                    <Banner type="info" className="mb-4">
                                         <p>
                                             You can reapply for the YC Program and receive $50,000 in credits annually,
                                             renewed each year.
                                         </p>
-                                    </LemonBanner>
+                                    </Banner>
                                 )}
 
                                 {formSubmitted ? (
@@ -403,9 +403,9 @@ export function StartupProgram(): JSX.Element {
                                             Thank you for your application! We'll review it and get back to you as soon
                                             as possible. In the meantime, you can continue using Insights.
                                         </p>
-                                        <LemonButton type="primary" to={urls.projectRoot()}>
+                                        <Button type="primary" to={urls.projectRoot()}>
                                             Return to Insights
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 ) : (
                                     <Form
@@ -416,67 +416,67 @@ export function StartupProgram(): JSX.Element {
                                     >
                                         <div className="hidden">
                                             <div className="grid md:grid-cols-2 gap-3">
-                                                <LemonField name="first_name" label="First name">
-                                                    <LemonInput placeholder="Jane" />
-                                                </LemonField>
+                                                <Field name="first_name" label="First name">
+                                                    <Input placeholder="Jane" />
+                                                </Field>
 
-                                                <LemonField name="last_name" label="Last name">
-                                                    <LemonInput placeholder="Doe" />
-                                                </LemonField>
+                                                <Field name="last_name" label="Last name">
+                                                    <Input placeholder="Doe" />
+                                                </Field>
                                             </div>
 
-                                            <LemonField name="email" label="Email">
-                                                <LemonInput placeholder="you@example.com" />
-                                            </LemonField>
+                                            <Field name="email" label="Email">
+                                                <Input placeholder="you@example.com" />
+                                            </Field>
 
-                                            <LemonField name="startup_domain" label="Company domain">
-                                                <LemonInput placeholder="example.com" />
-                                            </LemonField>
+                                            <Field name="startup_domain" label="Company domain">
+                                                <Input placeholder="example.com" />
+                                            </Field>
                                         </div>
 
-                                        <LemonField
+                                        <Field
                                             name="organization_name"
                                             label="Insights organization"
                                             info="To apply for a different organization, switch to that organization first"
                                         >
-                                            <LemonInput placeholder="Your Insights organization" disabled />
-                                        </LemonField>
+                                            <Input placeholder="Your Insights organization" disabled />
+                                        </Field>
 
-                                        <LemonField name="organization_id" className="hidden">
-                                            <LemonInput />
-                                        </LemonField>
+                                        <Field name="organization_id" className="hidden">
+                                            <Input />
+                                        </Field>
 
                                         {!isYC && (
                                             <>
-                                                <LemonField
+                                                <Field
                                                     name="raised"
                                                     label="How much in total funding have you raised (USD)"
                                                 >
-                                                    <LemonSelect options={RAISED_OPTIONS} className="bg-bg-light" />
-                                                </LemonField>
+                                                    <Select options={RAISED_OPTIONS} className="bg-bg-light" />
+                                                </Field>
 
-                                                <LemonField
+                                                <Field
                                                     name="incorporation_date"
                                                     label="The date that your company was incorporated"
                                                 >
-                                                    <LemonCalendarSelectInput
+                                                    <CalendarSelectInput
                                                         clearable={false}
                                                         format="YYYY-MM-DD"
                                                         buttonProps={{ className: 'bg-bg-light' }}
                                                         placeholder=" "
                                                         selectionPeriod="past"
                                                     />
-                                                </LemonField>
+                                                </Field>
                                             </>
                                         )}
 
                                         {isYC && (
                                             <>
-                                                <LemonField name="yc_batch" label="Which YC batch are you?">
-                                                    <LemonSelect options={ycBatchOptions} className="bg-bg-light" />
-                                                </LemonField>
+                                                <Field name="yc_batch" label="Which YC batch are you?">
+                                                    <Select options={ycBatchOptions} className="bg-bg-light" />
+                                                </Field>
 
-                                                <LemonField
+                                                <Field
                                                     name="yc_proof_screenshot_url"
                                                     label={
                                                         <span>
@@ -489,7 +489,7 @@ export function StartupProgram(): JSX.Element {
                                                     }
                                                     info="Open Insights deal on Bookface, click 'Mark Using', take a screenshot and attach it below"
                                                 >
-                                                    <LemonFileInput
+                                                    <FileInput
                                                         accept="image/*"
                                                         multiple={false}
                                                         value={filesToUpload}
@@ -511,7 +511,7 @@ export function StartupProgram(): JSX.Element {
                                                                                 alt="YC Profile"
                                                                                 className="h-10 w-10 rounded object-cover"
                                                                             />
-                                                                            <LemonButton
+                                                                            <Button
                                                                                 type="tertiary"
                                                                                 status="danger"
                                                                                 size="xsmall"
@@ -538,30 +538,30 @@ export function StartupProgram(): JSX.Element {
                                                             </div>
                                                         }
                                                     />
-                                                </LemonField>
+                                                </Field>
 
-                                                <LemonField
+                                                <Field
                                                     name="yc_merch_count"
                                                     label="How many merch packs do you need for you and your co-founder(s)?"
                                                 >
-                                                    <LemonInput type="number" min={1} max={5} />
-                                                </LemonField>
+                                                    <Input type="number" min={1} max={5} />
+                                                </Field>
                                             </>
                                         )}
 
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             htmlType="submit"
                                             className="mt-4"
                                             data-attr="startup-program-submit"
                                         >
                                             Submit Application
-                                        </LemonButton>
+                                        </Button>
 
                                         {/* This will display a form error if user is not on a paid plan. Kea forms requires a child element */}
-                                        <LemonField name="_form">
+                                        <Field name="_form">
                                             <span />
-                                        </LemonField>
+                                        </Field>
                                     </Form>
                                 )}
                             </div>

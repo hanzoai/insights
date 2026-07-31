@@ -7,18 +7,18 @@ import insights from '@hanzo/insights'
 import { ReactNode, useEffect, useState } from 'react'
 
 import { IconCollapse, IconExpand, IconInfo, IconLock } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonDivider, LemonModal, LemonSkeleton, LemonSwitch } from '@hanzo/lemon-ui'
+import { Banner, Button, Divider, Modal, Skeleton, Switch } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { TemplateLinkSection } from 'lib/components/Sharing/TemplateLinkSection'
 import { TEMPLATE_LINK_HEADING, TEMPLATE_LINK_PII_WARNING } from 'lib/components/Sharing/templateLinkMessages'
 import { TitleWithIcon } from 'lib/components/TitleWithIcon'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { Dialog } from 'lib/elements/Dialog'
+import { Field } from 'lib/elements/Field'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconLink } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { accessLevelSatisfied } from 'lib/utils/accessControlUtils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -174,7 +174,7 @@ export function SharingModalContent({
                             push(urls.dashboard(dashboardId))
                         }}
                     />
-                    <LemonDivider />
+                    <Divider />
                 </>
             ) : undefined}
 
@@ -186,27 +186,27 @@ export function SharingModalContent({
                             push(urls.insightView(insightShortId))
                         }}
                     />
-                    <LemonDivider />
+                    <Divider />
                 </>
             ) : undefined}
 
             <div className="deprecated-space-y-2">
                 {!sharingConfiguration && sharingConfigurationLoading ? (
-                    <LemonSkeleton.Row repeat={3} />
+                    <Skeleton.Row repeat={3} />
                 ) : !sharingConfiguration ? (
                     <p>Something went wrong...</p>
                 ) : (
                     <>
                         <h3>Sharing</h3>
                         {!sharingAllowed ? (
-                            <LemonBanner type="warning">Public sharing is disabled for this organization.</LemonBanner>
+                            <Banner type="warning">Public sharing is disabled for this organization.</Banner>
                         ) : (
                             <AccessControlAction
                                 resourceType={getResourceType(dashboardId, insightShortId, recordingId)}
                                 minAccessLevel={AccessControlLevel.Editor}
                                 userAccessLevel={userAccessLevel}
                             >
-                                <LemonSwitch
+                                <Switch
                                     id="sharing-switch"
                                     label={`Share ${resource} publicly`}
                                     checked={sharingConfiguration.enabled}
@@ -223,8 +223,8 @@ export function SharingModalContent({
                             <>
                                 <div className="deprecated-space-y-2">
                                     {passwordProtectedSharesEnabled && (
-                                        <div className="LemonSwitch LemonSwitch--medium LemonSwitch--bordered LemonSwitch--full-width flex-col py-1.5">
-                                            <LemonSwitch
+                                        <div className="Switch Switch--medium Switch--bordered Switch--full-width flex-col py-1.5">
+                                            <Switch
                                                 className="px-0"
                                                 fullWidth
                                                 label={
@@ -260,7 +260,7 @@ export function SharingModalContent({
                                             )}
                                         </div>
                                     )}
-                                    <LemonButton
+                                    <Button
                                         data-attr="sharing-link-button"
                                         type="secondary"
                                         onClick={() => {
@@ -278,7 +278,7 @@ export function SharingModalContent({
                                         className="mb-4"
                                     >
                                         Copy public link
-                                    </LemonButton>
+                                    </Button>
                                     {recordingLinkTimeForm}
                                     <TitleWithIcon
                                         icon={
@@ -302,9 +302,9 @@ export function SharingModalContent({
                                     >
                                         <div className="grid grid-cols-2 gap-2 grid-flow *:odd:last:col-span-2">
                                             {insight && (
-                                                <LemonField name="noHeader">
+                                                <Field name="noHeader">
                                                     {({ value, onChange }) => (
-                                                        <LemonSwitch
+                                                        <Switch
                                                             fullWidth
                                                             bordered
                                                             label={<div>Show title and description</div>}
@@ -312,11 +312,11 @@ export function SharingModalContent({
                                                             checked={!value}
                                                         />
                                                     )}
-                                                </LemonField>
+                                                </Field>
                                             )}
-                                            <LemonField name="whitelabel">
+                                            <Field name="whitelabel">
                                                 {({ value }) => (
-                                                    <LemonSwitch
+                                                    <Switch
                                                         fullWidth
                                                         bordered
                                                         label={
@@ -350,7 +350,7 @@ export function SharingModalContent({
                                                         checked={!value}
                                                     />
                                                 )}
-                                            </LemonField>
+                                            </Field>
 
                                             {isInsightVizNode(insight?.query) && insightShortId && (
                                                 // These options are only valid for `InsightVizNode`s, and they rely on `insightVizDataLogic`
@@ -361,9 +361,9 @@ export function SharingModalContent({
                                             )}
 
                                             {recordingId && (
-                                                <LemonField name="showInspector">
+                                                <Field name="showInspector">
                                                     {({ value, onChange }) => (
-                                                        <LemonSwitch
+                                                        <Switch
                                                             fullWidth
                                                             bordered
                                                             label={<div>Show inspector panel</div>}
@@ -371,13 +371,13 @@ export function SharingModalContent({
                                                             checked={value}
                                                         />
                                                     )}
-                                                </LemonField>
+                                                </Field>
                                             )}
 
                                             {dashboardId && (
-                                                <LemonField name="hideExtraDetails">
+                                                <Field name="hideExtraDetails">
                                                     {({ value, onChange }) => (
-                                                        <LemonSwitch
+                                                        <Switch
                                                             fullWidth
                                                             bordered
                                                             label={
@@ -392,20 +392,20 @@ export function SharingModalContent({
                                                             checked={!value}
                                                         />
                                                     )}
-                                                </LemonField>
+                                                </Field>
                                             )}
                                         </div>
 
                                         {previewIframe && (
                                             <div className="rounded border">
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     sideIcon={showPreview ? <IconCollapse /> : <IconExpand />}
                                                     onClick={togglePreview}
                                                 >
                                                     Preview
                                                     {showPreview && !iframeLoaded ? <Spinner className="ml-2" /> : null}
-                                                </LemonButton>
+                                                </Button>
                                                 {showPreview && (
                                                     <div className="SharingPreview border-t">
                                                         <iframe
@@ -428,7 +428,7 @@ export function SharingModalContent({
             </div>
             {insight?.query && (
                 <>
-                    <LemonDivider />
+                    <Divider />
                     <TemplateLinkSection
                         collapsible
                         defaultExpanded={false}
@@ -601,9 +601,9 @@ function DetailedResultsCheckbox({ insightShortId }: { insightShortId: InsightSh
     }
 
     return (
-        <LemonField name="detailed">
+        <Field name="detailed">
             {({ value, onChange }) => (
-                <LemonSwitch
+                <Switch
                     fullWidth
                     bordered
                     label="Show detailed results"
@@ -611,7 +611,7 @@ function DetailedResultsCheckbox({ insightShortId }: { insightShortId: InsightSh
                     checked={value}
                 />
             )}
-        </LemonField>
+        </Field>
     )
 }
 
@@ -623,35 +623,35 @@ function LegendCheckbox({ insightShortId }: { insightShortId: InsightShortId }):
     }
 
     return (
-        <LemonField name="legend">
+        <Field name="legend">
             {({ value, onChange }) => (
-                <LemonSwitch fullWidth bordered label="Show legend" onChange={() => onChange(!value)} checked={value} />
+                <Switch fullWidth bordered label="Show legend" onChange={() => onChange(!value)} checked={value} />
             )}
-        </LemonField>
+        </Field>
     )
 }
 
 export function SharingModal({ closeModal, isOpen, inline, title, ...props }: SharingModalProps): JSX.Element {
     return (
-        <LemonModal
+        <Modal
             onClose={closeModal}
             isOpen={isOpen}
             width={SHARING_MODAL_WIDTH}
             title={title ?? 'Sharing'}
             footer={
-                <LemonButton type="secondary" onClick={closeModal}>
+                <Button type="secondary" onClick={closeModal}>
                     Done
-                </LemonButton>
+                </Button>
             }
             inline={inline}
         >
             <SharingModalContent {...props} />
-        </LemonModal>
+        </Modal>
     )
 }
 
 SharingModal.open = (props: SharingModalBaseProps) => {
-    LemonDialog.open({
+    Dialog.open({
         title: props.title ?? 'Sharing',
         content: (
             <>

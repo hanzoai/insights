@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
+import { Dialog } from 'lib/elements/Dialog'
 import { teamLogic } from 'scenes/teamLogic'
 
 export function WeekStartConfig({ displayWarning = true }: { displayWarning?: boolean }): JSX.Element {
@@ -10,11 +10,11 @@ export function WeekStartConfig({ displayWarning = true }: { displayWarning?: bo
     const { updateCurrentTeam } = useActions(teamLogic)
 
     return (
-        <LemonSelect
+        <Select
             value={currentTeam?.week_start_day || 0}
             onChange={(value) => {
                 if (displayWarning) {
-                    LemonDialog.open({
+                    Dialog.open({
                         title: `Change the first day of the week to ${value === 0 ? 'Sunday' : 'Monday'}?`,
                         description: 'Queries grouped by week will need to be recalculated.',
                         primaryButton: {

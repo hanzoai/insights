@@ -5,7 +5,7 @@ import React from 'react'
 
 import { IconPin, IconPinFilled } from '@hanzo/icons'
 import insights from '@hanzo/insights'
-import { LemonTable, LemonTableColumn, Tooltip } from '@hanzo/lemon-ui'
+import { Table, TableColumn, Tooltip } from '@hanzo/elements'
 
 import { execScript } from 'lib/iql'
 import { lightenDarkenColor } from 'lib/utils'
@@ -65,7 +65,7 @@ export const Table = (props: TableProps): JSX.Element => {
     } = useValues(dataVisualizationLogic)
     const { toggleColumnPin } = useActions(dataVisualizationLogic)
 
-    const tableColumns: LemonTableColumn<TableDataCell<any>[], any>[] = tabularColumns.map(
+    const tableColumns: TableColumn<TableDataCell<any>[], any>[] = tabularColumns.map(
         ({ column, settings }, index) => {
             const { title, ...columnMeta } = renderColumnMeta(column.name, props.query, props.context)
 
@@ -170,7 +170,7 @@ export const Table = (props: TableProps): JSX.Element => {
     )
 
     return (
-        <LemonTable
+        <Table
             className="DataVisualizationTable"
             dataSource={tabularData}
             columns={tableColumns}

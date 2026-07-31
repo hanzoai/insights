@@ -2,7 +2,7 @@ import { kea, key, listeners, path, props } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -27,19 +27,19 @@ export const taskLogic = kea<taskLogicType>([
                 },
                 runTask: async () => {
                     const response = await api.tasks.run(props.taskId)
-                    lemonToast.success('Task run started')
+                    toast.success('Task run started')
                     return response
                 },
                 deleteTask: async () => {
                     await api.tasks.delete(props.taskId)
-                    lemonToast.success('Task archived')
+                    toast.success('Task archived')
                     tasksLogic.findAllMounted().forEach((logic) => logic.actions.loadTasks())
                     router.actions.push('/tasks')
                     return null
                 },
                 updateTask: async ({ data }: { data: TaskUpsertProps }) => {
                     const updatedTask = await api.tasks.update(props.taskId, data)
-                    lemonToast.success('Task updated')
+                    toast.success('Task updated')
                     tasksLogic.findAllMounted().forEach((logic) => logic.actions.loadTasks())
                     return updatedTask
                 },

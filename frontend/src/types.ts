@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 import { Layout } from 'react-grid-layout'
 
 import type { PropertyMatchType, SupportedWebVitalsMetrics } from '@hanzo/insights'
-import { LemonTableColumns } from '@hanzo/lemon-ui'
+import { TableColumns } from '@hanzo/elements'
 import { PluginConfigSchema } from '@hanzo/plugin-scaffold'
 import { LogLevel } from '@hanzo/rrweb-plugin-console-record'
 import { eventWithTime } from '@hanzo/rrweb-types'
@@ -31,7 +31,7 @@ import {
     TeamMembershipLevel,
 } from 'lib/constants'
 import { Dayjs, dayjs } from 'lib/dayjs'
-import { PopoverProps } from 'lib/lemon-ui/Popover/Popover'
+import { PopoverProps } from 'lib/elements/Popover/Popover'
 import { BehavioralFilterKey, BehavioralFilterType } from 'scenes/cohorts/CohortFilters/types'
 import { BreakdownColorConfig } from 'scenes/dashboard/DashboardInsightColorsModal'
 import { AggregationAxisFormat } from 'scenes/insights/aggregationAxisFormat'
@@ -5877,7 +5877,7 @@ export enum SidePanelTab {
 }
 
 export interface ProductPricingTierSubrows {
-    columns: LemonTableColumns<BillingTableTierAddonRow>
+    columns: TableColumns<BillingTableTierAddonRow>
     rows: BillingTableTierAddonRow[]
 }
 

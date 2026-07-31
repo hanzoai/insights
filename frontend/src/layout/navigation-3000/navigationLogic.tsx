@@ -29,10 +29,10 @@ import {
     IconToggle,
     IconWarning,
 } from '@hanzo/icons'
-import { Spinner, lemonToast } from '@hanzo/lemon-ui'
+import { Spinner, toast } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { isNotNil } from 'lib/utils'
 import { getAppContext } from 'lib/utils/getAppContext'
@@ -284,7 +284,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
             } catch (e) {
                 insights.captureException(e)
                 console.error(e)
-                lemonToast.error('Something went wrong while saving the item. Please try again.')
+                toast.error('Something went wrong while saving the item. Please try again.')
             } finally {
                 actions.saveNewItemComplete()
             }
@@ -407,7 +407,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                                           identifier: 'pinned-dashboards-dropdown',
                                           dropdown: {
                                               overlay: (
-                                                  <LemonMenuOverlay
+                                                  <MenuOverlay
                                                       items={[
                                                           {
                                                               title: 'Pinned dashboards',
@@ -503,7 +503,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                                 identifier: 'replay-dropdown',
                                 dropdown: {
                                     overlay: (
-                                        <LemonMenuOverlay
+                                        <MenuOverlay
                                             items={
                                                 savedFilters.count > 0
                                                     ? [

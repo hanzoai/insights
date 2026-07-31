@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -19,7 +19,7 @@ export function RetentionDashboardDisplayPicker(): JSX.Element | null {
     }
 
     return (
-        <LemonSelect
+        <Select
             value={displayType}
             onChange={(value) => {
                 updateInsightFilter({ dashboardDisplay: value })

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { userPreferencesLogic } from 'lib/logic/userPreferencesLogic'
@@ -24,7 +24,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodePersonPropertie
     const { pinPersonProperty, unpinPersonProperty } = useActions(userPreferencesLogic)
 
     if (personLoading) {
-        return <LemonSkeleton className="h-6" />
+        return <Skeleton className="h-6" />
     } else if (!person) {
         return <NotFound object="person" />
     }

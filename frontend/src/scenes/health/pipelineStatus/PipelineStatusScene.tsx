@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 
 import { IconRefresh } from '@hanzo/icons'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { HealthIssueCard } from '~/layout/navigation-3000/sidepanel/panels/SidePanelHealth'
@@ -38,7 +38,7 @@ export function PipelineStatusScene(): JSX.Element {
                     type: 'pipeline_status',
                 }}
                 actions={
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="small"
                         icon={<IconRefresh className="size-4" />}
@@ -46,28 +46,28 @@ export function PipelineStatusScene(): JSX.Element {
                         onClick={() => loadHealthIssues()}
                     >
                         {healthIssuesLoading ? 'Refreshing...' : 'Refresh'}
-                    </LemonButton>
+                    </Button>
                 }
             />
 
             <div className="max-w-3xl space-y-4">
                 {healthIssuesLoading && issues.length === 0 ? (
                     <div className="space-y-3">
-                        <LemonSkeleton className="h-8" />
-                        <LemonSkeleton className="h-20" />
-                        <LemonSkeleton className="h-20" />
+                        <Skeleton className="h-8" />
+                        <Skeleton className="h-20" />
+                        <Skeleton className="h-20" />
                     </div>
                 ) : hasErrors ? (
                     <div className="text-center text-muted p-4">
                         Error loading health information. Please try again later.
                     </div>
                 ) : issueCount === 0 ? (
-                    <LemonBanner type="success" hideIcon={false}>
+                    <Banner type="success" hideIcon={false}>
                         <p className="font-semibold">All data pipelines healthy</p>
                         <p className="text-sm mt-1">
                             Your sources, syncs, destinations, and transformations are running without issues.
                         </p>
-                    </LemonBanner>
+                    </Banner>
                 ) : (
                     <>
                         <PipelineStatusSummary />

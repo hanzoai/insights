@@ -1,12 +1,12 @@
 import { IconPencil } from '@hanzo/icons'
-import { LemonButton, LemonTable, LemonTableColumns, ProfilePicture } from '@hanzo/lemon-ui'
+import { Button, Table, TableColumns, ProfilePicture } from '@hanzo/elements'
 
 import { APIScopeObject } from '~/types'
 
 import { SummarizeAccessLevels } from './SummarizeAccessLevels'
 import { AccessControlRow, AccessControlsTab } from './types'
 
-function getScopeColumnsForTab(activeTab: AccessControlsTab): LemonTableColumns<AccessControlRow> {
+function getScopeColumnsForTab(activeTab: AccessControlsTab): TableColumns<AccessControlRow> {
     switch (activeTab) {
         case 'roles':
             return [
@@ -57,7 +57,7 @@ export function AccessControlTable(props: AccessControlTableProps): JSX.Element 
     const columns = getColumns(props.activeTab, props.canEditAny, props.onEdit)
 
     return (
-        <LemonTable
+        <Table
             columns={columns}
             dataSource={props.rows}
             loading={props.loading}
@@ -87,7 +87,7 @@ function getColumns(
     activeTab: AccessControlsTab,
     canEditAny: boolean,
     onEdit: (row: AccessControlRow) => void
-): LemonTableColumns<AccessControlRow> {
+): TableColumns<AccessControlRow> {
     const scopeColumns = getScopeColumnsForTab(activeTab)
 
     return [
@@ -114,7 +114,7 @@ function getColumns(
             align: 'right' as const,
             render: function RenderActions(_: any, row: AccessControlRow) {
                 return (
-                    <LemonButton
+                    <Button
                         size="small"
                         fullWidth
                         icon={<IconPencil />}
@@ -122,7 +122,7 @@ function getColumns(
                         onClick={() => onEdit(row)}
                     >
                         Edit
-                    </LemonButton>
+                    </Button>
                 )
             },
         },

@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useState } from 'react'
 
 import { IconArrowCircleRight } from '@hanzo/icons'
-import { LemonSnack, Tooltip } from '@hanzo/lemon-ui'
+import { Snack, Tooltip } from '@hanzo/elements'
 
 import { isValidRegexp } from 'lib/utils/regexp'
 
@@ -47,7 +47,7 @@ export function PathCleanFilterItem({ filter, onChange, onRemove }: PathCleanFil
                 style={{ transform: CSS.Translate.toString(transform), transition }}
             >
                 <Tooltip title={isInvalidRegex ? 'NOTE: Invalid Regex, will be skipped' : null}>
-                    <LemonSnack
+                    <Snack
                         type="pill"
                         onClick={onChange ? () => setVisible(!visible) : undefined}
                         onClose={onRemove}
@@ -59,7 +59,7 @@ export function PathCleanFilterItem({ filter, onChange, onRemove }: PathCleanFil
                             <IconArrowCircleRight className="mx-2" />
                             <span className="font-mono text-xs">{parseAliasToReadable(filter.alias ?? '(Empty)')}</span>
                         </span>
-                    </LemonSnack>
+                    </Snack>
                 </Tooltip>
             </div>
         </>

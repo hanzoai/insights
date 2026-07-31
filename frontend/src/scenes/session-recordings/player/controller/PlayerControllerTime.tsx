@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconClock } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, Tooltip } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Tooltip } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { useKeyHeld } from 'lib/hooks/useKeyHeld'
-import { IconSkipBackward } from 'lib/lemon-ui/icons'
+import { IconSkipBackward } from 'lib/elements/icons'
 import { capitalizeFirstLetter, colonDelimitedDuration, shortTimeZone } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 import { formatLocalizedDate } from 'lib/utils/dateTimeUtils'
@@ -66,7 +66,7 @@ function RelativeTimestampLabel({ size }: { size: 'small' | 'normal' }): JSX.Ele
 export function Timestamp({
     size,
     noPadding,
-}: { size: 'small' | 'normal' } & Pick<LemonButtonProps, 'noPadding'>): JSX.Element {
+}: { size: 'small' | 'normal' } & Pick<ButtonProps, 'noPadding'>): JSX.Element {
     const { logicProps, currentTimestamp, currentPlayerTimeSeconds, sessionPlayerData } =
         useValues(sessionRecordingPlayerLogic)
     const { isScrubbing, scrubbingTime, scrubbingTimeSeconds } = useValues(seekbarLogic(logicProps))
@@ -114,7 +114,7 @@ export function Timestamp({
 
     return (
         <Tooltip title={tooltipContent} placement="top" visible={isHovered}>
-            <LemonButton
+            <Button
                 data-attr="recording-timestamp"
                 className="text-center whitespace-nowrap text-xs"
                 noPadding={noPadding}
@@ -137,7 +137,7 @@ export function Timestamp({
                         />
                     )}
                 </span>
-            </LemonButton>
+            </Button>
         </Tooltip>
     )
 }
@@ -173,7 +173,7 @@ export function SeekSkip({ direction }: { direction: 'forward' | 'backward' }): 
                 </div>
             }
         >
-            <LemonButton
+            <Button
                 data-attr={`seek-skip-${direction}`}
                 size="xsmall"
                 noPadding={true}
@@ -191,7 +191,7 @@ export function SeekSkip({ direction }: { direction: 'forward' | 'backward' }): 
                         })}
                     />
                 </div>
-            </LemonButton>
+            </Button>
         </Tooltip>
     )
 }

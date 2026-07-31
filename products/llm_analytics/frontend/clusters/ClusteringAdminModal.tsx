@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonInput, LemonModal, LemonSegmentedButton, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Input, Modal, SegmentedButton, Select } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -12,38 +12,38 @@ export function ClusteringAdminModal(): JSX.Element {
     const { closeModal, setParams, triggerClusteringRun, resetParams } = useActions(clustersAdminLogic)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isModalOpen}
             onClose={closeModal}
             title="Run clustering workflow"
             description="Configure and trigger a clustering workflow with custom parameters for experimentation."
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={resetParams}
                         disabled={isRunning}
                         data-attr="clusters-admin-reset"
                     >
                         Reset to defaults
-                    </LemonButton>
+                    </Button>
                     <div className="flex-1" />
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={closeModal}
                         disabled={isRunning}
                         data-attr="clusters-admin-cancel"
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={triggerClusteringRun}
                         loading={isRunning}
                         data-attr="clusters-admin-run"
                     >
                         Run clustering
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -51,7 +51,7 @@ export function ClusteringAdminModal(): JSX.Element {
                 {/* Analysis Level */}
                 <div>
                     <h4 className="font-semibold mb-3">Analysis level</h4>
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         value={params.analysis_level}
                         onChange={(value) => setParams({ analysis_level: value })}
                         options={[
@@ -72,7 +72,7 @@ export function ClusteringAdminModal(): JSX.Element {
                     <h4 className="font-semibold mb-3">Experiment tracking</h4>
                     <div>
                         <label className="text-sm font-medium mb-1 block">Run label</label>
-                        <LemonInput
+                        <Input
                             type="text"
                             value={params.run_label}
                             onChange={(value) => setParams({ run_label: value })}
@@ -117,7 +117,7 @@ export function ClusteringAdminModal(): JSX.Element {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="text-sm font-medium mb-1 block">Lookback days</label>
-                            <LemonInput
+                            <Input
                                 type="number"
                                 min={1}
                                 max={90}
@@ -132,7 +132,7 @@ export function ClusteringAdminModal(): JSX.Element {
                         </div>
                         <div>
                             <label className="text-sm font-medium mb-1 block">Max samples</label>
-                            <LemonInput
+                            <Input
                                 type="number"
                                 min={20}
                                 max={10000}
@@ -153,7 +153,7 @@ export function ClusteringAdminModal(): JSX.Element {
                     <h4 className="font-semibold mb-3">Embedding preprocessing</h4>
                     <div>
                         <label className="text-sm font-medium mb-1 block">Normalization</label>
-                        <LemonSelect
+                        <Select
                             value={params.embedding_normalization}
                             onChange={(value) => setParams({ embedding_normalization: value })}
                             options={[
@@ -175,7 +175,7 @@ export function ClusteringAdminModal(): JSX.Element {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="text-sm font-medium mb-1 block">Method</label>
-                            <LemonSelect
+                            <Select
                                 value={params.dimensionality_reduction_method}
                                 onChange={(value) => setParams({ dimensionality_reduction_method: value })}
                                 options={[
@@ -190,7 +190,7 @@ export function ClusteringAdminModal(): JSX.Element {
                         </div>
                         <div>
                             <label className="text-sm font-medium mb-1 block">Target dimensions</label>
-                            <LemonInput
+                            <Input
                                 type="number"
                                 min={2}
                                 max={500}
@@ -213,7 +213,7 @@ export function ClusteringAdminModal(): JSX.Element {
                     <h4 className="font-semibold mb-3">Clustering algorithm</h4>
                     <div>
                         <label className="text-sm font-medium mb-1 block">Method</label>
-                        <LemonSelect
+                        <Select
                             value={params.clustering_method}
                             onChange={(value) => setParams({ clustering_method: value })}
                             options={[
@@ -237,7 +237,7 @@ export function ClusteringAdminModal(): JSX.Element {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm font-medium mb-1 block">min_cluster_size_fraction</label>
-                                <LemonInput
+                                <Input
                                     type="number"
                                     min={0.01}
                                     max={0.5}
@@ -253,7 +253,7 @@ export function ClusteringAdminModal(): JSX.Element {
                             </div>
                             <div>
                                 <label className="text-sm font-medium mb-1 block">min_samples</label>
-                                <LemonInput
+                                <Input
                                     type="number"
                                     min={1}
                                     max={100}
@@ -277,7 +277,7 @@ export function ClusteringAdminModal(): JSX.Element {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm font-medium mb-1 block">Min k</label>
-                                <LemonInput
+                                <Input
                                     type="number"
                                     min={2}
                                     max={50}
@@ -291,7 +291,7 @@ export function ClusteringAdminModal(): JSX.Element {
                             </div>
                             <div>
                                 <label className="text-sm font-medium mb-1 block">Max k</label>
-                                <LemonInput
+                                <Input
                                     type="number"
                                     min={2}
                                     max={100}
@@ -312,7 +312,7 @@ export function ClusteringAdminModal(): JSX.Element {
                     <h4 className="font-semibold mb-3">Visualization</h4>
                     <div>
                         <label className="text-sm font-medium mb-1 block">2D scatter plot method</label>
-                        <LemonSelect
+                        <Select
                             value={params.visualization_method}
                             onChange={(value) => setParams({ visualization_method: value })}
                             options={[
@@ -329,6 +329,6 @@ export function ClusteringAdminModal(): JSX.Element {
                     </div>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

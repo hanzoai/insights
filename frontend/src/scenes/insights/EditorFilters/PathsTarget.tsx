@@ -4,8 +4,8 @@ import { combineUrl, encodeParams, router } from 'kea-router'
 import { IconX } from '@hanzo/icons'
 
 import { PathItemSelector } from 'lib/components/PropertyFilters/components/PathItemSelector'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconFunnelVertical } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconFunnelVertical } from 'lib/elements/icons'
 import { pathsDataLogic } from 'scenes/paths/pathsDataLogic'
 
 import { queryNodeToFilter } from '~/queries/nodes/InsightQuery/utils/queryNodeToFilter'
@@ -123,7 +123,7 @@ function PathsTarget({ position, insightProps }: PathTargetProps): JSX.Element {
             disabled={overrideInputs}
             wildcardOptions={pathGroupings?.map((name) => ({ name }))}
         >
-            <LemonButton
+            <Button
                 data-attr={'new-prop-filter-' + positionOptions.index}
                 fullWidth
                 className="paths-endpoint-field"
@@ -156,7 +156,7 @@ function PathsTarget({ position, insightProps }: PathTargetProps): JSX.Element {
                 }
             >
                 {positionOptions.getLabel()}
-            </LemonButton>
+            </Button>
         </PathItemSelector>
     )
 }

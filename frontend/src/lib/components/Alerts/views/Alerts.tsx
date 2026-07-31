@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Tooltip } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
 import { DetectiveMascot } from 'lib/components/mascots'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdByColumn } from 'lib/elements/Table/columnUtils'
 import { urls } from 'scenes/urls'
 
 import { ProductKey } from '~/queries/schema/schema-general'
@@ -32,7 +32,7 @@ export function Alerts({ alertId }: AlertsProps): JSX.Element {
 
     const { alert } = useValues(alertLogic({ alertId }))
 
-    const columns: LemonTableColumns<AlertType> = [
+    const columns: TableColumns<AlertType> = [
         {
             key: 'id',
             width: 32,
@@ -44,7 +44,7 @@ export function Alerts({ alertId }: AlertsProps): JSX.Element {
             render: function renderName(name: any, alert) {
                 return (
                     <>
-                        <LemonTableLink
+                        <TableLink
                             to={urls.alert(alert.id)}
                             className={alert.enabled ? '' : 'text-muted'}
                             title={
@@ -82,14 +82,14 @@ export function Alerts({ alertId }: AlertsProps): JSX.Element {
                 )
             },
         },
-        createdByColumn() as LemonTableColumn<AlertType, keyof AlertType | undefined>,
+        createdByColumn() as TableColumn<AlertType, keyof AlertType | undefined>,
         {
             title: 'Insight',
             dataIndex: 'insight',
             key: 'insight',
             render: function renderInsightLink(insight: any) {
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={urls.insightView(insight.short_id)}
                         title={
                             <Tooltip title={insight.name}>
@@ -105,7 +105,7 @@ export function Alerts({ alertId }: AlertsProps): JSX.Element {
             dataIndex: 'enabled',
             key: 'enabled',
             render: (enabled: any) =>
-                enabled ? <LemonTag type="success">ENABLED</LemonTag> : <LemonTag type="danger">DISABLED</LemonTag>,
+                enabled ? <Tag type="success">ENABLED</Tag> : <Tag type="danger">DISABLED</Tag>,
         },
     ]
 
@@ -146,7 +146,7 @@ export function Alerts({ alertId }: AlertsProps): JSX.Element {
                 />
             )}
 
-            <LemonTable
+            <Table
                 loading={alertsLoading}
                 columns={columns}
                 dataSource={alertsSortedByState}

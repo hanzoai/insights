@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { Link } from 'lib/lemon-ui/Link'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { Link } from 'lib/elements/Link'
 import { urls } from 'scenes/urls'
 
 import { CohortType } from '~/types'
@@ -17,7 +17,7 @@ export function PersonCohorts(): JSX.Element {
         loadCohorts()
     }, [person, loadCohorts])
 
-    const columns: LemonTableColumns<CohortType> = [
+    const columns: TableColumns<CohortType> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -43,7 +43,7 @@ export function PersonCohorts(): JSX.Element {
     ]
 
     return (
-        <LemonTable
+        <Table
             dataSource={cohorts || []}
             loading={cohortsLoading}
             columns={columns}

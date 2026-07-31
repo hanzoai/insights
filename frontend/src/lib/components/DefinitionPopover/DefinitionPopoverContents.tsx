@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { Fragment, useEffect, useMemo } from 'react'
 
 import { IconBadge, IconEye, IconHide, IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonSegmentedButton, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Divider, SegmentedButton, Select, Tag } from '@hanzo/elements'
 
 import { ActionPopoverInfo } from 'lib/components/DefinitionPopover/ActionPopoverInfo'
 import { CohortPopoverInfo } from 'lib/components/DefinitionPopover/CohortPopoverInfo'
@@ -18,10 +18,10 @@ import {
     TaxonomicFilterGroup,
     TaxonomicFilterGroupType,
 } from 'lib/components/TaxonomicFilter/types'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
-import { Popover } from 'lib/lemon-ui/Popover'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
+import { Popover } from 'lib/elements/Popover'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 import { DataWarehouseTableForInsight } from 'scenes/data-warehouse/types'
 
@@ -73,7 +73,7 @@ export function PropertyStatusControl({
 
     return (
         <>
-            <LemonSegmentedButton
+            <SegmentedButton
                 value={currentStatus}
                 onChange={(value) => {
                     const status = value as PropertyDefinitionVerificationStatus
@@ -189,7 +189,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                 updatedAt={(definition && 'updated_at' in definition && definition.updated_at) || undefined}
                 updatedBy={(definition && 'updated_by' in definition && definition.updated_by) || undefined}
             />
-            <LemonDivider className="DefinitionPopover my-4" />
+            <Divider className="DefinitionPopover my-4" />
         </>
     )
 
@@ -243,9 +243,9 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                 {_definition.verified && (
                     <div className="mb-4">
                         <Tooltip title="This property is verified by the team. It is prioritized in filters and other selection components.">
-                            <LemonTag type="success">
+                            <Tag type="success">
                                 <IconBadge /> Verified
-                            </LemonTag>
+                            </Tag>
                         </Tooltip>
                     </div>
                 )}
@@ -453,7 +453,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                 <DefinitionPopover.Grid cols={2}>
                     <DefinitionPopover.Card title="Type" value={_definition.property_type ?? '-'} />
                 </DefinitionPopover.Grid>
-                <LemonDivider className="DefinitionPopover my-4" />
+                <Divider className="DefinitionPopover my-4" />
                 <DefinitionPopover.Section>
                     <DefinitionPopover.Card
                         title="Sent as"
@@ -518,7 +518,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                                             )}
                                         </label>
                                         {!insightsQLOnly && (
-                                            <LemonSelect
+                                            <Select
                                                 fullWidth
                                                 allowClear={!!optional}
                                                 value={isInsightsQL ? '' : fieldValue}
@@ -544,7 +544,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                         )}
                     </DefinitionPopover.Section>
                     <div className="flex justify-end">
-                        <LemonButton
+                        <Button
                             onClick={() => {
                                 selectItem(group, itemValue ?? null, localDefinition, undefined)
                             }}
@@ -559,7 +559,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                             type="primary"
                         >
                             Select
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </form>
@@ -592,7 +592,7 @@ function DefinitionEdit(): JSX.Element {
 
     return (
         <>
-            <LemonDivider className="DefinitionPopover my-4" />
+            <Divider className="DefinitionPopover my-4" />
             <form className="definition-popover-edit-form">
                 {definition && 'description' in localDefinition && (
                     <>
@@ -600,7 +600,7 @@ function DefinitionEdit(): JSX.Element {
                             <span className="label-text">Description</span>
                             <span className="text-secondary">(optional)</span>
                         </label>
-                        <LemonTextArea
+                        <TextArea
                             id="description"
                             className="definition-popover-edit-form-value"
                             autoFocus
@@ -644,10 +644,10 @@ function DefinitionEdit(): JSX.Element {
                         />
                     </div>
                 )}
-                <LemonDivider className="DefinitionPopover mt-0" />
+                <Divider className="DefinitionPopover mt-0" />
                 <div className="flex items-center justify-between gap-2 click-outside-block">
                     {!hideView && isViewable && type !== TaxonomicFilterGroupType.Events ? (
-                        <LemonButton
+                        <Button
                             sideIcon={<IconOpenInNew style={{ marginLeft: 4, fontSize: '1rem' }} />}
                             disabledReason={definitionLoading ? 'Loading…' : undefined}
                             type="secondary"
@@ -656,12 +656,12 @@ function DefinitionEdit(): JSX.Element {
                             targetBlank
                         >
                             More options
-                        </LemonButton>
+                        </Button>
                     ) : (
                         <div className="flex-1" />
                     )}
                     <div className="flex items-center">
-                        <LemonButton
+                        <Button
                             onClick={handleCancel}
                             className=" mr-2"
                             disabledReason={definitionLoading ? 'Loading…' : undefined}
@@ -669,8 +669,8 @@ function DefinitionEdit(): JSX.Element {
                             size="small"
                         >
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             onClick={handleSave}
                             disabledReason={!dirty ? 'No changes to save' : undefined}
@@ -678,7 +678,7 @@ function DefinitionEdit(): JSX.Element {
                             size="small"
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </form>

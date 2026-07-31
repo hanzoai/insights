@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { beforeUnload } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { dayjs } from 'lib/dayjs'
@@ -312,7 +312,7 @@ export const revenueAnalyticsSettingsLogic = kea<revenueAnalyticsSettingsLogicTy
         const updateCurrentTeam = (): void => {
             if (values.revenueAnalyticsConfig) {
                 actions.updateCurrentTeam({ revenue_analytics_config: values.revenueAnalyticsConfig })
-                lemonToast.success('Revenue analytics config saved')
+                toast.success('Revenue analytics config saved')
             }
         }
 

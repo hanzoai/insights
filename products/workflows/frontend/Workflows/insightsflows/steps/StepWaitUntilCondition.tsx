@@ -1,9 +1,9 @@
 import { Node } from '@xyflow/react'
 import { useActions } from 'kea'
 
-import { LemonLabel } from '@hanzo/lemon-ui'
+import { Label } from '@hanzo/elements'
 
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
+import { Input } from 'lib/elements/Input'
 
 import { workflowLogic } from '../../workflowLogic'
 import { InsightsFlowPropertyFilters } from '../filters/InsightsFlowFilters'
@@ -31,7 +31,7 @@ export function StepWaitUntilConditionConfiguration({
             <StepSchemaErrors />
 
             <div className="flex flex-col gap-1">
-                <LemonLabel>Wait time</LemonLabel>
+                <Label>Wait time</Label>
                 <InsightsFlowDuration
                     value={max_wait_duration}
                     onChange={(value) => {
@@ -41,8 +41,8 @@ export function StepWaitUntilConditionConfiguration({
             </div>
 
             <div className="flex flex-col gap-1">
-                <LemonLabel>Conditions to wait for</LemonLabel>
-                <LemonInput
+                <Label>Conditions to wait for</Label>
+                <Input
                     value={localConditionName || ''}
                     onChange={handleNameChange}
                     placeholder="If condition matches"

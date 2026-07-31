@@ -4,12 +4,12 @@ import { useState } from 'react'
 import { IconX } from '@hanzo/icons'
 
 import api from 'lib/api'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Label } from 'lib/elements/Label'
+import { Modal } from 'lib/elements/Modal'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { PropertyDefinition, materializedColumnsLogic } from './materializedColumnsLogic'
@@ -32,11 +32,11 @@ export function CreateSlotModal(): JSX.Element {
             await api.create(`api/environments/${currentTeam.id}/materialized_column_slots/assign_slot/`, {
                 property_definition_id: selectedPropertyId,
             })
-            lemonToast.success('Slot assigned successfully')
+            toast.success('Slot assigned successfully')
             setShowCreateModal(false)
             loadSlots()
         } catch (error: any) {
-            lemonToast.error(error.detail || 'Failed to assign slot')
+            toast.error(error.detail || 'Failed to assign slot')
             console.error(error)
         } finally {
             setIsSubmitting(false)
@@ -51,24 +51,24 @@ export function CreateSlotModal(): JSX.Element {
     const selectedProperty = availableProperties.find((prop: PropertyDefinition) => prop.id === selectedPropertyId)
 
     return (
-        <LemonModal
+        <Modal
             isOpen
             onClose={() => setShowCreateModal(false)}
             title="Assign Materialized Column Slot"
             width="36rem"
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={() => setShowCreateModal(false)}>
+                    <Button type="secondary" onClick={() => setShowCreateModal(false)}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={handleSubmit}
                         loading={isSubmitting}
                         disabledReason={!selectedPropertyId ? 'Please select a property' : undefined}
                     >
                         Assign Slot
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -79,9 +79,9 @@ export function CreateSlotModal(): JSX.Element {
                 </p>
 
                 <div>
-                    <LemonLabel>Property to Materialize</LemonLabel>
+                    <Label>Property to Materialize</Label>
                     {selectedProperty ? (
-                        <LemonButton
+                        <Button
                             fullWidth
                             onClick={() => setSelectedPropertyId(null)}
                             sideAction={{
@@ -92,14 +92,14 @@ export function CreateSlotModal(): JSX.Element {
                         >
                             <span className="flex items-center justify-between gap-2 flex-1">
                                 <span>{selectedProperty.name}</span>
-                                <LemonTag type="default" size="small">
+                                <Tag type="default" size="small">
                                     {selectedProperty.property_type}
-                                </LemonTag>
+                                </Tag>
                             </span>
-                        </LemonButton>
+                        </Button>
                     ) : (
                         <div className="deprecated-space-y-2">
-                            <LemonInput
+                            <Input
                                 type="search"
                                 placeholder="Search properties..."
                                 value={searchTerm}
@@ -118,7 +118,7 @@ export function CreateSlotModal(): JSX.Element {
                                     <ul className="deprecated-space-y-px">
                                         {filteredProperties.map((prop: PropertyDefinition) => (
                                             <li key={prop.id}>
-                                                <LemonButton
+                                                <Button
                                                     fullWidth
                                                     role="menuitem"
                                                     size="small"
@@ -129,11 +129,11 @@ export function CreateSlotModal(): JSX.Element {
                                                 >
                                                     <span className="flex items-center justify-between gap-2 flex-1">
                                                         <span className="truncate">{prop.name}</span>
-                                                        <LemonTag type="default" size="small">
+                                                        <Tag type="default" size="small">
                                                             {prop.property_type}
-                                                        </LemonTag>
+                                                        </Tag>
                                                     </span>
-                                                </LemonButton>
+                                                </Button>
                                             </li>
                                         ))}
                                     </ul>
@@ -150,6 +150,6 @@ export function CreateSlotModal(): JSX.Element {
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

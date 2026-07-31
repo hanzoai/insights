@@ -10,7 +10,7 @@ import {
     detectBoolean,
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { truncate } from 'lib/utils'
 import { urls } from 'scenes/urls'
 

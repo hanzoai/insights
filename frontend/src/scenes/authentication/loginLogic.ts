@@ -6,7 +6,7 @@ import { encodeParams, urlToAction } from 'kea-router'
 import { router } from 'kea-router'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { getRelativeNextPath } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -115,14 +115,14 @@ export const loginLogic = kea<loginLogicType>([
                     breakpoint()
                     try {
                         const response = await api.create<any>('api/login/email-mfa/resend')
-                        lemonToast.success('Verification email resent')
+                        toast.success('Verification email resent')
                         return response
                     } catch (e) {
                         const { code, detail } = e as Record<string, any>
                         if (code === 'too_soon') {
-                            lemonToast.error(detail || 'Please wait before requesting another email')
+                            toast.error(detail || 'Please wait before requesting another email')
                         } else {
-                            lemonToast.error(detail || 'Failed to resend email')
+                            toast.error(detail || 'Failed to resend email')
                         }
                         return null
                     }
@@ -215,7 +215,7 @@ export const loginLogic = kea<loginLogicType>([
             }
 
             if (message) {
-                lemonToast.info(message)
+                toast.info(message)
                 const { message: _, ...otherParams } = router.values.searchParams
                 router.actions.replace('/login', otherParams)
             }

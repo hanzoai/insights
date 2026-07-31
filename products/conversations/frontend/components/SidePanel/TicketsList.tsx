@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconChevronRight } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonTag, Spinner } from '@hanzo/lemon-ui'
-import { Link } from '@hanzo/lemon-ui'
+import { Badge, Button, Tag, Spinner } from '@hanzo/elements'
+import { Link } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { stripMarkdown } from 'lib/utils/stripMarkdown'
@@ -33,7 +33,7 @@ export function TicketsList(): JSX.Element {
 
     return (
         <div className="flex flex-col gap-2">
-            <LemonButton
+            <Button
                 type="primary"
                 fullWidth
                 center
@@ -41,7 +41,7 @@ export function TicketsList(): JSX.Element {
                 data-attr="sidebar-create-new-ticket"
             >
                 Create new ticket
-            </LemonButton>
+            </Button>
             <p className="text-center text-xs text-muted-alt m-0">
                 Switched browsers?{' '}
                 <Link className="cursor-pointer" onClick={() => setView('restore')} data-attr="sidebar-recover-tickets">
@@ -72,7 +72,7 @@ export function TicketsList(): JSX.Element {
                                             #{ticket.ticket_number}
                                         </span>
                                     )}
-                                    <LemonTag
+                                    <Tag
                                         type={
                                             ticket.status === 'resolved'
                                                 ? 'success'
@@ -83,9 +83,9 @@ export function TicketsList(): JSX.Element {
                                         size="small"
                                     >
                                         {ticket.status === 'on_hold' ? 'On hold' : ticket.status}
-                                    </LemonTag>
+                                    </Tag>
                                     {(ticket.unread_count ?? 0) > 0 && (
-                                        <LemonBadge.Number
+                                        <Badge.Number
                                             count={ticket.unread_count ?? 0}
                                             size="small"
                                             status="primary"

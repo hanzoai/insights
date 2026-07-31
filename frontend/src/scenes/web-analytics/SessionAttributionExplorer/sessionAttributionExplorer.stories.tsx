@@ -13,7 +13,7 @@ const meta: Meta = {
         viewMode: 'story',
         mockDate: '2022-03-11',
         pageUrl: urls.sessionAttributionExplorer(),
-        testOptions: { waitForSelector: '.LemonTable__boundary' },
+        testOptions: { waitForSelector: '.Table__boundary' },
     },
     decorators: [
         mswDecorator({

@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 
 import { IconInfo, IconTrending } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
-import { IconTrendingDown } from 'lib/lemon-ui/icons'
+import { IconTrendingDown } from 'lib/elements/icons'
 
 import { experimentsLogic } from './experimentsLogic'
 

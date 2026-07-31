@@ -1,5 +1,5 @@
 import { IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Tooltip } from '@hanzo/elements'
 
 import { TZLabel, TZLabelProps } from 'lib/components/TZLabel'
 import { cn } from 'lib/utils/css-classes'
@@ -139,7 +139,7 @@ export function LogRow({
                         </div>
                     </Tooltip>
                     <div className="flex items-center justify-center shrink-0" style={{ width: CHECKBOX_WIDTH }}>
-                        <LemonCheckbox
+                        <Checkbox
                             checked={isSelected}
                             onChange={() => onToggleSelect?.()}
                             stopPropagation
@@ -150,7 +150,7 @@ export function LogRow({
                         className="flex items-stretch self-stretch justify-center"
                         style={{ width: EXPAND_WIDTH, flexShrink: 0 }}
                     >
-                        <LemonButton
+                        <Button
                             size="xsmall"
                             icon={
                                 <IconChevronRight className={cn('transition-transform', isExpanded && 'rotate-90')} />

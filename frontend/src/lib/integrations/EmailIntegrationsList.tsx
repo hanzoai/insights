@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 
@@ -12,7 +12,7 @@ export function EmailIntegrationsList(): JSX.Element {
     return (
         <div className="deprecated-space-y-2">
             {integrationsLoading ? (
-                <LemonSkeleton className="h-10" />
+                <Skeleton className="h-10" />
             ) : (
                 domainGroupedEmailIntegrations.map((integration) => (
                     <IntegrationEmailDomainView key={integration.domain} integration={integration} />

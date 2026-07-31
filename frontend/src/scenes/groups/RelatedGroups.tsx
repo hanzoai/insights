@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 
 import { IconPerson } from '@hanzo/icons'
 
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { relatedGroupsLogic } from 'scenes/groups/relatedGroupsLogic'
 import { GroupActorDisplay } from 'scenes/persons/GroupActorDisplay'
@@ -32,7 +32,7 @@ export function RelatedGroups({
     const dataSource = type === 'person' ? relatedPeople : relatedActors
     const { aggregationLabel } = useValues(groupsModel)
 
-    const columns: LemonTableColumns<ActorType> = [
+    const columns: TableColumns<ActorType> = [
         {
             title: 'Type',
             key: 'type',
@@ -63,7 +63,7 @@ export function RelatedGroups({
         type === 'person' ? ['related person', 'related people'] : ['related group', 'related groups']
 
     return (
-        <LemonTable
+        <Table
             dataSource={dataSource}
             columns={columns}
             embedded={embedded}

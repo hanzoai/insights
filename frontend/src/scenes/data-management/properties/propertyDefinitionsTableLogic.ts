@@ -4,7 +4,7 @@ import { actionToUrl, combineUrl, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
 import { EVENT_PROPERTY_DEFINITIONS_PER_PAGE } from 'lib/constants'
-import { LemonSelectOption } from 'lib/lemon-ui/LemonSelect'
+import { SelectOption } from 'lib/elements/Select'
 import { capitalizeFirstLetter, objectsEqual } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import {
@@ -86,13 +86,13 @@ export const propertyDefinitionsTableLogic = kea<propertyDefinitionsTableLogicTy
         propertyTypeOptions: [
             (s) => [s.groupTypes, s.aggregationLabel],
             (groupTypes, aggregationLabel) => {
-                const groupChoices: Array<LemonSelectOption<string>> = Array.from(groupTypes.values()).map((type) => ({
+                const groupChoices: Array<SelectOption<string>> = Array.from(groupTypes.values()).map((type) => ({
                     label: `${capitalizeFirstLetter(aggregationLabel(type.group_type_index).singular)} properties`,
                     value: `group::${type.group_type_index}`,
                 }))
                 return [
-                    { label: 'Event properties', value: 'event::' } as LemonSelectOption<string>,
-                    { label: 'Person properties', value: 'person::' } as LemonSelectOption<string>,
+                    { label: 'Event properties', value: 'event::' } as SelectOption<string>,
+                    { label: 'Person properties', value: 'person::' } as SelectOption<string>,
                 ].concat(groupChoices)
             },
         ],

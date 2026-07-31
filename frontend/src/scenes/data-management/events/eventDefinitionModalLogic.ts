@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { urls } from 'scenes/urls'
@@ -91,13 +91,13 @@ export const eventDefinitionModalLogic = kea<eventDefinitionModalLogicType>([
 
                     const createdEvent = await api.eventDefinitions.create(payload)
 
-                    lemonToast.success(`Event "${formValues.name}" created successfully`)
+                    toast.success(`Event "${formValues.name}" created successfully`)
                     actions.resetEventDefinitionForm()
                     props.onClose()
                     router.actions.push(urls.eventDefinition(createdEvent.id))
                 } catch (error: any) {
                     const errorMessage = error?.detail || error?.message || 'Failed to create event definition'
-                    lemonToast.error(errorMessage)
+                    toast.error(errorMessage)
                     throw error
                 }
             },

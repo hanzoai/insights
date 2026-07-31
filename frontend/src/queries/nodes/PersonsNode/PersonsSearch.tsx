@@ -1,4 +1,4 @@
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
+import { Input } from 'lib/elements/Input/Input'
 
 import { useDebouncedQuery } from '~/queries/hooks/useDebouncedQuery'
 import { ActorsQuery, PersonsNode } from '~/queries/schema/schema-general'
@@ -26,7 +26,7 @@ export function PersonsSearch({ query, setQuery }: PersonSearchProps): JSX.Eleme
 
     return (
         <div className="flex items-center flex-1 min-w-0">
-            <LemonInput
+            <Input
                 type="search"
                 value={value ?? ''}
                 placeholder={placeholders[target]}

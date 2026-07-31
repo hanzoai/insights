@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 
 import { IconArrowRight } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonCheckbox, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
+import { Banner, Button, Checkbox, Select, Tag } from '@hanzo/elements'
 
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { IconSync } from 'lib/lemon-ui/icons'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { IconSync } from 'lib/elements/icons'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
@@ -46,7 +46,7 @@ const getColumns = ({
     aggregationLabel: (groupTypeIndex: number | null | undefined, deferToUserWording?: boolean) => Noun
     currentTeamId: number | null
     currentOrganization: OrganizationType | null
-}): LemonTableColumns<OrganizationFeatureFlag> => {
+}): TableColumns<OrganizationFeatureFlag> => {
     return [
         {
             title: 'Project',
@@ -61,7 +61,7 @@ const getColumns = ({
                 const linkText = isCurrentTeam ? `${team.name} (current)` : team.name
 
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={
                             !isCurrentTeam
                                 ? urls.project(team.id, record.flag_id ? urls.featureFlag(record.flag_id) : '')
@@ -72,15 +72,15 @@ const getColumns = ({
                 )
             },
         },
-        createdByColumn() as LemonTableColumn<OrganizationFeatureFlag, keyof OrganizationFeatureFlag | undefined>,
-        createdAtColumn() as LemonTableColumn<OrganizationFeatureFlag, keyof OrganizationFeatureFlag | undefined>,
+        createdByColumn() as TableColumn<OrganizationFeatureFlag, keyof OrganizationFeatureFlag | undefined>,
+        createdAtColumn() as TableColumn<OrganizationFeatureFlag, keyof OrganizationFeatureFlag | undefined>,
         {
             title: 'Release conditions',
             width: 200,
             render: function Render(_, record: OrganizationFeatureFlag) {
                 const releaseText = groupFilters(record.filters, undefined, aggregationLabel)
                 return typeof releaseText === 'string' && releaseText.startsWith('100% of') ? (
-                    <LemonTag type="highlight">{releaseText}</LemonTag>
+                    <Tag type="highlight">{releaseText}</Tag>
                 ) : (
                     releaseText
                 )
@@ -91,13 +91,13 @@ const getColumns = ({
             dataIndex: 'active',
             render: (dataValue) => {
                 return dataValue ? (
-                    <LemonTag type="success" className="uppercase">
+                    <Tag type="success" className="uppercase">
                         Enabled
-                    </LemonTag>
+                    </Tag>
                 ) : (
-                    <LemonTag type="default" className="uppercase">
+                    <Tag type="default" className="uppercase">
                         Disabled
-                    </LemonTag>
+                    </Tag>
                 )
             },
         },
@@ -126,9 +126,9 @@ function InfoBanner(): JSX.Element {
     }
 
     return (
-        <LemonBanner type="info" className="mb-4">
+        <Banner type="info" className="mb-4">
             {text}
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -154,11 +154,11 @@ function FeatureFlagCopySection(): JSX.Element {
             <h3 className="l3">Feature flag copy</h3>
             <div>Copy your flag and its configuration to another project.</div>
             {hasStaticCohort && (
-                <LemonBanner type="info" className="mt-4">
+                <Banner type="info" className="mt-4">
                     The flag you are about to copy references a static cohort. If the cohort with identical name does
                     not exist in the target project, it will be copied as an empty cohort. This is because the
                     associated persons might not exist in the target project.
-                </LemonBanner>
+                </Banner>
             )}
             <div className="inline-flex gap-4 my-6">
                 <div>
@@ -173,7 +173,7 @@ function FeatureFlagCopySection(): JSX.Element {
                 </div>
                 <div>
                     <div className="font-semibold leading-6 h-6">Destination project</div>
-                    <LemonSelect
+                    <Select
                         dropdownMatchSelectWidth={false}
                         value={copyDestinationProject}
                         onChange={(id) => setCopyDestinationProject(id)}
@@ -188,7 +188,7 @@ function FeatureFlagCopySection(): JSX.Element {
                 </div>
                 <div>
                     <div className="font-semibold leading-6 h-6">Copy schedules</div>
-                    <LemonCheckbox
+                    <Checkbox
                         checked={copySchedule}
                         onChange={setCopySchedule}
                         disabled={scheduledChanges.length === 0}
@@ -198,7 +198,7 @@ function FeatureFlagCopySection(): JSX.Element {
                 </div>
                 <div>
                     <div className="h-6" />
-                    <LemonButton
+                    <Button
                         disabledReason={!copyDestinationProject && 'Select destination project'}
                         loading={featureFlagCopyLoading}
                         type="primary"
@@ -209,7 +209,7 @@ function FeatureFlagCopySection(): JSX.Element {
                         {projectsWithCurrentFlag.find((p) => Number(p.team_id) === copyDestinationProject)
                             ? 'Update'
                             : 'Copy'}
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </>
@@ -236,7 +236,7 @@ export default function FeatureFlagProjects(): JSX.Element {
         <div>
             <InfoBanner />
             <FeatureFlagCopySection />
-            <LemonTable
+            <Table
                 loading={false}
                 dataSource={projectsWithCurrentFlag}
                 columns={getColumns({ currentTeamId, currentOrganization, aggregationLabel })}

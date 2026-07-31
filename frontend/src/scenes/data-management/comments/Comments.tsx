@@ -2,18 +2,18 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Input, Select } from '@hanzo/elements'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
 import { MicrophoneMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconOpenInApp } from 'lib/lemon-ui/icons'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { getText } from 'scenes/comments/Comment'
 import { Scene } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -38,7 +38,7 @@ export function Comments(): JSX.Element {
         loadComments()
     }, [loadComments])
 
-    const columns: LemonTableColumns<CommentType> = [
+    const columns: TableColumns<CommentType> = [
         {
             title: 'Comment',
             key: 'content',
@@ -77,7 +77,7 @@ export function Comments(): JSX.Element {
             title: 'Scope',
             key: 'scope',
             render: function RenderScope(_, comment: CommentType): JSX.Element {
-                return <LemonTag className="uppercase">{comment.scope}</LemonTag>
+                return <Tag className="uppercase">{comment.scope}</Tag>
             },
         },
         {
@@ -103,7 +103,7 @@ export function Comments(): JSX.Element {
                 return (
                     <div className="flex">
                         <>
-                            <LemonButton
+                            <Button
                                 icon={<IconTrash />}
                                 size="small"
                                 status="danger"
@@ -111,7 +111,7 @@ export function Comments(): JSX.Element {
                                 disabledReason={canEdit ? undefined : 'You can only delete your own comments'}
                                 data-attr="comment-management-scene-delete"
                             />
-                            <LemonButton
+                            <Button
                                 icon={<IconOpenInApp />}
                                 size="small"
                                 to={openURLFor(comment) || ''}
@@ -140,7 +140,7 @@ export function Comments(): JSX.Element {
             />
             <div className="flex flex-row gap-4 justify-between">
                 <div className="flex flex-row items-center gap-2">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search comments..."
                         value={searchText}
@@ -153,7 +153,7 @@ export function Comments(): JSX.Element {
                     <div className="flex flex-row items-center gap-4 flex-wrap">
                         <div className="flex flex-row items-center gap-2">
                             <div>Scope:</div>
-                            <LemonSelect options={SCOPE_OPTIONS} value={scope} onSelect={setScope} size="small" />
+                            <Select options={SCOPE_OPTIONS} value={scope} onSelect={setScope} size="small" />
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -181,7 +181,7 @@ export function Comments(): JSX.Element {
                     />
                 </div>
                 {!shouldShowEmptyState && (
-                    <LemonTable
+                    <Table
                         data-attr="comments-table"
                         rowKey="id"
                         dataSource={comments}

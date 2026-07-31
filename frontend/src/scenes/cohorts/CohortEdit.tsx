@@ -3,7 +3,7 @@ import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 
 import { IconClock, IconCopy, IconRefresh, IconTrash, IconUpload, IconWarning } from '@hanzo/icons'
-import { LemonBanner, LemonDialog, LemonDivider, LemonFileInput, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Dialog, Divider, FileInput, Link, Tooltip } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { SceneAddToNotebookDropdownMenu } from 'lib/components/Scenes/InsightOrDashboard/SceneAddToNotebookDropdownMenu'
@@ -11,10 +11,10 @@ import { SceneFile } from 'lib/components/Scenes/SceneFile'
 import { TZLabel } from 'lib/components/TZLabel'
 import { CohortTypeEnum, FEATURE_FLAGS } from 'lib/constants'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Select } from 'lib/elements/Select'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
@@ -117,7 +117,7 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
     if (cohort.deleted) {
         return (
             <div>
-                <LemonBanner type="error">The cohort '{cohort.name}' has been soft deleted.</LemonBanner>
+                <Banner type="error">The cohort '{cohort.name}' has been soft deleted.</Banner>
                 <ScenePanel>
                     <ButtonPrimitive
                         disabled={cohortLoading}
@@ -194,7 +194,7 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                             <ScenePanelActionsSection>
                                 <ButtonPrimitive
                                     onClick={() => {
-                                        LemonDialog.open({
+                                        Dialog.open({
                                             title: 'Delete cohort?',
                                             description: `Are you sure you want to delete "${cohort.name}"?`,
                                             primaryButton: {
@@ -224,7 +224,7 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
 
                 <Form id="cohort" logic={cohortEditLogic} props={logicProps} formKey="cohort" enableFormOnSubmit>
                     <SceneContent>
-                        <LemonField name="name" className="contents">
+                        <Field name="name" className="contents">
                             <SceneTitleSection
                                 name={cohort.name}
                                 description={cohort.description || ''}
@@ -244,7 +244,7 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                 actions={
                                     <>
                                         {isNewCohort ? (
-                                            <LemonButton
+                                            <Button
                                                 data-attr="cancel-cohort"
                                                 type="secondary"
                                                 onClick={() => {
@@ -254,9 +254,9 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                                 disabled={cohortLoading}
                                             >
                                                 Cancel
-                                            </LemonButton>
+                                            </Button>
                                         ) : null}
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             data-attr="save-cohort"
                                             htmlType="submit"
@@ -266,11 +266,11 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                             size="small"
                                         >
                                             Save
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 }
                             />
-                        </LemonField>
+                        </Field>
 
                         <SceneSection
                             title="Type"
@@ -280,9 +280,9 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                         >
                             <div className="flex gap-4 flex-wrap">
                                 <div className={cn('flex-1 flex flex-col gap-y-4')}>
-                                    <LemonField name="is_static" label={null}>
+                                    <Field name="is_static" label={null}>
                                         {({ value, onChange }) => (
-                                            <LemonSelect
+                                            <Select
                                                 disabledReason={
                                                     isNewCohort
                                                         ? null
@@ -297,7 +297,7 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                                 data-attr="cohort-type"
                                             />
                                         )}
-                                    </LemonField>
+                                    </Field>
 
                                     {!isNewCohort && !cohort?.is_static && (
                                         <div className="flex flex-col gap-y-2">
@@ -316,7 +316,7 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                             </div>
 
                                             {isCalculatingOrPending ? (
-                                                <LemonBanner type="warning">
+                                                <Banner type="warning">
                                                     {isPendingCalculation && !cohort.is_calculating
                                                         ? cohort.last_calculation
                                                             ? "We're queuing a recalculation. The table below shows results from the previous calculation."
@@ -324,9 +324,9 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                                         : cohort.last_calculation
                                                           ? "We're recalculating the cohort. The table below shows results from the previous calculation."
                                                           : "We're calculating the cohort. It should be ready in a few minutes."}
-                                                </LemonBanner>
+                                                </Banner>
                                             ) : cohort.errors_calculating ? (
-                                                <LemonBanner
+                                                <Banner
                                                     type="error"
                                                     action={{
                                                         onClick: () =>
@@ -337,7 +337,7 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                                     <strong>Calculation failed:</strong>{' '}
                                                     {cohort.last_error_message ||
                                                         'Unable to calculate this cohort. Please check your matching criteria and try again.'}
-                                                </LemonBanner>
+                                                </Banner>
                                             ) : null}
                                         </div>
                                     )}
@@ -374,9 +374,9 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                     {/* TODO: @adamleithp Tell users that adding ANOTHER file will NOT(?) replace the current one */}
                                     {/* TODO: @adamleithp Render the csv file and validate it */}
                                     {/* TODO: @adamleithp Adding a csv file doesn't show up with cohort.csv... */}
-                                    <LemonField name="csv" data-attr="cohort-csv">
+                                    <Field name="csv" data-attr="cohort-csv">
                                         {({ onChange }) => (
-                                            <LemonFileInput
+                                            <FileInput
                                                 accept=".csv"
                                                 multiple={false}
                                                 value={cohort.csv ? [cohort.csv] : []}
@@ -420,11 +420,11 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                                 }
                                             />
                                         )}
-                                    </LemonField>
+                                    </Field>
                                 </SceneSection>
                                 {isNewCohort && (
                                     <>
-                                        <LemonDivider label="OR" />
+                                        <Divider label="OR" />
                                         <div>
                                             <h3 className="font-semibold my-0 mb-1 max-w-prose">Add users manually</h3>
                                             <span className="max-w-prose">
@@ -443,20 +443,20 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                                 )}
                                 {!isNewCohort && (
                                     <>
-                                        <LemonDivider label="OR" />
+                                        <Divider label="OR" />
                                         <div>
                                             <h3 className="text-sm">Add users manually</h3>
                                             <span className="max-w-prose">
                                                 Select the users that you would like to add to the cohort.
                                             </span>
-                                            <LemonButton
+                                            <Button
                                                 className="w-fit mt-4"
                                                 type="primary"
                                                 onClick={showAddPersonToCohortModal}
                                                 data-attr="cohort-add-users-modal-open"
                                             >
                                                 Add Users
-                                            </LemonButton>
+                                            </Button>
                                         </div>
                                     </>
                                 )}
@@ -465,13 +465,13 @@ export function CohortEdit({ id, attachTo, tabId }: CohortEditProps): JSX.Elemen
                             <>
                                 <SceneDivider />
                                 {!isNewCohort && cohort.experiment_set && cohort.experiment_set.length > 0 && (
-                                    <LemonBanner type="info">
+                                    <Banner type="info">
                                         This cohort manages exposure for an experiment. Editing this cohort may change
                                         experiment metrics. If unsure,{' '}
                                         <Link to={urls.experiment(cohort.experiment_set[0])}>
                                             check the experiment details.
                                         </Link>
-                                    </LemonBanner>
+                                    </Banner>
                                 )}
                                 <SceneSection
                                     // TODO: @adamleithp Add a number of matching persons to the title "Matching criteria (100)"

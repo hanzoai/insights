@@ -1,5 +1,5 @@
 import { IconClock } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { isLegacyExperimentQuery } from 'scenes/experiments/utils'
 
@@ -30,9 +30,9 @@ export function ChartEmptyState({
     if (!experimentStarted) {
         return (
             <div className="flex items-center justify-center text-secondary cursor-default text-[12px] font-normal">
-                <LemonTag size="small" className="mr-2">
+                <Tag size="small" className="mr-2">
                     <IconClock fontSize="1em" />
-                </LemonTag>
+                </Tag>
                 <span>Waiting for experiment to start&hellip;</span>
             </div>
         )

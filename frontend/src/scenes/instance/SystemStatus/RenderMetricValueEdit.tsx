@@ -1,6 +1,6 @@
-import { LemonCheckbox, LemonInput } from '@hanzo/lemon-ui'
+import { Checkbox, Input } from '@hanzo/elements'
 
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
+import { Tag } from 'lib/elements/Tag/Tag'
 
 import { MetricValue } from './RenderMetricValue'
 
@@ -17,13 +17,13 @@ export function RenderMetricValueEdit({
 }: MetricValueEditInterface): JSX.Element | string {
     if (value_type === 'bool') {
         return (
-            <LemonCheckbox
+            <Checkbox
                 defaultChecked={!!value}
                 onChange={(val) => onValueChanged(key, val)}
                 label={
-                    <LemonTag type={value ? 'success' : 'danger'} className="uppercase">
+                    <Tag type={value ? 'success' : 'danger'} className="uppercase">
                         {value ? 'Yes' : 'No'}
-                    </LemonTag>
+                    </Tag>
                 }
             />
         )
@@ -32,7 +32,7 @@ export function RenderMetricValueEdit({
     const parsedValue = isSecret && value ? '' : (value as string | number)
 
     return (
-        <LemonInput
+        <Input
             defaultValue={parsedValue as any}
             type={value_type === 'int' ? 'number' : 'text'}
             placeholder={isSecret && value ? 'Keep existing secret value' : undefined}

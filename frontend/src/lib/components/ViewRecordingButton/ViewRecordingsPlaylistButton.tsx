@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 
 import { IconRewindPlay } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, Tooltip } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Tooltip } from '@hanzo/elements'
 
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { urls } from 'scenes/urls'
@@ -15,7 +15,7 @@ type ViewRecordingsPlaylistButtonProps = {
     disabled?: boolean
     disabledReason?: string | JSX.Element | null
     onClick?: () => void
-} & Pick<LemonButtonProps, 'size' | 'type' | 'data-attr' | 'fullWidth' | 'className' | 'loading'>
+} & Pick<ButtonProps, 'size' | 'type' | 'data-attr' | 'fullWidth' | 'className' | 'loading'>
 
 /**
  * Button for opening the Session Replay page with filters applied.
@@ -37,7 +37,7 @@ export default function ViewRecordingsPlaylistButton({
     }
 
     const button = (
-        <LemonButton
+        <Button
             onClick={onClick}
             sideIcon={<IconRewindPlay />}
             disabled={disabled}
@@ -45,7 +45,7 @@ export default function ViewRecordingsPlaylistButton({
             {...buttonProps}
         >
             {label}
-        </LemonButton>
+        </Button>
     )
 
     return tooltip ? <Tooltip title={tooltip}>{button}</Tooltip> : button

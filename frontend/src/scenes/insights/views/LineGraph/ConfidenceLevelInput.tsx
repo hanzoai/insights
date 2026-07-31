@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { LemonInput, Tooltip } from '@hanzo/lemon-ui'
+import { Input, Tooltip } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -36,7 +36,7 @@ export function ConfidenceLevelInput(): JSX.Element {
             <Tooltip title="A 95% confidence level means that for each data point, we are 95% confident that the true value is within the confidence interval.">
                 <span>Confidence level</span>
             </Tooltip>
-            <LemonInput
+            <Input
                 type="number"
                 className="w-20"
                 value={localValue}

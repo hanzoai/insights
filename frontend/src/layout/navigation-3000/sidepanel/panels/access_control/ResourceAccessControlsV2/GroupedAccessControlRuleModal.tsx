@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
 import { IconHome, IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonModal, LemonSelect, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Divider, Modal, Select, Link, Tooltip } from '@hanzo/elements'
 
 import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'
 
@@ -70,7 +70,7 @@ export function GroupedAccessControlRuleModal(props: {
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={true}
             onClose={props.loading ? undefined : props.close}
             title={getGroupedAccessControlRuleModalTitle(scopeType)}
@@ -97,7 +97,7 @@ export function GroupedAccessControlRuleModal(props: {
                 memberHasAdminAccess={props.memberHasAdminAccess}
                 roleHasAdminAccess={props.roleHasAdminAccess}
             />
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -120,16 +120,16 @@ function GroupedAccessControlRuleModalFooter(props: {
 
     return (
         <div className="flex items-center justify-end gap-2">
-            <LemonButton
+            <Button
                 type="secondary"
                 onClick={props.close}
                 disabledReason={props.loading ? 'Cannot close' : undefined}
             >
                 Cancel
-            </LemonButton>
-            <LemonButton type="primary" disabledReason={disabledReason} loading={props.loading} onClick={props.onSave}>
+            </Button>
+            <Button type="primary" disabledReason={disabledReason} loading={props.loading} onClick={props.onSave}>
                 Save
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -193,7 +193,7 @@ function GroupedAccessControlRuleModalContent(props: {
                     Project access
                 </div>
                 <div className="min-w-[8rem]">
-                    <LemonSelect
+                    <Select
                         dropdownPlacement="bottom-end"
                         value={mappedLevels['project'] ?? null}
                         disabledReason={disabledReasonForProject}
@@ -211,7 +211,7 @@ function GroupedAccessControlRuleModalContent(props: {
                 </div>
             </div>
 
-            <LemonDivider className="mb-4" />
+            <Divider className="mb-4" />
 
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -246,7 +246,7 @@ function GroupedAccessControlRuleModalContent(props: {
                                     )}
                                 </div>
                                 <div className="min-w-[8rem]">
-                                    <LemonSelect
+                                    <Select
                                         placeholder="No override"
                                         className="w-36"
                                         size="small"

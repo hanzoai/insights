@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonModal, LemonTable, Link } from '@hanzo/lemon-ui'
+import { Modal, Table, Link } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { experimentsLogic } from 'scenes/experiments/experimentsLogic'
 import { FeatureFlagFiltersSection } from 'scenes/feature-flags/FeatureFlagFilters'
 import { urls } from 'scenes/urls'
@@ -39,7 +39,7 @@ export function DuplicateExperimentModal({ isOpen, onClose, experiment }: Duplic
     }
 
     return (
-        <LemonModal isOpen={isOpen} onClose={handleClose} title="Duplicate experiment" width="max-content">
+        <Modal isOpen={isOpen} onClose={handleClose} title="Duplicate experiment" width="max-content">
             <div className="space-y-4">
                 <div className="text-muted max-w-xl">
                     Select a feature flag for the duplicated experiment. You can reuse the original flag or choose a
@@ -59,9 +59,9 @@ export function DuplicateExperimentModal({ isOpen, onClose, experiment }: Duplic
                                 <IconOpenInNew className="ml-1" />
                             </Link>
                         </div>
-                        <LemonButton type="primary" size="xsmall" onClick={() => handleDuplicate()}>
+                        <Button type="primary" size="xsmall" onClick={() => handleDuplicate()}>
                             Select
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
 
@@ -75,7 +75,7 @@ export function DuplicateExperimentModal({ isOpen, onClose, experiment }: Duplic
                             filtersConfig={{ search: true, type: true }}
                         />
                     </div>
-                    <LemonTable
+                    <Table
                         id="ff"
                         dataSource={featureFlagModalFeatureFlags.results}
                         loading={featureFlagModalFeatureFlagsLoading}
@@ -118,14 +118,14 @@ export function DuplicateExperimentModal({ isOpen, onClose, experiment }: Duplic
                                         disabledReason = (error as Error).message
                                     }
                                     return (
-                                        <LemonButton
+                                        <Button
                                             size="xsmall"
                                             type="primary"
                                             disabledReason={disabledReason}
                                             onClick={() => handleDuplicate(flag.key)}
                                         >
                                             Select
-                                        </LemonButton>
+                                        </Button>
                                     )
                                 },
                             },
@@ -143,6 +143,6 @@ export function DuplicateExperimentModal({ isOpen, onClose, experiment }: Duplic
                     />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

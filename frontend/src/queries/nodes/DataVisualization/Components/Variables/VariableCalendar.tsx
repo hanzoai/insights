@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { LemonCalendarSelect } from '@hanzo/lemon-ui'
+import { CalendarSelect } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 
@@ -17,7 +17,7 @@ export const VariableCalendar = ({
     })
 
     return (
-        <LemonCalendarSelect
+        <CalendarSelect
             value={value}
             onChange={(date) => {
                 updateVariable(

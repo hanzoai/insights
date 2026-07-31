@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 
 import { IconSupport } from '@hanzo/icons'
 
-import { IconWithCount } from 'lib/lemon-ui/icons'
+import { IconWithCount } from 'lib/elements/icons'
 
 import { supportTicketCounterLogic } from '../../supportTicketCounterLogic'
 

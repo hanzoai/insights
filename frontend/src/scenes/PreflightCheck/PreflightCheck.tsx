@@ -4,14 +4,14 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
 import { IconCheckCircle, IconCollapse, IconExpand, IconRefresh, IconWarning } from '@hanzo/icons'
-import { Link, Spinner } from '@hanzo/lemon-ui'
+import { Link, Spinner } from '@hanzo/elements'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonRow } from 'lib/lemon-ui/LemonRow'
-import { IconErrorOutline } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Row } from 'lib/elements/Row'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -96,7 +96,7 @@ export function PreflightCheck(): JSX.Element {
                                 What's your plan for this installation? We'll make infrastructure checks accordingly.
                             </p>
                         </div>
-                        <LemonButton
+                        <Button
                             fullWidth
                             center
                             type="primary"
@@ -106,8 +106,8 @@ export function PreflightCheck(): JSX.Element {
                             onClick={() => setPreflightMode('live')}
                         >
                             Live implementation
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="secondary"
                             fullWidth
                             center
@@ -117,8 +117,8 @@ export function PreflightCheck(): JSX.Element {
                             onClick={() => setPreflightMode('experimentation')}
                         >
                             Just experimenting
-                        </LemonButton>
-                        <LemonDivider thick dashed className="my-6" />
+                        </Button>
+                        <Divider thick dashed className="my-6" />
                         <p className="text-secondary text-center mb-0">
                             We will not enforce some security requirements in experimentation mode.
                         </p>
@@ -162,7 +162,7 @@ export function PreflightCheck(): JSX.Element {
                                         {checksSummary.summaryString}
                                     </p>
                                 </div>
-                                <LemonButton
+                                <Button
                                     icon={
                                         areChecksExpanded ? (
                                             <IconCollapse style={{ color: 'var(--color-text-secondary)' }} />
@@ -182,7 +182,7 @@ export function PreflightCheck(): JSX.Element {
                                     ))}
                                 </>
                             </AnimatedCollapsible>
-                            <LemonButton
+                            <Button
                                 center
                                 fullWidth
                                 size="large"
@@ -192,11 +192,11 @@ export function PreflightCheck(): JSX.Element {
                                 icon={<IconRefresh />}
                             >
                                 Validate requirements
-                            </LemonButton>
+                            </Button>
                         </div>
-                        <LemonDivider thick dashed className="my-6" />
+                        <Divider thick dashed className="my-6" />
                         {checksSummary.summaryStatus !== 'error' || preflightMode == 'experimentation' ? (
-                            <LemonButton
+                            <Button
                                 fullWidth
                                 center
                                 type="primary"
@@ -206,13 +206,13 @@ export function PreflightCheck(): JSX.Element {
                                 onClick={handlePreflightFinished}
                             >
                                 Continue
-                            </LemonButton>
+                            </Button>
                         ) : (
-                            <LemonRow fullWidth center className="mt-2 Preflight__cannot-continue" size="large">
+                            <Row fullWidth center className="mt-2 Preflight__cannot-continue" size="large">
                                 <p className="text-center text-secondary">
                                     All required checks must pass before you can continue
                                 </p>
-                            </LemonRow>
+                            </Row>
                         )}
                     </>
                 )}

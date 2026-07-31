@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconInfo, IconStethoscope } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonTable, LemonTableColumns, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Button, Table, TableColumns, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { IconWithBadge } from 'lib/lemon-ui/icons'
+import { IconWithBadge } from 'lib/elements/icons'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -86,7 +86,7 @@ const queryForSdkVersion = (sdkType: SdkType, version: string): string => {
     return `SELECT * FROM events WHERE timestamp >= NOW() - INTERVAL 7 DAY AND properties.$lib = '${sdkType}' AND properties.$lib_version = '${version}' ORDER BY timestamp DESC LIMIT 50`
 }
 
-const COLUMNS: LemonTableColumns<AugmentedTeamSdkVersionsInfoRelease> = [
+const COLUMNS: TableColumns<AugmentedTeamSdkVersionsInfoRelease> = [
     {
         title: 'Version',
         dataIndex: 'version',
@@ -116,9 +116,9 @@ const COLUMNS: LemonTableColumns<AugmentedTeamSdkVersionsInfoRelease> = [
                                     : 'Upgrade recommended'
                             }
                         >
-                            <LemonTag type="danger" className="shrink-0 cursor-help">
+                            <Tag type="danger" className="shrink-0 cursor-help">
                                 Outdated
-                            </LemonTag>
+                            </Tag>
                         </Tooltip>
                     ) : record.isCurrentOrNewer ? (
                         <Tooltip
@@ -131,9 +131,9 @@ const COLUMNS: LemonTableColumns<AugmentedTeamSdkVersionsInfoRelease> = [
                                 </>
                             }
                         >
-                            <LemonTag type="success" className="shrink-0 cursor-help">
+                            <Tag type="success" className="shrink-0 cursor-help">
                                 Current
-                            </LemonTag>
+                            </Tag>
                         </Tooltip>
                     ) : (
                         <Tooltip
@@ -150,9 +150,9 @@ const COLUMNS: LemonTableColumns<AugmentedTeamSdkVersionsInfoRelease> = [
                                 )
                             }
                         >
-                            <LemonTag type="warning" className="shrink-0 cursor-help">
+                            <Tag type="warning" className="shrink-0 cursor-help">
                                 Recent
-                            </LemonTag>
+                            </Tag>
                         </Tooltip>
                     )}
                 </div>
@@ -214,39 +214,39 @@ export function SidePanelSdkDoctor(): JSX.Element | null {
                 title={
                     <span>
                         SDK Doctor{' '}
-                        <LemonTag type="warning" className="ml-1">
+                        <Tag type="warning" className="ml-1">
                             Beta
-                        </LemonTag>
+                        </Tag>
                     </span>
                 }
             >
-                <LemonButton
+                <Button
                     size="xsmall"
                     type="primary"
                     disabledReason={loading ? 'Scan in progress' : undefined}
                     onClick={scanEvents}
                 >
                     {loading ? 'Scanning events...' : 'Scan events'}
-                </LemonButton>
+                </Button>
             </SidePanelPaneHeader>
 
             {/* Explain to devs how they can get the SDK data to show up */}
             {isDev && !inStorybook() && !inStorybookTestRunner() && (
                 <div className="m-2 mb-4">
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         <strong>DEVELOPMENT WARNING!</strong> When running in development, make sure you've run the
-                        appropriate Dasgter jobs: <LemonTag>cache_all_team_sdk_versions_job</LemonTag> and{' '}
-                        <LemonTag>cache_github_sdk_versions_job</LemonTag>. Data won't be available otherwise.
-                    </LemonBanner>
+                        appropriate Dasgter jobs: <Tag>cache_all_team_sdk_versions_job</Tag> and{' '}
+                        <Tag>cache_github_sdk_versions_job</Tag>. Data won't be available otherwise.
+                    </Banner>
                 </div>
             )}
 
             {/* Beta feedback banner */}
             <div className="m-2">
-                <LemonBanner type="info">
+                <Banner type="info">
                     <strong>SDK Doctor is in Beta!</strong> Help us improve by sharing your feedback?{' '}
                     <Link to="#panel=support%3Asupport%3Asdk%3Alow%3Atrue">Send feedback</Link>
-                </LemonBanner>
+                </Banner>
             </div>
 
             <div className="p-3">
@@ -262,15 +262,15 @@ export function SidePanelSdkDoctor(): JSX.Element | null {
                 ) : needsUpdatingCount === 0 ? (
                     <section className="mb-2">
                         <h3>SDK health is good</h3>
-                        <LemonBanner type="success" hideIcon={false}>
+                        <Banner type="success" hideIcon={false}>
                             <p className="font-semibold">All caught up! Your SDKs are up to date.</p>
                             <p className="text-sm mt-1">You've got the latest. Nice work keeping everything current.</p>
-                        </LemonBanner>
+                        </Banner>
                     </section>
                 ) : (
                     <section className="mb-2">
                         <h3>Time for an update!</h3>
-                        <LemonBanner
+                        <Banner
                             type="warning"
                             hideIcon={false}
                             action={{
@@ -283,7 +283,7 @@ export function SidePanelSdkDoctor(): JSX.Element | null {
                                 An outdated SDK means you're missing out on bug fixes and enhancements.
                             </p>
                             <p className="text-sm mt-1">Check the links below to get caught up.</p>
-                        </LemonBanner>
+                        </Banner>
                     </section>
                 )}
             </div>
@@ -350,7 +350,7 @@ export function SdkSection({ sdkType }: { sdkType: SdkType }): JSX.Element {
                 </div>
             </div>
 
-            <LemonTable
+            <Table
                 dataSource={sdk.allReleases}
                 loading={loading}
                 columns={COLUMNS}

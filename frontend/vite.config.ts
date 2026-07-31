@@ -55,9 +55,9 @@ export default defineConfig(({ mode }) => {
                 exporter: resolve(__dirname, 'src/exporter'),
                 stories: resolve(__dirname, 'src/stories'),
                 types: resolve(__dirname, 'src/types.ts'),
-                // @hanzo/lemon-ui aliases
-                '@hanzo/lemon-ui': resolve(__dirname, '@hanzo/lemon-ui/src/index'),
-                '@hanzo/lemon-ui/': resolve(__dirname, '@hanzo/lemon-ui/src/'),
+                // @hanzo/elements aliases
+                '@hanzo/elements': resolve(__dirname, '@hanzo/elements/src/index'),
+                '@hanzo/elements/': resolve(__dirname, '@hanzo/elements/src/'),
                 // Other aliases from tsconfig.json
                 storybook: resolve(__dirname, '../.storybook'),
                 // Just for Vite: we copy public assets to src/assets, we need to alias it to the correct path

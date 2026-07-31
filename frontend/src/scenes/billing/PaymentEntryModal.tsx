@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Banner, Button, Modal } from '@hanzo/elements'
 
 import { paymentEntryLogic } from './paymentEntryLogic'
 
@@ -36,7 +36,7 @@ export const PaymentEntryModal = (): JSX.Element => {
     }
 
     return (
-        <LemonModal
+        <Modal
             onClose={hidePaymentEntryModal}
             width="max(44vw)"
             isOpen={paymentEntryModalOpen}
@@ -50,7 +50,7 @@ export const PaymentEntryModal = (): JSX.Element => {
                             We could not complete your upgrade at this time. Please review the error below and contact
                             support if you need help.
                         </p>
-                        <LemonBanner type="error">{apiError}</LemonBanner>
+                        <Banner type="error">{apiError}</Banner>
                     </div>
                 ) : clientSecret ? (
                     <div className="flex flex-col gap-3 my-2">
@@ -60,12 +60,12 @@ export const PaymentEntryModal = (): JSX.Element => {
                             automatically released within 7 days.
                         </p>
                         <div className="flex justify-end deprecated-space-x-2 mt-2">
-                            <LemonButton disabled={isLoading} type="secondary" onClick={hidePaymentEntryModal}>
+                            <Button disabled={isLoading} type="secondary" onClick={hidePaymentEntryModal}>
                                 Cancel
-                            </LemonButton>
-                            <LemonButton loading={isLoading} type="primary" onClick={goToPay}>
+                            </Button>
+                            <Button loading={isLoading} type="primary" onClick={goToPay}>
                                 Continue to checkout
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 ) : (
@@ -80,6 +80,6 @@ export const PaymentEntryModal = (): JSX.Element => {
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

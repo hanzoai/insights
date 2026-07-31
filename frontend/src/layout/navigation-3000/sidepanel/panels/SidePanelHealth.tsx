@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconDatabase, IconPlug, IconRefresh, IconRevert, IconServer, IconX } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonSkeleton, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Button, Skeleton, Tag, Link, Tooltip } from '@hanzo/elements'
 
-import { IconWithBadge } from 'lib/lemon-ui/icons'
+import { IconWithBadge } from 'lib/elements/icons'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -36,7 +36,7 @@ export function SidePanelHealth(): JSX.Element {
     return (
         <div className="flex flex-col h-full">
             <SidePanelPaneHeader title="Data Pipeline status">
-                <LemonButton
+                <Button
                     size="xsmall"
                     type="secondary"
                     icon={<IconRefresh />}
@@ -44,29 +44,29 @@ export function SidePanelHealth(): JSX.Element {
                     onClick={() => loadHealthIssues()}
                 >
                     {healthIssuesLoading ? 'Refreshing...' : 'Refresh'}
-                </LemonButton>
+                </Button>
             </SidePanelPaneHeader>
 
             <div className="flex-1 overflow-y-auto p-3">
                 {healthIssuesLoading && issues.length === 0 ? (
                     <div className="space-y-3">
-                        <LemonSkeleton className="h-20" />
-                        <LemonSkeleton className="h-20" />
+                        <Skeleton className="h-20" />
+                        <Skeleton className="h-20" />
                     </div>
                 ) : hasErrors ? (
                     <div className="text-center text-muted p-4">
                         Error loading health information. Please try again later.
                     </div>
                 ) : issueCount === 0 ? (
-                    <LemonBanner type="success" hideIcon={false}>
+                    <Banner type="success" hideIcon={false}>
                         <p className="font-semibold">All data pipelines healthy</p>
                         <p className="text-sm mt-1">
                             Your sources, syncs, destinations, and transformations are running without issues.
                         </p>
-                    </LemonBanner>
+                    </Banner>
                 ) : (
                     <>
-                        <LemonBanner type="warning" hideIcon={false} className="mb-4">
+                        <Banner type="warning" hideIcon={false} className="mb-4">
                             <p className="font-semibold">
                                 {issueCount} issue{issueCount === 1 ? '' : 's'} need{issueCount === 1 ? 's' : ''}{' '}
                                 attention
@@ -74,7 +74,7 @@ export function SidePanelHealth(): JSX.Element {
                             <p className="text-sm mt-1">
                                 These data pipelines have failed or been disabled and may affect your data.
                             </p>
-                        </LemonBanner>
+                        </Banner>
 
                         <div className="space-y-3">
                             {issues.map((issue: DataHealthIssue) => (
@@ -202,11 +202,11 @@ export function HealthIssueCard({
                         ) : (
                             <span className="font-semibold truncate">{issue.name}</span>
                         )}
-                        <LemonTag type={statusTagType} size="small">
+                        <Tag type={statusTagType} size="small">
                             {statusLabel}
-                        </LemonTag>
+                        </Tag>
                         {(onDismiss || onUndismiss) && (
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 type="tertiary"
                                 icon={isDismissed ? <IconRevert /> : <IconX />}

@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonSkeleton, Link } from '@hanzo/lemon-ui'
+import { Banner, Skeleton, Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -98,20 +98,20 @@ const MarketingAnalyticsDashboard = (): JSX.Element => {
     }, [loading, hasSources, showOnboarding, resetOnboarding]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     const feedbackBanner = (
-        <LemonBanner type="info" action={{ children: 'Send feedback', id: 'marketing-analytics-feedback-button' }}>
+        <Banner type="info" action={{ children: 'Send feedback', id: 'marketing-analytics-feedback-button' }}>
             Marketing analytics is in beta. Please let us know what you'd like to see here and/or report any issues
             directly to us!
-        </LemonBanner>
+        </Banner>
     )
 
     if (!featureFlags[FEATURE_FLAGS.WEB_ANALYTICS_MARKETING]) {
         return (
             <>
                 {feedbackBanner}
-                <LemonBanner type="info">
+                <Banner type="info">
                     You can enable marketing analytics in the feature preview settings{' '}
                     <Link to="https://insights.hanzo.ai/settings/user-feature-previews#marketing-analytics">here</Link>.
-                </LemonBanner>
+                </Banner>
             </>
         )
     }
@@ -120,7 +120,7 @@ const MarketingAnalyticsDashboard = (): JSX.Element => {
         return (
             <>
                 {feedbackBanner}
-                <LemonSkeleton />
+                <Skeleton />
             </>
         )
     }

@@ -2,7 +2,7 @@ import { actions, connect, kea, key, path, props, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { DataWarehouseManagedViewsetKind } from '~/queries/schema/schema-general'
@@ -55,10 +55,10 @@ export const dataWarehouseManagedViewsetsLogic = kea<dataWarehouseManagedViewset
                     // If enabling, proceed directly
                     try {
                         await api.dataWarehouseManagedViewsets.toggle(kind, true)
-                        lemonToast.success(`Viewset enabled successfully`)
+                        toast.success(`Viewset enabled successfully`)
                         actions.loadCurrentTeam()
                     } catch (error: any) {
-                        lemonToast.error(`Failed to enable viewset: ${error.message || 'Unknown error'}`)
+                        toast.error(`Failed to enable viewset: ${error.message || 'Unknown error'}`)
                         throw error
                     }
                 },

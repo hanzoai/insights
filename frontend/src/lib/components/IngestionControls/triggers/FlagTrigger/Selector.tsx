@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FlagSelector } from 'lib/components/FlagSelector'
-import { IconCancel } from 'lib/lemon-ui/icons'
+import { IconCancel } from 'lib/elements/icons'
 
 import { AccessControlLevel } from '~/types'
 
@@ -32,7 +32,7 @@ export const FlagTriggerSelector = (): JSX.Element => {
             </AccessControlAction>
             {flag && (
                 <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
-                    <LemonButton
+                    <Button
                         className="ml-2"
                         icon={<IconCancel />}
                         size="small"

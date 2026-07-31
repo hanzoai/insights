@@ -3,7 +3,7 @@ import insights from '@hanzo/insights'
 import { useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'

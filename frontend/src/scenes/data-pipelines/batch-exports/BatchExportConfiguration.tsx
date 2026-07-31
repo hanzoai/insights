@@ -2,19 +2,19 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconCheckCircle, IconPlus, IconX } from '@hanzo/icons'
-import { LemonSelect, LemonSwitch } from '@hanzo/lemon-ui'
+import { Select, Switch } from '@hanzo/elements'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Collapse } from 'lib/elements/Collapse'
+import { Field } from 'lib/elements/Field'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { Label } from 'lib/elements/Label'
+import { Spinner } from 'lib/elements/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { timeZoneLabel } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -70,13 +70,13 @@ export function BatchExportConfiguration(): JSX.Element {
             <div className="flex flex-wrap gap-4 items-start">
                 <div className="flex flex-col flex-1 max-w-200 min-w-100 gap-y-3">
                     <div className="flex flex-col p-3 rounded border bg-surface-primary gap-y-2">
-                        <LemonField
+                        <Field
                             label="Status"
                             name="paused"
                             info="Start in a paused state or continuously exporting from now"
                         >
                             {({ value, onChange }) => (
-                                <LemonSwitch
+                                <Switch
                                     label="Enabled"
                                     onChange={() => onChange(!value)}
                                     checked={!value}
@@ -84,10 +84,10 @@ export function BatchExportConfiguration(): JSX.Element {
                                     bordered
                                 />
                             )}
-                        </LemonField>
+                        </Field>
 
                         <div className="flex gap-2 min-h-16">
-                            <LemonField
+                            <Field
                                 name="interval"
                                 label="Interval"
                                 className="flex-1"
@@ -98,7 +98,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                     </>
                                 }
                             >
-                                <LemonSelect
+                                <Select
                                     options={[
                                         { value: 'hour', label: 'Hourly' },
                                         { value: 'day', label: 'Daily' },
@@ -110,13 +110,13 @@ export function BatchExportConfiguration(): JSX.Element {
                                         },
                                     ]}
                                 />
-                            </LemonField>
+                            </Field>
                         </div>
 
                         {showTimezoneAndOffsetSelector && (
                             <>
                                 <div className="flex gap-2 min-h-16">
-                                    <LemonField
+                                    <Field
                                         name="timezone"
                                         label="Timezone"
                                         className="flex-1"
@@ -125,7 +125,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                         {({ value, onChange }) => {
                                             const currentTimezone = value || teamTimezone || 'UTC'
                                             return (
-                                                <LemonInputSelect
+                                                <InputSelect
                                                     mode="single"
                                                     placeholder="Select a time zone"
                                                     value={[currentTimezone]}
@@ -138,11 +138,11 @@ export function BatchExportConfiguration(): JSX.Element {
                                                 />
                                             )
                                         }}
-                                    </LemonField>
+                                    </Field>
                                 </div>
                                 {configuration.interval === 'day' && (
                                     <div className="flex gap-2 min-h-16">
-                                        <LemonField
+                                        <Field
                                             name="offset_hour"
                                             label="Start time"
                                             className="flex-1"
@@ -151,7 +151,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                             {({ value, onChange }) => {
                                                 const hour = value ?? 0
                                                 return (
-                                                    <LemonSelect
+                                                    <Select
                                                         value={hour}
                                                         onChange={(newHour) => {
                                                             onChange(newHour ?? 0)
@@ -160,12 +160,12 @@ export function BatchExportConfiguration(): JSX.Element {
                                                     />
                                                 )
                                             }}
-                                        </LemonField>
+                                        </Field>
                                     </div>
                                 )}
                                 {configuration.interval === 'week' && (
                                     <div className="flex items-end gap-2 min-h-16">
-                                        <LemonField
+                                        <Field
                                             name="offset_day"
                                             label="Start time"
                                             className="flex-1"
@@ -175,7 +175,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                                 const defaultDay = weekStartDay ?? 0
                                                 const day = dayValue ?? defaultDay
                                                 return (
-                                                    <LemonSelect
+                                                    <Select
                                                         value={day}
                                                         onChange={(newDay) => {
                                                             onChangeDay(newDay ?? defaultDay)
@@ -184,12 +184,12 @@ export function BatchExportConfiguration(): JSX.Element {
                                                     />
                                                 )
                                             }}
-                                        </LemonField>
-                                        <LemonField name="offset_hour" className="flex-1">
+                                        </Field>
+                                        <Field name="offset_hour" className="flex-1">
                                             {({ value: hourValue, onChange: onChangeHour }) => {
                                                 const hour = hourValue ?? 0
                                                 return (
-                                                    <LemonSelect
+                                                    <Select
                                                         value={hour}
                                                         onChange={(newHour) => {
                                                             onChangeHour(newHour ?? 0)
@@ -198,7 +198,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                                     />
                                                 )
                                             }}
-                                        </LemonField>
+                                        </Field>
                                     </div>
                                 )}
                             </>
@@ -206,13 +206,13 @@ export function BatchExportConfiguration(): JSX.Element {
                     </div>
                     <div className="flex flex-col p-3 rounded border bg-surface-primary gap-y-2">
                         <div className="flex gap-2 min-h-16">
-                            <LemonField
+                            <Field
                                 name="model"
                                 label="Model"
                                 info="A model defines the data that will be exported."
                                 className="flex flex-1"
                             >
-                                <LemonSelect
+                                <Select
                                     options={tables.map((table) => ({
                                         value: table.name,
                                         label: table.id,
@@ -223,11 +223,11 @@ export function BatchExportConfiguration(): JSX.Element {
                                     }}
                                     fullWidth={true}
                                 />
-                            </LemonField>
+                            </Field>
                         </div>
 
                         <div className="flex gap-2">
-                            <LemonCollapse
+                            <Collapse
                                 className="flex flex-1"
                                 panels={[
                                     {
@@ -237,7 +237,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                             <div className="flex-1">
                                                 {/* TODO: display the data types that will be used in the destination */}
                                                 {isDatabaseDestination && (
-                                                    <LemonBanner type="info" className="mb-4">
+                                                    <Banner type="info" className="mb-4">
                                                         This schema is just for reference and does not reflect the
                                                         actual data types that will be used in {service}.
                                                         <br />
@@ -246,7 +246,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                                             It is recommended to allow the batch export to create the
                                                             destination table automatically.
                                                         </b>
-                                                    </LemonBanner>
+                                                    </Banner>
                                                 )}
                                                 <DatabaseTable
                                                     table={selectedModel ? selectedModel : 'events'}
@@ -263,7 +263,7 @@ export function BatchExportConfiguration(): JSX.Element {
                             <>
                                 <div className="flex flex-col gap-2 min-h-16">
                                     <div className="flex gap-2 justify-between w-full">
-                                        <LemonLabel>Include events</LemonLabel>
+                                        <Label>Include events</Label>
                                     </div>
                                     <p className="mb-0 text-xs text-secondary">
                                         If set, the batch export will <b>only</b> export events matching any of the
@@ -278,20 +278,20 @@ export function BatchExportConfiguration(): JSX.Element {
                                             configuration.include_events ? configuration.include_events : []
                                         }
                                         addElement={
-                                            <LemonButton
+                                            <Button
                                                 size="small"
                                                 type="secondary"
                                                 icon={<IconPlus />}
                                                 sideIcon={null}
                                             >
                                                 Include event
-                                            </LemonButton>
+                                            </Button>
                                         }
                                     />
                                 </div>
                                 <div className="flex flex-col gap-2 min-h-16">
                                     <div className="flex gap-2 justify-between w-full">
-                                        <LemonLabel>Exclude events</LemonLabel>
+                                        <Label>Exclude events</Label>
                                     </div>
                                     <p className="mb-0 text-xs text-secondary">
                                         If set, the batch export will <b>exclude</b> events matching any of the below.
@@ -306,19 +306,19 @@ export function BatchExportConfiguration(): JSX.Element {
                                             configuration.exclude_events ? configuration.exclude_events : []
                                         }
                                         addElement={
-                                            <LemonButton
+                                            <Button
                                                 size="small"
                                                 type="secondary"
                                                 icon={<IconPlus />}
                                                 sideIcon={null}
                                             >
                                                 Exclude event
-                                            </LemonButton>
+                                            </Button>
                                         }
                                     />
                                 </div>
                                 <div className="flex gap-2 min-h-16">
-                                    <LemonField name="filters" label="Filters" className="flex flex-1">
+                                    <Field name="filters" label="Filters" className="flex flex-1">
                                         <PropertyFilters
                                             propertyFilters={
                                                 (configuration.filters
@@ -343,7 +343,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                             }`}
                                             metadataSource={{ kind: NodeKind.ActorsQuery }}
                                         />
-                                    </LemonField>
+                                    </Field>
                                 </div>
                             </>
                         ) : null}
@@ -450,10 +450,10 @@ export function BatchExportConfigurationTests({
         return (
             <div className="space-y-4">
                 {header}
-                <LemonBanner type="info">
+                <Banner type="info">
                     Please select a value for the following fields before testing the configuration:{' '}
                     {requiredFieldsMissing.join(', ')}
-                </LemonBanner>
+                </Banner>
             </div>
         )
     }
@@ -462,14 +462,14 @@ export function BatchExportConfigurationTests({
         <div className="space-y-4">
             <div className="flex justify-between items-center">
                 {header}
-                <LemonButton
+                <Button
                     onClick={() => runBatchExportConfigTestStep(0)}
                     disabledReason={runningStep !== null ? 'Test step is running' : null}
                     size="small"
                     type="primary"
                 >
                     {runningStep ? 'Testing...' : 'Start test'}
-                </LemonButton>
+                </Button>
             </div>
 
             <div className="space-y-4">
@@ -484,14 +484,14 @@ export function BatchExportConfigurationTests({
                             <div className="flex gap-2 items-start">
                                 <div className="mt-px">{renderStatusIcon(step, index)}</div>
                                 <div className="flex-1">
-                                    <LemonLabel info={step.description} className="mb-2">
+                                    <Label info={step.description} className="mb-2">
                                         {step.name}
-                                    </LemonLabel>
+                                    </Label>
                                     {step.result && (
                                         <div className="mt-2">
-                                            <LemonBanner type={step.result.status === 'Passed' ? 'success' : 'error'}>
+                                            <Banner type={step.result.status === 'Passed' ? 'success' : 'error'}>
                                                 {step.result.status === 'Passed' ? 'Success' : `${step.result.message}`}
-                                            </LemonBanner>
+                                            </Banner>
                                         </div>
                                     )}
                                 </div>

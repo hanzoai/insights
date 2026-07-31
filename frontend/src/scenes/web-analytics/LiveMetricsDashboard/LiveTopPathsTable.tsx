@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useLayoutEffect, useRef } from 'react'
 
-import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
+import { Skeleton, Tooltip } from '@hanzo/elements'
 
 import { PathItem } from './LiveWebAnalyticsMetricsTypes'
 
@@ -97,7 +97,7 @@ export const LiveTopPathsTable = ({ paths, isLoading, totalPageviews }: LiveTopP
             {isLoading ? (
                 <div className="space-y-2">
                     {Array.from({ length: 5 }).map((_, i) => (
-                        <LemonSkeleton key={i} className="h-8" />
+                        <Skeleton key={i} className="h-8" />
                     ))}
                 </div>
             ) : paths.length === 0 ? (

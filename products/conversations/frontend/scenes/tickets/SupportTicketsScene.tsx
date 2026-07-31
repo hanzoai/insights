@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconChevronDown, IconRefresh } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonCheckbox, LemonDropdown, LemonTable, LemonTag } from '@hanzo/lemon-ui'
+import { Badge, Button, Checkbox, Dropdown, Table, Tag } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -68,18 +68,18 @@ export function SupportTicketsScene(): JSX.Element {
                         dateTo={dateTo}
                         onChange={(dateFrom, dateTo) => setDateRange(dateFrom, dateTo)}
                     />
-                    <LemonDropdown
+                    <Dropdown
                         closeOnClickInside={false}
                         overlay={
                             <div className="space-y-px p-1">
                                 {statusMultiselectOptions.map((option) => (
-                                    <LemonButton
+                                    <Button
                                         key={option.key}
                                         type="tertiary"
                                         size="small"
                                         fullWidth
                                         icon={
-                                            <LemonCheckbox
+                                            <Checkbox
                                                 checked={statusFilter.includes(option.key)}
                                                 className="pointer-events-none"
                                             />
@@ -92,31 +92,31 @@ export function SupportTicketsScene(): JSX.Element {
                                         }}
                                     >
                                         {option.label}
-                                    </LemonButton>
+                                    </Button>
                                 ))}
                             </div>
                         }
                     >
-                        <LemonButton type="secondary" size="small" sideIcon={<IconChevronDown />}>
+                        <Button type="secondary" size="small" sideIcon={<IconChevronDown />}>
                             {statusFilter.length === 0
                                 ? 'All statuses'
                                 : statusFilter.length === 1
                                   ? statusMultiselectOptions.find((o) => o.key === statusFilter[0])?.label
                                   : `${statusFilter.length} statuses`}
-                        </LemonButton>
-                    </LemonDropdown>
-                    <LemonDropdown
+                        </Button>
+                    </Dropdown>
+                    <Dropdown
                         closeOnClickInside={false}
                         overlay={
                             <div className="space-y-px p-1">
                                 {priorityMultiselectOptions.map((option) => (
-                                    <LemonButton
+                                    <Button
                                         key={option.key}
                                         type="tertiary"
                                         size="small"
                                         fullWidth
                                         icon={
-                                            <LemonCheckbox
+                                            <Checkbox
                                                 checked={priorityFilter.includes(option.key)}
                                                 className="pointer-events-none"
                                             />
@@ -129,25 +129,25 @@ export function SupportTicketsScene(): JSX.Element {
                                         }}
                                     >
                                         {option.label}
-                                    </LemonButton>
+                                    </Button>
                                 ))}
                             </div>
                         }
                     >
-                        <LemonButton type="secondary" size="small" sideIcon={<IconChevronDown />}>
+                        <Button type="secondary" size="small" sideIcon={<IconChevronDown />}>
                             {priorityFilter.length === 0
                                 ? 'All priorities'
                                 : priorityFilter.length === 1
                                   ? priorityMultiselectOptions.find((o) => o.key === priorityFilter[0])?.label
                                   : `${priorityFilter.length} priorities`}
-                        </LemonButton>
-                    </LemonDropdown>
+                        </Button>
+                    </Dropdown>
                     <AssigneeSelect
                         assignee={assigneeFilter === 'all' || assigneeFilter === 'unassigned' ? null : assigneeFilter}
                         onChange={(assignee) => setAssigneeFilter(assignee ?? 'all')}
                     >
                         {(resolvedAssignee, isOpen) => (
-                            <LemonButton size="small" type="secondary" active={isOpen} sideIcon={<IconChevronDown />}>
+                            <Button size="small" type="secondary" active={isOpen} sideIcon={<IconChevronDown />}>
                                 <span className="flex items-center gap-1">
                                     <AssigneeIconDisplay assignee={resolvedAssignee} size="small" />
                                     <AssigneeLabelDisplay
@@ -156,16 +156,16 @@ export function SupportTicketsScene(): JSX.Element {
                                         placeholder="All assignees"
                                     />
                                 </span>
-                            </LemonButton>
+                            </Button>
                         )}
                     </AssigneeSelect>
-                    <LemonCheckbox
+                    <Checkbox
                         checked={assigneeFilter === 'unassigned'}
                         onChange={(checked) => setAssigneeFilter(checked ? 'unassigned' : 'all')}
                         label="Unassigned only"
                     />
                 </div>
-                <LemonButton
+                <Button
                     type="secondary"
                     icon={<IconRefresh />}
                     loading={ticketsLoading}
@@ -175,10 +175,10 @@ export function SupportTicketsScene(): JSX.Element {
                     data-attr="refresh-tickets"
                 >
                     Refresh
-                </LemonButton>
+                </Button>
             </div>
 
-            <LemonTable<Ticket>
+            <Table<Ticket>
                 dataSource={filteredTickets}
                 rowKey="id"
                 loading={ticketsLoading}
@@ -256,7 +256,7 @@ export function SupportTicketsScene(): JSX.Element {
                                     <span className="text-muted-alt text-xs">—</span>
                                 )}
                                 {ticket.unread_team_count > 0 && (
-                                    <LemonBadge.Number count={ticket.unread_team_count} size="small" status="primary" />
+                                    <Badge.Number count={ticket.unread_team_count} size="small" status="primary" />
                                 )}
                             </div>
                         ),
@@ -265,7 +265,7 @@ export function SupportTicketsScene(): JSX.Element {
                         title: 'Status',
                         key: 'status',
                         render: (_, ticket) => (
-                            <LemonTag
+                            <Tag
                                 type={
                                     ticket.status === 'resolved'
                                         ? 'success'
@@ -275,7 +275,7 @@ export function SupportTicketsScene(): JSX.Element {
                                 }
                             >
                                 {ticket.status === 'on_hold' ? 'On hold' : ticket.status}
-                            </LemonTag>
+                            </Tag>
                         ),
                     },
                     {
@@ -283,7 +283,7 @@ export function SupportTicketsScene(): JSX.Element {
                         key: 'priority',
                         render: (_, ticket) =>
                             ticket.priority ? (
-                                <LemonTag
+                                <Tag
                                     type={
                                         ticket.priority === 'high'
                                             ? 'danger'
@@ -293,7 +293,7 @@ export function SupportTicketsScene(): JSX.Element {
                                     }
                                 >
                                     {ticket.priority}
-                                </LemonTag>
+                                </Tag>
                             ) : (
                                 <span className="text-muted-alt text-xs">—</span>
                             ),

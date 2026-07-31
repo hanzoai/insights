@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 
 import api, { PaginatedResponse } from 'lib/api'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { BatchExportBackfill, RawBatchExportBackfill } from '~/types'
@@ -46,7 +46,7 @@ export const batchExportBackfillsLogic = kea<batchExportBackfillsLogicType>([
                             ordering: '-created_at',
                         })
                     } catch (e) {
-                        lemonToast.error('Unknown error occurred when fetching backfills')
+                        toast.error('Unknown error occurred when fetching backfills')
                         throw e
                     }
                 },
@@ -62,7 +62,7 @@ export const batchExportBackfillsLogic = kea<batchExportBackfillsLogicType>([
 
                         return res
                     } catch (e) {
-                        lemonToast.error('Unknown error occurred when fetching backfills')
+                        toast.error('Unknown error occurred when fetching backfills')
                         throw e
                     }
                 },
@@ -106,10 +106,10 @@ export const batchExportBackfillsLogic = kea<batchExportBackfillsLogicType>([
         cancelBackfill: async ({ backfill }) => {
             try {
                 await api.batchExports.cancelBackfill(props.id, backfill.id)
-                lemonToast.success('Backfill has been cancelled.')
+                toast.success('Backfill has been cancelled.')
                 actions.loadBackfills()
             } catch {
-                lemonToast.error('Failed to cancel backfill. Please try again.')
+                toast.error('Failed to cancel backfill. Please try again.')
             }
         },
         submitBackfillFormSuccess: () => {

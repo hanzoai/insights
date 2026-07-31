@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SESSION_REPLAY_MINIMUM_DURATION_OPTIONS } from 'lib/constants'
@@ -20,7 +20,7 @@ export function MinDurationTrigger({
 
     return (
         <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
-            <LemonSelect
+            <Select
                 dropdownMatchSelectWidth={false}
                 onChange={onChange}
                 options={SESSION_REPLAY_MINIMUM_DURATION_OPTIONS}

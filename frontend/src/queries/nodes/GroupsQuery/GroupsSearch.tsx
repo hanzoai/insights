@@ -1,7 +1,7 @@
 import { IconInfo } from '@hanzo/icons'
 
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Input } from 'lib/elements/Input/Input'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { useDebouncedQuery } from '~/queries/hooks/useDebouncedQuery'
 import { GroupsQuery } from '~/queries/schema/schema-general'
@@ -22,7 +22,7 @@ export function GroupsSearch({ query, setQuery, groupTypeLabel = 'groups' }: Gro
 
     return (
         <div className="flex items-center gap-2">
-            <LemonInput
+            <Input
                 type="search"
                 value={value}
                 placeholder={`Search for ${groupTypeLabel}`}

@@ -7,13 +7,13 @@ import { router } from 'kea-router'
 import { useEffect } from 'react'
 
 import { IconCheckCircle } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput, Link } from '@hanzo/lemon-ui'
+import { Button, Divider, Input, Link } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { IconErrorOutline } from 'lib/lemon-ui/icons'
+import { Field } from 'lib/elements/Field'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -72,7 +72,7 @@ function EmailUnavailable(): JSX.Element {
                 Self-serve password reset is unavailable. Please <b>contact your instance administrator</b> to reset
                 your password.
             </div>
-            <LemonDivider className="my-6" />
+            <Divider className="my-6" />
             <div className="mt-4">
                 If you're an administrator:
                 <p>
@@ -108,8 +108,8 @@ function ResetForm(): JSX.Element {
             <div className="text-center">
                 Enter your email address. If an account exists, you’ll receive an email with a password reset link soon.
             </div>
-            <LemonField name="email" label="Email">
-                <LemonInput
+            <Field name="email" label="Email">
+                <Input
                     className="ph-ignore-input"
                     autoFocus
                     data-attr="reset-email"
@@ -117,8 +117,8 @@ function ResetForm(): JSX.Element {
                     type="email"
                     disabled={isRequestPasswordResetSubmitting}
                 />
-            </LemonField>
-            <LemonButton
+            </Field>
+            <Button
                 fullWidth
                 type="primary"
                 status="alt"
@@ -129,7 +129,7 @@ function ResetForm(): JSX.Element {
                 size="large"
             >
                 Continue
-            </LemonButton>
+            </Button>
         </Form>
     )
 }
@@ -143,7 +143,7 @@ function ResetSuccess(): JSX.Element {
             Request received successfully! If the email <b>{requestPasswordReset?.email || 'you typed'}</b> exists,
             you’ll receive an email with a reset link soon.
             <div className="mt-4">
-                <LemonButton
+                <Button
                     type="primary"
                     status="alt"
                     data-attr="back-to-login"
@@ -153,7 +153,7 @@ function ResetSuccess(): JSX.Element {
                     size="large"
                 >
                     Back to login
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )
@@ -168,7 +168,7 @@ function ResetThrottled(): JSX.Element {
             There have been too many reset requests for the email <b>{requestPasswordReset?.email || 'you typed'}</b>.
             Please try again later or contact support if you think this has been a mistake.
             <div className="mt-4">
-                <LemonButton
+                <Button
                     type="primary"
                     status="alt"
                     data-attr="back-to-login"
@@ -178,7 +178,7 @@ function ResetThrottled(): JSX.Element {
                     size="large"
                 >
                     Back to login
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

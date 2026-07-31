@@ -3,9 +3,9 @@ import './NetworkView.scss'
 import { Meta } from '@storybook/react'
 import { useCallback, useRef, useState } from 'react'
 
-import { LemonTable } from '@hanzo/lemon-ui'
+import { Table } from '@hanzo/elements'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { humanFriendlyMilliseconds } from 'lib/utils'
 import { initiatorTypeToColor } from 'scenes/session-recordings/apm/performance-event-utils'
 import { MethodTag, StatusTag } from 'scenes/session-recordings/apm/playerInspector/ItemPerformanceEvent'
@@ -329,7 +329,7 @@ export function Default(): JSX.Element {
                     style={{ left: urlColumnWidth }}
                     onMouseDown={onUrlHeaderMouseDown}
                 />
-                <LemonTable
+                <Table
                     className="NetworkView__table"
                     size="small"
                     dataSource={MOCK_NETWORK_DATA}

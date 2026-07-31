@@ -2,16 +2,16 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonButton, LemonDialog } from '@hanzo/lemon-ui'
+import { Button, Dialog } from '@hanzo/elements'
 
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { atColumn, createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { More } from 'lib/elements/Button/More'
+import { Divider } from 'lib/elements/Divider'
+import { Input } from 'lib/elements/Input'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { atColumn, createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { Tag } from 'lib/elements/Tag'
+import { toast } from 'lib/elements/Toast/Toast'
 import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
 import { urls } from 'scenes/urls'
 
@@ -48,7 +48,7 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
     const { duplicateEndpoint } = useValues(endpointLogic({ tabId }))
 
     const handleDelete = (endpointName: string): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Delete endpoint?',
             content: (
                 <div className="text-sm text-secondary">
@@ -84,7 +84,7 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
         }
     }
 
-    const columns: LemonTableColumns<EndpointType> = [
+    const columns: TableColumns<EndpointType> = [
         {
             title: 'Name',
             key: 'name',
@@ -92,14 +92,14 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
             width: '25%',
             render: function Render(_, record) {
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={urls.endpoint(record.name)}
                         title={
                             <>
                                 {record.name}
-                                <LemonTag type="option" size="small" className="mr-1">
+                                <Tag type="option" size="small" className="mr-1">
                                     {record.query?.kind && humanizeQueryKind(record.query.kind)}
-                                </LemonTag>
+                                </Tag>
                             </>
                         }
                         description={record.description}
@@ -108,9 +108,9 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
             },
             sorter: (a: EndpointType, b: EndpointType) => a.name.localeCompare(b.name),
         },
-        createdAtColumn<EndpointType>() as LemonTableColumn<EndpointType, keyof EndpointType | undefined>,
-        createdByColumn<EndpointType>() as LemonTableColumn<EndpointType, keyof EndpointType | undefined>,
-        atColumn<EndpointType>('last_executed_at', 'Last executed at') as LemonTableColumn<
+        createdAtColumn<EndpointType>() as TableColumn<EndpointType, keyof EndpointType | undefined>,
+        createdByColumn<EndpointType>() as TableColumn<EndpointType, keyof EndpointType | undefined>,
+        atColumn<EndpointType>('last_executed_at', 'Last executed at') as TableColumn<
             EndpointType,
             keyof EndpointType | undefined
         >,
@@ -118,23 +118,23 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
             'materialization' as any,
             'Last materialized at',
             (record) => record.materialization?.last_materialized_at
-        ) as LemonTableColumn<EndpointType, keyof EndpointType | undefined>,
+        ) as TableColumn<EndpointType, keyof EndpointType | undefined>,
         {
             title: 'Endpoint path',
             key: 'endpoint_path',
             dataIndex: 'endpoint_path',
             render: (_, record) => (
-                <LemonButton
+                <Button
                     type="secondary"
                     size="xsmall"
                     onClick={() => {
                         navigator.clipboard.writeText(record.endpoint_path)
-                        lemonToast.success('Endpoint URL copied to clipboard')
+                        toast.success('Endpoint URL copied to clipboard')
                     }}
                     className="font-mono text-xs"
                 >
                     {record.endpoint_path}
-                </LemonButton>
+                </Button>
             ),
         },
         {
@@ -145,9 +145,9 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
             render: (_, record) => (
                 <span>
                     {record.is_active ? (
-                        <LemonTag type="success">Active</LemonTag>
+                        <Tag type="success">Active</Tag>
                     ) : (
-                        <LemonTag type="danger">Inactive</LemonTag>
+                        <Tag type="danger">Inactive</Tag>
                     )}
                 </span>
             ),
@@ -160,20 +160,20 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
                 <More
                     overlay={
                         <>
-                            <LemonButton
+                            <Button
                                 onClick={() => {
                                     router.actions.push(urls.endpointsUsage({ endpointFilter: [record.name] }))
                                 }}
                                 fullWidth
                             >
                                 View usage
-                            </LemonButton>
-                            <LemonButton onClick={() => handleDuplicate(record)} fullWidth>
+                            </Button>
+                            <Button onClick={() => handleDuplicate(record)} fullWidth>
                                 Duplicate endpoint
-                            </LemonButton>
+                            </Button>
 
-                            <LemonDivider />
-                            <LemonButton
+                            <Divider />
+                            <Button
                                 onClick={() => {
                                     handleEndpointActivation(record)
                                 }}
@@ -182,8 +182,8 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
                                 data-attr="endpoint-activate"
                             >
                                 {record.is_active ? 'Deactivate endpoint' : 'Activate endpoint'}
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 onClick={() => {
                                     handleDelete(record.name)
                                 }}
@@ -191,7 +191,7 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
                                 status="danger"
                             >
                                 Delete endpoint
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                 />
@@ -202,14 +202,14 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
     return (
         <SceneContent>
             <div className="flex justify-between gap-2 flex-wrap">
-                <LemonInput
+                <Input
                     type="search"
                     className="w-1/3"
                     placeholder="Search for endpoints"
                     onChange={(x) => setFilters({ search: x })}
                     value={filters.search}
                 />
-                <LemonButton
+                <Button
                     type="secondary"
                     icon={<IconRefresh />}
                     onClick={() => loadEndpoints()}
@@ -217,9 +217,9 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
                     size="small"
                 >
                     Reload
-                </LemonButton>
+                </Button>
             </div>
-            <LemonTable
+            <Table
                 data-attr="endpoints-table"
                 pagination={{ pageSize: 20 }}
                 dataSource={endpoints as EndpointType[]}

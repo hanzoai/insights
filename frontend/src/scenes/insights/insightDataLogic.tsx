@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { actionToUrl, router } from 'kea-router'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { objectsEqual } from 'lib/utils'
 import { DATAWAREHOUSE_EDITOR_ITEM_ID } from 'scenes/data-warehouse/utils'
 import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
@@ -120,7 +120,7 @@ export const insightDataLogic = kea<insightDataLogicType>([
                         })
                         return response.name
                     } catch (e) {
-                        lemonToast.error('Failed to generate name')
+                        toast.error('Failed to generate name')
                         throw e
                     }
                 },

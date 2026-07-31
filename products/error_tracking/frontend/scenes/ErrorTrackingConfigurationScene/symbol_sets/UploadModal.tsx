@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconUpload } from '@hanzo/icons'
-import { LemonButton, LemonFileInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, FileInput, Modal } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { symbolSetLogic } from './symbolSetLogic'
 
@@ -15,14 +15,14 @@ export const UploadModal = (): JSX.Element => {
     const onClose = (): void => setUploadSymbolSetId(null)
 
     return (
-        <LemonModal title="" onClose={onClose} isOpen={!!uploadSymbolSetId} simple>
+        <Modal title="" onClose={onClose} isOpen={!!uploadSymbolSetId} simple>
             <Form logic={symbolSetLogic} formKey="uploadSymbolSet" className="gap-1" enableFormOnSubmit>
-                <LemonModal.Header>
+                <Modal.Header>
                     <h3>Upload javscript symbol set</h3>
-                </LemonModal.Header>
-                <LemonModal.Content className="deprecated-space-y-2">
-                    <LemonField name="minified">
-                        <LemonFileInput
+                </Modal.Header>
+                <Modal.Content className="deprecated-space-y-2">
+                    <Field name="minified">
+                        <FileInput
                             accept="text/javascript"
                             multiple={false}
                             callToAction={
@@ -36,9 +36,9 @@ export const UploadModal = (): JSX.Element => {
                                 </div>
                             }
                         />
-                    </LemonField>
-                    <LemonField name="sourceMap">
-                        <LemonFileInput
+                    </Field>
+                    <Field name="sourceMap">
+                        <FileInput
                             accept="*"
                             multiple={false}
                             callToAction={
@@ -50,13 +50,13 @@ export const UploadModal = (): JSX.Element => {
                                 </div>
                             }
                         />
-                    </LemonField>
-                </LemonModal.Content>
-                <LemonModal.Footer>
-                    <LemonButton type="secondary" onClick={onClose}>
+                    </Field>
+                </Modal.Content>
+                <Modal.Footer>
+                    <Button type="secondary" onClick={onClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         disabledReason={
                             uploadSymbolSet.minified.length < 1
                                 ? 'Upload a minified source'
@@ -70,9 +70,9 @@ export const UploadModal = (): JSX.Element => {
                         loading={isUploadSymbolSetSubmitting}
                     >
                         Upload
-                    </LemonButton>
-                </LemonModal.Footer>
+                    </Button>
+                </Modal.Footer>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

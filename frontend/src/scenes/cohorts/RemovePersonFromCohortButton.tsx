@@ -2,8 +2,8 @@ import { useActions } from 'kea'
 
 import { IconTrash } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
+import { Button } from 'lib/elements/Button'
+import { Dialog } from 'lib/elements/Dialog'
 
 import { cohortEditLogic } from '~/scenes/cohorts/cohortEditLogic'
 
@@ -20,7 +20,7 @@ export function RemovePersonFromCohortButton({ person }: RemovePersonFromCohortB
     const { removePersonFromCohort } = useActions(cohortEditLogic)
 
     const handleRemoveClick = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Remove person from cohort',
             description: (
                 <>
@@ -50,7 +50,7 @@ export function RemovePersonFromCohortButton({ person }: RemovePersonFromCohortB
     }
 
     return (
-        <LemonButton
+        <Button
             onClick={handleRemoveClick}
             icon={<IconTrash />}
             status="danger"

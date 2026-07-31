@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonSwitch, Link, Spinner, Tooltip, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Divider, Switch, Link, Spinner, Tooltip, toast } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
+import { Table } from 'lib/elements/Table'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { cn } from 'lib/utils/css-classes'
 import { DataWarehouseManagedViewsetImpactModal } from 'scenes/data-management/managed-viewsets/DataWarehouseManagedViewsetImpactModal'
@@ -67,10 +67,10 @@ export function ExternalDataSourceConfiguration({
             })
             setSourceToBeDisabled(null)
 
-            lemonToast.success(`Revenue analytics disabled for ${sourceToBeDisabled.source_type}`)
+            toast.success(`Revenue analytics disabled for ${sourceToBeDisabled.source_type}`)
             return true
         } catch (error: any) {
-            lemonToast.error(`Failed to disable source: ${error.message || 'Unknown error'}`)
+            toast.error(`Failed to disable source: ${error.message || 'Unknown error'}`)
             return false
         }
     }
@@ -85,7 +85,7 @@ export function ExternalDataSourceConfiguration({
                     resourceType={AccessControlResourceType.RevenueAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         className="my-1"
                         ref={buttonRef}
                         type="primary"
@@ -96,10 +96,10 @@ export function ExternalDataSourceConfiguration({
                         }}
                     >
                         Add new source
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
-            <LemonTable
+            <Table
                 rowKey={(item) => item.id}
                 loading={dataWarehouseSources === null}
                 dataSource={revenueSources}
@@ -130,7 +130,7 @@ export function ExternalDataSourceConfiguration({
                                         resourceType={AccessControlResourceType.RevenueAnalytics}
                                         minAccessLevel={AccessControlLevel.Editor}
                                     >
-                                        <LemonSwitch
+                                        <Switch
                                             checked={source.revenue_analytics_config.enabled}
                                             disabledReason={dataWarehouseSourcesLoading ? 'Updating...' : undefined}
                                             onChange={(checked) => {
@@ -184,7 +184,7 @@ export function ExternalDataSourceConfiguration({
                                         {({ disabledReason }) =>
                                             join && source.revenue_analytics_config.enabled ? (
                                                 <>
-                                                    <LemonButton
+                                                    <Button
                                                         type="secondary"
                                                         size="small"
                                                         onClick={() => toggleEditJoinModal(join)}
@@ -194,9 +194,9 @@ export function ExternalDataSourceConfiguration({
                                                         }
                                                     >
                                                         {join.source_table_name}.{join.source_table_key}
-                                                    </LemonButton>
+                                                    </Button>
 
-                                                    <LemonButton
+                                                    <Button
                                                         type="secondary"
                                                         status="danger"
                                                         size="small"
@@ -207,7 +207,7 @@ export function ExternalDataSourceConfiguration({
                                                     />
                                                 </>
                                             ) : (
-                                                <LemonButton
+                                                <Button
                                                     type="secondary"
                                                     size="small"
                                                     icon={<IconPlus />}
@@ -228,7 +228,7 @@ export function ExternalDataSourceConfiguration({
                                                     }
                                                 >
                                                     Add join
-                                                </LemonButton>
+                                                </Button>
                                             )
                                         }
                                     </AccessControlAction>
@@ -268,7 +268,7 @@ export function ExternalDataSourceConfiguration({
                                         {({ disabledReason }) =>
                                             join && source.revenue_analytics_config.enabled ? (
                                                 <>
-                                                    <LemonButton
+                                                    <Button
                                                         type="secondary"
                                                         size="small"
                                                         onClick={() => toggleEditJoinModal(join)}
@@ -279,9 +279,9 @@ export function ExternalDataSourceConfiguration({
                                                         tooltip="Edit join"
                                                     >
                                                         {join.source_table_name}.{join.source_table_key}
-                                                    </LemonButton>
+                                                    </Button>
 
-                                                    <LemonButton
+                                                    <Button
                                                         type="secondary"
                                                         status="danger"
                                                         size="small"
@@ -292,7 +292,7 @@ export function ExternalDataSourceConfiguration({
                                                     />
                                                 </>
                                             ) : (
-                                                <LemonButton
+                                                <Button
                                                     type="secondary"
                                                     size="small"
                                                     icon={<IconPlus />}
@@ -313,7 +313,7 @@ export function ExternalDataSourceConfiguration({
                                                     }
                                                 >
                                                     Add join
-                                                </LemonButton>
+                                                </Button>
                                             )
                                         }
                                     </AccessControlAction>
@@ -323,7 +323,7 @@ export function ExternalDataSourceConfiguration({
                     },
                     {
                         key: 'separator',
-                        title: <LemonDivider vertical className="py-1 h-[16px]" />,
+                        title: <Divider vertical className="py-1 h-[16px]" />,
                     },
                     {
                         key: 'include_invoiceless_charges',
@@ -337,7 +337,7 @@ export function ExternalDataSourceConfiguration({
                         ),
                         render: (_, source: ExternalDataSource) => {
                             return (
-                                <LemonSwitch
+                                <Switch
                                     checked={
                                         source.revenue_analytics_config.enabled &&
                                         source.revenue_analytics_config.include_invoiceless_charges

@@ -3,7 +3,7 @@
  */
 import { useActions, useValues } from 'kea'
 
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { LLMTrace, LLMTraceEvent } from '~/queries/schema/schema-general'
 

@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, key, listeners, path, props, selecto
 import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
-import { LemonSelectOption } from '@hanzo/lemon-ui'
+import { SelectOption } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
@@ -213,7 +213,7 @@ export const accessControlLogic = kea<accessControlLogicType>([
 
         accessControlDefaultOptions: [
             (s) => [s.availableLevelsWithNone, s.minimumAccessLevel, (_, props) => props.resource],
-            (availableLevelsWithNone, minimumAccessLevel): LemonSelectOption<string>[] => {
+            (availableLevelsWithNone, minimumAccessLevel): SelectOption<string>[] => {
                 const options = availableLevelsWithNone.map((level) => {
                     const isDisabled = minimumAccessLevel
                         ? availableLevelsWithNone.indexOf(level) < availableLevelsWithNone.indexOf(minimumAccessLevel)

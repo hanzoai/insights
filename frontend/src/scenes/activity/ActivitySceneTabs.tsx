@@ -1,4 +1,4 @@
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tabs } from 'lib/elements/Tabs'
 import { Scene } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
 import { urls } from 'scenes/urls'
@@ -40,5 +40,5 @@ export const activityTabs = [
 ]
 
 export const ActivitySceneTabs = ({ activeKey }: { activeKey: ActivityTab }): JSX.Element => {
-    return <LemonTabs activeKey={activeKey} tabs={activityTabs} sceneInset className="mb-3" />
+    return <Tabs activeKey={activeKey} tabs={activityTabs} sceneInset className="mb-3" />
 }

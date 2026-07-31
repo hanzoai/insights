@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -73,11 +73,11 @@ export const dashboardTemplateEditorLogic = kea<dashboardTemplateEditorLogicType
             {
                 createDashboardTemplate: async (): Promise<DashboardTemplateEditorType | undefined> => {
                     if (!values.dashboardTemplate) {
-                        lemonToast.error('Unable to create dashboard template')
+                        toast.error('Unable to create dashboard template')
                         return
                     }
                     const response = await api.dashboardTemplates.create(values.dashboardTemplate)
-                    lemonToast.success('Dashboard template created')
+                    toast.success('Dashboard template created')
                     return response
                 },
                 getDashboardTemplate: async (id: string): Promise<DashboardTemplateType> => {
@@ -97,15 +97,15 @@ export const dashboardTemplateEditorLogic = kea<dashboardTemplateEditorLogicType
                     } else if (values.dashboardTemplate) {
                         response = await api.dashboardTemplates.update(id, values.dashboardTemplate)
                     } else {
-                        lemonToast.error('Unable to update dashboard template')
+                        toast.error('Unable to update dashboard template')
                         return
                     }
-                    lemonToast.success('Dashboard template updated')
+                    toast.success('Dashboard template updated')
                     return response
                 },
                 deleteDashboardTemplate: async (id: string): Promise<null> => {
                     await api.dashboardTemplates.delete(id)
-                    lemonToast.success('Dashboard template deleted')
+                    toast.success('Dashboard template deleted')
                     return null
                 },
             },
@@ -152,7 +152,7 @@ export const dashboardTemplateEditorLogic = kea<dashboardTemplateEditorLogicType
                     actions.setDashboardTemplate(dashboardTemplate)
                 } catch (error) {
                     console.error('error', error)
-                    lemonToast.error('Unable to parse dashboard template')
+                    toast.error('Unable to parse dashboard template')
                 }
             }
         },

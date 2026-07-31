@@ -2,17 +2,17 @@ import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 
 import {
-    LemonButton,
-    LemonDivider,
-    LemonDropdown,
-    LemonInput,
-    LemonInputPropsText,
-    LemonTextArea,
-} from '@hanzo/lemon-ui'
+    Button,
+    Divider,
+    Dropdown,
+    Input,
+    InputPropsText,
+    TextArea,
+} from '@hanzo/elements'
 
 import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
 
-export interface InlineEditableFieldProps extends Pick<LemonInputPropsText, 'value' | 'onChange'> {
+export interface InlineEditableFieldProps extends Pick<InputPropsText, 'value' | 'onChange'> {
     value?: string
     onChange?: (value: string) => void
     className?: string
@@ -44,14 +44,14 @@ export function InlineEditableField({ value, onChange, className, multiline }: I
     }
 
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             visible={isEditing}
             onVisibilityChange={(visible) => setIsEditing(visible)}
             overlay={
                 <div>
                     {multiline ? (
-                        <LemonTextArea
+                        <TextArea
                             value={editingValue}
                             onChange={(val) => setEditingValue(val)}
                             autoFocus
@@ -59,7 +59,7 @@ export function InlineEditableField({ value, onChange, className, multiline }: I
                             onPressEnter={save}
                         />
                     ) : (
-                        <LemonInput
+                        <Input
                             type="text"
                             value={editingValue}
                             onChange={(val) => setEditingValue(val)}
@@ -69,20 +69,20 @@ export function InlineEditableField({ value, onChange, className, multiline }: I
                             autoWidth
                         />
                     )}
-                    <LemonDivider className="my-1" />
+                    <Divider className="my-1" />
 
                     <div className="flex flex-row gap-2 justify-end">
-                        <LemonButton
+                        <Button
                             size="xsmall"
                             type="secondary"
                             onClick={cancel}
                             sideIcon={<KeyboardShortcut escape />}
                         >
                             Cancel
-                        </LemonButton>
-                        <LemonButton size="xsmall" type="primary" onClick={save} sideIcon={<KeyboardShortcut enter />}>
+                        </Button>
+                        <Button size="xsmall" type="primary" onClick={save} sideIcon={<KeyboardShortcut enter />}>
                             Save
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             }
@@ -98,6 +98,6 @@ export function InlineEditableField({ value, onChange, className, multiline }: I
             >
                 {value}
             </span>
-        </LemonDropdown>
+        </Dropdown>
     )
 }

@@ -25,13 +25,13 @@ import {
     IconWarning,
     IconX,
 } from '@hanzo/icons'
-import { LemonBadge, Spinner } from '@hanzo/lemon-ui'
+import { Badge, Spinner } from '@hanzo/elements'
 
 import { AnimatedLogomark } from 'lib/brand/Logomark'
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
-import { LemonMenu, LemonMenuItem, LemonMenuItems } from 'lib/lemon-ui/LemonMenu'
-import { Link } from 'lib/lemon-ui/Link'
-import { IconMenu } from 'lib/lemon-ui/icons'
+import { Menu, MenuItem, MenuItems } from 'lib/elements/Menu'
+import { Link } from 'lib/elements/Link'
+import { IconMenu } from 'lib/elements/icons'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
 
 import { ActionsToolbarMenu } from '~/toolbar/actions/ActionsToolbarMenu'
@@ -67,7 +67,7 @@ function insightsDebugInfoMenuItem(
     insights: Insights | null,
     loadingSurveys: boolean,
     surveysCount: number
-): LemonMenuItem {
+): MenuItem {
     const isAutocaptureEnabled = insights?.autocapture?.isEnabled
 
     return {
@@ -121,7 +121,7 @@ function insightsDebugInfoMenuItem(
                     <div className="flex justify-between items-center w-full">
                         <div>surveys: </div>
                         <div>
-                            {loadingSurveys ? <Spinner /> : <LemonBadge.Number showZero={true} count={surveysCount} />}
+                            {loadingSurveys ? <Spinner /> : <Badge.Number showZero={true} count={surveysCount} />}
                         </div>
                     </div>
                 ),
@@ -154,7 +154,7 @@ function piiMaskingMenuItem(
     togglePiiMasking: () => void,
     setPiiMaskingColor: (color: string) => void,
     piiWarning: string[] | null
-): LemonMenuItem[] {
+): MenuItem[] {
     return [
         {
             icon: piiMaskingEnabled ? <IconEye /> : <IconHide />,
@@ -197,7 +197,7 @@ function piiMaskingMenuItem(
                   })),
               }
             : undefined,
-    ].filter(Boolean) as LemonMenuItem[]
+    ].filter(Boolean) as MenuItem[]
 }
 
 function MoreMenu(): JSX.Element {
@@ -235,7 +235,7 @@ function MoreMenu(): JSX.Element {
     return (
         <>
             <ScreenshotUploadModal />
-            <LemonMenu
+            <Menu
                 placement="top-end"
                 fallbackPlacements={['bottom-end']}
                 items={
@@ -269,12 +269,12 @@ function MoreMenu(): JSX.Element {
                             },
                         },
                         { icon: <IconX />, label: 'Close toolbar', onClick: startGracefulExit },
-                    ].filter(Boolean) as LemonMenuItems
+                    ].filter(Boolean) as MenuItems
                 }
                 maxContentWidth={true}
             >
                 <ToolbarButton>{isTakingScreenshot ? <Spinner /> : <IconMenu />}</ToolbarButton>
-            </LemonMenu>
+            </Menu>
         </>
     )
 }

@@ -1,7 +1,7 @@
 import { Node } from '@xyflow/react'
 import { useActions, useValues } from 'kea'
 
-import { LemonDivider, LemonInputSelect, LemonLabel, LemonSelect, LemonSwitch } from '@hanzo/lemon-ui'
+import { Divider, InputSelect, Label, Select, Switch } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -160,7 +160,7 @@ export function StepWaitUntilTimeWindowConfiguration({ node }: { node: Node<Wait
                         }
                     />
 
-                    <LemonDivider vertical />
+                    <Divider vertical />
 
                     <TimeConfiguration
                         time={time}
@@ -207,8 +207,8 @@ function DayConfiguration({
 }): JSX.Element {
     return (
         <div className="flex-1 flex flex-col gap-2">
-            <LemonLabel>Days of week</LemonLabel>
-            <LemonSelect
+            <Label>Days of week</Label>
+            <Select
                 value={getDaySelectValue(day)}
                 onChange={onDayChange}
                 options={DATE_OPTIONS}
@@ -216,8 +216,8 @@ function DayConfiguration({
             />
             {isCustomDate && Array.isArray(day) && (
                 <>
-                    <LemonLabel>Custom days</LemonLabel>
-                    <LemonInputSelect
+                    <Label>Custom days</Label>
+                    <InputSelect
                         value={day}
                         onChange={(newDays) => onCustomDaysChange(newDays as WeekdayType[])}
                         options={WEEKDAY_OPTIONS}
@@ -243,8 +243,8 @@ function TimeConfiguration({
 }): JSX.Element {
     return (
         <div className="flex-1 flex flex-col gap-2">
-            <LemonLabel>Time of day</LemonLabel>
-            <LemonSelect
+            <Label>Time of day</Label>
+            <Select
                 value={isCustomTime ? 'custom' : (time as string)}
                 onChange={onTimeChange}
                 options={TIME_OPTIONS}
@@ -253,8 +253,8 @@ function TimeConfiguration({
             {isCustomTime && Array.isArray(time) && (
                 <div className="flex flex-col gap-2">
                     <div>
-                        <LemonLabel>Start time</LemonLabel>
-                        <LemonSelect
+                        <Label>Start time</Label>
+                        <Select
                             value={time[0]}
                             onChange={(value) => onTimeRangeChange(value as string, 0)}
                             options={TIME_RANGE_OPTIONS}
@@ -262,8 +262,8 @@ function TimeConfiguration({
                         />
                     </div>
                     <div>
-                        <LemonLabel>End time</LemonLabel>
-                        <LemonSelect
+                        <Label>End time</Label>
+                        <Select
                             value={time[1]}
                             onChange={(value) => onTimeRangeChange(value as string, 1)}
                             options={TIME_RANGE_OPTIONS}
@@ -300,7 +300,7 @@ function TimezoneConfiguration({
     return (
         <div className="flex flex-col gap-3">
             {showPersonTimezoneOption && (
-                <LemonSwitch
+                <Switch
                     checked={usePersonTimezone ?? false}
                     onChange={onUsePersonTimezoneChange}
                     label="Use person's timezone"
@@ -312,11 +312,11 @@ function TimezoneConfiguration({
 
             {showPersonTimezoneOption && usePersonTimezone ? (
                 <div>
-                    <LemonLabel>Fallback timezone</LemonLabel>
+                    <Label>Fallback timezone</Label>
                     <p className="text-xs text-muted mb-2">
                         Used when the person doesn't have a timezone set (no $geoip_time_zone property)
                     </p>
-                    <LemonInputSelect
+                    <InputSelect
                         mode="single"
                         placeholder="Select a fallback time zone"
                         value={[fallbackTimezone || timezone || currentTeamTimezone || 'UTC']}
@@ -328,8 +328,8 @@ function TimezoneConfiguration({
                 </div>
             ) : (
                 <div>
-                    <LemonLabel>Timezone</LemonLabel>
-                    <LemonInputSelect
+                    <Label>Timezone</Label>
+                    <InputSelect
                         mode="single"
                         placeholder="Select a time zone"
                         value={[timezone || currentTeamTimezone || 'UTC']}

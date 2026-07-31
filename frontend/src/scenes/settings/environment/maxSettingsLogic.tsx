@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
 import { AI_AVAILABLE } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { CoreMemory } from '~/types'
 
@@ -54,12 +54,12 @@ export const maxSettingsLogic = kea<maxSettingsLogicType>([
             updateCoreMemory: async (data: CoreMemoryForm) => {
                 if (!values.coreMemory) {
                     const response = await api.coreMemory.create(data)
-                    lemonToast.success('Insights AI mmory has been created.')
+                    toast.success('Insights AI mmory has been created.')
                     return response
                 }
 
                 const response = await api.coreMemory.update(values.coreMemory.id, data)
-                lemonToast.success('Insights AI memory has been updated.')
+                toast.success('Insights AI memory has been updated.')
                 return response
             },
         },

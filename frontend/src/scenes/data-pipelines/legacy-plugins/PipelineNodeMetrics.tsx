@@ -10,13 +10,13 @@ import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { TZLabel } from 'lib/components/TZLabel'
 import { useChart } from 'lib/hooks/useChart'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Label } from 'lib/elements/Label/Label'
+import { Modal } from 'lib/elements/Modal'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Table } from 'lib/elements/Table'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { humanFriendlyNumber, inStorybookTestRunner, lightenDarkenColor } from 'lib/utils'
 
 import {
@@ -70,7 +70,7 @@ export function PipelineNodeMetrics({ id }: PipelineNodeMetricsProps): JSX.Eleme
 
 function MetricsOverview({ metrics, metricsLoading }: MetricsOverviewProps): JSX.Element {
     if (metricsLoading) {
-        return <LemonSkeleton className="w-20 h-4 mb-2" repeat={4} />
+        return <Skeleton className="w-20 h-4 mb-2" repeat={4} />
     }
 
     return (
@@ -165,7 +165,7 @@ function AppMetricsGraph({ metrics, metricsLoading }: AppMetricsGraphProps): JSX
     })
 
     if (metricsLoading || !metrics) {
-        return <LemonSkeleton className="AppMetricsGraph border rounded p-6" />
+        return <Skeleton className="AppMetricsGraph border rounded p-6" />
     }
 
     return (
@@ -197,7 +197,7 @@ function ErrorsOverview({ id }: { id: number | string }): JSX.Element {
     return (
         <>
             <ErrorDetailsModal id={id} />
-            <LemonTable
+            <Table
                 dataSource={appMetricsResponse?.errors || []}
                 loading={appMetricsResponseLoading}
                 columns={[
@@ -267,7 +267,7 @@ function ErrorDetailsModal({ id }: { id: number | string }): JSX.Element {
     const activeErrorDetails: AppMetricErrorDetail = errorDetails[page]
 
     return (
-        <LemonModal
+        <Modal
             isOpen={!!errorDetailsModalError}
             onClose={closeErrorDetailsModal}
             title={errorDetailsModalError}
@@ -276,18 +276,18 @@ function ErrorDetailsModal({ id }: { id: number | string }): JSX.Element {
             footer={
                 <div className="flex items-center justify-end gap-1 h-">
                     {errorDetailsLoading ? (
-                        <LemonSkeleton className="h-10" />
+                        <Skeleton className="h-10" />
                     ) : (
                         <>
                             <span>
                                 {page + 1} of {errorDetails.length} sample{errorDetails.length > 1 ? 's' : ''}
                             </span>
-                            <LemonButton
+                            <Button
                                 icon={<IconChevronLeft />}
                                 onClick={() => setPage(page - 1)}
                                 disabledReason={page == 0 ? 'First page' : undefined}
                             />
-                            <LemonButton
+                            <Button
                                 icon={<IconChevronRight />}
                                 onClick={() => setPage(page + 1)}
                                 disabledReason={page == errorDetails.length - 1 ? 'Last page' : undefined}
@@ -298,7 +298,7 @@ function ErrorDetailsModal({ id }: { id: number | string }): JSX.Element {
             }
         >
             {!errorDetailsModalError || errorDetailsLoading ? (
-                <LemonSkeleton className="h-10" />
+                <Skeleton className="h-10" />
             ) : (
                 <div className="flex flex-col deprecated-space-y-2 h-[80vh]">
                     <div>
@@ -308,7 +308,7 @@ function ErrorDetailsModal({ id }: { id: number | string }): JSX.Element {
 
                     {activeErrorDetails.error_details.eventCount && (
                         <div>
-                            <LemonLabel>Event Count</LemonLabel>
+                            <Label>Event Count</Label>
                             <div>{activeErrorDetails.error_details.eventCount}</div>
                         </div>
                     )}
@@ -338,7 +338,7 @@ function ErrorDetailsModal({ id }: { id: number | string }): JSX.Element {
                     )}
                 </div>
             )}
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -351,7 +351,7 @@ function CollapsibleSection(props: {
 
     return (
         <div className="bg-primary border rounded">
-            <LemonButton
+            <Button
                 fullWidth
                 onClick={() => setIsExpanded(!isExpanded)}
                 sideIcon={isExpanded ? <IconCollapse /> : <IconExpand />}
@@ -359,7 +359,7 @@ function CollapsibleSection(props: {
                 className="bg-primary"
             >
                 {props.title}
-            </LemonButton>
+            </Button>
             {isExpanded && <div className="bg-surface-primary p-2">{props.children}</div>}
         </div>
     )

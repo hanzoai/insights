@@ -3,24 +3,24 @@ import { useActions, useValues } from 'kea'
 
 import { IconCalendar, IconPin, IconPinFilled } from '@hanzo/icons'
 import {
-    LemonBadge,
-    LemonButton,
-    LemonDivider,
-    LemonInput,
-    LemonSelect,
-    LemonTable,
+    Badge,
+    Button,
+    Divider,
+    Input,
+    Select,
+    Table,
     Link,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { More } from 'lib/elements/Button/More'
+import { TableColumn, TableColumns } from 'lib/elements/Table'
+import { createdByColumn } from 'lib/elements/Table/columnUtils'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { isObject } from 'lib/utils'
 import { urls } from 'scenes/urls'
@@ -35,7 +35,7 @@ import {
 import { SessionRecordingCollectionsEmptyState } from './SessionRecordingCollectionsEmptyState'
 import { PLAYLISTS_PER_PAGE, sessionRecordingCollectionsLogic } from './sessionRecordingCollectionsLogic'
 
-function nameColumn(): LemonTableColumn<SessionRecordingPlaylistType, 'name'> {
+function nameColumn(): TableColumn<SessionRecordingPlaylistType, 'name'> {
     return {
         title: 'Name',
         dataIndex: 'name',
@@ -60,7 +60,7 @@ function nameColumn(): LemonTableColumn<SessionRecordingPlaylistType, 'name'> {
     }
 }
 
-export function countColumn(): LemonTableColumn<SessionRecordingPlaylistType, 'recordings_counts'> {
+export function countColumn(): TableColumn<SessionRecordingPlaylistType, 'recordings_counts'> {
     return {
         dataIndex: 'recordings_counts',
         title: 'Count',
@@ -107,7 +107,7 @@ export function countColumn(): LemonTableColumn<SessionRecordingPlaylistType, 'r
                     <Tooltip title={tooltip}>
                         {hasResults ? (
                             <span className="flex items-center gap-x-1 cursor-help">
-                                <LemonBadge.Number
+                                <Badge.Number
                                     status={unwatchedCount ? 'primary' : 'muted'}
                                     className="text-xs cursor-pointer"
                                     count={totalCount || 0}
@@ -117,7 +117,7 @@ export function countColumn(): LemonTableColumn<SessionRecordingPlaylistType, 'r
                             </span>
                         ) : (
                             <span>
-                                <LemonBadge status="muted" content="?" className="cursor-pointer" />
+                                <Badge status="muted" content="?" className="cursor-pointer" />
                             </span>
                         )}
                     </Tooltip>
@@ -138,7 +138,7 @@ export function SessionRecordingCollections(): JSX.Element {
     )
     const { featureFlags } = useValues(featureFlagLogic)
 
-    const columns: LemonTableColumns<SessionRecordingPlaylistType> = [
+    const columns: TableColumns<SessionRecordingPlaylistType> = [
         {
             width: 0,
             dataIndex: 'pinned',
@@ -152,7 +152,7 @@ export function SessionRecordingCollections(): JSX.Element {
                         resourceType={AccessControlResourceType.SessionRecording}
                         minAccessLevel={AccessControlLevel.Editor}
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             onClick={() => updatePlaylist(short_id, { pinned: !pinned })}
                             icon={pinned ? <IconPinFilled /> : <IconPin />}
@@ -161,10 +161,10 @@ export function SessionRecordingCollections(): JSX.Element {
                 )
             },
         },
-        countColumn() as LemonTableColumn<SessionRecordingPlaylistType, keyof SessionRecordingPlaylistType | undefined>,
-        nameColumn() as LemonTableColumn<SessionRecordingPlaylistType, keyof SessionRecordingPlaylistType | undefined>,
+        countColumn() as TableColumn<SessionRecordingPlaylistType, keyof SessionRecordingPlaylistType | undefined>,
+        nameColumn() as TableColumn<SessionRecordingPlaylistType, keyof SessionRecordingPlaylistType | undefined>,
         {
-            ...(createdByColumn<SessionRecordingPlaylistType>() as LemonTableColumn<
+            ...(createdByColumn<SessionRecordingPlaylistType>() as TableColumn<
                 SessionRecordingPlaylistType,
                 keyof SessionRecordingPlaylistType | undefined
             >),
@@ -201,30 +201,30 @@ export function SessionRecordingCollections(): JSX.Element {
                                     resourceType={AccessControlResourceType.SessionRecording}
                                     minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    <LemonButton
+                                    <Button
                                         onClick={() => duplicatePlaylist(playlist)}
                                         fullWidth
                                         data-attr="duplicate-playlist"
                                         loading={playlistsLoading}
                                     >
                                         Duplicate
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
 
-                                <LemonDivider />
+                                <Divider />
 
                                 <AccessControlAction
                                     resourceType={AccessControlResourceType.SessionRecording}
                                     minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    <LemonButton
+                                    <Button
                                         status="danger"
                                         onClick={() => deletePlaylist(playlist)}
                                         fullWidth
                                         loading={playlistsLoading}
                                     >
                                         Delete collection
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             </>
                         }
@@ -237,7 +237,7 @@ export function SessionRecordingCollections(): JSX.Element {
     return (
         <>
             <div className="flex justify-between gap-2 items-center flex-wrap">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search for collections"
                     onChange={(value) => setSavedPlaylistsFilters({ search: value || undefined })}
@@ -245,7 +245,7 @@ export function SessionRecordingCollections(): JSX.Element {
                 />
                 <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-2">
-                        <LemonButton
+                        <Button
                             data-attr="session-recording-playlist-pinned-filter"
                             active={filters.pinned}
                             size="small"
@@ -256,11 +256,11 @@ export function SessionRecordingCollections(): JSX.Element {
                             icon={filters.pinned ? <IconPinFilled /> : <IconPin />}
                         >
                             Pinned
-                        </LemonButton>
+                        </Button>
 
                         <div className="flex items-center gap-2">
                             <span>Collection type:</span>
-                            <LemonSelect
+                            <Select
                                 data-attr="session-recording-collections-type-select"
                                 value={filters.collectionType}
                                 onSelect={(value) => {
@@ -323,7 +323,7 @@ export function SessionRecordingCollections(): JSX.Element {
             {!playlistsLoading && playlists.count < 1 ? (
                 <SessionRecordingCollectionsEmptyState />
             ) : (
-                <LemonTable
+                <Table
                     loading={playlistsLoading}
                     columns={columns}
                     dataSource={playlists.results}

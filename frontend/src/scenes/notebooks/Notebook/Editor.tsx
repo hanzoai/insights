@@ -9,7 +9,7 @@ import { useActions, useValues } from 'kea'
 import { useThrottledCallback } from 'use-debounce'
 
 import { IconComment } from '@hanzo/icons'
-import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
+import { Button, Divider } from '@hanzo/elements'
 
 import { RichContentEditor } from 'lib/components/RichContentEditor'
 import { RichContentNodeMention } from 'lib/components/RichContentEditor/RichContentNodeMention'
@@ -187,8 +187,8 @@ export function Editor(): JSX.Element {
                 extra={(editor) =>
                     !editor.isActive('comment') ? (
                         <>
-                            <LemonDivider vertical />
-                            <LemonButton
+                            <Divider vertical />
+                            <Button
                                 onClick={() => {
                                     const markId = uuid()
                                     editor.setMark(markId)

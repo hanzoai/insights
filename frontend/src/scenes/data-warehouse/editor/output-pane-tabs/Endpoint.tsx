@@ -2,17 +2,17 @@ import { useActions, useValues } from 'kea'
 
 import { IconCode2 } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInput,
-    LemonSelect,
-    LemonSwitch,
-    LemonTag,
-    LemonTextArea,
+    Button,
+    Input,
+    Select,
+    Switch,
+    Tag,
+    TextArea,
     Link,
-    lemonToast,
-} from '@hanzo/lemon-ui'
+    toast,
+} from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { variablesLogic } from '~/queries/nodes/DataVisualization/Components/Variables/variablesLogic'
 import { NodeKind } from '~/queries/schema/schema-general'
@@ -46,17 +46,17 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
     const handleSubmit = (): void => {
         const sqlQuery = queryInput || ''
         if (!sqlQuery.trim()) {
-            lemonToast.error('You are missing a InsightsQL query.')
+            toast.error('You are missing a InsightsQL query.')
             return
         }
 
         if (isUpdateMode && !selectedEndpointName) {
-            lemonToast.error('You need to select an endpoint to update.')
+            toast.error('You need to select an endpoint to update.')
             return
         }
 
         if (!isUpdateMode && !endpointName) {
-            lemonToast.error('You need to name your endpoint.')
+            toast.error('You need to name your endpoint.')
             return
         }
 
@@ -100,7 +100,7 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
         <div className="overflow-auto" data-attr="sql-editor-endpoint-pane">
             <div className="flex flex-row items-center gap-2">
                 <h3 className="mb-0">Endpoint</h3>
-                <LemonTag type="warning">BETA</LemonTag>
+                <Tag type="warning">BETA</Tag>
             </div>
             <div className="space-y-2">
                 <p className="text-xs">
@@ -113,7 +113,7 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
                 </p>
 
                 <div className="flex items-center gap-2">
-                    <LemonSwitch
+                    <Switch
                         checked={isUpdateMode}
                         onChange={(checked) => {
                             setIsUpdateMode(checked)
@@ -128,8 +128,8 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
                 </div>
 
                 {isUpdateMode ? (
-                    <LemonField.Pure label="Select endpoint">
-                        <LemonSelect
+                    <Field.Pure label="Select endpoint">
+                        <Select
                             value={selectedEndpointName}
                             onChange={(value) => setSelectedEndpointName(value)}
                             options={endpoints.map((endpoint) => ({
@@ -139,32 +139,32 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
                             placeholder="Select an endpoint to update"
                             className="max-w-prose"
                         />
-                    </LemonField.Pure>
+                    </Field.Pure>
                 ) : (
-                    <LemonField.Pure label="Endpoint name">
-                        <LemonInput
+                    <Field.Pure label="Endpoint name">
+                        <Input
                             id={`endpoint-name-${tabId}`}
                             type="text"
                             onChange={setEndpointName}
                             value={endpointName || ''}
                             className="max-w-prose"
                         />
-                    </LemonField.Pure>
+                    </Field.Pure>
                 )}
 
-                <LemonField.Pure label="Endpoint description">
-                    <LemonTextArea
+                <Field.Pure label="Endpoint description">
+                    <TextArea
                         minRows={1}
                         maxRows={3}
                         onChange={setEndpointDescription}
                         value={endpointDescription || ''}
                         className="max-w-prose"
                     />
-                </LemonField.Pure>
+                </Field.Pure>
 
-                <LemonButton type="primary" onClick={handleSubmit} icon={<IconCode2 />} size="medium">
+                <Button type="primary" onClick={handleSubmit} icon={<IconCode2 />} size="medium">
                     {isUpdateMode ? 'Update endpoint' : 'Create endpoint'}
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

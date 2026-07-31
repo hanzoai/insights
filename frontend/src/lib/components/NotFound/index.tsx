@@ -6,12 +6,12 @@ import insights from '@hanzo/insights'
 import { useState } from 'react'
 
 import { IconArrowRight, IconCheckCircle } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, ProfilePicture, SpinnerOverlay, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Checkbox, ProfilePicture, SpinnerOverlay, toast } from '@hanzo/elements'
 
 import { getCookie } from 'lib/api'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { Link } from 'lib/lemon-ui/Link'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { Link } from 'lib/elements/Link'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 import { getAppContext } from 'lib/utils/getAppContext'
@@ -99,14 +99,14 @@ export function NotFound({ object, caption, meta, className }: NotFoundProps): J
             </p>
             {nodeLogic && (
                 <div className="flex justify-center mt-4 w-fit">
-                    <LemonButton type="secondary" status="danger" onClick={nodeLogic.actions.deleteNode}>
+                    <Button type="secondary" status="danger" onClick={nodeLogic.actions.deleteNode}>
                         Remove from Notebook
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
             {object === 'Person' && meta?.urlId && (
                 <div className="flex justify-center mt-4 w-fit">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         tooltip={`View events matching distinct_id=${meta?.urlId}`}
@@ -128,7 +128,7 @@ export function NotFound({ object, caption, meta, className }: NotFoundProps): J
                         }
                     >
                         View events
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </div>
@@ -218,7 +218,7 @@ export function LogInAsSuggestions({ suggestedUsers }: { suggestedUsers: UserBas
             setSuccessfulUserId(user.id)
             window.location.reload()
         } catch {
-            lemonToast.error(`Failed to log in as ${user.first_name}`)
+            toast.error(`Failed to log in as ${user.first_name}`)
             setIsLoginInProgress(false) // Only set to false if we aren't about to reload the page
         }
     }
@@ -226,7 +226,7 @@ export function LogInAsSuggestions({ suggestedUsers }: { suggestedUsers: UserBas
     return (
         <>
             <ScrollableShadows direction="vertical" className="bg-surface-primary border rounded mt-1 max-h-64 *:p-1">
-                <LemonMenuOverlay
+                <MenuOverlay
                     items={suggestedUsers.map((user) => ({
                         icon: <ProfilePicture user={user} size="md" />,
                         label: `${user.first_name} ${user.last_name} (${user.email})`,
@@ -254,7 +254,7 @@ export function LogInAsSuggestions({ suggestedUsers }: { suggestedUsers: UserBas
                 title={`Log in as ${selectedUser?.first_name} ${selectedUser?.last_name}`}
                 confirmText="Log in"
             >
-                <LemonCheckbox checked={readOnly} onChange={setReadOnly} label="Read-only mode (recommended)" />
+                <Checkbox checked={readOnly} onChange={setReadOnly} label="Read-only mode (recommended)" />
             </ImpersonationReasonModal>
         </>
     )

@@ -7,8 +7,8 @@ import React from 'react'
 import { IconPlus } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Button } from 'lib/elements/Button'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { urls } from 'scenes/urls'
 
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
@@ -21,8 +21,8 @@ function SkeletonCard({ children, active }: { children: React.ReactNode; active:
     return (
         <div className="border rounded p-10 h-full deprecated-space-y-4 flex-1 flex flex-col justify-between">
             <div className="deprecated-space-y-4">
-                <LemonSkeleton className="w-1/3 h-4" active={active} />
-                <LemonSkeleton className="w-1/2 h-4" active={active} />
+                <Skeleton className="w-1/3 h-4" active={active} />
+                <Skeleton className="w-1/2 h-4" active={active} />
             </div>
             {children}
         </div>
@@ -40,7 +40,7 @@ function SkeletonCardOne({ active }: { active: boolean }): JSX.Element {
                     >
                         {/* eslint-disable-next-line react/forbid-dom-props */}
                         <div style={{ height: `${height}%` }}>
-                            <LemonSkeleton active={active} className="h-full w-full" />
+                            <Skeleton active={active} className="h-full w-full" />
                         </div>
                     </div>
                 ))}
@@ -65,7 +65,7 @@ function SkeletonBarsRaw({ active }: { active: boolean }): JSX.Element {
                                 height: `${height}%`,
                             }}
                         >
-                            <LemonSkeleton active={active} className="h-full w-full" />
+                            <Skeleton active={active} className="h-full w-full" />
                         </div>
                     )
                 })}
@@ -94,7 +94,7 @@ export function EmptyDashboardComponent({ loading, canEdit }: { loading: boolean
                     <h3 className="l3">Dashboard empty</h3>
                     <p>This dashboard sure would look better with some graphs!</p>
                     <div className="mt-4 text-center">
-                        <LemonButton
+                        <Button
                             data-attr="dashboard-add-graph-header"
                             onClick={showAddInsightToDashboardModal}
                             type="primary"
@@ -113,7 +113,7 @@ export function EmptyDashboardComponent({ loading, canEdit }: { loading: boolean
                                                       minAccessLevel={AccessControlLevel.Editor}
                                                       userAccessLevel={dashboard.user_access_level}
                                                   >
-                                                      <LemonButton
+                                                      <Button
                                                           fullWidth
                                                           onClick={() => {
                                                               push(urls.dashboardTextTile(dashboard.id, 'new'))
@@ -121,7 +121,7 @@ export function EmptyDashboardComponent({ loading, canEdit }: { loading: boolean
                                                           data-attr="add-text-tile-to-dashboard"
                                                       >
                                                           Add text card
-                                                      </LemonButton>
+                                                      </Button>
                                                   </AccessControlAction>
                                               ),
                                           },
@@ -132,7 +132,7 @@ export function EmptyDashboardComponent({ loading, canEdit }: { loading: boolean
                             }
                         >
                             Add insight
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             )}

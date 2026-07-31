@@ -1,7 +1,7 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton, LemonTable, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Button, Skeleton, Table, Tag, Link } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { urls } from 'scenes/urls'
@@ -18,9 +18,9 @@ export function ClustersTabContent(): JSX.Element {
     if (clustersLoading) {
         return (
             <div className="py-4 space-y-3">
-                <LemonSkeleton className="h-8 w-full" />
-                <LemonSkeleton className="h-8 w-full" />
-                <LemonSkeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
             </div>
         )
     }
@@ -42,7 +42,7 @@ export function ClustersTabContent(): JSX.Element {
         <div className="py-4">
             <div className="flex justify-between items-center mb-4">
                 <h4 className="font-semibold m-0">Clusters containing this trace</h4>
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     icon={<IconRefresh />}
@@ -50,9 +50,9 @@ export function ClustersTabContent(): JSX.Element {
                     loading={clustersLoading}
                 >
                     Refresh
-                </LemonButton>
+                </Button>
             </div>
-            <LemonTable
+            <Table
                 dataSource={clusters}
                 columns={[
                     {
@@ -64,9 +64,9 @@ export function ClustersTabContent(): JSX.Element {
                                     {cluster.clusterTitle}
                                 </Link>
                                 {cluster.isOutlier && (
-                                    <LemonTag type="caution" size="small">
+                                    <Tag type="caution" size="small">
                                         Outlier
-                                    </LemonTag>
+                                    </Tag>
                                 )}
                             </div>
                         ),

@@ -5,7 +5,7 @@ import { actionToUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import isEqual from 'lodash.isequal'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -475,7 +475,7 @@ export const productTourLogic = kea<productTourLogicType>([
                 values.productTourFormAllErrors._form ||
                 values.productTourFormAllErrors.name ||
                 'Failed to save product tour'
-            lemonToast.error(errorMessage)
+            toast.error(errorMessage)
         },
         publishDraft: async () => {
             if (!values.productTour) {
@@ -484,12 +484,12 @@ export const productTourLogic = kea<productTourLogicType>([
             actions.setDraftActionInProgress('publish')
             try {
                 await api.productTours.publishDraft(values.productTour.id, buildDraftPayload(values.productTourForm))
-                lemonToast.success('Product tour saved')
+                toast.success('Product tour saved')
                 actions.editingProductTour(false)
                 actions.loadProductTour()
                 actions.loadProductTours()
             } catch (e: any) {
-                lemonToast.error(e.detail || 'Failed to save product tour')
+                toast.error(e.detail || 'Failed to save product tour')
             } finally {
                 actions.setDraftActionInProgress(null)
             }
@@ -506,7 +506,7 @@ export const productTourLogic = kea<productTourLogicType>([
                 }
                 actions.editingProductTour(false)
             } catch (e: any) {
-                lemonToast.error(e.detail || 'Failed to discard draft')
+                toast.error(e.detail || 'Failed to discard draft')
             } finally {
                 actions.setDraftActionInProgress(null)
             }
@@ -516,7 +516,7 @@ export const productTourLogic = kea<productTourLogicType>([
                 await api.productTours.update(values.productTour.id, {
                     start_date: new Date().toISOString(),
                 })
-                lemonToast.success('Product tour launched')
+                toast.success('Product tour launched')
                 actions.loadProductTour()
                 actions.loadProductTours()
             }
@@ -526,7 +526,7 @@ export const productTourLogic = kea<productTourLogicType>([
                 await api.productTours.update(values.productTour.id, {
                     end_date: new Date().toISOString(),
                 })
-                lemonToast.success('Product tour stopped')
+                toast.success('Product tour stopped')
                 actions.loadProductTour()
                 actions.loadProductTours()
             }
@@ -536,7 +536,7 @@ export const productTourLogic = kea<productTourLogicType>([
                 await api.productTours.update(values.productTour.id, {
                     end_date: null,
                 })
-                lemonToast.success('Product tour resumed')
+                toast.success('Product tour resumed')
                 actions.loadProductTour()
                 actions.loadProductTours()
             }

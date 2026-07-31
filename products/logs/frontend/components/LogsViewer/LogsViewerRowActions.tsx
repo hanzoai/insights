@@ -2,9 +2,9 @@ import { useActions } from 'kea'
 
 import { IconCopy } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { ParsedLogMessage } from 'products/logs/frontend/types'
@@ -22,22 +22,22 @@ export function LogsViewerRowActions({ log }: LogsViewerRowActionsProps): JSX.El
         <More
             overlay={
                 <>
-                    <LemonButton
+                    <Button
                         onClick={() => copyToClipboard(log.body, 'log message')}
                         fullWidth
                         sideIcon={<IconCopy />}
                         data-attr="logs-viewer-copy-message"
                     >
                         Copy log message
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         onClick={() => copyLinkToLog(log.uuid)}
                         fullWidth
                         sideIcon={<IconLink />}
                         data-attr="logs-viewer-copy-link"
                     >
                         Copy link to log
-                    </LemonButton>
+                    </Button>
                 </>
             }
         />

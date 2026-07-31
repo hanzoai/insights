@@ -4,12 +4,12 @@ import { useValues } from 'kea'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TZLabel } from 'lib/components/TZLabel'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { liveEventsLogic } from 'scenes/activity/live/liveEventsLogic'
 
 import type { LiveEvent } from '~/types'
 
-const columns: LemonTableColumns<LiveEvent> = [
+const columns: TableColumns<LiveEvent> = [
     {
         title: 'Event',
         key: 'event',
@@ -48,7 +48,7 @@ export function OnboardingLiveEvents(): JSX.Element | null {
     }
 
     return (
-        <LemonTable
+        <Table
             columns={columns}
             data-attr="onboarding-live-events-table"
             rowKey="uuid"

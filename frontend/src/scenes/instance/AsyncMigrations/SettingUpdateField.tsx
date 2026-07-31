@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Divider, Input } from '@hanzo/elements'
 
 import { InstanceSetting } from '~/types'
 
@@ -18,19 +18,19 @@ export function SettingUpdateField({ setting }: { setting: InstanceSetting }): J
             <p>{setting.description}</p>
             <div className="flex deprecated-space-x-2">
                 <div className="w-1/3">
-                    <LemonInput value={inputValue} onChange={setInputValue} />
+                    <Input value={inputValue} onChange={setInputValue} />
                 </div>
                 <div>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         disabledReason={String(setting.value) === inputValue && 'Edit the value to save it'}
                         onClick={() => updateSetting(setting.key, inputValue)}
                     >
                         Update
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
-            <LemonDivider />
+            <Divider />
         </div>
     )
 }

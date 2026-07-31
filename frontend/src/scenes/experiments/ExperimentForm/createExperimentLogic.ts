@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { featureFlagsLogic } from 'scenes/feature-flags/featureFlagsLogic'
@@ -329,13 +329,13 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                         name: name ?? '',
                     })
 
-                    lemonToast.success('Metric added successfully!')
+                    toast.success('Metric added successfully!')
 
                     return
                 }
             } catch (error) {
                 console.error('Error parsing metric from URL', error)
-                lemonToast.error('Error parsing metric from URL')
+                toast.error('Error parsing metric from URL')
                 // Continue to draft fallback
             }
 
@@ -378,7 +378,7 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
 
             // Check if async validation is still loading
             if (values.featureFlagKeyValidationLoading) {
-                lemonToast.error('Please wait for validation to complete')
+                toast.error('Please wait for validation to complete')
                 actions.saveExperimentFailure()
                 return
             }
@@ -403,9 +403,9 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                     mode: values.mode,
                 })
                 if (validation.hasErrors) {
-                    lemonToast.error('Please fix variants configuration')
+                    toast.error('Please fix variants configuration')
                 } else {
-                    lemonToast.error('Experiment is not valid')
+                    toast.error('Experiment is not valid')
                 }
 
                 actions.saveExperimentFailure()
@@ -480,7 +480,7 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                     if (isEditMode) {
                         // Update flow
                         actions.reportExperimentUpdated(response)
-                        lemonToast.success('Experiment updated successfully!')
+                        toast.success('Experiment updated successfully!')
                     } else {
                         // Create flow
                         actions.reportExperimentCreated(response)
@@ -490,7 +490,7 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                         })
                         actions.createExperimentSuccess()
                         globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.CreateExperiment)
-                        lemonToast.success('Experiment created successfully!')
+                        toast.success('Experiment created successfully!')
                         // Don't reset - we just set the fresh data above
                     }
 
@@ -517,7 +517,7 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                     }
                 }
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to save experiment')
+                toast.error(error.detail || 'Failed to save experiment')
                 actions.saveExperimentFailure()
             }
         },

@@ -2,7 +2,7 @@ import { type PublicKeyCredentialDescriptorJSON, startAuthentication, startRegis
 import { actions, connect, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { twoFactorLogic } from 'scenes/authentication/twoFactorLogic'
@@ -125,12 +125,12 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
                 },
                 deletePasskey: async ({ id }) => {
                     await api.delete(`api/webauthn/credentials/${id}/`)
-                    lemonToast.success('Passkey deleted')
+                    toast.success('Passkey deleted')
                     return values.passkeys.filter((p: PasskeyCredential) => p.id !== id)
                 },
                 renamePasskey: async ({ id, label }) => {
                     const updated = await api.update<PasskeyCredential>(`api/webauthn/credentials/${id}/`, { label })
-                    lemonToast.success('Passkey renamed')
+                    toast.success('Passkey renamed')
                     return values.passkeys.map((p: PasskeyCredential) => (p.id === id ? updated : p))
                 },
                 verifyPasskey: async ({ id }) => {
@@ -157,7 +157,7 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
                             assertion
                         )
 
-                        lemonToast.success('Passkey verified successfully!')
+                        toast.success('Passkey verified successfully!')
                         return values.passkeys.map((p: PasskeyCredential) => (p.id === id ? updated : p))
                     } catch (e: any) {
                         actions.setError(getPasskeyErrorMessage(e, 'Failed to verify passkey. Please try again.'))
@@ -223,7 +223,7 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
                         await api.create(`api/webauthn/credentials/${credentialId}/verify_complete`, assertion)
 
                         actions.setRegistrationStep('complete')
-                        lemonToast.success('Passkey added successfully!')
+                        toast.success('Passkey added successfully!')
                         actions.loadPasskeys()
                         actions.loadUser()
                         actions.loadStatus()

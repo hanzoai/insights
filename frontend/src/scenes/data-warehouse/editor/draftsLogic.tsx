@@ -2,7 +2,7 @@ import { actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { ApiError, PaginatedResponse } from 'lib/api'
 
@@ -86,7 +86,7 @@ export const draftsLogic = kea<draftsLogicType>([
                     saved_query_id: viewId,
                     edited_history_id: tab.view?.latest_history_id,
                 })
-                lemonToast.success('Draft saved')
+                toast.success('Draft saved')
 
                 const newDrafts = [...values.drafts, draft]
                 actions.setDrafts(newDrafts)
@@ -94,7 +94,7 @@ export const draftsLogic = kea<draftsLogicType>([
             } catch (e) {
                 const apiError = e as ApiError
                 if (apiError) {
-                    lemonToast.error(`Draft save failed: ${apiError.message}`)
+                    toast.error(`Draft save failed: ${apiError.message}`)
                 }
                 insights.captureException(e)
             }
@@ -102,13 +102,13 @@ export const draftsLogic = kea<draftsLogicType>([
         updateDraft: async ({ draft }) => {
             try {
                 const updatedDraft = await api.dataWarehouseSavedQueryDrafts.update(draft.id, draft)
-                lemonToast.success('Draft updated')
+                toast.success('Draft updated')
                 const newDrafts = values.drafts.map((d) => (d.id === draft.id ? updatedDraft : d))
                 actions.setDrafts(newDrafts)
             } catch (e) {
                 const apiError = e as ApiError
                 if (apiError) {
-                    lemonToast.error(`Draft update failed: ${apiError.message}`)
+                    toast.error(`Draft update failed: ${apiError.message}`)
                 }
                 insights.captureException(e)
             }
@@ -116,7 +116,7 @@ export const draftsLogic = kea<draftsLogicType>([
         deleteDraft: async ({ draftId, viewName }) => {
             try {
                 await api.dataWarehouseSavedQueryDrafts.delete(draftId)
-                lemonToast.success('Draft deleted')
+                toast.success('Draft deleted')
 
                 const newDrafts = values.drafts.filter((draft) => draft.id !== draftId)
                 actions.setDrafts(newDrafts)
@@ -124,7 +124,7 @@ export const draftsLogic = kea<draftsLogicType>([
             } catch (e) {
                 const apiError = e as ApiError
                 if (apiError) {
-                    lemonToast.error(`Draft delete failed: ${apiError.message}`)
+                    toast.error(`Draft delete failed: ${apiError.message}`)
                 }
                 insights.captureException(e)
             }
@@ -139,13 +139,13 @@ export const draftsLogic = kea<draftsLogicType>([
                     const updatedDraft = await api.dataWarehouseSavedQueryDrafts.update(draftId, {
                         query,
                     })
-                    lemonToast.success('Draft updated')
+                    toast.success('Draft updated')
                     const newDrafts = values.drafts.map((d) => (d.id === draftId ? updatedDraft : d))
                     actions.setDrafts(newDrafts)
                 } catch (e) {
                     const apiError = e as ApiError
                     if (apiError) {
-                        lemonToast.error(`Draft update failed: ${apiError.message}`)
+                        toast.error(`Draft update failed: ${apiError.message}`)
                     }
                     insights.captureException(e)
                 }

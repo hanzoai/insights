@@ -4,7 +4,7 @@ import './TileFiltersOverride.scss'
 import { useActions, useValues } from 'kea'
 
 import { IconCalendar } from '@hanzo/icons'
-import '@hanzo/lemon-ui'
+import '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

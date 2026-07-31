@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 
 import { playerMetaLogic } from '../player-meta/playerMetaLogic'
@@ -15,7 +15,7 @@ export function ResolutionView(): JSX.Element {
     const { resolutionDisplay, scaleDisplay, loading } = useValues(playerMetaLogic(logicProps))
 
     return loading ? (
-        <LemonSkeleton className="w-1/3 h-4" />
+        <Skeleton className="w-1/3 h-4" />
     ) : (
         <Tooltip
             placement="bottom"

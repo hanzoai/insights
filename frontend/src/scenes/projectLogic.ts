@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 
 import api, { ApiConfig } from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { identifierToHuman, isUserLoggedIn } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { getAppContext } from 'lib/utils/getAppContext'
@@ -81,7 +81,7 @@ export const projectLogic = kea<projectLogicType>([
                         const message = `${
                             updatedAttribute ? identifierToHuman(updatedAttribute) : 'Project'
                         } updated successfully!`
-                        lemonToast.success(message)
+                        toast.success(message)
                     }
 
                     return patchedProject
@@ -90,7 +90,7 @@ export const projectLogic = kea<projectLogicType>([
                     try {
                         return await api.create('api/projects/', { name })
                     } catch {
-                        lemonToast.error('Failed to create project')
+                        toast.error('Failed to create project')
                         return values.currentProject
                     }
                 },
@@ -133,12 +133,12 @@ export const projectLogic = kea<projectLogicType>([
                 await api.delete(`api/projects/${project.id}`)
                 actions.deleteProjectSuccess()
             } catch {
-                lemonToast.error('Failed to delete project. Please try again.')
+                toast.error('Failed to delete project. Please try again.')
                 actions.deleteProjectFailure()
             }
         },
         deleteProjectSuccess: () => {
-            lemonToast.success('Project deletion started. You will receive an email when complete.')
+            toast.success('Project deletion started. You will receive an email when complete.')
             // Can't stay on current page since project is being deleted
             window.location.href = '/'
         },
@@ -149,7 +149,7 @@ export const projectLogic = kea<projectLogicType>([
         },
 
         moveProjectSuccess: () => {
-            lemonToast.success('Project has been moved. Redirecting...')
+            toast.success('Project has been moved. Redirecting...')
             window.location.reload()
         },
     })),

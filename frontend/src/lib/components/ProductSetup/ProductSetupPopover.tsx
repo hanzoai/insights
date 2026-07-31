@@ -4,12 +4,12 @@ import { router } from 'kea-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { IconCheck, IconExternal, IconLock, IconTarget } from '@hanzo/icons'
-import { LemonButton, LemonSelect, Link } from '@hanzo/lemon-ui'
+import { Button, Select, Link } from '@hanzo/elements'
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { SetupTaskId } from 'lib/components/ProductSetup'
-import { Popover } from 'lib/lemon-ui/Popover'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Popover } from 'lib/elements/Popover'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { addProductIntent } from 'lib/utils/product-intents'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -279,13 +279,13 @@ export function ProductSetupPopover({
                                                 onHover={handleTaskHover}
                                                 actionButton={
                                                     exploreTasks.some((t) => !t.completed && !t.skipped) ? (
-                                                        <LemonButton
+                                                        <Button
                                                             type="tertiary"
                                                             size="xsmall"
                                                             onClick={handleSkipAllExploreTasks}
                                                         >
                                                             Skip all
-                                                        </LemonButton>
+                                                        </Button>
                                                     ) : undefined
                                                 }
                                             />
@@ -371,7 +371,7 @@ function PopoverHeader({
                 <IconTarget className="text-muted w-4 h-4 flex-shrink-0" />
                 <span className="font-semibold text-sm">Quick start</span>
                 {!isProductSelectionLocked && (
-                    <LemonSelect
+                    <Select
                         size="xsmall"
                         value={selectedProduct}
                         onChange={(value) => value && onSelectProduct(value)}
@@ -508,13 +508,13 @@ function PopoverFooter({ isDismissed, onMinimize, onRestore, selectedProduct }: 
     return (
         <div className="px-3 py-2 border-t border-border flex items-center justify-between">
             {isDismissed ? (
-                <LemonButton type="tertiary" size="xsmall" onClick={onRestore}>
+                <Button type="tertiary" size="xsmall" onClick={onRestore}>
                     Restore
-                </LemonButton>
+                </Button>
             ) : (
-                <LemonButton type="tertiary" size="xsmall" onClick={onMinimize}>
+                <Button type="tertiary" size="xsmall" onClick={onMinimize}>
                     Minimize
-                </LemonButton>
+                </Button>
             )}
             <Link
                 to={`https://hanzo.ai/docs/${selectedProduct.replace(/_/g, '-')}`}
@@ -754,14 +754,14 @@ function TaskActions({
     if (isSkipped) {
         return (
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                <LemonButton
+                <Button
                     type="tertiary"
                     size="xsmall"
                     onClick={(e) => onUnskip(e, task.id)}
                     tooltip="Restore this task"
                 >
                     Restore
-                </LemonButton>
+                </Button>
             </div>
         )
     }
@@ -769,14 +769,14 @@ function TaskActions({
     if (isCompleted && onUnmarkComplete) {
         return (
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                <LemonButton
+                <Button
                     type="tertiary"
                     size="xsmall"
                     onClick={(e) => onUnmarkComplete(e, task.id)}
                     tooltip="Mark as incomplete"
                 >
                     Undo
-                </LemonButton>
+                </Button>
             </div>
         )
     }
@@ -785,23 +785,23 @@ function TaskActions({
         return (
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                 {onMarkComplete && (
-                    <LemonButton
+                    <Button
                         type="tertiary"
                         size="xsmall"
                         onClick={(e) => onMarkComplete(e, task.id)}
                         tooltip="Mark as complete"
                     >
                         <IconCheck className="w-3 h-3" />
-                    </LemonButton>
+                    </Button>
                 )}
-                <LemonButton
+                <Button
                     type="tertiary"
                     size="xsmall"
                     onClick={(e) => onSkip(e, task.id)}
                     tooltip={task.skipWarning || 'Skip this task'}
                 >
                     Skip
-                </LemonButton>
+                </Button>
                 {task.docsUrl && <IconExternal className="w-3.5 h-3.5 text-muted" />}
             </div>
         )

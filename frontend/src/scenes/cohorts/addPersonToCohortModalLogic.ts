@@ -2,7 +2,7 @@ import { actions, kea, key, listeners, path, props, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
 import api, { PaginatedResponse } from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { ActorsQuery, NodeKind } from '~/queries/schema/schema-general'
@@ -106,7 +106,7 @@ export const addPersonToCohortModalLogic = kea<addPersonToCohortModalLogicType>(
                 const response = await api.cohorts.addPersonsToStaticCohort(cohortId, ids)
                 await actions.loadCohortPersons()
                 if (response) {
-                    lemonToast.success('Users added to cohort')
+                    toast.success('Users added to cohort')
                     const mountedCohortEditLogic = cohortEditLogic.findMounted({ id: cohortId, tabId: props.tabId })
                     await mountedCohortEditLogic?.actions.updateCohortCount()
 
@@ -118,7 +118,7 @@ export const addPersonToCohortModalLogic = kea<addPersonToCohortModalLogicType>(
                 actions.hideAddPersonToCohortModal()
             } catch (error) {
                 console.error('Failed to add person to cohort:', error)
-                lemonToast.error('Unable to add person to cohort')
+                toast.error('Unable to add person to cohort')
             } finally {
                 actions.setCohortUpdating(false)
             }

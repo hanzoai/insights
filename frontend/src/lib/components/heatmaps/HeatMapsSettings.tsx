@@ -5,11 +5,11 @@ import { IconInfo } from '@hanzo/icons'
 
 import { HEATMAP_COLOR_PALETTE_OPTIONS } from 'lib/components/heatmaps/heatmapDataLogic'
 import { HeatmapFilters, HeatmapFixedPositionMode } from 'lib/components/heatmaps/types'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
-import { LemonSegmentedButton } from 'lib/lemon-ui/LemonSegmentedButton'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
+import { Button } from 'lib/elements/Button'
+import { Label } from 'lib/elements/Label'
+import { SegmentedButton } from 'lib/elements/SegmentedButton'
+import { Select } from 'lib/elements/Select'
+import { Slider } from 'lib/elements/Slider'
 
 import { heatmapToolbarMenuLogic } from '~/toolbar/elements/heatmapToolbarMenuLogic'
 
@@ -46,11 +46,11 @@ export const SectionSetting = ({
     return (
         <div className="deprecated-space-y-2 mb-2">
             <div className="flex items-center gap-2">
-                <LemonLabel className="flex-1">
+                <Label className="flex-1">
                     <span>{title}</span>
 
                     {info && (
-                        <LemonButton
+                        <Button
                             icon={<IconInfo />}
                             size="xsmall"
                             active={showInfo}
@@ -58,7 +58,7 @@ export const SectionSetting = ({
                             noPadding
                         />
                     )}
-                </LemonLabel>
+                </Label>
             </div>
 
             {showInfo ? <div className="text-sm">{info}</div> : null}
@@ -103,7 +103,7 @@ export const HeatmapsSettings = ({
                 }
             >
                 <div className="flex gap-2 justify-between items-center">
-                    <LemonSelect
+                    <Select
                         onChange={(e) => patchHeatmapFilters?.({ type: e })}
                         value={heatmapFilters?.type ?? undefined}
                         options={[
@@ -145,7 +145,7 @@ export const HeatmapsSettings = ({
                 }
             >
                 <div className="flex gap-2 justify-between items-center">
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         onChange={(e) => patchHeatmapFilters?.({ aggregation: e })}
                         value={heatmapFilters?.aggregation ?? 'total_count'}
                         options={[
@@ -178,7 +178,7 @@ export const HeatmapsSettings = ({
                 }
             >
                 <div className="flex gap-2 justify-between items-center">
-                    <LemonSlider
+                    <Slider
                         className="flex-1"
                         min={0}
                         max={1}
@@ -195,7 +195,7 @@ export const HeatmapsSettings = ({
             </SectionSetting>
 
             <SectionSetting title="Color palette">
-                <LemonSelect
+                <Select
                     size="small"
                     options={HEATMAP_COLOR_PALETTE_OPTIONS}
                     value={heatmapColorPalette}
@@ -216,7 +216,7 @@ export const HeatmapsSettings = ({
                         </>
                     }
                 >
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         onChange={setHeatmapFixedPositionMode}
                         value={heatmapFixedPositionMode}
                         options={[

@@ -13,7 +13,7 @@ import {
     calculateViewportRange,
 } from 'lib/components/IframedToolbarBrowser/utils'
 import { CommonFilters, HeatmapFixedPositionMode } from 'lib/components/heatmaps/types'
-import { LemonBannerProps } from 'lib/lemon-ui/LemonBanner'
+import { BannerProps } from 'lib/elements/Banner'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { ToolbarUserIntent } from '~/types'
@@ -28,7 +28,7 @@ export type IframedToolbarBrowserLogicProps = {
 }
 
 export interface IFrameBanner {
-    level: LemonBannerProps['type']
+    level: BannerProps['type']
     message: string | JSX.Element
 }
 

@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonInput, LemonLabel, LemonTabs, LemonTag } from '@hanzo/lemon-ui'
+import { Input, Label, Tabs, Tag } from '@hanzo/elements'
 
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
 import { EXPERIMENT_DEFAULT_DURATION } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 import { teamLogic } from 'scenes/teamLogic'
@@ -47,7 +47,7 @@ export function TrendsMetricForm({ isSecondary = false }: { isSecondary?: boolea
 
     return (
         <>
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 onChange={(newKey) => setActiveTab(newKey)}
                 tabs={[
@@ -57,8 +57,8 @@ export function TrendsMetricForm({ isSecondary = false }: { isSecondary?: boolea
                         content: (
                             <>
                                 <div className="mb-4">
-                                    <LemonLabel>Name (optional)</LemonLabel>
-                                    <LemonInput
+                                    <Label>Name (optional)</Label>
+                                    <Input
                                         value={currentMetric.name}
                                         onChange={(newName) => {
                                             if (!currentMetric.uuid) {
@@ -129,10 +129,10 @@ export function TrendsMetricForm({ isSecondary = false }: { isSecondary?: boolea
                                     />
                                 </div>
                                 {isExperimentRunning && (
-                                    <LemonBanner type="info" className="mt-3 mb-3">
+                                    <Banner type="info" className="mt-3 mb-3">
                                         Preview insights are generated based on {EXPERIMENT_DEFAULT_DURATION} days of
                                         data. This can cause a mismatch between the preview and the actual results.
-                                    </LemonBanner>
+                                    </Banner>
                                 )}
                                 <div className="mt-4">
                                     <Query
@@ -160,7 +160,7 @@ export function TrendsMetricForm({ isSecondary = false }: { isSecondary?: boolea
                                         description={
                                             <>
                                                 Uses the number of unique users who trigger the{' '}
-                                                <LemonTag>$feature_flag_called</LemonTag> event as your exposure count.
+                                                <Tag>$feature_flag_called</Tag> event as your exposure count.
                                                 This is the recommended setting for most experiments, as it accurately
                                                 tracks variant exposure.
                                             </>
@@ -283,11 +283,11 @@ export function TrendsMetricForm({ isSecondary = false }: { isSecondary?: boolea
                                             />
                                         </div>
                                         {isExperimentRunning && (
-                                            <LemonBanner type="info" className="mt-3 mb-3">
+                                            <Banner type="info" className="mt-3 mb-3">
                                                 Preview insights are generated based on {EXPERIMENT_DEFAULT_DURATION}{' '}
                                                 days of data. This can cause a mismatch between the preview and the
                                                 actual results.
-                                            </LemonBanner>
+                                            </Banner>
                                         )}
                                         <div className="mt-4">
                                             <Query

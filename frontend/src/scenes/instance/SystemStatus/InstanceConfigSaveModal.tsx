@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 import { pluralize } from 'lib/utils'
 
 import { SystemStatusRow } from '~/types'
@@ -66,7 +66,7 @@ export function InstanceConfigSaveModal({ onClose, isOpen }: { onClose: () => vo
     const changeNoun = Object.keys(instanceConfigEditingState).length === 1 ? 'change' : 'changes'
 
     return (
-        <LemonModal
+        <Modal
             title={`Confirm ${changeNoun} to instance configuration`}
             isOpen={isOpen}
             closable={!loading}
@@ -74,34 +74,34 @@ export function InstanceConfigSaveModal({ onClose, isOpen }: { onClose: () => vo
             width={576}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={onClose}
                         disabledReason={loading ? 'Saving in progress' : undefined}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="secondary" status="danger" loading={loading} onClick={saveInstanceConfig}>
+                    </Button>
+                    <Button type="secondary" status="danger" loading={loading} onClick={saveInstanceConfig}>
                         Apply {changeNoun}
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="deprecated-space-y-2">
                 {isChangingEnabledEmailSettings && (
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         As you are changing email settings and {isEnablingEmail ? 'enabling email' : 'email is enabled'}
                         , we'll attempt to send a test email so you can verify everything works.
-                    </LemonBanner>
+                    </Banner>
                 )}
                 {Object.keys(instanceConfigEditingState).includes('RECORDINGS_PERFORMANCE_EVENTS_TTL_WEEKS') && (
-                    <LemonBanner type="warning">
+                    <Banner type="warning">
                         <>
                             Changing your performance events TTL requires Datastore to have enough free space to
                             perform the operation (even when reducing this value). In addition, please mind that
                             removing old recordings will be removed asynchronously, not immediately.
                         </>
-                    </LemonBanner>
+                    </Banner>
                 )}
                 <div>The following {changeNoun} will be immediately applied to your instance.</div>
                 {Object.keys(instanceConfigEditingState).map((key) => (
@@ -119,6 +119,6 @@ export function InstanceConfigSaveModal({ onClose, isOpen }: { onClose: () => vo
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

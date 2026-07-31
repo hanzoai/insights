@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useMemo, useRef, useState } from 'react'
 
-import { Popover } from '@hanzo/lemon-ui'
+import { Popover } from '@hanzo/elements'
 
 import { ScaleOptions, TooltipModel } from 'lib/Chart'
 import { getColorVar } from 'lib/colors'
@@ -11,7 +11,7 @@ import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { humanFriendlyNumber } from 'lib/utils'
 import { InsightTooltip } from 'scenes/insights/InsightTooltip/InsightTooltip'
 
-import { LemonSkeleton } from '../lemon-ui/LemonSkeleton'
+import { Skeleton } from '../elements/Skeleton'
 
 export interface SparklineTimeSeries {
     name: string
@@ -359,6 +359,6 @@ export function Sparkline({
             </>
         </div>
     ) : (
-        <LemonSkeleton className={finalClassName} />
+        <Skeleton className={finalClassName} />
     )
 }

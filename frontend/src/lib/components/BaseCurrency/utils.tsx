@@ -1,4 +1,4 @@
-import { LemonSelectOption } from '@hanzo/lemon-ui'
+import { SelectOption } from '@hanzo/elements'
 
 import {
     CURRENCY_SYMBOL_TO_EMOJI_MAP,
@@ -10,7 +10,7 @@ import {
 
 import { CurrencyCode } from '~/queries/schema/schema-general'
 
-const optionFromCurrency = (currency: CurrencyCode): LemonSelectOption<CurrencyCode> => {
+const optionFromCurrency = (currency: CurrencyCode): SelectOption<CurrencyCode> => {
     return {
         value: currency,
         disabledReason: DISABLED_CURRENCIES[currency],
@@ -22,7 +22,7 @@ const optionFromCurrency = (currency: CurrencyCode): LemonSelectOption<CurrencyC
     }
 }
 
-const optionFromCurrencyAbbreviated = (currency: CurrencyCode): LemonSelectOption<CurrencyCode> => {
+const optionFromCurrencyAbbreviated = (currency: CurrencyCode): SelectOption<CurrencyCode> => {
     return {
         value: currency,
         disabledReason: DISABLED_CURRENCIES[currency],
@@ -35,10 +35,10 @@ const optionFromCurrencyAbbreviated = (currency: CurrencyCode): LemonSelectOptio
 }
 
 // Computing these before hand is more efficient than computing them on the fly.
-export const OPTIONS_FOR_IMPORTANT_CURRENCIES: LemonSelectOption<CurrencyCode>[] =
+export const OPTIONS_FOR_IMPORTANT_CURRENCIES: SelectOption<CurrencyCode>[] =
     IMPORTANT_CURRENCIES.map(optionFromCurrency)
-export const OPTIONS_FOR_OTHER_CURRENCIES: LemonSelectOption<CurrencyCode>[] = OTHER_CURRENCIES.map(optionFromCurrency)
-export const OPTIONS_FOR_IMPORTANT_CURRENCIES_ABBREVIATED: LemonSelectOption<CurrencyCode>[] =
+export const OPTIONS_FOR_OTHER_CURRENCIES: SelectOption<CurrencyCode>[] = OTHER_CURRENCIES.map(optionFromCurrency)
+export const OPTIONS_FOR_IMPORTANT_CURRENCIES_ABBREVIATED: SelectOption<CurrencyCode>[] =
     IMPORTANT_CURRENCIES.map(optionFromCurrencyAbbreviated)
-export const OPTIONS_FOR_OTHER_CURRENCIES_ABBREVIATED: LemonSelectOption<CurrencyCode>[] =
+export const OPTIONS_FOR_OTHER_CURRENCIES_ABBREVIATED: SelectOption<CurrencyCode>[] =
     OTHER_CURRENCIES.map(optionFromCurrencyAbbreviated)

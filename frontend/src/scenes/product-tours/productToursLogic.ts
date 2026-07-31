@@ -3,7 +3,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { PaginatedResponse } from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -271,12 +271,12 @@ export const productToursLogic = kea<productToursLogicType>([
             deleteProductTour: async (id: string) => {
                 await api.productTours.delete(id)
                 deleteFromTree('product_tour', id)
-                lemonToast.success('Product tour deleted')
+                toast.success('Product tour deleted')
                 return values.productTours.filter((t: ProductTour) => t.id !== id)
             },
             updateProductTour: async ({ id, updatePayload }: { id: string; updatePayload: Partial<ProductTour> }) => {
                 const updatedTour = await api.productTours.update(id, updatePayload)
-                lemonToast.success('Product tour updated')
+                toast.success('Product tour updated')
                 return values.productTours.map((t: ProductTour) => (t.id === id ? updatedTour : t))
             },
         },
@@ -301,7 +301,7 @@ export const productToursLogic = kea<productToursLogicType>([
                         auto_launch: tour.auto_launch,
                     })
 
-                    lemonToast.success('Product tour duplicated', {
+                    toast.success('Product tour duplicated', {
                         toastId: `product-tour-duplicated-${createdTour.id}`,
                         button: {
                             label: 'View tour',
@@ -314,7 +314,7 @@ export const productToursLogic = kea<productToursLogicType>([
                     actions.loadProductTours()
                     return createdTour
                 } catch {
-                    lemonToast.error('Error duplicating Product tour')
+                    toast.error('Error duplicating Product tour')
                     return null
                 }
             },
@@ -361,7 +361,7 @@ export const productToursLogic = kea<productToursLogicType>([
                 actions.loadProductTours()
                 router.actions.push(urls.productTour(announcement.id, 'edit=true'))
             } catch {
-                lemonToast.error('Failed to create announcement')
+                toast.error('Failed to create announcement')
             }
         },
         createBanner: async ({ name }) => {
@@ -378,7 +378,7 @@ export const productToursLogic = kea<productToursLogicType>([
                 actions.loadProductTours()
                 router.actions.push(urls.productTour(banner.id, 'edit=true'))
             } catch {
-                lemonToast.error('Failed to create banner')
+                toast.error('Failed to create banner')
             }
         },
         createTour: async ({ name }) => {
@@ -395,7 +395,7 @@ export const productToursLogic = kea<productToursLogicType>([
                 actions.loadProductTours()
                 router.actions.push(urls.productTour(tour.id, 'edit=true'))
             } catch {
-                lemonToast.error('Failed to create tour')
+                toast.error('Failed to create tour')
             }
         },
         loadProductToursSuccess: () => {

@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Popover } from 'lib/elements/Popover'
 import { dateMapping } from 'lib/utils'
 import { TestAccountFilter } from 'scenes/insights/filters/TestAccountFilter'
 
@@ -51,13 +51,13 @@ export function BreakdownsSearchBar(): JSX.Element {
                 visible={filterOpen}
                 onClickOutside={() => setFilterOpen(false)}
             >
-                <LemonButton size="small" type="secondary" onClick={() => setFilterOpen(!filterOpen)}>
+                <Button size="small" type="secondary" onClick={() => setFilterOpen(!filterOpen)}>
                     <PropertyKeyInfo
                         value={breakdownProperty}
                         disablePopover
                         type={TaxonomicFilterGroupType.EventProperties}
                     />
-                </LemonButton>
+                </Button>
             </Popover>
             <div className="flex-1" />
             <div>

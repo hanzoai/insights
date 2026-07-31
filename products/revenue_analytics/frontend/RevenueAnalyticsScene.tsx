@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonBanner, Link, SpinnerOverlay } from '@hanzo/lemon-ui'
+import { Banner, Link, SpinnerOverlay } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -60,7 +60,7 @@ export function RevenueAnalyticsScene(): JSX.Element {
                     actions={<RevenueAnalyticsViewStatusIcon />}
                 />
 
-                <LemonBanner type="info" className="mb-4">
+                <Banner type="info" className="mb-4">
                     <strong>Revenue analytics is currently in maintenance mode.</strong> This product is not being
                     actively developed at the moment, so bug reports and fixes might be far and between. Revenue
                     analytics will be re-released in the future as part of{' '}
@@ -70,10 +70,10 @@ export function RevenueAnalyticsScene(): JSX.Element {
                         <Link to={urls.earlyAccessFeatures()}>Customer analytics (early access)</Link>
                     )}
                     .
-                </LemonBanner>
+                </Banner>
 
                 {sourceRunningForTheFirstTime && (
-                    <LemonBanner
+                    <Banner
                         type="success"
                         dismissKey={`revenue-analytics-sync-in-progress-banner-${sourceRunningForTheFirstTime.id}`}
                         action={{ children: 'Refresh', onClick: () => window.location.reload() }}
@@ -82,7 +82,7 @@ export function RevenueAnalyticsScene(): JSX.Element {
                         This means you might not see all of your revenue data yet. <br />
                         We display partial data - most recent months first - while the initial sync is running. <br />
                         Refresh the page to see the latest data.
-                    </LemonBanner>
+                    </Banner>
                 )}
 
                 <RevenueAnalyticsSceneContent />

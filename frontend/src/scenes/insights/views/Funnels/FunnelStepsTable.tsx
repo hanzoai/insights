@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import { compare as compareFn } from 'natural-orderby'
 
 import { IconFlag } from '@hanzo/icons'
-import { LemonColorButton } from '@hanzo/lemon-ui'
+import { ColorButton } from '@hanzo/elements'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonRow } from 'lib/lemon-ui/LemonRow'
-import { LemonTable, LemonTableColumn, LemonTableColumnGroup } from 'lib/lemon-ui/LemonTable'
-import { Lettermark, LettermarkColor } from 'lib/lemon-ui/Lettermark'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Row } from 'lib/elements/Row'
+import { Table, TableColumn, TableColumnGroup } from 'lib/elements/Table'
+import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
 import { humanFriendlyDuration, humanFriendlyNumber, percentage } from 'lib/utils'
 import { ValueInspectorButton } from 'scenes/funnels/ValueInspectorButton'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
@@ -65,7 +65,7 @@ export function FunnelStepsTable(): JSX.Element | null {
                         'Breakdown'
                     ) : (
                         <span className="inline-flex items-center gap-2">
-                            <LemonCheckbox
+                            <Checkbox
                                 checked={allChecked ? true : someChecked ? 'indeterminate' : false}
                                 onChange={() => {
                                     // Either toggle all breakdowns on or off
@@ -130,7 +130,7 @@ export function FunnelStepsTable(): JSX.Element | null {
                                     formatPropertyValueForDisplay
                                 )}
                                 {showCustomizationIcon && (
-                                    <LemonColorButton
+                                    <ColorButton
                                         onClick={() => openModal(breakdown)}
                                         color={color}
                                         type="tertiary"
@@ -143,7 +143,7 @@ export function FunnelStepsTable(): JSX.Element | null {
                         return isOnlySeries ? (
                             <span className="font-medium">{label}</span>
                         ) : (
-                            <LemonCheckbox
+                            <Checkbox
                                 checked={!hiddenLegendBreakdowns?.includes(getVisibilityKey(breakdown.breakdown_value))}
                                 onChange={() =>
                                     toggleLegendBreakdownVisibility(getVisibilityKey(breakdown.breakdown_value))
@@ -173,7 +173,7 @@ export function FunnelStepsTable(): JSX.Element | null {
         },
         ...steps.map((step, stepIndex) => ({
             title: (
-                <LemonRow
+                <Row
                     icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />}
                     style={{ font: 'inherit', padding: 0 }}
                     size="small"
@@ -182,7 +182,7 @@ export function FunnelStepsTable(): JSX.Element | null {
                         filter={getActionFilterFromFunnelStep(step)}
                         isOptional={isStepOptional(stepIndex + 1)}
                     />
-                </LemonRow>
+                </Row>
             ),
             children: [
                 {
@@ -263,14 +263,14 @@ export function FunnelStepsTable(): JSX.Element | null {
                     ): JSX.Element | string {
                         const significance = getSignificanceFromBreakdownStep(breakdown, step.order)
                         return significance?.total ? (
-                            <LemonRow
+                            <Row
                                 className="funnel-significance-highlight"
                                 tooltip="Significantly different from other breakdown values"
                                 icon={<IconFlag />}
                                 size="small"
                             >
                                 {percentage(breakdown.steps?.[step.order]?.conversionRates.total ?? 0, 2, true)}
-                            </LemonRow>
+                            </Row>
                         ) : (
                             percentage(breakdown.steps?.[step.order]?.conversionRates.total ?? 0, 2, true)
                         )
@@ -299,7 +299,7 @@ export function FunnelStepsTable(): JSX.Element | null {
                                   const significance = getSignificanceFromBreakdownStep(breakdown, step.order)
                                   // Only flag as significant here if not flagged already in "Conversion so far"
                                   return !significance?.total && significance?.fromPrevious ? (
-                                      <LemonRow
+                                      <Row
                                           className="funnel-significance-highlight"
                                           tooltip="Significantly different from other breakdown values"
                                           icon={<IconFlag />}
@@ -310,7 +310,7 @@ export function FunnelStepsTable(): JSX.Element | null {
                                               2,
                                               true
                                           )}
-                                      </LemonRow>
+                                      </Row>
                                   ) : (
                                       percentage(
                                           breakdown.steps?.[step.order]?.conversionRates.fromPrevious ?? 0,
@@ -369,12 +369,12 @@ export function FunnelStepsTable(): JSX.Element | null {
                                   (b.steps?.[step.order]?.average_conversion_time ?? 0),
                           },
                       ]),
-            ] as LemonTableColumn<FlattenedFunnelStepByBreakdown, keyof FlattenedFunnelStepByBreakdown>[],
+            ] as TableColumn<FlattenedFunnelStepByBreakdown, keyof FlattenedFunnelStepByBreakdown>[],
         })),
-    ] as LemonTableColumnGroup<FlattenedFunnelStepByBreakdown>[]
+    ] as TableColumnGroup<FlattenedFunnelStepByBreakdown>[]
 
     return (
-        <LemonTable
+        <Table
             dataSource={flattenedBreakdowns}
             columns={columnsGrouped}
             loading={insightLoading}

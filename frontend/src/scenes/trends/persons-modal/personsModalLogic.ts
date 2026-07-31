@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, props, propsChanged
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { isGroupType } from 'lib/utils'
@@ -269,7 +269,7 @@ export const personsModalLogic = kea<personsModalLogicType>([
             }
             const cohort = await api.create('api/cohort', { ...cohortParams, query: values.actorsQuery })
             cohortsModel.actions.cohortCreated(cohort)
-            lemonToast.success('Cohort saved', {
+            toast.success('Cohort saved', {
                 toastId: `cohort-saved-${cohort.id}`,
                 button: {
                     label: 'View cohort',

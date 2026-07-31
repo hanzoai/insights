@@ -2,7 +2,7 @@ import { actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { addProductIntent } from 'lib/utils/product-intents'
@@ -30,7 +30,7 @@ export const tasksLogic = kea<tasksLogicType>([
                 },
                 createTask: async ({ data }: { data: TaskUpsertProps }) => {
                     const newTask = await api.tasks.create(data)
-                    lemonToast.success('Task created successfully')
+                    toast.success('Task created successfully')
                     void addProductIntent({
                         product_type: ProductKey.TASKS,
                         intent_context: ProductIntentContext.TASK_CREATED,
@@ -39,7 +39,7 @@ export const tasksLogic = kea<tasksLogicType>([
                 },
                 deleteTask: async ({ taskId }: { taskId: string }) => {
                     await api.tasks.delete(taskId)
-                    lemonToast.success('Task deleted')
+                    toast.success('Task deleted')
                     return values.tasks.filter((t) => t.id !== taskId)
                 },
             },

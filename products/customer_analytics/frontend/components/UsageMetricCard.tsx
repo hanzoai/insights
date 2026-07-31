@@ -1,8 +1,8 @@
 import { IconTrending } from '@hanzo/icons'
-import { LemonCard, LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
+import { Card, Skeleton, Tooltip } from '@hanzo/elements'
 
 import { getColorVar } from 'lib/colors'
-import { IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'
+import { IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 import { formatPercentage, humanFriendlyCurrency, humanFriendlyLargeNumber, humanFriendlyNumber } from 'lib/utils'
 
 import { UsageMetric } from '~/queries/schema/schema-general'
@@ -58,7 +58,7 @@ export const UsageMetricCard = ({ metric }: { metric: UsageMetric }): JSX.Elemen
     return (
         <Tooltip title={tooltip}>
             <div>
-                <LemonCard hoverEffect={false} className="p-4 flex flex-col flex-1 justify-between max-w-80 min-h-36 ">
+                <Card hoverEffect={false} className="p-4 flex flex-col flex-1 justify-between max-w-80 min-h-36 ">
                     <div>
                         <div className="text-sm font-semibold text-muted-alt mb-1">{metric.name}</div>
                         <div className="text-3xl font-bold text-primary my-2 truncate">{formatValue()}</div>
@@ -70,7 +70,7 @@ export const UsageMetricCard = ({ metric }: { metric: UsageMetric }): JSX.Elemen
                         </div>
                     )}
                     <div className="text-xs text-muted">Last {metric.interval} days</div>
-                </LemonCard>
+                </Card>
             </div>
         </Tooltip>
     )
@@ -80,11 +80,11 @@ export const UsageMetricCardSkeleton = (): JSX.Element => (
     <div className="@container">
         <div className="grid grid-cols-1 @md:grid-cols-2 @xl:grid-cols-4 gap-4 p-4">
             {[1, 2, 3].map((i) => (
-                <LemonCard key={i} className="p-4 min-h-36">
-                    <LemonSkeleton className="h-4 bg-border rounded w-24 mb-2" />
-                    <LemonSkeleton className="h-8 bg-border rounded w-32 my-2" />
-                    <LemonSkeleton className="h-3 bg-border rounded w-20" />
-                </LemonCard>
+                <Card key={i} className="p-4 min-h-36">
+                    <Skeleton className="h-4 bg-border rounded w-24 mb-2" />
+                    <Skeleton className="h-8 bg-border rounded w-32 my-2" />
+                    <Skeleton className="h-3 bg-border rounded w-20" />
+                </Card>
             ))}
         </div>
     </div>

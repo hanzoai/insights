@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { IconX } from '@hanzo/icons'
 
 import { useEventListener } from 'lib/hooks/useEventListener'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { urls } from 'scenes/urls'
 
 import { SessionRecordingPlayer } from '../player/SessionRecordingPlayer'
@@ -76,7 +76,7 @@ export function KioskPlayer(): JSX.Element | null {
                     isActive ? 'opacity-100' : 'opacity-0'
                 }`}
             >
-                <LemonButton
+                <Button
                     type="secondary"
                     icon={<IconX className="text-2xl" />}
                     size="large"

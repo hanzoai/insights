@@ -3,9 +3,9 @@ import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
 import { IconSearch, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonModal, Spinner } from '@hanzo/lemon-ui'
+import { Button, Modal, Spinner } from '@hanzo/elements'
 
-import { LemonModalContent, LemonModalHeader } from 'lib/lemon-ui/LemonModal/LemonModal'
+import { ModalContent, ModalHeader } from 'lib/elements/Modal/Modal'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
 import { urls } from 'scenes/urls'
 
@@ -51,13 +51,13 @@ export const SimilarIssuesList = (): JSX.Element => {
                     title="AI data processing required"
                     description="Similar issue search uses AI embeddings to find related issues. Enable AI data processing for your organization to use this feature."
                     action={
-                        <LemonButton
+                        <Button
                             type="primary"
                             size="small"
                             to={urls.settings('organization-details', 'organization-ai-consent')}
                         >
                             Go to organization settings
-                        </LemonButton>
+                        </Button>
                     }
                 />
             ) : similarIssuesLoading ? (
@@ -68,9 +68,9 @@ export const SimilarIssuesList = (): JSX.Element => {
                     title="Embeddings not available"
                     description="No embeddings have been generated for this issue yet. Embeddings may still be processing, please try again later."
                     action={
-                        <LemonButton type="primary" size="small" onClick={() => loadSimilarIssues(true)}>
+                        <Button type="primary" size="small" onClick={() => loadSimilarIssues(true)}>
                             Retry
-                        </LemonButton>
+                        </Button>
                     }
                 />
             ) : similarIssues.length > 0 ? (
@@ -95,15 +95,15 @@ export const SimilarIssuesList = (): JSX.Element => {
                     title="No similar issues found"
                     description="No issues within the current search distance match this issue. Try expanding the search range to find more distant matches."
                     action={
-                        <LemonButton type="primary" size="small" onClick={increaseMaxDistance}>
+                        <Button type="primary" size="small" onClick={increaseMaxDistance}>
                             Search further
-                        </LemonButton>
+                        </Button>
                     }
                 />
             )}
 
             {/* Issue Detail Modal */}
-            <LemonModal
+            <Modal
                 isOpen={!!selectedIssue}
                 onClose={() => setSelectedIssue(null)}
                 width="95%"
@@ -111,13 +111,13 @@ export const SimilarIssuesList = (): JSX.Element => {
                 className="h-[80vh]"
                 simple
             >
-                <LemonModalHeader className="shrink-0">
+                <ModalHeader className="shrink-0">
                     <h3>{selectedIssue?.name || 'Issue Details'}</h3>
-                </LemonModalHeader>
-                <LemonModalContent embedded className="flex-1 flex flex-col min-h-0 !overflow-y-hidden">
+                </ModalHeader>
+                <ModalContent embedded className="flex-1 flex flex-col min-h-0 !overflow-y-hidden">
                     {selectedIssue && <IssueModalContent issueId={selectedIssue.id} />}
-                </LemonModalContent>
-            </LemonModal>
+                </ModalContent>
+            </Modal>
         </div>
     )
 }

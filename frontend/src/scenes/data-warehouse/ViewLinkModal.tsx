@@ -6,24 +6,24 @@ import { useState } from 'react'
 
 import { IconCollapse, IconExpand } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonButtonProps,
-    LemonCard,
-    LemonCheckbox,
-    LemonDivider,
-    LemonInput,
-    LemonModal,
-    LemonSearchableSelect,
-    LemonSelect,
-    LemonTag,
-} from '@hanzo/lemon-ui'
+    Banner,
+    Button,
+    ButtonProps,
+    Card,
+    Checkbox,
+    Divider,
+    Input,
+    Modal,
+    SearchableSelect,
+    Select,
+    Tag,
+} from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { InsightsQLDropdown } from 'lib/components/InsightsQLDropdown/InsightsQLDropdown'
 import { TablePreview } from 'lib/components/TablePreview/TablePreview'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { IconLink, IconSwapHoriz } from 'lib/lemon-ui/icons'
+import { IconLink, IconSwapHoriz } from 'lib/elements/icons'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { viewLinkLogic } from 'scenes/data-warehouse/viewLinkLogic'
 
@@ -40,7 +40,7 @@ export function ViewLinkModal({ mode }: ViewLinkModalProps): JSX.Element {
     const hasPreviewFlag = useFeatureFlag('DWH_JOIN_TABLE_PREVIEW')
 
     return (
-        <LemonModal
+        <Modal
             title="Join tables"
             description={
                 mode === 'revenue_analytics' ? (
@@ -65,7 +65,7 @@ export function ViewLinkModal({ mode }: ViewLinkModalProps): JSX.Element {
             width={hasPreviewFlag ? 1200 : 700}
         >
             {hasPreviewFlag ? <ViewLinkFormWithPreview mode={mode} /> : <ViewLinkForm mode={mode} />}
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -114,7 +114,7 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                                 (selectedSourceTableName ?? '')
                             ) : (
                                 <Field name="source_table_name">
-                                    <LemonSelect
+                                    <Select
                                         fullWidth
                                         options={tableOptions}
                                         onSelect={selectSourceTable}
@@ -131,7 +131,7 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                                 (selectedJoiningTableName ?? '')
                             ) : (
                                 <Field name="joining_table_name">
-                                    <LemonSearchableSelect
+                                    <SearchableSelect
                                         fullWidth
                                         options={tableOptions}
                                         onSelect={selectJoiningTable}
@@ -149,7 +149,7 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                             <Field name="source_table_key">
                                 {({ value, onChange }) => (
                                     <>
-                                        <LemonSelect
+                                        <Select
                                             fullWidth
                                             onSelect={selectSourceKey}
                                             onChange={onChange}
@@ -193,7 +193,7 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                                 <Field name="joining_table_key">
                                     {({ value, onChange }) => (
                                         <>
-                                            <LemonSelect
+                                            <Select
                                                 fullWidth
                                                 onSelect={selectJoiningKey}
                                                 onChange={onChange}
@@ -225,12 +225,12 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                 </div>
                 {'events' === selectedJoiningTableName && (
                     <div className="w-full mt-2">
-                        <LemonDivider className="mt-4 mb-4" />
+                        <Divider className="mt-4 mb-4" />
                         <div className="mt-4 flex flex-row justify-between w-full">
                             <div className="mr-4">
                                 <span className="l4">Optimize for Experiments</span>
                                 <Field name="experiments_optimized">
-                                    <LemonCheckbox
+                                    <Checkbox
                                         className="mt-2"
                                         checked={experimentsOptimized}
                                         onChange={(checked) => setExperimentsOptimized(checked)}
@@ -242,7 +242,7 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                             <div className="w-60 shrink-0">
                                 <span className="l4">Source Timestamp Key</span>
                                 <Field name="experiments_timestamp_key">
-                                    <LemonSelect
+                                    <Select
                                         fullWidth
                                         onSelect={selectExperimentsTimestampKey}
                                         value={experimentsTimestampKey ?? undefined}
@@ -256,8 +256,8 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                 )}
                 {sqlCodeSnippet && mode !== 'revenue_analytics' && (
                     <div className="w-full mt-2">
-                        <LemonDivider className="mt-4 mb-4" />
-                        <LemonButton
+                        <Divider className="mt-4 mb-4" />
+                        <Button
                             fullWidth
                             onClick={() => setAdvancedSettingsExpanded(!advancedSettingsExpanded)}
                             sideIcon={advancedSettingsExpanded ? <IconCollapse /> : <IconExpand />}
@@ -268,7 +268,7 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                                     Customize how the fields are accessed
                                 </div>
                             </div>
-                        </LemonButton>
+                        </Button>
                     </div>
                 )}
                 {sqlCodeSnippet && advancedSettingsExpanded && (
@@ -280,7 +280,7 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                                     name="field_name"
                                     hint={`Pick a field name to access ${selectedJoiningTableName} from ${selectedSourceTableName}`}
                                 >
-                                    <LemonInput
+                                    <Input
                                         value={fieldName}
                                         onChange={(fieldName) => setFieldName(fieldName)}
                                         placeholder="Field name"
@@ -303,14 +303,14 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                     </div>
                 )}
             </div>
-            <LemonDivider className="mt-4 mb-4" />
+            <Divider className="mt-4 mb-4" />
             <div className="flex flex-row justify-end w-full">
-                <LemonButton className="mr-3" type="secondary" onClick={toggleJoinTableModal}>
+                <Button className="mr-3" type="secondary" onClick={toggleJoinTableModal}>
                     Close
-                </LemonButton>
-                <LemonButton type="primary" htmlType="submit" loading={isViewLinkSubmitting}>
+                </Button>
+                <Button type="primary" htmlType="submit" loading={isViewLinkSubmitting}>
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </Form>
     )
@@ -360,7 +360,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
     return (
         <Form logic={viewLinkLogic} formKey="viewLink" enableFormOnSubmit>
             <div className="flex flex-row items-start justify-between gap-4">
-                <LemonCard className="flex-1 p-0 max-w-136">
+                <Card className="flex-1 p-0 max-w-136">
                     <div className="flex flex-col gap-4 p-4">
                         <div title="source-table-name-and-key" className="flex flex-row gap-4">
                             <div title="source-table-name" className="flex-1">
@@ -370,7 +370,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                         <div>{selectedSourceTableName ?? ''}</div>
                                     ) : (
                                         <Field name="source_table_name">
-                                            <LemonSelect
+                                            <Select
                                                 fullWidth
                                                 options={tableOptions}
                                                 onSelect={selectSourceTable}
@@ -386,7 +386,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                     <Field name="source_table_key">
                                         {({ value, onChange }) => (
                                             <div className="flex flex-col gap-2">
-                                                <LemonSelect
+                                                <Select
                                                     fullWidth
                                                     onSelect={selectSourceKey}
                                                     onChange={onChange}
@@ -434,13 +434,13 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                             />
                         )}
                     </div>
-                </LemonCard>
+                </Card>
 
                 <div className="flex items-center mt-16">
                     <IconSwapHoriz />
                 </div>
 
-                <LemonCard className="flex-1 p-0 max-w-136">
+                <Card className="flex-1 p-0 max-w-136">
                     <div className="flex flex-col gap-4 p-4">
                         <div title="joining-table-name-and-key" className="flex flex-row gap-4">
                             <div title="joining-table-name" className="flex-1">
@@ -450,7 +450,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                         <div>{selectedJoiningTableName ?? ''}</div>
                                     ) : (
                                         <Field name="joining_table_name">
-                                            <LemonSearchableSelect
+                                            <SearchableSelect
                                                 fullWidth
                                                 options={tableOptions}
                                                 onSelect={selectJoiningTable}
@@ -471,7 +471,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                         <Field name="joining_table_key">
                                             {({ value, onChange }) => (
                                                 <div className="flex flex-col gap-2">
-                                                    <LemonSelect
+                                                    <Select
                                                         fullWidth
                                                         onSelect={selectJoiningKey}
                                                         onChange={onChange}
@@ -518,17 +518,17 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                             />
                         )}
                     </div>
-                </LemonCard>
+                </Card>
             </div>
             <div className="w-full mt-4">
                 {'events' === selectedJoiningTableName && (
                     <div className="w-full mt-2">
-                        <LemonDivider className="mt-4 mb-4" />
+                        <Divider className="mt-4 mb-4" />
                         <div className="mt-4 flex flex-row justify-between w-full">
                             <div className="mr-4">
                                 <span className="l4">Optimize for Experiments</span>
                                 <Field name="experiments_optimized">
-                                    <LemonCheckbox
+                                    <Checkbox
                                         className="mt-2"
                                         checked={experimentsOptimized}
                                         onChange={(checked) => setExperimentsOptimized(checked)}
@@ -540,7 +540,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                             <div className="w-60 shrink-0">
                                 <span className="l4">Source Timestamp Key</span>
                                 <Field name="experiments_timestamp_key">
-                                    <LemonSelect
+                                    <Select
                                         fullWidth
                                         onSelect={selectExperimentsTimestampKey}
                                         value={experimentsTimestampKey ?? undefined}
@@ -554,8 +554,8 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                 )}
                 {sqlCodeSnippet && mode !== 'revenue_analytics' && (
                     <div className="w-full mt-2">
-                        <LemonDivider className="mt-4 mb-4" />
-                        <LemonButton
+                        <Divider className="mt-4 mb-4" />
+                        <Button
                             fullWidth
                             onClick={() => setAdvancedSettingsExpanded(!advancedSettingsExpanded)}
                             sideIcon={advancedSettingsExpanded ? <IconCollapse /> : <IconExpand />}
@@ -566,7 +566,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                     Customize how the fields are accessed
                                 </div>
                             </div>
-                        </LemonButton>
+                        </Button>
                     </div>
                 )}
                 {sqlCodeSnippet && advancedSettingsExpanded && (
@@ -578,7 +578,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                     name="field_name"
                                     hint={`Pick a field name to access ${selectedJoiningTableName} from ${selectedSourceTableName}`}
                                 >
-                                    <LemonInput
+                                    <Input
                                         value={fieldName}
                                         onChange={(fieldName) => setFieldName(fieldName)}
                                         placeholder="Field name"
@@ -602,7 +602,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                 )}
             </div>
             {validationError && (
-                <LemonBanner
+                <Banner
                     className="mt-2"
                     type="error"
                     children={
@@ -612,7 +612,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                 <br />
                                 {validationError}
                             </div>
-                            <LemonButton
+                            <Button
                                 children="Get help"
                                 type="secondary"
                                 onClick={() => {
@@ -626,29 +626,29 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                     }
                 />
             )}
-            {validationWarning && <LemonBanner className="mt-2" type="warning" children={validationWarning} />}
-            <LemonDivider className="mt-4 mb-4" />
+            {validationWarning && <Banner className="mt-2" type="warning" children={validationWarning} />}
+            <Divider className="mt-4 mb-4" />
             <div className="flex flex-row gap-2 justify-end w-full">
                 {isJoinValid ? (
                     <>
-                        <LemonButton disabledReason="Join is valid">Join is valid</LemonButton>
-                        <LemonButton type="primary" htmlType="submit" loading={isViewLinkSubmitting}>
+                        <Button disabledReason="Join is valid">Join is valid</Button>
+                        <Button type="primary" htmlType="submit" loading={isViewLinkSubmitting}>
                             Save join
-                        </LemonButton>
+                        </Button>
                     </>
                 ) : (
                     <>
-                        <LemonButton htmlType="submit" loading={isViewLinkSubmitting} disabledReason={validationError}>
+                        <Button htmlType="submit" loading={isViewLinkSubmitting} disabledReason={validationError}>
                             Save join without validating
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             onClick={validateJoin}
                             loading={isJoinValidating}
                             disabledReason={validationError || validationWarning}
                         >
                             Validate join
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
             </div>
@@ -664,14 +664,14 @@ export function ViewLinkKeyLabel({ column }: KeyLabelProps): JSX.Element {
     return (
         <span>
             {column.name}{' '}
-            <LemonTag type="success" className="uppercase">
+            <Tag type="success" className="uppercase">
                 {column.type}
-            </LemonTag>
+            </Tag>
         </span>
     )
 }
 
-type ViewLinkButtonProps = LemonButtonProps & {
+type ViewLinkButtonProps = ButtonProps & {
     tableName: string
 }
 
@@ -687,7 +687,7 @@ export function ViewLinkButton({ tableName, ...props }: ViewLinkButtonProps): JS
 
     return (
         <>
-            <LemonButton
+            <Button
                 children="Join data"
                 icon={<IconLink />}
                 onClick={handleClick}

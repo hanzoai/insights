@@ -1,4 +1,4 @@
-import { LemonButton, LemonCollapse } from '@hanzo/lemon-ui'
+import { Button, Collapse } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 
@@ -20,7 +20,7 @@ export function RecentEventsPanel({
     sessionId,
 }: RecentEventsPanelProps): JSX.Element {
     return (
-        <LemonCollapse
+        <Collapse
             className="bg-surface-primary"
             panels={[
                 {
@@ -48,13 +48,13 @@ export function RecentEventsPanel({
                             )}
                             {distinctId && (
                                 <div className="mt-2 pt-2 border-t flex justify-end">
-                                    <LemonButton
+                                    <Button
                                         type="tertiary"
                                         size="xsmall"
                                         to={`${urls.personByDistinctId(distinctId)}#activeTab=${PersonsTabType.EVENTS}`}
                                     >
                                         See all events →
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             )}
                         </div>

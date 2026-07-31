@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { userLogic } from 'scenes/userLogic'
 
 import { IntegrationType } from '~/types'
@@ -48,10 +48,10 @@ export const slackSetupModalLogic = kea<slackSetupModalLogicType>([
                         },
                     })
                     actions.loadIntegrations()
-                    lemonToast.success('Slack integration created successfully!')
+                    toast.success('Slack integration created successfully!')
                     props.onComplete(integration.id)
                 } catch (error) {
-                    lemonToast.error('Failed to create Slack integration')
+                    toast.error('Failed to create Slack integration')
                     throw error
                 }
             },

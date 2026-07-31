@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { IconX } from '@hanzo/icons'
 
 import { useWindowSize } from 'lib/hooks/useWindowSize'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Modal } from 'lib/elements/Modal'
 
 import { StoriesPlayer, Story } from './StoriesPlayer'
 import { storiesLogic } from './storiesLogic'
@@ -337,7 +337,7 @@ export const StoriesModal = (): JSX.Element | null => {
     )
 
     return (
-        <LemonModal
+        <Modal
             isOpen={openStoriesModal}
             simple
             className="StoriesModal__modal"
@@ -412,6 +412,6 @@ export const StoriesModal = (): JSX.Element | null => {
                     )}
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

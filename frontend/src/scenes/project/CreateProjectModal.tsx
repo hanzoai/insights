@@ -1,16 +1,16 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Modal, Link } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { projectLogic } from 'scenes/projectLogic'
 
 import { organizationLogic } from '../organizationLogic'
 
 const MOCK_PRODUCT_NAMES = [
-    'Lemonify',
+    'Apricotify',
     'Pineapplify',
     'Bananify',
     'Mangofy',
@@ -57,7 +57,7 @@ export function CreateProjectModal({
     }, [currentProject]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <LemonModal
+        <Modal
             width={560}
             title={currentOrganization ? `Create a project within ${currentOrganization.name}` : 'Create a project'}
             description={
@@ -85,22 +85,22 @@ export function CreateProjectModal({
             footer={
                 <>
                     {onClose && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={onClose}
                             disabledReason={currentProjectLoading ? 'Creating project...' : undefined}
                         >
                             Cancel
-                        </LemonButton>
+                        </Button>
                     )}
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={handleSubmit}
                         loading={currentProjectLoading}
                         disabledReason={!name ? 'Think of a name!' : null}
                     >
                         Create project
-                    </LemonButton>
+                    </Button>
                 </>
             }
             isOpen={isVisible}
@@ -108,8 +108,8 @@ export function CreateProjectModal({
             inline={inline}
             closable={!currentProjectLoading}
         >
-            <LemonField.Pure label="Project name">
-                <LemonInput
+            <Field.Pure label="Project name">
+                <Input
                     placeholder={`E.g. ${MOCK_PRODUCT_NAMES[Math.floor(Math.random() * MOCK_PRODUCT_NAMES.length)]}`}
                     maxLength={64}
                     autoFocus
@@ -122,7 +122,7 @@ export function CreateProjectModal({
                     }}
                     disabled={currentProjectLoading}
                 />
-            </LemonField.Pure>
-        </LemonModal>
+            </Field.Pure>
+        </Modal>
     )
 }

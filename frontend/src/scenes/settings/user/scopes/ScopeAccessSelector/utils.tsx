@@ -1,8 +1,8 @@
-import { LemonInputSelectOption, Tooltip } from '@hanzo/lemon-ui'
+import { InputSelectOption, Tooltip } from '@hanzo/elements'
 
 import type { OrganizationOption, TeamOption } from './types'
 
-export const createOrganizationOption = (org: OrganizationOption): LemonInputSelectOption<string> => ({
+export const createOrganizationOption = (org: OrganizationOption): InputSelectOption<string> => ({
     key: `${org.id}`,
     label: org.name,
     labelComponent: (
@@ -22,7 +22,7 @@ export const createOrganizationOption = (org: OrganizationOption): LemonInputSel
 export const createTeamOption = (
     team: TeamOption,
     organizations: OrganizationOption[]
-): LemonInputSelectOption<string> => {
+): InputSelectOption<string> => {
     const orgName = organizations.find((org) => org.id === team.organization)?.name
     const displayLabel = organizations.length > 1 && orgName ? `${orgName} / ${team.name}` : team.name
 

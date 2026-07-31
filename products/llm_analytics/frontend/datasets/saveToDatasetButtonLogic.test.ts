@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import api, { CountedPaginatedResponse } from '~/lib/api'
 import { initKeaTests } from '~/test/init'
@@ -16,7 +16,7 @@ import {
 } from './saveToDatasetButtonLogic'
 
 jest.mock('~/lib/api')
-jest.mock('lib/lemon-ui/LemonToast')
+jest.mock('lib/elements/Toast')
 
 describe('saveToDatasetButtonLogic', () => {
     const mockDataset1: Dataset = {
@@ -76,9 +76,9 @@ describe('saveToDatasetButtonLogic', () => {
         // Clear localStorage to ensure persistent state doesn't leak between tests
         window.localStorage.clear()
 
-        // Mock lemonToast methods
-        ;(lemonToast.success as jest.Mock) = jest.fn()
-        ;(lemonToast.error as jest.Mock) = jest.fn()
+        // Mock toast methods
+        ;(toast.success as jest.Mock) = jest.fn()
+        ;(toast.error as jest.Mock) = jest.fn()
 
         mockApi.datasets = {
             create: jest.fn(),
@@ -340,7 +340,7 @@ describe('saveToDatasetButtonLogic', () => {
                     ...mockPartialDatasetItem,
                     dataset: 'test-dataset-1',
                 })
-                expect(lemonToast.success).toHaveBeenCalledWith('Dataset item has been created successfully', {
+                expect(toast.success).toHaveBeenCalledWith('Dataset item has been created successfully', {
                     button: {
                         label: 'View',
                         action: expect.any(Function),
@@ -367,7 +367,7 @@ describe('saveToDatasetButtonLogic', () => {
                     logic.actions.submitSearchForm()
                 }).toFinishAllListeners()
 
-                expect(lemonToast.error).toHaveBeenCalledWith('Failed to create dataset item', {
+                expect(toast.error).toHaveBeenCalledWith('Failed to create dataset item', {
                     button: {
                         label: 'Retry',
                         action: expect.any(Function),
@@ -454,7 +454,7 @@ describe('saveToDatasetButtonLogic', () => {
                     logic.actions.submitSearchForm()
                 }).toFinishAllListeners()
 
-                const successCall = (lemonToast.success as jest.Mock).mock.calls[0]
+                const successCall = (toast.success as jest.Mock).mock.calls[0]
                 const viewAction = successCall[1].button.action
 
                 viewAction()

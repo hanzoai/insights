@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconCheckCircle } from '@hanzo/icons'
-import { LemonBanner, LemonTabs, LemonTag } from '@hanzo/lemon-ui'
+import { Banner, Tabs, Tag } from '@hanzo/elements'
 
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
 import { EXPERIMENT_DEFAULT_DURATION } from 'lib/constants'
@@ -36,7 +36,7 @@ export function LegacySharedTrendsMetricForm(): JSX.Element {
 
     return (
         <>
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 onChange={(newKey) => setActiveTab(newKey)}
                 tabs={[
@@ -92,10 +92,10 @@ export function LegacySharedTrendsMetricForm(): JSX.Element {
                                         fullWidth
                                     />
                                 </div>
-                                <LemonBanner type="info" className="mt-3 mb-3">
+                                <Banner type="info" className="mt-3 mb-3">
                                     Preview insights are generated based on {EXPERIMENT_DEFAULT_DURATION} days of data.
                                     This can cause a mismatch between the preview and the actual results.
-                                </LemonBanner>
+                                </Banner>
                                 <div className="mt-4">
                                     <Query
                                         query={{
@@ -140,7 +140,7 @@ export function LegacySharedTrendsMetricForm(): JSX.Element {
                                         </div>
                                         <div className="text-secondary text-sm leading-relaxed">
                                             Uses the number of unique users who trigger the{' '}
-                                            <LemonTag>$feature_flag_called</LemonTag> event as your exposure count. This
+                                            <Tag>$feature_flag_called</Tag> event as your exposure count. This
                                             is the recommended setting for most experiments, as it accurately tracks
                                             variant exposure.
                                         </div>
@@ -250,11 +250,11 @@ export function LegacySharedTrendsMetricForm(): JSX.Element {
                                                 fullWidth
                                             />
                                         </div>
-                                        <LemonBanner type="info" className="mt-3 mb-3">
+                                        <Banner type="info" className="mt-3 mb-3">
                                             Preview insights are generated based on {EXPERIMENT_DEFAULT_DURATION} days
                                             of data. This can cause a mismatch between the preview and the actual
                                             results.
-                                        </LemonBanner>
+                                        </Banner>
                                         <div className="mt-4">
                                             <Query
                                                 query={{

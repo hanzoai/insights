@@ -4,8 +4,8 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { DataSourceIcon } from './DataSourceIcon'
 
 // Mocking because it is annoying to mock the hover to assert the tooltip text
-jest.mock('@hanzo/lemon-ui', () => ({
-    ...jest.requireActual('@hanzo/lemon-ui'),
+jest.mock('@hanzo/elements', () => ({
+    ...jest.requireActual('@hanzo/elements'),
     Tooltip: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-attr={title}>{children}</div>
     ),

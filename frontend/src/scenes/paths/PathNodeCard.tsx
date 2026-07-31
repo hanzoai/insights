@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonDropdown } from '@hanzo/lemon-ui'
+import { Dropdown } from '@hanzo/elements'
 
 import { FunnelPathsFilter } from '~/queries/schema/schema-general'
 import { InsightLogicProps } from '~/types'
@@ -39,7 +39,7 @@ export function PathNodeCard({ insightProps, node, canvasHeight }: PathNodeCardP
         : null
 
     return (
-        <LemonDropdown
+        <Dropdown
             overlay={
                 <PathNodeCardMenu
                     name={node.name}
@@ -86,6 +86,6 @@ export function PathNodeCard({ insightProps, node, canvasHeight }: PathNodeCardP
                     tooltipContent={pageUrl(node, true, true)}
                 />
             </div>
-        </LemonDropdown>
+        </Dropdown>
     )
 }

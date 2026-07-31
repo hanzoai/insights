@@ -6,11 +6,11 @@ import { List } from 'react-window'
 import { useDebouncedCallback } from 'use-debounce'
 
 import { IconExternal } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Tag } from '@hanzo/elements'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Input } from 'lib/elements/Input/Input'
+import { Spinner } from 'lib/elements/Spinner'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'
 
@@ -59,7 +59,7 @@ const PersonRowComponent = ({
     return (
         // eslint-disable-next-line react/forbid-dom-props
         <div style={style} className="AddPersonToCohortModalBody__row" data-attr="cohort-person-row">
-            <LemonCheckbox
+            <Checkbox
                 checked={isInCohort || isSelected}
                 disabledReason={isInCohort ? 'This person is already in the cohort' : null}
                 onChange={() => {
@@ -86,9 +86,9 @@ const PersonRowComponent = ({
                 data-attr="cohort-person-checkbox"
             />
             <div className="flex items-center gap-2 shrink-0">
-                {isInCohort && <LemonTag type="success">In cohort</LemonTag>}
+                {isInCohort && <Tag type="success">In cohort</Tag>}
                 {personUrl && (
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         type="tertiary"
                         icon={<IconExternal />}
@@ -156,7 +156,7 @@ export function PersonSelectList({
 
     return (
         <div className="AddPersonToCohortModalBody">
-            <LemonInput
+            <Input
                 type="search"
                 value={searchValue}
                 placeholder="Search by name, email, Person ID or Distinct ID"
@@ -197,7 +197,7 @@ export function PersonSelectList({
                     )}
                     {canLoadNextData && persons.length > 0 && (
                         <div className="p-2">
-                            <LemonButton
+                            <Button
                                 onClick={loadNextData}
                                 loading={nextDataLoading}
                                 type="secondary"
@@ -207,7 +207,7 @@ export function PersonSelectList({
                                 data-attr="cohort-person-load-more"
                             >
                                 Load more
-                            </LemonButton>
+                            </Button>
                         </div>
                     )}
                 </div>

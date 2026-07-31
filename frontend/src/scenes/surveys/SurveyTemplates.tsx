@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonTag, Link } from '@hanzo/lemon-ui'
+import { Tag, Link } from '@hanzo/elements'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
@@ -94,9 +94,9 @@ export function TemplateCard({ template, idx, handleTemplateClick, surveyAppeara
                     <h3 className="text-sm font-semibold text-default line-clamp-2 flex-1 mb-0">
                         {template.templateType}
                     </h3>
-                    <LemonTag type={template.tagType || 'default'} size="small" className="ml-2 flex-shrink-0">
+                    <Tag type={template.tagType || 'default'} size="small" className="ml-2 flex-shrink-0">
                         {template.category || 'General'}
-                    </LemonTag>
+                    </Tag>
                 </div>
                 <p className="text-sm text-secondary leading-relaxed line-clamp-3">{template.description}</p>
             </div>

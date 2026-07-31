@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 
@@ -19,7 +19,7 @@ export function DashboardTemplateEditor({ inline = false }: { inline?: boolean }
         useValues(dashboardTemplateEditorLogic)
 
     return (
-        <LemonModal
+        <Modal
             title={id ? 'Edit dashboard template' : 'New dashboard template'}
             isOpen={isOpenNewDashboardTemplateModal}
             width={1000}
@@ -29,7 +29,7 @@ export function DashboardTemplateEditor({ inline = false }: { inline?: boolean }
             inline={inline}
             footer={
                 id ? (
-                    <LemonButton
+                    <Button
                         type="primary"
                         data-attr="update-dashboard-template-button"
                         onClick={() => {
@@ -44,9 +44,9 @@ export function DashboardTemplateEditor({ inline = false }: { inline?: boolean }
                         }
                     >
                         Update template
-                    </LemonButton>
+                    </Button>
                 ) : (
-                    <LemonButton
+                    <Button
                         type="primary"
                         data-attr="create-dashboard-template-button"
                         onClick={() => {
@@ -61,7 +61,7 @@ export function DashboardTemplateEditor({ inline = false }: { inline?: boolean }
                         }
                     >
                         Create new template
-                    </LemonButton>
+                    </Button>
                 )
             }
         >
@@ -79,6 +79,6 @@ export function DashboardTemplateEditor({ inline = false }: { inline?: boolean }
                 schema={templateSchema}
                 height={600}
             />
-        </LemonModal>
+        </Modal>
     )
 }

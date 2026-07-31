@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonButtonPropsBase } from '@hanzo/lemon-ui'
+import { Button, ButtonPropsBase } from '@hanzo/elements'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { inviteLogic } from 'scenes/settings/organization/inviteLogic'
@@ -11,12 +11,12 @@ export function InviteMembersButton({
     center = false,
     type = 'tertiary',
     ...props
-}: LemonButtonPropsBase & { text?: string }): JSX.Element {
+}: ButtonPropsBase & { text?: string }): JSX.Element {
     const { showInviteModal } = useActions(inviteLogic)
     const { reportInviteMembersButtonClicked } = useActions(eventUsageLogic)
 
     return (
-        <LemonButton
+        <Button
             icon={<IconPlusSmall />}
             onClick={() => {
                 showInviteModal()
@@ -29,6 +29,6 @@ export function InviteMembersButton({
             {...props}
         >
             {text}
-        </LemonButton>
+        </Button>
     )
 }

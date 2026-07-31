@@ -1,15 +1,15 @@
 import { expectLogic } from 'kea-test-utils'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 
 import { logsViewerDataLogic } from './logsViewerDataLogic'
 
-jest.mock('@hanzo/lemon-ui', () => ({
-    ...jest.requireActual('@hanzo/lemon-ui'),
-    lemonToast: {
+jest.mock('@hanzo/elements', () => ({
+    ...jest.requireActual('@hanzo/elements'),
+    toast: {
         error: jest.fn(),
     },
 }))
@@ -50,7 +50,7 @@ describe('logsViewerDataLogic', () => {
             logic.actions.fetchLogsFailure(error)
             await expectLogic(logic).toFinishAllListeners()
 
-            expect(lemonToast.error).not.toHaveBeenCalled()
+            expect(toast.error).not.toHaveBeenCalled()
         })
 
         it.each([['Network error'], ['Server returned 500'], ['Timeout exceeded']])(
@@ -59,7 +59,7 @@ describe('logsViewerDataLogic', () => {
                 logic.actions.fetchLogsFailure(error)
                 await expectLogic(logic).toFinishAllListeners()
 
-                expect(lemonToast.error).toHaveBeenCalledWith(`Failed to load logs: ${error}`)
+                expect(toast.error).toHaveBeenCalledWith(`Failed to load logs: ${error}`)
             }
         )
 
@@ -70,14 +70,14 @@ describe('logsViewerDataLogic', () => {
             logic.actions.fetchNextLogsPageFailure(error)
             await expectLogic(logic).toFinishAllListeners()
 
-            expect(lemonToast.error).not.toHaveBeenCalled()
+            expect(toast.error).not.toHaveBeenCalled()
         })
 
         it('shows toast for legitimate fetchNextLogsPage error', async () => {
             logic.actions.fetchNextLogsPageFailure('Network error')
             await expectLogic(logic).toFinishAllListeners()
 
-            expect(lemonToast.error).toHaveBeenCalledWith('Failed to load more logs: Network error')
+            expect(toast.error).toHaveBeenCalledWith('Failed to load more logs: Network error')
         })
     })
 })

@@ -4,13 +4,13 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback, useRef, useState } from 'react'
 
 import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
-import { LemonTable, Link } from '@hanzo/lemon-ui'
+import { Table, Link } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tooltip } from 'lib/elements/Tooltip'
 import AssetProportions from 'scenes/session-recordings/apm/components/AssetProportions'
 import { PerformanceCardRow } from 'scenes/session-recordings/apm/components/PerformanceCard'
 import { MethodTag, StatusTag } from 'scenes/session-recordings/apm/playerInspector/ItemPerformanceEvent'
@@ -84,7 +84,7 @@ function WaterfallMeta(): JSX.Element | null {
     return (
         <>
             <div className="flex gap-x-2 px-2 justify-between">
-                <LemonButton
+                <Button
                     onClick={prevPage}
                     icon={<IconChevronLeft />}
                     disabledReason={page === 0 ? "You're on the first page" : null}
@@ -105,7 +105,7 @@ function WaterfallMeta(): JSX.Element | null {
                         </Link>
                     </Tooltip>
                 </div>
-                <LemonButton
+                <Button
                     onClick={nextPage}
                     icon={<IconChevronRight />}
                     disabledReason={page === pageCount - 1 ? "You're on the last page" : null}
@@ -114,7 +114,7 @@ function WaterfallMeta(): JSX.Element | null {
                     size="xsmall"
                 />
             </div>
-            <LemonDivider />
+            <Divider />
             <div className="px-4">
                 <h3 className="mb-0">Page score</h3>
                 <PerformanceCardRow item={currentPage[0]} />
@@ -184,7 +184,7 @@ export function NetworkView(): JSX.Element {
     if (isLoading) {
         return (
             <div className="flex flex-col px-4 py-2 deprecated-space-y-2">
-                <LemonSkeleton repeat={10} fade={true} />
+                <Skeleton repeat={10} fade={true} />
             </div>
         )
     }
@@ -193,7 +193,7 @@ export function NetworkView(): JSX.Element {
         <BindLogic logic={networkViewLogic} props={{ sessionRecordingId: logicProps.sessionRecordingId }}>
             <div className="NetworkView overflow-y-auto py-2 px-4">
                 <WaterfallMeta />
-                <LemonDivider />
+                <Divider />
                 {/* eslint-disable-next-line react/forbid-dom-props */}
                 <div
                     ref={containerRef}
@@ -206,7 +206,7 @@ export function NetworkView(): JSX.Element {
                         style={{ left: urlColumnWidth }}
                         onMouseDown={onUrlHeaderMouseDown}
                     />
-                    <LemonTable
+                    <Table
                         className="NetworkView__table"
                         size="small"
                         dataSource={currentPage}

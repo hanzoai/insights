@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'
 
 import { Survey, SurveyQuestionBranchingType, SurveyType } from '~/types'
@@ -45,8 +45,8 @@ export function SurveyFormAppearance({
                     )
                 }}
             />
-            <LemonField.Pure label="Current question" className="max-w-xs gap-1" htmlFor="current-question-select">
-                <LemonSelect
+            <Field.Pure label="Current question" className="max-w-xs gap-1" htmlFor="current-question-select">
+                <Select
                     onChange={(pageIndex) => handleSetSelectedPageIndex(pageIndex)}
                     id="current-question-select"
                     fullWidth
@@ -67,7 +67,7 @@ export function SurveyFormAppearance({
                             : []),
                     ]}
                 />
-            </LemonField.Pure>
+            </Field.Pure>
         </div>
     ) : (
         <div className="flex flex-col">

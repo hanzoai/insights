@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { PropertySelect } from 'lib/components/PropertySelect/PropertySelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { IconSelectEvents, IconSelectProperties } from 'lib/lemon-ui/icons'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { IconSelectEvents, IconSelectProperties } from 'lib/elements/icons'
 import { teamLogic } from 'scenes/teamLogic'
 
 export function CorrelationConfig(): JSX.Element {
@@ -61,9 +61,9 @@ export function CorrelationConfig(): JSX.Element {
                             onChange={(excludedEvents) => handleChange(undefined, excludedEvents)}
                             selectedEvents={funnelCorrelationConfig.excluded_event_names || []}
                             addElement={
-                                <LemonButton size="small" type="secondary" icon={<IconPlus />} sideIcon={null}>
+                                <Button size="small" type="secondary" icon={<IconPlus />} sideIcon={null}>
                                     Add exclusion
-                                </LemonButton>
+                                </Button>
                             }
                         />
                     </div>
@@ -73,7 +73,7 @@ export function CorrelationConfig(): JSX.Element {
                             Excluded event properties
                         </h3>
                         <div className="max-w-160">
-                            <LemonInputSelect
+                            <InputSelect
                                 mode="multiple"
                                 allowCustomValues
                                 onChange={(properties: string[]) => handleChange(undefined, undefined, properties)}

@@ -1,7 +1,7 @@
 import { useMountedLogic, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import {

@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { encodeParams, router } from 'kea-router'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { urls } from 'scenes/urls'
 
 import api from '~/lib/api'
@@ -177,7 +177,7 @@ export const saveToDatasetButtonLogic = kea<saveToDatasetButtonLogicType>([
                             ...props.partialDatasetItem,
                             dataset: datasetId,
                         })
-                        lemonToast.success('Dataset item has been created successfully', {
+                        toast.success('Dataset item has been created successfully', {
                             button: {
                                 label: 'View',
                                 action: () => {
@@ -186,7 +186,7 @@ export const saveToDatasetButtonLogic = kea<saveToDatasetButtonLogicType>([
                             },
                         })
                     } catch {
-                        lemonToast.error('Failed to create dataset item', {
+                        toast.error('Failed to create dataset item', {
                             button:
                                 recursionCount < 3
                                     ? {

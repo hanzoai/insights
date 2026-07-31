@@ -1,7 +1,7 @@
 import { actions, connect, defaults, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { ErrorTrackingFingerprint } from 'lib/components/Errors/types'
@@ -153,7 +153,7 @@ export const errorTrackingIssueFingerprintsSceneLogic = kea<errorTrackingIssueFi
     listeners(({ actions, props, values }) => ({
         split: ({ exclusive }) => {
             actions.splitIssue(props.id, values.selectedFingerprints, exclusive)
-            lemonToast.success('Issue split successfully!')
+            toast.success('Issue split successfully!')
             actions.setSelectedFingerprints([])
         },
     })),

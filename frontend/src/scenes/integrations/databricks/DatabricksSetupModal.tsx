@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { IconDatabricks } from 'lib/lemon-ui/icons'
+import { Field } from 'lib/elements/Field'
+import { IconDatabricks } from 'lib/elements/icons'
 
 import { DatabricksSetupModalLogicProps, databricksSetupModalLogic } from './databricksSetupModalLogic'
 
@@ -13,7 +13,7 @@ export const DatabricksSetupModal = (props: DatabricksSetupModalLogicProps): JSX
     const { submitDatabricksIntegration } = useActions(databricksSetupModalLogic(props))
 
     return (
-        <LemonModal
+        <Modal
             isOpen={props.isOpen}
             title={
                 <div className="flex items-center gap-2">
@@ -25,27 +25,27 @@ export const DatabricksSetupModal = (props: DatabricksSetupModalLogicProps): JSX
         >
             <Form logic={databricksSetupModalLogic} formKey="databricksIntegration">
                 <div className="gap-4 flex flex-col">
-                    <LemonField name="serverHostname" label="Server Hostname">
-                        <LemonInput type="text" placeholder="dbc-xxxxxxxxx-xxxx.cloud.databricks.com" />
-                    </LemonField>
-                    <LemonField name="clientId" label="Client ID">
-                        <LemonInput type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-                    </LemonField>
-                    <LemonField name="clientSecret" label="Client Secret">
-                        <LemonInput type="password" />
-                    </LemonField>
+                    <Field name="serverHostname" label="Server Hostname">
+                        <Input type="text" placeholder="dbc-xxxxxxxxx-xxxx.cloud.databricks.com" />
+                    </Field>
+                    <Field name="clientId" label="Client ID">
+                        <Input type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+                    </Field>
+                    <Field name="clientSecret" label="Client Secret">
+                        <Input type="password" />
+                    </Field>
                     <div className="flex justify-end">
-                        <LemonButton
+                        <Button
                             type="primary"
                             htmlType="submit"
                             loading={isDatabricksIntegrationSubmitting}
                             onClick={submitDatabricksIntegration}
                         >
                             Connect
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

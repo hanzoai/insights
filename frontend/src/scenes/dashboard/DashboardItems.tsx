@@ -9,8 +9,8 @@ import { Responsive as ReactGridLayout } from 'react-grid-layout'
 import { InsightCard } from 'lib/components/Cards/InsightCard'
 import { TextCard } from 'lib/components/Cards/TextCard/TextCard'
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
-import { LemonButton, LemonButtonWithDropdown } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Button, ButtonWithDropdown } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 import { BREAKPOINTS, BREAKPOINT_COLUMN_COUNTS } from 'scenes/dashboard/dashboardUtils'
 import { useSurveyLinkedInsights } from 'scenes/surveys/hooks/useSurveyLinkedInsights'
@@ -258,7 +258,7 @@ export function DashboardItems(): JSX.Element {
                                     placement={placement}
                                     moreButtonOverlay={
                                         <>
-                                            <LemonButton
+                                            <Button
                                                 fullWidth
                                                 onClick={() =>
                                                     dashboard?.id &&
@@ -267,16 +267,16 @@ export function DashboardItems(): JSX.Element {
                                                 data-attr="edit-text"
                                             >
                                                 Edit text
-                                            </LemonButton>
+                                            </Button>
 
                                             {commonTileProps.moveToDashboard && (
-                                                <LemonButtonWithDropdown
+                                                <ButtonWithDropdown
                                                     disabledReason={
                                                         otherDashboards.length > 0 ? undefined : 'No other dashboards'
                                                     }
                                                     dropdown={{
                                                         overlay: otherDashboards.map((otherDashboard) => (
-                                                            <LemonButton
+                                                            <Button
                                                                 key={otherDashboard.id}
                                                                 onClick={() => {
                                                                     commonTileProps.moveToDashboard(otherDashboard)
@@ -284,7 +284,7 @@ export function DashboardItems(): JSX.Element {
                                                                 fullWidth
                                                             >
                                                                 {otherDashboard.name || <i>Untitled</i>}
-                                                            </LemonButton>
+                                                            </Button>
                                                         )),
                                                         placement: 'right-start',
                                                         fallbackPlacements: ['left-start'],
@@ -294,25 +294,25 @@ export function DashboardItems(): JSX.Element {
                                                     fullWidth
                                                 >
                                                     Move to
-                                                </LemonButtonWithDropdown>
+                                                </ButtonWithDropdown>
                                             )}
-                                            <LemonButton
+                                            <Button
                                                 onClick={() => duplicateTile(tile)}
                                                 fullWidth
                                                 data-attr="duplicate-text-from-dashboard"
                                             >
                                                 Duplicate
-                                            </LemonButton>
-                                            <LemonDivider />
+                                            </Button>
+                                            <Divider />
                                             {commonTileProps.removeFromDashboard && (
-                                                <LemonButton
+                                                <Button
                                                     status="danger"
                                                     onClick={() => commonTileProps.removeFromDashboard()}
                                                     fullWidth
                                                     data-attr="remove-text-tile-from-dashboard"
                                                 >
                                                     Delete
-                                                </LemonButton>
+                                                </Button>
                                             )}
                                         </>
                                     }

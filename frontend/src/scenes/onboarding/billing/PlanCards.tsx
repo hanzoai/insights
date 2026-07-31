@@ -5,7 +5,7 @@ import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
 import { IconCheck, IconX } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { HeartMascot } from 'lib/components/mascots'
@@ -162,7 +162,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight
                         </BillingUpgradeCTA>
                     )}
                     {planData.ctaAction === 'next' && (
-                        <LemonButton
+                        <Button
                             type="primary"
                             fullWidth
                             center
@@ -173,7 +173,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight
                             }}
                         >
                             {planData.ctaText}
-                        </LemonButton>
+                        </Button>
                     )}
                 </footer>
             </div>

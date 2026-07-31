@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { urlToAction } from 'kea-router'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { getRelativeNextPath } from 'lib/utils'
 
 import type { confirmOrganizationLogicType } from './confirmOrganizationLogicType'
@@ -63,7 +63,7 @@ export const confirmOrganizationLogic = kea<confirmOrganizationLogicType>([
                     })
                     .catch((error: any) => {
                         console.error('error', error)
-                        lemonToast.error(error.detail || 'Failed to create organization')
+                        toast.error(error.detail || 'Failed to create organization')
                     })
             },
         },

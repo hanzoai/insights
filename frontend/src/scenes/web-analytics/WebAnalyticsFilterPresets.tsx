@@ -13,16 +13,16 @@ import {
     IconX,
 } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonDivider,
-    LemonInput,
-    LemonModal,
-    LemonSkeleton,
-    LemonTextArea,
+    Button,
+    Divider,
+    Input,
+    Modal,
+    Skeleton,
+    TextArea,
     Popover,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { IconSync } from 'lib/lemon-ui/icons'
+import { IconSync } from 'lib/elements/icons'
 
 import { WebAnalyticsFilterPresetType } from '~/types'
 
@@ -88,19 +88,19 @@ export const FilterPresetsDropdown = (): JSX.Element => {
                     </div>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         icon={preset.pinned ? <IconPinFilled /> : <IconPin />}
                         onClick={(e) => handleTogglePin(preset, e)}
                         tooltip={preset.pinned ? 'Unpin' : 'Pin'}
                     />
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         icon={<IconPencil />}
                         onClick={(e) => handleEdit(preset, e)}
                         tooltip="Edit"
                     />
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         icon={<IconTrash />}
                         onClick={(e) => handleDelete(preset, e)}
@@ -117,7 +117,7 @@ export const FilterPresetsDropdown = (): JSX.Element => {
             <div className="px-2 pt-2 pb-1 ">
                 {activePreset && hasUnsavedChanges ? (
                     <>
-                        <LemonButton
+                        <Button
                             fullWidth
                             size="small"
                             type="primary"
@@ -128,9 +128,9 @@ export const FilterPresetsDropdown = (): JSX.Element => {
                             }}
                         >
                             Update "{activePreset.name}"
-                        </LemonButton>
-                        <LemonDivider className="mt-2 mb-2" />
-                        <LemonButton
+                        </Button>
+                        <Divider className="mt-2 mb-2" />
+                        <Button
                             fullWidth
                             size="small"
                             type="tertiary"
@@ -141,10 +141,10 @@ export const FilterPresetsDropdown = (): JSX.Element => {
                             }}
                         >
                             Save as new preset
-                        </LemonButton>
+                        </Button>
                     </>
                 ) : (
-                    <LemonButton
+                    <Button
                         fullWidth
                         size="small"
                         icon={<IconPlus />}
@@ -154,14 +154,14 @@ export const FilterPresetsDropdown = (): JSX.Element => {
                         }}
                     >
                         Save current filters
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
 
             {presetsLoading ? (
                 <div className="p-3 space-y-2">
-                    <LemonSkeleton className="h-8" />
-                    <LemonSkeleton className="h-8" />
+                    <Skeleton className="h-8" />
+                    <Skeleton className="h-8" />
                 </div>
             ) : !hasPresets ? (
                 <div className="px-3 pb-3 text-center text-muted text-sm">
@@ -173,7 +173,7 @@ export const FilterPresetsDropdown = (): JSX.Element => {
                 <>
                     {pinnedPresets.length > 0 && (
                         <>
-                            <LemonDivider />
+                            <Divider />
                             <div className="px-2 py-1">
                                 <div className="text-xs font-semibold text-muted uppercase px-2 py-1">Pinned</div>
                                 {pinnedPresets.map(renderPresetItem)}
@@ -183,7 +183,7 @@ export const FilterPresetsDropdown = (): JSX.Element => {
 
                     {recentPresets.length > 0 && (
                         <>
-                            <LemonDivider />
+                            <Divider />
                             <div className="px-2 py-1">
                                 <div className="text-xs font-semibold text-muted uppercase px-2 py-1">Recent</div>
                                 {recentPresets.map(renderPresetItem)}
@@ -205,7 +205,7 @@ export const FilterPresetsDropdown = (): JSX.Element => {
                 fallbackPlacements={['bottom-end']}
                 overlay={dropdownContent}
             >
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     icon={bookmarkIcon}
@@ -233,7 +233,7 @@ export const FilterPresetsDropdown = (): JSX.Element => {
                     ) : (
                         'Presets'
                     )}
-                </LemonButton>
+                </Button>
             </Popover>
             <SaveFilterPresetModal />
             <DeletePresetModal
@@ -274,30 +274,30 @@ const SaveFilterPresetModal = (): JSX.Element | null => {
     const isOpen = saveModalOpen || isEditMode
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={closeSaveModal}
             title={isEditMode ? `Edit "${editingPreset?.name}"` : 'Save filter preset'}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={closeSaveModal}>
+                    <Button type="secondary" onClick={closeSaveModal}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={handleSave}
                         loading={savedPresetLoading}
                         disabledReason={!canSavePreset ? 'Name is required' : undefined}
                     >
                         {isEditMode ? 'Update preset' : 'Save preset'}
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="space-y-4">
                 <div>
                     <label className="text-sm font-medium mb-1 block">Name</label>
-                    <LemonInput
+                    <Input
                         value={presetFormName}
                         onChange={setPresetFormName}
                         placeholder="e.g., US Mobile Traffic"
@@ -306,7 +306,7 @@ const SaveFilterPresetModal = (): JSX.Element | null => {
                 </div>
                 <div>
                     <label className="text-sm font-medium mb-1 block">Description (optional)</label>
-                    <LemonTextArea
+                    <TextArea
                         value={presetFormDescription}
                         onChange={setPresetFormDescription}
                         placeholder="Describe what this preset filters for..."
@@ -314,7 +314,7 @@ const SaveFilterPresetModal = (): JSX.Element | null => {
                     />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -328,7 +328,7 @@ const DeletePresetModal = ({
     onConfirm: () => void
 }): JSX.Element => {
     return (
-        <LemonModal
+        <Modal
             isOpen={!!preset}
             onClose={onClose}
             title={`Delete "${preset?.name}"?`}
@@ -336,12 +336,12 @@ const DeletePresetModal = ({
             overlayClassName="!items-center"
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={onClose}>
+                    <Button type="secondary" onClick={onClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" status="danger" onClick={onConfirm}>
+                    </Button>
+                    <Button type="primary" status="danger" onClick={onConfirm}>
                         Delete
-                    </LemonButton>
+                    </Button>
                 </>
             }
         />

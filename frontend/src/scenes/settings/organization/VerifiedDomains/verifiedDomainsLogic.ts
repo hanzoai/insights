@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
 import { SECURE_URL_REGEX } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -113,7 +113,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                         `api/organizations/${values.currentOrganization?.id}/domains/${payload.id}`,
                         { ...payload, id: undefined }
                     )
-                    lemonToast.success('Domain updated successfully! Changes will take effect immediately.')
+                    toast.success('Domain updated successfully! Changes will take effect immediately.')
                     actions.replaceDomain(response)
                     return false
                 },
@@ -122,9 +122,9 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                         `api/organizations/${values.currentOrganization?.id}/domains/${values.verifyModal}/verify`
                     )
                     if (response.is_verified) {
-                        lemonToast.success('Domain verified successfully.')
+                        toast.success('Domain verified successfully.')
                     } else {
-                        lemonToast.warning(
+                        toast.warning(
                             'We could not verify your domain yet. DNS propagation may take up to 72 hours. Please try again later.'
                         )
                     }
@@ -151,7 +151,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                         { scim_enabled: true }
                     )
                     actions.replaceDomain({ ...domain, scim_bearer_token: undefined })
-                    lemonToast.success('SCIM enabled successfully!')
+                    toast.success('SCIM enabled successfully!')
                     return {
                         id: domainId,
                         scim_enabled: domain.scim_enabled,
@@ -165,7 +165,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                         { scim_enabled: false }
                     )
                     actions.replaceDomain({ ...domain, scim_bearer_token: undefined })
-                    lemonToast.success('SCIM disabled successfully!')
+                    toast.success('SCIM disabled successfully!')
                     return {
                         id: domainId,
                         scim_enabled: domain.scim_enabled,
@@ -176,7 +176,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                     const response = await api.create<SCIMConfigType>(
                         `api/organizations/${values.currentOrganization?.id}/domains/${domainId}/scim/token`
                     )
-                    lemonToast.success('SCIM token regenerated successfully!')
+                    toast.success('SCIM token regenerated successfully!')
                     return { ...response, id: domainId }
                 },
             },
@@ -240,7 +240,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                 actions.replaceDomain(response)
                 actions.setConfigureSAMLModalId(null)
                 actions.setSamlConfigValues({})
-                lemonToast.success(`SAML configuration for ${response.domain} updated successfully.`)
+                toast.success(`SAML configuration for ${response.domain} updated successfully.`)
             },
         },
     })),

@@ -2,11 +2,11 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonTagType, PaginationManual } from '@hanzo/lemon-ui'
+import { TagType, PaginationManual } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { FeatureFlagsSet, featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { objectsEqual, toParams } from 'lib/utils'
 import { FLAGS_PER_PAGE, type FeatureFlagsResult, featureFlagsLogic } from 'scenes/feature-flags/featureFlagsLogic'
@@ -108,7 +108,7 @@ export function getShippedVariantKey(experiment: Experiment): string | null {
     )
 }
 
-export function getExperimentStatusColor(status: ExperimentProgressStatus): LemonTagType {
+export function getExperimentStatusColor(status: ExperimentProgressStatus): TagType {
     switch (status) {
         case ExperimentProgressStatus.Draft:
             return 'default'
@@ -225,7 +225,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
                 },
                 archiveExperiment: async (id: number) => {
                     await api.update(`api/projects/${values.currentProjectId}/experiments/${id}`, { archived: true })
-                    lemonToast.info('Experiment archived')
+                    toast.info('Experiment archived')
                     return {
                         ...values.experiments,
                         results: values.experiments.results.filter((experiment) => experiment.id !== id),
@@ -238,7 +238,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
                         `api/projects/${values.currentProjectId}/experiments/${payload.id}/duplicate`,
                         data
                     )
-                    lemonToast.success('Experiment duplicated successfully')
+                    toast.success('Experiment duplicated successfully')
                     // Navigate to the newly created experiment
                     router.actions.push(urls.experiment(duplicatedExperiment.id))
 

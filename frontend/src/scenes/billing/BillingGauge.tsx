@@ -3,7 +3,7 @@ import './BillingGauge.scss'
 import clsx from 'clsx'
 import { useMemo } from 'react'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { BillingProductV2AddonType, BillingProductV2Type } from '~/types'
 

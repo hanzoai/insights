@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
+import { Skeleton, Tooltip } from '@hanzo/elements'
 
 import { webAnalyticsLogic } from 'scenes/web-analytics/webAnalyticsLogic'
 
@@ -44,7 +44,7 @@ export const WebVitalsContent = ({ webVitalsQueryResponse, isLoading }: WebVital
 
     // Show skeleton only when loading
     if (isLoading) {
-        return <LemonSkeleton fade className="w-full h-full rounded sm:w-[30%]" />
+        return <Skeleton fade className="w-full h-full rounded sm:w-[30%]" />
     }
 
     // Show no data message when not loading and value is undefined

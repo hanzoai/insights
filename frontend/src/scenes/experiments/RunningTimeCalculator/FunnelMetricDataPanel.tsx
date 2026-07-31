@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
 
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonSegmentedButton } from 'lib/lemon-ui/LemonSegmentedButton'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Input } from 'lib/elements/Input'
+import { SegmentedButton } from 'lib/elements/SegmentedButton'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { humanFriendlyNumber } from 'lib/utils'
 
 import { experimentLogic } from '../experimentLogic'
@@ -48,7 +48,7 @@ export const FunnelMetricDataPanel = ({
                             <IconInfo className="text-secondary ml-1" />
                         </Tooltip>
                     </div>
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         className="mt-2"
                         size="small"
                         options={[
@@ -69,7 +69,7 @@ export const FunnelMetricDataPanel = ({
                     />
                     {conversionRateInputType === ConversionRateInputType.MANUAL && (
                         <div className="flex items-center gap-2">
-                            <LemonInput
+                            <Input
                                 className="w-[80px] mt-2"
                                 min={0}
                                 step={1}

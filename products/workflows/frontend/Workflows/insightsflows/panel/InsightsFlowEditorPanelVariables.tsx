@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCode, IconCopy, IconPlus, IconX } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonLabel, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Label, toast } from '@hanzo/elements'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
-import { LemonField } from 'lib/lemon-ui/LemonField/LemonField'
+import { Field } from 'lib/elements/Field/Field'
 
 import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
 
@@ -42,7 +42,7 @@ export function InsightsFlowEditorPanelVariables(): JSX.Element | null {
     }
 
     const deleteVariable = (idx: number): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Delete variable',
             description: `Are you sure you want to delete the variable "${workflow.variables?.[idx]?.key}"?`,
             primaryButton: {
@@ -60,7 +60,7 @@ export function InsightsFlowEditorPanelVariables(): JSX.Element | null {
 
     return (
         <div className="flex flex-col h-full overflow-hidden m-2">
-            <LemonLabel
+            <Label
                 info={
                     <span>
                         These variables can be used by actions and conditions in this workflow. Use{' '}
@@ -71,7 +71,7 @@ export function InsightsFlowEditorPanelVariables(): JSX.Element | null {
                 }
             >
                 <IconCode className="text-lg" /> Workflow variables
-            </LemonLabel>
+            </Label>
 
             <ScrollableShadows
                 direction="vertical"
@@ -90,8 +90,8 @@ export function InsightsFlowEditorPanelVariables(): JSX.Element | null {
 
                 {workflow.variables?.map((variable, idx) => (
                     <div key={`${workflow.id}_${idx}`} className="w-full flex items-center gap-2">
-                        <LemonField.Pure className="w-1/4 shrink-0">
-                            <LemonInput
+                        <Field.Pure className="w-1/4 shrink-0">
+                            <Input
                                 size="small"
                                 type="text"
                                 value={variable.key}
@@ -100,9 +100,9 @@ export function InsightsFlowEditorPanelVariables(): JSX.Element | null {
                                     editVariableKey(idx, key)
                                 }}
                             />
-                        </LemonField.Pure>
-                        <LemonField.Pure className="w-1/4 shrink-0">
-                            <LemonInput
+                        </Field.Pure>
+                        <Field.Pure className="w-1/4 shrink-0">
+                            <Input
                                 size="small"
                                 type="text"
                                 value={workflow?.variables?.[idx]?.default || ''}
@@ -111,25 +111,25 @@ export function InsightsFlowEditorPanelVariables(): JSX.Element | null {
                                     editVariableDefaultValue(idx, defaultValue)
                                 }}
                             />
-                        </LemonField.Pure>
+                        </Field.Pure>
                         <span className="group relative flex-1 min-w-0">
                             <code className="w-full py-1 bg-primary-alt-highlight-secondary rounded-sm text-center text-xs truncate block">
                                 {`{ variables.${variable.key} }`}
                             </code>
                             <span className="absolute top-0 right-0 z-10 p-px opacity-0 transition-opacity group-hover:opacity-100">
-                                <LemonButton
+                                <Button
                                     size="small"
                                     icon={<IconCopy />}
                                     className="bg-white/80"
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         void navigator.clipboard.writeText(`{{ variables.${variable.key} }}`)
-                                        lemonToast.success('Copied to clipboard')
+                                        toast.success('Copied to clipboard')
                                     }}
                                 />
                             </span>
                         </span>
-                        <LemonButton
+                        <Button
                             size="small"
                             icon={<IconX />}
                             onClick={() => {
@@ -138,7 +138,7 @@ export function InsightsFlowEditorPanelVariables(): JSX.Element | null {
                         />
                     </div>
                 ))}
-                <LemonButton
+                <Button
                     icon={<IconPlus />}
                     type="secondary"
                     size="small"
@@ -146,7 +146,7 @@ export function InsightsFlowEditorPanelVariables(): JSX.Element | null {
                     onClick={addNewVariable}
                 >
                     New variable
-                </LemonButton>
+                </Button>
             </ScrollableShadows>
         </div>
     )

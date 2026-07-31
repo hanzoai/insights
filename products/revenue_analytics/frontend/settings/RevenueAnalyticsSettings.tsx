@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonTabs, Link } from '@hanzo/lemon-ui'
+import { Tabs, Link } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { BaseCurrency } from 'lib/components/BaseCurrency/BaseCurrency'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { dataWarehouseSettingsLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsLogic'
@@ -102,7 +102,7 @@ export function RevenueAnalyticsSettings(): JSX.Element {
                                         resourceType={AccessControlResourceType.RevenueAnalytics}
                                         minAccessLevel={AccessControlLevel.Editor}
                                     >
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             icon={<IconPlus />}
                                             onClick={() => {
@@ -112,14 +112,14 @@ export function RevenueAnalyticsSettings(): JSX.Element {
                                             data-attr="create-revenue-event"
                                         >
                                             Add revenue event
-                                        </LemonButton>
+                                        </Button>
                                     </AccessControlAction>
 
                                     <AccessControlAction
                                         resourceType={AccessControlResourceType.RevenueAnalytics}
                                         minAccessLevel={AccessControlLevel.Editor}
                                     >
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             icon={<IconPlus />}
                                             onClick={() => {
@@ -131,7 +131,7 @@ export function RevenueAnalyticsSettings(): JSX.Element {
                                             data-attr="import-revenue-data-warehouse-tables"
                                         >
                                             Import revenue data from data warehouse
-                                        </LemonButton>
+                                        </Button>
                                     </AccessControlAction>
 
                                     <span className="text-xs text-muted-alt">
@@ -151,7 +151,7 @@ export function RevenueAnalyticsSettings(): JSX.Element {
                     <EventConfiguration buttonRef={eventsButtonRef} />
                     <SceneDivider />
 
-                    <LemonTabs
+                    <Tabs
                         activeKey={activeTab}
                         onChange={(key) => setActiveTab(key as Tab)}
                         tabs={[

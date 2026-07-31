@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -26,7 +26,7 @@ export function TeamSettingToggle({
     const displayChecked = invert ? !rawValue : rawValue
 
     return (
-        <LemonSwitch
+        <Switch
             onChange={(checked) => {
                 const newValue = invert ? !checked : checked
                 updateCurrentTeam({ [field]: newValue })

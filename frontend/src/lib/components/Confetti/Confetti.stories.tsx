@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/react'
 
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { useConfetti } from './Confetti'
 
@@ -19,13 +19,13 @@ export function Confetti(): JSX.Element {
     return (
         <>
             <ConfettiComponent />
-            <LemonButton type="secondary" onClick={handleClick}>
+            <Button type="secondary" onClick={handleClick}>
                 Trigger Confetti
-            </LemonButton>
-            <LemonBanner type="warning" className="mt-4">
+            </Button>
+            <Banner type="warning" className="mt-4">
                 The rendering in Storybook is not the same as in the app so it may appear laggy here but it should be
                 working as expected in the app.
-            </LemonBanner>
+            </Banner>
         </>
     )
 }

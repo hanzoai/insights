@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonInput } from '@hanzo/lemon-ui'
+import { Input } from '@hanzo/elements'
 
-import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { usersSelectOptions } from 'lib/components/UserSelectItem'
+import { Button } from 'lib/elements/Button'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { Modal } from 'lib/elements/Modal'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { organizationLogic } from 'scenes/organizationLogic'
 
 import { RoleMemberType, UserType } from '~/types'
@@ -46,7 +46,7 @@ export function CreateRoleModal(): JSX.Element {
     }
 
     return (
-        <LemonModal
+        <Modal
             onClose={handleClose}
             isOpen={createRoleModalShown}
             title={
@@ -63,7 +63,7 @@ export function CreateRoleModal(): JSX.Element {
                     <div className="flex flex-row justify-between w-full">
                         <div>
                             {!isNewRole && (
-                                <LemonButton
+                                <Button
                                     htmlType="submit"
                                     type="secondary"
                                     status="danger"
@@ -71,13 +71,13 @@ export function CreateRoleModal(): JSX.Element {
                                     data-attr="role-delete-submit"
                                 >
                                     Delete role
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
                         {isNewRole && (
-                            <LemonButton type="primary" onClick={handleSubmit}>
+                            <Button type="primary" onClick={handleSubmit}>
                                 Save
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 ) : undefined
@@ -86,7 +86,7 @@ export function CreateRoleModal(): JSX.Element {
             {isNewRole && (
                 <div className="mb-5">
                     <h5>Role Name</h5>
-                    <LemonInput placeholder="Product" autoFocus value={roleName} onChange={setRoleName} />
+                    <Input placeholder="Product" autoFocus value={roleName} onChange={setRoleName} />
                 </div>
             )}
             {isAdminOrOwner && (
@@ -94,25 +94,25 @@ export function CreateRoleModal(): JSX.Element {
                     <h5>Members</h5>
                     <div className="flex gap-2">
                         <div className="flex-1">
-                            <LemonInputSelect
+                            <InputSelect
                                 placeholder="Search for team members to add…"
                                 value={roleMembersToAdd}
                                 loading={roleMembersInFocusLoading}
                                 onChange={(newValues: string[]) => setRoleMembersToAdd(newValues)}
                                 mode="multiple"
                                 data-attr="subscribed-emails"
-                                options={usersLemonSelectOptions(addableMembers, 'uuid')}
+                                options={usersSelectOptions(addableMembers, 'uuid')}
                             />
                         </div>
                         {!isNewRole && (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 loading={roleMembersInFocusLoading}
                                 disabled={roleMembersToAdd.length === 0}
                                 onClick={() => addRoleMembers({ role: roleInFocus, membersToAdd: roleMembersToAdd })}
                             >
                                 Add
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -138,7 +138,7 @@ export function CreateRoleModal(): JSX.Element {
                     )}
                 </>
             )}
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -157,7 +157,7 @@ function MemberRow({
         <div className="flex items-center justify-between mt-2 h-8">
             <ProfilePicture user={user} size="md" showName />
             {isAdminOrOwner && deleteMember && (
-                <LemonButton
+                <Button
                     icon={<IconTrash />}
                     onClick={() => deleteMember(member.id)}
                     tooltip="Remove user from role"

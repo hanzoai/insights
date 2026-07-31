@@ -1,6 +1,6 @@
 import { actions, afterMount, kea, listeners, path, reducers, selectors } from 'kea'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -143,7 +143,7 @@ export const supportTicketsSceneLogic = kea<supportTicketsSceneLogicType>([
                 actions.setTickets(response.results || [])
                 actions.setTotalCount(response.count ?? response.results?.length ?? 0)
             } catch {
-                lemonToast.error('Failed to load tickets')
+                toast.error('Failed to load tickets')
                 actions.setTicketsLoading(false)
             }
         },

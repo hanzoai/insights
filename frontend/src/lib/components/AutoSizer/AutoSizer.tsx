@@ -16,7 +16,7 @@ type AutoSizerProps = BaseAutoSizerProps & {
  *
  * 1. Uses offsetHeight/offsetWidth for measurement instead of getBoundingClientRect().
  *    This is necessary because getBoundingClientRect() is affected by CSS transforms
- *    (like the scale transform used in LemonModal's opening animation), which causes
+ *    (like the scale transform used in Modal's opening animation), which causes
  *    incorrect initial measurements.
  *
  * 2. Supports disableWidth/disableHeight props (not available in the base package)

@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconUpload, IconX } from '@hanzo/icons'
-import { LemonButton, LemonFileInput, lemonToast } from '@hanzo/lemon-ui'
+import { Button, FileInput, toast } from '@hanzo/elements'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
-import { UploadedLogo } from 'lib/lemon-ui/UploadedLogo/UploadedLogo'
+import { UploadedLogo } from 'lib/elements/UploadedLogo/UploadedLogo'
 import { organizationLogic } from 'scenes/organizationLogic'
 
 export function OrganizationLogo(): JSX.Element {
@@ -21,7 +21,7 @@ export function OrganizationLogo(): JSX.Element {
             setLogoMediaId(id)
         },
         onError: (detail) => {
-            lemonToast.error(`Error uploading image: ${detail}`)
+            toast.error(`Error uploading image: ${detail}`)
         },
     })
 
@@ -29,7 +29,7 @@ export function OrganizationLogo(): JSX.Element {
 
     return (
         <div className="deprecated-space-y-4">
-            <LemonFileInput
+            <FileInput
                 accept="image/*"
                 multiple={false}
                 onChange={setFilesToUpload}
@@ -47,11 +47,11 @@ export function OrganizationLogo(): JSX.Element {
                             />
                             {logoMediaId && (
                                 <div className="absolute -inset-2 group">
-                                    <LemonButton
+                                    <Button
                                         icon={<IconX />}
                                         onClick={(e) => {
                                             setLogoMediaId(null)
-                                            e.preventDefault() // Don't fire LemonFileInput's handler
+                                            e.preventDefault() // Don't fire FileInput's handler
                                         }}
                                         size="small"
                                         tooltip="Reset back to lettermark"
@@ -71,7 +71,7 @@ export function OrganizationLogo(): JSX.Element {
                     </>
                 }
             />
-            <LemonButton
+            <Button
                 type="primary"
                 onClick={(e) => {
                     e.preventDefault()
@@ -89,7 +89,7 @@ export function OrganizationLogo(): JSX.Element {
                 loading={currentOrganizationLoading || uploading}
             >
                 Save logo
-            </LemonButton>
+            </Button>
         </div>
     )
 }

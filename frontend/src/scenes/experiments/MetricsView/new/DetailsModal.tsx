@@ -1,4 +1,4 @@
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { ExperimentFunnelsQuery, ExperimentMetric, ExperimentTrendsQuery } from '~/queries/schema/schema-general'
 import type { Experiment } from '~/types'
@@ -18,18 +18,18 @@ export function DetailsModal({ isOpen, onClose, metric, result, experiment }: De
     result.metric = metric
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             width={1200}
             title={`Metric results: ${metric.name || 'Untitled metric'}`}
             footer={
-                <LemonButton type="secondary" onClick={onClose}>
+                <Button type="secondary" onClick={onClose}>
                     Close
-                </LemonButton>
+                </Button>
             }
         >
             <ResultDetails result={result} experiment={experiment} metric={metric as ExperimentMetric} />
-        </LemonModal>
+        </Modal>
     )
 }

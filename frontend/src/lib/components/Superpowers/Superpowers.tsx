@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Divider, Select } from '@hanzo/elements'
 
 import { SupermanMascot } from 'lib/components/mascots'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Modal } from 'lib/elements/Modal'
 import { teamLogic } from 'scenes/teamLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -16,9 +16,9 @@ export function SuperpowersModal(): JSX.Element | null {
     const { closeSuperpowers } = useActions(superpowersLogic)
 
     return (
-        <LemonModal title="" isOpen={isSuperpowersOpen} onClose={closeSuperpowers} width={500}>
+        <Modal title="" isOpen={isSuperpowersOpen} onClose={closeSuperpowers} width={500}>
             <SuperpowersContent />
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -59,7 +59,7 @@ function SuperpowersContent(): JSX.Element {
                 </div>
             </div>
 
-            <LemonDivider />
+            <Divider />
 
             <div>
                 <h3 className="font-semibold mb-2">Quick start / Onboarding</h3>
@@ -71,7 +71,7 @@ function SuperpowersContent(): JSX.Element {
                                 Reset all quick start task progress for this team
                             </div>
                         </div>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             status="danger"
                             icon={<IconTrash />}
@@ -79,7 +79,7 @@ function SuperpowersContent(): JSX.Element {
                             onClick={clearOnboardingTasks}
                         >
                             Clear
-                        </LemonButton>
+                        </Button>
                     </div>
                     <div className="text-xs text-secondary font-mono p-2 bg-surface-tertiary rounded max-h-40 overflow-auto whitespace-pre">
                         Current tasks: {JSON.stringify(currentTeam?.onboarding_tasks || {}, null, 2)}
@@ -87,7 +87,7 @@ function SuperpowersContent(): JSX.Element {
                 </div>
             </div>
 
-            <LemonDivider />
+            <Divider />
 
             <div>
                 <h3 className="font-semibold mb-2">Insights status</h3>
@@ -99,7 +99,7 @@ function SuperpowersContent(): JSX.Element {
                                 Simulate a status outage for testing the status indicator
                             </div>
                         </div>
-                        <LemonSelect
+                        <Select
                             size="small"
                             value={fakeStatusOverride}
                             options={STATUS_OPTIONS}
@@ -109,7 +109,7 @@ function SuperpowersContent(): JSX.Element {
                 </div>
             </div>
 
-            <LemonDivider />
+            <Divider />
 
             <div>
                 <h3 className="font-semibold mb-2">Debug tools</h3>
@@ -119,14 +119,14 @@ function SuperpowersContent(): JSX.Element {
                             <div className="font-medium">Datastore queries</div>
                             <div className="text-sm text-secondary">View recent Datastore queries for this user</div>
                         </div>
-                        <LemonButton type="secondary" size="small" onClick={handleOpenCHQueries}>
+                        <Button type="secondary" size="small" onClick={handleOpenCHQueries}>
                             Open
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </div>
 
-            <LemonDivider />
+            <Divider />
 
             <div className="text-xs text-secondary">
                 <div>

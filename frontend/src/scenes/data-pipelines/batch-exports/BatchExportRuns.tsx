@@ -2,12 +2,12 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
 import { IconCalendar, IconRefresh } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonSwitch, LemonTable, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Dialog, Switch, Table, Tooltip } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'
-import { IconCancel } from 'lib/lemon-ui/icons'
+import { IconCancel } from 'lib/elements/icons'
 import { humanFriendlyNumber, humanizeBytes } from 'lib/utils'
 
 import { BatchExportConfiguration, BatchExportRun, GroupedBatchExportRuns } from '~/types'
@@ -59,10 +59,10 @@ function BatchExportRunsFilters({ id }: { id: string }): JSX.Element {
 
     return (
         <div className="flex gap-2 items-center">
-            <LemonButton onClick={loadRuns} loading={loading} type="secondary" icon={<IconRefresh />} size="small">
+            <Button onClick={loadRuns} loading={loading} type="secondary" icon={<IconRefresh />} size="small">
                 Refresh
-            </LemonButton>
-            <LemonSwitch
+            </Button>
+            <Switch
                 bordered
                 label="Show latest runs"
                 checked={usingLatestRuns}
@@ -97,16 +97,16 @@ function BatchExportLatestRuns({ id }: BatchExportRunsLogicProps): JSX.Element {
 
     return (
         <>
-            <LemonTable
+            <Table
                 dataSource={latestRuns}
                 loading={loading}
                 loadingSkeletonRows={5}
                 footer={
                     hasMoreRunsToLoad && (
                         <div className="flex items-center m-2">
-                            <LemonButton center fullWidth onClick={loadOlderRuns} loading={loading}>
+                            <Button center fullWidth onClick={loadOlderRuns} loading={loading}>
                                 Load more rows
-                            </LemonButton>
+                            </Button>
                         </div>
                     )
                 }
@@ -196,9 +196,9 @@ function BatchExportLatestRuns({ id }: BatchExportRunsLogicProps): JSX.Element {
                         <div>
                             No runs in this time range. Your exporter runs every <b>{batchExportConfig.interval}</b>.
                         </div>
-                        <LemonButton type="primary" onClick={() => openBackfillModal()}>
+                        <Button type="primary" onClick={() => openBackfillModal()}>
                             Start backfill
-                        </LemonButton>
+                        </Button>
                     </div>
                 }
             />
@@ -229,16 +229,16 @@ export function BatchExportRunsGrouped({
 
     return (
         <>
-            <LemonTable
+            <Table
                 dataSource={groupedRuns}
                 loading={loading}
                 loadingSkeletonRows={5}
                 footer={
                     hasMoreRunsToLoad && (
                         <div className="flex items-center m-2">
-                            <LemonButton center fullWidth onClick={loadOlderRuns} loading={loading}>
+                            <Button center fullWidth onClick={loadOlderRuns} loading={loading}>
                                 Load more rows
-                            </LemonButton>
+                            </Button>
                         </div>
                     )
                 }
@@ -246,7 +246,7 @@ export function BatchExportRunsGrouped({
                     noIndent: true,
                     expandedRowRender: (groupedRuns) => {
                         return (
-                            <LemonTable
+                            <Table
                                 dataSource={groupedRuns.runs}
                                 embedded={true}
                                 columns={[
@@ -354,9 +354,9 @@ export function BatchExportRunsGrouped({
                         <div>
                             No runs in this time range. Your exporter runs every <b>{interval}</b>.
                         </div>
-                        <LemonButton type="primary" onClick={() => openBackfillModal()}>
+                        <Button type="primary" onClick={() => openBackfillModal()}>
                             Start backfill
-                        </LemonButton>
+                        </Button>
                     </div>
                 }
             />
@@ -367,12 +367,12 @@ export function BatchExportRunsGrouped({
 function RunRetryButton({ run, retryRun }: { run: any; retryRun: any }): JSX.Element {
     return (
         <span className="flex gap-1 items-center">
-            <LemonButton
+            <Button
                 size="small"
                 type="secondary"
                 icon={<IconRefresh />}
                 onClick={() =>
-                    LemonDialog.open({
+                    Dialog.open({
                         title: 'Retry export?',
                         description: (
                             <>
@@ -403,7 +403,7 @@ function RunRetryButton({ run, retryRun }: { run: any; retryRun: any }): JSX.Ele
 function RunCancelButton({ run, cancelRun }: { run: BatchExportRun; cancelRun: any }): JSX.Element {
     return (
         <span className="flex gap-1 items-center">
-            <LemonButton
+            <Button
                 size="small"
                 type="secondary"
                 icon={<IconCancel />}
@@ -413,7 +413,7 @@ function RunCancelButton({ run, cancelRun }: { run: BatchExportRun; cancelRun: a
                         : `Cannot cancel as run is '${run.status}'`
                 }
                 onClick={() =>
-                    LemonDialog.open({
+                    Dialog.open({
                         title: 'Cancel run?',
                         description: (
                             <>

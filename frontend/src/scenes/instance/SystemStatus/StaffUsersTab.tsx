@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonDivider, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Divider, Modal, Link } from '@hanzo/elements'
 
-import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { usersSelectOptions } from 'lib/components/UserSelectItem'
+import { Button } from 'lib/elements/Button'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { userLogic } from 'scenes/userLogic'
 
 import { UserType } from '~/types'
@@ -22,7 +22,7 @@ export function StaffUsersTab(): JSX.Element {
     const { setStaffUsersToBeAdded, addStaffUsers, deleteStaffUser, setStaffUserToBeDeleted } =
         useActions(staffUsersLogic)
 
-    const columns: LemonTableColumns<UserType> = [
+    const columns: TableColumns<UserType> = [
         {
             key: 'profile_picture',
             render: function ProfilePictureRender(_, user) {
@@ -38,7 +38,7 @@ export function StaffUsersTab(): JSX.Element {
                 return (
                     <>
                         <span className="ph-no-capture">{user.first_name}</span>
-                        {user.uuid === myself?.uuid && <LemonTag className="uppercase ml-1">Me</LemonTag>}
+                        {user.uuid === myself?.uuid && <Tag className="uppercase ml-1">Me</Tag>}
                     </>
                 )
             },
@@ -54,7 +54,7 @@ export function StaffUsersTab(): JSX.Element {
             width: 32,
             render: function RenderActions(_, user) {
                 return (
-                    <LemonButton
+                    <Button
                         data-attr="invite-delete"
                         icon={<IconTrash />}
                         status="danger"
@@ -86,31 +86,31 @@ export function StaffUsersTab(): JSX.Element {
                 </Link>
                 .
             </div>
-            <LemonDivider className="mb-4" />
+            <Divider className="mb-4" />
             <section>
                 <div className="flex gap-2 mb-4">
                     <div className="flex-1">
-                        <LemonInputSelect
+                        <InputSelect
                             placeholder="Add staff users here…"
                             loading={allUsersLoading}
                             value={staffUsersToBeAdded}
                             onChange={(newValues: string[]) => setStaffUsersToBeAdded(newValues)}
                             mode="multiple"
                             data-attr="subscribed-emails"
-                            options={usersLemonSelectOptions(nonStaffUsers, 'uuid')}
+                            options={usersSelectOptions(nonStaffUsers, 'uuid')}
                         />
                     </div>
-                    <LemonButton
+                    <Button
                         type="primary"
                         loading={allUsersLoading}
                         disabled={staffUsersToBeAdded.length === 0}
                         onClick={addStaffUsers}
                     >
                         Add
-                    </LemonButton>
+                    </Button>
                 </div>
             </section>
-            <LemonTable dataSource={staffUsers} columns={columns} loading={allUsersLoading} rowKey="uuid" />
+            <Table dataSource={staffUsers} columns={columns} loading={allUsersLoading} rowKey="uuid" />
             <StaffUsersRemovalModal
                 myself={myself}
                 user={staffUserToBeDeleted}
@@ -138,17 +138,17 @@ const StaffUsersRemovalModal = ({
     onRemove: () => void
 }): JSX.Element => {
     return (
-        <LemonModal
+        <Modal
             closable={false}
             isOpen={!!user}
             title={`Remove ${myself?.uuid === user?.uuid ? 'yourself' : user?.first_name} as a Staff User?`}
             onClose={onClose}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={onClose}>
+                    <Button type="secondary" onClick={onClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         form="text-tile-form"
                         htmlType="submit"
                         type="primary"
@@ -156,7 +156,7 @@ const StaffUsersRemovalModal = ({
                         onClick={onRemove}
                     >
                         Remove user
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -172,6 +172,6 @@ const StaffUsersRemovalModal = ({
                     `Are you sure you want to remove ${user?.first_name} as a Staff User?`
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

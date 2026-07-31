@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconExternal } from '@hanzo/icons'
-import { LemonButton, Spinner } from '@hanzo/lemon-ui'
+import { Button, Spinner } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { teamLogic } from 'scenes/teamLogic'
@@ -46,7 +46,7 @@ const IngestionStatusCheck = ({ className }: { className?: string }): JSX.Elemen
             className={className}
             actionElementOverride={
                 <>
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => {
                             addProductIntent({
@@ -57,8 +57,8 @@ const IngestionStatusCheck = ({ className }: { className?: string }): JSX.Elemen
                         }}
                     >
                         Enable exception autocapture
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         targetBlank
                         sideIcon={<IconExternal className="w-5 h-5" />}
                         to="https://hanzo.ai/docs/error-tracking/installation"
@@ -70,7 +70,7 @@ const IngestionStatusCheck = ({ className }: { className?: string }): JSX.Elemen
                         }}
                     >
                         Read the docs
-                    </LemonButton>
+                    </Button>
                 </>
             }
         />

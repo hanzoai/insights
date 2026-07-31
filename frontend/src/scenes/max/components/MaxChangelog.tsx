@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconSparkles, IconWarning, IconX } from '@hanzo/icons'
-import { LemonButton, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Tag } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Popover } from 'lib/elements/Popover/Popover'
 
 import { sidePanelSettingsLogic } from '~/layout/navigation-3000/sidepanel/panels/sidePanelSettingsLogic'
 
@@ -68,7 +68,7 @@ export function MaxChangelog(): JSX.Element | null {
                         <h3 className="font-semibold text-sm m-0">
                             {showAlerts ? 'Insights AI status' : "What's new in Insights AI"}
                         </h3>
-                        <LemonButton size="xsmall" icon={<IconX />} onClick={closeChangelog} />
+                        <Button size="xsmall" icon={<IconX />} onClick={closeChangelog} />
                     </div>
                     {showAlerts && (
                         <ul className="space-y-2 mb-3">
@@ -78,7 +78,7 @@ export function MaxChangelog(): JSX.Element | null {
                                     className="flex gap-2 text-sm p-2 rounded bg-bg-light border border-border"
                                 >
                                     <div className="w-16 shrink-0 pt-0.5">
-                                        <LemonTag size="small" {...getAlertTagProps(alert.severity)} />
+                                        <Tag size="small" {...getAlertTagProps(alert.severity)} />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <span className="font-medium">{alert.title}</span>
@@ -95,7 +95,7 @@ export function MaxChangelog(): JSX.Element | null {
                                 {displayedEntries.map((entry, index) => (
                                     <li key={index} className="flex gap-2 text-sm">
                                         <div className="w-16 shrink-0 pt-0.5">
-                                            {entry.tag && <LemonTag size="small" {...getTagProps(entry.tag)} />}
+                                            {entry.tag && <Tag size="small" {...getTagProps(entry.tag)} />}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <span className="font-medium">{entry.title}</span>
@@ -106,7 +106,7 @@ export function MaxChangelog(): JSX.Element | null {
                             </ul>
                             <div className="flex justify-between items-center pt-2 border-t">
                                 {hasMoreEntries ? (
-                                    <LemonButton
+                                    <Button
                                         size="xsmall"
                                         type="tertiary"
                                         onClick={() => {
@@ -115,20 +115,20 @@ export function MaxChangelog(): JSX.Element | null {
                                         }}
                                     >
                                         Show all
-                                    </LemonButton>
+                                    </Button>
                                 ) : (
                                     <span />
                                 )}
-                                <LemonButton size="xsmall" type="tertiary" onClick={dismissChangelog}>
+                                <Button size="xsmall" type="tertiary" onClick={dismissChangelog}>
                                     Don't show again
-                                </LemonButton>
+                                </Button>
                             </div>
                         </>
                     )}
                 </div>
             }
         >
-            <LemonButton
+            <Button
                 size="xsmall"
                 type="tertiary"
                 icon={showAlerts ? <IconWarning /> : <IconSparkles />}
@@ -143,7 +143,7 @@ export function MaxChangelog(): JSX.Element | null {
                         }`}
                     />
                 )}
-            </LemonButton>
+            </Button>
         </Popover>
     )
 }

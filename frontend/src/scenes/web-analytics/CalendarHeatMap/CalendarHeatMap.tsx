@@ -3,7 +3,7 @@ import './CalendarHeatMap.scss'
 import { useValues } from 'kea'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
+import { Skeleton, Tooltip } from '@hanzo/elements'
 
 import { cn } from 'lib/utils/css-classes'
 import { dataThemeLogic } from 'scenes/dataThemeLogic'
@@ -242,7 +242,7 @@ function LoadingRow({ cellCount = 14 }: { cellCount?: number }): JSX.Element {
                 {Array(cellCount)
                     .fill(0)
                     .map((_, i) => (
-                        <LemonSkeleton key={i} className="h-8 w-8 rounded" />
+                        <Skeleton key={i} className="h-8 w-8 rounded" />
                     ))}
             </div>
         </div>

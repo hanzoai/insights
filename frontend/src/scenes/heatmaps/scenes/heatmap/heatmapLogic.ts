@@ -6,7 +6,7 @@ import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { DEFAULT_HEATMAP_WIDTH } from 'lib/components/IframedToolbarBrowser/utils'
 import { heatmapDataLogic } from 'lib/components/heatmaps/heatmapDataLogic'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { heatmapsBrowserLogic } from 'scenes/heatmaps/components/heatmapsBrowserLogic'
 import { heatmapsSceneLogic } from 'scenes/heatmaps/scenes/heatmaps/heatmapsSceneLogic'
 
@@ -178,7 +178,7 @@ export const heatmapLogic = kea<heatmapLogicType>([
                 // Navigate to the created heatmap detail page
                 router.actions.push(`/heatmaps/${created.short_id}`)
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to create heatmap')
+                toast.error(error.detail || 'Failed to create heatmap')
             } finally {
                 actions.setLoading(false)
             }
@@ -194,7 +194,7 @@ export const heatmapLogic = kea<heatmapLogicType>([
                 }
                 await api.savedHeatmaps.update(props.id, data)
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to update heatmap')
+                toast.error(error.detail || 'Failed to update heatmap')
             } finally {
                 actions.setLoading(false)
             }

@@ -2,7 +2,7 @@ import { connect, kea, path, selectors } from 'kea'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { GroupsAccessStatus } from 'lib/introductions/groupsAccessLogic'
-import { LemonTab } from 'lib/lemon-ui/LemonTabs'
+import { Tab } from 'lib/elements/Tabs'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { urls } from 'scenes/urls'
@@ -78,9 +78,9 @@ export const personsManagementSceneLogic = kea<personsManagementSceneLogicType>(
             },
         ],
 
-        lemonTabs: [
+        tabs: [
             (s) => [s.tabs],
-            (tabs): LemonTab<string>[] =>
+            (tabs): Tab<string>[] =>
                 tabs.map((tab) => ({
                     key: tab.key,
                     label: <span data-attr={`persons-management-${tab.key}-tab`}>{tab.label}</span>,

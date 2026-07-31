@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
+import { Checkbox } from 'lib/elements/Checkbox'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
 import { insightLogic } from '../insightLogic'
@@ -11,7 +11,7 @@ export function ValueOnSeriesFilter(): JSX.Element {
     const { showValuesOnSeries } = useValues(insightVizDataLogic(insightProps))
 
     return (
-        <LemonCheckbox
+        <Checkbox
             className="p-1 px-2"
             checked={!!showValuesOnSeries}
             onChange={() => {

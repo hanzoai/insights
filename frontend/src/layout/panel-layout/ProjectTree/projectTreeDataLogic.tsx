@@ -2,13 +2,13 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 
 import { IconDocument, IconFolder, IconPlus } from '@hanzo/icons'
-import { LemonDialog } from '@hanzo/lemon-ui'
+import { Dialog } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { GroupsAccessStatus } from 'lib/introductions/groupsAccessLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
-import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { toast } from 'lib/elements/Toast'
+import { TreeDataItem } from 'lib/elements/Tree/Tree'
+import { Spinner } from 'lib/elements/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter, humanList, identifierToHuman, pluralize } from 'lib/utils'
 import { getCurrentTeamIdOrNone } from 'lib/utils/getAppContext'
@@ -241,7 +241,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                             actions.queueAction({ ...action, type: verb }, projectTreeLogicKey)
                         } catch (error) {
                             console.error(`Error ${verbing} item:`, error)
-                            lemonToast.error(`Error ${verbing} item: ${error}`)
+                            toast.error(`Error ${verbing} item: ${error}`)
                             actions.removeQueuedAction(action)
                         }
                     } else if (action.type === 'move' && action.newPath) {
@@ -251,7 +251,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                             await api.fileSystem.move(action.item.id, newPath)
                             actions.removeQueuedAction(action)
                             actions.movedItem(action.item, oldPath, newPath)
-                            lemonToast.success('Item moved successfully', {
+                            toast.success('Item moved successfully', {
                                 button: {
                                     label: 'Undo',
                                     dataAttr: 'undo-project-tree-move',
@@ -267,7 +267,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                             })
                         } catch (error) {
                             console.error('Error moving item:', error)
-                            lemonToast.error(`Error moving item: ${error}`)
+                            toast.error(`Error moving item: ${error}`)
                             actions.removeQueuedAction(action)
                         }
                     } else if (action.type === 'link' && action.newPath) {
@@ -281,10 +281,10 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                             if (action.item.type === 'folder') {
                                 actions.loadFolder(newPath)
                             }
-                            lemonToast.success('Item linked successfully') // TODO: undo for linking
+                            toast.success('Item linked successfully') // TODO: undo for linking
                         } catch (error) {
                             console.error('Error linking item:', error)
-                            lemonToast.error(`Error linking item: ${error}`)
+                            toast.error(`Error linking item: ${error}`)
                             actions.removeQueuedAction(action)
                         }
                     } else if (action.type === 'create') {
@@ -292,7 +292,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                             const response = await api.fileSystem.create(action.item)
                             actions.removeQueuedAction(action)
                             actions.createSavedItem(response)
-                            lemonToast.success('Folder created successfully', {
+                            toast.success('Folder created successfully', {
                                 button: {
                                     label: 'Undo',
                                     dataAttr: 'undo-project-tree-create-folder',
@@ -308,7 +308,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                                 ?.actions.expandProjectFolder(action.item.path)
                         } catch (error) {
                             console.error('Error creating folder:', error)
-                            lemonToast.error(`Error creating folder: ${error}`)
+                            toast.error(`Error creating folder: ${error}`)
                             actions.removeQueuedAction(action)
                         }
                     } else if (action.type === 'prepare-delete' && action.item.id) {
@@ -318,7 +318,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                             if (response && response.count > DELETE_ALERT_LIMIT) {
                                 const folderName =
                                     splitPath(action.item.path).pop() ?? action.item.path ?? 'this folder'
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: `Delete "${folderName}"?`,
                                     content: (
                                         <DeleteFolderDialogContent
@@ -345,7 +345,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                             actions.queueAction({ ...action, type: 'delete' }, projectTreeLogicKey)
                         } catch (error) {
                             console.error('Error deleting item:', error)
-                            lemonToast.error(`Error deleting item: ${error}`)
+                            toast.error(`Error deleting item: ${error}`)
                             actions.removeQueuedAction(action)
                         }
                     } else if (action.type === 'delete' && action.item.id) {
@@ -368,7 +368,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                             const undoableEntries = deletionSummary.filter(
                                 (entry) => entry.can_undo && Boolean(entry.ref)
                             )
-                            lemonToast.success(message, {
+                            toast.success(message, {
                                 button: undoableEntries.length
                                     ? {
                                           label: 'Undo',
@@ -415,10 +415,10 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                                                       restoreParts.length > 0
                                                           ? `Restored ${humanList(restoreParts)}.`
                                                           : 'Item restored.'
-                                                  lemonToast.success(restoreMessage)
+                                                  toast.success(restoreMessage)
                                               } catch (undoError) {
                                                   console.error('Error undoing delete:', undoError)
-                                                  lemonToast.error(`Error undoing delete: ${undoError}`)
+                                                  toast.error(`Error undoing delete: ${undoError}`)
                                               }
                                           },
                                       }
@@ -426,7 +426,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                             })
                         } catch (error) {
                             console.error('Error deleting item:', error)
-                            lemonToast.error(`Error deleting item: ${error}`)
+                            toast.error(`Error deleting item: ${error}`)
                             actions.removeQueuedAction(action)
                         }
                     }
@@ -462,7 +462,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                                   href: item.href,
                               }
                     const response = await api.fileSystemShortcuts.create(shortcutItem)
-                    lemonToast.success('Shortcut created successfully', {
+                    toast.success('Shortcut created successfully', {
                         button: {
                             label: 'View',
                             dataAttr: 'project-tree-view-shortcuts',
@@ -1166,7 +1166,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                 if (items.length > 0) {
                     item = items[0]
                 } else {
-                    lemonToast.error(`Could not find filesystem entry for ${item.path}. Can't delete.`)
+                    toast.error(`Could not find filesystem entry for ${item.path}. Can't delete.`)
                     return
                 }
             }
@@ -1180,7 +1180,7 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                 return
             }
             if (!item.id) {
-                lemonToast.error("Sorry, can't move an unsaved item (no id)")
+                toast.error("Sorry, can't move an unsaved item (no id)")
                 return
             }
             actions.queueAction(
@@ -1195,13 +1195,13 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
         },
         linkItem: async ({ oldPath, newPath, force, projectTreeLogicKey }) => {
             if (newPath === oldPath) {
-                lemonToast.error('Cannot link folder into itself')
+                toast.error('Cannot link folder into itself')
                 return
             }
             const item = values.viableItems.find((item) => item.path === oldPath)
             if (item && item.path === oldPath) {
                 if (!item.id) {
-                    lemonToast.error("Sorry, can't link an unsaved item (no id)")
+                    toast.error("Sorry, can't link an unsaved item (no id)")
                     return
                 }
                 actions.queueAction(

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconPlusSmall, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
@@ -116,7 +116,7 @@ export function TrendsFormula({ insightProps }: EditorFilterProps): JSX.Element 
             {localValues.map((value, index) => (
                 <div key={index} className="space-y-1">
                     <div className="flex items-center gap-2">
-                        <LemonInput
+                        <Input
                             className="flex-1"
                             placeholder="Example: (A + B) / 100"
                             size="small"
@@ -126,7 +126,7 @@ export function TrendsFormula({ insightProps }: EditorFilterProps): JSX.Element 
                             onBlur={(e) => handleFormulaBlur(index, e)}
                             onPressEnter={handleFormulaEnter}
                         />
-                        <LemonInput
+                        <Input
                             className="flex-1"
                             placeholder="Formula name (optional)"
                             size="small"
@@ -135,7 +135,7 @@ export function TrendsFormula({ insightProps }: EditorFilterProps): JSX.Element 
                             onBlur={() => handleCustomNameBlur(index)}
                             onPressEnter={handleFormulaEnter}
                         />
-                        <LemonButton
+                        <Button
                             icon={<IconTrash />}
                             status="alt"
                             onClick={() => removeFormula(index)}
@@ -147,9 +147,9 @@ export function TrendsFormula({ insightProps }: EditorFilterProps): JSX.Element 
                 </div>
             ))}
             <div>
-                <LemonButton icon={<IconPlusSmall />} type="tertiary" size="small" onClick={addFormula}>
+                <Button icon={<IconPlusSmall />} type="tertiary" size="small" onClick={addFormula}>
                     Add formula
-                </LemonButton>
+                </Button>
             </div>
         </div>
     ) : null

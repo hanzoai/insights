@@ -2,8 +2,8 @@ import './PersonDisplay.scss'
 
 import { IconInfo } from '@hanzo/icons'
 
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { urls } from 'scenes/urls'
 
 import { GroupActorType } from '~/types'

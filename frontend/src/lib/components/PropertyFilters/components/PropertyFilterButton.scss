@@ -13,7 +13,7 @@
     border-radius: 99rem;
     outline: 0;
 
-    &[aria-disabled='true']:not(.LemonButton--loading) {
+    &[aria-disabled='true']:not(.Button--loading) {
         cursor: not-allowed;
         opacity: var(--opacity-disabled);
     }
@@ -53,17 +53,17 @@
     }
 
     // Property type icon
-    > .LemonIcon {
+    > .Icon {
         font-size: 1rem;
     }
 
     // Close button
-    .LemonButton {
+    .Button {
         margin: 0 -0.5rem 0 -0.125rem;
         border-radius: 99rem;
     }
 
-    .LemonButton__chrome {
+    .Button__chrome {
         min-height: auto;
         padding: 0.1875rem;
     }

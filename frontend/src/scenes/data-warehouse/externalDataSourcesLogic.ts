@@ -1,7 +1,7 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { ApiMethodOptions, PaginatedResponse } from 'lib/api'
 
@@ -45,7 +45,7 @@ export const externalDataSourcesLogic = kea<externalDataSourcesLogicType>([
                 updateSource: async (source: ExternalDataSource) => {
                     const updatedSource = await api.externalDataSources.update(source.id, source)
 
-                    lemonToast.success('Source updated successfully!')
+                    toast.success('Source updated successfully!')
                     return {
                         ...values.dataWarehouseSources,
                         results:

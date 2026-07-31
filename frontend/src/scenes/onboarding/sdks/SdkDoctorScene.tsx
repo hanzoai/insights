@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Tag, Link } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
@@ -58,7 +58,7 @@ export function SdkDoctorScene(): JSX.Element {
                 }}
                 actions={
                     <>
-                        <LemonButton
+                        <Button
                             size="small"
                             type="primary"
                             disabledReason={loading ? 'Scan in progress' : undefined}
@@ -66,26 +66,26 @@ export function SdkDoctorScene(): JSX.Element {
                             icon={<IconRefresh className="size-4" />}
                         >
                             {loading ? 'Scanning events...' : 'Scan events'}
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             />
 
             {isDev && !inStorybook() && !inStorybookTestRunner() && (
                 <div>
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         <strong>DEVELOPMENT WARNING!</strong> When running in development, make sure you've run the
-                        appropriate Dasgter jobs: <LemonTag>cache_all_team_sdk_versions_job</LemonTag> and{' '}
-                        <LemonTag>cache_github_sdk_versions_job</LemonTag>. Data won't be available otherwise.
-                    </LemonBanner>
+                        appropriate Dasgter jobs: <Tag>cache_all_team_sdk_versions_job</Tag> and{' '}
+                        <Tag>cache_github_sdk_versions_job</Tag>. Data won't be available otherwise.
+                    </Banner>
                 </div>
             )}
 
             {/* Beta feedback banner */}
-            <LemonBanner type="info">
+            <Banner type="info">
                 <strong>SDK Doctor is in Beta!</strong> Help us improve by sharing your feedback?{' '}
                 <Link to="#panel=support%3Asupport%3Asdk%3Alow%3Atrue">Send feedback</Link>
-            </LemonBanner>
+            </Banner>
 
             <div className="p-3">
                 {loading ? null : hasErrors ? (
@@ -100,15 +100,15 @@ export function SdkDoctorScene(): JSX.Element {
                 ) : needsUpdatingCount === 0 ? (
                     <section className="mb-2">
                         <h3>SDK health is good</h3>
-                        <LemonBanner type="success" hideIcon={false}>
+                        <Banner type="success" hideIcon={false}>
                             <p className="font-semibold">All caught up! Your SDKs are up to date.</p>
                             <p className="text-sm mt-1">You've got the latest. Nice work keeping everything current.</p>
-                        </LemonBanner>
+                        </Banner>
                     </section>
                 ) : (
                     <section className="mb-2">
                         <h3>Time for an update!</h3>
-                        <LemonBanner
+                        <Banner
                             type="warning"
                             hideIcon={false}
                             action={{
@@ -121,7 +121,7 @@ export function SdkDoctorScene(): JSX.Element {
                                 An outdated SDK means you're missing out on bug fixes and enhancements.
                             </p>
                             <p className="text-sm mt-1">Check the links below to get caught up.</p>
-                        </LemonBanner>
+                        </Banner>
                     </section>
                 )}
             </div>

@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPencil, IconTrash } from '@hanzo/icons'
-import { LemonDialog, LemonInput, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Dialog, Input, Tag, Link } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Button } from 'lib/elements/Button'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -19,7 +19,7 @@ export function SqlVariablesTable(): JSX.Element {
     const { deleteVariable, setSearchTerm } = useActions(sqlVariablesLogic)
 
     const handleDelete = (variable: Variable): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: `Delete variable "${variable.name}"?`,
             description:
                 'Are you sure you want to delete this variable? This cannot be undone. Queries that use this variable will no longer work.',
@@ -34,7 +34,7 @@ export function SqlVariablesTable(): JSX.Element {
         })
     }
 
-    const columns: LemonTableColumns<Variable> = [
+    const columns: TableColumns<Variable> = [
         {
             title: 'Name',
             key: 'name',
@@ -54,7 +54,7 @@ export function SqlVariablesTable(): JSX.Element {
             width: '25%',
             tooltip: 'Use this to reference the variable in your SQL query',
             render: function RenderCodeName(_, variable: Variable): JSX.Element {
-                return <LemonTag className="font-mono">{formatVariableReference(variable.code_name)}</LemonTag>
+                return <Tag className="font-mono">{formatVariableReference(variable.code_name)}</Tag>
             },
             sorter: (a, b) => a.code_name.localeCompare(b.code_name),
         },
@@ -63,7 +63,7 @@ export function SqlVariablesTable(): JSX.Element {
             key: 'type',
             width: '15%',
             render: function RenderType(_, variable: Variable): JSX.Element {
-                return <LemonTag>{VARIABLE_TYPE_LABELS[variable.type]}</LemonTag>
+                return <Tag>{VARIABLE_TYPE_LABELS[variable.type]}</Tag>
             },
             sorter: (a, b) => a.type.localeCompare(b.type),
         },
@@ -88,8 +88,8 @@ export function SqlVariablesTable(): JSX.Element {
             render: function RenderActions(_, variable: Variable): JSX.Element {
                 return (
                     <div className="flex items-center gap-1">
-                        <LemonButton icon={<IconPencil />} size="small" to={urls.variableEdit(variable.id)} />
-                        <LemonButton
+                        <Button icon={<IconPencil />} size="small" to={urls.variableEdit(variable.id)} />
+                        <Button
                             icon={<IconTrash />}
                             size="small"
                             status="danger"
@@ -108,13 +108,13 @@ export function SqlVariablesTable(): JSX.Element {
                 description="Create reusable variables for your SQL queries. Use variables to parameterize your queries and make them dynamic."
                 resourceType={{ type: 'variable' }}
                 actions={
-                    <LemonButton type="primary" size="small" to={urls.variableEdit('new')}>
+                    <Button type="primary" size="small" to={urls.variableEdit('new')}>
                         New variable
-                    </LemonButton>
+                    </Button>
                 }
             />
             <div className="flex flex-row items-center gap-2 justify-start mb-4">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search variables..."
                     value={searchTerm}
@@ -122,11 +122,11 @@ export function SqlVariablesTable(): JSX.Element {
                     className="w-60"
                 />
             </div>
-            <LemonTable<Variable>
+            <Table<Variable>
                 data-attr="sql-variables-table"
                 rowKey="id"
                 dataSource={filteredVariables}
-                columns={columns as LemonTableColumn<Variable, keyof Variable | undefined>[]}
+                columns={columns as TableColumn<Variable, keyof Variable | undefined>[]}
                 loading={variablesLoading}
                 emptyState="No variables yet. Create your first variable to get started."
                 defaultSorting={{

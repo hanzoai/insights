@@ -2,14 +2,14 @@ import { useActions } from 'kea'
 
 import { IconPlus } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { modalsLogic } from 'scenes/experiments/modalsLogic'
 
 export function AddPrimaryMetric(): JSX.Element {
     const { openPrimaryMetricSourceModal } = useActions(modalsLogic)
 
     return (
-        <LemonButton
+        <Button
             icon={<IconPlus />}
             type="secondary"
             size="xsmall"
@@ -18,7 +18,7 @@ export function AddPrimaryMetric(): JSX.Element {
             }}
         >
             Add primary metric
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -26,7 +26,7 @@ export function AddSecondaryMetric(): JSX.Element {
     const { openSecondaryMetricSourceModal } = useActions(modalsLogic)
 
     return (
-        <LemonButton
+        <Button
             icon={<IconPlus />}
             type="secondary"
             size="xsmall"
@@ -35,6 +35,6 @@ export function AddSecondaryMetric(): JSX.Element {
             }}
         >
             Add secondary metric
-        </LemonButton>
+        </Button>
     )
 }

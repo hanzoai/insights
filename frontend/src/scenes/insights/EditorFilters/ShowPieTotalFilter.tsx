@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox } from '@hanzo/lemon-ui'
+import { Checkbox } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { trendsDataLogic } from 'scenes/trends/trendsDataLogic'
@@ -26,7 +26,7 @@ export function ShowPieTotalFilter(): JSX.Element | null {
     }
 
     return (
-        <LemonCheckbox
+        <Checkbox
             className="p-1 px-2"
             onChange={toggleShowTotal}
             checked={showTotal}

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconArrowRight, IconCode } from '@hanzo/icons'
-import { LemonButton, LemonCard, LemonSelect, Spinner } from '@hanzo/lemon-ui'
+import { Button, Card, Select, Spinner } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
@@ -44,7 +44,7 @@ export function RepositorySelector({ value, onChange }: RepositorySelectorProps)
 
     if (githubIntegrations.length === 0) {
         return (
-            <LemonCard className="p-6 text-center">
+            <Card className="p-6 text-center">
                 <div className="space-y-4 flex flex-col items-center">
                     <IconCode className="mx-auto text-4xl text-muted" />
                     <div>
@@ -53,7 +53,7 @@ export function RepositorySelector({ value, onChange }: RepositorySelectorProps)
                             Connect your GitHub account to create tasks from repositories.
                         </p>
                     </div>
-                    <LemonButton
+                    <Button
                         icon={<IconArrowRight />}
                         type="primary"
                         className="w-max"
@@ -64,9 +64,9 @@ export function RepositorySelector({ value, onChange }: RepositorySelectorProps)
                         })}
                     >
                         Connect GitHub
-                    </LemonButton>
+                    </Button>
                 </div>
-            </LemonCard>
+            </Card>
         )
     }
 
@@ -74,7 +74,7 @@ export function RepositorySelector({ value, onChange }: RepositorySelectorProps)
         <div className="space-y-4">
             <div>
                 <label className="block text-sm font-medium mb-2">GitHub Integration</label>
-                <LemonSelect
+                <Select
                     value={value.integrationId}
                     onChange={(integrationId) => {
                         const integration = githubIntegrations.find((i: any) => i.id === integrationId)
@@ -98,7 +98,7 @@ export function RepositorySelector({ value, onChange }: RepositorySelectorProps)
             {selectedRepoData && (
                 <div>
                     <label className="block text-sm font-medium mb-2">Repository</label>
-                    <LemonSelect
+                    <Select
                         value={value.repository}
                         onChange={(repository) =>
                             onChange({

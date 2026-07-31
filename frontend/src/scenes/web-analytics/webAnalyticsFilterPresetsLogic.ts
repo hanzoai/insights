@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
 import api, { PaginatedResponse } from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { objectsEqual, toParams } from 'lib/utils'
 
 import { WebAnalyticsFilterPresetType } from '~/types'
@@ -146,7 +146,7 @@ export const webAnalyticsFilterPresetsLogic = kea<webAnalyticsFilterPresetsLogic
                         actions.applyPreset(preset)
                     }
                 } catch {
-                    lemonToast.error('Preset not found or has been deleted')
+                    toast.error('Preset not found or has been deleted')
 
                     const { presetId: _, ...restParams } = router.values.searchParams
                     router.actions.replace(router.values.location.pathname, restParams)
@@ -169,7 +169,7 @@ export const webAnalyticsFilterPresetsLogic = kea<webAnalyticsFilterPresetsLogic
         },
         updatePresetSuccess: ({ savedPreset }) => {
             if (savedPreset) {
-                lemonToast.success(`Preset "${savedPreset.name}" updated`)
+                toast.success(`Preset "${savedPreset.name}" updated`)
                 if (values.appliedPreset?.short_id === savedPreset.short_id) {
                     actions.setAppliedPreset(savedPreset)
                 }
@@ -177,11 +177,11 @@ export const webAnalyticsFilterPresetsLogic = kea<webAnalyticsFilterPresetsLogic
             }
         },
         saveCurrentFiltersAsPresetSuccess: ({ savedPreset }) => {
-            lemonToast.success(`Preset "${savedPreset.name}" saved`)
+            toast.success(`Preset "${savedPreset.name}" saved`)
             actions.setAppliedPreset(savedPreset)
         },
         saveCurrentFiltersAsPresetFailure: ({ errorObject }) => {
-            lemonToast.error(`Failed to save preset: ${errorObject?.detail || 'Unknown error'}`)
+            toast.error(`Failed to save preset: ${errorObject?.detail || 'Unknown error'}`)
         },
         clearPreset: () => {
             actions.clearPropertyFilters()

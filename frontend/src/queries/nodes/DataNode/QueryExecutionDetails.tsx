@@ -4,8 +4,8 @@ import { useState } from 'react'
 
 import { IconChip } from '@hanzo/icons'
 
-import { Popover } from 'lib/lemon-ui/Popover'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Popover } from 'lib/elements/Popover'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { humanFriendlyMilliseconds, humanizeBytes } from '~/lib/utils'
 

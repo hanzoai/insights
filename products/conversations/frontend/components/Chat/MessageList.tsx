@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
 import type { ChatMessage, MessageDeliveryStatus } from '../../types'
 import { Message } from './Message'

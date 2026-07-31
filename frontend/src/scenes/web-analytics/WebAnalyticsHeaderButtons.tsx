@@ -5,9 +5,9 @@ import { IconBolt } from '@hanzo/icons'
 
 import { LiveUserCount } from 'lib/components/LiveUserCount'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Switch } from 'lib/elements/Switch'
+import { Tag } from 'lib/elements/Tag'
+import { Popover } from 'lib/elements/Popover'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { WebAnalyticsMenu } from 'scenes/web-analytics/WebAnalyticsMenu'
@@ -49,9 +49,9 @@ export function WebAnalyticsHeaderButtons(): JSX.Element {
                             <div className="flex items-center gap-2 mb-2">
                                 <h3 className="font-semibold flex items-center gap-2">
                                     About the New Query Engine
-                                    <LemonTag type="warning" className="uppercase">
+                                    <Tag type="warning" className="uppercase">
                                         Beta
-                                    </LemonTag>
+                                    </Tag>
                                 </h3>
                             </div>
                             <p className="mb-3">
@@ -100,7 +100,7 @@ export function WebAnalyticsHeaderButtons(): JSX.Element {
                         <span className="text-sm font-medium">
                             {isUsingNewEngine ? 'New Query Engine' : 'Regular Query Engine'}
                         </span>
-                        <LemonSwitch checked={!!isUsingNewEngine} onChange={handleToggleEngine} size="small" />
+                        <Switch checked={!!isUsingNewEngine} onChange={handleToggleEngine} size="small" />
                     </div>
                 </Popover>
             )}

@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconEllipsis, IconSort, IconTrash } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonCheckbox, LemonInput, LemonModal, Spinner } from '@hanzo/lemon-ui'
+import { Badge, Button, Checkbox, Input, Modal, Spinner } from '@hanzo/elements'
 
-import { LemonMenuItem } from 'lib/lemon-ui/LemonMenu/LemonMenu'
+import { MenuItem } from 'lib/elements/Menu/Menu'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { sessionRecordingCollectionsLogic } from 'scenes/session-recordings/collections/sessionRecordingCollectionsLogic'
 import { SettingsBar, SettingsMenu } from 'scenes/session-recordings/components/PanelSettings'
@@ -143,7 +143,7 @@ function ConfirmDeleteRecordings({ shortId }: { shortId?: string }): JSX.Element
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isDeleteSelectedRecordingsDialogOpen}
             onClose={handleClose}
             title="Confirm deletion"
@@ -158,7 +158,7 @@ function ConfirmDeleteRecordings({ shortId }: { shortId?: string }): JSX.Element
                     <label className="text-sm">
                         To confirm, please type <strong>{DELETE_CONFIRMATION_TEXT}</strong> below:
                     </label>
-                    <LemonInput
+                    <Input
                         value={deleteConfirmationText}
                         onChange={setDeleteConfirmationText}
                         placeholder={DELETE_CONFIRMATION_TEXT}
@@ -171,10 +171,10 @@ function ConfirmDeleteRecordings({ shortId }: { shortId?: string }): JSX.Element
                 </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
-                <LemonButton type="secondary" onClick={handleClose}>
+                <Button type="secondary" onClick={handleClose}>
                     Cancel
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="primary"
                     disabledReason={
                         deleteConfirmationText !== DELETE_CONFIRMATION_TEXT
@@ -184,9 +184,9 @@ function ConfirmDeleteRecordings({ shortId }: { shortId?: string }): JSX.Element
                     onClick={() => handleDeleteSelectedRecordings(shortId)}
                 >
                     Delete
-                </LemonButton>
+                </Button>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -203,7 +203,7 @@ function NewCollectionModal(): JSX.Element {
     }
 
     return (
-        <LemonModal isOpen={isNewCollectionDialogOpen} onClose={handleClose} title="Create collection" maxWidth="500px">
+        <Modal isOpen={isNewCollectionDialogOpen} onClose={handleClose} title="Create collection" maxWidth="500px">
             <div className="space-y-4">
                 <p>
                     Collections help you organize and save recordings for later analysis. This will create a new
@@ -212,7 +212,7 @@ function NewCollectionModal(): JSX.Element {
                 </p>
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Collection name</label>
-                    <LemonInput
+                    <Input
                         value={newCollectionName}
                         onChange={setNewCollectionName}
                         placeholder="e.g., Bug reports, User onboarding, Feature usage"
@@ -223,18 +223,18 @@ function NewCollectionModal(): JSX.Element {
             </div>
 
             <div className="flex justify-end gap-2 mt-8">
-                <LemonButton type="secondary" onClick={handleClose}>
+                <Button type="secondary" onClick={handleClose}>
                     Cancel
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="primary"
                     disabledReason={newCollectionName.length === 0 ? 'Collection name is required' : undefined}
                     onClick={() => handleCreateNewCollectionBulkAdd(loadPlaylists)}
                 >
                     Create collection
-                </LemonButton>
+                </Button>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -271,8 +271,8 @@ export function SessionRecordingsPlaylistTopSettings({
         AccessControlLevel.Editor
     )
 
-    const getActionsMenuItems = (): LemonMenuItem[] => {
-        const menuItems: LemonMenuItem[] = [
+    const getActionsMenuItems = (): MenuItem[] => {
+        const menuItems: MenuItem[] = [
             {
                 label: 'Add to new collection...',
                 onClick: () => setIsNewCollectionDialogOpen(true),
@@ -339,7 +339,7 @@ export function SessionRecordingsPlaylistTopSettings({
     return (
         <SettingsBar border="none" className="justify-between">
             <div className="flex items-center">
-                <LemonCheckbox
+                <Checkbox
                     disabledReason={
                         recordings.length === 0
                             ? 'No recordings'
@@ -369,7 +369,7 @@ export function SessionRecordingsPlaylistTopSettings({
                 {selectedRecordingsIds.length > 0 && (
                     <SettingsMenu
                         items={getActionsMenuItems()}
-                        label={<LemonBadge content={selectedRecordingsIds.length.toString()} size="small" />}
+                        label={<Badge content={selectedRecordingsIds.length.toString()} size="small" />}
                         data-attr="bulk-action-menu"
                     />
                 )}

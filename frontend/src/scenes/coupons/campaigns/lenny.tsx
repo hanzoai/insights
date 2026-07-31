@@ -1,5 +1,5 @@
 import { IconX } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { Logo } from 'lib/brand/Logo'
 

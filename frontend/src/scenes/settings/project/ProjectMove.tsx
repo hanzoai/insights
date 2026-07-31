@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Dispatch, SetStateAction, useState } from 'react'
 
 import { IconArrowRight } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Input, Modal, Select } from '@hanzo/elements'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -26,28 +26,28 @@ export function MoveProjectModal({
     const [isConfirmed, setConfirmed] = useState(false)
 
     return (
-        <LemonModal
+        <Modal
             title="Move the project to another organization?"
             onClose={!projectBeingMovedLoading ? () => setIsOpen(false) : undefined}
             closable={!projectBeingMovedLoading}
             maxWidth="30rem"
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         disabledReason={projectBeingMovedLoading && 'Moving...'}
                         type="secondary"
                         onClick={() => setIsOpen(false)}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="secondary"
                         disabled={!isConfirmed}
                         loading={projectBeingMovedLoading}
                         data-attr="move-project-ok"
                         status="danger"
                         onClick={currentProject ? () => moveProject(currentProject, organization.id) : undefined}
-                    >{`Move ${currentProject ? currentProject.name : 'the current project'}`}</LemonButton>
+                    >{`Move ${currentProject ? currentProject.name : 'the current project'}`}</Button>
                 </>
             }
             isOpen={isOpen}
@@ -59,7 +59,7 @@ export function MoveProjectModal({
             <p>
                 Please type <strong>{currentProject ? currentProject.name : "this project's name"}</strong> to confirm.
             </p>
-            <LemonInput
+            <Input
                 type="text"
                 onChange={(value) => {
                     if (currentProject) {
@@ -67,7 +67,7 @@ export function MoveProjectModal({
                     }
                 }}
             />
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -91,7 +91,7 @@ export function ProjectMove(): JSX.Element {
             </p>
 
             <div className="flex items-center gap-2">
-                <LemonSelect
+                <Select
                     options={otherOrganizations.map((o) => ({
                         label: o.name,
                         value: o.id,
@@ -105,7 +105,7 @@ export function ProjectMove(): JSX.Element {
                     disabledReason={restrictedReason ?? moveProjectDisabledReason}
                 />
 
-                <LemonButton
+                <Button
                     status="danger"
                     type="secondary"
                     onClick={() => setIsModalVisible(true)}
@@ -118,7 +118,7 @@ export function ProjectMove(): JSX.Element {
                     }
                 >
                     Move {currentProject?.name || 'the current project'}
-                </LemonButton>
+                </Button>
             </div>
             {targetOrganization && (
                 <MoveProjectModal

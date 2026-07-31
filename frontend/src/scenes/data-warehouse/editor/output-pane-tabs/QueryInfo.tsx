@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 
 import { IconRevert, IconTarget, IconX } from '@hanzo/icons'
-import { LemonDialog, LemonTable, Link, Spinner } from '@hanzo/lemon-ui'
+import { Dialog, Table, Link, Spinner } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
-import { LemonSegmentedButton } from 'lib/lemon-ui/LemonSegmentedButton'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { LemonTag, LemonTagType } from 'lib/lemon-ui/LemonTag'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Progress } from 'lib/elements/Progress'
+import { SegmentedButton } from 'lib/elements/SegmentedButton'
+import { Select } from 'lib/elements/Select'
+import { Tag, TagType } from 'lib/elements/Tag'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { humanFriendlyDetailedTime, humanFriendlyDuration, humanFriendlyNumber } from 'lib/utils'
 import { dataWarehouseViewsLogic } from 'scenes/data-warehouse/saved_queries/dataWarehouseViewsLogic'
@@ -158,10 +158,10 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                 <div>
                     <div className="flex flex-row items-center gap-2">
                         <h3 className="mb-0">Materialization</h3>
-                        <LemonTag type="warning">BETA</LemonTag>
+                        <Tag type="warning">BETA</Tag>
                         {savedQuery?.latest_error && savedQuery.status === 'Failed' && (
                             <Tooltip title={savedQuery.latest_error}>
-                                <LemonTag type="danger">Error</LemonTag>
+                                <Tag type="danger">Error</Tag>
                             </Tooltip>
                         )}
                     </div>
@@ -176,7 +176,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                     </div>
                                 )}
                                 <div className="flex gap-4 mt-2">
-                                    <LemonButton
+                                    <Button
                                         className="whitespace-nowrap"
                                         loading={startingMaterialization || currentJobStatus === 'Running'}
                                         disabledReason={sync}
@@ -199,8 +199,8 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                             : currentJobStatus === 'Running'
                                               ? 'Running...'
                                               : 'Sync now'}
-                                    </LemonButton>
-                                    <LemonSelect
+                                    </Button>
+                                    <Select
                                         className="h-9"
                                         disabledReason={sync}
                                         value={
@@ -223,14 +223,14 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                         options={OPTIONS}
                                     />
                                     {editingView && (
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             size="small"
                                             tooltip="Revert materialized view to view"
                                             disabledReason={revert}
                                             icon={<IconRevert />}
                                             onClick={() => {
-                                                LemonDialog.open({
+                                                Dialog.open({
                                                     title: 'Revert materialization',
                                                     maxWidth: '30rem',
                                                     description:
@@ -264,7 +264,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                     </Link>
                                     .
                                 </p>
-                                <LemonButton
+                                <Button
                                     size="small"
                                     onClick={() => {
                                         if (editingView) {
@@ -277,7 +277,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                     loading={updatingDataWarehouseSavedQuery}
                                 >
                                     {editingView ? 'Materialize' : 'Save and materialize'}
-                                </LemonButton>
+                                </Button>
                             </div>
                         )}
                     </div>
@@ -290,7 +290,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                 The last runs for this materialized view. These can be scheduled or run on demand.
                             </p>
                         </div>
-                        <LemonTable
+                        <Table
                             size="small"
                             loading={initialDataWarehouseSavedQueryLoading}
                             dataSource={dataModelingJobs?.results || []}
@@ -300,7 +300,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                     dataIndex: 'status',
                                     render: (_, job: DataModelingJob) => {
                                         const { status, error, rows_materialized, rows_expected } = job
-                                        const statusToType: Record<string, LemonTagType> = {
+                                        const statusToType: Record<string, TagType> = {
                                             Completed: 'success',
                                             Failed: 'danger',
                                             Running: 'warning',
@@ -325,7 +325,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                                     )}
                                                 >
                                                     <div className="w-[68px]">
-                                                        <LemonProgress percent={progressPercentage} />
+                                                        <Progress percent={progressPercentage} />
                                                     </div>
                                                 </Tooltip>
                                             )
@@ -333,10 +333,10 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
 
                                         return error && status !== 'Completed' ? (
                                             <Tooltip title={error}>
-                                                <LemonTag type={type}>{status}</LemonTag>
+                                                <Tag type={type}>{status}</Tag>
                                             </Tooltip>
                                         ) : (
-                                            <LemonTag type={type}>{status}</LemonTag>
+                                            <Tag type={type}>{status}</Tag>
                                         )
                                     },
                                 },
@@ -377,14 +377,14 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                             footer={
                                 hasMoreJobsToLoad && (
                                     <div className="flex items-center m-2">
-                                        <LemonButton
+                                        <Button
                                             center
                                             fullWidth
                                             onClick={() => loadOlderDataModelingJobs()}
                                             loading={initialDataWarehouseSavedQueryLoading}
                                         >
                                             Load older runs
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 )
                             }
@@ -397,7 +397,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                             <h3>Dependencies</h3>
                             <p className="text-xs">Dependencies are tables that this query uses.</p>
                         </div>
-                        <LemonTable
+                        <Table
                             size="small"
                             columns={[
                                 {
@@ -466,7 +466,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                     <h3 className="mb-1">Tables we use</h3>
                                     <p className="text-xs mb-0">Tables and views that this query relies on.</p>
                                 </div>
-                                <LemonSegmentedButton
+                                <SegmentedButton
                                     value={upstreamViewMode}
                                     onChange={(mode) => setUpstreamViewMode(mode)}
                                     options={[
@@ -484,7 +484,7 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                             </div>
                         </div>
                         {upstreamViewMode === 'table' ? (
-                            <LemonTable
+                            <Table
                                 size="small"
                                 columns={[
                                     {
@@ -530,9 +530,9 @@ export function QueryInfo({ tabId }: QueryInfoProps): JSX.Element {
                                             return (
                                                 <div className="flex flex-wrap gap-1">
                                                     {upstreamNodes.map((upstreamNode) => (
-                                                        <LemonTag key={upstreamNode.id} type="primary">
+                                                        <Tag key={upstreamNode.id} type="primary">
                                                             {upstreamNode.name}
-                                                        </LemonTag>
+                                                        </Tag>
                                                     ))}
                                                 </div>
                                             )

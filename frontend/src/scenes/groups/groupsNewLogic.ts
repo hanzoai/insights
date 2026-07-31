@@ -6,7 +6,7 @@ import { router } from 'kea-router'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { Scene } from 'scenes/sceneTypes'
@@ -174,10 +174,10 @@ export const groupsNewLogic = kea<groupsNewLogicType>([
                 saveGroup: async ({ groupParams }): Promise<Group> => {
                     try {
                         const newGroup = await api.groups.create(groupParams)
-                        lemonToast.success('Group saved')
+                        toast.success('Group saved')
                         return newGroup
                     } catch (error) {
-                        lemonToast.error('Failed to save group')
+                        toast.error('Failed to save group')
                         throw error
                     }
                 },
@@ -188,7 +188,7 @@ export const groupsNewLogic = kea<groupsNewLogicType>([
     listeners(({ actions, values }) => ({
         submitGroup: () => {
             if (values.groupHasErrors) {
-                lemonToast.error('There was an error submitting this group. Make sure all fields are filled correctly.')
+                toast.error('There was an error submitting this group. Make sure all fields are filled correctly.')
             }
         },
         saveGroupSuccess: () => actions.resetGroup(),

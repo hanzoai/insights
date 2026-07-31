@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tooltip } from '@hanzo/elements'
 
 import { cn } from 'lib/utils/css-classes'
 import { removeProjectIdIfPresent } from 'lib/utils/router-utils'
@@ -78,7 +78,7 @@ export function FloatingSuggestionsDisplay({
                     <ul className="flex items-center justify-center flex-wrap gap-1.5">
                         {QUESTION_SUGGESTIONS_DATA.map((group) => (
                             <li key={group.label}>
-                                <LemonButton
+                                <Button
                                     key={group.label}
                                     onClick={() => handleSuggestionGroupClick(group)}
                                     size="xsmall"
@@ -90,7 +90,7 @@ export function FloatingSuggestionsDisplay({
                                     disabled={!dataProcessingAccepted}
                                 >
                                     {group.label}
-                                </LemonButton>
+                                </Button>
                             </li>
                         ))}
                         {additionalSuggestions?.map((suggestion, index) => (

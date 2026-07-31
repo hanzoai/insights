@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AssigneeLabelDisplay } from '../Assignee/AssigneeDisplay'
 import { AssigneeSelect } from '../Assignee/AssigneeSelect'
@@ -13,9 +13,9 @@ export const AssigneeFilter = (): JSX.Element => {
     return (
         <AssigneeSelect assignee={assignee ?? null} onChange={(assignee) => setAssignee(assignee)}>
             {(displayAssignee) => (
-                <LemonButton type="secondary" size="small">
+                <Button type="secondary" size="small">
                     <AssigneeLabelDisplay assignee={displayAssignee} placeholder="Any assignee" />
-                </LemonButton>
+                </Button>
             )}
         </AssigneeSelect>
     )

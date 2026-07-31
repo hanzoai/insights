@@ -1,4 +1,4 @@
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { JumpToTimestampForm } from './JumpToTimestampForm'
 
@@ -14,10 +14,10 @@ export function JumpToTimestampPicker({
             <JumpToTimestampForm onSubmit={onApply}>
                 {({ dateRange, submit }) => (
                     <div className="flex justify-between mt-3">
-                        <LemonButton size="small" type="secondary" onClick={onClose}>
+                        <Button size="small" type="secondary" onClick={onClose}>
                             Back
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             size="small"
                             type="primary"
                             disabledReason={!dateRange ? 'Enter a valid timestamp' : undefined}
@@ -25,7 +25,7 @@ export function JumpToTimestampPicker({
                             data-attr="jump-to-timestamp-apply"
                         >
                             Apply
-                        </LemonButton>
+                        </Button>
                     </div>
                 )}
             </JumpToTimestampForm>

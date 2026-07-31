@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonButton, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Link, Tooltip } from '@hanzo/elements'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
-import { IconPlayCircle } from 'lib/lemon-ui/icons'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconOpenInNew } from 'lib/elements/icons'
+import { IconPlayCircle } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { PropertyDefinitionType } from '~/types'
@@ -56,7 +56,7 @@ export function SessionPreview({ sessionId, onClose }: SessionPreviewProps): JSX
                 </Link>
                 {hasRecording && (
                     <Tooltip title="Watch recording">
-                        <LemonButton
+                        <Button
                             size="small"
                             icon={<IconPlayCircle />}
                             to={urls.replaySingle(sessionId)}
@@ -76,7 +76,7 @@ export function SessionPreview({ sessionId, onClose }: SessionPreviewProps): JSX
             </ScrollableShadows>
 
             <div className="border-t px-2 py-2">
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     fullWidth
@@ -86,7 +86,7 @@ export function SessionPreview({ sessionId, onClose }: SessionPreviewProps): JSX
                     sideIcon={<IconOpenInNew />}
                 >
                     View session details
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

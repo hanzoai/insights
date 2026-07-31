@@ -6,7 +6,7 @@ import api from 'lib/api'
 import { TriggerExportProps, downloadBlob, downloadExportedAsset } from 'lib/components/ExportButton/exporter'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { delay } from 'lib/utils'
 import { newInternalTab } from 'lib/utils/newInternalTab'
@@ -104,9 +104,9 @@ export const exportsLogic = kea<exportsLogicType>([
                         type: exportData.export_context.mediaType,
                     })
                     downloadBlob(blob, exportData.export_context.filename)
-                    lemonToast.success('Export complete!')
+                    toast.success('Export complete!')
                 } catch (e: any) {
-                    lemonToast.error(`Export failed with error: ${e.message}`)
+                    toast.error(`Export failed with error: ${e.message}`)
                 }
                 return
             }
@@ -115,7 +115,7 @@ export const exportsLogic = kea<exportsLogicType>([
         },
         createExportSuccess: () => {
             if (featureFlagLogic.findMounted()?.values.featureFlags?.[FEATURE_FLAGS.UX_REMOVE_SIDEPANEL]) {
-                lemonToast.info('Export starting...', {
+                toast.info('Export starting...', {
                     button: {
                         label: 'View exports',
                         action: () => newInternalTab(urls.exports()),
@@ -124,7 +124,7 @@ export const exportsLogic = kea<exportsLogicType>([
                 })
             } else {
                 actions.openSidePanel(SidePanelTab.Exports)
-                lemonToast.info('Export starting...')
+                toast.info('Export starting...')
             }
             actions.loadExports()
         },
@@ -140,7 +140,7 @@ export const exportsLogic = kea<exportsLogicType>([
         createStaticCohort: async ({ query, name }) => {
             const toastId = 'toast-' + Math.random()
             try {
-                lemonToast.info('Saving cohort...', { toastId, autoClose: false })
+                toast.info('Saving cohort...', { toastId, autoClose: false })
                 const cohort: CohortType = await api.create('api/cohort', {
                     is_static: true,
                     name: name || 'Query cohort',
@@ -148,8 +148,8 @@ export const exportsLogic = kea<exportsLogicType>([
                 })
                 cohortsModel.actions.cohortCreated(cohort)
                 await delay(500) // just in case the toast is too fast
-                lemonToast.dismiss(toastId)
-                lemonToast.success('Cohort saved', {
+                toast.dismiss(toastId)
+                toast.success('Cohort saved', {
                     toastId: `${toastId}-success`,
                     button: {
                         label: 'View cohort',
@@ -157,8 +157,8 @@ export const exportsLogic = kea<exportsLogicType>([
                     },
                 })
             } catch {
-                lemonToast.dismiss(toastId)
-                lemonToast.error('Cohort save failed')
+                toast.dismiss(toastId)
+                toast.error('Cohort save failed')
             }
         },
         setAssetFormat: () => {
@@ -241,14 +241,14 @@ export const exportsLogic = kea<exportsLogicType>([
                             if (response && response.has_content) {
                                 await downloadExportedAsset(response)
                             } else if (response && response.exception) {
-                                lemonToast.error('Export failed: ' + response.exception)
+                                toast.error('Export failed: ' + response.exception)
                             }
                         } catch (error) {
                             const apiError = error as { data?: APIErrorType }
                             // Show a survey when the user reaches the export limit
                             if (apiError?.data?.attr === 'export_limit_exceeded') {
                                 actions.setHasReachedExportFullVideoLimit(true)
-                                lemonToast.error(apiError?.data?.detail || 'You reached your export limit.', {
+                                toast.error(apiError?.data?.detail || 'You reached your export limit.', {
                                     autoClose: false,
                                     button: {
                                         label: 'I want more',
@@ -259,7 +259,7 @@ export const exportsLogic = kea<exportsLogicType>([
                                 })
                             } else {
                                 const message = error instanceof Error ? error.message : String(error)
-                                lemonToast.error('Export failed: ' + message)
+                                toast.error('Export failed: ' + message)
                             }
                         }
                     })()

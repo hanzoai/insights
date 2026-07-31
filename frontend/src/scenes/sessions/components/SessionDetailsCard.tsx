@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconCollapse, IconExpand } from '@hanzo/icons'
-import { LemonButton, LemonCard, LemonDivider, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Button, Card, Divider, Tag, Link } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 
@@ -44,7 +44,7 @@ function DetailSection({
                 className="flex ml-1 gap-2 items-center justify-start cursor-pointer hover:bg-surface-primary"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <LemonButton
+                <Button
                     icon={isExpanded ? <IconCollapse /> : <IconExpand />}
                     size="small"
                     onClick={(e) => {
@@ -86,17 +86,17 @@ export function SessionDetailsCard(): JSX.Element | null {
         (sessionData.urls && sessionData.urls.length > 0)
 
     return (
-        <LemonCard className="p-2" hoverEffect={false}>
+        <Card className="p-2" hoverEffect={false}>
             <DetailSection title="Session Properties" defaultExpanded={true} showBorder={false}>
                 {sessionData.channel_type && (
-                    <DetailRow label="Channel type" value={<LemonTag>{sessionData.channel_type}</LemonTag>} />
+                    <DetailRow label="Channel type" value={<Tag>{sessionData.channel_type}</Tag>} />
                 )}
                 <DetailRow
                     label="Is bounce"
                     value={
-                        <LemonTag type={sessionData.is_bounce ? 'warning' : 'success'}>
+                        <Tag type={sessionData.is_bounce ? 'warning' : 'success'}>
                             {sessionData.is_bounce ? 'Yes' : 'No'}
-                        </LemonTag>
+                        </Tag>
                     }
                 />
                 {sessionData.entry_hostname && <DetailRow label="Entry hostname" value={sessionData.entry_hostname} />}
@@ -184,7 +184,7 @@ export function SessionDetailsCard(): JSX.Element | null {
 
                         return (
                             <div key={event.id} className="flex flex-col gap-1">
-                                {index > 0 && <LemonDivider className="my-2" />}
+                                {index > 0 && <Divider className="my-2" />}
                                 <div className="flex gap-2 items-center">
                                     <span className="text-secondary min-w-32">
                                         <TZLabel time={event.timestamp} formatDate="MMM DD, h:mm A" />:
@@ -204,6 +204,6 @@ export function SessionDetailsCard(): JSX.Element | null {
                     })}
                 </DetailSection>
             )}
-        </LemonCard>
+        </Card>
     )
 }

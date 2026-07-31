@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconArrowLeft } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
+import { Banner } from 'lib/elements/Banner'
+import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { userLogic } from '../../../userLogic'
@@ -49,10 +49,10 @@ export function SignupForm(): JSX.Element | null {
             <div className="deprecated-space-y-2">
                 <h2>{panelTitle}</h2>
                 {!isSignupPanelOnboardingSubmitting && signupPanelOnboardingManualErrors?.generic && (
-                    <LemonBanner type="error">
+                    <Banner type="error">
                         {signupPanelOnboardingManualErrors.generic?.detail ||
                             'Could not complete your signup. Please try again.'}
-                    </LemonBanner>
+                    </Banner>
                 )}
                 {panel === 0 ? (
                     <SignupPanelEmail />
@@ -60,7 +60,7 @@ export function SignupForm(): JSX.Element | null {
                     <>
                         <SignupPanelAuth />
                         <div className="flex justify-center">
-                            <LemonButton
+                            <Button
                                 icon={<IconArrowLeft />}
                                 onClick={() => setPanel(0)}
                                 size="small"
@@ -68,14 +68,14 @@ export function SignupForm(): JSX.Element | null {
                                 data-attr="signup-go-back"
                             >
                                 or go back
-                            </LemonButton>
+                            </Button>
                         </div>
                     </>
                 ) : (
                     <>
                         <SignupPanelOnboarding />
                         <div className="flex justify-center">
-                            <LemonButton
+                            <Button
                                 icon={<IconArrowLeft />}
                                 onClick={() => setPanel(panel - 1)}
                                 size="small"
@@ -83,7 +83,7 @@ export function SignupForm(): JSX.Element | null {
                                 data-attr="signup-go-back"
                             >
                                 or go back
-                            </LemonButton>
+                            </Button>
                         </div>
                     </>
                 )}
@@ -97,9 +97,9 @@ export function SignupForm(): JSX.Element | null {
         <div className="deprecated-space-y-2">
             <h2>{panelTitle}</h2>
             {!isSignupPanel2Submitting && signupPanel2ManualErrors?.generic && (
-                <LemonBanner type="error">
+                <Banner type="error">
                     {signupPanel2ManualErrors.generic?.detail || 'Could not complete your signup. Please try again.'}
-                </LemonBanner>
+                </Banner>
             )}
             {panel === 0 ? (
                 <SignupPanel1 />
@@ -107,7 +107,7 @@ export function SignupForm(): JSX.Element | null {
                 <>
                     <SignupPanel2 />
                     <div className="flex justify-center">
-                        <LemonButton
+                        <Button
                             icon={<IconArrowLeft />}
                             onClick={() => setPanel(panel - 1)}
                             size="small"
@@ -115,7 +115,7 @@ export function SignupForm(): JSX.Element | null {
                             data-attr="signup-go-back"
                         >
                             or go back
-                        </LemonButton>
+                        </Button>
                     </div>
                 </>
             )}

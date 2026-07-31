@@ -1,4 +1,4 @@
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 
@@ -26,7 +26,7 @@ export function ErrorTrackingClientSuppression({ disabled }: { disabled: boolean
                             </div>
                             {!disabled && <Rules.Actions rule={rule} editing={editing} />}
                         </div>
-                        <LemonDivider className="my-0" />
+                        <Divider className="my-0" />
                         <div className="p-2">
                             <Rules.Filters
                                 rule={rule}

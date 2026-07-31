@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
 import { IconCopy, IconFilter, IconGraph, IconRefresh, IconX } from '@hanzo/icons'
-import { LemonButton, LemonSelect, LemonSelectOptions, LemonSwitch } from '@hanzo/lemon-ui'
+import { Button, Select, SelectOptions, Switch } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { OPERATOR_OPTIONS } from 'scenes/surveys/SurveyResponseFilters'
 import { QUESTION_TYPE_ICON_MAP, SurveyQuestionLabel } from 'scenes/surveys/constants'
@@ -121,7 +121,7 @@ export function SurveyResultsFiltersBar(): JSX.Element {
                         onChange={(dateFrom, dateTo) => setDateRange({ date_from: dateFrom, date_to: dateTo })}
                     />
                     {questionWithFiltersAvailable.length > 0 && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             icon={<IconFilter />}
@@ -131,7 +131,7 @@ export function SurveyResultsFiltersBar(): JSX.Element {
                         >
                             Filter by response
                             {activeAnswerFiltersCount > 0 && ` (${activeAnswerFiltersCount})`}
-                        </LemonButton>
+                        </Button>
                     )}
                     <PropertyFilters
                         propertyFilters={propertyFilters}
@@ -149,17 +149,17 @@ export function SurveyResultsFiltersBar(): JSX.Element {
                     />
                 </div>
                 <div className="flex flex-wrap gap-2 items-center">
-                    <LemonSwitch
+                    <Switch
                         checked={showArchivedResponses}
                         onChange={setShowArchivedResponses}
                         label="Show archived"
                     />
-                    <LemonButton size="small" type="secondary" icon={<IconGraph />} to={surveyAsInsightURL}>
+                    <Button size="small" type="secondary" icon={<IconGraph />} to={surveyAsInsightURL}>
                         View insights
-                    </LemonButton>
-                    <LemonButton size="small" type="secondary" icon={<IconRefresh />} onClick={handleResetFilters}>
+                    </Button>
+                    <Button size="small" type="secondary" icon={<IconRefresh />} onClick={handleResetFilters}>
                         Reset filters
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
 
@@ -175,7 +175,7 @@ export function SurveyResultsFiltersBar(): JSX.Element {
 
                         return (
                             <React.Fragment key={question.id}>
-                                {index > 0 && <LemonDivider className="my-0" label={FilterLogicalOperator.And} />}
+                                {index > 0 && <Divider className="my-0" label={FilterLogicalOperator.And} />}
                                 <div className="grid grid-cols-6 gap-2 p-2 items-center">
                                     <div className="col-span-3">
                                         <span className="font-medium">{question.question}</span>
@@ -188,10 +188,10 @@ export function SurveyResultsFiltersBar(): JSX.Element {
                                         </div>
                                     </div>
                                     <div>
-                                        <LemonSelect
+                                        <Select
                                             value={currentFilter?.operator}
                                             onChange={(val) => handleUpdateFilter(question.id ?? '', 'operator', val)}
-                                            options={operators as LemonSelectOptions<PropertyOperator>}
+                                            options={operators as SelectOptions<PropertyOperator>}
                                             className="w-full"
                                         />
                                     </div>

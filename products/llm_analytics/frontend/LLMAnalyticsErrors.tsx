@@ -3,9 +3,9 @@ import { combineUrl, router } from 'kea-router'
 
 import { IconCopy } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { urls } from 'scenes/urls'
 
@@ -94,7 +94,7 @@ export function LLMAnalyticsErrors(): JSX.Element {
                                             {displayValue}
                                         </Link>
                                     </Tooltip>
-                                    <LemonButton
+                                    <Button
                                         size="xsmall"
                                         noPadding
                                         icon={<IconCopy />}

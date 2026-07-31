@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconFilter } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonDropdown } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Dropdown } from '@hanzo/elements'
 
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 
@@ -59,7 +59,7 @@ export function IntegrationFilter(): JSX.Element {
     }
 
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             visible={showPopover}
             matchWidth={false}
@@ -67,17 +67,17 @@ export function IntegrationFilter(): JSX.Element {
             onVisibilityChange={setShowPopover}
             overlay={
                 <div className="max-w-80 space-y-px p-1">
-                    <LemonButton fullWidth size="small" onClick={handleToggleAll} className="justify-start">
+                    <Button fullWidth size="small" onClick={handleToggleAll} className="justify-start">
                         <span className="flex items-center gap-2">
-                            <LemonCheckbox checked={isAllSelected} className="pointer-events-none" />
+                            <Checkbox checked={isAllSelected} className="pointer-events-none" />
                             <span className="font-semibold">
                                 {isAllSelected || isSomeSelected ? 'Clear all' : 'Select all'}
                             </span>
                         </span>
-                    </LemonButton>
+                    </Button>
                     <div className="border-t border-border my-1" />
                     {allAvailableSourcesWithStatus.map((source) => (
-                        <LemonButton
+                        <Button
                             key={source.id}
                             fullWidth
                             size="small"
@@ -85,7 +85,7 @@ export function IntegrationFilter(): JSX.Element {
                             className="justify-start"
                         >
                             <span className="flex items-center gap-2">
-                                <LemonCheckbox
+                                <Checkbox
                                     checked={selectedIds.includes(source.id)}
                                     className="pointer-events-none"
                                 />
@@ -99,14 +99,14 @@ export function IntegrationFilter(): JSX.Element {
                                         <StatusIcon status={source.status} message={source.statusMessage} />
                                     )}
                             </span>
-                        </LemonButton>
+                        </Button>
                     ))}
                 </div>
             }
         >
-            <LemonButton type="secondary" size="small" icon={<IconFilter />} data-attr="integration-filter">
+            <Button type="secondary" size="small" icon={<IconFilter />} data-attr="integration-filter">
                 {displayValue()}
-            </LemonButton>
-        </LemonDropdown>
+            </Button>
+        </Dropdown>
     )
 }

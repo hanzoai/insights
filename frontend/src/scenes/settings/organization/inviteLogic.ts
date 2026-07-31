@@ -4,7 +4,7 @@ import { router, urlToAction } from 'kea-router'
 
 import api, { PaginatedResponse } from 'lib/api'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { pluralize } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -116,7 +116,7 @@ export const inviteLogic = kea<inviteLogicType>([
                 deleteInvite: async (invite: OrganizationInviteType) => {
                     await api.delete(`api/organizations/@current/invites/${invite.id}/`)
                     preflightLogic.actions.loadPreflight() // Make sure licensed_users_available is updated
-                    lemonToast.success(`Invite for ${invite.target_email} has been canceled`)
+                    toast.success(`Invite for ${invite.target_email} has been canceled`)
                     return values.invites.filter((thisInvite) => thisInvite.id !== invite.id)
                 },
             },
@@ -221,9 +221,9 @@ export const inviteLogic = kea<inviteLogicType>([
         inviteTeamMembersSuccess: (): void => {
             const inviteCount = values.invitedTeamMembersInternal.length
             if (values.preflight?.email_service_available) {
-                lemonToast.success(`Invited ${pluralize(inviteCount, 'new team member')}`)
+                toast.success(`Invited ${pluralize(inviteCount, 'new team member')}`)
             } else {
-                lemonToast.success('Team invite links generated')
+                toast.success('Team invite links generated')
             }
 
             organizationLogic.actions.loadCurrentOrganization()

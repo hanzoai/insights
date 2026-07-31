@@ -1,6 +1,6 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Banner, Skeleton } from '@hanzo/elements'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import { ErrorTrackingIssueCard } from 'scenes/max/messages/ErrorTrackingIssueCard'
@@ -49,9 +49,9 @@ function RelatedErrorsTabContent(): JSX.Element {
 
     if (relatedIssuesError) {
         return (
-            <LemonBanner type="error" action={{ children: 'Retry', onClick: loadRelatedIssues }}>
+            <Banner type="error" action={{ children: 'Retry', onClick: loadRelatedIssues }}>
                 Failed to load related errors
-            </LemonBanner>
+            </Banner>
         )
     }
 
@@ -65,9 +65,9 @@ function RelatedErrorsTabContent(): JSX.Element {
 function LoadingState(): JSX.Element {
     return (
         <div className="flex flex-col gap-3">
-            <LemonSkeleton className="h-16 w-full" />
-            <LemonSkeleton className="h-16 w-full" />
-            <LemonSkeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
         </div>
     )
 }

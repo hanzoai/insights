@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 
-import { LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
+import { Table, TableColumns } from '@hanzo/elements'
 
 import { DatabaseSchemaTable } from '~/queries/schema/schema-general'
 
@@ -39,7 +39,7 @@ export function TablePreview({
         return () => cancelAnimationFrame(frameId)
     }, [selectedKey, tableName])
 
-    const columns: LemonTableColumns<Record<string, any>> = table
+    const columns: TableColumns<Record<string, any>> = table
         ? Object.values(table.fields)
               .filter((column) => column.type !== 'view')
               .map((column) => {
@@ -78,7 +78,7 @@ export function TablePreview({
                 }
             >
                 {table ? (
-                    <LemonTable
+                    <Table
                         size="small"
                         className="w-full h-full"
                         embedded

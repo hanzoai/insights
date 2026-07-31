@@ -1,13 +1,13 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconInfo, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
-import { LemonButton, LemonCollapse, LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Collapse, Skeleton, Tooltip } from '@hanzo/elements'
 
 import { CompareFilter } from 'lib/components/CompareFilter/CompareFilter'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { IntervalFilterStandalone } from 'lib/components/IntervalFilter'
 import { dayjs } from 'lib/dayjs'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { LineGraph } from 'scenes/insights/views/LineGraph/LineGraph'
 import { StackedBar, StackedBarSegment, StackedBarSkeleton } from 'scenes/surveys/components/StackedBar'
@@ -119,7 +119,7 @@ export function NPSBreakdownSkeleton(): JSX.Element {
     return (
         <div className="flex flex-col gap-2">
             <div className="font-semibold text-secondary">
-                <LemonSkeleton className="h-10 w-20" />
+                <Skeleton className="h-10 w-20" />
                 <Tooltip
                     placement="bottom"
                     title="NPS Score is calculated by subtracting the percentage of detractors (0-6) from the percentage of promoters (9-10). Passives (7-8) are not included in the calculation. It can go from -100 to 100."
@@ -262,7 +262,7 @@ function NPSRatingOverTime({ questionIndex, questionId }: { questionIndex: numbe
 
     return (
         <div className="bg-surface-primary rounded">
-            <LemonCollapse
+            <Collapse
                 panels={[
                     {
                         key: 'nps-rating-over-time',
@@ -291,14 +291,14 @@ function NPSRatingOverTime({ questionIndex, questionId }: { questionIndex: numbe
                                             updateCompareFilter={(compareFilter) => setCompareFilter(compareFilter)}
                                         />
                                     </div>
-                                    <LemonButton
+                                    <Button
                                         to={urls.insightNew({ query: insightVizQuery })}
                                         icon={<IconOpenInNew />}
                                         size="small"
                                         type="secondary"
                                     >
                                         Open as new insight
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                                 <Query query={insightVizQuery} readOnly />
                             </div>
@@ -410,7 +410,7 @@ function RatingScoreOverTime({
 
     return (
         <div className="bg-surface-primary rounded">
-            <LemonCollapse
+            <Collapse
                 panels={[
                     {
                         key: 'average-rating-trend',
@@ -439,14 +439,14 @@ function RatingScoreOverTime({
                                             updateCompareFilter={(compareFilter) => setCompareFilter(compareFilter)}
                                         />
                                     </div>
-                                    <LemonButton
+                                    <Button
                                         to={urls.insightNew({ query: insightVizQuery })}
                                         icon={<IconOpenInNew />}
                                         size="small"
                                         type="secondary"
                                     >
                                         Open as new insight
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                                 <Query query={insightVizQuery} readOnly />
                             </div>

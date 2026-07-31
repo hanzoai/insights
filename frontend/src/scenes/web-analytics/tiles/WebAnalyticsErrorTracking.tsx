@@ -2,9 +2,9 @@ import clsx from 'clsx'
 import { useActions } from 'kea'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { humanFriendlyLargeNumber } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -21,7 +21,7 @@ export const CustomGroupTitleColumn: QueryContextColumnComponent = (props) => {
 
     return (
         <div className="flex items-start gap-x-1.5 group">
-            <LemonTableLink
+            <TableLink
                 target="_blank"
                 title={record.name || 'Unknown Type'}
                 description={<div className="line-clamp-1">{record.description}</div>}
@@ -88,7 +88,7 @@ export const WebAnalyticsErrorTrackingTile = ({ tile }: { tile: ErrorTrackingTil
                 <Query attachTo={webAnalyticsLogic} query={query} embedded={true} context={context} />
             </div>
             <div className="flex flex-row-reverse my-2">
-                <LemonButton
+                <Button
                     to={to}
                     icon={<IconOpenInNew />}
                     onClick={() => {
@@ -102,7 +102,7 @@ export const WebAnalyticsErrorTrackingTile = ({ tile }: { tile: ErrorTrackingTil
                     type="secondary"
                 >
                     View all
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

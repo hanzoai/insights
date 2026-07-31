@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonDropdown, ProfilePicture } from '@hanzo/lemon-ui'
+import { Dropdown, ProfilePicture } from '@hanzo/elements'
 
 import { UserDropdown } from './UserDropdown'
 import { UserAssignee, userSelectLogic } from './userSelectLogic'
@@ -32,7 +32,7 @@ export const UserSelect = ({
     const selectedUser = userId ? (users.find((u) => u.id === userId) ?? null) : null
 
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             visible={showPopover}
             matchWidth={false}
@@ -40,7 +40,7 @@ export const UserSelect = ({
             overlay={<UserDropdown userId={userId} onChange={_onChange} />}
         >
             <div>{children(selectedUser, showPopover)}</div>
-        </LemonDropdown>
+        </Dropdown>
     )
 }
 

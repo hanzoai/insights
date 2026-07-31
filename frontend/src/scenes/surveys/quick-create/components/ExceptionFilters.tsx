@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonLabel } from '@hanzo/lemon-ui'
+import { Label } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -38,7 +38,7 @@ export function ExceptionFilters(): JSX.Element {
 
     return (
         <div className="mt-2">
-            <LemonLabel className="mb-2">Exception filters</LemonLabel>
+            <Label className="mb-2">Exception filters</Label>
             <div className="border rounded p-3 bg-bg-light">
                 <div className="text-xs font-medium text-muted-alt mb-2">
                     Survey will trigger when an exception matches these filters:

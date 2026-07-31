@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { OrgCombobox } from 'lib/components/Account/OrgCombobox'
-import { UploadedLogo } from 'lib/lemon-ui/UploadedLogo/UploadedLogo'
+import { UploadedLogo } from 'lib/elements/UploadedLogo/UploadedLogo'
 import { ButtonPrimitive, ButtonPrimitiveProps } from 'lib/ui/Button/ButtonPrimitives'
 import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'
 import {

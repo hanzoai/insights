@@ -109,7 +109,7 @@
                 "forbid": [
                     {
                         "propName": "style",
-                        "message": "style should be avoided in favor of utility CSS classes - see https://storybook.dev.insights.dev/?path=/docs/lemon-ui-utilities--overview"
+                        "message": "style should be avoided in favor of utility CSS classes - see https://storybook.dev.insights.dev/?path=/docs/elements-utilities--overview"
                     }
                 ]
             }
@@ -124,7 +124,7 @@
                     },
                     {
                         "element": "Tabs",
-                        "message": "use <LemonTabs> instead"
+                        "message": "use <Tabs> instead"
                     },
                     {
                         "element": "Space",
@@ -136,23 +136,23 @@
                     },
                     {
                         "element": "Badge",
-                        "message": "use LemonBadge instead"
+                        "message": "use Badge instead"
                     },
                     {
                         "element": "InputNumber",
-                        "message": "use LemonInput with type=\"number\" instead"
+                        "message": "use Input with type=\"number\" instead"
                     },
                     {
                         "element": "Collapse",
-                        "message": "use <LemonCollapse> instead"
+                        "message": "use <Collapse> instead"
                     },
                     {
                         "element": "Slider",
-                        "message": "use <LemonSlider> instead"
+                        "message": "use <Slider> instead"
                     },
                     {
                         "element": "Checkbox",
-                        "message": "use <LemonCheckbox> instead"
+                        "message": "use <Checkbox> instead"
                     },
                     {
                         "element": "MonacoEditor",
@@ -164,11 +164,11 @@
                     },
                     {
                         "element": "Input.TextArea",
-                        "message": "use <LemonTextArea> instead"
+                        "message": "use <TextArea> instead"
                     },
                     {
                         "element": "ReactMarkdown",
-                        "message": "use <LemonMarkdown> instead"
+                        "message": "use <Markdown> instead"
                     },
                     {
                         "element": "a",
@@ -176,11 +176,11 @@
                     },
                     {
                         "element": "Tag",
-                        "message": "use <LemonTag> instead"
+                        "message": "use <Tag> instead"
                     },
                     {
                         "element": "Alert",
-                        "message": "use <LemonBanner> instead"
+                        "message": "use <Banner> instead"
                     },
                     {
                         "element": "ReactJson",
@@ -188,39 +188,39 @@
                     },
                     {
                         "element": "Radio",
-                        "message": "use <LemonRadio> instead"
+                        "message": "use <Radio> instead"
                     },
                     {
                         "element": "Skeleton",
-                        "message": "use <LemonSkeleton> instead"
+                        "message": "use <Skeleton> instead"
                     },
                     {
                         "element": "Divider",
-                        "message": "use <LemonDivider> instead"
+                        "message": "use <Divider> instead"
                     },
                     {
                         "element": "Popconfirm",
-                        "message": "use <LemonDialog> instead"
+                        "message": "use <Dialog> instead"
                     },
                     {
                         "element": "Button",
-                        "message": "use <LemonButton> instead"
+                        "message": "use <Button> instead"
                     },
                     {
                         "element": "Input",
-                        "message": "use <LemonInput> instead"
+                        "message": "use <Input> instead"
                     },
                     {
                         "element": "Modal",
-                        "message": "use <LemonModal> or <LemonDialog> instead"
+                        "message": "use <Modal> or <Dialog> instead"
                     },
                     {
                         "element": "Select",
-                        "message": "use <LemonSelect> instead"
+                        "message": "use <Select> instead"
                     },
                     {
                         "element": "Progress",
-                        "message": "use <LemonProgress> instead"
+                        "message": "use <Progress> instead"
                     }
                 ]
             }

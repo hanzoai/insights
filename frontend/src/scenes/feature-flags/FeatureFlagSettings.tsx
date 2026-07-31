@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconRefresh, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonSwitch, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, Dialog, Switch, TextArea } from '@hanzo/elements'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { featureFlagConfirmationSettingsLogic } from './featureFlagConfirmationSettingsLogic'
@@ -15,7 +15,7 @@ export function FlagPersistenceSettings(): JSX.Element {
     const { currentTeam } = useValues(teamLogic)
 
     return (
-        <LemonSwitch
+        <Switch
             data-attr="default-flag-persistence-switch"
             onChange={(checked) => {
                 updateCurrentTeam({
@@ -36,7 +36,7 @@ export function FlagChangeConfirmationSettings(): JSX.Element {
 
     return (
         <div className="space-y-2">
-            <LemonSwitch
+            <Switch
                 data-attr="feature-flag-confirmation-switch"
                 onChange={(checked) => {
                     updateCurrentTeam({
@@ -56,21 +56,21 @@ export function FlagChangeConfirmationSettings(): JSX.Element {
                         enableFormOnSubmit
                         className="w-full"
                     >
-                        <LemonField name="message" label="Custom confirmation message">
-                            <LemonTextArea
+                        <Field name="message" label="Custom confirmation message">
+                            <TextArea
                                 placeholder="Optional custom message. Default: '⚠️ These changes will immediately affect users matching the release conditions. Please ensure you understand the consequences before proceeding.'"
                                 maxLength={500}
                                 maxRows={3}
                             />
-                        </LemonField>
-                        <LemonButton
+                        </Field>
+                        <Button
                             type="primary"
                             htmlType="submit"
                             disabledReason={!currentTeam ? 'Loading team...' : undefined}
                             loading={confirmationMessageLoading}
                         >
                             Save message
-                        </LemonButton>
+                        </Button>
                     </Form>
                 </div>
             )}
@@ -90,7 +90,7 @@ export function FlagsSecureApiKeys(): JSX.Element {
                 ? ' and move the existing one to backup. The old key will remain active until you delete it.'
                 : '')
 
-        LemonDialog.open({
+        Dialog.open({
             title: `${verb} Flag Definitions API key?`,
             description: description,
             primaryButton: {
@@ -106,7 +106,7 @@ export function FlagsSecureApiKeys(): JSX.Element {
     }
 
     const openDeleteBackupDialog = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Delete Backup API key?',
             description: 'This will permanently delete the previous key. Make sure your systems are using the new key.',
             primaryButton: {
@@ -129,7 +129,7 @@ export function FlagsSecureApiKeys(): JSX.Element {
             </h3>
             <CodeSnippet
                 actions={
-                    <LemonButton
+                    <Button
                         icon={<IconRefresh />}
                         noPadding
                         onClick={openResetDialog}
@@ -152,7 +152,7 @@ export function FlagsSecureApiKeys(): JSX.Element {
                     </h3>
                     <CodeSnippet
                         actions={
-                            <LemonButton
+                            <Button
                                 icon={<IconTrash />}
                                 noPadding
                                 status="danger"
@@ -188,7 +188,7 @@ export function FeatureFlagSettings(): JSX.Element {
 }
 
 export function openFeatureFlagSettingsDialog(): void {
-    LemonDialog.open({
+    Dialog.open({
         title: 'Feature flag settings',
         content: <FeatureFlagSettings />,
         width: 600,

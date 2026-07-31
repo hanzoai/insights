@@ -6,11 +6,11 @@ import { combineUrl } from 'kea-router'
 import { useMemo, useState } from 'react'
 
 import { IconPencil, IconTrash, IconWarning } from '@hanzo/icons'
-import { LemonCheckbox, LemonDialog, LemonInput, LemonMenu, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Checkbox, Dialog, Input, Menu, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTable, LemonTableColumns, LemonTableProps } from 'lib/lemon-ui/LemonTable'
+import { Button } from 'lib/elements/Button'
+import { Table, TableColumns, TableProps } from 'lib/elements/Table'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { userPreferencesLogic } from 'lib/logic/userPreferencesLogic'
 import { isObject, isURL } from 'lib/utils'
@@ -59,7 +59,7 @@ function EditTextValueComponent({
     const [value, setValue] = useState(initialValue)
 
     return (
-        <LemonInput
+        <Input
             autoFocus
             value={value}
             onChange={setValue}
@@ -132,7 +132,7 @@ function ValueDisplay({
             {!editing ? (
                 <>
                     {canEdit && boolNullTypes.includes(valueType) ? (
-                        <LemonMenu
+                        <Menu
                             items={[
                                 {
                                     label: 'true',
@@ -150,7 +150,7 @@ function ValueDisplay({
                             ]}
                         >
                             {valueComponent}
-                        </LemonMenu>
+                        </Menu>
                     ) : (
                         valueComponent
                     )}
@@ -169,14 +169,14 @@ function ValueDisplay({
                                     : undefined
                             }
                         >
-                            <LemonTag
+                            <Tag
                                 className="ml-1 font-mono uppercase"
                                 type={isTypeMismatched ? 'danger' : 'muted'}
                                 icon={isTypeMismatched ? <IconWarning /> : undefined}
                             >
                                 {valueType}
                                 {isTypeMismatched && ' (mismatched)'}
-                            </LemonTag>
+                            </Tag>
                         </Link>
                     </Tooltip>
                 </>
@@ -198,7 +198,7 @@ interface PropertiesTableType extends BasePropertyType {
     className?: string
     /* only event types are detected and so describe-able. see https://github.com/hanzoai/insights/issues/9245 */
     useDetectedPropertyType?: boolean
-    tableProps?: Partial<LemonTableProps<Record<string, any>>>
+    tableProps?: Partial<TableProps<Record<string, any>>>
     highlightedKeys?: string[]
     type: PropertyDefinitionType
     /**
@@ -322,7 +322,7 @@ export function PropertiesTable({
         return (
             <div>
                 {properties.length ? (
-                    <LemonTable
+                    <Table
                         columns={[
                             {
                                 key: 'key',
@@ -336,9 +336,9 @@ export function PropertiesTable({
                                 title: (
                                     <div className="flex justify-between w-full">
                                         <div>Value</div>
-                                        <LemonTag type="muted" className="font-mono uppercase">
+                                        <Tag type="muted" className="font-mono uppercase">
                                             array
-                                        </LemonTag>
+                                        </Tag>
                                     </div>
                                 ),
                                 fullWidth: true,
@@ -383,16 +383,16 @@ export function PropertiesTable({
                         dataSource={properties.map((item, index) => [index, item])}
                     />
                 ) : (
-                    <LemonTag type="muted" className="font-mono uppercase">
+                    <Tag type="muted" className="font-mono uppercase">
                         Array (empty)
-                    </LemonTag>
+                    </Tag>
                 )}
             </div>
         )
     }
 
     if (properties instanceof Object) {
-        const columns: LemonTableColumns<Record<string, any>> = [
+        const columns: TableColumns<Record<string, any>> = [
             {
                 key: 'key',
                 title: 'Key',
@@ -458,7 +458,7 @@ export function PropertiesTable({
 
         if (onDelete && nestingLevel === 0) {
             const onClickDelete = (property: string): void => {
-                LemonDialog.open({
+                Dialog.open({
                     title: (
                         <>
                             Are you sure you want to delete property <code>{property}</code>?
@@ -482,7 +482,7 @@ export function PropertiesTable({
                     return (
                         !PROPERTY_KEYS.includes(item[0]) &&
                         !String(item[0]).startsWith('$initial_') && (
-                            <LemonButton
+                            <Button
                                 icon={<IconTrash />}
                                 status="danger"
                                 size="small"
@@ -500,7 +500,7 @@ export function PropertiesTable({
                     <div className="flex items-center justify-between gap-2 mb-2">
                         <span className="flex justify-between gap-2">
                             {searchable && (
-                                <LemonInput
+                                <Input
                                     type="search"
                                     placeholder="Search property keys and values"
                                     value={searchTerm || ''}
@@ -511,14 +511,14 @@ export function PropertiesTable({
 
                             {filterable && (
                                 <>
-                                    <LemonCheckbox
+                                    <Checkbox
                                         checked={hideInsightsPropertiesInTable}
                                         label="Hide Insights properties"
                                         bordered
                                         onChange={setHideInsightsPropertiesInTable}
                                     />
 
-                                    <LemonCheckbox
+                                    <Checkbox
                                         checked={hideNullValues}
                                         label="Hide null values"
                                         bordered
@@ -532,7 +532,7 @@ export function PropertiesTable({
                     </div>
                 )}
 
-                <LemonTable
+                <Table
                     columns={columns}
                     showHeader={!embedded}
                     rowKey="0"
@@ -544,7 +544,7 @@ export function PropertiesTable({
                             {hideInsightsPropertiesInTable || searchTerm ? (
                                 <span className="flex gap-2">
                                     <span>No properties found</span>
-                                    <LemonButton
+                                    <Button
                                         noPadding
                                         onClick={() => {
                                             setSearchTerm('')
@@ -553,7 +553,7 @@ export function PropertiesTable({
                                         }}
                                     >
                                         Clear filters
-                                    </LemonButton>
+                                    </Button>
                                 </span>
                             ) : (
                                 'No properties set yet'

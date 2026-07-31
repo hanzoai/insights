@@ -115,7 +115,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 
 ## Component Patterns
 
-### Button (LemonButton)
+### Button (Button)
 
 | Size    | Height | H-Padding | V-Padding | Font Size |
 | ------- | ------ | --------- | --------- | --------- |
@@ -128,7 +128,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 - Border radius: `var(--radius)` (6px)
 - Default size: medium
 
-### Input (LemonInput)
+### Input (Input)
 
 | Size   | Height | H-Padding | V-Padding |
 | ------ | ------ | --------- | --------- |
@@ -141,7 +141,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 - Border radius: `var(--radius)` (6px)
 - Focus ring: `box-shadow: 0 0 0 3px var(--color-bg-fill-highlight-75)`
 
-### Card (LemonCard)
+### Card (Card)
 
 - Border: `1px solid` (default border color)
 - Padding: 24px (`p-6`)
@@ -149,7 +149,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 - Background: `bg-surface-primary`
 - Hover (when hoverEffect): `box-shadow: var(--shadow-elevation-3000)` + `scale(1.01)`
 
-### Modal (LemonModal)
+### Modal (Modal)
 
 - Border: `1px solid var(--border-bold)`
 - Border radius: `var(--radius)` (6px)
@@ -214,7 +214,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 | `--z-mascot-buddy`  | 1050  |
 | `--z-drawer`          | 900   |
 | `--z-main-nav`        | 750   |
-| `--z-lemon-sidebar`   | 700   |
+| `--z-sidebar`   | 700   |
 | `--z-top-navigation`  | 550   |
 | `--z-content-overlay` | 500   |
 | `--z-raised`          | 5     |
@@ -232,7 +232,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 Three-tier architecture:
 
 1. **Primitives** (`frontend/src/lib/ui/`) — Low-level React primitives (Button, Combobox, DropdownMenu, etc.)
-2. **Lemon UI** (`frontend/src/lib/lemon-ui/`) — 50+ published components (LemonButton, LemonInput, LemonModal, LemonTable, etc.)
-3. **Composed components** (`frontend/src/lib/components/`) — Feature-specific composed components built on Lemon UI
+2. **Elements** (`frontend/src/lib/elements/`) — 50+ published components (Button, Input, Modal, Table, etc.)
+3. **Composed components** (`frontend/src/lib/components/`) — Feature-specific composed components built on Elements
 
-Always prefer Lemon UI components over custom implementations.
+Always prefer Elements components over custom implementations.

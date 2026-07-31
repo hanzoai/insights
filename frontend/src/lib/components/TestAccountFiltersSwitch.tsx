@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton, LemonSwitch, LemonSwitchProps } from '@hanzo/lemon-ui'
+import { Button, Switch, SwitchProps } from '@hanzo/elements'
 
 import { teamLogic } from 'scenes/teamLogic'
 
 import { sidePanelSettingsLogic } from '~/layout/navigation-3000/sidepanel/panels/sidePanelSettingsLogic'
 
-type TestAccountFilterProps = Partial<LemonSwitchProps> & {
+type TestAccountFilterProps = Partial<SwitchProps> & {
     checked: boolean
     onChange: (checked: boolean) => void
 }
@@ -17,7 +17,7 @@ export function TestAccountFilterSwitch({ checked, onChange, ...props }: TestAcc
     const hasFilters = (currentTeam?.test_account_filters || []).length > 0
     const { openSettingsPanel } = useActions(sidePanelSettingsLogic)
     return (
-        <LemonSwitch
+        <Switch
             id="test-account-filter"
             bordered
             {...props}
@@ -31,7 +31,7 @@ export function TestAccountFilterSwitch({ checked, onChange, ...props }: TestAcc
             label={
                 <div className="flex items-center">
                     <span>Filter out internal and test users</span>
-                    <LemonButton
+                    <Button
                         icon={<IconGear />}
                         size="small"
                         noPadding

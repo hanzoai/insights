@@ -3,9 +3,9 @@ import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
 import { IconX } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { addProductIntent } from 'lib/utils/product-intents'
 
 import { pinnedFolderLogic } from '~/layout/panel-layout/PinnedFolder/pinnedFolderLogic'
@@ -100,7 +100,7 @@ export function NavPanelAdvertisementContent({
                                 {productInfo.path}
                             </strong>
                         </div>
-                        <LemonButton
+                        <Button
                             icon={<IconX className="text-muted m-1" />}
                             tooltip="Dismiss"
                             tooltipPlacement="right"

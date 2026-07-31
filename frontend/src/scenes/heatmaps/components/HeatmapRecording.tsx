@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { LemonBanner, LemonDivider, LemonInput, LemonLabel } from '@hanzo/lemon-ui'
+import { Banner, Divider, Input, Label } from '@hanzo/elements'
 
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { FixedReplayHeatmapBrowser } from 'scenes/heatmaps/components/FixedReplayHeatmapBrowser'
@@ -23,11 +23,11 @@ function UrlSearchHeader(): JSX.Element {
                 <div className="flex gap-2 flex-1 min-w-0">
                     <div className="flex-1">
                         <div className="mt-2">
-                            <LemonLabel>Heatmap data URL</LemonLabel>
+                            <Label>Heatmap data URL</Label>
                             <div className="text-xs text-muted mb-1">
                                 Add * for wildcards to aggregate data from multiple pages
                             </div>
-                            <LemonInput
+                            <Input
                                 value={replayIframeData?.url}
                                 onChange={(s) => setReplayIframeDataURL(s)}
                                 className="truncate"
@@ -52,12 +52,12 @@ export function HeatmapRecording(): JSX.Element {
 
     if (!hasValidReplayIframeData) {
         return (
-            <LemonBanner type="warning" dismissKey="heatmaps-no-replay-iframe-data-warning">
+            <Banner type="warning" dismissKey="heatmaps-no-replay-iframe-data-warning">
                 <div className="flex items-center justify-between gap-4">
                     <p>This view is based on session recording data. Please open a session recording to view it.</p>
                     <ViewRecordingsPlaylistButton filters={{}} type="secondary" size="small" />
                 </div>
-            </LemonBanner>
+            </Banner>
         )
     }
 
@@ -67,9 +67,9 @@ export function HeatmapRecording(): JSX.Element {
                 <HeatmapsWarnings />
                 <div className="overflow-hidden w-full min-h-screen">
                     <UrlSearchHeader />
-                    <LemonDivider className="my-4" />
+                    <Divider className="my-4" />
                     <FilterPanel />
-                    <LemonDivider className="my-4" />
+                    <Divider className="my-4" />
                     <div className="relative flex flex-1 overflow-hidden min-h-screen">
                         <FixedReplayHeatmapBrowser iframeRef={iframeRef} />
                     </div>

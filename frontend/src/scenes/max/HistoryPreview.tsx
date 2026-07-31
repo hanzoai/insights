@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconExternal } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton, LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
+import { Button, Skeleton, Tag, Link, Spinner } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 
@@ -26,20 +26,20 @@ export function HistoryPreview({ sidePanel = false }: HistoryPreviewProps): JSX.
         <div className="max-w-120 w-full self-center flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2 -mr-2">
                 <h3 className="text-sm font-medium text-secondary mb-0">Recent chats</h3>
-                <LemonButton
+                <Button
                     size="small"
                     onClick={() => toggleConversationHistory()}
                     tooltip="Open chat history"
                     tooltipPlacement="bottom"
                 >
                     View all
-                </LemonButton>
+                </Button>
             </div>
             {conversationHistoryLoading && !conversationHistory.length ? (
                 <>
-                    <LemonSkeleton className="h-5 w-full" />
-                    <LemonSkeleton className="h-5 w-full" />
-                    <LemonSkeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
                 </>
             ) : (
                 conversationHistory.slice(0, 3).map((conversation) => (
@@ -56,13 +56,13 @@ export function HistoryPreview({ sidePanel = false }: HistoryPreviewProps): JSX.
                         >
                             <div className="flex items-center gap-2">
                                 <span className="flex-1 line-clamp-1">{conversation.title}</span>
-                                {conversation.is_internal && <LemonTag type="muted">Impersonated</LemonTag>}
-                                {conversation.type === ConversationType.DeepResearch && <LemonTag>Research</LemonTag>}
+                                {conversation.is_internal && <Tag type="muted">Impersonated</Tag>}
+                                {conversation.type === ConversationType.DeepResearch && <Tag>Research</Tag>}
                             </div>
                         </Link>
 
                         {conversation.slack_thread_key && (
-                            <LemonTag>
+                            <Tag>
                                 <Link
                                     to={getSlackThreadUrl(
                                         conversation.slack_thread_key,
@@ -75,7 +75,7 @@ export function HistoryPreview({ sidePanel = false }: HistoryPreviewProps): JSX.
                                 >
                                     Slack thread <IconExternal />
                                 </Link>
-                            </LemonTag>
+                            </Tag>
                         )}
                         {conversation.status === ConversationStatus.InProgress ? (
                             <Spinner className="h-4 w-4" />

@@ -3,12 +3,12 @@ import { useActions, useValues } from 'kea'
 import { forwardRef, memo, useEffect, useRef, useState } from 'react'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Collapse } from 'lib/elements/Collapse'
+import { Divider } from 'lib/elements/Divider'
+import { Markdown } from 'lib/elements/Markdown'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
+import { Spinner } from 'lib/elements/Spinner'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 
@@ -36,7 +36,7 @@ const MemoizedMessageContent = memo(function MemoizedMessageContent({ content }:
 
     return (
         <div onClick={handleClick}>
-            <LemonMarkdown disableDocsRedirect>{processedContent}</LemonMarkdown>
+            <Markdown disableDocsRedirect>{processedContent}</Markdown>
         </div>
     )
 })
@@ -194,7 +194,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                                                                         .hasQualityScore ||
                                                                     extractURLValidation(message.content)
                                                                         .hasQualityScore) && (
-                                                                    <LemonCollapse
+                                                                    <Collapse
                                                                         key={`analysis-${message.timestamp}`}
                                                                         className="mt-4 text-sm"
                                                                         panels={[
@@ -211,7 +211,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                                                                                         {extractThinkingBlock(
                                                                                             message.content
                                                                                         ).map((content, index) => (
-                                                                                            <LemonCollapse
+                                                                                            <Collapse
                                                                                                 key={`thinking-${index}-${message.timestamp}`}
                                                                                                 panels={[
                                                                                                     {
@@ -233,7 +233,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                                                                                         {extractSearchReflection(
                                                                                             message.content
                                                                                         ).map((content, index) => (
-                                                                                            <LemonCollapse
+                                                                                            <Collapse
                                                                                                 key={`reflection-${index}-${message.timestamp}`}
                                                                                                 panels={[
                                                                                                     {
@@ -255,7 +255,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                                                                                         {extractSearchQualityScore(
                                                                                             message.content
                                                                                         ).hasQualityScore && (
-                                                                                            <LemonCollapse
+                                                                                            <Collapse
                                                                                                 panels={[
                                                                                                     {
                                                                                                         key: 'quality',
@@ -279,7 +279,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                                                                                         {extractInfoValidation(
                                                                                             message.content
                                                                                         ).hasQualityScore && (
-                                                                                            <LemonCollapse
+                                                                                            <Collapse
                                                                                                 panels={[
                                                                                                     {
                                                                                                         key: 'info',
@@ -303,7 +303,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                                                                                         {extractURLValidation(
                                                                                             message.content
                                                                                         ).hasQualityScore && (
-                                                                                            <LemonCollapse
+                                                                                            <Collapse
                                                                                                 panels={[
                                                                                                     {
                                                                                                         key: 'url',
@@ -360,7 +360,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                     <div ref={messagesEndRef} />
                 </div>
 
-                <LemonDivider />
+                <Divider />
 
                 {showInput && (
                     <>
@@ -371,7 +371,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                             </div>
                         )}
                         <form className="p-4 pb-1">
-                            <LemonTextArea
+                            <TextArea
                                 value={inputMessage}
                                 onChange={setInputMessage}
                                 onKeyDown={handleKeyDown}
@@ -384,7 +384,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                             <div className="px-0 text-xs text-secondary mt-1 mb-2">
                                 `enter` to send, `shift+enter` for a new line
                             </div>
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 data-attr="max-chat-send"
                                 fullWidth
@@ -399,7 +399,7 @@ const MaxChatInterfaceContent = forwardRef<HTMLDivElement, Record<string, never>
                                 }}
                             >
                                 Send
-                            </LemonButton>
+                            </Button>
                         </form>
                         <div ref={endButtonRef} />
                     </>

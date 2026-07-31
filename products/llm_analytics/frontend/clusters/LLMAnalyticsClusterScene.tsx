@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconChevronDown, IconChevronLeft, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton, LemonTag, Link, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Skeleton, Tag, Link, Spinner, Tooltip } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -51,15 +51,15 @@ export function LLMAnalyticsClusterScene(): JSX.Element {
         return (
             <SceneContent>
                 <div className="flex flex-col gap-4">
-                    <LemonSkeleton className="h-8 w-1/3" />
-                    <LemonSkeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-8 w-1/3" />
+                    <Skeleton className="h-4 w-2/3" />
                     <div className="flex gap-2">
-                        <LemonSkeleton className="h-6 w-24" />
-                        <LemonSkeleton className="h-6 w-24" />
+                        <Skeleton className="h-6 w-24" />
+                        <Skeleton className="h-6 w-24" />
                     </div>
                     <div className="space-y-3 mt-4">
                         {[...Array(5)].map((_, i) => (
-                            <LemonSkeleton key={i} className="h-20 w-full" />
+                            <Skeleton key={i} className="h-20 w-full" />
                         ))}
                     </div>
                 </div>
@@ -78,9 +78,9 @@ export function LLMAnalyticsClusterScene(): JSX.Element {
                 resourceType={{ type: 'llm_analytics' }}
                 actions={
                     <Link to={urls.llmAnalyticsClusters()}>
-                        <LemonButton type="secondary" size="small" data-attr="clusters-back-button">
+                        <Button type="secondary" size="small" data-attr="clusters-back-button">
                             Back to clusters
-                        </LemonButton>
+                        </Button>
                     </Link>
                 }
             />
@@ -92,9 +92,9 @@ export function LLMAnalyticsClusterScene(): JSX.Element {
                 }`}
             >
                 <div className="flex flex-wrap items-center gap-3 mb-2">
-                    <LemonTag type={isOutlierCluster ? 'caution' : 'primary'} size="medium">
+                    <Tag type={isOutlierCluster ? 'caution' : 'primary'} size="medium">
                         {totalTraces} traces
-                    </LemonTag>
+                    </Tag>
                     {windowStart && windowEnd && (
                         <span className="text-muted text-sm">
                             Window: {new Date(windowStart).toLocaleDateString()} -{' '}
@@ -127,7 +127,7 @@ export function LLMAnalyticsClusterScene(): JSX.Element {
                         {Math.min(currentPage * TRACES_PER_PAGE, totalTraces)} of {totalTraces} traces
                     </span>
                     <div className="flex items-center gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             icon={<IconChevronLeft />}
@@ -138,7 +138,7 @@ export function LLMAnalyticsClusterScene(): JSX.Element {
                         <span className="text-sm">
                             Page {currentPage} of {totalPages}
                         </span>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             icon={<IconChevronRight />}
@@ -188,7 +188,7 @@ export function LLMAnalyticsClusterScene(): JSX.Element {
             {totalPages > 1 && (
                 <div className="flex justify-center mt-4">
                     <div className="flex items-center gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             icon={<IconChevronLeft />}
@@ -199,7 +199,7 @@ export function LLMAnalyticsClusterScene(): JSX.Element {
                         <span className="text-sm">
                             Page {currentPage} of {totalPages}
                         </span>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             icon={<IconChevronRight />}
@@ -250,37 +250,37 @@ function ClusterMetricsChips({
         <div className="flex flex-row flex-wrap items-center gap-2 mt-2">
             {metrics.avgCost !== null && (
                 <Tooltip title={`Average cost per ${clusteringLevel}`}>
-                    <LemonTag type="muted" size="small">
+                    <Tag type="muted" size="small">
                         Avg Cost: {formatLLMCost(metrics.avgCost)}
-                    </LemonTag>
+                    </Tag>
                 </Tooltip>
             )}
             {metrics.avgLatency !== null && (
                 <Tooltip title={`Average latency per ${clusteringLevel}`}>
-                    <LemonTag type="muted" size="small">
+                    <Tag type="muted" size="small">
                         Avg Latency: {formatLLMLatency(metrics.avgLatency)}
-                    </LemonTag>
+                    </Tag>
                 </Tooltip>
             )}
             {metrics.avgTokens !== null && (
                 <Tooltip title={`Average tokens (input + output) per ${clusteringLevel}`}>
-                    <LemonTag type="muted" size="small">
+                    <Tag type="muted" size="small">
                         Avg Tokens: {formatTokens(metrics.avgTokens)}
-                    </LemonTag>
+                    </Tag>
                 </Tooltip>
             )}
             {metrics.errorRate !== null && (
                 <Tooltip title={`Error rate: ${metrics.errorCount} errors out of ${metrics.itemCount} ${itemLabel}`}>
-                    <LemonTag type={metrics.errorRate > 0 ? 'danger' : 'muted'} size="small">
+                    <Tag type={metrics.errorRate > 0 ? 'danger' : 'muted'} size="small">
                         Errors: {formatErrorRate(metrics.errorRate)}
-                    </LemonTag>
+                    </Tag>
                 </Tooltip>
             )}
             {metrics.totalCost !== null && (
                 <Tooltip title={`Total cost across all ${itemLabel} in this cluster`}>
-                    <LemonTag type="muted" size="small">
+                    <Tag type="muted" size="small">
                         Total Cost: {formatLLMCost(metrics.totalCost)}
-                    </LemonTag>
+                    </Tag>
                 </Tooltip>
             )}
         </div>
@@ -311,9 +311,9 @@ function TraceListItem({
         <div className="p-4 hover:bg-surface-secondary transition-colors">
             {/* Header row with rank, title, and link */}
             <div className="flex items-center gap-2 mb-2">
-                <LemonTag type="muted" size="small">
+                <Tag type="muted" size="small">
                     #{displayRank}
-                </LemonTag>
+                </Tag>
                 <span className="font-medium flex-1 min-w-0 truncate">{summary?.title || 'Loading...'}</span>
                 <Link
                     to={urls.llmAnalyticsTrace(clusteringLevel === 'generation' ? traceInfo.trace_id : traceId, {
@@ -337,7 +337,7 @@ function TraceListItem({
                     {/* Expandable buttons row */}
                     <div className="flex items-center gap-2">
                         {summary.flowDiagram && (
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 type="secondary"
                                 icon={showFlow ? <IconChevronDown /> : <IconChevronRight />}
@@ -345,10 +345,10 @@ function TraceListItem({
                                 data-attr="clusters-trace-flow-toggle"
                             >
                                 Flow
-                            </LemonButton>
+                            </Button>
                         )}
                         {bulletItems.length > 0 && (
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 type="secondary"
                                 icon={showBullets ? <IconChevronDown /> : <IconChevronRight />}
@@ -356,10 +356,10 @@ function TraceListItem({
                                 data-attr="clusters-trace-summary-toggle"
                             >
                                 Summary
-                            </LemonButton>
+                            </Button>
                         )}
                         {noteItems.length > 0 && (
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 type="secondary"
                                 icon={showNotes ? <IconChevronDown /> : <IconChevronRight />}
@@ -367,7 +367,7 @@ function TraceListItem({
                                 data-attr="clusters-trace-notes-toggle"
                             >
                                 Notes
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
 

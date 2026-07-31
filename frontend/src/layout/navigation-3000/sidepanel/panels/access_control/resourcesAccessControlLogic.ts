@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -135,7 +135,7 @@ export const resourcesAccessControlLogic = kea<resourcesAccessControlLogicType>(
         },
         updateResourceAccessControlsSuccess: () => {
             actions.loadResourceAccessControls()
-            lemonToast.success('Access controls updated successfully')
+            toast.success('Access controls updated successfully')
             if (cache.pendingSaveType === 'member') {
                 actions.closeMemberModal()
             } else if (cache.pendingSaveType === 'role') {

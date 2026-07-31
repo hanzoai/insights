@@ -1,4 +1,4 @@
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { urls } from 'scenes/urls'
 
 import { Group } from '~/types'
@@ -15,13 +15,13 @@ export function GroupPeopleCard({ groupData }: { groupData: Group }): JSX.Elemen
                 pageSize={5}
             />
             <div className="flex justify-end">
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     to={urls.group(groupData.group_type_index, groupData.group_key, true, 'related')}
                 >
                     View people
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

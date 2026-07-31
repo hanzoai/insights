@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import React, { PropsWithChildren, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { AppShortcutMenu } from 'lib/components/AppShortcuts/AppShortcutMenu'
 import { Label, LabelProps } from 'lib/ui/Label/Label'
@@ -40,7 +40,7 @@ export function ScenePanel({ children }: { children: React.ReactNode }): JSX.Ele
 }
 
 export function ScenePanelDivider({ className }: { className?: string }): JSX.Element {
-    return <LemonDivider className={cn('-mx-2 w-[calc(100%+1rem)]', className)} />
+    return <Divider className={cn('-mx-2 w-[calc(100%+1rem)]', className)} />
 }
 
 export function ScenePanelInfoSection({ children }: { children: React.ReactNode }): JSX.Element {

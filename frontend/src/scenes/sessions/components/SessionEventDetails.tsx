@@ -2,7 +2,7 @@ import { ErrorDisplay } from 'lib/components/Errors/ErrorDisplay'
 import { EventPropertyTabs } from 'lib/components/EventPropertyTabs/EventPropertyTabs'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
 import { dayjs } from 'lib/dayjs'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Spinner } from 'lib/elements/Spinner'
 
 import { RecordingEventType } from '~/types'
 

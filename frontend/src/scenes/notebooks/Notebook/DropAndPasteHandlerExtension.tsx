@@ -4,7 +4,7 @@ import { Extension } from '@tiptap/react'
 import Papa from 'papaparse'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { NotebookNodeType } from '../types'
 
@@ -124,7 +124,7 @@ export const DropAndPasteHandlerExtension = Extension.create({
                                             attrs: { file },
                                         })
                                     } else {
-                                        lemonToast.warning('Only images can be added to Notebooks at this time.')
+                                        toast.warning('Only images can be added to Notebooks at this time.')
                                     }
                                 }
 
@@ -186,7 +186,7 @@ export const DropAndPasteHandlerExtension = Extension.create({
                                         attrs: { file },
                                     })
                                 } else {
-                                    lemonToast.warning('Only images can be added to Notebooks at this time.')
+                                    toast.warning('Only images can be added to Notebooks at this time.')
                                 }
                             }
 

@@ -4,7 +4,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { IconCornerDownRight } from '@hanzo/icons'
 
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Popover } from 'lib/elements/Popover/Popover'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 

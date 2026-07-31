@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 
 import { IconEllipsis } from '@hanzo/icons'
-import { LemonButton, LemonMenu, Tooltip, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Menu, Tooltip, toast } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
@@ -35,7 +35,7 @@ export function NotebooksScene(): JSX.Element {
                 }}
                 actions={
                     <>
-                        <LemonMenu
+                        <Menu
                             items={[
                                 {
                                     label: 'Load from JSON',
@@ -61,18 +61,18 @@ export function NotebooksScene(): JSX.Element {
                                                 )
                                             })
                                             .catch((e) => {
-                                                lemonToast.error(e.message)
+                                                toast.error(e.message)
                                             })
                                     },
                                 },
                             ]}
                         >
-                            <LemonButton icon={<IconEllipsis />} size="small" />
-                        </LemonMenu>
+                            <Button icon={<IconEllipsis />} size="small" />
+                        </Menu>
                         <Tooltip title="Like a Notebook but all your exploration is persisted to the URL for easy sharing.">
-                            <LemonButton size="small" data-attr="new-canvas" to={urls.canvas()} type="secondary">
+                            <Button size="small" data-attr="new-canvas" to={urls.canvas()} type="secondary">
                                 New canvas
-                            </LemonButton>
+                            </Button>
                         </Tooltip>
                         <AccessControlAction
                             resourceType={AccessControlResourceType.Notebook}
@@ -85,7 +85,7 @@ export function NotebooksScene(): JSX.Element {
                                 interaction="click"
                                 scope={Scene.Notebooks}
                             >
-                                <LemonButton
+                                <Button
                                     size="small"
                                     data-attr="new-notebook"
                                     to={urls.notebook('new')}
@@ -93,7 +93,7 @@ export function NotebooksScene(): JSX.Element {
                                     tooltip="New notebook"
                                 >
                                     New notebook
-                                </LemonButton>
+                                </Button>
                             </AppShortcut>
                         </AccessControlAction>
                     </>

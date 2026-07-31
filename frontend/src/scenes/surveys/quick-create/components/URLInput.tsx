@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonInputSelect, LemonLabel } from '@hanzo/lemon-ui'
+import { InputSelect, Label } from '@hanzo/elements'
 
 import { quickSurveyFormLogic } from 'scenes/surveys/quick-create/quickSurveyFormLogic'
 
@@ -33,8 +33,8 @@ export function URLInput(): JSX.Element {
 
     return (
         <div>
-            <LemonLabel className="mb-2">Target specific URL (optional)</LemonLabel>
-            <LemonInputSelect
+            <Label className="mb-2">Target specific URL (optional)</Label>
+            <InputSelect
                 mode="single"
                 value={targetUrl ? [targetUrl] : []}
                 onChange={(val) => updateConditions({ url: val[0] || undefined })}

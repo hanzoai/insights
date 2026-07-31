@@ -2,19 +2,19 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconSort } from '@hanzo/icons'
-import { LemonButton, LemonTable, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Table, Tag } from '@hanzo/elements'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { LemonCalendarSelectInput } from 'lib/lemon-ui/LemonCalendar/LemonCalendarSelect'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { CalendarSelectInput } from 'lib/elements/Calendar/CalendarSelect'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
+import { Progress } from 'lib/elements/Progress'
+import { Select } from 'lib/elements/Select'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -37,7 +37,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 function StatusTag({ status }: { status: string }): JSX.Element {
     const label = STATUS_LABELS[status] ?? status.charAt(0).toUpperCase() + status.slice(1)
-    return <LemonTag type={STATUS_COLORS[status as keyof typeof STATUS_COLORS] || 'default'}>{label}</LemonTag>
+    return <Tag type={STATUS_COLORS[status as keyof typeof STATUS_COLORS] || 'default'}>{label}</Tag>
 }
 
 function AmplitudeImportOptions({
@@ -49,29 +49,29 @@ function AmplitudeImportOptions({
 }): JSX.Element {
     return (
         <FlaggedFeature flag={FEATURE_FLAGS.AMPLITUDE_BATCH_IMPORT_OPTIONS}>
-            <LemonField name="import_events">
-                <LemonCheckbox
+            <Field name="import_events">
+                <Checkbox
                     checked={managedMigration.import_events !== false}
                     onChange={(checked) => setManagedMigrationValue('import_events', checked)}
                     label="Import events from Amplitude"
                 />
-            </LemonField>
+            </Field>
 
-            <LemonField name="generate_identify_events">
-                <LemonCheckbox
+            <Field name="generate_identify_events">
+                <Checkbox
                     checked={managedMigration.generate_identify_events !== false}
                     onChange={(checked) => setManagedMigrationValue('generate_identify_events', checked)}
                     label="Generate identify events to link user IDs with device IDs"
                 />
-            </LemonField>
+            </Field>
 
-            <LemonField name="generate_group_identify_events">
-                <LemonCheckbox
+            <Field name="generate_group_identify_events">
+                <Checkbox
                     checked={managedMigration.generate_group_identify_events === true}
                     onChange={(checked) => setManagedMigrationValue('generate_group_identify_events', checked)}
                     label="Generate group identify events from group property changes"
                 />
-            </LemonField>
+            </Field>
         </FlaggedFeature>
     )
 }
@@ -87,9 +87,9 @@ export function ManagedMigration(): JSX.Element {
                     name="New managed migration"
                     resourceType={{ type: 'managed_migration', forceIcon: <IconSort /> }}
                     actions={
-                        <LemonButton type="primary" htmlType="submit" size="small">
+                        <Button type="primary" htmlType="submit" size="small">
                             Import Data
-                        </LemonButton>
+                        </Button>
                     }
                     forceBackTo={{
                         path: urls.managedMigration(),
@@ -97,8 +97,8 @@ export function ManagedMigration(): JSX.Element {
                         name: 'Managed migrations',
                     }}
                 />
-                <LemonField name="source_type" label="Source">
-                    <LemonSelect
+                <Field name="source_type" label="Source">
+                    <Select
                         value={managedMigration.source_type}
                         onChange={(value) => {
                             setManagedMigrationValue('source_type', value)
@@ -139,12 +139,12 @@ export function ManagedMigration(): JSX.Element {
                             },
                         ]}
                     />
-                </LemonField>
+                </Field>
 
                 {(managedMigration.source_type === 's3' || managedMigration.source_type === 's3_gzip') && (
                     <>
-                        <LemonField name="content_type" label="Content Type">
-                            <LemonSelect
+                        <Field name="content_type" label="Content Type">
+                            <Select
                                 value={managedMigration.content_type}
                                 onChange={(value) => setManagedMigrationValue('content_type', value)}
                                 options={[
@@ -153,58 +153,58 @@ export function ManagedMigration(): JSX.Element {
                                     { value: 'amplitude', label: 'Amplitude Events' },
                                 ]}
                             />
-                        </LemonField>
+                        </Field>
                     </>
                 )}
 
                 {(managedMigration.source_type === 's3' || managedMigration.source_type === 's3_gzip') && (
                     <>
                         <div className="flex gap-4">
-                            <LemonField name="s3_region" label="S3 Region" className="flex-1">
-                                <LemonInput placeholder="us-east-1" />
-                            </LemonField>
+                            <Field name="s3_region" label="S3 Region" className="flex-1">
+                                <Input placeholder="us-east-1" />
+                            </Field>
 
-                            <LemonField name="s3_bucket" label="S3 Bucket" className="flex-1">
-                                <LemonInput placeholder="my-bucket" />
-                            </LemonField>
+                            <Field name="s3_bucket" label="S3 Bucket" className="flex-1">
+                                <Input placeholder="my-bucket" />
+                            </Field>
                         </div>
 
-                        <LemonField name="s3_prefix" label="S3 Prefix (optional)">
-                            <LemonInput placeholder="path/to/files/" />
-                        </LemonField>
+                        <Field name="s3_prefix" label="S3 Prefix (optional)">
+                            <Input placeholder="path/to/files/" />
+                        </Field>
                     </>
                 )}
                 {(managedMigration.source_type === 'mixpanel' || managedMigration.source_type === 'amplitude') && (
                     <>
                         <div className="flex gap-4">
-                            <LemonField name="start_date" label="Start Date" className="flex-1">
-                                <LemonCalendarSelectInput
+                            <Field name="start_date" label="Start Date" className="flex-1">
+                                <CalendarSelectInput
                                     granularity={managedMigration.source_type === 'mixpanel' ? 'day' : 'hour'}
                                     value={managedMigration.start_date ? dayjs(managedMigration.start_date) : null}
                                     onChange={(date) =>
                                         setManagedMigrationValue('start_date', date?.format('YYYY-MM-DD HH:mm:ss'))
                                     }
                                 />
-                            </LemonField>
+                            </Field>
 
-                            <LemonField name="end_date" label="End Date" className="flex-1">
-                                <LemonCalendarSelectInput
+                            <Field name="end_date" label="End Date" className="flex-1">
+                                <CalendarSelectInput
                                     granularity={managedMigration.source_type === 'mixpanel' ? 'day' : 'hour'}
                                     value={managedMigration.end_date ? dayjs(managedMigration.end_date) : null}
                                     onChange={(date) =>
                                         setManagedMigrationValue('end_date', date?.format('YYYY-MM-DD HH:mm:ss'))
                                     }
                                 />
-                            </LemonField>
+                            </Field>
                         </div>
 
-                        <LemonField name="is_eu_region">
-                            <LemonCheckbox
+                        <Field name="is_eu_region">
+                            <Checkbox
                                 checked={managedMigration.is_eu_region || false}
                                 onChange={(checked) => setManagedMigrationValue('is_eu_region', checked)}
                                 label="Use EU region endpoint"
                             />
-                        </LemonField>
+                        </Field>
 
                         {managedMigration.source_type === 'amplitude' && (
                             <AmplitudeImportOptions
@@ -224,19 +224,19 @@ export function ManagedMigration(): JSX.Element {
                     )}
 
                 <div className="flex gap-4">
-                    <LemonField name="access_key" label="Access Key ID" className="flex-1">
-                        <LemonInput type="password" />
-                    </LemonField>
+                    <Field name="access_key" label="Access Key ID" className="flex-1">
+                        <Input type="password" />
+                    </Field>
 
-                    <LemonField name="secret_key" label="Secret Access Key" className="flex-1">
-                        <LemonInput type="password" />
-                    </LemonField>
+                    <Field name="secret_key" label="Secret Access Key" className="flex-1">
+                        <Input type="password" />
+                    </Field>
                 </div>
 
                 <div className="flex justify-end">
-                    <LemonButton type="primary" htmlType="submit">
+                    <Button type="primary" htmlType="submit">
                         Import Data
-                    </LemonButton>
+                    </Button>
                 </div>
             </SceneContent>
         </Form>
@@ -276,17 +276,17 @@ export function ManagedMigrations(): JSX.Element {
                             forceIcon: <IconSort />,
                         }}
                         actions={
-                            <LemonButton
+                            <Button
                                 data-attr="new-managed-migration"
                                 to={urls.managedMigrationNew()}
                                 type="primary"
                                 size="small"
                             >
                                 New migration
-                            </LemonButton>
+                            </Button>
                         }
                     />
-                    <LemonTable
+                    <Table
                         dataSource={migrations}
                         loading={migrationsLoading}
                         defaultSorting={{
@@ -386,7 +386,7 @@ export function ManagedMigrations(): JSX.Element {
                                     const { progress, completed, total } = calculateProgress(migration)
                                     return (
                                         <div className="flex flex-col gap-1">
-                                            <LemonProgress
+                                            <Progress
                                                 percent={progress}
                                                 strokeColor={
                                                     migration.display_status === 'paused' ? 'var(--danger)' : undefined
@@ -444,25 +444,25 @@ export function ManagedMigrations(): JSX.Element {
                                 render: (_: any, migration: ManagedMigration) => {
                                     if (migration.display_status === 'running') {
                                         return (
-                                            <LemonButton
+                                            <Button
                                                 type="secondary"
                                                 size="small"
                                                 onClick={() => pauseMigration(migration.id)}
                                                 loading={migrationsLoading}
                                             >
                                                 Pause
-                                            </LemonButton>
+                                            </Button>
                                         )
                                     } else if (migration.display_status === 'paused') {
                                         return (
-                                            <LemonButton
+                                            <Button
                                                 type="primary"
                                                 size="small"
                                                 onClick={() => resumeMigration(migration.id)}
                                                 loading={migrationsLoading}
                                             >
                                                 Resume
-                                            </LemonButton>
+                                            </Button>
                                         )
                                     }
                                     return null

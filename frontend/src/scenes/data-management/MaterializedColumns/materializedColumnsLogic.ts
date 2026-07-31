@@ -2,7 +2,7 @@ import { actions, connect, events, kea, listeners, path, reducers, selectors } f
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import type { materializedColumnsLogicType } from './materializedColumnsLogicType'
@@ -153,10 +153,10 @@ export const materializedColumnsLogic = kea<materializedColumnsLogicType>([
                     return
                 }
                 await api.delete(`api/environments/${values.currentTeam.id}/materialized_column_slots/${slotId}/`)
-                lemonToast.success('Slot deleted successfully')
+                toast.success('Slot deleted successfully')
                 actions.loadSlots()
             } catch (error) {
-                lemonToast.error('Failed to delete slot')
+                toast.error('Failed to delete slot')
                 console.error(error)
             }
         },

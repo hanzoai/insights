@@ -2,19 +2,19 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import {
-    LemonBanner,
-    LemonButton,
-    LemonCollapse,
-    LemonDivider,
-    LemonInput,
-    LemonModal,
-    LemonTag,
+    Banner,
+    Button,
+    Collapse,
+    Divider,
+    Input,
+    Modal,
+    Tag,
     Link,
     Spinner,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonFileInput } from 'lib/lemon-ui/LemonFileInput'
+import { Field } from 'lib/elements/Field'
+import { FileInput } from 'lib/elements/FileInput'
 
 import { CSVImportProgress, customerIOImportLogic } from './customerIOImportLogic'
 
@@ -50,31 +50,31 @@ export function CustomerIOImportModal(): JSX.Element {
 
         if (importProgress?.status === 'failed') {
             return (
-                <LemonBanner type="error">
+                <Banner type="error">
                     <div>
                         <div className="font-semibold mb-2">Import Failed</div>
                         <div className="text-sm">
                             {importProgress.errors?.join(', ') || 'An unknown error occurred'}
                         </div>
                     </div>
-                </LemonBanner>
+                </Banner>
             )
         }
 
         if (importProgress?.status === 'completed') {
             return (
                 <div className="space-y-4">
-                    <LemonBanner type="success">
+                    <Banner type="success">
                         <span className="font-semibold">API Import Complete!</span>
-                    </LemonBanner>
+                    </Banner>
                     <div className="space-y-2 text-sm">
                         <div className="flex items-center justify-between">
                             <span>Categories imported:</span>
-                            <LemonTag>{importProgress.categories_created || 0}</LemonTag>
+                            <Tag>{importProgress.categories_created || 0}</Tag>
                         </div>
                         <div className="flex items-center justify-between">
                             <span>Globally unsubscribed users:</span>
-                            <LemonTag>{(importProgress.globally_unsubscribed_count || 0).toLocaleString()}</LemonTag>
+                            <Tag>{(importProgress.globally_unsubscribed_count || 0).toLocaleString()}</Tag>
                         </div>
                     </div>
                 </div>
@@ -85,7 +85,7 @@ export function CustomerIOImportModal(): JSX.Element {
         return (
             <Form logic={customerIOImportLogic} formKey="importForm" enableFormOnSubmit>
                 <div className="space-y-4">
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         <span>
                             Check our{' '}
                             <Link to="https://hanzo.ai/docs/workflows/import-customerio-optouts" target="_blank">
@@ -93,26 +93,26 @@ export function CustomerIOImportModal(): JSX.Element {
                             </Link>{' '}
                             for detailed instructions.
                         </span>
-                    </LemonBanner>
+                    </Banner>
                     <div>
                         <p className="text-sm text-muted mb-4">
                             Step 1: Import categories and globally unsubscribed users from Customer.io API.
                         </p>
                     </div>
 
-                    <LemonField name="app_api_key" label="Customer.io App API Key">
-                        <LemonInput
+                    <Field name="app_api_key" label="Customer.io App API Key">
+                        <Input
                             placeholder="Enter your App API key"
                             type="password"
                             data-attr="customerio-api-key"
                             autoComplete="off"
                         />
-                    </LemonField>
+                    </Field>
 
                     {importError && (
-                        <LemonBanner type="error" className="text-sm">
+                        <Banner type="error" className="text-sm">
                             {importError}
-                        </LemonBanner>
+                        </Banner>
                     )}
 
                     <div className="text-xs text-muted-alt">
@@ -131,7 +131,7 @@ export function CustomerIOImportModal(): JSX.Element {
             }
 
             return (
-                <LemonCollapse
+                <Collapse
                     className="mt-4"
                     panels={[
                         {
@@ -160,7 +160,7 @@ export function CustomerIOImportModal(): JSX.Element {
         if (isUploadingCSV && !csvProgress) {
             return (
                 <div className="space-y-4">
-                    <LemonDivider />
+                    <Divider />
                     <div className="text-center py-8">
                         <Spinner className="text-3xl mb-4" />
                         <div className="text-lg font-semibold mb-2">Processing CSV...</div>
@@ -179,27 +179,27 @@ export function CustomerIOImportModal(): JSX.Element {
             if (csvProgress.status === 'completed') {
                 return (
                     <div className="space-y-4">
-                        <LemonDivider />
-                        <LemonBanner type="success">
+                        <Divider />
+                        <Banner type="success">
                             <span className="font-semibold">CSV Import Complete!</span>
-                        </LemonBanner>
+                        </Banner>
                         <div className="space-y-2 text-sm">
                             <div className="flex items-center justify-between">
                                 <span>Total rows processed:</span>
-                                <LemonTag>{csvProgress.total_rows.toLocaleString()}</LemonTag>
+                                <Tag>{csvProgress.total_rows.toLocaleString()}</Tag>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span>Users with opt-outs:</span>
-                                <LemonTag>{csvProgress.users_with_optouts.toLocaleString()}</LemonTag>
+                                <Tag>{csvProgress.users_with_optouts.toLocaleString()}</Tag>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span>Users skipped (no opt-outs):</span>
-                                <LemonTag>{csvProgress.users_skipped.toLocaleString()}</LemonTag>
+                                <Tag>{csvProgress.users_skipped.toLocaleString()}</Tag>
                             </div>
                             {csvProgress.parse_errors > 0 && (
                                 <div className="flex items-center justify-between text-warning">
                                     <span>Parse errors:</span>
-                                    <LemonTag type="warning">{csvProgress.parse_errors}</LemonTag>
+                                    <Tag type="warning">{csvProgress.parse_errors}</Tag>
                                 </div>
                             )}
                         </div>
@@ -209,13 +209,13 @@ export function CustomerIOImportModal(): JSX.Element {
             } else if (csvProgress.status === 'failed') {
                 return (
                     <div className="space-y-4">
-                        <LemonDivider />
-                        <LemonBanner type="error">
+                        <Divider />
+                        <Banner type="error">
                             <div>
                                 <div className="font-semibold mb-2">CSV Import Failed</div>
                                 <div className="text-sm">{csvProgress.details}</div>
                             </div>
-                        </LemonBanner>
+                        </Banner>
                     </div>
                 )
             }
@@ -223,7 +223,7 @@ export function CustomerIOImportModal(): JSX.Element {
 
         return (
             <div className="space-y-3">
-                <LemonDivider />
+                <Divider />
                 <div>
                     <h3 className="font-semibold mb-2">Step 2: Import User Preferences (Optional)</h3>
                     <p className="text-sm text-muted mb-3">
@@ -239,7 +239,7 @@ export function CustomerIOImportModal(): JSX.Element {
 
                     <div className="flex justify-center">
                         {!csvFile ? (
-                            <LemonFileInput
+                            <FileInput
                                 accept=".csv"
                                 multiple={false}
                                 value={[]}
@@ -263,9 +263,9 @@ export function CustomerIOImportModal(): JSX.Element {
                                             Size: {(csvFile.size / (1024 * 1024)).toFixed(2)}MB
                                         </div>
                                     </div>
-                                    <LemonButton size="small" type="secondary" onClick={() => setCSVFile(null)}>
+                                    <Button size="small" type="secondary" onClick={() => setCSVFile(null)}>
                                         Remove
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             </div>
                         )}
@@ -302,9 +302,9 @@ export function CustomerIOImportModal(): JSX.Element {
         // API import failed
         if (importProgress?.status === 'failed') {
             return (
-                <LemonButton type="primary" onClick={closeImportModal}>
+                <Button type="primary" onClick={closeImportModal}>
                     Close
-                </LemonButton>
+                </Button>
             )
         }
 
@@ -312,25 +312,25 @@ export function CustomerIOImportModal(): JSX.Element {
         if (showCSVPhase) {
             if (csvProgress?.status === 'completed' || csvProgress?.status === 'failed') {
                 return (
-                    <LemonButton type="primary" onClick={closeImportModal}>
+                    <Button type="primary" onClick={closeImportModal}>
                         Close
-                    </LemonButton>
+                    </Button>
                 )
             }
 
             return (
                 <>
-                    <LemonButton type="secondary" onClick={closeImportModal}>
+                    <Button type="secondary" onClick={closeImportModal}>
                         Skip CSV Import
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={uploadCSV}
                         loading={isUploadingCSV}
                         disabledReason={!csvFile ? 'Please select a CSV file' : undefined}
                     >
                         Upload & Process CSV
-                    </LemonButton>
+                    </Button>
                 </>
             )
         }
@@ -338,23 +338,23 @@ export function CustomerIOImportModal(): JSX.Element {
         // Initial API import form
         return (
             <>
-                <LemonButton type="secondary" onClick={closeImportModal}>
+                <Button type="secondary" onClick={closeImportModal}>
                     Cancel
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="primary"
                     onClick={submitImportForm}
                     loading={isImporting}
                     disabledReason={!importForm.app_api_key ? 'Please enter your API key' : undefined}
                 >
                     Start Import
-                </LemonButton>
+                </Button>
             </>
         )
     }
 
     return (
-        <LemonModal
+        <Modal
             title="Import from Customer.io"
             isOpen={isImportModalOpen}
             onClose={closeImportModal}
@@ -362,6 +362,6 @@ export function CustomerIOImportModal(): JSX.Element {
             width="medium"
         >
             {renderContent()}
-        </LemonModal>
+        </Modal>
     )
 }

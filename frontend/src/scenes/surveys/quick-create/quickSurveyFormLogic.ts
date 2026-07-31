@@ -2,7 +2,7 @@ import { actions, kea, key, listeners, path, props, reducers, selectors } from '
 import { forms } from 'kea-forms'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -176,7 +176,7 @@ export const quickSurveyFormLogic = kea<quickSurveyFormLogicType>([
                     },
                 })
 
-                lemonToast.success(shouldLaunch ? 'Survey created and launched!' : 'Survey created as draft')
+                toast.success(shouldLaunch ? 'Survey created and launched!' : 'Survey created as draft')
                 router.actions.push(`${urls.survey(response.id)}${shouldEdit ? '?edit=true' : ''}`)
 
                 props.onSuccess?.()

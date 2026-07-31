@@ -3,7 +3,7 @@ import * as motion from 'motion/react-client'
 import { useEffect, useRef, useState } from 'react'
 
 import { IconPlus, IconX } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { SurveyQuestionType } from '~/types'
 
@@ -47,7 +47,7 @@ export function AddQuestionButton({ onAdd }: AddQuestionButtonProps): JSX.Elemen
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.15 }}
                     >
-                        <LemonButton
+                        <Button
                             type="secondary"
                             icon={<IconPlus />}
                             onClick={() => setIsExpanded(true)}
@@ -55,7 +55,7 @@ export function AddQuestionButton({ onAdd }: AddQuestionButtonProps): JSX.Elemen
                             center
                         >
                             Add question
-                        </LemonButton>
+                        </Button>
                     </motion.div>
                 ) : (
                     <motion.div
@@ -72,7 +72,7 @@ export function AddQuestionButton({ onAdd }: AddQuestionButtonProps): JSX.Elemen
                     >
                         <div className="w-full flex items-center justify-between mb-1">
                             <p className="text-xs text-secondary">Select question type</p>
-                            <LemonButton
+                            <Button
                                 icon={<IconX />}
                                 size="xsmall"
                                 type="tertiary"
@@ -92,14 +92,14 @@ export function AddQuestionButton({ onAdd }: AddQuestionButtonProps): JSX.Elemen
                                     delay: index * 0.03,
                                 }}
                             >
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     size="small"
                                     icon={option.icon}
                                     onClick={() => handleAddQuestion(option.type)}
                                 >
                                     {option.label}
-                                </LemonButton>
+                                </Button>
                             </motion.div>
                         ))}
                     </motion.div>

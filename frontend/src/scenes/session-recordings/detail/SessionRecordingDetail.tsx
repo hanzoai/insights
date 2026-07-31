@@ -2,8 +2,8 @@ import './SessionRecordingScene.scss'
 
 import { useValues } from 'kea'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { Link } from 'lib/elements/Link'
 import { SceneExport } from 'scenes/sceneTypes'
 import {
     SessionRecordingDetailLogicProps,
@@ -29,10 +29,10 @@ export function SessionRecordingDetail({ id }: SessionRecordingDetailLogicProps)
         <div className="SessionRecordingScene">
             {currentTeam && !currentTeam?.session_recording_opt_in ? (
                 <div className="mb-4">
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         Session recordings are currently disabled for this project. To use this feature, please go to
                         your <Link to={`${urls.settings('project')}#recordings`}>project settings</Link> and enable it.
-                    </LemonBanner>
+                    </Banner>
                 </div>
             ) : null}
             <div className="mt-4 flex-1">

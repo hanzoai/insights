@@ -1,6 +1,6 @@
 import { IconFilter, IconList, IconSort } from '@hanzo/icons'
 
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
+import { Tag } from 'lib/elements/Tag/Tag'
 import { pluralize } from 'lib/utils'
 
 import { MaxErrorTrackingSearchResponse } from '~/queries/schema/schema-assistant-error-tracking'
@@ -79,10 +79,10 @@ function IssueCountSummary({ filters }: { filters: MaxErrorTrackingSearchRespons
 
     return (
         <div className="flex items-center gap-2">
-            <LemonTag size="small" type="highlight">
+            <Tag size="small" type="highlight">
                 {issueCount} {pluralize(issueCount, 'issue', 'issues', false)} found
                 {filters.has_more && ' (more available)'}
-            </LemonTag>
+            </Tag>
         </div>
     )
 }

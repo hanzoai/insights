@@ -13,10 +13,10 @@ import {
     IconStethoscope,
     IconTerminal,
 } from '@hanzo/icons'
-import { LemonButton, LemonInput, SideAction, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Input, SideAction, Tooltip } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconUnverifiedEvent } from 'lib/lemon-ui/icons'
+import { IconUnverifiedEvent } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { SettingsBar, SettingsButton, SettingsToggle } from 'scenes/session-recordings/components/PanelSettings'
@@ -52,7 +52,7 @@ function sideActionForType({
                         // without setting fontVariant to none a single digit number between brackets gets rendered as a ligature 🤷
                         (filter: SharedListMiniFilter) => {
                             return (
-                                <LemonButton
+                                <Button
                                     data-attr={`player-inspector-${filter.key}-mini-filter-toggle`}
                                     fullWidth
                                     size="xsmall"
@@ -81,7 +81,7 @@ function sideActionForType({
                                             (<span>{allItemsByMiniFilterKey[filter.key]?.length ?? 0}</span>)
                                         </span>
                                     </div>
-                                </LemonButton>
+                                </Button>
                             )
                         }
                     )}
@@ -161,7 +161,7 @@ function NetworkFilterSettingsButton(): JSX.Element {
                           dropdown: {
                               closeOnClickInside: false,
                               overlay: (
-                                  <LemonButton
+                                  <Button
                                       data-attr="player-inspector-network-upsell"
                                       icon={<IconGear />}
                                       fullWidth
@@ -174,7 +174,7 @@ function NetworkFilterSettingsButton(): JSX.Element {
                                       }
                                   >
                                       Configure network capture in settings.
-                                  </LemonButton>
+                                  </Button>
                               ),
                           },
                       }
@@ -208,7 +208,7 @@ function ConsoleFilterSettingsButton(): JSX.Element {
                           dropdown: {
                               closeOnClickInside: false,
                               overlay: (
-                                  <LemonButton
+                                  <Button
                                       data-attr="player-inspector-console-upsell"
                                       icon={<IconGear />}
                                       fullWidth
@@ -221,7 +221,7 @@ function ConsoleFilterSettingsButton(): JSX.Element {
                                       }
                                   >
                                       Configure console log capture in settings.
-                                  </LemonButton>
+                                  </Button>
                               ),
                           },
                       }
@@ -304,7 +304,7 @@ export function PlayerInspectorControls(): JSX.Element {
             </SettingsBar>
 
             <div className="flex px-2 py-1">
-                <LemonInput
+                <Input
                     data-attr="player-inspector-search-input"
                     size="xsmall"
                     onChange={(e) => setSearchQuery(e)}

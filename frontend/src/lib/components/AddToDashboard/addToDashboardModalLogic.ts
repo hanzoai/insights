@@ -2,7 +2,7 @@ import FuseClass from 'fuse.js'
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { newDashboardLogic } from 'scenes/dashboard/newDashboardLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -121,7 +121,7 @@ export const addToDashboardModalLogic = kea<addToDashboardModalLogicType>([
                         actions.setDashboardToNavigateTo(null)
                         router.actions.push(urls.dashboard(dashboardId))
                     } else {
-                        lemonToast.success('Insight added to dashboard', {
+                        toast.success('Insight added to dashboard', {
                             button: {
                                 label: 'View dashboard',
                                 action: () => router.actions.push(urls.dashboard(dashboardId)),
@@ -141,7 +141,7 @@ export const addToDashboardModalLogic = kea<addToDashboardModalLogicType>([
                 },
                 () => {
                     actions.reportRemovedInsightFromDashboard(values.insight, dashboardId)
-                    lemonToast.success('Insight removed from dashboard')
+                    toast.success('Insight removed from dashboard')
                 }
             )
         },

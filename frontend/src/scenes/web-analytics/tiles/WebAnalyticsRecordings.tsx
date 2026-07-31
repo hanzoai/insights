@@ -4,9 +4,9 @@ import { useActions, useValues } from 'kea'
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Table } from 'lib/elements/Table'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { humanFriendlyDuration } from 'lib/utils'
 import { asDisplay } from 'scenes/persons/person-utils'
 import { ActivityScoreLabel } from 'scenes/session-recordings/components/RecordingRow'
@@ -69,13 +69,13 @@ export function WebAnalyticsRecordingsTile({ tile }: { tile: ReplayTile }): JSX.
                     {sessionRecordingsResponseLoading ? (
                         <div className="p-2 deprecated-space-y-6">
                             {Array.from({ length: 6 }, (_, index) => (
-                                <LemonSkeleton key={index} />
+                                <Skeleton key={index} />
                             ))}
                         </div>
                     ) : items.length === 0 && emptyMessage ? (
                         <EmptyMessage {...emptyMessage} />
                     ) : (
-                        <LemonTable
+                        <Table
                             className="mt-4"
                             columns={[
                                 {

@@ -1,11 +1,11 @@
 import { useValues } from 'kea'
 
 import { IconGraph, IconLineGraph, IconTrending } from '@hanzo/icons'
-import { LemonSegmentedButtonOption } from '@hanzo/lemon-ui'
+import { SegmentedButtonOption } from '@hanzo/elements'
 
 import { getColorVar } from 'lib/colors'
-import { Tooltip } from 'lib/lemon-ui/Tooltip/Tooltip'
-import { IconAreaChart, IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'
+import { Tooltip } from 'lib/elements/Tooltip/Tooltip'
+import { IconAreaChart, IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 import { humanFriendlyDuration, humanFriendlyLargeNumber, humanFriendlyNumber, percentage } from 'lib/utils'
 import { isNotNil } from 'lib/utils'
 import { DEFAULT_CURRENCY, getCurrencySymbol } from 'lib/utils/geography/currency'
@@ -15,7 +15,7 @@ import { InfinityValue, MarketingAnalyticsItem, WebAnalyticsItemKind } from '~/q
 import { ChartDisplayType } from '~/types'
 
 // Simple mapping for the display mode options and their icons
-export const DISPLAY_MODE_OPTIONS: LemonSegmentedButtonOption<ChartDisplayType>[] = [
+export const DISPLAY_MODE_OPTIONS: SegmentedButtonOption<ChartDisplayType>[] = [
     { value: ChartDisplayType.ActionsLineGraph, icon: <IconLineGraph /> },
     { value: ChartDisplayType.ActionsAreaGraph, icon: <IconAreaChart /> },
     { value: ChartDisplayType.ActionsBar, icon: <IconGraph /> },

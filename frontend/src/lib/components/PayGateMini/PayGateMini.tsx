@@ -4,7 +4,7 @@ import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
 import { IconInfo, IconOpenSidebar, IconUnlock } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Skeleton, Link, Tooltip } from '@hanzo/elements'
 
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { billingLogic } from 'scenes/billing/billingLogic'
@@ -94,13 +94,13 @@ export function PayGateMini({
                         'PayGateMini rounded flex flex-col items-center p-4 text-center'
                     )}
                 >
-                    <LemonSkeleton className="w-20 h-10 mb-2" />
-                    <LemonSkeleton className="w-48 h-12 mb-2" />
-                    <LemonSkeleton className="w-1/2 h-6 mb-2" />
-                    <LemonSkeleton className="w-1/2 h-6 mb-2" />
+                    <Skeleton className="w-20 h-10 mb-2" />
+                    <Skeleton className="w-48 h-12 mb-2" />
+                    <Skeleton className="w-1/2 h-6 mb-2" />
+                    <Skeleton className="w-1/2 h-6 mb-2" />
                     <div className="flex items-center justify-center gap-x-2 mt-3">
-                        <LemonSkeleton className="w-32 h-10" />
-                        <LemonSkeleton className="w-32 h-10" />
+                        <Skeleton className="w-32 h-10" />
+                        <Skeleton className="w-32 h-10" />
                     </div>
                 </div>
             )
@@ -124,7 +124,7 @@ export function PayGateMini({
                 <div className="flex items-center justify-center deprecated-space-x-3">
                     <PayGateButton feature={feature} currentUsage={currentUsage} onClick={handleCtaClick} />
                     {docsLink && isCloudOrDev && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             to={`${docsLink}?utm_medium=in-product&utm_campaign=${feature}-upgrade-learn-more`}
                             targetBlank
@@ -132,18 +132,18 @@ export function PayGateMini({
                             data-attr={`${feature}-learn-more`}
                         >
                             Learn more <IconOpenSidebar className="ml-2" />
-                        </LemonButton>
+                        </Button>
                     )}
 
                     {user?.is_impersonated && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             icon={<IconUnlock />}
                             tooltip="Bypass this paywall - (UI only)"
                             onClick={() => setBypassPaywall(true)}
                         >
                             Bypass paywall
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
             </PayGateContent>

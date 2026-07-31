@@ -1,11 +1,11 @@
 import { Logic, LogicWrapper } from 'kea'
 import React from 'react'
 
-import { LemonTagType, SideAction } from '@hanzo/lemon-ui'
+import { TagType, SideAction } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Dayjs } from 'lib/dayjs'
-import { LemonMenuItems } from 'lib/lemon-ui/LemonMenu'
+import { MenuItems } from 'lib/elements/Menu'
 
 export interface SidebarLogic extends Logic {
     actions: Record<never, never> // No actions required in the base version
@@ -137,12 +137,12 @@ export interface BasicListItem {
     }
     /** An optional tag shown as a suffix of the name. */
     tag?: {
-        status: LemonTagType
+        status: TagType
         text: string
     }
     /** If search is on, this should be present to convey why this item is included in results. */
     searchMatch?: SearchMatch | null
-    menuItems?: LemonMenuItems | ((initiateRename?: () => void) => LemonMenuItems)
+    menuItems?: MenuItems | ((initiateRename?: () => void) => MenuItems)
     onRename?: ListItemSaveHandler
     /** Ref to the corresponding <a> element. This is injected automatically when the element is rendered. */
     ref?: React.MutableRefObject<HTMLElement | null>

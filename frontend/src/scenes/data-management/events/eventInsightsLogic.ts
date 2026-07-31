@@ -2,7 +2,7 @@ import { actions, connect, events, kea, key, listeners, path, props, reducers, s
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { Sorting } from 'lib/lemon-ui/LemonTable'
+import { Sorting } from 'lib/elements/Table'
 import { objectsEqual, toParams } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { InsightsResult, SavedInsightFilters, cleanFilters } from 'scenes/saved-insights/savedInsightsLogic'

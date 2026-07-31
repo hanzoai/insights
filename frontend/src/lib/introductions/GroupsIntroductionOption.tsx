@@ -1,6 +1,6 @@
 import { IconLock } from '@hanzo/icons'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 
 export function GroupsIntroductionOption(): JSX.Element {
     return (

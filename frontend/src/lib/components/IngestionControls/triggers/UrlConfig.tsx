@@ -2,9 +2,9 @@ import { LogicWrapper, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconCheck, IconPencil, IconPlus, IconTrash, IconX } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonDialog, LemonInput, LemonLabel, lemonToast } from '@hanzo/lemon-ui'
+import { Banner, Button, Dialog, Input, Label, toast } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { cn } from 'lib/utils/css-classes'
 import { AiRegexHelper, AiRegexHelperButton } from 'scenes/session-recordings/components/AiRegexHelper/AiRegexHelper'
 import { Since } from 'scenes/settings/environment/SessionRecordingSettings'
@@ -52,11 +52,11 @@ export function UrlConfig({
     return (
         <div className="flex flex-col deprecated-space-y-2 mt-4">
             <div className="flex items-center gap-2 justify-between">
-                <LemonLabel className="text-base">
+                <Label className="text-base">
                     {title} <Since web={{ version: '1.171.0' }} />
-                </LemonLabel>
+                </Label>
                 <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
-                    <LemonButton
+                    <Button
                         onClick={props.onAdd}
                         type="secondary"
                         icon={<IconPlus />}
@@ -64,7 +64,7 @@ export function UrlConfig({
                         size="small"
                     >
                         Add
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
             <p>{description}</p>
@@ -83,10 +83,10 @@ export function UrlConfig({
 
             {!props.isAddFormVisible && props.config && props.config.length > 0 && (
                 <div className="border rounded p-3 bg-surface-primary">
-                    <LemonLabel className="text-sm font-medium mb-2 block">
+                    <Label className="text-sm font-medium mb-2 block">
                         Test a URL against these patterns:
-                    </LemonLabel>
-                    <LemonInput
+                    </Label>
+                    <Input
                         value={checkUrl}
                         onChange={setCheckUrl}
                         placeholder="Enter a URL to test (e.g., https://example.com/page)"
@@ -199,18 +199,18 @@ function UrlConfigRow({
             </span>
             <div className="Actions flex deprecated-space-x-1 shrink-0">
                 <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
-                    <LemonButton icon={<IconPencil />} onClick={() => onEdit(index)} tooltip="Edit" center>
+                    <Button icon={<IconPencil />} onClick={() => onEdit(index)} tooltip="Edit" center>
                         Edit
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
 
                 <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
-                    <LemonButton
+                    <Button
                         icon={<IconTrash />}
                         tooltip="Remove URL"
                         center
                         onClick={() => {
-                            LemonDialog.open({
+                            Dialog.open({
                                 title: <>Remove URL</>,
                                 description: 'Are you sure you want to remove this URL?',
                                 primaryButton: {
@@ -225,7 +225,7 @@ function UrlConfigRow({
                         }}
                     >
                         Remove
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
         </div>
@@ -258,17 +258,17 @@ function UrlConfigForm({
             className="w-full flex flex-col border rounded items-center p-2 pl-4 bg-surface-primary gap-2"
         >
             <div className="flex flex-col gap-2 w-full">
-                <LemonBanner type="info" className="text-sm">
+                <Banner type="info" className="text-sm">
                     We always wrap the URL regex with anchors to avoid unexpected behavior (if you do not). This is
                     because <pre className="inline">https://example.com/</pre> does not only match the homepage. You'd
                     need <pre className="inline">^https://example.com/$</pre>
-                </LemonBanner>
-                <LemonLabel className="w-full">
+                </Banner>
+                <Label className="w-full">
                     Matching regex:
-                    <LemonField name="url" className="flex-1">
-                        <LemonInput autoFocus placeholder="Enter URL regex." data-attr="url-input" />
-                    </LemonField>
-                </LemonLabel>
+                    <Field name="url" className="flex-1">
+                        <Input autoFocus placeholder="Enter URL regex." data-attr="url-input" />
+                    </Field>
+                </Label>
                 {validationWarning && <span className="text-danger">{validationWarning}</span>}
             </div>
             <div className="flex justify-between gap-2 w-full">
@@ -281,7 +281,7 @@ function UrlConfigForm({
                                     matching: 'regex',
                                 })
                             } catch {
-                                lemonToast.error('Failed to apply regex')
+                                toast.error('Failed to apply regex')
                             }
                         }}
                     />
@@ -289,17 +289,17 @@ function UrlConfigForm({
                 </div>
 
                 <div className="flex gap-2">
-                    <LemonButton type="secondary" onClick={onCancel}>
+                    <Button type="secondary" onClick={onCancel}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         htmlType="submit"
                         type="primary"
                         disabledReason={isSubmitting ? `Saving url in progress` : undefined}
                         data-attr="url-save"
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </Form>

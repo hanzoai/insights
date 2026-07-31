@@ -1,10 +1,10 @@
 import clsx from 'clsx'
 
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
+import { Label } from 'lib/elements/Label/Label'
 
 import { InspectorListItemAppState, InspectorListItemConsole } from '../playerInspectorLogic'
 
@@ -45,7 +45,7 @@ export function ItemConsoleLogDetail({ item }: ItemConsoleLogProps): JSX.Element
                         <div className="italic">
                             This log occurred <b>{item.data.count}</b> times in a row.
                         </div>
-                        <LemonDivider dashed />
+                        <Divider dashed />
                     </>
                 ) : null}
                 {item.data.lines?.length && (
@@ -56,8 +56,8 @@ export function ItemConsoleLogDetail({ item }: ItemConsoleLogProps): JSX.Element
 
                 {item.data.trace?.length ? (
                     <>
-                        <LemonDivider dashed />
-                        <LemonLabel>Stack trace</LemonLabel>
+                        <Divider dashed />
+                        <Label>Stack trace</Label>
                         <CodeSnippet language={Language.Markup} wrap thing="stack trace">
                             {item.data.trace.join('\n')}
                         </CodeSnippet>

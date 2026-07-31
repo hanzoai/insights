@@ -3,21 +3,21 @@ import { useMemo, useState } from 'react'
 
 import { IconCalendar, IconCheck, IconClock, IconHourglass, IconInfinity, IconInfo } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonDialog,
-    LemonSegmentedButton,
-    LemonSegmentedButtonOption,
-    LemonSelect,
-    LemonSwitch,
+    Banner,
+    Dialog,
+    SegmentedButton,
+    SegmentedButtonOption,
+    Select,
+    Switch,
     Link,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { SESSION_RECORDING_OPT_OUT_SURVEY_ID } from 'lib/constants'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
+import { Label } from 'lib/elements/Label/Label'
 import { isObject } from 'lib/utils'
 import { getAppContext } from 'lib/utils/getAppContext'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -70,7 +70,7 @@ export function LogCaptureSettings(): JSX.Element {
             resourceType={AccessControlResourceType.SessionRecording}
             minAccessLevel={AccessControlLevel.Editor}
         >
-            <LemonSwitch
+            <Switch
                 data-attr="opt-in-capture-console-log-switch"
                 onChange={(checked) => {
                     updateCurrentTeam({ capture_console_log_opt_in: checked })
@@ -94,7 +94,7 @@ export function CanvasCaptureSettings(): JSX.Element | null {
             resourceType={AccessControlResourceType.SessionRecording}
             minAccessLevel={AccessControlLevel.Editor}
         >
-            <LemonSwitch
+            <Switch
                 data-attr="opt-in-capture-canvas-switch"
                 onChange={(checked) => {
                     updateCurrentTeam({
@@ -104,7 +104,7 @@ export function CanvasCaptureSettings(): JSX.Element | null {
                         },
                     })
                 }}
-                label={<LemonLabel>Capture canvas elements</LemonLabel>}
+                label={<Label>Capture canvas elements</Label>}
                 bordered
                 checked={
                     currentTeam?.session_replay_config ? !!currentTeam?.session_replay_config?.record_canvas : false
@@ -145,7 +145,7 @@ export function ReplayNetworkCapture(): JSX.Element {
             resourceType={AccessControlResourceType.SessionRecording}
             minAccessLevel={AccessControlLevel.Editor}
         >
-            <LemonSwitch
+            <Switch
                 data-attr="opt-in-capture-performance-switch"
                 onChange={(checked) => {
                     updateCurrentTeam({ capture_performance_opt_in: checked })
@@ -170,11 +170,11 @@ export function ReplayNetworkHeadersPayloads(): JSX.Element {
                 resourceType={AccessControlResourceType.SessionRecording}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonSwitch
+                <Switch
                     data-attr="opt-in-capture-network-headers-switch"
                     onChange={(checked) => {
                         if (checked) {
-                            LemonDialog.open({
+                            Dialog.open({
                                 maxWidth: '650px',
                                 title: 'Network header capture',
                                 description: <PayloadWarning />,
@@ -219,11 +219,11 @@ export function ReplayNetworkHeadersPayloads(): JSX.Element {
                 resourceType={AccessControlResourceType.SessionRecording}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonSwitch
+                <Switch
                     data-attr="opt-in-capture-network-body-switch"
                     onChange={(checked) => {
                         if (checked) {
-                            LemonDialog.open({
+                            Dialog.open({
                                 maxWidth: '650px',
                                 title: 'Network body capture',
                                 description: <PayloadWarning />,
@@ -275,10 +275,10 @@ export function ReplayNetworkHeadersPayloads(): JSX.Element {
 export function ReplayAuthorizedDomains(): JSX.Element {
     return (
         <div className="gap-y-2">
-            <LemonBanner type="warning">
+            <Banner type="warning">
                 <strong>This setting is now deprecated and cannot be updated.</strong> Instead we recommend deleting the
                 domains below and using URL triggers in your recording conditions to control which domains you record.
-            </LemonBanner>
+            </Banner>
             <p>
                 Domains and wildcard subdomains are allowed (e.g. <code>https://*.example.com</code>). However,
                 wildcarded top-level domains cannot be used (for security reasons).
@@ -312,7 +312,7 @@ export function ReplayMaskingSettings(): JSX.Element {
                 resourceType={AccessControlResourceType.SessionRecording}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonSelect
+                <Select
                     value={maskingLevel}
                     onChange={(val) => val && handleMaskingChange(val)}
                     options={[
@@ -341,7 +341,7 @@ export function ReplayDataRetentionSettings(): JSX.Element {
         retentionFeature?.limit >= 60
     const currentRetention = currentTeam?.session_recording_retention_period || '30d'
 
-    const renderOptions = (loading: boolean): LemonSegmentedButtonOption<SessionRecordingRetentionPeriod>[] => {
+    const renderOptions = (loading: boolean): SegmentedButtonOption<SessionRecordingRetentionPeriod>[] => {
         const disabledReason = loading ? 'Loading...' : undefined
         const options = [
             {
@@ -409,7 +409,7 @@ export function ReplayDataRetentionSettings(): JSX.Element {
                 minAccessLevel={AccessControlLevel.Editor}
                 userAccessLevel={getAppContext()?.resource_access_control?.[AccessControlResourceType.SessionRecording]}
             >
-                <LemonSegmentedButton
+                <SegmentedButton
                     value={currentRetention}
                     onChange={(val) => val && handleRetentionChange(val)}
                     options={renderOptions(currentTeamLoading)}
@@ -446,7 +446,7 @@ export function ReplayGeneral(): JSX.Element {
                 resourceType={AccessControlResourceType.SessionRecording}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonSwitch
+                <Switch
                     data-attr="opt-in-session-recording-switch"
                     onChange={(checked) => {
                         handleOptInChange(checked)

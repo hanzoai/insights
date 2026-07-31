@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonBanner, LemonButton, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Button, Spinner, Tooltip } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { TZLabel } from 'lib/components/TZLabel'
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
 import { dayjs } from 'lib/dayjs'
 import { IntegrationScopesWarning } from 'lib/integrations/IntegrationScopesWarning'
-import { IconBranch, IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconBranch, IconOpenInNew } from 'lib/elements/icons'
 
 import { CyclotronJobInputSchemaType, IntegrationType } from '~/types'
 
@@ -42,14 +42,14 @@ export function IntegrationView({
 
     suffix = suffix || (
         <div className="flex flex-row gap-2">
-            <LemonButton
+            <Button
                 type="secondary"
                 status="danger"
                 onClick={() => deleteIntegration(integration.id)}
                 icon={<IconTrash />}
             >
                 Disconnect
-            </LemonButton>
+            </Button>
         </div>
     )
 
@@ -105,7 +105,7 @@ export function IntegrationView({
                                             {repositories.length} repositor{repositories.length === 1 ? 'y' : 'ies'}:{' '}
                                             {repositories.join(', ')}
                                         </div>
-                                        <LemonButton
+                                        <Button
                                             size="xsmall"
                                             type="secondary"
                                             icon={<IconOpenInNew />}
@@ -127,7 +127,7 @@ export function IntegrationView({
                                             <IconBranch className="inline mr-1" />
                                             No repositories accessible
                                         </div>
-                                        <LemonButton
+                                        <Button
                                             size="xsmall"
                                             type="secondary"
                                             icon={<IconOpenInNew />}
@@ -154,7 +154,7 @@ export function IntegrationView({
 
             {errors.length > 0 ? (
                 <div className="p-2">
-                    <LemonBanner
+                    <Banner
                         type="error"
                         action={{
                             children: 'Reconnect',
@@ -168,7 +168,7 @@ export function IntegrationView({
                         {errors[0] === 'TOKEN_REFRESH_FAILED'
                             ? 'Authentication token could not be refreshed. Please reconnect.'
                             : `There was an error with this integration: ${errors[0]}`}
-                    </LemonBanner>
+                    </Banner>
                 </div>
             ) : (
                 <IntegrationScopesWarning integration={integration} schema={schema} />

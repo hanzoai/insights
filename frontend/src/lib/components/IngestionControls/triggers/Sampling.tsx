@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, LemonInput, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Input, toast } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 
@@ -23,7 +23,7 @@ export function SamplingTrigger({
     const updateSampling = (): void => {
         const returnRate = typeof value == 'number' ? value / 100 : 0
         if (returnRate > 1) {
-            lemonToast.error('Session recording sample rate must be between 0 to 100')
+            toast.error('Session recording sample rate must be between 0 to 100')
         } else {
             onChange(returnRate)
         }
@@ -32,7 +32,7 @@ export function SamplingTrigger({
     return (
         <AccessControlAction resourceType={resourceType} minAccessLevel={AccessControlLevel.Editor}>
             <div className="flex flex-row gap-x-2">
-                <LemonInput
+                <Input
                     type="number"
                     className="[&>input::-webkit-inner-spin-button]:appearance-none"
                     onChange={(value) => setValue(value)}
@@ -43,14 +43,14 @@ export function SamplingTrigger({
                     onPressEnter={updateSampling}
                     data-attr="sampling-setting-input"
                 />
-                <LemonButton
+                <Button
                     type="primary"
                     disabledReason={initialSampleRate === value && 'Update the sample rate to save changes'}
                     onClick={updateSampling}
                     data-attr="sampling-setting-update"
                 >
                     Update
-                </LemonButton>
+                </Button>
             </div>
         </AccessControlAction>
     )

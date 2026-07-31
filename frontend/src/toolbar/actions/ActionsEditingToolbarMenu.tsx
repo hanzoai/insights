@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { Field, Form, Group } from 'kea-forms'
 
 import { IconPencil, IconPlus, IconSearch, IconTrash } from '@hanzo/icons'
-import { LemonDivider, LemonTag } from '@hanzo/lemon-ui'
+import { Divider, Tag } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
 
 import { SelectorEditingModal } from '~/toolbar/actions/SelectorEditingModal'
 import { StepField } from '~/toolbar/actions/StepField'
@@ -60,7 +60,7 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                         <div>
                             <p>What did your user do?</p>
                             <Field name="name">
-                                <LemonInput
+                                <Input
                                     placeholder="E.g: Clicked Sign Up"
                                     className="action-title-field"
                                     stopPropagation={true}
@@ -70,13 +70,13 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
 
                         {actionForm.steps?.map((step, index) => (
                             <Group key={index} name={['steps', index]}>
-                                <LemonDivider />
+                                <Divider />
                                 <div key={index} className="p-1 flex flex-col gap-2">
                                     <div className="flex flex-row justify-between">
                                         <h3>
                                             {index > 0 ? 'OR ' : null}Element #{index + 1}
                                         </h3>
-                                        <LemonButton
+                                        <Button
                                             type="tertiary"
                                             size="small"
                                             onClick={() =>
@@ -89,11 +89,11 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                                             sideIcon={<IconTrash />}
                                         >
                                             Remove
-                                        </LemonButton>
+                                        </Button>
                                     </div>
 
                                     <div className="action-inspect">
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             type={inspectingElement === index ? 'primary' : 'secondary'}
                                             onClick={(e) => {
@@ -103,7 +103,7 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                                             icon={<IconSearch />}
                                         >
                                             {step?.event === '$autocapture' ? 'Change Element' : 'Select Element'}
-                                        </LemonButton>
+                                        </Button>
                                     </div>
 
                                     {step?.event === '$autocapture' || inspectingElement === index ? (
@@ -116,7 +116,7 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                                             />
                                             <SelectorQualityWarning selector={step?.selector} />
                                             <div className="flex flex-row justify-end mb-2">
-                                                <LemonButton
+                                                <Button
                                                     size="small"
                                                     type="secondary"
                                                     icon={<IconPencil />}
@@ -132,7 +132,7 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                                                     }}
                                                 >
                                                     Edit the selector
-                                                </LemonButton>
+                                                </Button>
                                             </div>
                                             <StepField
                                                 step={step}
@@ -145,18 +145,18 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                                                     </>
                                                 }
                                             />
-                                            <LemonTag type="highlight">
+                                            <Tag type="highlight">
                                                 <span className="uppercase">and</span>
-                                            </LemonTag>
+                                            </Tag>
                                             <StepField
                                                 step={step}
                                                 item="text"
                                                 label="Text"
                                                 caption="Text content inside your element"
                                             />
-                                            <LemonTag type="highlight">
+                                            <Tag type="highlight">
                                                 <span className="uppercase">and</span>
-                                            </LemonTag>
+                                            </Tag>
                                             <StepField
                                                 step={step}
                                                 item="url"
@@ -168,7 +168,7 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
 
                                     {index === (actionForm.steps?.length || 0) - 1 ? (
                                         <div className="text-right mt-4">
-                                            <LemonButton
+                                            <Button
                                                 type="secondary"
                                                 size="small"
                                                 sideIcon={<IconPlus />}
@@ -177,7 +177,7 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                                                 }
                                             >
                                                 Add Another Element
-                                            </LemonButton>
+                                            </Button>
                                         </div>
                                     ) : null}
                                 </div>
@@ -185,7 +185,7 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                         ))}
 
                         {(actionForm.steps || []).length === 0 ? (
-                            <LemonButton
+                            <Button
                                 icon={<IconPlus />}
                                 size="small"
                                 type="primary"
@@ -193,19 +193,19 @@ export const ActionsEditingToolbarMenu = (): JSX.Element => {
                                 className="my-2"
                             >
                                 Add An Element
-                            </LemonButton>
+                            </Button>
                         ) : null}
                     </div>
                 </ToolbarMenu.Body>
                 <ToolbarMenu.Footer>
                     <span className="flex-1" />
-                    <LemonButton type="secondary" size="small" onClick={() => selectAction(null)}>
+                    <Button type="secondary" size="small" onClick={() => selectAction(null)}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" htmlType="submit" size="small">
+                    </Button>
+                    <Button type="primary" htmlType="submit" size="small">
                         {selectedActionId === 'new' ? 'Create ' : 'Save '}
                         action
-                    </LemonButton>
+                    </Button>
                 </ToolbarMenu.Footer>
             </Form>
         </ToolbarMenu>

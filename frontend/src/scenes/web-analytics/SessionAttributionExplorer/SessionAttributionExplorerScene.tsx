@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import React from 'react'
 
 import { IconCollapse, IconExpand, IconPlus } from '@hanzo/icons'
-import { LemonMenu, LemonSwitch } from '@hanzo/lemon-ui'
+import { Menu, Switch } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconFeedback } from 'lib/lemon-ui/icons'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconFeedback } from 'lib/elements/icons'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -51,7 +51,7 @@ const ExpandableDataCell: QueryContextColumnComponent = ({ value }: { value: unk
         <div className="flex flex-row">
             <div>
                 <span>
-                    <LemonButton
+                    <Button
                         active={isExpanded}
                         onClick={() => {
                             setIsExpanded(!isExpanded)
@@ -157,11 +157,11 @@ export const GroupByFilter = (): JSX.Element => {
 
     return (
         <div className="mb-2">
-            <LemonMenu
+            <Menu
                 items={groupByOptions.map(({ label, value }) => {
                     return {
                         label: () => (
-                            <LemonSwitch
+                            <Switch
                                 checked={groupBy.includes(value)}
                                 onChange={(val) => {
                                     if (val) {
@@ -178,10 +178,10 @@ export const GroupByFilter = (): JSX.Element => {
                 })}
                 closeOnClickInside={false}
             >
-                <LemonButton icon={<IconPlus />} size="small" type="secondary">
+                <Button icon={<IconPlus />} size="small" type="secondary">
                     Group by
-                </LemonButton>
-            </LemonMenu>
+                </Button>
+            </Menu>
         </div>
     )
 }
@@ -196,7 +196,7 @@ export function SessionAttributionExplorer(): JSX.Element {
     return (
         <div>
             <SceneBreadcrumbBackButton />
-            <LemonBanner type="info" className="my-4">
+            <Banner type="info" className="my-4">
                 <div className="flex items-center flex-wrap gap-2 justify-between">
                     <div className="flex-1 min-w-full sm:min-w-0">
                         <p>
@@ -214,7 +214,7 @@ export function SessionAttributionExplorer(): JSX.Element {
                     </div>
                     {showSupportOptions ? (
                         <span className="flex items-center gap-2">
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 icon={<IconFeedback />}
                                 onClick={() =>
@@ -226,11 +226,11 @@ export function SessionAttributionExplorer(): JSX.Element {
                                 }
                             >
                                 Give feedback
-                            </LemonButton>
+                            </Button>
                         </span>
                     ) : null}
                 </div>
-            </LemonBanner>
+            </Banner>
             <GroupByFilter />
             <Query<DataTableNode>
                 context={queryContext}

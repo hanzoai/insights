@@ -6,7 +6,7 @@ import api, { CountedPaginatedResponse } from 'lib/api'
 import { TriggerExportProps } from 'lib/components/ExportButton/exporter'
 import { convertPropertyGroupToProperties, isValidPropertyFilter } from 'lib/components/PropertyFilters/utils'
 import { FEATURE_FLAGS, PERSON_DISPLAY_NAME_COLUMN_NAME } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { toParams } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -440,7 +440,7 @@ export const personsLogic = kea<personsLogicType>([
                 // :KLUDGE: Person properties are updated asynchronously in the plugin server - the response won't reflect
                 //      the _updated_ properties yet.
                 await api.persons.updateProperty(person.id, key, parsedValue)
-                lemonToast.success(`User property ${action}`)
+                toast.success(`User property ${action}`)
 
                 eventUsageLogic.actions.reportPersonPropertyUpdated(
                     action,
@@ -460,7 +460,7 @@ export const personsLogic = kea<personsLogicType>([
                 actions.setPerson({ ...person, properties: updatedProperties }) // To update the UI immediately
                 // await api.create(`api/person/${person.id}/delete_property`, { $unset: key })
                 await api.persons.deleteProperty(person.id, key)
-                lemonToast.success(`User property deleted`)
+                toast.success(`User property deleted`)
 
                 eventUsageLogic.actions.reportPersonPropertyUpdated('removed', 1, undefined, undefined)
             }

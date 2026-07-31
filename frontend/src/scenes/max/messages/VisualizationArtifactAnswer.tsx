@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import React, { useLayoutEffect, useMemo, useState } from 'react'
 
 import { IconCollapse, IconExpand, IconEye, IconHide, IconWarning } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import {
     InsightBreakdownSummary,
@@ -11,7 +11,7 @@ import {
     SeriesSummary,
 } from 'lib/components/Cards/InsightCard/InsightDetails'
 import { TopHeading } from 'lib/components/Cards/InsightCard/TopHeading'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightSceneLogic } from 'scenes/insights/insightSceneLogic'
 import { Scene } from 'scenes/sceneTypes'
@@ -50,7 +50,7 @@ function InsightSuggestionButton({ tabId }: { tabId: string }): JSX.Element {
     return (
         <>
             {suggestedQuery && (
-                <LemonButton
+                <Button
                     onClick={() => {
                         if (previousQuery) {
                             onRejectSuggestedInsight()
@@ -124,7 +124,7 @@ export const VisualizationArtifactAnswer = React.memo(function VisualizationArti
             <div className={clsx('flex items-center justify-between', !isCollapsed && 'mt-2')}>
                 {isInsightVizNode(query) ? (
                     <div className="flex items-center gap-1.5">
-                        <LemonButton
+                        <Button
                             sideIcon={isSummaryShown ? <IconCollapse /> : <IconExpand />}
                             onClick={() => setIsSummaryShown(!isSummaryShown)}
                             size="xsmall"
@@ -134,7 +134,7 @@ export const VisualizationArtifactAnswer = React.memo(function VisualizationArti
                             <h5 className="m-0 leading-none">
                                 <TopHeading query={query} />
                             </h5>
-                        </LemonButton>
+                        </Button>
                     </div>
                 ) : (
                     <h5 className="m-0 leading-none">
@@ -146,7 +146,7 @@ export const VisualizationArtifactAnswer = React.memo(function VisualizationArti
                         <InsightSuggestionButton tabId={activeTabId} />
                     )}
                     {!isEditingInsight && (
-                        <LemonButton
+                        <Button
                             to={
                                 isSavedInsight
                                     ? urls.insightView(message.artifact_id as InsightShortId)
@@ -159,7 +159,7 @@ export const VisualizationArtifactAnswer = React.memo(function VisualizationArti
                             tooltip={isSavedInsight ? 'Open insight' : 'Open as new insight'}
                         />
                     )}
-                    <LemonButton
+                    <Button
                         icon={isCollapsed ? <IconEye /> : <IconHide />}
                         onClick={() => setIsCollapsed(!isCollapsed)}
                         size="xsmall"

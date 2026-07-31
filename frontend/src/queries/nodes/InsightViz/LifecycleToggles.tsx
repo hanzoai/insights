@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox, LemonLabel } from '@hanzo/lemon-ui'
+import { Checkbox, Label } from '@hanzo/elements'
 
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
@@ -53,14 +53,14 @@ export function LifecycleToggles({ insightProps }: EditorFilterProps): JSX.Eleme
     return (
         <div className="flex flex-col -mt-1 uppercase">
             {lifecycles.map((lifecycle) => (
-                <LemonLabel key={lifecycle.name} info={lifecycle.tooltip}>
-                    <LemonCheckbox
+                <Label key={lifecycle.name} info={lifecycle.tooltip}>
+                    <Checkbox
                         label={lifecycle.name}
                         color={lifecycle.color}
                         checked={toggledLifecycles.includes(lifecycle.name)}
                         onChange={() => toggleLifecycle(lifecycle.name)}
                     />
-                </LemonLabel>
+                </Label>
             ))}
         </div>
     )

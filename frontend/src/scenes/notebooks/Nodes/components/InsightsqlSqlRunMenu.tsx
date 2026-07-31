@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconChevronDown, IconPlay } from '@hanzo/icons'
-import { LemonButton, LemonMenuItems, LemonMenuOverlay } from '@hanzo/lemon-ui'
+import { Button, MenuItems, MenuOverlay } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -34,7 +34,7 @@ export const InsightsqlSqlRunMenu = ({
     const insightsqlRunIconClass = isFresh ? 'text-success' : isStale ? 'text-danger' : undefined
     const insightsqlRunTooltip = `Run SQL (InsightsQL) query.${queued ? ' Queued.' : isStale ? ' Stale.' : ''}`
 
-    const insightsqlRunMenuItems: LemonMenuItems = [...buildRunMenuItems(onRun)]
+    const insightsqlRunMenuItems: MenuItems = [...buildRunMenuItems(onRun)]
 
     if (featureFlags[FEATURE_FLAGS.NOTEBOOK_PYTHON]) {
         insightsqlRunMenuItems.push({
@@ -44,7 +44,7 @@ export const InsightsqlSqlRunMenu = ({
     }
 
     return (
-        <LemonButton
+        <Button
             onClick={() => onRun('auto')}
             size="small"
             icon={<IconPlay className={insightsqlRunIconClass} />}
@@ -55,7 +55,7 @@ export const InsightsqlSqlRunMenu = ({
                 icon: <IconChevronDown />,
                 dropdown: {
                     placement: 'bottom-end',
-                    overlay: <LemonMenuOverlay items={insightsqlRunMenuItems} />,
+                    overlay: <MenuOverlay items={insightsqlRunMenuItems} />,
                 },
                 divider: false,
                 'aria-label': 'Open run options',

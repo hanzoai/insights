@@ -1,10 +1,10 @@
 import { useActions } from 'kea'
 
 import { IconBolt } from '@hanzo/icons'
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { registerTriggerType } from 'products/workflows/frontend/Workflows/insightsflows/registry/triggers/triggerTypeRegistry'
 import { workflowLogic } from 'products/workflows/frontend/Workflows/workflowLogic'
@@ -61,8 +61,8 @@ function StepTriggerConfigurationSupportStatusChanged({ node }: { node: any }): 
             <p className="mb-0 text-sm text-muted-alt">
                 This trigger runs when a ticket changes to the selected status.
             </p>
-            <LemonField.Pure label="New status">
-                <LemonSelect<SupportStatusValue>
+            <Field.Pure label="New status">
+                <Select<SupportStatusValue>
                     value={selectedStatus}
                     options={[
                         { label: 'New', value: 'new' },
@@ -78,7 +78,7 @@ function StepTriggerConfigurationSupportStatusChanged({ node }: { node: any }): 
                         })
                     }
                 />
-            </LemonField.Pure>
+            </Field.Pure>
         </div>
     )
 }

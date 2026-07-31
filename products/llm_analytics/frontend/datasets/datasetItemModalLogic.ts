@@ -1,7 +1,7 @@
 import { actions, defaults, kea, key, path, props, propsChanged, reducers } from 'kea'
 import { forms } from 'kea-forms'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from '~/lib/api'
 import { DatasetItem } from '~/types'
@@ -89,7 +89,7 @@ export const datasetItemModalLogic = kea<datasetItemModalLogicType>([
                             output: coerceJsonToObject(formValues.output),
                             metadata: coerceJsonToObject(formValues.metadata),
                         })
-                        lemonToast.success('Dataset item created successfully')
+                        toast.success('Dataset item created successfully')
                         if (values.shouldCloseModal) {
                             props.closeModal(true)
                         } else {
@@ -105,13 +105,13 @@ export const datasetItemModalLogic = kea<datasetItemModalLogicType>([
                             output: coerceJsonToObject(formValues.output),
                             metadata: coerceJsonToObject(formValues.metadata),
                         })
-                        lemonToast.success('Dataset item updated successfully')
+                        toast.success('Dataset item updated successfully')
                         props.closeModal(true)
                         actions.setDatasetItemFormValues(getDatasetItemFormDefaults(updatedItem))
                     }
                 } catch (error) {
                     console.error(error)
-                    lemonToast.error('Failed to save a dataset item.')
+                    toast.error('Failed to save a dataset item.')
                 }
             },
         },

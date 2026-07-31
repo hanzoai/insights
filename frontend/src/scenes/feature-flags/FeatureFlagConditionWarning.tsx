@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { Link } from 'lib/elements/Link'
 
 import { AnyPropertyFilter, FeatureFlagEvaluationRuntime } from '~/types'
 
@@ -25,12 +25,12 @@ export function FeatureFlagConditionWarning({
     }
 
     return (
-        <LemonBanner type="warning" className={className}>
+        <Banner type="warning" className={className}>
             This flag cannot be locally evaluated by server-side SDKs due to unsupported features: {warning}. The flag
             will still evaluate correctly when not using local evaluation.{' '}
             <Link to="https://hanzo.ai/docs/feature-flags/local-evaluation#restriction-on-local-evaluation">
                 Learn more
             </Link>
-        </LemonBanner>
+        </Banner>
     )
 }

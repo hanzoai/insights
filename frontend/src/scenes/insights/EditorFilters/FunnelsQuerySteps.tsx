@@ -2,11 +2,11 @@ import './FunnelsQuerySteps.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
+import { Label } from 'lib/elements/Label/Label'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { getProjectEventExistence } from 'lib/utils/getAppContext'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
@@ -55,7 +55,7 @@ export function FunnelsQuerySteps({ insightProps }: EditorFilterProps): JSX.Elem
     return (
         <>
             <div className="flex justify-between items-center">
-                <LemonLabel>Query Steps</LemonLabel>
+                <Label>Query Steps</Label>
 
                 <Tooltip docLink="https://hanzo.ai/docs/product-analytics/funnels#graph-type">
                     <div className="flex items-center gap-2">

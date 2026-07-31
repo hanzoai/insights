@@ -3,9 +3,9 @@ import { Fragment } from 'react'
 import { toast } from 'react-toastify'
 
 import { IconInfo, IconPlusSmall, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input, Select } from '@hanzo/elements'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { getOrdinalSuffix } from 'lib/utils'
 import { AggregationSelect } from 'scenes/insights/filters/AggregationSelect'
 import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
@@ -65,7 +65,7 @@ function CustomBrackets({ insightProps }: { insightProps: EditorFilterProps['ins
         <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
                 <div>Bracket By</div>
-                <LemonSelect
+                <Select
                     value={period ?? RetentionPeriod.Day}
                     onChange={(value): void => {
                         updateInsightFilter({ period: value ? value : undefined })
@@ -87,7 +87,7 @@ function CustomBrackets({ insightProps }: { insightProps: EditorFilterProps['ins
                             {index + 1}
                             {getOrdinalSuffix(index + 1)} Bracket
                         </div>
-                        <LemonInput
+                        <Input
                             type="number"
                             className="w-20"
                             value={typeof bracket === 'number' ? bracket : undefined}
@@ -96,7 +96,7 @@ function CustomBrackets({ insightProps }: { insightProps: EditorFilterProps['ins
                                 updateLocalCustomBracket(index, value)
                             }}
                         />
-                        <LemonButton
+                        <Button
                             icon={<IconTrash />}
                             size="small"
                             status="danger"
@@ -108,7 +108,7 @@ function CustomBrackets({ insightProps }: { insightProps: EditorFilterProps['ins
                 )
             })}
             <div className="flex items-center gap-2">
-                <LemonButton
+                <Button
                     icon={<IconPlusSmall />}
                     size="small"
                     onClick={() => addCustomBracket()}
@@ -117,7 +117,7 @@ function CustomBrackets({ insightProps }: { insightProps: EditorFilterProps['ins
                     }
                 >
                     Add another bracket
-                </LemonButton>
+                </Button>
             </div>
             {totalRange > MAX_RANGE && <div className="text-xs text-danger">Total range is too large.</div>}
         </div>
@@ -158,7 +158,7 @@ export function RetentionCondition({ insightProps }: EditorFilterProps): JSX.Ele
                 }}
                 typeKey={`${keyForInsightLogicProps('new')(insightProps)}-targetEntity`}
             />
-            <LemonSelect
+            <Select
                 options={Object.entries(retentionOptions).map(([key, value]) => ({
                     value: key,
                     label: value,
@@ -203,7 +203,7 @@ export function RetentionCondition({ insightProps }: EditorFilterProps): JSX.Ele
                 {!retentionCustomBrackets ? (
                     <Fragment>
                         <div>during the next</div>
-                        <LemonInput
+                        <Input
                             type="number"
                             className="ml-2 w-20"
                             defaultValue={(totalIntervals ?? 7) - 1}
@@ -236,7 +236,7 @@ export function RetentionCondition({ insightProps }: EditorFilterProps): JSX.Ele
                                 }
                             }}
                         />
-                        <LemonSelect
+                        <Select
                             value={period ?? RetentionPeriod.Day}
                             onChange={(value): void => {
                                 updateInsightFilter({ period: value ? value : undefined })
@@ -255,7 +255,7 @@ export function RetentionCondition({ insightProps }: EditorFilterProps): JSX.Ele
                     </Fragment>
                 ) : null}
             </div>
-            <LemonCheckbox
+            <Checkbox
                 label="Use custom return ranges"
                 checked={retentionCustomBrackets !== undefined}
                 onChange={(checked) => {

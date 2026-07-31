@@ -3,10 +3,10 @@ import { router } from 'kea-router'
 import { useEffect, useRef, useState } from 'react'
 
 import { IconArchive, IconCopy, IconScreen } from '@hanzo/icons'
-import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
+import { Button, Divider } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { More } from 'lib/lemon-ui/LemonButton/More'
+import { More } from 'lib/elements/Button/More'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 
 import { ScenePanel, ScenePanelActionsSection, ScenePanelDivider } from '~/layout/scenes/SceneLayout'
@@ -78,7 +78,7 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
                         {isManualWorkflow && <InsightsFlowManualTriggerButton {...props} />}
                         {isSavedWorkflow && (
                             <>
-                                <LemonButton
+                                <Button
                                     type={displayStatus === 'active' ? 'primary' : 'secondary'}
                                     onClick={() =>
                                         saveWorkflowPartial({
@@ -103,8 +103,8 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
                                     >
                                         {displayStatus === 'draft' ? 'Enable' : 'Disable'}
                                     </span>
-                                </LemonButton>
-                                <LemonDivider vertical />
+                                </Button>
+                                <Divider vertical />
                                 {isRemovingSidePanelFlag ? (
                                     <ScenePanel>
                                         <ScenePanelActionsSection>
@@ -134,20 +134,20 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
                                         size="small"
                                         overlay={
                                             <>
-                                                <LemonButton fullWidth onClick={() => duplicate()}>
+                                                <Button fullWidth onClick={() => duplicate()}>
                                                     Duplicate
-                                                </LemonButton>
-                                                <LemonButton fullWidth onClick={showSaveAsTemplateModal}>
+                                                </Button>
+                                                <Button fullWidth onClick={showSaveAsTemplateModal}>
                                                     Save as template
-                                                </LemonButton>
-                                                <LemonDivider />
-                                                <LemonButton
+                                                </Button>
+                                                <Divider />
+                                                <Button
                                                     status="danger"
                                                     fullWidth
                                                     onClick={() => archiveWorkflow(workflow)}
                                                 >
                                                     Archive
-                                                </LemonButton>
+                                                </Button>
                                             </>
                                         }
                                     />
@@ -155,26 +155,26 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
                             </>
                         )}
                         {workflowChanged && (
-                            <LemonButton
+                            <Button
                                 data-attr="discard-workflow-changes"
                                 type="secondary"
                                 onClick={() => discardChanges()}
                                 size="small"
                             >
                                 Clear changes
-                            </LemonButton>
+                            </Button>
                         )}
                         {editTemplateId ? (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 size="small"
                                 onClick={showSaveAsTemplateModal}
                                 loading={isWorkflowSubmitting}
                             >
                                 Update template
-                            </LemonButton>
+                            </Button>
                         ) : (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 size="small"
                                 htmlType="submit"
@@ -192,7 +192,7 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
                                 }
                             >
                                 {props.id === 'new' ? 'Create as draft' : 'Save'}
-                            </LemonButton>
+                            </Button>
                         )}
                     </>
                 }

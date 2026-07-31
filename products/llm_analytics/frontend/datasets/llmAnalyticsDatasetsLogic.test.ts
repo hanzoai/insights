@@ -1,6 +1,6 @@
 import { expectLogic } from 'kea-test-utils'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import api from '~/lib/api'
 import { initKeaTests } from '~/test/init'
@@ -9,7 +9,7 @@ import { Dataset } from '~/types'
 import { DATASETS_PER_PAGE, llmAnalyticsDatasetsLogic } from './llmAnalyticsDatasetsLogic'
 
 jest.mock('~/lib/api')
-jest.mock('lib/lemon-ui/LemonToast/LemonToast')
+jest.mock('lib/elements/Toast/Toast')
 
 describe('llmAnalyticsDatasetsLogic', () => {
     const mockDataset1: Dataset = {
@@ -224,7 +224,7 @@ describe('llmAnalyticsDatasetsLogic', () => {
             }).toFinishAllListeners()
 
             expect(mockApi.datasets.update).toHaveBeenCalledWith(mockDataset1.id, { deleted: true })
-            expect(lemonToast.info).toHaveBeenCalledWith(`${mockDataset1.name} has been deleted.`)
+            expect(toast.info).toHaveBeenCalledWith(`${mockDataset1.name} has been deleted.`)
         })
 
         it('handles deletion error', async () => {
@@ -236,7 +236,7 @@ describe('llmAnalyticsDatasetsLogic', () => {
                 logic.actions.deleteDataset(mockDataset1.id)
             }).toFinishAllListeners()
 
-            expect(lemonToast.error).toHaveBeenCalledWith('Failed to delete dataset')
+            expect(toast.error).toHaveBeenCalledWith('Failed to delete dataset')
         })
     })
 

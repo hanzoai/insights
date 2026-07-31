@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconCalendar, IconClock } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput, Popover } from '@hanzo/lemon-ui'
+import { Button, Divider, Input, Popover } from '@hanzo/elements'
 
 import { RollingDateRangeFilter } from 'lib/components/DateFilter/RollingDateRangeFilter'
 import { dayjs } from 'lib/dayjs'
-import { LemonCalendarSelect } from 'lib/lemon-ui/LemonCalendar/LemonCalendarSelect'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { CalendarSelect } from 'lib/elements/Calendar/CalendarSelect'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { DateRange } from '~/queries/schema/schema-general'
 import { DateMappingOption } from '~/types'
@@ -45,7 +45,7 @@ const DateTimeInput = ({ value, onChange, placeholder, timezone, label }: DateTi
                 onClickOutside={() => setCalendarOpen(false)}
                 placement="bottom-start"
                 overlay={
-                    <LemonCalendarSelect
+                    <CalendarSelect
                         value={parsedValue}
                         onChange={handleCalendarSelect}
                         onClose={() => setCalendarOpen(false)}
@@ -54,12 +54,12 @@ const DateTimeInput = ({ value, onChange, placeholder, timezone, label }: DateTi
                     />
                 }
             >
-                <LemonInput
+                <Input
                     value={value}
                     onChange={onChange}
                     placeholder={placeholder}
                     suffix={
-                        <LemonButton
+                        <Button
                             size="xsmall"
                             noPadding
                             icon={<IconCalendar className="text-secondary" />}
@@ -103,17 +103,17 @@ export const LogsDateRangePicker = ({ dateRange, setDateRange }: LogsDateRangePi
         const toDate = customTo ? parseDateExpression(customTo, timezone) : null
 
         if (!fromDate) {
-            lemonToast.error('Invalid start date format. Use formats like "-1h", "-30M", or "YYYY-MM-DD HH:mm"')
+            toast.error('Invalid start date format. Use formats like "-1h", "-30M", or "YYYY-MM-DD HH:mm"')
             return
         }
 
         if (customTo && !toDate) {
-            lemonToast.error('Invalid end date format. Use formats like "-1h", "-30M", or "YYYY-MM-DD HH:mm"')
+            toast.error('Invalid end date format. Use formats like "-1h", "-30M", or "YYYY-MM-DD HH:mm"')
             return
         }
 
         if (toDate && fromDate.isAfter(toDate)) {
-            lemonToast.error('Start date must be before end date')
+            toast.error('Start date must be before end date')
             return
         }
 
@@ -143,7 +143,7 @@ export const LogsDateRangePicker = ({ dateRange, setDateRange }: LogsDateRangePi
                     <div className="flex flex-col gap-1 p-3">
                         <div className="text-xs font-medium text-secondary mb-1">In the last</div>
                         {LOGS_DATE_OPTIONS.map((option) => (
-                            <LemonButton
+                            <Button
                                 key={option.key}
                                 size="small"
                                 type={isOptionSelected(option) ? 'primary' : 'tertiary'}
@@ -151,7 +151,7 @@ export const LogsDateRangePicker = ({ dateRange, setDateRange }: LogsDateRangePi
                                 fullWidth
                             >
                                 {getShortLabel(option)}
-                            </LemonButton>
+                            </Button>
                         ))}
                         <RollingDateRangeFilter
                             dateFrom={dateRange.date_from}
@@ -166,7 +166,7 @@ export const LogsDateRangePicker = ({ dateRange, setDateRange }: LogsDateRangePi
                         />
                     </div>
 
-                    <LemonDivider vertical className="my-3" />
+                    <Divider vertical className="my-3" />
 
                     <div className="flex flex-col gap-3 p-3 w-fit">
                         <div className="flex flex-col gap-2">
@@ -187,18 +187,18 @@ export const LogsDateRangePicker = ({ dateRange, setDateRange }: LogsDateRangePi
                                     label="To"
                                 />
                             </div>
-                            <LemonButton type="primary" size="small" onClick={handleApplyCustom} fullWidth>
+                            <Button type="primary" size="small" onClick={handleApplyCustom} fullWidth>
                                 Apply
-                            </LemonButton>
+                            </Button>
                         </div>
 
                         {history.length > 0 && (
                             <>
-                                <LemonDivider className="my-0" />
+                                <Divider className="my-0" />
                                 <div className="flex flex-col gap-1 flex-1">
                                     <div className="text-xs font-medium text-secondary">Recent</div>
                                     {history.map((historyDateRange, index) => (
-                                        <LemonButton
+                                        <Button
                                             key={index}
                                             size="small"
                                             type="tertiary"
@@ -209,26 +209,26 @@ export const LogsDateRangePicker = ({ dateRange, setDateRange }: LogsDateRangePi
                                             <span className="truncate">
                                                 {formatDateRangeLabel(historyDateRange, timezone, LOGS_DATE_OPTIONS)}
                                             </span>
-                                        </LemonButton>
+                                        </Button>
                                     ))}
                                 </div>
                             </>
                         )}
 
-                        <LemonDivider className="my-0" />
+                        <Divider className="my-0" />
                         <TimezoneSelect value={timezone} onChange={setTimezone} size="xsmall" />
                     </div>
                 </div>
             }
         >
-            <LemonButton
+            <Button
                 size="small"
                 type="secondary"
                 icon={<IconCalendar />}
                 onClick={() => setPopoverOpen(!popoverOpen)}
             >
                 {currentLabel}
-            </LemonButton>
+            </Button>
         </Popover>
     )
 }

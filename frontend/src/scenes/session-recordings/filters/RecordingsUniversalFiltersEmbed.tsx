@@ -17,16 +17,16 @@ import {
     IconX,
 } from '@hanzo/icons'
 import {
-    LemonBadge,
-    LemonButton,
-    LemonDivider,
-    LemonInput,
-    LemonModal,
-    LemonTab,
-    LemonTabs,
-    LemonTag,
+    Badge,
+    Button,
+    Divider,
+    Input,
+    Modal,
+    Tab,
+    Tabs,
+    Tag,
     Popover,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
@@ -37,8 +37,8 @@ import { isCommentTextFilter, isUniversalGroupFilterLike } from 'lib/components/
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconUnverifiedEvent } from 'lib/lemon-ui/icons'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconUnverifiedEvent } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { getProjectEventExistence } from 'lib/utils/getAppContext'
 import { TestAccountFilter } from 'scenes/insights/filters/TestAccountFilter'
@@ -100,7 +100,7 @@ function QuickFilterButton({
                 <span>{propertyTypeLabel}</span>
             </div>
             <span>Sent as: {filterKey}</span>
-            <LemonDivider className="my-1" />
+            <Divider className="my-1" />
             <span className="text-secondary">
                 This person property doesn't exist in your data. You may have set this as an event property instead. Try
                 adding a new filter from the events category.
@@ -118,7 +118,7 @@ function QuickFilterButton({
 
     return (
         <Tooltip title={tooltipContent}>
-            <LemonButton
+            <Button
                 type="secondary"
                 size="small"
                 icon={icon}
@@ -159,7 +159,7 @@ function QuickFilterButton({
                 }}
             >
                 {label}
-            </LemonButton>
+            </Button>
         </Tooltip>
     )
 }
@@ -247,7 +247,7 @@ export const RecordingsUniversalFiltersEmbedButton = ({
                     onMaxOpen={() => setIsFiltersExpanded(false)}
                     className="grow"
                 >
-                    <LemonButton
+                    <Button
                         active={isFiltersExpanded}
                         type="secondary"
                         size="small"
@@ -259,11 +259,11 @@ export const RecordingsUniversalFiltersEmbedButton = ({
                         data-attr="filter-recordings-button"
                     >
                         {isFiltersExpanded ? 'Hide' : 'Show'} filters{' '}
-                        {totalFiltersCount ? <LemonBadge.Number count={totalFiltersCount} size="small" /> : null}
-                    </LemonButton>
+                        {totalFiltersCount ? <Badge.Number count={totalFiltersCount} size="small" /> : null}
+                    </Button>
                     <CurrentFilterIndicator />
                 </MaxTool>
-                <LemonButton
+                <Button
                     type="secondary"
                     onClick={onReload}
                     icon={<IconRefresh />}
@@ -323,7 +323,7 @@ export const RecordingsUniversalFiltersEmbed = ({ ...props }: ReplayUniversalFil
 
     const { savedFilters } = useValues(sessionRecordingSavedFiltersLogic)
 
-    const tabs: LemonTab<string>[] = [
+    const tabs: Tab<string>[] = [
         {
             key: 'filters',
             label: <div className="px-2">Filters</div>,
@@ -336,7 +336,7 @@ export const RecordingsUniversalFiltersEmbed = ({ ...props }: ReplayUniversalFil
                 <div className="px-2 flex">
                     <span>
                         {savedFilters.results?.length ? (
-                            <LemonBadge.Number count={savedFilters.results?.length} className="mr-2" />
+                            <Badge.Number count={savedFilters.results?.length} className="mr-2" />
                         ) : null}
                     </span>
                     <span>Saved filters</span>
@@ -350,9 +350,9 @@ export const RecordingsUniversalFiltersEmbed = ({ ...props }: ReplayUniversalFil
     return (
         <div className="relative">
             <div className="absolute top-0 right-0 z-1">
-                <LemonButton icon={<IconX />} size="small" onClick={() => setIsFiltersExpanded(false)} />
+                <Button icon={<IconX />} size="small" onClick={() => setIsFiltersExpanded(false)} />
             </div>
-            <LemonTabs
+            <Tabs
                 activeKey={activeFilterTab}
                 onChange={(activeKey) => setActiveFilterTab(activeKey)}
                 size="small"
@@ -392,7 +392,7 @@ const RecordingsUniversalFilterGroup = ({
                                 visible={isPopoverVisible}
                                 onClickOutside={() => setIsPopoverVisible(false)}
                             >
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     size="small"
                                     data-attr="replay-filters-add-filter-button"
@@ -400,7 +400,7 @@ const RecordingsUniversalFilterGroup = ({
                                     onClick={() => setIsPopoverVisible(!isPopoverVisible)}
                                 >
                                     Add filter
-                                </LemonButton>
+                                </Button>
                             </Popover>
                         )}
                     </UniversalFilters.Group>
@@ -455,14 +455,14 @@ const SaveFiltersModal = ({
     }
 
     return (
-        <LemonModal
+        <Modal
             title="Save filters for later"
             description="You can access them on 'Saved filters' tab"
             isOpen={isOpen}
             onClose={closeSaveFiltersModal}
         >
             <div>
-                <LemonInput
+                <Input
                     value={savedFilterName}
                     placeholder="Saved filter name"
                     onChange={setSavedFilterName}
@@ -474,20 +474,20 @@ const SaveFiltersModal = ({
                     }}
                 />
                 <div className="flex justify-end gap-2 mt-4">
-                    <LemonButton type="secondary" onClick={closeSaveFiltersModal} tooltip="Close">
+                    <Button type="secondary" onClick={closeSaveFiltersModal} tooltip="Close">
                         Close
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         size="small"
                         disabledReason={savedFilterName.length === 0 ? 'Enter a name' : undefined}
                         onClick={() => void addSavedFilter()}
                     >
                         Save filters
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -563,7 +563,7 @@ const ReplayFiltersTab = ({
                 <div className="border-b px-2 py-3 flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                         <span className="font-medium whitespace-nowrap flex-shrink-0">Loaded saved filter:</span>
-                        <LemonTag
+                        <Tag
                             type={hasFilterChanges ? 'option' : 'primary'}
                             icon={hasFilterChanges ? <IconAsterisk /> : undefined}
                             closable
@@ -577,11 +577,11 @@ const ReplayFiltersTab = ({
                                 {appliedSavedFilter.name || appliedSavedFilter.derived_name || 'Unnamed'}
                                 {hasFilterChanges && ' (edited)'}
                             </span>
-                        </LemonTag>
+                        </Tag>
                     </div>
                     {hasFilterChanges && (
                         <div className="flex gap-2 ml-auto">
-                            <LemonButton
+                            <Button
                                 data-attr="replay-filters-discard-changes-button"
                                 type="secondary"
                                 size="small"
@@ -591,8 +591,8 @@ const ReplayFiltersTab = ({
                                 }
                             >
                                 Discard changes
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 data-attr="replay-filters-save-changes-button"
                                 type="secondary"
                                 status="danger"
@@ -602,7 +602,7 @@ const ReplayFiltersTab = ({
                                 onClick={() => void updateSavedFilter()}
                             >
                                 Save changes to "{appliedSavedFilter.name || 'Unnamed'}"
-                            </LemonButton>
+                            </Button>
                         </div>
                     )}
                 </div>
@@ -710,7 +710,7 @@ const ReplayFiltersTab = ({
                                     visible={isPopoverVisible}
                                     onClickOutside={() => setIsPopoverVisible(false)}
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         data-attr="replay-filters-add-filter-button"
@@ -718,7 +718,7 @@ const ReplayFiltersTab = ({
                                         onClick={() => setIsPopoverVisible(!isPopoverVisible)}
                                     >
                                         Add filter
-                                    </LemonButton>
+                                    </Button>
                                 </Popover>
                             </UniversalFilters>
                         )}
@@ -772,11 +772,11 @@ const ReplayFiltersTab = ({
                 </div>
             </UniversalFilters>
 
-            <LemonDivider className="mt-4" />
+            <Divider className="mt-4" />
 
             <div className="flex items-center py-2 justify-between px-1 gap-2">
                 {useFeatureFlag('SHOW_REPLAY_FILTERS_FEEDBACK_BUTTON') && (
-                    <LemonButton
+                    <Button
                         id="replay-filters-feedback-button"
                         type="tertiary"
                         status="danger"
@@ -784,10 +784,10 @@ const ReplayFiltersTab = ({
                         data-attr="replay-filters-feedback-button"
                     >
                         Unexpected filter results?
-                    </LemonButton>
+                    </Button>
                 )}
                 <div className="flex gap-2 ml-auto">
-                    <LemonButton
+                    <Button
                         type="tertiary"
                         size="small"
                         onClick={handleResetFilters}
@@ -798,10 +798,10 @@ const ReplayFiltersTab = ({
                         }
                     >
                         Reset filters
-                    </LemonButton>
-                    <LemonButton type="primary" size="small" onClick={() => setIsSaveFiltersModalOpen(true)}>
+                    </Button>
+                    <Button type="primary" size="small" onClick={() => setIsSaveFiltersModalOpen(true)}>
                         Save as new filter
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
 

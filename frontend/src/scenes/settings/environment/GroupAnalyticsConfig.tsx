@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonInput, Link } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Link } from '@hanzo/elements'
 
 import { GroupsAccessStatus, groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Banner } from 'lib/elements/Banner'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { GroupsIntroduction } from 'scenes/groups/GroupsIntroduction'
 
 import { GroupType } from '~/types'
@@ -19,7 +19,7 @@ export interface DeleteGroupTypeDialogProps {
 
 export function openDeleteGroupTypeDialog({ onConfirm, groupTypeName }: DeleteGroupTypeDialogProps): void {
     const groupType = groupTypeName.toLowerCase()
-    LemonDialog.open({
+    Dialog.open({
         title: `Delete ${groupType} group type`,
         description: (
             <div className="mt-2 w-150">
@@ -60,7 +60,7 @@ export function GroupAnalyticsConfig(): JSX.Element | null {
         return <GroupsIntroduction />
     }
 
-    const columns: LemonTableColumns<GroupType> = [
+    const columns: TableColumns<GroupType> = [
         {
             title: 'Group type',
             tooltip: 'As used in code',
@@ -75,7 +75,7 @@ export function GroupAnalyticsConfig(): JSX.Element | null {
             key: 'singular',
             render: function Render(_, groupType) {
                 return (
-                    <LemonInput
+                    <Input
                         value={
                             singularChanges[groupType.group_type_index] ||
                             groupType.name_singular ||
@@ -91,7 +91,7 @@ export function GroupAnalyticsConfig(): JSX.Element | null {
             key: 'plural',
             render: function Render(_, groupType) {
                 return (
-                    <LemonInput
+                    <Input
                         value={
                             pluralChanges[groupType.group_type_index] ||
                             groupType.name_plural ||
@@ -108,7 +108,7 @@ export function GroupAnalyticsConfig(): JSX.Element | null {
             width: 24,
             render: function Render(_, groupType) {
                 return (
-                    <LemonButton
+                    <Button
                         status="danger"
                         size="small"
                         icon={<IconTrash />}
@@ -127,29 +127,29 @@ export function GroupAnalyticsConfig(): JSX.Element | null {
     return (
         <>
             {groupsAccessStatus !== GroupsAccessStatus.AlreadyUsing && (
-                <LemonBanner type="info" className="mb-4">
+                <Banner type="info" className="mb-4">
                     Group types will show up here after you send your first event associated with a group. Take a look
                     at{' '}
                     <Link to="https://hanzo.ai/docs/product-analytics/group-analytics" target="_blank">
                         this guide
                     </Link>{' '}
                     for more information on getting started.
-                </LemonBanner>
+                </Banner>
             )}
 
-            <LemonTable columns={columns} dataSource={Array.from(groupTypes.values())} loading={groupTypesLoading} />
+            <Table columns={columns} dataSource={Array.from(groupTypes.values())} loading={groupTypesLoading} />
 
             <div className="flex gap-2 mt-4">
-                <LemonButton
+                <Button
                     type="primary"
                     disabledReason={!hasChanges && 'Make some changes before saving'}
                     onClick={save}
                 >
                     Save
-                </LemonButton>
-                <LemonButton disabledReason={!hasChanges && 'Revert any changes made'} onClick={reset}>
+                </Button>
+                <Button disabledReason={!hasChanges && 'Revert any changes made'} onClick={reset}>
                     Cancel
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

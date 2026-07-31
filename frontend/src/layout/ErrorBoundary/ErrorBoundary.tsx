@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { InsightsErrorBoundary, type InsightsErrorBoundaryFallbackProps } from '@hanzo/insights/react'
 
 import { SupportTicketExceptionEvent, supportLogic } from 'lib/components/Support/supportLogic'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
 import { teamLogic } from 'scenes/teamLogic'
 
 const DOM_MUTATION_PATTERNS = [
@@ -55,7 +55,7 @@ export function ErrorBoundary({ children, exceptionProps = {}, className }: Erro
                     <div className={clsx('ErrorBoundary', className)}>
                         <h2>An error has occurred</h2>
                         {isBrowserExtensionError && (
-                            <LemonBanner
+                            <Banner
                                 type="warning"
                                 className="mb-2"
                                 action={{
@@ -72,7 +72,7 @@ export function ErrorBoundary({ children, exceptionProps = {}, className }: Erro
                                 This error is commonly caused by browser extensions (such as translation or ad-blocking
                                 extensions) that modify the page. Try disabling your browser extension(s) and reloading
                                 the page to avoid this error in the future.
-                            </LemonBanner>
+                            </Banner>
                         )}
                         <pre>
                             <code>
@@ -91,7 +91,7 @@ export function ErrorBoundary({ children, exceptionProps = {}, className }: Erro
                         {!isBrowserExtensionError && (
                             <>
                                 Please help us resolve the issue by sending a screenshot of this message.
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     fullWidth
                                     center
@@ -106,7 +106,7 @@ export function ErrorBoundary({ children, exceptionProps = {}, className }: Erro
                                     className="mt-2"
                                 >
                                     Email an engineer
-                                </LemonButton>
+                                </Button>
                             </>
                         )}
                     </div>

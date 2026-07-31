@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 import insights from '@hanzo/insights'
 import React from 'react'
 
-import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -682,11 +682,11 @@ export const billingProductLogic = kea<billingProductLogicType>([
                     paymentEntryLogic.actions.setRedirectPath(redirectPath || null)
                     paymentEntryLogic.actions.showPaymentEntryModal()
                 } else {
-                    lemonToast.error(response.error || 'Failed to activate subscription')
+                    toast.error(response.error || 'Failed to activate subscription')
                 }
             } catch (error) {
                 insights.captureException(new Error('payment entry api error - product upgrade error', { cause: error }))
-                lemonToast.error('Failed to activate subscription. Please try again.')
+                toast.error('Failed to activate subscription. Please try again.')
             } finally {
                 actions.setBillingProductLoading(null)
             }
@@ -740,11 +740,11 @@ export const billingProductLogic = kea<billingProductLogicType>([
                     type: 'autosubscribe',
                     target: props.product.type,
                 })
-                lemonToast.success('Your trial has been activated!')
+                toast.success('Your trial has been activated!')
                 await breakpoint(400)
                 window.location.reload()
             } catch {
-                lemonToast.error('There was an error activating your trial. Please try again or contact support.')
+                toast.error('There was an error activating your trial. Please try again or contact support.')
                 actions.setTrialLoading(false)
                 actions.loadBilling()
             }
@@ -753,14 +753,14 @@ export const billingProductLogic = kea<billingProductLogicType>([
             actions.setTrialLoading(true)
             try {
                 await api.create(`api/billing/trials/cancel`)
-                lemonToast.success('Your trial has been cancelled!')
+                toast.success('Your trial has been cancelled!')
                 if (values.surveyID) {
                     actions.reportSurveySent(values.surveyID, values.surveyResponse)
                 }
                 await breakpoint(1000)
                 window.location.reload()
             } catch {
-                lemonToast.error('There was an error cancelling your trial. Please try again or contact support.')
+                toast.error('There was an error cancelling your trial. Please try again or contact support.')
                 actions.setTrialLoading(false)
                 actions.loadBilling()
             }
@@ -774,10 +774,10 @@ export const billingProductLogic = kea<billingProductLogicType>([
         removeBillingLimitNextPeriod: async ({ productType }) => {
             try {
                 await api.update('api/billing', { reset_limit_next_period: productType })
-                lemonToast.success('Billing limit for next period has been removed.')
+                toast.success('Billing limit for next period has been removed.')
             } catch (e) {
                 console.error(e)
-                lemonToast.error(
+                toast.error(
                     'There was an error removing your billing limit for next period. Please try again or contact support.'
                 )
             } finally {
@@ -797,7 +797,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
             }),
             submit: async ({ input }) => {
                 if (props.product.current_amount_usd && input < props.product.current_amount_usd) {
-                    LemonDialog.open({
+                    Dialog.open({
                         maxWidth: '600px',
                         title: 'Billing limit warning',
                         description:
@@ -818,7 +818,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
                 }
 
                 if (props.product.projected_amount_usd && input < props.product.projected_amount_usd) {
-                    LemonDialog.open({
+                    Dialog.open({
                         maxWidth: '600px',
                         title: 'Billing limit warning',
                         description:

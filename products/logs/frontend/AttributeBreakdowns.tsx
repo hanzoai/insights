@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
-import { LemonButton, LemonTable } from '@hanzo/lemon-ui'
+import { Button, Table } from '@hanzo/elements'
 
 import { PropertyFilterType, PropertyOperator } from '~/types'
 
@@ -33,7 +33,7 @@ export const AttributeBreakdowns = ({
     return (
         <div className="flex flex-col p-2 gap-y-2">
             {attributeValues.length} of the {logCount} logs have the label {attribute}
-            <LemonTable
+            <Table
                 className="w-fit"
                 hideScrollbar
                 dataSource={dataSource}
@@ -44,20 +44,20 @@ export const AttributeBreakdowns = ({
                         width: 0,
                         render: (_, record) => (
                             <div className="flex gap-x-0">
-                                <LemonButton
+                                <Button
                                     tooltip="Add as filter"
                                     size="xsmall"
                                     onClick={() => addFilter(attribute, record.value, PropertyOperator.Exact, type)}
                                 >
                                     <IconPlusSquare />
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     tooltip="Exclude as filter"
                                     size="xsmall"
                                     onClick={() => addFilter(attribute, record.value, PropertyOperator.IsNot, type)}
                                 >
                                     <IconMinusSquare />
-                                </LemonButton>
+                                </Button>
                             </div>
                         ),
                     },

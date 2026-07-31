@@ -1,10 +1,10 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonButton, Spinner } from '@hanzo/lemon-ui'
+import { Button, Spinner } from '@hanzo/elements'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { sceneLogic } from 'scenes/sceneLogic'
 import { Scene } from 'scenes/sceneTypes'
 import { sessionPlayerModalLogic } from 'scenes/session-recordings/player/modal/sessionPlayerModalLogic'
@@ -146,7 +146,7 @@ function RecordingsListContent(): JSX.Element {
                     ))}
                     {hasNext && (
                         <div className="p-2">
-                            <LemonButton
+                            <Button
                                 fullWidth
                                 type="secondary"
                                 size="small"
@@ -154,7 +154,7 @@ function RecordingsListContent(): JSX.Element {
                                 loading={sessionRecordingsResponseLoading}
                             >
                                 Load more recordings
-                            </LemonButton>
+                            </Button>
                         </div>
                     )}
                 </>
@@ -265,7 +265,7 @@ function ErrorTrackingFiltersWidgetContent({ filters }: { filters: MaxErrorTrack
             {!isOnErrorTrackingPage && (
                 <div className="flex items-center justify-between px-2 pt-2">
                     <span className="text-xs font-semibold text-secondary">Error tracking</span>
-                    <LemonButton
+                    <Button
                         to={errorTrackingUrl}
                         icon={<IconOpenInNew />}
                         size="xsmall"
@@ -288,9 +288,9 @@ function ErrorTrackingFiltersWidgetContent({ filters }: { filters: MaxErrorTrack
                 )}
                 {hasMore && (
                     <div className="flex justify-center p-2 border-t">
-                        <LemonButton type="tertiary" size="xsmall" onClick={() => loadMoreIssues()} loading={isLoading}>
+                        <Button type="tertiary" size="xsmall" onClick={() => loadMoreIssues()} loading={isLoading}>
                             Load more issues
-                        </LemonButton>
+                        </Button>
                     </div>
                 )}
             </div>

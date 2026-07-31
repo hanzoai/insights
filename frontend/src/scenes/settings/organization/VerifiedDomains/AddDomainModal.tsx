@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonInput } from '@hanzo/lemon-ui'
+import { Input } from '@hanzo/elements'
 
 import { DOMAIN_REGEX } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
 
 import { verifiedDomainsLogic } from './verifiedDomainsLogic'
 
@@ -36,21 +36,21 @@ export function AddDomainModal(): JSX.Element {
     }
 
     return (
-        <LemonModal
+        <Modal
             onClose={handleClose}
             isOpen={addModalShown}
             title="Add authentication domain"
             footer={
-                <LemonButton
+                <Button
                     type="primary"
                     disabled={newDomain === '' || (submitted && errored) || verifiedDomainsLoading}
                     onClick={handleSubmit}
                 >
                     Add domain
-                </LemonButton>
+                </Button>
             }
         >
-            <LemonInput
+            <Input
                 placeholder="hanzo.ai"
                 autoFocus
                 value={newDomain}
@@ -62,6 +62,6 @@ export function AddDomainModal(): JSX.Element {
                     Please enter a valid domain or subdomain name (e.g. my.hanzo.ai)
                 </span>
             )}
-        </LemonModal>
+        </Modal>
     )
 }

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonLabel, LemonSelect } from '@hanzo/lemon-ui'
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Button, Label, Select } from '@hanzo/elements'
+import { Modal } from '@hanzo/elements'
 
 import { ExperimentStatsMethod } from '~/types'
 
@@ -54,17 +54,17 @@ export function StatsMethodModal(): JSX.Element {
     }
 
     return (
-        <LemonModal
+        <Modal
             maxWidth={600}
             isOpen={isStatsEngineModalOpen}
             onClose={onClose}
             title="Statistics configuration"
             footer={
                 <div className="flex items-center gap-2 justify-end">
-                    <LemonButton type="secondary" onClick={onClose}>
+                    <Button type="secondary" onClick={onClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={() => {
                             updateExperiment({ stats_config: experiment.stats_config })
@@ -72,7 +72,7 @@ export function StatsMethodModal(): JSX.Element {
                         }}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
@@ -90,8 +90,8 @@ export function StatsMethodModal(): JSX.Element {
                 />
             </div>
             <div className="flex flex-col gap-2">
-                <LemonLabel>Confidence level</LemonLabel>
-                <LemonSelect
+                <Label>Confidence level</Label>
+                <Select
                     value={currentConfidenceLevel}
                     onChange={handleConfidenceLevelChange}
                     options={CONFIDENCE_LEVEL_OPTIONS}
@@ -103,6 +103,6 @@ export function StatsMethodModal(): JSX.Element {
                         : `Higher confidence means we need stronger evidence before declaring a winner. ${currentConfidenceLevel * 100}% confidence requires a p-value below ${(1 - currentConfidenceLevel).toFixed(2)}.`}
                 </p>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

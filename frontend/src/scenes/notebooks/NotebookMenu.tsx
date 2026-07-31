@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconClock, IconCopy, IconDownload, IconEllipsis, IconShare, IconTrash } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonMenu } from 'lib/lemon-ui/LemonMenu'
+import { Menu } from 'lib/elements/Menu'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     DropdownMenu,
@@ -85,7 +85,7 @@ export function NotebookMenu({ shortId }: NotebookLogicProps): JSX.Element {
     }
 
     return (
-        <LemonMenu
+        <Menu
             items={[
                 !isTemplate && {
                     label: 'Duplicate',
@@ -134,7 +134,7 @@ export function NotebookMenu({ shortId }: NotebookLogicProps): JSX.Element {
                 },
             ]}
         >
-            <LemonButton aria-label="more" icon={<IconEllipsis />} size="small" />
-        </LemonMenu>
+            <Button aria-label="more" icon={<IconEllipsis />} size="small" />
+        </Menu>
     )
 }

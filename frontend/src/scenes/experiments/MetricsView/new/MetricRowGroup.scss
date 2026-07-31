@@ -13,11 +13,11 @@
 
 // Breakdown section collapse - match parent row background
 .breakdown-collapse {
-    &--alt-row .LemonCollapsePanel__header {
+    &--alt-row .CollapsePanel__header {
         background: var(--bg-table) !important;
     }
 
-    &--normal-row .LemonCollapsePanel__header {
+    &--normal-row .CollapsePanel__header {
         background: var(--bg-light) !important;
     }
 }

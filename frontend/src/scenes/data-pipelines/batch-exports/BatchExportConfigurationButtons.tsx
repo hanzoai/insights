@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import { batchExportConfigurationLogic, getDefaultConfiguration } from './batchExportConfigurationLogic'
 
@@ -8,7 +8,7 @@ export function BatchExportConfigurationSaveButton(): JSX.Element {
     const { isNew, isConfigurationSubmitting, configurationChanged } = useValues(batchExportConfigurationLogic)
     const { submitConfiguration } = useActions(batchExportConfigurationLogic)
     return (
-        <LemonButton
+        <Button
             type="primary"
             htmlType="submit"
             onClick={submitConfiguration}
@@ -23,7 +23,7 @@ export function BatchExportConfigurationSaveButton(): JSX.Element {
             size="small"
         >
             {isNew ? 'Create' : 'Save'}
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -37,7 +37,7 @@ export function BatchExportConfigurationClearChangesButton(): JSX.Element | null
     }
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             htmlType="reset"
             onClick={() =>
@@ -51,6 +51,6 @@ export function BatchExportConfigurationClearChangesButton(): JSX.Element | null
             size="small"
         >
             {isNew ? 'Reset' : 'Clear changes'}
-        </LemonButton>
+        </Button>
     )
 }

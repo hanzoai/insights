@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 
 import { IconCheck, IconX } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { CodeEditor, CodeEditorProps } from 'lib/monaco/CodeEditor'
@@ -73,7 +73,7 @@ export function CodeEditorResizeable({
 
             {showDiffActions && (
                 <div className="flex absolute top-2 right-2 z-20 gap-1 p-1 bg-white rounded-lg border shadow-sm">
-                    <LemonButton
+                    <Button
                         status="danger"
                         icon={<IconX />}
                         onClick={onRejectChanges}
@@ -81,8 +81,8 @@ export function CodeEditorResizeable({
                         size="small"
                     >
                         Reject
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="tertiary"
                         icon={<IconCheck color="var(--success)" />}
                         onClick={onAcceptChanges}
@@ -90,7 +90,7 @@ export function CodeEditorResizeable({
                         size="small"
                     >
                         Accept
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
 

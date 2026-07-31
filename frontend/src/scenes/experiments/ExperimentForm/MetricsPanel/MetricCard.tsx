@@ -1,10 +1,10 @@
 import { useActions } from 'kea'
 
 import { IconPencil, IconTrash } from '@hanzo/icons'
-import { LemonDialog } from '@hanzo/lemon-ui'
+import { Dialog } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Button } from 'lib/elements/Button'
+import { Tag } from 'lib/elements/Tag'
 
 import type { ExperimentMetric } from '~/queries/schema/schema-general'
 import type { MetricContext } from '~/scenes/experiments/Metrics/experimentMetricModalLogic'
@@ -36,7 +36,7 @@ export const MetricCard = ({ metric, metricContext, onDelete, filterTestAccounts
             return onDelete(metric, metricContext)
         }
 
-        LemonDialog.open({
+        Dialog.open({
             title: 'Delete metric?',
             description: 'Are you sure you want to delete this metric? This action cannot be undone.',
             primaryButton: {
@@ -58,25 +58,25 @@ export const MetricCard = ({ metric, metricContext, onDelete, filterTestAccounts
                         <div className="font-semibold text-sm mb-1 break-words">{metricName}</div>
                         <MetricEventDetails metric={metric} />
                         <div className="flex items-center mt-2">
-                            <LemonTag type="muted" size="small">
+                            <Tag type="muted" size="small">
                                 {metricTag}
-                            </LemonTag>
+                            </Tag>
                             {metric.isSharedMetric && (
-                                <LemonTag type="option" size="small">
+                                <Tag type="option" size="small">
                                     Shared metric
-                                </LemonTag>
+                                </Tag>
                             )}
                         </div>
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="xsmall"
                             icon={<IconPencil fontSize="12" />}
                             tooltip="Edit metric"
                             onClick={() => openExperimentMetricModal(metricContext, metric)}
                         />
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="xsmall"
                             icon={<IconTrash fontSize="12" />}

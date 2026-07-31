@@ -5,8 +5,8 @@ import { beforeUnload, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
-import { Link } from 'lib/lemon-ui/Link'
+import { toast } from 'lib/elements/Toast/Toast'
+import { Link } from 'lib/elements/Link'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { eventDefinitionsTableLogic } from 'scenes/data-management/events/eventDefinitionsTableLogic'
 import { urls } from 'scenes/urls'
@@ -104,7 +104,7 @@ export const actionEditLogic = kea<actionEditLogicType>([
                         // `This project already has an action with this name, ID ${errorActionId}`
                         const dupeId = response.detail.split(' ').pop()
 
-                        lemonToast.error(
+                        toast.error(
                             <>
                                 Action with this name already exists.{' '}
                                 <Link to={urls.action(dupeId)} target="_blank">
@@ -118,7 +118,7 @@ export const actionEditLogic = kea<actionEditLogicType>([
                     throw response
                 }
 
-                lemonToast.success(`Action saved`)
+                toast.success(`Action saved`)
                 actions.resetAction(updatedAction)
                 refreshTreeItem('action', String(action.id))
                 if (!props.id) {
@@ -192,7 +192,7 @@ export const actionEditLogic = kea<actionEditLogicType>([
                     },
                 })
             } catch (e: any) {
-                lemonToast.error(`Error deleting action: ${e.detail}`)
+                toast.error(`Error deleting action: ${e.detail}`)
             }
         },
     })),

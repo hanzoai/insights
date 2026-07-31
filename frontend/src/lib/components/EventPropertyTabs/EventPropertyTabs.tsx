@@ -6,7 +6,7 @@ import { INTERNAL_EXCEPTION_PROPERTY_KEYS } from '@hanzo/products-error-tracking
 import { eventPropertyFilteringLogic } from 'lib/components/EventPropertyTabs/eventPropertyFilteringLogic'
 import { HTMLElementsDisplay } from 'lib/components/HTMLElementsDisplay/HTMLElementsDisplay'
 import { dayjs } from 'lib/dayjs'
-import { LemonTab, LemonTabs, LemonTabsProps } from 'lib/lemon-ui/LemonTabs'
+import { Tab, Tabs, TabsProps } from 'lib/elements/Tabs'
 import { AutocaptureImageTab, autocaptureToImage } from 'lib/utils/autocapture-previews'
 
 import { CORE_FILTER_DEFINITIONS_BY_GROUP, INSIGHTS_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
@@ -42,13 +42,13 @@ type EventPropertyTabKey =
 export const EventPropertyTabs = ({
     event,
     tabContentComponentFn,
-    ...lemonTabsProps
+    ...tabsProps
 }: {
     event: ErrorPropertyTabEvent
     tabContentComponentFn: (props: TabContentComponentFnProps) => JSX.Element
-    dataAttr?: LemonTabsProps<EventPropertyTabKey>['data-attr']
-    size?: LemonTabsProps<EventPropertyTabKey>['size']
-    barClassName?: LemonTabsProps<EventPropertyTabKey>['barClassName']
+    dataAttr?: TabsProps<EventPropertyTabKey>['data-attr']
+    size?: TabsProps<EventPropertyTabKey>['size']
+    barClassName?: TabsProps<EventPropertyTabKey>['barClassName']
 }): JSX.Element => {
     const isAIGenerationEvent = event.event === '$ai_generation'
     const isAIConversationEvent = isAIGenerationEvent || event.event === '$ai_span' || event.event === '$ai_trace'
@@ -102,7 +102,7 @@ export const EventPropertyTabs = ({
         ...filterProperties(properties),
     }
 
-    const tabs: (LemonTab<EventPropertyTabKey> | null | false)[] = [
+    const tabs: (Tab<EventPropertyTabKey> | null | false)[] = [
         isErrorEvent && {
             key: 'error_display',
             label: 'Exception',
@@ -226,8 +226,8 @@ export const EventPropertyTabs = ({
         },
     ]
     return (
-        <LemonTabs
-            {...lemonTabsProps}
+        <Tabs
+            {...tabsProps}
             activeKey={activeTab}
             onChange={(newKey: EventPropertyTabKey) => setActiveTab(newKey)}
             tabs={tabs}

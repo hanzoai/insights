@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
-import { LemonButton, LemonModal, Spinner } from '@hanzo/lemon-ui'
+import { Button, Modal, Spinner } from '@hanzo/elements'
 
-import { LemonInputSelect, LemonInputSelectOption } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
+import { InputSelect, InputSelectOption } from 'lib/elements/InputSelect/InputSelect'
 import { CURRENCY_SYMBOL_TO_NAME_MAP, IMPORTANT_CURRENCIES, OTHER_CURRENCIES } from 'lib/utils/geography/currency'
 
 import {
@@ -27,7 +27,7 @@ interface ColumnMappingModalProps {
     onClose: () => void
 }
 
-const PREDEFINED_SOURCE_CONSTANTS: LemonInputSelectOption[] = VALID_NATIVE_MARKETING_SOURCES.map(
+const PREDEFINED_SOURCE_CONSTANTS: InputSelectOption[] = VALID_NATIVE_MARKETING_SOURCES.map(
     (source: NativeMarketingSource) => ({
         key: `${MarketingAnalyticsConstants.ConstantValuePrefix}${MARKETING_INTEGRATION_CONFIGS[source].primarySource}`,
         label: `${MARKETING_INTEGRATION_CONFIGS[source].primarySource} (constant)`,
@@ -78,7 +78,7 @@ function ColumnMappingCombobox({
     }
 
     return (
-        <LemonInputSelect
+        <InputSelect
             value={currentValue ? [currentValue] : []}
             onChange={handleChange}
             options={options}
@@ -93,11 +93,11 @@ function ColumnMappingCombobox({
 function buildColumnOptions(
     fieldName: MarketingAnalyticsColumnsSchemaNames,
     tableColumns: { name: string; type: string }[]
-): LemonInputSelectOption[] {
+): InputSelectOption[] {
     const expectedTypes = MARKETING_ANALYTICS_SCHEMA[fieldName]
 
     if (fieldName === MarketingAnalyticsColumnsSchemaNames.Currency) {
-        const currencyOptions: LemonInputSelectOption[] = []
+        const currencyOptions: InputSelectOption[] = []
 
         for (const col of tableColumns) {
             currencyOptions.push({
@@ -124,7 +124,7 @@ function buildColumnOptions(
     }
 
     if (fieldName === MarketingAnalyticsColumnsSchemaNames.Source) {
-        const sourceOptions: LemonInputSelectOption[] = []
+        const sourceOptions: InputSelectOption[] = []
 
         // Type-compatible columns first
         const compatible = tableColumns.filter((col) =>
@@ -154,7 +154,7 @@ function buildColumnOptions(
         return sourceOptions
     }
 
-    const options: LemonInputSelectOption[] = []
+    const options: InputSelectOption[] = []
 
     // Type-compatible columns first
     const compatible = tableColumns.filter((col) =>
@@ -247,7 +247,7 @@ export function ColumnMappingModal({ table, isOpen, onClose }: ColumnMappingModa
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             title={`Configure ${table.name} mapping`}
@@ -258,7 +258,7 @@ export function ColumnMappingModal({ table, isOpen, onClose }: ColumnMappingModa
                         {requiredFieldsConfigured}/{requiredFields.length} required fields configured
                     </span>
                     <div className="flex items-center gap-2">
-                        <LemonButton
+                        <Button
                             onClick={handleTestMapping}
                             tooltip="Test the mapping by running the adapter query"
                             disabledReason={
@@ -275,13 +275,13 @@ export function ColumnMappingModal({ table, isOpen, onClose }: ColumnMappingModa
                             ) : (
                                 'Test mapping'
                             )}
-                        </LemonButton>
-                        <LemonButton onClick={clearAllMappings} tooltip="Clear all mappings for this table">
+                        </Button>
+                        <Button onClick={clearAllMappings} tooltip="Clear all mappings for this table">
                             Clear
-                        </LemonButton>
-                        <LemonButton type="primary" onClick={onClose}>
+                        </Button>
+                        <Button type="primary" onClick={onClose}>
                             Done
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             }
@@ -390,6 +390,6 @@ export function ColumnMappingModal({ table, isOpen, onClose }: ColumnMappingModa
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

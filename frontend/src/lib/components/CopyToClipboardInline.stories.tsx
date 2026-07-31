@@ -4,7 +4,7 @@ import { CopyToClipboardInline } from './CopyToClipboard'
 
 type Story = StoryObj<typeof CopyToClipboardInline>
 const meta: Meta<typeof CopyToClipboardInline> = {
-    title: 'Lemon UI/Copy To Clipboard Inline',
+    title: 'Elements/Copy To Clipboard Inline',
     component: CopyToClipboardInline,
     tags: ['autodocs'],
     parameters: {

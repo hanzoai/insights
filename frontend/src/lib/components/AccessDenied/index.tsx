@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { cn } from 'lib/utils/css-classes'
 
 import noAccessNope from 'public/no-access.png'

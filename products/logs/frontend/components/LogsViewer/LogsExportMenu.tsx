@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconDownload } from '@hanzo/icons'
-import { LemonButton, LemonMenu } from '@hanzo/lemon-ui'
+import { Button, Menu } from '@hanzo/elements'
 
 import { humanFriendlyNumber } from 'lib/utils'
 
@@ -18,7 +18,7 @@ export const LogsExportMenu = ({ totalLogsCount }: LogsExportMenuProps): JSX.Ele
     const { maxExportableLogs } = useValues(logsExportLogic)
 
     return (
-        <LemonMenu
+        <Menu
             items={[
                 ...(selectedCount > 0
                     ? [
@@ -48,7 +48,7 @@ export const LogsExportMenu = ({ totalLogsCount }: LogsExportMenuProps): JSX.Ele
                 },
             ]}
         >
-            <LemonButton size="small" type="secondary" icon={<IconDownload />} tooltip="Export logs" />
-        </LemonMenu>
+            <Button size="small" type="secondary" icon={<IconDownload />} tooltip="Export logs" />
+        </Menu>
     )
 }

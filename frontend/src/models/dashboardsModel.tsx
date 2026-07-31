@@ -5,7 +5,7 @@ import { router } from 'kea-router'
 import api, { PaginatedResponse } from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { GENERATED_DASHBOARD_PREFIX } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { idToKey, isUserLoggedIn } from 'lib/utils'
 import { DashboardEventSource, eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { permanentlyMount } from 'lib/utils/kea-logic-builders'
@@ -141,7 +141,7 @@ export const dashboardsModel = kea<dashboardsModelType>([
                     }
                 }
                 if (allowUndo) {
-                    lemonToast.success('Dashboard updated', {
+                    toast.success('Dashboard updated', {
                         button: {
                             label: 'Undo',
                             action: async () => {
@@ -150,7 +150,7 @@ export const dashboardsModel = kea<dashboardsModelType>([
                                     beforeChange
                                 )
                                 actions.updateDashboardSuccess(getQueryBasedDashboard(reverted))
-                                lemonToast.success('Dashboard change reverted')
+                                toast.success('Dashboard change reverted')
                             },
                         },
                     })
@@ -328,7 +328,7 @@ export const dashboardsModel = kea<dashboardsModelType>([
                 // don't send a toast if we're in onboarding
                 return
             }
-            lemonToast.success(<>Dashboard created</>, {
+            toast.success(<>Dashboard created</>, {
                 button: {
                     label: 'View',
                     action: () => router.actions.push(urls.dashboard(dashboard.id)),
@@ -337,7 +337,7 @@ export const dashboardsModel = kea<dashboardsModelType>([
         },
 
         restoreDashboardSuccess: ({ dashboard }) => {
-            lemonToast.success(
+            toast.success(
                 <>
                     Dashboard <b>{dashboard.name}</b> restored
                 </>
@@ -353,7 +353,7 @@ export const dashboardsModel = kea<dashboardsModelType>([
                 teamLogic.actions.loadCurrentTeamSuccess({ ...currentTeam, primary_dashboard: null })
             }
 
-            lemonToast.success(
+            toast.success(
                 <>
                     Dashboard <b>{dashboard.name}</b> deleted
                 </>,
@@ -371,7 +371,7 @@ export const dashboardsModel = kea<dashboardsModelType>([
         },
 
         duplicateDashboardSuccess: async ({ dashboard }) => {
-            lemonToast.success(
+            toast.success(
                 <>
                     Dashboard copied as <b>{dashboard.name}</b>
                 </>

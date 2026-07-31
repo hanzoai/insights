@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { IconPin, IconPinFilled } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input } from '@hanzo/elements'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -59,7 +59,7 @@ export function Properties({
     return (
         <div className="py-2 px-4 text-xs">
             <div className="flex items-center gap-2 mb-2">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search properties..."
                     value={searchTerm}
@@ -67,7 +67,7 @@ export function Properties({
                     size="small"
                     className="flex-1"
                 />
-                <LemonCheckbox
+                <Checkbox
                     checked={!hideNullValues}
                     onChange={(checked) => setHideNullValues(!checked)}
                     label="Show null"
@@ -93,7 +93,7 @@ export function Properties({
                             <div key={key} className="mb-1">
                                 <div className="flex justify-between leading-4">
                                     <PropertyKeyInfo value={key} />
-                                    <LemonButton noPadding size="small" icon={<Icon />} onClick={onClick} />
+                                    <Button noPadding size="small" icon={<Icon />} onClick={onClick} />
                                 </div>
                                 <div className={`${!isLast && 'border-b border-primary pb-1'}`}>
                                     <PropertiesTable

@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
@@ -67,12 +67,12 @@ export const dataWarehouseTableLogic = kea<dataWarehouseTableLogicType>([
     })),
     listeners(({ actions, props }) => ({
         createTableSuccess: async ({ table }) => {
-            lemonToast.success(<>Table {table.name} created</>)
+            toast.success(<>Table {table.name} created</>)
             actions.loadDatabase()
             router.actions.replace(urls.sources())
         },
         updateTableSuccess: async ({ table }) => {
-            lemonToast.success(<>Table {table.name} updated</>)
+            toast.success(<>Table {table.name} updated</>)
             actions.editingTable(false)
             actions.loadDatabase()
             router.actions.replace(urls.sources())
@@ -144,7 +144,7 @@ export const dataWarehouseTableLogic = kea<dataWarehouseTableLogicType>([
                         actions.createTable(tablePayload)
                     }
                 } catch (e: any) {
-                    lemonToast.error(e.data?.message ?? e.message)
+                    toast.error(e.data?.message ?? e.message)
                 }
             },
         },

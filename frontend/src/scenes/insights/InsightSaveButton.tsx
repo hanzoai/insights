@@ -1,4 +1,4 @@
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 export function InsightSaveButton({
     saveAs,
@@ -19,7 +19,7 @@ export function InsightSaveButton({
     const saveAsAvailable = isSaved && !addingToDashboard
 
     return (
-        <LemonButton
+        <Button
             type="primary"
             onClick={() => saveInsight(true)}
             data-attr="insight-save-button"
@@ -32,18 +32,18 @@ export function InsightSaveButton({
                     overlay: (
                         <>
                             {!disabled && (
-                                <LemonButton
+                                <Button
                                     onClick={() => saveInsight(false)}
                                     data-attr="insight-save-and-continue"
                                     fullWidth
                                 >
                                     {addingToDashboard ? 'Save, add to dashboard' : 'Save'} & continue editing
-                                </LemonButton>
+                                </Button>
                             )}
                             {saveAsAvailable && (
-                                <LemonButton onClick={() => saveAs()} data-attr="insight-save-as-new-insight" fullWidth>
+                                <Button onClick={() => saveAs()} data-attr="insight-save-as-new-insight" fullWidth>
                                     Save as…
-                                </LemonButton>
+                                </Button>
                             )}
                         </>
                     ),
@@ -53,6 +53,6 @@ export function InsightSaveButton({
             }}
         >
             {disabled ? 'No changes' : addingToDashboard ? 'Save & add to dashboard' : 'Save'}
-        </LemonButton>
+        </Button>
     )
 }

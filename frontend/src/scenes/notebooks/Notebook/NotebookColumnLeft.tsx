@@ -2,10 +2,10 @@ import clsx from 'clsx'
 import { BindLogic, BuiltLogic, useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { LemonWidget } from 'lib/lemon-ui/LemonWidget'
+import { Widget } from 'lib/elements/Widget'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
 
@@ -91,14 +91,14 @@ export const NotebookNodeSettingsWidget = ({ logic }: { logic: BuiltLogic<notebo
     const { updateAttributes, selectNode } = useActions(logic)
 
     return (
-        <LemonWidget
+        <Widget
             title={`Editing '${title}'`}
             className="NotebookColumn__widget"
             actions={
                 <>
-                    <LemonButton size="small" onClick={() => setEditingNodeEditing(nodeAttributes.nodeId, false)}>
+                    <Button size="small" onClick={() => setEditingNodeEditing(nodeAttributes.nodeId, false)}>
                         Done
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -115,6 +115,6 @@ export const NotebookNodeSettingsWidget = ({ logic }: { logic: BuiltLogic<notebo
                     </ErrorBoundary>
                 ) : null}
             </div>
-        </LemonWidget>
+        </Widget>
     )
 }

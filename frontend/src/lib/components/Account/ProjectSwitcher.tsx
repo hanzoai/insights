@@ -5,7 +5,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { IconCheck, IconPlusSmall, IconSearch, IconX } from '@hanzo/icons'
 
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { IconBlank } from 'lib/elements/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { MenuSeparator } from 'lib/ui/Menus/Menus'
 import { cn } from 'lib/utils/css-classes'

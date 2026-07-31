@@ -4,15 +4,15 @@ import { useCallback } from 'react'
 
 import { IconChevronLeft, IconInfo } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonCheckbox,
-    LemonCollapse,
-    LemonInput,
-    LemonSegmentedButton,
-    LemonSelect,
+    Banner,
+    Checkbox,
+    Collapse,
+    Input,
+    SegmentedButton,
+    Select,
     SpinnerOverlay,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AlertStateIndicator } from 'lib/components/Alerts/views/ManageAlertsModal'
 import { MemberSelectMultiple } from 'lib/components/MemberSelectMultiple'
@@ -20,9 +20,9 @@ import { TZLabel } from 'lib/components/TZLabel'
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Modal } from 'lib/elements/Modal'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { alphabet, formatDate } from 'lib/utils'
 import { trendsDataLogic } from 'scenes/trends/trendsDataLogic'
@@ -161,7 +161,7 @@ export function EditAlertModal({
     const can_check_ongoing_interval = canCheckOngoingInterval(alertForm)
 
     return (
-        <LemonModal onClose={onClose} isOpen={isOpen} width={750} simple title="">
+        <Modal onClose={onClose} isOpen={isOpen} width={750} simple title="">
             {alertLoading ? (
                 <SpinnerOverlay />
             ) : (
@@ -170,31 +170,31 @@ export function EditAlertModal({
                     props={formLogicProps}
                     formKey="alertForm"
                     enableFormOnSubmit
-                    className="LemonModal__layout"
+                    className="Modal__layout"
                 >
-                    <LemonModal.Header>
+                    <Modal.Header>
                         <div className="flex items-center gap-2">
-                            <LemonButton icon={<IconChevronLeft />} onClick={onClose} size="xsmall" />
+                            <Button icon={<IconChevronLeft />} onClick={onClose} size="xsmall" />
 
                             <h3>{creatingNewAlert ? 'New' : 'Edit '} Alert</h3>
                         </div>
-                    </LemonModal.Header>
+                    </Modal.Header>
 
-                    <LemonModal.Content>
+                    <Modal.Content>
                         <div className="deprecated-space-y-8">
                             <div className="deprecated-space-y-4">
                                 <div className="flex gap-4 items-center">
-                                    <LemonField className="flex-auto" name="name">
-                                        <LemonInput placeholder="Alert name" data-attr="alertForm-name" />
-                                    </LemonField>
-                                    <LemonField name="enabled">
-                                        <LemonCheckbox
+                                    <Field className="flex-auto" name="name">
+                                        <Input placeholder="Alert name" data-attr="alertForm-name" />
+                                    </Field>
+                                    <Field name="enabled">
+                                        <Checkbox
                                             checked={alertForm?.enabled}
                                             data-attr="alertForm-enabled"
                                             fullWidth
                                             label="Enabled"
                                         />
-                                    </LemonField>
+                                    </Field>
                                 </div>
                                 {alert?.created_by ? (
                                     <UserActivityIndicator
@@ -209,16 +209,16 @@ export function EditAlertModal({
                                 <h3>Definition</h3>
                                 <div className="deprecated-space-y-5">
                                     {isBreakdownValid && (
-                                        <LemonBanner type="warning">
+                                        <Banner type="warning">
                                             For trends with breakdown, the alert will fire if any of the breakdown
                                             values breaches the threshold.
-                                        </LemonBanner>
+                                        </Banner>
                                     )}
                                     <div className="flex gap-4 items-center">
                                         <div>When</div>
                                         <Group name={['config']}>
-                                            <LemonField name="series_index" className="flex-auto">
-                                                <LemonSelect
+                                            <Field name="series_index" className="flex-auto">
+                                                <Select
                                                     fullWidth
                                                     data-attr="alertForm-series-index"
                                                     options={
@@ -246,11 +246,11 @@ export function EditAlertModal({
                                             values breaches the threshold.`
                                                     }
                                                 />
-                                            </LemonField>
+                                            </Field>
                                         </Group>
                                         <Group name={['condition']}>
-                                            <LemonField name="type">
-                                                <LemonSelect
+                                            <Field name="type">
+                                                <Select
                                                     fullWidth
                                                     className="w-40"
                                                     data-attr="alertForm-condition"
@@ -275,13 +275,13 @@ export function EditAlertModal({
                                                         },
                                                     ]}
                                                 />
-                                            </LemonField>
+                                            </Field>
                                         </Group>
                                     </div>
                                     <div className="flex gap-4 items-center">
                                         <div>less than</div>
-                                        <LemonField name="lower">
-                                            <LemonInput
+                                        <Field name="lower">
+                                            <Input
                                                 type="number"
                                                 className="w-30"
                                                 data-attr="alertForm-lower-threshold"
@@ -309,10 +309,10 @@ export function EditAlertModal({
                                                     })
                                                 }
                                             />
-                                        </LemonField>
+                                        </Field>
                                         <div>or more than</div>
-                                        <LemonField name="upper">
-                                            <LemonInput
+                                        <Field name="upper">
+                                            <Input
                                                 type="number"
                                                 className="w-30"
                                                 data-attr="alertForm-upper-threshold"
@@ -340,11 +340,11 @@ export function EditAlertModal({
                                                     })
                                                 }
                                             />
-                                        </LemonField>
+                                        </Field>
                                         {alertForm.condition.type !== AlertConditionType.ABSOLUTE_VALUE && (
                                             <Group name={['threshold', 'configuration']}>
-                                                <LemonField name="type">
-                                                    <LemonSegmentedButton
+                                                <Field name="type">
+                                                    <SegmentedButton
                                                         options={[
                                                             {
                                                                 value: InsightThresholdType.PERCENTAGE,
@@ -358,14 +358,14 @@ export function EditAlertModal({
                                                             },
                                                         ]}
                                                     />
-                                                </LemonField>
+                                                </Field>
                                             </Group>
                                         )}
                                     </div>
                                     <div className="flex gap-4 items-center">
                                         <div>Run alert every</div>
-                                        <LemonField name="calculation_interval">
-                                            <LemonSelect
+                                        <Field name="calculation_interval">
+                                            <Select
                                                 fullWidth
                                                 className="w-28"
                                                 data-attr="alertForm-calculation-interval"
@@ -374,11 +374,11 @@ export function EditAlertModal({
                                                     value: interval,
                                                 }))}
                                             />
-                                        </LemonField>
+                                        </Field>
                                         <div>
                                             and check {alertForm?.config.check_ongoing_interval ? 'current' : 'last'}
                                         </div>
-                                        <LemonSelect
+                                        <Select
                                             fullWidth
                                             className="w-28"
                                             data-attr="alertForm-trend-interval"
@@ -433,7 +433,7 @@ export function EditAlertModal({
                             </div>
 
                             <div className="deprecated-space-y-2">
-                                <LemonCollapse
+                                <Collapse
                                     panels={[
                                         {
                                             key: 'advanced',
@@ -442,8 +442,8 @@ export function EditAlertModal({
                                                 <div className="space-y-2">
                                                     <Group name={['config']}>
                                                         <div className="flex gap-1">
-                                                            <LemonField name="check_ongoing_interval">
-                                                                <LemonCheckbox
+                                                            <Field name="check_ongoing_interval">
+                                                                <Checkbox
                                                                     checked={
                                                                         can_check_ongoing_interval &&
                                                                         alertForm?.config.check_ongoing_interval
@@ -456,7 +456,7 @@ export function EditAlertModal({
                                                                         'Can only alert for ongoing period when checking for absolute value/increase above a set upper threshold.'
                                                                     }
                                                                 />
-                                                            </LemonField>
+                                                            </Field>
                                                             <Tooltip
                                                                 title="Checks the insight value for the ongoing period (current week/month) that hasn't yet completed. Use this if you want to be alerted right away when the insight value rises/increases above threshold"
                                                                 placement="right"
@@ -466,8 +466,8 @@ export function EditAlertModal({
                                                             </Tooltip>
                                                         </div>
                                                     </Group>
-                                                    <LemonField name="skip_weekend">
-                                                        <LemonCheckbox
+                                                    <Field name="skip_weekend">
+                                                        <Checkbox
                                                             checked={
                                                                 (alertForm?.calculation_interval ===
                                                                     AlertCalculationInterval.DAILY ||
@@ -486,7 +486,7 @@ export function EditAlertModal({
                                                                 'Can only skip weekend checking for hourly/daily alerts'
                                                             }
                                                         />
-                                                    </LemonField>
+                                                    </Field>
                                                 </div>
                                             ),
                                         },
@@ -496,21 +496,21 @@ export function EditAlertModal({
                         </div>
 
                         {alert && <AlertStateTable alert={alert} />}
-                    </LemonModal.Content>
+                    </Modal.Content>
 
-                    <LemonModal.Footer>
+                    <Modal.Footer>
                         <div className="flex-1">
                             <div className="flex gap-2">
                                 {!creatingNewAlert ? (
-                                    <LemonButton type="secondary" status="danger" onClick={deleteAlert}>
+                                    <Button type="secondary" status="danger" onClick={deleteAlert}>
                                         Delete alert
-                                    </LemonButton>
+                                    </Button>
                                 ) : null}
                                 {!creatingNewAlert && alert?.state === AlertState.FIRING ? (
                                     <SnoozeButton onChange={snoozeAlert} value={alert?.snoozed_until} />
                                 ) : null}
                                 {!creatingNewAlert && alert?.state === AlertState.SNOOZED ? (
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         status="default"
                                         onClick={clearSnooze}
@@ -520,21 +520,21 @@ export function EditAlertModal({
                                         )}`}
                                     >
                                         Clear snooze
-                                    </LemonButton>
+                                    </Button>
                                 ) : null}
                             </div>
                         </div>
-                        <LemonButton
+                        <Button
                             type="primary"
                             htmlType="submit"
                             loading={isAlertFormSubmitting}
                             disabledReason={!alertFormChanged && !hasPendingNotifications && 'No changes to save'}
                         >
                             {creatingNewAlert ? 'Create alert' : 'Save'}
-                        </LemonButton>
-                    </LemonModal.Footer>
+                        </Button>
+                    </Modal.Footer>
                 </Form>
             )}
-        </LemonModal>
+        </Modal>
     )
 }

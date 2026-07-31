@@ -1,4 +1,4 @@
-import { LemonButton, LemonCollapse } from '@hanzo/lemon-ui'
+import { Button, Collapse } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 
@@ -14,7 +14,7 @@ interface ExceptionsPanelProps {
 
 export function ExceptionsPanel({ exceptionsQuery, sessionId, distinctId }: ExceptionsPanelProps): JSX.Element {
     return (
-        <LemonCollapse
+        <Collapse
             className="bg-surface-primary"
             panels={[
                 {
@@ -36,13 +36,13 @@ export function ExceptionsPanel({ exceptionsQuery, sessionId, distinctId }: Exce
                             )}
                             {distinctId && (
                                 <div className="mt-2 pt-2 border-t flex justify-end">
-                                    <LemonButton
+                                    <Button
                                         type="tertiary"
                                         size="xsmall"
                                         to={`${urls.personByDistinctId(distinctId)}#activeTab=${PersonsTabType.EXCEPTIONS}`}
                                     >
                                         See all exceptions →
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             )}
                         </div>

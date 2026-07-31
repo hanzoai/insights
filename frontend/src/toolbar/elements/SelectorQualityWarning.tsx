@@ -1,5 +1,5 @@
 import { IconWarning } from '@hanzo/icons'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { checkSelectorFragilityCached } from '~/toolbar/utils/selectorQuality'
 
@@ -26,7 +26,7 @@ export function SelectorQualityWarning({ selector, compact = false }: SelectorQu
     }
 
     return (
-        <LemonBanner type="warning">
+        <Banner type="warning">
             <div className="text-sm">
                 <strong>Fragile selector:</strong> {result.reason}{' '}
                 <code className="text-xs">{result.fragileSelector}</code>. <strong>Recommendation:</strong> Add a{' '}
@@ -39,7 +39,7 @@ export function SelectorQualityWarning({ selector, compact = false }: SelectorQu
                     Learn more
                 </button>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }
 

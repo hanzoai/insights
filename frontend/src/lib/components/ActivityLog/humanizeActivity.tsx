@@ -1,5 +1,5 @@
 import { dayjs } from 'lib/dayjs'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 import { fullName } from 'lib/utils'
 
 import { ActivityScope, InsightShortId, PersonType, UserBasicType } from '~/types'
@@ -241,7 +241,7 @@ export function defaultDescriber(
             description,
             extendedDescription: commentContent ? (
                 <div className="border rounded bg-surface-primary p-4">
-                    <LemonMarkdown lowKeyHeadings>{commentContent}</LemonMarkdown>
+                    <Markdown lowKeyHeadings>{commentContent}</Markdown>
                 </div>
             ) : undefined,
         }

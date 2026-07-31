@@ -1,20 +1,20 @@
 import { useState } from 'react'
 
-import { LemonTabs } from '@hanzo/lemon-ui'
+import { Tabs } from '@hanzo/elements'
 
 import { HumanizedActivityLogItem, humanizeActivity, humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
 import MonacoDiffEditor from 'lib/components/MonacoDiffEditor'
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { PaginationManual } from 'lib/lemon-ui/PaginationControl'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { PaginationManual } from 'lib/elements/PaginationControl'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 
 export interface AuditLogTableProps {
     logItems: HumanizedActivityLogItem[]
     pagination?: PaginationManual
 }
 
-const columns: LemonTableColumns<HumanizedActivityLogItem> = [
+const columns: TableColumns<HumanizedActivityLogItem> = [
     {
         title: 'Description',
         dataIndex: 'description',
@@ -91,7 +91,7 @@ export function AuditLogTable({ logItems, pagination }: AuditLogTableProps): JSX
     }
 
     return (
-        <LemonTable
+        <Table
             columns={columns}
             dataSource={logItems}
             expandable={{
@@ -103,7 +103,7 @@ export function AuditLogTable({ logItems, pagination }: AuditLogTableProps): JSX
             }}
             onRow={(logItem, index) => ({
                 onClick: (e) => {
-                    if ((e.target as HTMLElement).closest('.LemonTable__toggle')) {
+                    if ((e.target as HTMLElement).closest('.Table__toggle')) {
                         return
                     }
                     toggleRowExpansion(logItem, index)
@@ -163,7 +163,7 @@ const ActivityDetailsSection = ({ logItem }: { logItem: HumanizedActivityLogItem
     const [activeTab, setActiveTab] = useState<ActivityLogTabs>('diff')
 
     return (
-        <LemonTabs
+        <Tabs
             activeKey={activeTab}
             onChange={(key) => setActiveTab(key as ActivityLogTabs)}
             data-attr="audit-log-details-tabs"

@@ -4,7 +4,7 @@ import { Grid } from 'react-window'
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { TZLabel } from 'lib/components/TZLabel'
 import { useWindowSize } from 'lib/hooks/useWindowSize'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Popover } from 'lib/elements/Popover'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 
 import { OpenQuestionResponseData } from '~/types'

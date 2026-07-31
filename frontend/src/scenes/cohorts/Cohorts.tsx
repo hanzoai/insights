@@ -3,7 +3,7 @@ import './Cohorts.scss'
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { LemonDialog, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Dialog, Input, Select } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -12,13 +12,13 @@ import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductI
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { ListMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Divider } from 'lib/elements/Divider'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { cohortsSceneLogic } from 'scenes/cohorts/cohortsSceneLogic'
 import { PersonsManagementSceneTabs } from 'scenes/persons-management/PersonsManagementSceneTabs'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
@@ -42,7 +42,7 @@ export function Cohorts(): JSX.Element {
     const { deleteCohort, exportCohortPersons, setCohortFilters, setCohortSorting } = useActions(cohortsSceneLogic)
     const { searchParams } = useValues(router)
 
-    const columns: LemonTableColumns<CohortType> = [
+    const columns: TableColumns<CohortType> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -51,7 +51,7 @@ export function Cohorts(): JSX.Element {
             render: function Render(name, { id, description }) {
                 return (
                     <>
-                        <LemonTableLink
+                        <TableLink
                             to={combineUrl(urls.cohort(id), searchParams).url}
                             title={name ? <>{name}</> : 'Untitled'}
                             description={description}
@@ -69,8 +69,8 @@ export function Cohorts(): JSX.Element {
             dataIndex: 'count',
             sorter: (a, b) => (a.count || 0) - (b.count || 0),
         },
-        createdByColumn<CohortType>() as LemonTableColumn<CohortType, keyof CohortType | undefined>,
-        createdAtColumn<CohortType>() as LemonTableColumn<CohortType, keyof CohortType | undefined>,
+        createdByColumn<CohortType>() as TableColumn<CohortType, keyof CohortType | undefined>,
+        createdAtColumn<CohortType>() as TableColumn<CohortType, keyof CohortType | undefined>,
         {
             title: 'Last calculated',
             tooltip:
@@ -96,9 +96,9 @@ export function Cohorts(): JSX.Element {
                     <More
                         overlay={
                             <>
-                                <LemonButton to={urls.cohort(cohort.id)} fullWidth>
+                                <Button to={urls.cohort(cohort.id)} fullWidth>
                                     Edit
-                                </LemonButton>
+                                </Button>
                                 {cohortId && (
                                     <ViewRecordingsPlaylistButton
                                         filters={{
@@ -124,7 +124,7 @@ export function Cohorts(): JSX.Element {
                                         data-attr="cohort-view-recordings"
                                     />
                                 )}
-                                <LemonButton
+                                <Button
                                     onClick={() =>
                                         exportCohortPersons(cohort.id, [
                                             'distinct_ids.0',
@@ -137,19 +137,19 @@ export function Cohorts(): JSX.Element {
                                     fullWidth
                                 >
                                     Export important columns for users
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     onClick={() => exportCohortPersons(cohort.id)}
                                     tooltip="Export all users belonging to this cohort in CSV format."
                                     fullWidth
                                 >
                                     Export all columns for users
-                                </LemonButton>
-                                <LemonDivider />
-                                <LemonButton
+                                </Button>
+                                <Divider />
+                                <Button
                                     status="danger"
                                     onClick={() => {
-                                        LemonDialog.open({
+                                        Dialog.open({
                                             title: 'Delete cohort?',
                                             description: `Are you sure you want to delete "${cohort.name}"?`,
                                             primaryButton: {
@@ -169,7 +169,7 @@ export function Cohorts(): JSX.Element {
                                     fullWidth
                                 >
                                     Delete cohort
-                                </LemonButton>
+                                </Button>
                             </>
                         }
                     />
@@ -187,7 +187,7 @@ export function Cohorts(): JSX.Element {
                 interaction="click"
                 scope={Scene.Cohorts}
             >
-                <LemonInput
+                <Input
                     className="w-60"
                     type="search"
                     placeholder="Search for cohorts"
@@ -202,7 +202,7 @@ export function Cohorts(): JSX.Element {
                 <span>
                     <b>Type</b>
                 </span>
-                <LemonSelect
+                <Select
                     dropdownMatchSelectWidth={false}
                     size="small"
                     onChange={(type) => {
@@ -262,7 +262,7 @@ export function Cohorts(): JSX.Element {
                         interaction="click"
                         scope={Scene.Cohorts}
                     >
-                        <LemonButton
+                        <Button
                             type="primary"
                             size="small"
                             data-attr="new-cohort"
@@ -270,7 +270,7 @@ export function Cohorts(): JSX.Element {
                             tooltip="New cohort"
                         >
                             New cohort
-                        </LemonButton>
+                        </Button>
                     </AppShortcut>
                 }
             />
@@ -287,7 +287,7 @@ export function Cohorts(): JSX.Element {
             />
 
             <div>{filtersSection}</div>
-            <LemonTable
+            <Table
                 columns={columns}
                 loading={cohortsLoading}
                 rowKey="id"

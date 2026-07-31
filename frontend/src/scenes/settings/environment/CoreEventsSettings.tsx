@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconPencil, IconPlusSmall, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonLabel, LemonModal, LemonSelect, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, Input, Label, Modal, Select, TextArea } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
+import { Table } from 'lib/elements/Table'
 import { uuid } from 'lib/utils'
 import { ActionFilter as ActionFilterComponent } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
@@ -269,12 +269,12 @@ export function CoreEventsSettings(): JSX.Element {
                         ? 'No core events configured'
                         : `${coreEvents.length} core event${coreEvents.length === 1 ? '' : 's'}`}
                 </h3>
-                <LemonButton type="primary" icon={<IconPlusSmall />} onClick={handleOpenNewModal}>
+                <Button type="primary" icon={<IconPlusSmall />} onClick={handleOpenNewModal}>
                     Add core event
-                </LemonButton>
+                </Button>
             </div>
 
-            <LemonTable
+            <Table
                 rowKey={(item) => item.id}
                 dataSource={coreEvents}
                 columns={[
@@ -309,13 +309,13 @@ export function CoreEventsSettings(): JSX.Element {
                         width: 100,
                         render: (_, event: CoreEvent) => (
                             <div className="flex gap-1">
-                                <LemonButton
+                                <Button
                                     icon={<IconPencil />}
                                     size="small"
                                     onClick={() => handleOpenEditModal(event)}
                                     tooltip="Edit"
                                 />
-                                <LemonButton
+                                <Button
                                     icon={<IconTrash />}
                                     size="small"
                                     status="danger"
@@ -329,24 +329,24 @@ export function CoreEventsSettings(): JSX.Element {
                 emptyState="No core events configured yet. Add your first core event above."
             />
 
-            <LemonModal
+            <Modal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 title={isEditing ? 'Edit core event' : 'Add core event'}
                 width="40rem"
                 footer={
                     <>
-                        <LemonButton onClick={handleCloseModal}>Cancel</LemonButton>
-                        <LemonButton type="primary" onClick={handleSave} disabledReason={disabledReason}>
+                        <Button onClick={handleCloseModal}>Cancel</Button>
+                        <Button type="primary" onClick={handleSave} disabledReason={disabledReason}>
                             {isEditing ? 'Update' : 'Add'}
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
                 <div className="space-y-4">
                     <div className="space-y-1">
-                        <LemonLabel>Name</LemonLabel>
-                        <LemonInput
+                        <Label>Name</Label>
+                        <Input
                             value={formState.name}
                             onChange={(value) => setFormState((prev) => ({ ...prev, name: value }))}
                             placeholder="e.g., Purchase, Sign up"
@@ -354,8 +354,8 @@ export function CoreEventsSettings(): JSX.Element {
                     </div>
 
                     <div className="space-y-1">
-                        <LemonLabel>Description (optional)</LemonLabel>
-                        <LemonTextArea
+                        <Label>Description (optional)</Label>
+                        <TextArea
                             value={formState.description}
                             onChange={(value) => setFormState((prev) => ({ ...prev, description: value }))}
                             placeholder="Describe what this core event tracks"
@@ -363,7 +363,7 @@ export function CoreEventsSettings(): JSX.Element {
                     </div>
 
                     <div className="space-y-1">
-                        <LemonLabel>Event, action, or data warehouse table</LemonLabel>
+                        <Label>Event, action, or data warehouse table</Label>
                         <ActionFilterComponent
                             bordered
                             filters={currentFilter}
@@ -387,8 +387,8 @@ export function CoreEventsSettings(): JSX.Element {
                     </div>
 
                     <div className="space-y-1">
-                        <LemonLabel>Category</LemonLabel>
-                        <LemonSelect
+                        <Label>Category</Label>
+                        <Select
                             value={formState.category}
                             onChange={(value) => setFormState((prev) => ({ ...prev, category: value }))}
                             options={CATEGORY_OPTIONS}
@@ -396,7 +396,7 @@ export function CoreEventsSettings(): JSX.Element {
                         />
                     </div>
                 </div>
-            </LemonModal>
+            </Modal>
         </div>
     )
 }

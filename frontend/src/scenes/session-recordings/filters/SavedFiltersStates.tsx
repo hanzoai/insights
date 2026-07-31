@@ -1,13 +1,13 @@
 import { useValues } from 'kea'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 
 import { sessionRecordingSavedFiltersLogic } from '../filters/sessionRecordingSavedFiltersLogic'
 
 export function SavedFiltersEmptyState(): JSX.Element {
     const { loadSavedFiltersFailed } = useValues(sessionRecordingSavedFiltersLogic)
     return loadSavedFiltersFailed ? (
-        <LemonBanner type="error">Error while trying to load saved filters.</LemonBanner>
+        <Banner type="error">Error while trying to load saved filters.</Banner>
     ) : (
         <div className="flex items-center justify-center">
             <div className="max-w-248 mt-12 flex flex-col items-center">
@@ -23,7 +23,7 @@ export function SavedFiltersEmptyState(): JSX.Element {
 export function SavedFiltersLoadingState(): JSX.Element {
     const { loadSavedFiltersFailed } = useValues(sessionRecordingSavedFiltersLogic)
     return loadSavedFiltersFailed ? (
-        <LemonBanner type="error">Error while trying to load saved filters.</LemonBanner>
+        <Banner type="error">Error while trying to load saved filters.</Banner>
     ) : (
         <div className="flex items-center justify-center">
             <div className="max-w-248 mt-12 flex flex-col items-center">

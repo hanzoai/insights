@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonBanner, LemonButton, LemonInput, LemonModal, LemonSwitch } from '@hanzo/lemon-ui'
+import { Banner, Button, Input, Modal, Switch } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { dayjs } from 'lib/dayjs'
@@ -15,7 +15,7 @@ export function LogsCaptureSettings(): JSX.Element {
 
     return (
         <AccessControlAction resourceType={AccessControlResourceType.Logs} minAccessLevel={AccessControlLevel.Editor}>
-            <LemonSwitch
+            <Switch
                 data-attr="opt-in-logs-capture-console-log-switch"
                 onChange={(checked) => {
                     updateCurrentTeam({
@@ -43,7 +43,7 @@ export function LogsJsonParseSettings(): JSX.Element {
                 resourceType={AccessControlResourceType.Logs}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonSwitch
+                <Switch
                     data-attr="logs-json-parse-switch"
                     onChange={(checked) => {
                         updateCurrentTeam({
@@ -116,7 +116,7 @@ export function LogsRetentionSettings(): JSX.Element {
     return (
         <AccessControlAction resourceType={AccessControlResourceType.Logs} minAccessLevel={AccessControlLevel.Editor}>
             <div className="space-y-2">
-                <LemonInput
+                <Input
                     data-attr="logs-retention-input"
                     type="number"
                     value={retentionDays}
@@ -128,14 +128,14 @@ export function LogsRetentionSettings(): JSX.Element {
                     suffix={<>days</>}
                 />
                 {retentionDays < 15 && (
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         15 days is free. There's no discount for less than 15 days retention.
-                    </LemonBanner>
+                    </Banner>
                 )}
                 {hasChanges && canUpdate && (
-                    <LemonBanner type="warning">You can only update retention settings once per 24 hours.</LemonBanner>
+                    <Banner type="warning">You can only update retention settings once per 24 hours.</Banner>
                 )}
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={handleSave}
                     loading={currentTeamLoading}
@@ -143,20 +143,20 @@ export function LogsRetentionSettings(): JSX.Element {
                     data-attr="logs-retention-save"
                 >
                     Save retention settings
-                </LemonButton>
+                </Button>
 
-                <LemonModal
+                <Modal
                     isOpen={showConfirmModal}
                     onClose={() => setShowConfirmModal(false)}
                     title="Confirm retention reduction"
                     footer={
                         <>
-                            <LemonButton type="secondary" onClick={() => setShowConfirmModal(false)}>
+                            <Button type="secondary" onClick={() => setShowConfirmModal(false)}>
                                 Cancel
-                            </LemonButton>
-                            <LemonButton type="primary" status="danger" onClick={performSave}>
+                            </Button>
+                            <Button type="primary" status="danger" onClick={performSave}>
                                 Reduce retention
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                 >
@@ -164,7 +164,7 @@ export function LogsRetentionSettings(): JSX.Element {
                         Are you sure you want to reduce retention? Up to {savedRetentionDays - retentionDays} days of
                         logs will be <strong>permanently deleted</strong>.
                     </p>
-                </LemonModal>
+                </Modal>
             </div>
         </AccessControlAction>
     )

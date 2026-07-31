@@ -5,13 +5,13 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconEllipsis, IconX } from '@hanzo/icons'
-import { LemonButton, LemonButtonDropdown, LemonButtonWithDropdown } from '@hanzo/lemon-ui'
+import { Button, ButtonDropdown, ButtonWithDropdown } from '@hanzo/elements'
 
 import { HoqQLPropertyInfo } from 'lib/components/HoqQLPropertyInfo'
 import { PROPERTY_FILTER_TYPE_TO_TAXONOMIC_FILTER_GROUP_TYPE } from 'lib/components/PropertyFilters/utils'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { PopoverReferenceContext } from 'lib/lemon-ui/Popover/Popover'
+import { PopoverReferenceContext } from 'lib/elements/Popover/Popover'
 import { insightLogic } from 'scenes/insights/insightLogic'
 
 import { cohortsModel } from '~/models/cohortsModel'
@@ -61,7 +61,7 @@ export function EditableBreakdownTag({
                 {!isMultipleBreakdownsEnabled || isHistogramable || isNormalizeable ? (
                     <div className="max-w-full">
                         {/* :TRICKY: we don't want the close button to be active when the edit popover is open.
-                         * Therefore we're wrapping the lemon tag a context provider to override the parent context. */}
+                         * Therefore we're wrapping the tag a context provider to override the parent context. */}
                         <PopoverReferenceContext.Provider value={null}>
                             <BreakdownTag
                                 breakdown={breakdown}
@@ -108,7 +108,7 @@ type BreakdownTagProps = {
     disablePropertyInfo?: boolean
     onClose?: () => void
     onClick?: (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => void
-    popover?: LemonButtonDropdown
+    popover?: ButtonDropdown
     size?: 'small' | 'medium'
 }
 
@@ -168,7 +168,7 @@ export function BreakdownTag({
                 />
             )}
             {popover?.overlay && (
-                <LemonButtonWithDropdown
+                <ButtonWithDropdown
                     size="xsmall"
                     icon={<IconEllipsis />}
                     onClick={(e) => {
@@ -180,7 +180,7 @@ export function BreakdownTag({
             )}
 
             {closeable && (
-                <LemonButton
+                <Button
                     size="xsmall"
                     icon={<IconX />}
                     onClick={(e) => {

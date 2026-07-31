@@ -7,9 +7,9 @@ import { IconInfo } from '@hanzo/icons'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { TitleWithIcon } from 'lib/components/TitleWithIcon'
 import { FEATURE_FLAGS, FeatureFlagKey } from 'lib/constants'
-import { LemonTab } from 'lib/lemon-ui/LemonTabs'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tab } from 'lib/elements/Tabs'
+import { Tag } from 'lib/elements/Tag'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { Annotations } from 'scenes/annotations'
@@ -54,7 +54,7 @@ export enum DataManagementTab {
 
 type TabConfig = {
     url: string
-    label: LemonTab<any>['label']
+    label: Tab<any>['label']
     content: JSX.Element
     buttons?: React.ReactNode
     flag?: FeatureFlagKey
@@ -145,9 +145,9 @@ const tabs: Record<DataManagementTab, TabConfig> = {
         label: (
             <>
                 Revenue{' '}
-                <LemonTag type="warning" size="small" className="ml-2">
+                <Tag type="warning" size="small" className="ml-2">
                     BETA
-                </LemonTag>
+                </Tag>
             </>
         ),
         content: <RevenueAnalyticsSettings />,
@@ -179,9 +179,9 @@ const tabs: Record<DataManagementTab, TabConfig> = {
         label: (
             <>
                 Marketing{' '}
-                <LemonTag type="warning" size="small" className="ml-2">
+                <Tag type="warning" size="small" className="ml-2">
                     BETA
-                </LemonTag>
+                </Tag>
             </>
         ),
         content: <MarketingAnalyticsSettings />,

@@ -3,9 +3,9 @@ import { Form, Group, capitalizeFirstLetter } from 'kea-forms'
 import { router } from 'kea-router'
 
 import { IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Button, Divider, Input, SegmentedButton } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { GroupsNewLogicProps, groupsNewLogic } from 'scenes/groups/groupsNewLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -33,7 +33,7 @@ export function GroupsNew(): JSX.Element {
                     resourceType={{ type: 'group' }}
                     actions={
                         <>
-                            <LemonButton
+                            <Button
                                 data-attr="cancel-group"
                                 type="secondary"
                                 size="small"
@@ -42,8 +42,8 @@ export function GroupsNew(): JSX.Element {
                                 }}
                             >
                                 Cancel
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 size="small"
                                 type="primary"
                                 data-attr="save-group"
@@ -51,7 +51,7 @@ export function GroupsNew(): JSX.Element {
                                 form="group"
                             >
                                 Save
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                     forceBackTo={{
@@ -63,17 +63,17 @@ export function GroupsNew(): JSX.Element {
                 <div className="deprecated-space-y-2 max-w-200 gap-4">
                     <div className="flex gap-4 flex-wrap">
                         <div className="flex-1">
-                            <LemonField name="name" label="Name">
-                                <LemonInput data-attr="group-name" />
-                            </LemonField>
+                            <Field name="name" label="Name">
+                                <Input data-attr="group-name" />
+                            </Field>
                         </div>
                         <div className="flex-1">
-                            <LemonField name="group_key" label="ID">
-                                <LemonInput data-attr="group-key" />
-                            </LemonField>
+                            <Field name="group_key" label="ID">
+                                <Input data-attr="group-key" />
+                            </Field>
                         </div>
                     </div>
-                    <LemonDivider className="my-4" />
+                    <Divider className="my-4" />
                 </div>
                 <div className="deprecated-space-y-2 max-w-214 gap-4">
                     <div className="mt-4">
@@ -93,13 +93,13 @@ export function GroupsNew(): JSX.Element {
                                 <Group key={index} name={['customProperties', index]}>
                                     <div className="flex gap-4 mb-2 items-start">
                                         <div className="flex-1">
-                                            <LemonField name="name">
-                                                <LemonInput placeholder="e.g. is_subscribed" />
-                                            </LemonField>
+                                            <Field name="name">
+                                                <Input placeholder="e.g. is_subscribed" />
+                                            </Field>
                                         </div>
                                         <div className="flex-1">
-                                            <LemonField name="type">
-                                                <LemonSegmentedButton
+                                            <Field name="type">
+                                                <SegmentedButton
                                                     onChange={(value: 'string' | 'boolean') => {
                                                         const currentProperties = group.customProperties || []
                                                         const updatedProperties = currentProperties.map((prop, i) =>
@@ -126,12 +126,12 @@ export function GroupsNew(): JSX.Element {
                                                     ]}
                                                     size="small"
                                                 />
-                                            </LemonField>
+                                            </Field>
                                         </div>
                                         <div className="flex-1">
-                                            <LemonField name="value">
+                                            <Field name="value">
                                                 {group.customProperties?.[index]?.type === 'boolean' ? (
-                                                    <LemonSegmentedButton
+                                                    <SegmentedButton
                                                         onChange={(value: string) => {
                                                             const currentProperties = group.customProperties || []
                                                             const updatedProperties = currentProperties.map(
@@ -157,11 +157,11 @@ export function GroupsNew(): JSX.Element {
                                                         size="small"
                                                     />
                                                 ) : (
-                                                    <LemonInput placeholder="e.g. subscription_tier" />
+                                                    <Input placeholder="e.g. subscription_tier" />
                                                 )}
-                                            </LemonField>
+                                            </Field>
                                         </div>
-                                        <LemonButton
+                                        <Button
                                             icon={<IconTrash />}
                                             size="small"
                                             type="secondary"
@@ -173,14 +173,14 @@ export function GroupsNew(): JSX.Element {
                                 </Group>
                             ))}
 
-                        <LemonButton
+                        <Button
                             icon={<IconPlus />}
                             type="secondary"
                             onClick={addFormProperty}
                             data-attr="add-property"
                         >
                             Add property
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </SceneContent>

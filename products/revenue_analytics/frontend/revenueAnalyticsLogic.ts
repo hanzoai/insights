@@ -1,7 +1,7 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
@@ -444,10 +444,10 @@ export const revenueAnalyticsLogic = kea<revenueAnalyticsLogicType>([
         resumeViewSchedule: async ({ viewId }) => {
             try {
                 await api.dataWarehouseSavedQueries.resumeSchedules([viewId])
-                lemonToast.success('Schedule resumed')
+                toast.success('Schedule resumed')
                 actions.loadDataWarehouseSavedQueries()
             } catch {
-                lemonToast.error('Failed to resume schedule')
+                toast.error('Failed to resume schedule')
                 actions.loadDataWarehouseSavedQueries()
             }
         },

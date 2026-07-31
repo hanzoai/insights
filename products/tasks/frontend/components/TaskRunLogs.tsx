@@ -1,4 +1,4 @@
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
 export interface TaskRunLogsProps {
     logs: string

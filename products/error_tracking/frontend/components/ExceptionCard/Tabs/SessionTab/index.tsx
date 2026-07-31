@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { P, match } from 'ts-pattern'
 
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import { errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'

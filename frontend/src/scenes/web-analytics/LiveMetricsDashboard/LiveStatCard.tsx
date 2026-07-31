@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 const AnimatedNumber = ({ value, duration = 300 }: { value: number; duration?: number }): JSX.Element => {
     const [displayValue, setDisplayValue] = useState(value)
@@ -75,7 +75,7 @@ export const LiveStatCard = ({ label, value, isLoading }: LiveStatCardProps): JS
         <div className="flex flex-col">
             <span className="text-muted text-xs uppercase font-medium">{label}</span>
             {isLoading ? (
-                <LemonSkeleton className="w-16 h-8 mt-1" />
+                <Skeleton className="w-16 h-8 mt-1" />
             ) : (
                 <div className="flex items-baseline">
                     {value !== null ? <AnimatedNumber value={value} /> : <span className="text-2xl font-bold">-</span>}

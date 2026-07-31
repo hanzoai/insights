@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSnack } from '@hanzo/lemon-ui'
+import { Snack } from '@hanzo/elements'
 
 import { ButtonPrimitive, ButtonPrimitiveProps } from 'lib/ui/Button/ButtonPrimitives'
 import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'
@@ -20,7 +20,7 @@ export function ProjectName({ team }: { team: TeamBasicType }): JSX.Element {
     return (
         <div className="flex items-center max-w-full">
             <span className="truncate">{team.name}</span>
-            {team.is_demo ? <LemonSnack className="ml-2 text-xs shrink-0">Demo</LemonSnack> : null}
+            {team.is_demo ? <Snack className="ml-2 text-xs shrink-0">Demo</Snack> : null}
         </div>
     )
 }

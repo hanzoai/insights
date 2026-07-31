@@ -227,243 +227,243 @@
         "chromium": 2.6,
         "webkit": 2.4
     },
-    "frontend/src/lib/lemon-ui/ClampedText/ClampedText.stories.tsx": {
+    "frontend/src/lib/elements/ClampedText/ClampedText.stories.tsx": {
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonBadge/LemonBadge.stories.tsx": {
+    "frontend/src/lib/elements/Badge/Badge.stories.tsx": {
         "chromium": 17.0,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonBadge/LemonBadgeNumber.stories.tsx": {
+    "frontend/src/lib/elements/Badge/BadgeNumber.stories.tsx": {
         "chromium": 11.6,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonBanner/LemonBanner.stories.tsx": {
+    "frontend/src/lib/elements/Banner/Banner.stories.tsx": {
         "chromium": 31.3,
         "webkit": 3.0
     },
-    "frontend/src/lib/lemon-ui/LemonButton/LemonButton.stories.tsx": {
+    "frontend/src/lib/elements/Button/Button.stories.tsx": {
         "chromium": 71.7,
         "webkit": 4.2
     },
-    "frontend/src/lib/lemon-ui/LemonCalendar/LemonCalendar.stories.tsx": {
+    "frontend/src/lib/elements/Calendar/Calendar.stories.tsx": {
         "chromium": 40.6,
         "webkit": 3.1
     },
-    "frontend/src/lib/lemon-ui/LemonCalendar/LemonCalendarSelect.stories.tsx": {
+    "frontend/src/lib/elements/Calendar/CalendarSelect.stories.tsx": {
         "chromium": 33.7,
         "webkit": 3.3
     },
-    "frontend/src/lib/lemon-ui/LemonCalendar/LemonCalendarSelectInput.stories.tsx": {
+    "frontend/src/lib/elements/Calendar/CalendarSelectInput.stories.tsx": {
         "chromium": 11.4,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonCalendarRange/LemonCalendarRange.stories.tsx": {
+    "frontend/src/lib/elements/CalendarRange/CalendarRange.stories.tsx": {
         "chromium": 6.6,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonCalendarRange/LemonCalendarRangeInline.stories.tsx": {
+    "frontend/src/lib/elements/CalendarRange/CalendarRangeInline.stories.tsx": {
         "chromium": 6.1,
         "webkit": 2.6
     },
-    "frontend/src/lib/lemon-ui/LemonCard/LemonCard.stories.tsx": {
+    "frontend/src/lib/elements/Card/Card.stories.tsx": {
         "chromium": 14.1,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonCheckbox/LemonCheckbox.stories.tsx": {
+    "frontend/src/lib/elements/Checkbox/Checkbox.stories.tsx": {
         "chromium": 20.0,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonCollapse/LemonCollapse.stories.tsx": {
+    "frontend/src/lib/elements/Collapse/Collapse.stories.tsx": {
         "chromium": 17.0,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonColor/LemonColorButton.stories.tsx": {
+    "frontend/src/lib/elements/Color/ColorButton.stories.tsx": {
         "chromium": 23.2,
         "webkit": 3.4
     },
-    "frontend/src/lib/lemon-ui/LemonColor/LemonColorGlyph.stories.tsx": {
+    "frontend/src/lib/elements/Color/ColorGlyph.stories.tsx": {
         "chromium": 18.0,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonColor/LemonColorList.stories.tsx": {
+    "frontend/src/lib/elements/Color/ColorList.stories.tsx": {
         "chromium": 12.4,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonColor/LemonColorPicker.stories.tsx": {
+    "frontend/src/lib/elements/Color/ColorPicker.stories.tsx": {
         "chromium": 14.7,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonDialog/LemonDialog.stories.tsx": {
+    "frontend/src/lib/elements/Dialog/Dialog.stories.tsx": {
         "chromium": 14.7,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonDivider/LemonDivider.stories.tsx": {
+    "frontend/src/lib/elements/Divider/Divider.stories.tsx": {
         "chromium": 17.0,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonField/LemonField.stories.tsx": {
+    "frontend/src/lib/elements/Field/Field.stories.tsx": {
         "chromium": 9.7,
         "webkit": 2.6
     },
-    "frontend/src/lib/lemon-ui/LemonFileInput/LemonFileInput.stories.tsx": {
+    "frontend/src/lib/elements/FileInput/FileInput.stories.tsx": {
         "chromium": 17.1,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonInputSelect/LemonInputSelect.stories.tsx": {
+    "frontend/src/lib/elements/InputSelect/InputSelect.stories.tsx": {
         "chromium": 59.7,
         "webkit": 3.7
     },
-    "frontend/src/lib/lemon-ui/LemonLabel/LemonLabel.stories.tsx": {
+    "frontend/src/lib/elements/Label/Label.stories.tsx": {
         "webkit": 2.6
     },
-    "frontend/src/lib/lemon-ui/LemonMarkdown/LemonMarkdown.stories.tsx": {
+    "frontend/src/lib/elements/Markdown/Markdown.stories.tsx": {
         "chromium": 23.9,
         "webkit": 3.3
     },
-    "frontend/src/lib/lemon-ui/LemonMenu/LemonMenu.stories.tsx": {
+    "frontend/src/lib/elements/Menu/Menu.stories.tsx": {
         "chromium": 11.3,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonModal/LemonModal.stories.tsx": {
+    "frontend/src/lib/elements/Modal/Modal.stories.tsx": {
         "chromium": 14.5,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonProgress/LemonProgress.stories.tsx": {
+    "frontend/src/lib/elements/Progress/Progress.stories.tsx": {
         "chromium": 6.0,
         "webkit": 2.4
     },
-    "frontend/src/lib/lemon-ui/LemonProgressCircle/LemonProgressCircle.stories.tsx": {
+    "frontend/src/lib/elements/ProgressCircle/ProgressCircle.stories.tsx": {
         "chromium": 12.1,
         "webkit": 2.6
     },
-    "frontend/src/lib/lemon-ui/LemonRadio/LemonRadio.stories.tsx": {
+    "frontend/src/lib/elements/Radio/Radio.stories.tsx": {
         "chromium": 11.6,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonRichContent/LemonRichContentEditor.stories.tsx": {
+    "frontend/src/lib/elements/RichContent/RichContentEditor.stories.tsx": {
         "chromium": 6.0,
         "webkit": 2.4
     },
-    "frontend/src/lib/lemon-ui/LemonRow/LemonRow.stories.tsx": {
+    "frontend/src/lib/elements/Row/Row.stories.tsx": {
         "chromium": 47.4,
         "webkit": 3.2
     },
-    "frontend/src/lib/lemon-ui/LemonSegmentedButton/LemonSegmentedButton.stories.tsx": {
+    "frontend/src/lib/elements/SegmentedButton/SegmentedButton.stories.tsx": {
         "chromium": 11.9,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonSegmentedButton/LemonSegmentedDropdown.stories.tsx": {
+    "frontend/src/lib/elements/SegmentedButton/SegmentedDropdown.stories.tsx": {
         "chromium": 17.3,
         "webkit": 2.9
     },
-    "frontend/src/lib/lemon-ui/LemonSegmentedSelect/LemonSegmentedSelect.stories.tsx": {
+    "frontend/src/lib/elements/SegmentedSelect/SegmentedSelect.stories.tsx": {
         "chromium": 11.6,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonSelect/LemonSearchableSelect.stories.tsx": {
+    "frontend/src/lib/elements/Select/SearchableSelect.stories.tsx": {
         "chromium": 9.0,
         "webkit": 2.9
     },
-    "frontend/src/lib/lemon-ui/LemonSelect/LemonSelect.stories.tsx": {
+    "frontend/src/lib/elements/Select/Select.stories.tsx": {
         "chromium": 28.4,
         "webkit": 3.2
     },
-    "frontend/src/lib/lemon-ui/LemonSkeleton/LemonSkeleton.stories.tsx": {
+    "frontend/src/lib/elements/Skeleton/Skeleton.stories.tsx": {
         "chromium": 14.5,
         "webkit": 3.0
     },
-    "frontend/src/lib/lemon-ui/LemonSlider/LemonSlider.stories.tsx": {
+    "frontend/src/lib/elements/Slider/Slider.stories.tsx": {
         "webkit": 2.5
     },
-    "frontend/src/lib/lemon-ui/LemonSnack/LemonSnack.stories.tsx": {
+    "frontend/src/lib/elements/Snack/Snack.stories.tsx": {
         "chromium": 14.7,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonSwitch/LemonSwitch.stories.tsx": {
+    "frontend/src/lib/elements/Switch/Switch.stories.tsx": {
         "chromium": 25.4,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonTable/LemonTable.stories.tsx": {
+    "frontend/src/lib/elements/Table/Table.stories.tsx": {
         "chromium": 62.5,
         "webkit": 4.1
     },
-    "frontend/src/lib/lemon-ui/LemonTabs/LemonTabs.stories.tsx": {
+    "frontend/src/lib/elements/Tabs/Tabs.stories.tsx": {
         "chromium": 11.5,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonTag/LemonTag.stories.tsx": {
+    "frontend/src/lib/elements/Tag/Tag.stories.tsx": {
         "chromium": 8.7,
         "webkit": 2.5
     },
-    "frontend/src/lib/lemon-ui/LemonTextArea/LemonTextArea.stories.tsx": {
+    "frontend/src/lib/elements/TextArea/TextArea.stories.tsx": {
         "chromium": 17.2,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/LemonTextArea/LemonTextAreaMarkdown.stories.tsx": {
+    "frontend/src/lib/elements/TextArea/TextAreaMarkdown.stories.tsx": {
         "chromium": 12.1,
         "webkit": 2.5
     },
-    "frontend/src/lib/lemon-ui/LemonToast/LemonToast.stories.tsx": {
+    "frontend/src/lib/elements/Toast/Toast.stories.tsx": {
         "chromium": 14.7,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/LemonTree/LemonTree.stories.tsx": {
+    "frontend/src/lib/elements/Tree/Tree.stories.tsx": {
         "chromium": 6.6,
         "webkit": 3.0
     },
-    "frontend/src/lib/lemon-ui/LemonWidget/LemonWidget.stories.tsx": {
+    "frontend/src/lib/elements/Widget/Widget.stories.tsx": {
         "chromium": 14.2,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/Lettermark/Lettermark.stories.tsx": {
+    "frontend/src/lib/elements/Lettermark/Lettermark.stories.tsx": {
         "chromium": 25.2,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/Link/Link.stories.tsx": {
+    "frontend/src/lib/elements/Link/Link.stories.tsx": {
         "chromium": 11.3,
         "webkit": 2.7
     },
-    "frontend/src/lib/lemon-ui/PaginationControl/PaginationControl.stories.tsx": {
+    "frontend/src/lib/elements/PaginationControl/PaginationControl.stories.tsx": {
         "chromium": 8.6,
         "webkit": 2.5
     },
-    "frontend/src/lib/lemon-ui/Popover/Popover.stories.tsx": {
+    "frontend/src/lib/elements/Popover/Popover.stories.tsx": {
         "chromium": 2.5,
         "webkit": 2.4
     },
-    "frontend/src/lib/lemon-ui/ProfilePicture/ProfileBubbles.stories.tsx": {
+    "frontend/src/lib/elements/ProfilePicture/ProfileBubbles.stories.tsx": {
         "chromium": 19.6,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/Spinner/Spinner.stories.tsx": {
+    "frontend/src/lib/elements/Spinner/Spinner.stories.tsx": {
         "chromium": 20.8
     },
-    "frontend/src/lib/lemon-ui/Splotch/Splotch.stories.tsx": {
+    "frontend/src/lib/elements/Splotch/Splotch.stories.tsx": {
         "chromium": 5.7,
         "webkit": 2.4
     },
-    "frontend/src/lib/lemon-ui/UploadedLogo/UploadedLogo.stories.tsx": {
+    "frontend/src/lib/elements/UploadedLogo/UploadedLogo.stories.tsx": {
         "chromium": 19.7,
         "webkit": 2.8
     },
-    "frontend/src/lib/lemon-ui/colors.stories.tsx": {
+    "frontend/src/lib/elements/colors.stories.tsx": {
         "chromium": 17.9,
         "webkit": 2.9
     },
-    "frontend/src/lib/lemon-ui/icons/icons3000.stories.tsx": {
+    "frontend/src/lib/elements/icons/icons3000.stories.tsx": {
         "chromium": 2.7,
         "webkit": 2.3
     },
-    "frontend/src/lib/lemon-ui/icons/stories/Icons1.stories.tsx": {
+    "frontend/src/lib/elements/icons/stories/Icons1.stories.tsx": {
         "chromium": 29.7,
         "webkit": 3.2
     },
-    "frontend/src/lib/lemon-ui/icons/stories/Icons2.stories.tsx": {
+    "frontend/src/lib/elements/icons/stories/Icons2.stories.tsx": {
         "chromium": 28.7,
         "webkit": 2.9
     },
-    "frontend/src/lib/lemon-ui/icons/stories/Icons3.stories.tsx": {
+    "frontend/src/lib/elements/icons/stories/Icons3.stories.tsx": {
         "chromium": 40.7,
         "webkit": 3.7
     },

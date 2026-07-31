@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonCard, LemonSegmentedButton, LemonTag, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Card, SegmentedButton, Tag, Spinner, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { PaginationControl } from 'lib/lemon-ui/PaginationControl'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { PaginationControl } from 'lib/elements/PaginationControl'
 
 import { DataWarehouseSavedQueryOrigin } from '~/queries/schema/schema-general'
 import { DataWarehouseActivityRecord } from '~/types'
@@ -64,7 +64,7 @@ export function OverviewTab(): JSX.Element {
         pagination: { pageSize: LIST_SIZE },
     }
 
-    const activityColumns: LemonTableColumns<DataWarehouseActivityRecord> = [
+    const activityColumns: TableColumns<DataWarehouseActivityRecord> = [
         {
             title: 'Activity',
             key: 'name',
@@ -75,9 +75,9 @@ export function OverviewTab(): JSX.Element {
                     <div className="flex items-center gap-1">
                         <StatusIcon status={activity.status} />
                         <span>{activity.name}</span>
-                        <LemonTag size="medium" type="muted" className="px-1 rounded-lg ml-1">
+                        <Tag size="medium" type="muted" className="px-1 rounded-lg ml-1">
                             {tagText}
-                        </LemonTag>
+                        </Tag>
                     </div>
                 )
             },
@@ -106,7 +106,7 @@ export function OverviewTab(): JSX.Element {
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <LemonCard className="p-4 hover:transform-none">
+                <Card className="p-4 hover:transform-none">
                     <div className="flex items-start gap-1">
                         <div className="text-sm text-muted">Rows processed</div>
                         <Tooltip
@@ -123,15 +123,15 @@ export function OverviewTab(): JSX.Element {
                             (totalRowsStats?.total_rows ?? 0).toLocaleString()
                         )}
                     </div>
-                </LemonCard>
+                </Card>
 
-                <LemonCard className="p-4 hover:transform-none">
+                <Card className="p-4 hover:transform-none">
                     <div className="flex items-center justify-between">
                         <div className="text-sm text-muted">Data sources</div>
                         {jobStats && jobStats.external_data_jobs.running > 0 && (
-                            <LemonTag type="primary" size="small">
+                            <Tag type="primary" size="small">
                                 {jobStats.external_data_jobs.running} syncing
-                            </LemonTag>
+                            </Tag>
                         )}
                     </div>
                     <div className="text-2xl font-semibold mt-1 flex items-center gap-2">
@@ -141,15 +141,15 @@ export function OverviewTab(): JSX.Element {
                             (dataWarehouseSources?.results?.length ?? 0)
                         )}
                     </div>
-                </LemonCard>
+                </Card>
 
-                <LemonCard className="p-4 hover:transform-none">
+                <Card className="p-4 hover:transform-none">
                     <div className="flex items-center justify-between">
                         <div className="text-sm text-muted">Materialized views</div>
                         {jobStats && jobStats.modeling_jobs.running > 0 && (
-                            <LemonTag type="primary" size="small">
+                            <Tag type="primary" size="small">
                                 {jobStats.modeling_jobs.running} syncing
-                            </LemonTag>
+                            </Tag>
                         )}
                     </div>
                     <div className="text-2xl font-semibold mt-1 flex items-center gap-2">
@@ -159,7 +159,7 @@ export function OverviewTab(): JSX.Element {
                             (materializedViews?.length ?? 0)
                         )}
                     </div>
-                </LemonCard>
+                </Card>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
@@ -170,7 +170,7 @@ export function OverviewTab(): JSX.Element {
 
                 {/* Sync Success Rate - 2/3 width */}
                 <div className="lg:col-span-2">
-                    <LemonCard className="p-4 hover:transform-none min-h-96 flex flex-col h-full">
+                    <Card className="p-4 hover:transform-none min-h-96 flex flex-col h-full">
                         <div className="flex items-center justify-between mb-4 flex-shrink-0">
                             <div className="flex items-center gap-2">
                                 <div className="flex items-start gap-1">
@@ -178,7 +178,7 @@ export function OverviewTab(): JSX.Element {
                                 </div>
                                 {jobStatsLoading && <Spinner className="text-muted" />}
                             </div>
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 size="xsmall"
                                 value={jobStats?.days ?? 7}
                                 onChange={(value) => loadJobStats({ days: value as 1 | 7 | 30 })}
@@ -194,7 +194,7 @@ export function OverviewTab(): JSX.Element {
                                 <JobStatsChart jobStats={jobStats} />
                             </div>
                         )}
-                    </LemonCard>
+                    </Card>
                 </div>
             </div>
 
@@ -202,12 +202,12 @@ export function OverviewTab(): JSX.Element {
                 <h2 className="text-xl font-semibold">Source and materialization jobs</h2>
             </div>
 
-            <LemonCard className="hover:transform-none mt-4">
+            <Card className="hover:transform-none mt-4">
                 <div className="flex items-center gap-2 pb-2">
                     <span className="font-medium text-lg">Currently running</span>
                     {tablesLoading && runningActivityResponse !== null && <Spinner className="text-muted" />}
                 </div>
-                <LemonTable
+                <Table
                     dataSource={activityRunningPagination.dataSourcePage as DataWarehouseActivityRecord[]}
                     columns={activityColumns}
                     rowKey={(r) => `${r.type}-${r.name}-${r.created_at}`}
@@ -220,14 +220,14 @@ export function OverviewTab(): JSX.Element {
                         <PaginationControl {...activityRunningPagination} nouns={['activity', 'activities']} />
                     </div>
                 )}
-            </LemonCard>
+            </Card>
 
-            <LemonCard className="hover:transform-none mt-4">
+            <Card className="hover:transform-none mt-4">
                 <div className="flex items-center gap-2 pb-2">
                     <span className="font-medium text-lg">Recently completed</span>
                     {tablesLoading && completedActivityResponse !== null && <Spinner className="text-muted" />}
                 </div>
-                <LemonTable
+                <Table
                     dataSource={activityCompletedPagination.dataSourcePage as DataWarehouseActivityRecord[]}
                     columns={activityColumns}
                     rowKey={(r) => `${r.type}-${r.name}-${r.created_at}`}
@@ -240,7 +240,7 @@ export function OverviewTab(): JSX.Element {
                         <PaginationControl {...activityCompletedPagination} nouns={['activity', 'activities']} />
                     </div>
                 )}
-            </LemonCard>
+            </Card>
         </>
     )
 }

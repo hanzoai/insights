@@ -4,14 +4,14 @@ import { lazyLoaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 import insights from '@hanzo/insights'
 
-import { LemonDialog, Link, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, Link, toast } from '@hanzo/elements'
 
 import api, { getJSONOrNull } from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { LemonBannerAction } from 'lib/lemon-ui/LemonBanner/LemonBanner'
-import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
-import { LemonButtonPropsBase } from 'lib/lemon-ui/LemonButton'
+import { BannerAction } from 'lib/elements/Banner/Banner'
+import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
+import { ButtonPropsBase } from 'lib/elements/Button'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { pluralize } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -46,7 +46,7 @@ export interface BillingAlertConfig {
     contactSupport?: boolean
     buttonCTA?: string
     dismissKey?: string
-    action?: LemonBannerAction
+    action?: BannerAction
     pathName?: string
     onClose?: () => void
 }
@@ -65,7 +65,7 @@ export interface UnsubscribeError {
 export interface BillingError {
     status: 'info' | 'warning' | 'error'
     message: string
-    action: LemonButtonPropsBase
+    action: ButtonPropsBase
 }
 
 export type SwitchPlanPayload = {
@@ -189,9 +189,9 @@ export const billingLogic = kea<billingLogicType>([
             ['loadCurrentOrganization'],
             eventUsageLogic,
             ['reportProductUnsubscribed'],
-            lemonBannerLogic({ dismissKey: 'usage-limit-exceeded' }),
+            bannerLogic({ dismissKey: 'usage-limit-exceeded' }),
             ['resetDismissKey as resetUsageLimitExceededKey'],
-            lemonBannerLogic({ dismissKey: 'usage-limit-approaching' }),
+            bannerLogic({ dismissKey: 'usage-limit-approaching' }),
             ['resetDismissKey as resetUsageLimitApproachingKey'],
         ],
     })),
@@ -316,11 +316,11 @@ export const billingLogic = kea<billingLogicType>([
                 updateBillingLimits: async (limits: { [key: string]: number | null }) => {
                     try {
                         const response = await api.update('api/billing', { custom_limits_usd: limits })
-                        lemonToast.success('Billing limits updated')
+                        toast.success('Billing limits updated')
                         actions.loadBilling()
                         return parseBillingResponse(response)
                     } catch (error: any) {
-                        lemonToast.error(
+                        toast.error(
                             'There was an error updating your billing limits. Please try again or contact support.'
                         )
                         throw error
@@ -340,7 +340,7 @@ export const billingLogic = kea<billingLogicType>([
                         const response = await api.createResponse('api/billing/deactivate', { products: key })
                         const jsonRes = await getJSONOrNull(response)
 
-                        lemonToast.success(
+                        toast.success(
                             "You have been unsubscribed. We're sad to see you go."
                         )
                         actions.reportProductUnsubscribed(key)
@@ -395,7 +395,7 @@ export const billingLogic = kea<billingLogicType>([
                         await api.create('api/billing/subscription/switch-plan', data)
 
                         const productDisplayName = capitalizeFirstLetter(data.to_product_key)
-                        lemonToast.success(`You're now on ${productDisplayName}`)
+                        toast.success(`You're now on ${productDisplayName}`)
                         actions.setSwitchPlanLoading(null)
 
                         // Reload billing, user, and organization to get the updated available features
@@ -407,7 +407,7 @@ export const billingLogic = kea<billingLogicType>([
                         return values.billing as BillingType
                     } catch (error: any) {
                         insights.captureException(error)
-                        lemonToast.error(
+                        toast.error(
                             (error && error.detail) ||
                                 'There was an error switching your plan. Please try again or contact support.'
                         )
@@ -695,7 +695,7 @@ export const billingLogic = kea<billingLogicType>([
                 actions.loadCreditOverview()
                 actions.reportCreditsFormSubmitted(+creditInput)
 
-                LemonDialog.open({
+                Dialog.open({
                     title: 'Your credit purchase has been submitted',
                     width: 536,
                     content:

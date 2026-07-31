@@ -13,13 +13,13 @@ import {
 } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonDivider, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Divider, Skeleton } from '@hanzo/elements'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { NotFound } from 'lib/components/NotFound'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Tab, Tabs } from 'lib/elements/Tabs'
 import { BatchExportBackfills } from 'scenes/data-pipelines/batch-exports/BatchExportBackfills'
 import { BatchExportRuns } from 'scenes/data-pipelines/batch-exports/BatchExportRuns'
 import { LogsViewer } from 'scenes/insights-functions/logs/LogsViewer'
@@ -149,13 +149,13 @@ function BatchExportSceneHeader(): JSX.Element {
                             size="small"
                             overlay={
                                 <>
-                                    <LemonButton status="danger" fullWidth onClick={() => deleteBatchExport()}>
+                                    <Button status="danger" fullWidth onClick={() => deleteBatchExport()}>
                                         Delete
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             }
                         />
-                        <LemonDivider vertical />
+                        <Divider vertical />
                         <BatchExportConfigurationClearChangesButton />
                         <BatchExportConfigurationSaveButton />
                     </>
@@ -215,7 +215,7 @@ function BatchExportSceneContentInner({
     if (loading && !batchExportConfig) {
         return (
             <div className="flex flex-col gap-4">
-                <LemonSkeleton className="w-full h-12" />
+                <Skeleton className="w-full h-12" />
                 <InsightsFunctionSkeleton />
             </div>
         )
@@ -229,7 +229,7 @@ function BatchExportSceneContentInner({
         return <NotFound object={`batch export service ${service}`} />
     }
 
-    const tabs: (LemonTab<BatchExportSceneTab> | null)[] = [
+    const tabs: (Tab<BatchExportSceneTab> | null)[] = [
         {
             label: 'Configuration',
             key: 'configuration',
@@ -272,7 +272,7 @@ function BatchExportSceneContentInner({
     return (
         <SceneContent>
             <BatchExportSceneHeader />
-            <LemonTabs activeKey={currentTab} tabs={tabs} onChange={setCurrentTab} sceneInset />
+            <Tabs activeKey={currentTab} tabs={tabs} onChange={setCurrentTab} sceneInset />
         </SceneContent>
     )
 }

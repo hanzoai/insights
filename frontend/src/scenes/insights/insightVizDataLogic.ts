@@ -1,7 +1,7 @@
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import {
     DISPLAY_TYPES_WITHOUT_DETAILED_RESULTS,
@@ -779,12 +779,12 @@ const handleQuerySourceUpdateSideEffects = (
         (interval === 'hour' || interval === 'month' || interval === 'minute')
     ) {
         if (interval === 'hour' || interval === 'minute') {
-            lemonToast.info(
+            toast.info(
                 `Switched to grouping by day, because "${BASE_MATH_DEFINITIONS[maybeChangedActiveUsersMath].name}" does not support grouping by ${interval}.`
             )
             ;(mergedUpdate as TrendsQuery).interval = 'day'
         } else if (interval === 'month' && maybeChangedActiveUsersMath === BaseMathType.WeeklyActiveUsers) {
-            lemonToast.info(
+            toast.info(
                 `Switched to grouping by week, because "${BASE_MATH_DEFINITIONS[maybeChangedActiveUsersMath].name}" does not support grouping by ${interval}.`
             )
             ;(mergedUpdate as TrendsQuery).interval = 'week'

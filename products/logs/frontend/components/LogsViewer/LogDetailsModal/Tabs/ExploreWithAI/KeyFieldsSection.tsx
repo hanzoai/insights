@@ -1,5 +1,5 @@
 import { IconInfo, IconSearch } from '@hanzo/icons'
-import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tooltip } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 
@@ -21,7 +21,7 @@ export function KeyFieldsSection({ fields, onApplyFilter }: KeyFieldsSectionProp
                     </CopyToClipboardInline>
                     {onApplyFilter && (
                         <Tooltip title="Filter logs by this value">
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 icon={<IconSearch />}
                                 onClick={() =>

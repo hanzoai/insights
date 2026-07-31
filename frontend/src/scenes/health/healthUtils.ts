@@ -1,9 +1,9 @@
-import type { LemonTagType } from '@hanzo/lemon-ui'
+import type { TagType } from '@hanzo/elements'
 
 import { KIND_LABELS } from './healthCategories'
 import type { HealthIssueSeverity } from './types'
 
-export const severityToTagType = (severity: HealthIssueSeverity): LemonTagType => {
+export const severityToTagType = (severity: HealthIssueSeverity): TagType => {
     switch (severity) {
         case 'critical':
             return 'danger'

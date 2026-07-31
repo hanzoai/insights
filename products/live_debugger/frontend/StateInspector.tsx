@@ -4,7 +4,7 @@ import { IconX } from '@hanzo/icons'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 
-import { LemonButton } from '../../../frontend/src/lib/lemon-ui/LemonButton'
+import { Button } from '../../../frontend/src/lib/elements/Button'
 import { liveDebuggerLogic } from './liveDebuggerLogic'
 import { parseJsonPickleVariable } from './serde'
 
@@ -114,7 +114,7 @@ export function StateInspector({
                                             </div>
                                         </div>
                                         {lineNumber && (
-                                            <LemonButton
+                                            <Button
                                                 size="xsmall"
                                                 type={hasBreakpoint ? 'primary' : 'secondary'}
                                                 onClick={() => {
@@ -124,7 +124,7 @@ export function StateInspector({
                                                 }}
                                             >
                                                 BP
-                                            </LemonButton>
+                                            </Button>
                                         )}
                                     </div>
                                 )

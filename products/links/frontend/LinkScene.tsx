@@ -5,22 +5,22 @@ import { QRCodeSVG } from 'qrcode.react'
 
 import { IconCopy, IconDownload } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonDivider,
-    LemonInput,
-    LemonLabel,
-    LemonSelect,
-    LemonSelectOptions,
-    LemonSkeleton,
-    LemonTag,
-    LemonTextArea,
+    Button,
+    Divider,
+    Input,
+    Label,
+    Select,
+    SelectOptions,
+    Skeleton,
+    Tag,
+    TextArea,
     Link,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Dialog } from 'lib/elements/Dialog'
+import { Field } from 'lib/elements/Field'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -36,15 +36,15 @@ export const scene: SceneExport<LinkLogicProps> = {
 }
 
 const SOON_TAG = (
-    <LemonTag type="completion" size="small" className="ml-2">
+    <Tag type="completion" size="small" className="ml-2">
         SOON
-    </LemonTag>
+    </Tag>
 )
 
 const PAID_TAG = (
-    <LemonTag type="success" size="small" className="ml-2">
+    <Tag type="success" size="small" className="ml-2">
         PAID
-    </LemonTag>
+    </Tag>
 )
 
 const DomainLabelWithTag = ({
@@ -65,7 +65,7 @@ const DomainLabelWithTag = ({
     )
 }
 
-const DOMAIN_OPTIONS: LemonSelectOptions<AvailableDomain> = AVAILABLE_DOMAINS.map((domain) => ({
+const DOMAIN_OPTIONS: SelectOptions<AvailableDomain> = AVAILABLE_DOMAINS.map((domain) => ({
     label: <DomainLabelWithTag domain={domain.label} soon={domain.soon} paid={domain.paid} />,
     value: domain.value,
     disabledReason: domain.soon ? 'Coming soon...' : undefined,
@@ -89,7 +89,7 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
     }
 
     if (linkLoading) {
-        return <LemonSkeleton active />
+        return <Skeleton active />
     }
 
     const isNewLink = id === 'new' || id === undefined
@@ -110,7 +110,7 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                             {!linkLoading ? (
                                 displayForm ? (
                                     <>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             data-attr="cancel-link"
                                             onClick={() => {
@@ -125,8 +125,8 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                                             disabledReason={isLinkSubmitting ? 'Saving…' : undefined}
                                         >
                                             Cancel
-                                        </LemonButton>
-                                        <LemonButton
+                                        </Button>
+                                        <Button
                                             type="primary"
                                             htmlType="submit"
                                             data-attr="save-link"
@@ -138,17 +138,17 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                                             size="small"
                                         >
                                             Save
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 ) : (
                                     <>
-                                        <LemonButton
+                                        <Button
                                             data-attr="delete-link"
                                             status="danger"
                                             type="secondary"
                                             size="small"
                                             onClick={() => {
-                                                LemonDialog.open({
+                                                Dialog.open({
                                                     title: 'Permanently delete link?',
                                                     description:
                                                         'Doing so will remove the link and the existing redirect rules. You will NOT lose access to the `$clicklink` events.',
@@ -170,8 +170,8 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                                             }}
                                         >
                                             Delete
-                                        </LemonButton>
-                                        <LemonButton
+                                        </Button>
+                                        <Button
                                             type="secondary"
                                             onClick={() => editLink(true)}
                                             loading={false}
@@ -179,7 +179,7 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                                             size="small"
                                         >
                                             Edit
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 )
                             ) : undefined}
@@ -191,16 +191,16 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                     <div className="flex gap-8">
                         <div className="flex-1 space-y-4">
                             <div className="flex flex-col">
-                                <LemonLabel>Destination URL</LemonLabel>
+                                <Label>Destination URL</Label>
                                 {displayForm ? (
                                     <div className="flex gap-1 items-center">
-                                        <LemonField name="redirect_url">
-                                            <LemonInput
+                                        <Field name="redirect_url">
+                                            <Input
                                                 placeholder="https://loooooooooooooong.hanzo.ai/"
                                                 fullWidth
                                                 autoWidth={false}
                                             />
-                                        </LemonField>
+                                        </Field>
                                     </div>
                                 ) : (
                                     <Link to={link.redirect_url} className="text-muted" target="_blank">
@@ -210,24 +210,24 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                             </div>
 
                             <div className="flex flex-col">
-                                <LemonLabel>Short Link</LemonLabel>
+                                <Label>Short Link</Label>
                                 {displayForm ? (
                                     <div className="flex gap-1 items-center">
-                                        <LemonField name="short_link_domain">
-                                            <LemonSelect<AvailableDomain>
+                                        <Field name="short_link_domain">
+                                            <Select<AvailableDomain>
                                                 options={DOMAIN_OPTIONS}
                                                 className="text-muted"
                                             />
-                                        </LemonField>
+                                        </Field>
                                         <span className="text-muted">/</span>
-                                        <LemonField name="short_code" className="w-full">
-                                            <LemonInput
+                                        <Field name="short_code" className="w-full">
+                                            <Input
                                                 fullWidth
                                                 placeholder="short"
                                                 className="flex-1"
                                                 autoWidth={false}
                                             />
-                                        </LemonField>
+                                        </Field>
                                     </div>
                                 ) : (
                                     <Link to={fullLink} target="_blank">
@@ -237,15 +237,15 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                             </div>
 
                             <div className="flex flex-col">
-                                <LemonLabel>Description (optional)</LemonLabel>
+                                <Label>Description (optional)</Label>
                                 {displayForm ? (
                                     <div className="flex gap-1 items-center">
-                                        <LemonField name="description">
-                                            <LemonTextArea
+                                        <Field name="description">
+                                            <TextArea
                                                 placeholder="Add a description so that you can easily identify this link"
                                                 minRows={2}
                                             />
-                                        </LemonField>
+                                        </Field>
                                     </div>
                                 ) : (
                                     <div>{link.description || <span className="text-muted">No description</span>}</div>
@@ -253,22 +253,22 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                             </div>
                         </div>
 
-                        <LemonDivider vertical />
+                        <Divider vertical />
 
                         <div className="flex-1 space-y-6 max-w-80">
                             <div>
                                 <div className="flex justify-between items-center">
-                                    <LemonLabel>
+                                    <Label>
                                         <span className="flex items-center gap-1">QR Code</span>
-                                    </LemonLabel>
+                                    </Label>
                                     <div className="flex flex-row">
-                                        <LemonButton
+                                        <Button
                                             icon={<IconDownload />}
                                             size="xsmall"
                                             onClick={() => {}}
                                             tooltip="Download QR code"
                                         />
-                                        <LemonButton
+                                        <Button
                                             icon={<IconCopy />}
                                             size="xsmall"
                                             onClick={() => {}}

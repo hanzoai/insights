@@ -1,6 +1,6 @@
 import { actions, connect, kea, listeners, path, reducers } from 'kea'
 
-import { LemonSelectOptions } from '@hanzo/lemon-ui'
+import { SelectOptions } from '@hanzo/elements'
 
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -27,7 +27,7 @@ export interface ProductConfigurationSelect extends ProductConfigOptionBase {
     type: 'select'
     /** Sets the initial value. Use a team setting to reflect current state, or a static value to set a default. */
     value: string | number | null
-    selectOptions: LemonSelectOptions<any>
+    selectOptions: SelectOptions<any>
     onChange?: (value: string | number | null) => Partial<TeamType>
 }
 

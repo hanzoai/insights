@@ -4,9 +4,9 @@ import type { IDisposable } from 'monaco-editor'
 import { useEffect, useRef, useState } from 'react'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Tabs } from 'lib/elements/Tabs'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 
@@ -88,7 +88,7 @@ export function ScriptQueryEditor(props: ScriptQueryEditorProps): JSX.Element {
                 </div>
                 <div className="flex flex-row">
                     <div className="flex-1">
-                        <LemonButton
+                        <Button
                             onClick={saveQuery}
                             type="primary"
                             disabledReason={!props.setQuery ? 'No permission to update' : undefined}
@@ -97,7 +97,7 @@ export function ScriptQueryEditor(props: ScriptQueryEditorProps): JSX.Element {
                             data-attr="insightsql-query-editor-save"
                         >
                             {!props.setQuery ? 'No permission to update' : 'Update and run'}
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -132,7 +132,7 @@ export function ScriptDebug({ query, setQuery, queryKey, debug, modifiers, attac
                 {setQuery ? (
                     <>
                         <ScriptQueryEditor query={query} setQuery={setQuery} queryKey={queryKey} />
-                        <LemonDivider className="my-4" />
+                        <Divider className="my-4" />
                         <div className="flex gap-2">
                             <Reload />
                         </div>
@@ -149,7 +149,7 @@ export function ScriptDebug({ query, setQuery, queryKey, debug, modifiers, attac
                 ) : (
                     <>
                         {debug ? (
-                            <LemonTabs
+                            <Tabs
                                 tabs={[
                                     { label: 'Results', key: 'results' },
                                     { label: 'Stdout', key: 'stdout' },

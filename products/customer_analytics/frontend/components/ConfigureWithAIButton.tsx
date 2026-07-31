@@ -1,14 +1,14 @@
 import { useActions } from 'kea'
 
 import { IconSparkles } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps } from '@hanzo/lemon-ui'
+import { Button, ButtonProps } from '@hanzo/elements'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { useOpenAi } from 'scenes/max/useOpenAi'
 
 import { customerAnalyticsDashboardEventsLogic } from '../scenes/CustomerAnalyticsConfigurationScene/events/customerAnalyticsDashboardEventsLogic'
 
-type ConfigureWithAIButtonProps = LemonButtonProps & {
+type ConfigureWithAIButtonProps = ButtonProps & {
     prompt: string
     event?: string
     eventToHighlight?: string
@@ -35,7 +35,7 @@ export function ConfigureWithAIButton({
     }
 
     return (
-        <LemonButton
+        <Button
             size="small"
             type="tertiary"
             icon={<IconSparkles className="text-accent" />}
@@ -47,6 +47,6 @@ export function ConfigureWithAIButton({
             {...props}
         >
             {children}
-        </LemonButton>
+        </Button>
     )
 }

@@ -2,10 +2,10 @@ import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonRow } from 'lib/lemon-ui/LemonRow'
-import { Lettermark, LettermarkColor } from 'lib/lemon-ui/Lettermark'
-import { IconHandClick } from 'lib/lemon-ui/icons'
+import { Divider } from 'lib/elements/Divider'
+import { Row } from 'lib/elements/Row'
+import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
+import { IconHandClick } from 'lib/elements/icons'
 import { humanFriendlyDuration, humanFriendlyNumber, percentage } from 'lib/utils'
 import { useInsightTooltip } from 'scenes/insights/useInsightTooltip'
 import { formatBreakdownLabel } from 'scenes/insights/utils'
@@ -41,7 +41,7 @@ function FunnelTooltipContent({
                 'shadow-none': embedded,
             })}
         >
-            <LemonRow icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />} fullWidth>
+            <Row icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />} fullWidth>
                 <strong>
                     <EntityFilterInfo filter={getActionFilterFromFunnelStep(series)} allowWrap />
                     {series.breakdown_value && (
@@ -51,8 +51,8 @@ function FunnelTooltipContent({
                         </>
                     )}
                 </strong>
-            </LemonRow>
-            <LemonDivider className="my-2" />
+            </Row>
+            <Divider className="my-2" />
             <table>
                 <tbody>
                     <tr>

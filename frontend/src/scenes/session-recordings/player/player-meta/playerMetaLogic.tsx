@@ -10,7 +10,7 @@ import { IconClock, IconCursorClick, IconHourglass, IconKeyboard, IconWarning } 
 import api from 'lib/api'
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import {
     capitalizeFirstLetter,
     ceilMsToClosestSecond,
@@ -430,7 +430,7 @@ export const playerMetaLogic = kea<playerMetaLogicType>([
                         try {
                             // Stop loading and show error if encountered an error event
                             if (event === 'session-summary-error') {
-                                lemonToast.error(data)
+                                toast.error(data)
                                 actions.setSessionSummaryLoading(false)
                                 return
                             }
@@ -454,7 +454,7 @@ export const playerMetaLogic = kea<playerMetaLogicType>([
                     parser.feed(decodedValue)
                 }
             } catch (err) {
-                lemonToast.error('Failed to load session summary. Please, contact us, and try again in a few minutes.')
+                toast.error('Failed to load session summary. Please, contact us, and try again in a few minutes.')
                 throw err
             } finally {
                 actions.setSessionSummaryLoading(false)

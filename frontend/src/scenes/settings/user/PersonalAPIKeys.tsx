@@ -6,24 +6,24 @@ import { Fragment, useEffect } from 'react'
 import { IconWarning } from '@hanzo/icons'
 import { IconEllipsis, IconInfo, IconPlus } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonDialog,
-    LemonInput,
-    LemonLabel,
-    LemonMenu,
-    LemonModal,
-    LemonModalProps,
-    LemonSegmentedButton,
-    LemonSelect,
-    LemonTable,
-    LemonTag,
+    Banner,
+    Dialog,
+    Input,
+    Label,
+    Menu,
+    Modal,
+    ModalProps,
+    SegmentedButton,
+    Select,
+    Table,
+    Tag,
     Link,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { IconErrorOutline } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { API_KEY_SCOPE_PRESETS, MAX_API_KEYS_PER_USER } from 'lib/scopes'
 import { detailedTime, humanFriendlyDetailedTime } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -32,7 +32,7 @@ import { personalAPIKeysLogic } from './personalAPIKeysLogic'
 import ScopeAccessSelector from './scopes/ScopeAccessSelector'
 
 interface EditKeyModalProps {
-    zIndex?: LemonModalProps['zIndex']
+    zIndex?: ModalProps['zIndex']
 }
 
 export function EditKeyModal({ zIndex }: EditKeyModalProps): JSX.Element {
@@ -56,7 +56,7 @@ export function EditKeyModal({ zIndex }: EditKeyModalProps): JSX.Element {
 
     return (
         <Form logic={personalAPIKeysLogic} formKey="editingKey">
-            <LemonModal
+            <Modal
                 title={`${isNew ? 'Create' : 'Edit'} personal API key`}
                 onClose={() => setEditingKeyId(null)}
                 isOpen={!!editingKeyId}
@@ -65,11 +65,11 @@ export function EditKeyModal({ zIndex }: EditKeyModalProps): JSX.Element {
                 zIndex={zIndex}
                 footer={
                     <>
-                        <LemonButton type="secondary" onClick={() => setEditingKeyId(null)}>
+                        <Button type="secondary" onClick={() => setEditingKeyId(null)}>
                             Cancel
-                        </LemonButton>
+                        </Button>
 
-                        <LemonButton
+                        <Button
                             type="primary"
                             htmlType="submit"
                             loading={isEditingKeySubmitting}
@@ -77,33 +77,33 @@ export function EditKeyModal({ zIndex }: EditKeyModalProps): JSX.Element {
                             onClick={() => submitEditingKey()}
                         >
                             {isNew ? 'Create key' : 'Save key'}
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
                 <>
-                    <LemonField name="label" label="Label">
-                        <LemonInput placeholder='For example "Reports bot" or "Zapier"' maxLength={40} />
-                    </LemonField>
+                    <Field name="label" label="Label">
+                        <Input placeholder='For example "Reports bot" or "Zapier"' maxLength={40} />
+                    </Field>
                     <ScopeAccessSelector
                         accessType={editingKey.access_type}
                         organizations={allOrganizations}
                         teams={allTeams ?? undefined}
                     />
                     <div className="flex items-center justify-between mt-4 mb-2">
-                        <LemonLabel>Scopes</LemonLabel>
-                        <LemonField name="preset">
-                            <LemonSelect
+                        <Label>Scopes</Label>
+                        <Field name="preset">
+                            <Select
                                 size="small"
                                 placeholder="Select preset"
                                 options={API_KEY_SCOPE_PRESETS.filter((preset) => !preset.isCloudOnly || isCloudOrDev)}
                                 dropdownMatchSelectWidth={false}
                                 dropdownPlacement="bottom-end"
                             />
-                        </LemonField>
+                        </Field>
                     </div>
 
-                    <LemonField name="scopes">
+                    <Field name="scopes">
                         {({ error }) => (
                             <>
                                 <p className="mb-0">
@@ -122,7 +122,7 @@ export function EditKeyModal({ zIndex }: EditKeyModalProps): JSX.Element {
                                 )}
 
                                 {allAccessSelected ? (
-                                    <LemonBanner
+                                    <Banner
                                         type="warning"
                                         action={{
                                             children: 'Reset',
@@ -131,10 +131,10 @@ export function EditKeyModal({ zIndex }: EditKeyModalProps): JSX.Element {
                                     >
                                         <b>This API key has full access to all supported endpoints!</b> We highly
                                         recommend scoping this to only what it needs.
-                                    </LemonBanner>
+                                    </Banner>
                                 ) : (
                                     <div>
-                                        <LemonInput
+                                        <Input
                                             type="search"
                                             placeholder="Search scopes..."
                                             value={searchTerm}
@@ -179,7 +179,7 @@ export function EditKeyModal({ zIndex }: EditKeyModalProps): JSX.Element {
                                                                             </Tooltip>
                                                                         ) : null}
                                                                     </div>
-                                                                    <LemonSegmentedButton
+                                                                    <SegmentedButton
                                                                         onChange={(value) =>
                                                                             setScopeRadioValue(key, value)
                                                                         }
@@ -228,9 +228,9 @@ export function EditKeyModal({ zIndex }: EditKeyModalProps): JSX.Element {
                                 )}
                             </>
                         )}
-                    </LemonField>
+                    </Field>
                 </>
-            </LemonModal>
+            </Modal>
         </Form>
     )
 }
@@ -242,12 +242,12 @@ export function TagList({ tags, onMoreClick }: TagListProps): JSX.Element {
         <span className="flex flex-wrap gap-1">
             {tags.slice(0, 4).map((x) => (
                 <>
-                    <LemonTag key={x}>{x}</LemonTag>
+                    <Tag key={x}>{x}</Tag>
                 </>
             ))}
             {tags.length > 4 && (
                 <Tooltip title={tags.slice(4).join(', ')}>
-                    <LemonTag onClick={onMoreClick}>+{tags.length - 4} more</LemonTag>
+                    <Tag onClick={onMoreClick}>+{tags.length - 4} more</Tag>
                 </Tooltip>
             )}
         </span>
@@ -263,9 +263,9 @@ export function TagListWithRestrictions({ tags, onMoreClick }: TagListWithRestri
     return (
         <span className="flex flex-wrap gap-1 items-center">
             {tags.slice(0, 4).map((tag) => (
-                <LemonTag key={tag.id} className={tag.restricted ? 'line-through opacity-60' : ''}>
+                <Tag key={tag.id} className={tag.restricted ? 'line-through opacity-60' : ''}>
                     {tag.name}
-                </LemonTag>
+                </Tag>
             ))}
             {tags.length > 4 && (
                 <Tooltip
@@ -274,7 +274,7 @@ export function TagListWithRestrictions({ tags, onMoreClick }: TagListWithRestri
                         .map((tag) => tag.name)
                         .join(', ')}
                 >
-                    <LemonTag onClick={onMoreClick}>+{tags.length - 4} more</LemonTag>
+                    <Tag onClick={onMoreClick}>+{tags.length - 4} more</Tag>
                 </Tooltip>
             )}
         </span>
@@ -296,7 +296,7 @@ function PersonalAPIKeysTable(): JSX.Element {
     useEffect(() => loadKeys(), [loadKeys])
 
     return (
-        <LemonTable
+        <Table
             dataSource={keys}
             loading={keysLoading}
             loadingSkeletonRows={3}
@@ -352,7 +352,7 @@ function PersonalAPIKeysTable(): JSX.Element {
                                         )
                                     }
                                 >
-                                    <LemonTag type="danger">Disabled</LemonTag>
+                                    <Tag type="danger">Disabled</Tag>
                                 </Tooltip>
                             )
                         }
@@ -411,12 +411,12 @@ function PersonalAPIKeysTable(): JSX.Element {
 
                             return (
                                 <Tooltip title={tooltipMessage}>
-                                    <LemonTag type="warning">Partial restrictions</LemonTag>
+                                    <Tag type="warning">Partial restrictions</Tag>
                                 </Tooltip>
                             )
                         }
 
-                        return <LemonTag type="success">Active</LemonTag>
+                        return <Tag type="success">Active</Tag>
                     },
                 },
                 {
@@ -441,7 +441,7 @@ function PersonalAPIKeysTable(): JSX.Element {
                     dataIndex: 'scopes',
                     render: function RenderValue(_, key) {
                         return key.scopes[0] === '*' ? (
-                            <LemonTag type="warning">All access</LemonTag>
+                            <Tag type="warning">All access</Tag>
                         ) : (
                             <TagList tags={key.scopes} onMoreClick={() => setEditingKeyId(key.id)} />
                         )
@@ -484,7 +484,7 @@ function PersonalAPIKeysTable(): JSX.Element {
                                 <TagListWithRestrictions tags={teamTags} onMoreClick={() => setEditingKeyId(key.id)} />
                             )
                         }
-                        return <LemonTag type="warning">All access</LemonTag>
+                        return <Tag type="warning">All access</Tag>
                     },
                 },
                 {
@@ -530,7 +530,7 @@ function PersonalAPIKeysTable(): JSX.Element {
                     width: 0,
                     render: (_, key) => {
                         return (
-                            <LemonMenu
+                            <Menu
                                 items={[
                                     {
                                         label: 'Edit',
@@ -539,7 +539,7 @@ function PersonalAPIKeysTable(): JSX.Element {
                                     {
                                         label: 'Roll',
                                         onClick: () => {
-                                            LemonDialog.open({
+                                            Dialog.open({
                                                 title: `Roll key "${key.label}"?`,
                                                 description:
                                                     'This will generate a new key. The old key will immediately stop working.',
@@ -560,7 +560,7 @@ function PersonalAPIKeysTable(): JSX.Element {
                                         label: 'Delete',
                                         status: 'danger',
                                         onClick: () => {
-                                            LemonDialog.open({
+                                            Dialog.open({
                                                 title: `Permanently delete key "${key.label}"?`,
                                                 description:
                                                     'This action cannot be undone. Make sure to have removed the key from any live integrations first.',
@@ -574,8 +574,8 @@ function PersonalAPIKeysTable(): JSX.Element {
                                     },
                                 ]}
                             >
-                                <LemonButton size="small" icon={<IconEllipsis />} />
-                            </LemonMenu>
+                                <Button size="small" icon={<IconEllipsis />} />
+                            </Menu>
                         )
                     },
                 },
@@ -590,7 +590,7 @@ export function PersonalAPIKeys(): JSX.Element {
 
     return (
         <>
-            <LemonButton
+            <Button
                 type="primary"
                 icon={<IconPlus />}
                 onClick={() => setEditingKeyId('new')}
@@ -603,7 +603,7 @@ export function PersonalAPIKeys(): JSX.Element {
                 }
             >
                 Create personal API key
-            </LemonButton>
+            </Button>
 
             <PersonalAPIKeysTable />
 

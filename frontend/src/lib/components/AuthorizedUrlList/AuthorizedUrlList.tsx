@@ -3,11 +3,11 @@ import { useActions, useValues } from 'kea'
 
 import { IconCopy, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconOpenInApp } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Dialog } from 'lib/elements/Dialog'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconOpenInApp } from 'lib/elements/icons'
 
 import { ExperimentIdType, ToolbarUserIntent } from '~/types'
 
@@ -82,7 +82,7 @@ export function AuthorizedUrlList({
                     />
                 </div>
             ) : allowAdd ? (
-                <LemonButton
+                <Button
                     className="w-full"
                     onClick={newUrl}
                     type="secondary"
@@ -90,7 +90,7 @@ export function AuthorizedUrlList({
                     data-attr="toolbar-add-url"
                 >
                     {addText}
-                </LemonButton>
+                </Button>
             ) : null}
 
             {urlsKeyed.map((keyedURL, index) => {
@@ -119,9 +119,9 @@ export function AuthorizedUrlList({
                     >
                         {keyedURL.type === 'suggestion' && (
                             <Tooltip title={'Seen in ' + keyedURL.count + ' events in the last 3 days'}>
-                                <LemonTag type="highlight" className="mr-4 uppercase cursor-pointer">
+                                <Tag type="highlight" className="mr-4 uppercase cursor-pointer">
                                     Suggestion
-                                </LemonTag>
+                                </Tag>
                             </Tooltip>
                         )}
                         <span title={keyedURL.url} className="flex-1 truncate">
@@ -129,7 +129,7 @@ export function AuthorizedUrlList({
                         </span>
                         <div className="Actions flex deprecated-space-x-2 shrink-0">
                             {keyedURL.type === 'suggestion' && allowAdd ? (
-                                <LemonButton
+                                <Button
                                     onClick={() => addUrl(keyedURL.url)}
                                     icon={<IconPlus />}
                                     data-attr="toolbar-apply-suggestion"
@@ -137,11 +137,11 @@ export function AuthorizedUrlList({
                                     active={isHighlighted}
                                 >
                                     Apply suggestion
-                                </LemonButton>
+                                </Button>
                             ) : (
                                 <>
                                     {showLaunch && (
-                                        <LemonButton
+                                        <Button
                                             icon={<IconOpenInApp />}
                                             to={
                                                 // toolbar urls and web analytics urls are sent through the backend to be validated
@@ -178,7 +178,7 @@ export function AuthorizedUrlList({
                                                                 browser console on your site.
                                                             </p>
                                                             <p>NB you need to have added insights to the `window`</p>
-                                                            <LemonButton
+                                                            <Button
                                                                 icon={<IconCopy />}
                                                                 size="small"
                                                                 className="float-right"
@@ -190,7 +190,7 @@ export function AuthorizedUrlList({
                                                                 loading={manualLaunchParamsLoading}
                                                             >
                                                                 Copy launch code
-                                                            </LemonButton>
+                                                            </Button>
                                                         </div>
                                                     ),
                                                 },
@@ -198,11 +198,11 @@ export function AuthorizedUrlList({
                                             }}
                                         >
                                             Launch
-                                        </LemonButton>
+                                        </Button>
                                     )}
 
                                     {allowAdd && (
-                                        <LemonButton
+                                        <Button
                                             icon={<IconPencil />}
                                             onClick={() => setEditUrlIndex(keyedURL.originalIndex)}
                                             tooltip="Edit"
@@ -211,12 +211,12 @@ export function AuthorizedUrlList({
                                     )}
 
                                     {allowDelete && (
-                                        <LemonButton
+                                        <Button
                                             icon={<IconTrash />}
                                             tooltip={`Remove ${onlyAllowDomains ? 'domain' : 'URL'}`}
                                             center
                                             onClick={() => {
-                                                LemonDialog.open({
+                                                Dialog.open({
                                                     title: <>Remove {keyedURL.url} ?</>,
                                                     description: `Are you sure you want to remove this authorized ${
                                                         onlyAllowDomains ? 'domain' : 'URL'

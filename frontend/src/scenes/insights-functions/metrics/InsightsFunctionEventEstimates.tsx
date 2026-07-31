@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonLabel, LemonSelect, SpinnerOverlay } from '@hanzo/lemon-ui'
+import { Label, Select, SpinnerOverlay } from '@hanzo/elements'
 
 import { Sparkline } from 'lib/components/Sparkline'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
 import { base64Encode } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -51,17 +51,17 @@ export function InsightsFunctionEventEstimates(): JSX.Element | null {
 
     return (
         <div className="relative p-3 rounded border deprecated-space-y-2 bg-surface-primary">
-            <LemonLabel>Matching events</LemonLabel>
+            <Label>Matching events</Label>
             {sparkline && !sparklineLoading ? (
                 <>
                     {sparkline.count > EVENT_THRESHOLD_ALERT_LEVEL && type !== 'transformation' ? (
-                        <LemonBanner type="warning">
+                        <Banner type="warning">
                             <b>Warning:</b> This destination would have triggered{' '}
                             <strong>
                                 {sparkline.count ?? 0} time{sparkline.count !== 1 ? 's' : ''}
                             </strong>{' '}
                             in the last 7 days. Consider the impact of this function on your destination.
-                        </LemonBanner>
+                        </Banner>
                     ) : (
                         <p>
                             This {type} would have triggered{' '}
@@ -75,7 +75,7 @@ export function InsightsFunctionEventEstimates(): JSX.Element | null {
                     {hasMasking && <p>The estimate does not take into account trigger options.</p>}
 
                     {'warning' in sparkline && sparkline.warning && (
-                        <LemonBanner type="info">{sparkline.warning}</LemonBanner>
+                        <Banner type="info">{sparkline.warning}</Banner>
                     )}
                     <Sparkline type="bar" className="w-full h-20" data={sparkline.data} labels={sparkline.labels} />
                 </>
@@ -88,14 +88,14 @@ export function InsightsFunctionEventEstimates(): JSX.Element | null {
             )}
 
             <div className="flex flex-col gap-2 pt-2 border-t border-dashed">
-                <LemonButton onClick={() => setShowEventsList(!showEventsList)} fullWidth center>
+                <Button onClick={() => setShowEventsList(!showEventsList)} fullWidth center>
                     {showEventsList ? 'Hide matching events' : 'Show matching events'}
-                </LemonButton>
+                </Button>
 
                 {showEventsList ? (
                     <>
                         <div className="flex justify-end items-start">
-                            <LemonSelect
+                            <Select
                                 placeholder="Open in..."
                                 onChange={(target) => {
                                     if (target === 'insight') {

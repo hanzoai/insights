@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheckCircle, IconCopy, IconInfo, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonModal, LemonSwitch, Tooltip, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Modal, Switch, Tooltip, toast } from '@hanzo/elements'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { twoFactorLogic } from 'scenes/authentication/twoFactorLogic'
@@ -36,13 +36,13 @@ export function TwoFactorSettings(): JSX.Element {
     return (
         <div className="flex flex-col items-start space-y-4">
             {isDisable2FAModalOpen && (
-                <LemonModal
+                <Modal
                     title="Disable authenticator app"
                     onClose={() => toggleDisable2FAModal(false)}
                     footer={
                         <>
-                            <LemonButton onClick={() => toggleDisable2FAModal(false)}>Cancel</LemonButton>
-                            <LemonButton
+                            <Button onClick={() => toggleDisable2FAModal(false)}>Cancel</Button>
+                            <Button
                                 type="primary"
                                 status="danger"
                                 onClick={() => {
@@ -52,7 +52,7 @@ export function TwoFactorSettings(): JSX.Element {
                                 }}
                             >
                                 Disable 2FA
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                 >
@@ -60,11 +60,11 @@ export function TwoFactorSettings(): JSX.Element {
                         Are you sure you want to disable 2FA using an authenticator app? This will make your account
                         less secure.
                     </p>
-                </LemonModal>
+                </Modal>
             )}
 
             {isBackupCodesModalOpen && (
-                <LemonModal title="Backup Codes" onClose={() => toggleBackupCodesModal(false)}>
+                <Modal title="Backup Codes" onClose={() => toggleBackupCodesModal(false)}>
                     <div className="deprecated-space-y-4 max-w-md">
                         {status?.backup_codes?.length ? (
                             <>
@@ -73,7 +73,7 @@ export function TwoFactorSettings(): JSX.Element {
                                     sign in if you lose access to your authentication device.
                                 </p>
                                 <div className="bg-primary p-4 rounded font-mono deprecated-space-y-1 relative">
-                                    <LemonButton
+                                    <Button
                                         icon={<IconCopy />}
                                         size="small"
                                         className="absolute top-4 right-4"
@@ -82,7 +82,7 @@ export function TwoFactorSettings(): JSX.Element {
                                         }}
                                     >
                                         Copy
-                                    </LemonButton>
+                                    </Button>
                                     {status.backup_codes.map((code) => (
                                         <div key={code}>{code}</div>
                                     ))}
@@ -93,16 +93,16 @@ export function TwoFactorSettings(): JSX.Element {
                                 <p className="text-secondary mb-0">No backup codes generated</p>
                             </div>
                         )}
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={() => {
                                 generateBackupCodes()
                             }}
                         >
                             {status?.backup_codes?.length ? 'Generate new codes' : 'Generate backup codes'}
-                        </LemonButton>
+                        </Button>
                     </div>
-                </LemonModal>
+                </Modal>
             )}
 
             <div className="space-y-1">
@@ -154,26 +154,26 @@ export function TwoFactorSettings(): JSX.Element {
                             <div className="ml-4 flex items-center gap-2">
                                 {hasTotp ? (
                                     <>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             size="small"
                                             onClick={() => toggleBackupCodesModal(true)}
                                         >
                                             View backup codes
-                                        </LemonButton>
-                                        <LemonButton
+                                        </Button>
+                                        <Button
                                             type="secondary"
                                             size="small"
                                             status="danger"
                                             onClick={() => toggleDisable2FAModal(true)}
                                         >
                                             Disable
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 ) : (
-                                    <LemonButton type="primary" onClick={() => openTwoFactorSetupModal()}>
+                                    <Button type="primary" onClick={() => openTwoFactorSetupModal()}>
                                         Setup
-                                    </LemonButton>
+                                    </Button>
                                 )}
                             </div>
                         </div>
@@ -212,7 +212,7 @@ export function TwoFactorSettings(): JSX.Element {
                                 </p>
                             </div>
                             <div className="ml-4">
-                                <LemonSwitch
+                                <Switch
                                     checked={passkeysEnabled}
                                     disabledReason={
                                         !hasPasskeys
@@ -233,7 +233,7 @@ export function TwoFactorSettings(): JSX.Element {
                                                 )
                                             } catch (e: any) {
                                                 const { detail } = e as Record<string, any>
-                                                lemonToast.error(detail || 'Failed to update passkey 2FA setting')
+                                                toast.error(detail || 'Failed to update passkey 2FA setting')
                                             }
                                         }
                                     }}

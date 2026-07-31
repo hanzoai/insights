@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
 import { IconDownload, IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonCollapse, LemonDialog, LemonSkeleton, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Collapse, Dialog, Skeleton, Tag } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { BuilderMascot3 } from 'lib/components/mascots'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { More } from 'lib/elements/Button/More'
+import { Divider } from 'lib/elements/Divider'
 
 import { CustomerIOImportModal } from './CustomerIOImportModal'
 import { NewCategoryModal } from './NewCategoryModal'
@@ -55,22 +55,22 @@ export function OptOutCategories(): JSX.Element {
                                 <div className="font-medium">{category.name}</div>
                                 <div className="text-xs text-muted">{category.description}</div>
                             </div>
-                            <LemonTag type={category.category_type === 'marketing' ? 'success' : 'completion'}>
+                            <Tag type={category.category_type === 'marketing' ? 'success' : 'completion'}>
                                 {category.category_type.toUpperCase()}
-                            </LemonTag>
+                            </Tag>
                         </div>
                         <More
                             onClick={(e) => e.stopPropagation()}
                             overlay={
                                 <>
-                                    <LemonButton onClick={() => handleEditCategory(category)} fullWidth>
+                                    <Button onClick={() => handleEditCategory(category)} fullWidth>
                                         Edit
-                                    </LemonButton>
-                                    <LemonDivider />
-                                    <LemonButton
+                                    </Button>
+                                    <Divider />
+                                    <Button
                                         status="danger"
                                         onClick={() =>
-                                            LemonDialog.open({
+                                            Dialog.open({
                                                 title: 'Delete category',
                                                 description: (
                                                     <>
@@ -97,7 +97,7 @@ export function OptOutCategories(): JSX.Element {
                                         fullWidth
                                     >
                                         Delete
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             }
                         />
@@ -132,11 +132,11 @@ export function OptOutCategories(): JSX.Element {
     return (
         <>
             {categoriesLoading ? (
-                <LemonSkeleton className="h-10" />
+                <Skeleton className="h-10" />
             ) : (
                 <>
                     {collapseItems.length > 0 ? (
-                        <LemonCollapse panels={collapseItems} />
+                        <Collapse panels={collapseItems} />
                     ) : (
                         <ProductIntroduction
                             productName="Message Categories"
@@ -145,12 +145,12 @@ export function OptOutCategories(): JSX.Element {
                             docsURL="https://hanzo.ai/docs/workflows/customerio-import"
                             actionElementOverride={
                                 <>
-                                    <LemonButton type="primary" icon={<IconDownload />} onClick={openImportModal}>
+                                    <Button type="primary" icon={<IconDownload />} onClick={openImportModal}>
                                         Import from Customer.io
-                                    </LemonButton>
-                                    <LemonButton type="secondary" icon={<IconPlus />} onClick={openNewCategoryModal}>
+                                    </Button>
+                                    <Button type="secondary" icon={<IconPlus />} onClick={openNewCategoryModal}>
                                         Create category
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             }
                             customInsights={BuilderMascot3}

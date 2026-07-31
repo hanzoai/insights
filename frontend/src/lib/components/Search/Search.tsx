@@ -17,10 +17,10 @@ import {
 import { TextMorph } from 'torph/react'
 
 import { IconSearch, IconSparkles, IconX } from '@hanzo/icons'
-import { LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
+import { Tag, Link, Spinner } from '@hanzo/elements'
 
 import { AI_AVAILABLE } from 'lib/constants'
-import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { TreeDataItem } from 'lib/elements/Tree/Tree'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuTrigger } from 'lib/ui/ContextMenu/ContextMenu'
 import { Label } from 'lib/ui/Label/Label'
@@ -730,7 +730,7 @@ function SearchResults({
                                                                             </span>
                                                                         )}
                                                                         {item.tags?.map((tag) => (
-                                                                            <LemonTag
+                                                                            <Tag
                                                                                 key={tag}
                                                                                 type={
                                                                                     tag === 'alpha'
@@ -743,7 +743,7 @@ function SearchResults({
                                                                                 className="shrink-0"
                                                                             >
                                                                                 {tag.toUpperCase()}
-                                                                            </LemonTag>
+                                                                            </Tag>
                                                                         ))}
                                                                         {item.lastViewedAt && (
                                                                             <span className="ml-auto text-xs text-tertiary whitespace-nowrap shrink-0 mt-[2px]">

@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { CSSProperties, useMemo } from 'react'
 
 import { IconPencil, IconPlus } from '@hanzo/icons'
-import { LemonInputSelect, LemonTag, LemonTagType } from '@hanzo/lemon-ui'
+import { InputSelect, Tag, TagType } from '@hanzo/elements'
 
 import { objectTagsLogic } from 'lib/components/ObjectTags/objectTagsLogic'
 import { colorForString } from 'lib/utils'
@@ -34,7 +34,7 @@ export type ObjectTagsProps =
           tagsAvailable?: string[] /** Whether this field should be gated behind a "paywall". */
       })
 
-const COLOR_OVERRIDES: Record<string, LemonTagType> = {
+const COLOR_OVERRIDES: Record<string, TagType> = {
     official: 'success',
     approved: 'success',
     verified: 'success',
@@ -75,7 +75,7 @@ export function ObjectTags({
             data-attr={dataAttr}
         >
             {editingTags ? (
-                <LemonInputSelect
+                <InputSelect
                     mode="multiple"
                     allowCustomValues
                     value={tags}
@@ -99,14 +99,14 @@ export function ObjectTags({
                               .filter((t) => !!t)
                               .map((tag, index) => {
                                   return (
-                                      <LemonTag key={index} type={COLOR_OVERRIDES[tag] || colorForString(tag)}>
+                                      <Tag key={index} type={COLOR_OVERRIDES[tag] || colorForString(tag)}>
                                           {tag}
-                                      </LemonTag>
+                                      </Tag>
                                   )
                               })}
                     {!staticOnly && onChange && saving !== undefined && (
                         <span className="inline-flex font-normal">
-                            <LemonTag
+                            <Tag
                                 type="none"
                                 onClick={() => setEditingTags(true)}
                                 data-attr="button-add-tag"
@@ -115,7 +115,7 @@ export function ObjectTags({
                                 size="small"
                             >
                                 {hasTags ? 'Edit tags' : 'Add tag'}
-                            </LemonTag>
+                            </Tag>
                         </span>
                     )}
                 </>

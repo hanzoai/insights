@@ -5,16 +5,16 @@ import { useState } from 'react'
 
 import { SurveyEventProperties } from '@hanzo/insights'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonCheckbox,
-    LemonDivider,
-    LemonLabel,
-    LemonModal,
-    LemonTextArea,
+    Banner,
+    Button,
+    Checkbox,
+    Divider,
+    Label,
+    Modal,
+    TextArea,
     Link,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -89,9 +89,9 @@ export const UnsubscribeSurveyModal = ({
                     I still want to leave
                 </Link>
             </div>
-            <LemonDivider />
+            <Divider />
             <div className="deprecated-space-y-2 flex flex-col items-center justify-center">
-                <LemonButton
+                <Button
                     type="primary"
                     loading={billingLoading}
                     onClick={() => {
@@ -102,8 +102,8 @@ export const UnsubscribeSurveyModal = ({
                     }}
                 >
                     Never enough, proceed with {action}
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="tertiary"
                     disabled={billingLoading}
                     onClick={() => {
@@ -112,7 +112,7 @@ export const UnsubscribeSurveyModal = ({
                     }}
                 >
                     You convinced me to stay! 💕
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )
@@ -120,7 +120,7 @@ export const UnsubscribeSurveyModal = ({
     return (
         <>
             <ConfettiComponent />
-            <LemonModal
+            <Modal
                 onClose={() => {
                     reportSurveyDismissed(surveyID)
                     resetUnsubscribeError()
@@ -137,15 +137,15 @@ export const UnsubscribeSurveyModal = ({
                 footer={
                     unsubscribeModalStep === 1 ? (
                         <>
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 onClick={() => {
                                     reportSurveyDismissed(surveyID)
                                 }}
                             >
                                 Cancel
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 type={textAreaNotEmpty ? 'primary' : 'secondary'}
                                 disabledReason={
                                     surveyResponse['$survey_response_2'].length === 0
@@ -158,7 +158,7 @@ export const UnsubscribeSurveyModal = ({
                                 loading={billingLoading}
                             >
                                 {action}
-                            </LemonButton>
+                            </Button>
                         </>
                     ) : null
                 }
@@ -166,11 +166,11 @@ export const UnsubscribeSurveyModal = ({
                 {unsubscribeModalStep === 1 ? (
                     <div className="flex flex-col gap-3.5">
                         {unsubscribeError && (
-                            <LemonBanner type="error">
+                            <Banner type="error">
                                 <p>
                                     {unsubscribeError.detail} {unsubscribeError.link}
                                 </p>
-                            </LemonBanner>
+                            </Banner>
                         )}
                         {isAddonProduct ? (
                             <p className="mb-0">
@@ -190,7 +190,7 @@ export const UnsubscribeSurveyModal = ({
 
                         {isPlatformAndSupportAddon(product) && <AddonFeatureLossNotice product={product} />}
 
-                        <LemonLabel>
+                        <Label>
                             {billing?.subscription_level === 'paid'
                                 ? `Why are you ${actionVerb}?`
                                 : `Why are you ${actionVerb} from ${product.name}?`}{' '}
@@ -198,10 +198,10 @@ export const UnsubscribeSurveyModal = ({
                             <Tooltip title="Required">
                                 <span className="text-danger">*</span>
                             </Tooltip>
-                        </LemonLabel>
+                        </Label>
                         <div className="grid grid-cols-2 gap-2">
                             {randomizedReasons.map((reason) => (
-                                <LemonCheckbox
+                                <Checkbox
                                     bordered
                                     key={reason.reason}
                                     label={reason.reason}
@@ -215,7 +215,7 @@ export const UnsubscribeSurveyModal = ({
                         </div>
 
                         {surveyResponse['$survey_response_2'].length > 0 && (
-                            <LemonTextArea
+                            <TextArea
                                 data-attr="unsubscribe-reason-survey-textarea"
                                 placeholder={unsubscribeReasonQuestions}
                                 value={surveyResponse[SurveyEventProperties.SURVEY_RESPONSE]}
@@ -225,7 +225,7 @@ export const UnsubscribeSurveyModal = ({
                             />
                         )}
 
-                        <LemonBanner type="info">
+                        <Banner type="info">
                             <p>
                                 {'Are you looking to control your costs? Learn about ways to '}
                                 <Link
@@ -265,12 +265,12 @@ export const UnsubscribeSurveyModal = ({
                                 )}
                                 .
                             </p>
-                        </LemonBanner>
+                        </Banner>
                     </div>
                 ) : (
                     renderConfirmStep()
                 )}
-            </LemonModal>
+            </Modal>
         </>
     )
 }
