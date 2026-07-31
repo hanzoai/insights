@@ -14,18 +14,15 @@ import (
 
 var funFacts = []string{
 	"Hanzo AI was founded in 2017 during Techstars",
-	"The mascot mascot is named Max",
 	"Insights is 100% open source - check out github.com/hanzoai/insights",
 	"Insights supports 40+ data integrations out of the box",
 	"You can run SQL queries directly on your Insights data",
 	"Insights was built by engineers, for engineers",
-	"Mascots can run up to 6 miles per hour!",
 }
 
 type WelcomeModel struct {
 	isUpgrade bool
 	factIndex int
-	mascot  ui.Mascot
 }
 
 func NewWelcomeModel() WelcomeModel {
@@ -34,7 +31,6 @@ func NewWelcomeModel() WelcomeModel {
 	return WelcomeModel{
 		isUpgrade: isUpgrade,
 		factIndex: int(n.Int64()),
-		mascot:  ui.NewMascot(),
 	}
 }
 
@@ -68,8 +64,6 @@ func (m WelcomeModel) Update(msg tea.Msg) (WelcomeModel, tea.Cmd) {
 			if m.factIndex >= len(funFacts) {
 				m.factIndex = 0
 			}
-		case key.Matches(msg, key.NewBinding(key.WithKeys(" "))):
-			m.mascot.Pet()
 		case key.Matches(msg, key.NewBinding(key.WithKeys("q"))):
 			return m, tea.Quit
 		}
@@ -83,9 +77,6 @@ func (m WelcomeModel) View() string {
 
 	// Header section
 	header := ui.GetWelcomeArt()
-
-	// Mascot section - contained in its own area
-	mascotSection := m.mascot.RenderWithMessage()
 
 	// Action section - the main CTA
 	actionTitle := lipgloss.NewStyle().
@@ -122,8 +113,6 @@ func (m WelcomeModel) View() string {
 	content := lipgloss.JoinVertical(
 		lipgloss.Center,
 		header,
-		sectionGap,
-		mascotSection,
 		sectionGap,
 		actionSection,
 		sectionGap,
@@ -187,7 +176,6 @@ func (m WelcomeModel) renderHelp() string {
 	items := []string{
 		keyStyle.Render("enter") + descStyle.Render(" continue"),
 		keyStyle.Render("< / >") + descStyle.Render(" facts"),
-		keyStyle.Render("space") + descStyle.Render(" pet"),
 		keyStyle.Render("q/esc") + descStyle.Render(" quit"),
 	}
 

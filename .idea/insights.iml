@@ -31,7 +31,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.parcel-cache" />
       <excludeFolder url="file://$MODULE_DIR$/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/.typegen" />
-      <excludeFolder url="file://$MODULE_DIR$/common/hogvm/typescript/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/common/scriptvm/typescript/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/src/assets" />
       <excludeFolder url="file://$MODULE_DIR$/node_modules" />
@@ -44,7 +44,6 @@
       <excludeFolder url="file://$MODULE_DIR$/staticfiles/django_admin_inline_paginator" />
       <excludeFolder url="file://$MODULE_DIR$/staticfiles/django_extensions" />
       <excludeFolder url="file://$MODULE_DIR$/staticfiles/email" />
-      <excludeFolder url="file://$MODULE_DIR$/staticfiles/hedgehog" />
       <excludeFolder url="file://$MODULE_DIR$/staticfiles/icons" />
       <excludeFolder url="file://$MODULE_DIR$/staticfiles/rest_framework" />
       <excludeFolder url="file://$MODULE_DIR$/staticfiles/services" />
