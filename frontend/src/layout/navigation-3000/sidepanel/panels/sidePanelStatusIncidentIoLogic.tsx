@@ -54,63 +54,50 @@ export interface IncidentIoSummary {
 // Normalized status for display
 export type NormalizedStatus = 'operational' | 'degraded_performance' | 'partial_outage' | 'major_outage'
 
-export const INCIDENT_IO_STATUS_PAGE_BASE = 'https://www.insightsstatus.com'
+// Where the status DATA comes from: our own API, which serves the summary as
+// JSON. It used to be a status-page domain left over from the upstream project —
+// one Hanzo does not own and that resolves nowhere, so anyone could have
+// registered it and answered this fetch inside a logged-in admin session. Our one
+// API front door is api.hanzo.ai, and no path here carries an /api/ prefix.
+export const STATUS_SUMMARY_URL = 'https://api.hanzo.ai/v1/summary'
+
+// Where a HUMAN goes to read about an incident: a plain HTML page. This is a
+// different thing from the JSON endpoint above and must never be conflated with
+// it — one is for the side panel, one is for a person.
+export const STATUS_PAGE_URL = 'https://status.hanzo.ai'
+
 export const REFRESH_INTERVAL = 60 * 1000 * 5 // 5 minutes
 
-// Map hostname to the group_name used in incident.io
-const RELEVANT_GROUP_NAME_MAP: Record<string, string> = {
-    'insights.hanzo.ai': 'US Cloud 🇺🇸',
-    'insights.hanzo.ai': 'EU Cloud 🇪🇺',
-    localhost: 'US Cloud 🇺🇸', // Default to US for local dev
-}
-
-function getRelevantGroupName(): string | null {
-    return RELEVANT_GROUP_NAME_MAP[window.location.hostname] || null
-}
-
-function hasRelevantComponents(affectedComponents: IncidentIoAffectedComponent[]): boolean {
-    const relevantGroupName = getRelevantGroupName()
-    if (!relevantGroupName) {
-        // If no mapping, show all incidents
-        return true
-    }
-    // If no affected components, show the incident (it's global)
-    if (affectedComponents.length === 0) {
-        return true
-    }
-    return affectedComponents.some((component) => component.group_name === relevantGroupName)
-}
-
-function getWorstStatusForRegion(summary: IncidentIoSummary): NormalizedStatus {
-    // Filter incidents to only those affecting the current region
-    const relevantIncidents = summary.ongoing_incidents.filter((incident) =>
-        hasRelevantComponents(incident.affected_components)
-    )
-    const relevantMaintenances = summary.in_progress_maintenances.filter((maintenance) =>
-        hasRelevantComponents(maintenance.affected_components)
-    )
-
-    const hasOngoingIncidents = relevantIncidents.length > 0
-    const hasInProgressMaintenance = relevantMaintenances.length > 0
+// The API returns the incidents that apply to THIS platform, so the client
+// renders what it is given.
+//
+// It used to re-filter them by a region group_name ('US Cloud 🇺🇸' / 'EU Cloud
+// 🇪🇺') taken from a hostname map — upstream multi-region SaaS logic Hanzo does
+// not have. The map had both of its real entries under the same key, so only the
+// last one survived and every incident whose components were not tagged 'EU Cloud
+// 🇪🇺' was silently dropped. Deciding which incidents are relevant is the server's
+// job now; there is no second region to filter out.
+function worstStatus(summary: IncidentIoSummary): NormalizedStatus {
+    const hasOngoingIncidents = summary.ongoing_incidents.length > 0
+    const hasInProgressMaintenance = summary.in_progress_maintenances.length > 0
 
     if (!hasOngoingIncidents && !hasInProgressMaintenance) {
         return 'operational'
     }
 
-    // Check for worst impact across relevant ongoing incidents
-    for (const incident of relevantIncidents) {
+    for (const incident of summary.ongoing_incidents) {
         if (incident.current_worst_impact === 'full_outage') {
             return 'major_outage'
         }
     }
 
-    for (const incident of relevantIncidents) {
+    for (const incident of summary.ongoing_incidents) {
         if (incident.current_worst_impact === 'partial_outage') {
             return 'partial_outage'
         }
     }
 
-    for (const incident of relevantIncidents) {
+    for (const incident of summary.ongoing_incidents) {
         if (incident.current_worst_impact === 'degraded_performance') {
             return 'degraded_performance'
         }
@@ -140,7 +127,7 @@ export const sidePanelStatusIncidentIoLogic = kea<sidePanelStatusIncidentIoLogic
             null as IncidentIoSummary | null,
             {
                 loadSummary: async () => {
-                    const response = await fetch(`${INCIDENT_IO_STATUS_PAGE_BASE}/api/v1/summary`)
+                    const response = await fetch(STATUS_SUMMARY_URL)
                     const data: IncidentIoSummary = await response.json()
                     return data
                 },
@@ -155,7 +142,7 @@ export const sidePanelStatusIncidentIoLogic = kea<sidePanelStatusIncidentIoLogic
                 if (!summary) {
                     return 'operational'
                 }
-                return getWorstStatusForRegion(summary)
+                return worstStatus(summary)
             },
         ],
         status: [
@@ -176,13 +163,8 @@ export const sidePanelStatusIncidentIoLogic = kea<sidePanelStatusIncidentIoLogic
                 if (status === 'operational') {
                     return 'All systems operational'
                 }
-                // Filter to only count incidents/maintenances relevant to this region
-                const incidentCount = summary.ongoing_incidents.filter((incident: IncidentIoIncident) =>
-                    hasRelevantComponents(incident.affected_components)
-                ).length
-                const maintenanceCount = summary.in_progress_maintenances.filter((maintenance: IncidentIoMaintenance) =>
-                    hasRelevantComponents(maintenance.affected_components)
-                ).length
+                const incidentCount = summary.ongoing_incidents.length
+                const maintenanceCount = summary.in_progress_maintenances.length
                 if (incidentCount > 0) {
                     return `${incidentCount} ongoing incident${incidentCount > 1 ? 's' : ''}`
                 }
