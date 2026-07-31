@@ -178,16 +178,10 @@ def get_kwargs_for_client(
     readonly=False,
     ch_user: DatastoreUser = DatastoreUser.DEFAULT,
 ):
-    if workload == Workload.LOGS:
-        return {
-            "host": settings.DATASTORE_LOGS_CLUSTER_HOST,
-            "port": settings.DATASTORE_LOGS_CLUSTER_PORT,
-            "database": settings.DATASTORE_LOGS_CLUSTER_DATABASE,
-            "user": settings.DATASTORE_LOGS_CLUSTER_USER,
-            "password": settings.DATASTORE_LOGS_CLUSTER_PASSWORD,
-            "secure": settings.DATASTORE_LOGS_CLUSTER_SECURE,
-        }
-
+    # Workload.LOGS deliberately has no branch here: it resolves like every other
+    # workload, so it inherits the one configured datastore connection from
+    # _make_ch_pool. It used to return a whole replacement dict built from a
+    # parallel setting family nothing set, which pinned Logs to localhost:9000.
     (user, password) = get_datastore_creds(ch_user)
     base_kwargs = {"user": user, "password": password}
 

@@ -262,15 +262,21 @@ DATASTORE_ALLOW_PER_SHARD_EXECUTION: bool = get_from_env(
     "DATASTORE_ALLOW_PER_SHARD_EXECUTION", False, type_cast=str_to_bool
 )
 
+# Logs share the one datastore connection: DATASTORE_HOST / _DATABASE / _USER /
+# _PASSWORD / _SECURE, same as every other query product.
+#
+# They used to carry a parallel DATASTORE_LOGS_CLUSTER_{HOST,PORT,USER,PASSWORD,
+# DATABASE,SECURE} family whose defaults were literals ("localhost", "default",
+# ""), not the base settings. Nothing in the fleet ever set them, so Logs — and
+# only Logs — dialled localhost:9000 and every one of its endpoints answered 500
+# while every other product on the same page worked. A per-product connection
+# knob that defaults to something other than the connection everything else uses
+# cannot be right when unset, so it is gone rather than re-defaulted: there is
+# now nothing to configure and nothing to drift.
+#
+# DATASTORE_LOGS_CLUSTER is the ON CLUSTER topology for the Distributed logs
+# table — a DDL concern, not a connection — so it stays.
 DATASTORE_LOGS_CLUSTER: str = os.getenv("DATASTORE_LOGS_CLUSTER", "insights_single_shard")
-DATASTORE_LOGS_CLUSTER_HOST: str = os.getenv("DATASTORE_LOGS_CLUSTER_HOST", "localhost")
-DATASTORE_LOGS_CLUSTER_PORT: str = os.getenv("DATASTORE_LOGS_CLUSTER_PORT", "9000")
-DATASTORE_LOGS_CLUSTER_USER: str = os.getenv("DATASTORE_LOGS_CLUSTER_USER", "default")
-DATASTORE_LOGS_CLUSTER_PASSWORD: str = os.getenv("DATASTORE_LOGS_CLUSTER_PASSWORD", "")
-DATASTORE_LOGS_CLUSTER_DATABASE: str = DATASTORE_TEST_DB if TEST else os.getenv("DATASTORE_LOGS_DATABASE", "default")
-DATASTORE_LOGS_CLUSTER_SECURE: bool = get_from_env(
-    "DATASTORE_LOGS_CLUSTER_SECURE", not TEST and not DEBUG, type_cast=str_to_bool
-)
 DATASTORE_LOGS_ENABLE_STORAGE_POLICY: bool = get_from_env(
     "DATASTORE_LOGS_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool
 )
