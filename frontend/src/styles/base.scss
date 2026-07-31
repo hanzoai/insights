@@ -1028,7 +1028,11 @@
     --color-bg-fill-button-tertiary-hover-inverse: var(--color-bg-fill-highlight-inverse-75);
     --color-bg-fill-button-tertiary-active: var(--color-bg-fill-highlight-50);
     --color-bg-fill-button-tertiary-active-inverse: var(--color-bg-fill-highlight-inverse-50);
-    --color-bg-fill-button-panel: var(--color-bg-fill-highlight-100);
+    // No fill. The org dropdown and the user chip are the same KIND of control --
+    // an identity affordance in the chrome -- and only the org one carried a 10%
+    // white wash, so two controls inches apart read as different components.
+    // Transparent at rest; the hover/active steps below still give it feedback.
+    --color-bg-fill-button-panel: transparent;
     --color-bg-fill-button-panel-hover: var(--color-bg-fill-highlight-150);
     --color-bg-fill-button-panel-active: var(--color-bg-fill-highlight-100);
     --color-bg-fill-input: var(--color-neutral-cool-850);
@@ -1052,7 +1056,11 @@
     // Borders (dark mode)
     // Borders for surfaces/fills
     // //////////////////////////////////////////////////////////
-    --color-border-primary: var(--color-neutral-cool-800);
+    // 15%, not 20%. On a #000 ground a 20% hairline is the brightest thing in a
+    // quiet UI -- every table row, card and input is outlined in it, so the eye
+    // reads the grid instead of the data. 15% sits just above the raised surface
+    // it separates, which is all a border on black has to do.
+    --color-border-primary: var(--color-neutral-cool-850);
     --color-border-secondary: var(--color-neutral-cool-600);
     --color-border-info: var(--color-blue-900);
     --color-border-warning: var(--color-yellow-900);
