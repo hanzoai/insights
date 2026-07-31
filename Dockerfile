@@ -30,6 +30,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends git ca-certific
 
 COPY .pnpmfile.cjs turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY frontend/package.json frontend/
+# The design system is its own workspace package (pnpm-workspace.yaml lists
+# frontend/@hanzo/*), and products/ depend on it as workspace:*. Without its
+# manifest in the build context pnpm cannot see the local project, falls back to
+# the npm registry, and dies on ERR_PNPM_FETCH_404 — @hanzo/elements is not
+# published. `COPY frontend/package.json` does not reach nested packages.
+COPY frontend/@hanzo/ frontend/@hanzo/
 COPY frontend/bin/ frontend/bin/
 COPY bin/ bin/
 COPY patches/ patches/
