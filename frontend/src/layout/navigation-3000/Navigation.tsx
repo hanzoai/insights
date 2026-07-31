@@ -96,9 +96,15 @@ export function Navigation({
                         '--scene-layout-scrollbar-width': mainRef?.current?.clientWidth
                             ? mainRef.current.clientWidth - (mainContentRect?.width ?? 0) + 'px'
                             : '0px',
+                        // The scene canvas is a RAISED surface by default. It used to
+                        // default to the ground (#000) and only lift for the single scene
+                        // that sets canvasBackground, so every other page rendered content
+                        // on the same black as the chrome around it -- no elevation, the
+                        // panel read as a hole rather than a surface. The flag now opts a
+                        // scene DOWN to the ground for the edge-to-edge case.
                         '--scene-layout-background': sceneConfig?.canvasBackground
-                            ? 'var(--color-bg-surface-primary)'
-                            : 'var(--color-bg-primary)',
+                            ? 'var(--color-bg-primary)'
+                            : 'var(--color-bg-surface-primary)',
                         '--side-panel-width': sidePanelWidth + 'px',
                         '--left-nav-width': isLayoutNavCollapsed
                             ? 'var(--project-navbar-width-collapsed)'
