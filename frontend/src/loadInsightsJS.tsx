@@ -160,7 +160,17 @@ export function loadInsightsJS(): void {
             window.INSIGHTS_GLOBAL_ERRORS['onFeatureFlagsLoadError'] = true
         })
     } else {
+        // api_host is REQUIRED even for the opted-out stub. Without it the SDK falls
+        // back to its vendored default host, which the debrand rewrote into
+        // us.i.insights.com -- and the snippet's CDN rule then loads
+        // us-assets.i.insights.com/array/fake_token/config.js as a <script>.
+        //
+        // insights.com is a LIVE third-party domain (51.140.153.150) Hanzo does not
+        // own; only the subdomain is unregistered. Whoever holds that domain could
+        // create it and execute arbitrary JS inside a logged-in admin session on
+        // insights.hanzo.ai. Pinning our own origin closes that outright.
         insights.init('fake_token', {
+            api_host: window.location.origin,
             autocapture: false,
             loaded: function (ph) {
                 ph.opt_out_capturing()
