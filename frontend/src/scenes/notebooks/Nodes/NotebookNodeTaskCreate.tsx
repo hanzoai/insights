@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonTag, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, Tag, TextArea } from '@hanzo/elements'
 
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { NotebookNodeProps, NotebookNodeType } from 'scenes/notebooks/types'
@@ -46,8 +46,8 @@ function Component({ attributes }: NotebookNodeProps<NotebookNodeTaskCreateAttri
 
     return expanded ? (
         <div className="p-2 flex flex-col gap-2">
-            <LemonTextArea value={title} onChange={setTitle} placeholder="Task title" minRows={1} maxRows={3} />
-            <LemonTextArea
+            <TextArea value={title} onChange={setTitle} placeholder="Task title" minRows={1} maxRows={3} />
+            <TextArea
                 value={description}
                 onChange={setDescription}
                 placeholder="Task description"
@@ -55,17 +55,17 @@ function Component({ attributes }: NotebookNodeProps<NotebookNodeTaskCreateAttri
                 maxRows={10}
             />
             <div className="flex justify-end">
-                <LemonButton icon={<IconPlus />} size="small" onClick={onCreate} type="primary">
+                <Button icon={<IconPlus />} size="small" onClick={onCreate} type="primary">
                     Create as task
-                </LemonButton>
+                </Button>
             </div>
         </div>
     ) : (
         <div className="p-2 flex items-center gap-2 text-muted">
             {parsedSeverity ? (
-                <LemonTag size="small" type={parsedSeverity.toLowerCase() === 'critical' ? 'danger' : 'warning'}>
+                <Tag size="small" type={parsedSeverity.toLowerCase() === 'critical' ? 'danger' : 'warning'}>
                     {parsedSeverity}
-                </LemonTag>
+                </Tag>
             ) : null}
             {!parsedSeverity ? <span className="truncate">Click to open and review</span> : null}
         </div>

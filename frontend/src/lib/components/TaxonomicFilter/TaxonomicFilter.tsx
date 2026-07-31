@@ -5,16 +5,16 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
 import { IconKeyboard } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import {
     TaxonomicFilterGroupType,
     TaxonomicFilterLogicProps,
     TaxonomicFilterProps,
 } from 'lib/components/TaxonomicFilter/types'
-import { LemonInput, LemonInputPropsText } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { Tooltip, TooltipProps } from 'lib/lemon-ui/Tooltip'
-import { Icon123 } from 'lib/lemon-ui/icons'
+import { Input, InputPropsText } from 'lib/elements/Input/Input'
+import { Tooltip, TooltipProps } from 'lib/elements/Tooltip'
+import { Icon123 } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { InfiniteSelectResults } from './InfiniteSelectResults'
@@ -142,7 +142,7 @@ export const TaxonomicFilterSearchInput = forwardRef<
     {
         searchInputRef: React.Ref<HTMLInputElement> | null
         onClose: TaxonomicFilterProps['onClose']
-    } & Pick<LemonInputPropsText, 'onClick' | 'size' | 'prefix' | 'fullWidth' | 'onChange' | 'autoFocus'> &
+    } & Pick<InputPropsText, 'onClick' | 'size' | 'prefix' | 'fullWidth' | 'onChange' | 'autoFocus'> &
         Pick<TooltipProps, 'docLink'>
 >(function UniversalSearchInput(
     { searchInputRef, onClose, onChange, docLink, autoFocus = true, ...props },
@@ -164,7 +164,7 @@ export const TaxonomicFilterSearchInput = forwardRef<
     }
 
     return (
-        <LemonInput
+        <Input
             {...props}
             ref={ref}
             data-attr="taxonomic-filter-searchfield"

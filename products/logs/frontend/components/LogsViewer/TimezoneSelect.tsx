@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconGlobe, IconHome, IconLaptop } from '@hanzo/icons'
-import { LemonSelect, LemonSelectOptionLeaf, LemonSelectSection } from '@hanzo/lemon-ui'
+import { Select, SelectOptionLeaf, SelectSection } from '@hanzo/elements'
 
 import { shortTimeZone } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
@@ -29,7 +29,7 @@ export function TimezoneSelect({
     const projectTimezone = currentTeam?.timezone ?? 'UTC'
     const localTimezone = getLocalTimezone()
 
-    const baseOptions: LemonSelectOptionLeaf<string>[] = [
+    const baseOptions: SelectOptionLeaf<string>[] = [
         {
             value: 'UTC',
             label: 'UTC',
@@ -53,7 +53,7 @@ export function TimezoneSelect({
 
     // Filter out duplicates from additional timezones
     const seenTimezones = new Set(baseOptions.map((o) => o.value))
-    const additionalOptions: LemonSelectOptionLeaf<string>[] = additionalTimezones
+    const additionalOptions: SelectOptionLeaf<string>[] = additionalTimezones
         .filter((tz) => !seenTimezones.has(tz))
         .map((tz) => ({
             value: tz,
@@ -61,7 +61,7 @@ export function TimezoneSelect({
             icon: <IconGlobe className="text-muted" />,
         }))
 
-    const options: LemonSelectSection<string>[] | LemonSelectOptionLeaf<string>[] =
+    const options: SelectSection<string>[] | SelectOptionLeaf<string>[] =
         additionalOptions.length > 0
             ? [
                   {
@@ -76,7 +76,7 @@ export function TimezoneSelect({
             : baseOptions
 
     return (
-        <LemonSelect<string>
+        <Select<string>
             value={value}
             onChange={onChange}
             options={options}

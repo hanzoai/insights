@@ -1,8 +1,8 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Modal } from 'lib/elements/Modal'
 import { pluralize } from 'lib/utils'
 import { dashboardTemplatesLogic } from 'scenes/dashboard/dashboards/templates/dashboardTemplatesLogic'
 import { newDashboardLogic } from 'scenes/dashboard/newDashboardLogic'
@@ -32,7 +32,7 @@ export function NewDashboardModal(): JSX.Element {
     )
 
     return (
-        <LemonModal
+        <Modal
             onClose={hideNewDashboardModal}
             isOpen={newDashboardModalVisible}
             title={activeDashboardTemplate ? 'Choose your events' : 'Create a dashboard'}
@@ -47,7 +47,7 @@ export function NewDashboardModal(): JSX.Element {
                     <div className="flex flex-col gap-2">
                         <div>Choose a template or start with a blank slate</div>
                         <div>
-                            <LemonInput
+                            <Input
                                 type="search"
                                 placeholder="Filter templates"
                                 onChange={setTemplateFilter}
@@ -65,11 +65,11 @@ export function NewDashboardModal(): JSX.Element {
                         {variableSelectModalVisible ? (
                             <div />
                         ) : (
-                            <LemonButton onClick={clearActiveDashboardTemplate} type="secondary">
+                            <Button onClick={clearActiveDashboardTemplate} type="secondary">
                                 Back
-                            </LemonButton>
+                            </Button>
                         )}
-                        <LemonButton
+                        <Button
                             onClick={() => {
                                 activeDashboardTemplate &&
                                     createDashboardFromTemplate(activeDashboardTemplate, variables)
@@ -77,7 +77,7 @@ export function NewDashboardModal(): JSX.Element {
                             type="primary"
                         >
                             Create
-                        </LemonButton>
+                        </Button>
                     </>
                 ) : null
             }
@@ -85,6 +85,6 @@ export function NewDashboardModal(): JSX.Element {
             <div className="NewDashboardModal">
                 {activeDashboardTemplate ? <DashboardTemplateVariables /> : _dashboardTemplateChooser}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

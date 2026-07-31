@@ -10,7 +10,7 @@ import {
     IconRuby,
 } from '@hanzo/icons'
 
-import { IconAndroidOS, IconAppleIOS, IconNodeJS } from 'lib/lemon-ui/icons'
+import { IconAndroidOS, IconAppleIOS, IconNodeJS } from 'lib/elements/icons'
 
 import { SDKKey } from '~/types'
 

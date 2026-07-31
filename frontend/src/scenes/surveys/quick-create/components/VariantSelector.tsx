@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonLabel } from '@hanzo/lemon-ui'
+import { Label } from '@hanzo/elements'
 
 import { quickSurveyFormLogic } from 'scenes/surveys/quick-create/quickSurveyFormLogic'
 
@@ -23,7 +23,7 @@ export function VariantSelector({ variants, defaultOptionText }: VariantSelector
 
     return (
         <div>
-            <LemonLabel>Who should see this survey?</LemonLabel>
+            <Label>Who should see this survey?</Label>
             <div className="space-y-2 mt-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                     <input

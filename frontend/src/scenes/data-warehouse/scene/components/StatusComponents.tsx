@@ -1,7 +1,7 @@
 import { IconCheckCircle } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
-import { IconCancel, IconExclamation, IconRadioButtonUnchecked, IconSync } from 'lib/lemon-ui/icons'
+import { IconCancel, IconExclamation, IconRadioButtonUnchecked, IconSync } from 'lib/elements/icons'
 import { StatusTagSetting } from 'scenes/data-warehouse/utils'
 
 import { ExternalDataJobStatus } from '~/types'
@@ -29,17 +29,17 @@ export function StatusIcon({ status }: { status?: ExternalDataJobStatus }): JSX.
 export function StatusTag({ status }: { status?: ExternalDataJobStatus }): JSX.Element {
     if (!status) {
         return (
-            <LemonTag size="small" type="muted" className="px-1 rounded-lg">
+            <Tag size="small" type="muted" className="px-1 rounded-lg">
                 —
-            </LemonTag>
+            </Tag>
         )
     }
 
     const type = StatusTagSetting[status] || 'muted'
 
     return (
-        <LemonTag size="medium" type={type} className="px-1 rounded-lg">
+        <Tag size="medium" type={type} className="px-1 rounded-lg">
             {status}
-        </LemonTag>
+        </Tag>
     )
 }

@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import React from 'react'
 
 import { IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { CardMeta } from 'lib/components/Cards/CardMeta'
 import { TopHeading } from 'lib/components/Cards/InsightCard/TopHeading'
@@ -12,14 +12,14 @@ import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { LemonButton, LemonButtonWithDropdown } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
-import { LemonTableLoader } from 'lib/lemon-ui/LemonTable/LemonTableLoader'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { Splotch, SplotchColor } from 'lib/lemon-ui/Splotch'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button, ButtonWithDropdown } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Markdown } from 'lib/elements/Markdown'
+import { TableLoader } from 'lib/elements/Table/TableLoader'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner'
+import { Splotch, SplotchColor } from 'lib/elements/Splotch'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { accessLevelSatisfied } from 'lib/utils/accessControlUtils'
@@ -143,14 +143,14 @@ export function InsightMeta({
     const feedbackButtons =
         placement === DashboardPlacement.CustomerAnalytics && featureFlags[FEATURE_FLAGS.CUSTOMER_ANALYTICS] ? (
             <div className="flex gap-0">
-                <LemonButton
+                <Button
                     size="small"
                     icon={<IconThumbsUp className={insightFeedback === 'liked' ? 'text-accent' : ''} />}
                     onClick={() => setInsightFeedback('liked')}
                     tooltip="Like this insight"
                     disabledReason={insightFeedback === 'liked' ? 'Already liked' : ''}
                 />
-                <LemonButton
+                <Button
                     size="small"
                     icon={<IconThumbsDown className={insightFeedback === 'disliked' ? 'text-accent' : ''} />}
                     onClick={() => setInsightFeedback('disliked')}
@@ -247,7 +247,7 @@ export function InsightMeta({
                 <>
                     {/* Insight related */}
                     {canViewInsight && (
-                        <LemonButton
+                        <Button
                             to={urls.insightView(
                                 short_id,
                                 dashboardId,
@@ -258,11 +258,11 @@ export function InsightMeta({
                             fullWidth
                         >
                             View
-                        </LemonButton>
+                        </Button>
                     )}
                     {canEditInsight && (
                         <>
-                            <LemonButton
+                            <Button
                                 to={
                                     isDataVisualizationNode(insight.query)
                                         ? urls.sqlEditor({ insightShortId: short_id })
@@ -272,18 +272,18 @@ export function InsightMeta({
                                 {...getOverrideWarningPropsForButton(filtersOverride, variablesOverride)}
                             >
                                 Edit
-                            </LemonButton>
-                            <LemonButton onClick={rename} fullWidth>
+                            </Button>
+                            <Button onClick={rename} fullWidth>
                                 Rename
-                            </LemonButton>
+                            </Button>
                             {tile && (
-                                <LemonButton onClick={setOverride} fullWidth>
+                                <Button onClick={setOverride} fullWidth>
                                     Set override
-                                </LemonButton>
+                                </Button>
                             )}
                         </>
                     )}
-                    <LemonButton
+                    <Button
                         onClick={duplicate}
                         fullWidth
                         data-attr={
@@ -291,17 +291,17 @@ export function InsightMeta({
                         }
                     >
                         Duplicate
-                    </LemonButton>
+                    </Button>
 
                     {/* Dashboard related */}
                     {canEditDashboard && (
                         <>
-                            <LemonDivider />
+                            <Divider />
                             {updateColor && (
-                                <LemonButtonWithDropdown
+                                <ButtonWithDropdown
                                     dropdown={{
                                         overlay: Object.values(InsightColor).map((availableColor) => (
-                                            <LemonButton
+                                            <Button
                                                 key={availableColor}
                                                 active={availableColor === (ribbonColor || InsightColor.White)}
                                                 onClick={() => updateColor(availableColor)}
@@ -315,7 +315,7 @@ export function InsightMeta({
                                                 {availableColor !== InsightColor.White
                                                     ? capitalizeFirstLetter(availableColor)
                                                     : 'No color'}
-                                            </LemonButton>
+                                            </Button>
                                         )),
                                         placement: 'right-start',
                                         fallbackPlacements: ['left-start'],
@@ -325,13 +325,13 @@ export function InsightMeta({
                                     fullWidth
                                 >
                                     Set color
-                                </LemonButtonWithDropdown>
+                                </ButtonWithDropdown>
                             )}
                             {moveToDashboard && otherDashboards.length > 0 && (
-                                <LemonButtonWithDropdown
+                                <ButtonWithDropdown
                                     dropdown={{
                                         overlay: otherDashboards.map((otherDashboard) => (
-                                            <LemonButton
+                                            <Button
                                                 key={otherDashboard.id}
                                                 onClick={() => {
                                                     moveToDashboard(otherDashboard)
@@ -339,7 +339,7 @@ export function InsightMeta({
                                                 fullWidth
                                             >
                                                 {otherDashboard.name || <i>Untitled</i>}
-                                            </LemonButton>
+                                            </Button>
                                         )),
                                         placement: 'right-start',
                                         fallbackPlacements: ['left-start'],
@@ -349,12 +349,12 @@ export function InsightMeta({
                                     fullWidth
                                 >
                                     Move to
-                                </LemonButtonWithDropdown>
+                                </ButtonWithDropdown>
                             )}
                             {removeFromDashboard && (
-                                <LemonButton status="danger" onClick={removeFromDashboard} fullWidth>
+                                <Button status="danger" onClick={removeFromDashboard} fullWidth>
                                     Remove from dashboard
-                                </LemonButton>
+                                </Button>
                             )}
                         </>
                     )}
@@ -362,29 +362,29 @@ export function InsightMeta({
                     {/* Insight deletion - separate from dashboard actions */}
                     {canEditInsight && !removeFromDashboard && deleteWithUndo && (
                         <>
-                            <LemonDivider />
-                            <LemonButton
+                            <Divider />
+                            <Button
                                 status="danger"
                                 onClick={() => {
                                     void (async () => {
                                         try {
                                             await deleteWithUndo?.()
                                         } catch (error: any) {
-                                            lemonToast.error(`Failed to delete insight meta: ${error.detail}`)
+                                            toast.error(`Failed to delete insight meta: ${error.detail}`)
                                         }
                                     })()
                                 }}
                                 fullWidth
                             >
                                 Delete insight
-                            </LemonButton>
+                            </Button>
                         </>
                     )}
 
                     {/* Data related */}
                     {exportContext ? (
                         <>
-                            <LemonDivider />
+                            <Divider />
                             <ExportButton
                                 fullWidth
                                 items={[
@@ -407,7 +407,7 @@ export function InsightMeta({
                     ) : null}
                     <>
                         {refresh && (
-                            <LemonButton
+                            <Button
                                 onClick={() => {
                                     refresh()
                                 }}
@@ -429,14 +429,14 @@ export function InsightMeta({
                                 ) : (
                                     <>Refresh data</>
                                 )}
-                            </LemonButton>
+                            </Button>
                         )}
                     </>
 
                     {/* More */}
                     {moreButtons && (
                         <>
-                            <LemonDivider />
+                            <Divider />
                             {moreButtons}
                         </>
                     )}
@@ -495,12 +495,12 @@ export function InsightMetaContent({
         <>
             {titleEl}
             {!!description && (
-                <LemonMarkdown className="CardMeta__description" lowKeyHeadings>
+                <Markdown className="CardMeta__description" lowKeyHeadings>
                     {description}
-                </LemonMarkdown>
+                </Markdown>
             )}
             {tags && tags.length > 0 && <ObjectTags tags={tags} staticOnly />}
-            <LemonTableLoader loading={loading} />
+            <TableLoader loading={loading} />
         </>
     )
 }

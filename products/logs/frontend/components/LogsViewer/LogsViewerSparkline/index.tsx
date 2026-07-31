@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
-import { LemonSelect, SpinnerOverlay } from '@hanzo/lemon-ui'
+import { Select, SpinnerOverlay } from '@hanzo/elements'
 
 import { AnyScaleOptions, Sparkline } from 'lib/components/Sparkline'
 import { dayjs } from 'lib/dayjs'
@@ -123,7 +123,7 @@ export function LogsSparkline({
             {showServiceBreakdown && (
                 <div className="flex items-center justify-between">
                     <span className="text-xs text-muted">Volume over time</span>
-                    <LemonSelect
+                    <Select
                         size="xsmall"
                         value={breakdownBy}
                         onChange={(value) => value && onBreakdownByChange(value)}

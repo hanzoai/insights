@@ -1,7 +1,7 @@
 import { BuiltLogic, LogicWrapper, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { cn } from 'lib/utils/css-classes'
@@ -92,7 +92,7 @@ const ItemCell = ({ item }: { item: Item }): JSX.Element => {
     const { baseCurrency } = useValues(teamLogic)
 
     const value: React.ReactNode = item.loading ? (
-        <LemonSkeleton className="w-1/3 h-8" />
+        <Skeleton className="w-1/3 h-8" />
     ) : (
         <div
             className={cn(

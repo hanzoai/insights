@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
-import { Popover, Spinner } from '@hanzo/lemon-ui'
+import { Popover, Spinner } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
+import { Button } from 'lib/elements/Button'
+import { Select } from 'lib/elements/Select'
 
 import { MAX_TRANSLATE_LENGTH, SUPPORTED_LANGUAGES, messageActionsMenuLogic } from './messageActionsMenuLogic'
 
@@ -37,14 +37,14 @@ export function TranslatePopover({ content, title = 'Translate' }: TranslatePopo
                 <div className="p-3 min-w-72 max-w-120">
                     <div className="flex items-center justify-between mb-2">
                         <span className="font-semibold text-sm">{title}</span>
-                        <LemonButton
+                        <Button
                             size="xsmall"
                             onClick={() => setShowTranslatePopover(false)}
                             noPadding
                             data-attr="llma-translate-close"
                         >
                             <span className="text-lg leading-none">&times;</span>
-                        </LemonButton>
+                        </Button>
                     </div>
                     <div className="border-t pt-3">
                         {isTooLong ? (
@@ -54,7 +54,7 @@ export function TranslatePopover({ content, title = 'Translate' }: TranslatePopo
                         ) : null}
                         <div className="flex items-center gap-2 mb-3">
                             <span className="text-sm text-muted">To:</span>
-                            <LemonSelect
+                            <Select
                                 size="small"
                                 value={targetLanguage}
                                 onChange={(value) => value && setTargetLanguage(value)}
@@ -64,7 +64,7 @@ export function TranslatePopover({ content, title = 'Translate' }: TranslatePopo
                                 }))}
                                 data-attr="llma-translate-language-select"
                             />
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="primary"
                                 onClick={translate}
@@ -72,7 +72,7 @@ export function TranslatePopover({ content, title = 'Translate' }: TranslatePopo
                                 data-attr="llma-translate-submit"
                             >
                                 {translationText && isTranslatedForCurrentLanguage ? 'Re-translate' : 'Translate'}
-                            </LemonButton>
+                            </Button>
                         </div>
                         {translationLoading ? (
                             <div className="flex items-center justify-center py-4 gap-2">

@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 
-import { LemonButton, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Button, Modal, Link } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { IconSlack } from 'lib/lemon-ui/icons'
+import { IconSlack } from 'lib/elements/icons'
 
 import { SlackSetupModalLogicProps, slackSetupModalLogic } from './slackSetupModalLogic'
 
@@ -12,7 +12,7 @@ export const SlackSetupModal = (props: SlackSetupModalLogicProps): JSX.Element =
     const { slackAvailable } = useValues(logic)
 
     return (
-        <LemonModal
+        <Modal
             title={
                 <div className="flex items-center gap-2">
                     <IconSlack />
@@ -21,9 +21,9 @@ export const SlackSetupModal = (props: SlackSetupModalLogicProps): JSX.Element =
             }
             footer={
                 <div className="flex justify-end">
-                    <LemonButton type="secondary" onClick={props.onClose}>
+                    <Button type="secondary" onClick={props.onClose}>
                         Close
-                    </LemonButton>
+                    </Button>
                 </div>
             }
             onClose={props.onClose}
@@ -50,6 +50,6 @@ export const SlackSetupModal = (props: SlackSetupModalLogicProps): JSX.Element =
                     </p>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

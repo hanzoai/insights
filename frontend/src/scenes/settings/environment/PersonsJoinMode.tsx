@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
+import { RadioOption } from 'lib/elements/Radio'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
 import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
@@ -9,7 +9,7 @@ import { TeamSettingRadio } from '../components/TeamSettingRadio'
 
 type PersonsJoinModeType = NonNullable<InsightsQLQueryModifiers['personsJoinMode']>
 
-const personsJoinOptions: LemonRadioOption<PersonsJoinModeType>[] = [
+const personsJoinOptions: RadioOption<PersonsJoinModeType>[] = [
     {
         value: 'inner',
         label: (

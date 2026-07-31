@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconCalendar } from '@hanzo/icons'
-import { LemonButton, Popover } from '@hanzo/lemon-ui'
+import { Button, Popover } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -58,7 +58,7 @@ export function DashboardEditBar(): JSX.Element {
             visible={showEditBarApplyPopover}
             overlay={
                 <div className="flex items-center gap-2 m-1">
-                    <LemonButton
+                    <Button
                         onClick={() =>
                             setDashboardMode(
                                 hasUrlFilters ? dashboardMode : null,
@@ -70,10 +70,10 @@ export function DashboardEditBar(): JSX.Element {
                         size="small"
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton onClick={applyFilters} loading={loadingPreview} type="primary" size="small">
+                    </Button>
+                    <Button onClick={applyFilters} loading={loadingPreview} type="primary" size="small">
                         Apply filters and preview
-                    </LemonButton>
+                    </Button>
                 </div>
             }
             placement="bottom"

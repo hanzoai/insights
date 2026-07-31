@@ -4,13 +4,13 @@ import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
 
 import { IconBolt, IconCode2, IconDatabase, IconDocument, IconPlug, IconPlus } from '@hanzo/icons'
-import { LemonMenuItem } from '@hanzo/lemon-ui'
-import { Spinner } from '@hanzo/lemon-ui'
+import { MenuItem } from '@hanzo/elements'
+import { Spinner } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { TreeItem } from 'lib/components/DatabaseTableTree/DatabaseTableTree'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonTreeRef, TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { TreeRef, TreeDataItem } from 'lib/elements/Tree/Tree'
 import { FeatureFlagsSet, featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 import { DataWarehouseSourceIcon, mapUrlToProvider } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
@@ -35,7 +35,7 @@ import { viewLinkLogic } from '../../viewLinkLogic'
 import { draftsLogic } from '../draftsLogic'
 import type { queryDatabaseLogicType } from './queryDatabaseLogicType'
 
-export type EditorSidebarTreeRef = React.RefObject<LemonTreeRef> | null
+export type EditorSidebarTreeRef = React.RefObject<TreeRef> | null
 
 const isLazyNodeId = (id: string): boolean => {
     return id.startsWith('lazy-') || id.includes('-lazy-')
@@ -1788,7 +1788,7 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                     return []
                 }
 
-                const menuItems = (field: DatabaseSchemaField, tableName: string): LemonMenuItem[] => {
+                const menuItems = (field: DatabaseSchemaField, tableName: string): MenuItem[] => {
                     return isJoined(field) && joinsByFieldName[`${tableName}.${field.name}`]
                         ? [
                               {

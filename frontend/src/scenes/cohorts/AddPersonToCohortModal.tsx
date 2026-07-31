@@ -1,9 +1,9 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
+import { Dialog } from 'lib/elements/Dialog'
 
 import { AddPersonToCohortModalBody } from './AddPersonToCohortModalBody'
 import { AddPersonToCohortModalProps, addPersonToCohortModalLogic } from './addPersonToCohortModalLogic'
@@ -18,7 +18,7 @@ export function AddPersonToCohortModal({ id, tabId }: AddPersonToCohortModalProp
 
     const handleClose = useCallback(() => {
         if (hasUnsavedChanges) {
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Discard unsaved changes?',
                 description: 'You have selected persons that haven\u2019t been saved to the cohort yet.',
                 primaryButton: {
@@ -37,22 +37,22 @@ export function AddPersonToCohortModal({ id, tabId }: AddPersonToCohortModalProp
 
     return (
         <BindLogic logic={addPersonToCohortModalLogic} props={logicProps}>
-            <LemonModal
+            <Modal
                 title="Add users to cohort"
                 onClose={handleClose}
                 closable={!isCohortUpdating}
                 isOpen={addPersonToCohortModalVisible}
                 footer={
                     <div className="flex items-center justify-end gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={handleClose}
                             disabled={isCohortUpdating}
                             data-attr="cohort-add-users-modal-cancel"
                         >
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             onClick={async () => {
                                 await addPersonsToCohort()
@@ -64,12 +64,12 @@ export function AddPersonToCohortModal({ id, tabId }: AddPersonToCohortModalProp
                             data-attr="cohort-add-users-modal-save"
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </div>
                 }
             >
                 <AddPersonToCohortModalBody />
-            </LemonModal>
+            </Modal>
         </BindLogic>
     )
 }

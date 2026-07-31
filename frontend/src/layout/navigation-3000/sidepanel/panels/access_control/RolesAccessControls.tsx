@@ -5,25 +5,25 @@ import { useMemo, useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonDialog,
-    LemonInput,
-    LemonInputSelect,
-    LemonModal,
-    LemonSelect,
-    LemonTable,
-    LemonTableColumns,
-    LemonTag,
+    Button,
+    Dialog,
+    Input,
+    InputSelect,
+    Modal,
+    Select,
+    Table,
+    TableColumns,
+    Tag,
     ProfileBubbles,
     ProfilePicture,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
-import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
+import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { Field } from 'lib/elements/Field'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { fullName } from 'lib/utils'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { urls } from 'scenes/urls'
@@ -44,7 +44,7 @@ export function RolesAccessControls(): JSX.Element {
         minimumAccessLevel: OrganizationMembershipLevel.Admin,
     })
 
-    const columns: LemonTableColumns<RoleType> = [
+    const columns: TableColumns<RoleType> = [
         {
             title: 'Role',
             key: 'role',
@@ -53,7 +53,7 @@ export function RolesAccessControls(): JSX.Element {
                 const isDefaultRole = role?.id === currentOrganization?.default_role_id
                 return (
                     <div className="flex items-center gap-2">
-                        <LemonTableLink
+                        <TableLink
                             onClick={
                                 role
                                     ? () => (role.id === selectedRoleId ? selectRoleId(null) : selectRoleId(role.id))
@@ -62,9 +62,9 @@ export function RolesAccessControls(): JSX.Element {
                             title={role?.name ?? 'Default'}
                         />
                         {isDefaultRole && (
-                            <LemonTag type="primary" size="small">
+                            <Tag type="primary" size="small">
                                 Default
-                            </LemonTag>
+                            </Tag>
                         )}
                     </div>
                 )
@@ -106,7 +106,7 @@ export function RolesAccessControls(): JSX.Element {
                     access_role_id: role.id,
                 }).url
                 return (
-                    <LemonButton
+                    <Button
                         type="tertiary"
                         size="small"
                         className="whitespace-nowrap"
@@ -117,7 +117,7 @@ export function RolesAccessControls(): JSX.Element {
                         }
                     >
                         Manage access
-                    </LemonButton>
+                    </Button>
                 )
             },
         },
@@ -125,7 +125,7 @@ export function RolesAccessControls(): JSX.Element {
 
     return (
         <div>
-            <LemonTable
+            <Table
                 columns={columns}
                 dataSource={sortedRoles ?? []}
                 loading={rolesLoading}
@@ -138,7 +138,7 @@ export function RolesAccessControls(): JSX.Element {
                 }}
             />
 
-            <LemonButton
+            <Button
                 className="mt-2"
                 type="primary"
                 onClick={() => setEditingRoleId('new')}
@@ -146,7 +146,7 @@ export function RolesAccessControls(): JSX.Element {
                 disabledReason={defaultRoleRestrictionReason}
             >
                 Add a role
-            </LemonButton>
+            </Button>
 
             <RoleModal />
         </div>
@@ -183,20 +183,20 @@ function RoleDetails({ roleId }: { roleId: string }): JSX.Element | null {
             <div className="flex items-center gap-2 justify-between min-h-10">
                 <div className="flex items-center gap-2">
                     <div className="min-w-[16rem]">
-                        <LemonInputSelect
+                        <InputSelect
                             placeholder="Search for members to add..."
                             value={membersToAdd}
                             onChange={(newValues: string[]) => setMembersToAdd(newValues)}
                             mode="multiple"
                             disabled={!canEditRoles}
-                            options={usersLemonSelectOptions(
+                            options={usersSelectOptions(
                                 membersNotInRole.map((member) => member.user),
                                 'uuid'
                             )}
                         />
                     </div>
 
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={onSubmit}
                         disabledReason={
@@ -208,20 +208,20 @@ function RoleDetails({ roleId }: { roleId: string }): JSX.Element | null {
                         }
                     >
                         Add members
-                    </LemonButton>
+                    </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={() => setEditingRoleId(role.id)}
                         disabledReason={!canEditRoles ? 'You cannot edit this' : undefined}
                     >
                         Edit
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
 
-            <LemonTable
+            <Table
                 columns={[
                     {
                         key: 'user_profile_picture',
@@ -251,7 +251,7 @@ function RoleDetails({ roleId }: { roleId: string }): JSX.Element | null {
                         render: (_, member) => {
                             return (
                                 <div className="flex items-center gap-2">
-                                    <LemonButton
+                                    <Button
                                         status="danger"
                                         size="small"
                                         type="tertiary"
@@ -259,7 +259,7 @@ function RoleDetails({ roleId }: { roleId: string }): JSX.Element | null {
                                         onClick={() => removeMemberFromRole(role, member.id)}
                                     >
                                         Remove
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             )
                         },
@@ -282,7 +282,7 @@ function RoleModal(): JSX.Element {
     const onDelete = (): void => {
         const baseContent = 'Are you sure you want to delete this role? This action cannot be undone.'
 
-        LemonDialog.open({
+        Dialog.open({
             title: 'Delete role',
             maxWidth: 400,
             content: (
@@ -309,7 +309,7 @@ function RoleModal(): JSX.Element {
 
     return (
         <Form logic={roleAccessControlLogic} formKey="editingRole" enableFormOnSubmit>
-            <LemonModal
+            <Modal
                 isOpen={!!editingRoleId}
                 onClose={() => setEditingRoleId(null)}
                 title={!isEditing ? 'Create' : `Edit`}
@@ -317,26 +317,26 @@ function RoleModal(): JSX.Element {
                     <>
                         <div className="flex-1">
                             {isEditing ? (
-                                <LemonButton type="secondary" status="danger" onClick={() => onDelete()}>
+                                <Button type="secondary" status="danger" onClick={() => onDelete()}>
                                     Delete
-                                </LemonButton>
+                                </Button>
                             ) : null}
                         </div>
 
-                        <LemonButton type="secondary" onClick={() => setEditingRoleId(null)}>
+                        <Button type="secondary" onClick={() => setEditingRoleId(null)}>
                             Cancel
-                        </LemonButton>
+                        </Button>
 
-                        <LemonButton type="primary" htmlType="submit" onClick={submitEditingRole}>
+                        <Button type="primary" htmlType="submit" onClick={submitEditingRole}>
                             {!isEditing ? 'Create' : 'Save'}
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
-                <LemonField label="Role name" name="name">
-                    <LemonInput placeholder="Please enter a name..." autoFocus />
-                </LemonField>
-            </LemonModal>
+                <Field label="Role name" name="name">
+                    <Input placeholder="Please enter a name..." autoFocus />
+                </Field>
+            </Modal>
         </Form>
     )
 }
@@ -353,7 +353,7 @@ export function DefaultRoleSelector(): JSX.Element {
 
     return (
         <div className="max-w-80">
-            <LemonSelect
+            <Select
                 fullWidth
                 value={currentOrganization?.default_role_id || null}
                 onChange={(value) => {
@@ -371,9 +371,9 @@ export function DefaultRoleSelector(): JSX.Element {
                             <div>
                                 {role.name}
                                 {role.id === currentOrganization?.default_role_id && (
-                                    <LemonTag type="primary" className="ml-2" size="small">
+                                    <Tag type="primary" className="ml-2" size="small">
                                         Current default
-                                    </LemonTag>
+                                    </Tag>
                                 )}
                             </div>
                         ),

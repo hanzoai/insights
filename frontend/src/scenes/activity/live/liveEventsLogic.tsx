@@ -1,6 +1,6 @@
 import { actions, connect, events, kea, listeners, path, props, reducers, selectors } from 'kea'
 
-import { Spinner, lemonToast } from '@hanzo/lemon-ui'
+import { Spinner, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { liveEventsHostOrigin } from 'lib/utils/apiHost'
@@ -135,7 +135,7 @@ export const liveEventsLogic = kea<liveEventsLogicType>([
                 },
                 signal: cache.eventSourceController.signal,
                 onMessage: (event) => {
-                    lemonToast.dismiss(ERROR_TOAST_ID)
+                    toast.dismiss(ERROR_TOAST_ID)
                     const eventData = JSON.parse(event.data)
                     cache.batch.push(eventData)
                     if (cache.batch.length >= 10 || performance.now() - (values.lastBatchTimestamp || 0) > 300) {
@@ -146,7 +146,7 @@ export const liveEventsLogic = kea<liveEventsLogicType>([
                 onError: (error) => {
                     if (!cache.hasShownLiveStreamErrorToast && props.showLiveStreamErrorToast) {
                         console.error('Failed to poll events. You likely have no events coming in.', error)
-                        lemonToast.error(`No live events found. Continuing to retry in the background…`, {
+                        toast.error(`No live events found. Continuing to retry in the background…`, {
                             icon: <Spinner />,
                             toastId: ERROR_TOAST_ID,
                             autoClose: false,

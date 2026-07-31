@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 
 import { IconRefresh } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Spinner } from 'lib/elements/Spinner'
 
 import { dataNodeCollectionLogic } from '~/queries/nodes/DataNode/dataNodeCollectionLogic'
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
@@ -14,7 +14,7 @@ export function Reload(): JSX.Element {
     const { loadData, cancelQuery } = useActions(dataNodeLogic)
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             onClick={() => {
                 if (responseLoading) {
@@ -28,7 +28,7 @@ export function Reload(): JSX.Element {
             size="small"
         >
             {responseLoading ? 'Cancel' : 'Reload'}
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -37,7 +37,7 @@ export function ReloadAll({ iconOnly }: { iconOnly?: boolean }): JSX.Element {
     const { reloadAll } = useActions(dataNodeCollectionLogic)
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             size="small"
             onClick={reloadAll}
@@ -46,6 +46,6 @@ export function ReloadAll({ iconOnly }: { iconOnly?: boolean }): JSX.Element {
             disabledReason={areAnyLoading ? 'Loading' : undefined}
         >
             {!iconOnly && 'Reload'}
-        </LemonButton>
+        </Button>
     )
 }

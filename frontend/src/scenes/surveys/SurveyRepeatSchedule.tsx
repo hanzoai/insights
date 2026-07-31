@@ -3,10 +3,10 @@ import './EditSurvey.scss'
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonBanner, LemonInput, LemonSnack, Link } from '@hanzo/lemon-ui'
+import { Banner, Input, Snack, Link } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
+import { Field } from 'lib/elements/Field'
+import { Radio } from 'lib/elements/Radio'
 import { pluralize } from 'lib/utils'
 import { LinkToSurveyFormSection } from 'scenes/surveys/components/LinkToSurveyFormSection'
 import { SURVEY_FORM_INPUT_IDS } from 'scenes/surveys/constants'
@@ -51,16 +51,16 @@ function AlwaysScheduleBanner({
 
     if (doesSurveyHaveWaitPeriod) {
         return (
-            <LemonBanner type="info">
+            <Banner type="info">
                 This survey will be shown every {pluralize(survey.conditions?.seenSurveyWaitPeriodInDays ?? 0, 'day')},
                 as long as other display conditions are met.
-            </LemonBanner>
+            </Banner>
         )
     }
 
     if (doesSurveyHaveDisplayConditions(survey)) {
         return (
-            <LemonBanner type="warning">
+            <Banner type="warning">
                 <p>
                     This popover will reappear every time its display conditions are met. This might lead to users
                     seeing the survey very frequently.
@@ -69,12 +69,12 @@ function AlwaysScheduleBanner({
                     If this isn't intended, consider&nbsp;
                     <Link onClick={handleWaitPeriodClick}>adding a wait period</Link>.
                 </p>
-            </LemonBanner>
+            </Banner>
         )
     }
 
     return (
-        <LemonBanner type="warning">
+        <Banner type="warning">
             <p>
                 Setting a popover survey to show 'Always' without any display conditions will make it appear
                 persistently. Ensure this is the desired behavior.
@@ -84,7 +84,7 @@ function AlwaysScheduleBanner({
                 <Link onClick={handleWaitPeriodClick}>adding a wait period</Link>
                 &nbsp;or changing its frequency.
             </p>
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -94,11 +94,11 @@ function SurveyIterationOptions(): JSX.Element {
 
     return (
         <>
-            <LemonField.Pure
+            <Field.Pure
                 info="Showing a survey every time the display conditions are met requires at least version 1.234.11 of insights-js"
                 label={<h3 className="mb-0">How often should we show this survey to a person?</h3>}
             >
-                <LemonRadio
+                <Radio
                     value={survey.schedule ?? SurveySchedule.Once}
                     onChange={(newValue) => {
                         setSurveyValue('schedule', newValue)
@@ -124,10 +124,10 @@ function SurveyIterationOptions(): JSX.Element {
                                 <div className="flex flex-col gap-1">
                                     <div className="flex flex-row gap-2 items-center text-secondary">
                                         Show up to{' '}
-                                        <LemonField name="iteration_count">
+                                        <Field name="iteration_count">
                                             {({ onChange, value }) => {
                                                 return (
-                                                    <LemonInput
+                                                    <Input
                                                         type="number"
                                                         data-attr="survey-iteration-count"
                                                         size="small"
@@ -146,12 +146,12 @@ function SurveyIterationOptions(): JSX.Element {
                                                     />
                                                 )
                                             }}
-                                        </LemonField>{' '}
+                                        </Field>{' '}
                                         times total, once every
-                                        <LemonField name="iteration_frequency_days">
+                                        <Field name="iteration_frequency_days">
                                             {({ onChange, value }) => {
                                                 return (
-                                                    <LemonInput
+                                                    <Input
                                                         type="number"
                                                         data-attr="survey-iteration-frequency-days"
                                                         size="small"
@@ -168,7 +168,7 @@ function SurveyIterationOptions(): JSX.Element {
                                                     />
                                                 )
                                             }}
-                                        </LemonField>{' '}
+                                        </Field>{' '}
                                         days
                                     </div>
                                     {survey.iteration_count && survey.iteration_frequency_days && (
@@ -191,7 +191,7 @@ function SurveyIterationOptions(): JSX.Element {
                 {survey.schedule === SurveySchedule.Always && survey.type === SurveyType.Popover && (
                     <AlwaysScheduleBanner survey={survey} />
                 )}
-            </LemonField.Pure>
+            </Field.Pure>
         </>
     )
 }
@@ -209,7 +209,7 @@ export function SurveyRepeatSchedule(): JSX.Element {
                 <span className="font-medium">
                     <h3 className="mb-0">How often should we show this survey to a person?</h3>
                     <IconInfo className="mr-0.5" /> This survey is displayed whenever the&nbsp;
-                    <LemonSnack>{survey.conditions?.events?.values.map((v) => v.name).join(', ')}</LemonSnack>&nbsp;
+                    <Snack>{survey.conditions?.events?.values.map((v) => v.name).join(', ')}</Snack>&nbsp;
                     <span>{survey.conditions?.events?.values.length === 1 ? 'event is' : 'events are'}</span> triggered.
                     So these settings are not applicable. If you want, remove the event targeting in the&nbsp;
                     <LinkToSurveyFormSection section={SurveyEditSection.DisplayConditions} />.

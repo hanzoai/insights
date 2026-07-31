@@ -11,15 +11,15 @@ import {
     TaxonomicFilterGroupType,
     TaxonomicFilterValue,
 } from 'lib/components/TaxonomicFilter/types'
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
-import { LemonDropdown } from 'lib/lemon-ui/LemonDropdown'
+import { Button, ButtonProps } from 'lib/elements/Button'
+import { Dropdown } from 'lib/elements/Dropdown'
 import { LocalFilter } from 'scenes/insights/filters/ActionFilter/entityFilterLogic'
 import { MaxContextTaxonomicFilterOption } from 'scenes/max/maxTypes'
 
 import { AnyDataNode, DatabaseSchemaField } from '~/queries/schema/schema-general'
 
 export interface TaxonomicPopoverProps<ValueType extends TaxonomicFilterValue = TaxonomicFilterValue>
-    extends Omit<LemonButtonProps, 'children' | 'onClick' | 'sideAction'> {
+    extends Omit<ButtonProps, 'children' | 'onClick' | 'sideAction'> {
     groupType: TaxonomicFilterGroupType
     value?: ValueType | null
     onChange: (value: ValueType, groupType: TaxonomicFilterGroupType, item: any) => void
@@ -94,7 +94,7 @@ export const TaxonomicPopover = forwardRef(function TaxonomicPopover_<
 
     const isClearButtonShown = allowClear && !!localValue
 
-    const buttonPropsFinal: Omit<LemonButtonProps, 'sideAction' | 'sideIcon'> = buttonPropsRest
+    const buttonPropsFinal: Omit<ButtonProps, 'sideAction' | 'sideIcon'> = buttonPropsRest
     buttonPropsFinal.children = localValue ? (
         <span>{renderValue?.(localValue) ?? localValue}</span>
     ) : placeholder || placeholderClass ? (
@@ -112,7 +112,7 @@ export const TaxonomicPopover = forwardRef(function TaxonomicPopover_<
     }, [value]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <LemonDropdown
+        <Dropdown
             overlay={
                 <TaxonomicFilter
                     groupType={groupType}
@@ -146,7 +146,7 @@ export const TaxonomicPopover = forwardRef(function TaxonomicPopover_<
             placement={placement}
         >
             {isClearButtonShown ? (
-                <LemonButton
+                <Button
                     sideAction={{
                         icon: <IconX />,
                         tooltip: 'Clear selection',
@@ -161,9 +161,9 @@ export const TaxonomicPopover = forwardRef(function TaxonomicPopover_<
                     ref={ref}
                 />
             ) : (
-                <LemonButton {...buttonPropsFinal} {...(sideIcon !== undefined && { sideIcon })} ref={ref} />
+                <Button {...buttonPropsFinal} {...(sideIcon !== undefined && { sideIcon })} ref={ref} />
             )}
-        </LemonDropdown>
+        </Dropdown>
     )
 }) as <ValueType extends TaxonomicFilterValue = TaxonomicFilterValue>(
     props: TaxonomicPopoverProps<ValueType> & { ref?: Ref<HTMLButtonElement> }

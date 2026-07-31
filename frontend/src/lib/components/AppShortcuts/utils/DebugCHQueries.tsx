@@ -10,12 +10,12 @@ import { Chart, ChartConfiguration, ChartDataset } from 'lib/Chart'
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
 import { useChart } from 'lib/hooks/useChart'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Dialog } from 'lib/elements/Dialog'
+import { Table } from 'lib/elements/Table'
+import { Tag } from 'lib/elements/Tag'
+import { Link } from 'lib/elements/Link'
 import { humanizeBytes } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -27,7 +27,7 @@ import { CodeSnippet, Language } from '../../CodeSnippet'
 import type { debugCHQueriesLogicType } from './DebugCHQueriesType'
 
 export function openCHQueriesDebugModal(): void {
-    LemonDialog.open({
+    Dialog.open({
         title: 'Datastore queries recently executed for this user',
         content: <DebugCHQueries />,
         primaryButton: null,
@@ -264,14 +264,14 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                 <div className="flex flex-wrap gap-2">
                     {!debugResponse.stats
                         ? paths?.map(([path, count]) => (
-                              <LemonButton
+                              <Button
                                   key={path}
                                   type={pathFilter === path ? 'primary' : 'tertiary'}
                                   size="small"
                                   onClick={() => (pathFilter === path ? setPathFilter(null) : setPathFilter(path))}
                               >
                                   {path} <span className="ml-0.5 text-secondary ligatures-none">({count})</span>
-                              </LemonButton>
+                              </Button>
                           ))
                         : null}
                     {!debugResponseLoading && !!debugResponse.stats ? (
@@ -308,7 +308,7 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                         </div>
                     ) : null}
                 </div>
-                <LemonButton
+                <Button
                     icon={<IconRefresh />}
                     disabledReason={debugResponseLoading ? 'Loading…' : null}
                     onClick={() => loadDebugResponse()}
@@ -316,10 +316,10 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                     type="secondary"
                 >
                     Refresh
-                </LemonButton>
+                </Button>
             </div>
 
-            <LemonTable
+            <Table
                 columns={[
                     {
                         title: 'Timestamp',
@@ -349,13 +349,13 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                             return (
                                 <div className="max-w-200 py-1 deprecated-space-y-2">
                                     <div>
-                                        <LemonTag className="inline-block">
+                                        <Tag className="inline-block">
                                             <span className="font-bold tracking-wide">ID:</span>{' '}
                                             <span className="font-mono">{item.query_id}</span>
                                             <LinkMetabaseQuery queryId={item.query_id} />
-                                        </LemonTag>{' '}
+                                        </Tag>{' '}
                                         {typeof item.logComment.cache_key === 'string' ? (
-                                            <LemonTag className="inline-block">
+                                            <Tag className="inline-block">
                                                 <span className="font-bold tracking-wide">Cache key:</span>{' '}
                                                 <span className="font-mono">{item.logComment.cache_key}</span>{' '}
                                                 <Link
@@ -364,10 +364,10 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                                                     target="_blank"
                                                     targetBlankIcon
                                                 />
-                                            </LemonTag>
+                                            </Tag>
                                         ) : null}{' '}
                                         {typeof item.logComment.insight_id === 'number' ? (
-                                            <LemonTag className="inline-block">
+                                            <Tag className="inline-block">
                                                 <span className="font-bold tracking-wide">Insight ID:</span>{' '}
                                                 <span className="font-mono">{item.logComment.insight_id}</span>{' '}
                                                 <Link
@@ -376,10 +376,10 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                                                     target="_blank"
                                                     targetBlankIcon
                                                 />
-                                            </LemonTag>
+                                            </Tag>
                                         ) : null}{' '}
                                         {typeof item.logComment.dashboard_id === 'number' ? (
-                                            <LemonTag className="inline-block">
+                                            <Tag className="inline-block">
                                                 <span className="font-bold tracking-wide">Dashboard ID:</span>{' '}
                                                 <span className="font-mono">{item.logComment.dashboard_id}</span>{' '}
                                                 <Link
@@ -388,10 +388,10 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                                                     target="_blank"
                                                     targetBlankIcon
                                                 />
-                                            </LemonTag>
+                                            </Tag>
                                         ) : null}{' '}
                                         {typeof item.logComment.user_id === 'number' ? (
-                                            <LemonTag className="inline-block">
+                                            <Tag className="inline-block">
                                                 <span className="font-bold tracking-wide">User ID:</span>{' '}
                                                 <span className="font-mono">{item.logComment.user_id}</span>{' '}
                                                 <Link
@@ -400,13 +400,13 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                                                     target="_blank"
                                                     targetBlankIcon
                                                 />
-                                            </LemonTag>
+                                            </Tag>
                                         ) : null}
                                     </div>
                                     {item.exception && (
-                                        <LemonBanner type="error" className="text-xs font-mono">
+                                        <Banner type="error" className="text-xs font-mono">
                                             <div>{item.exception}</div>
-                                        </LemonBanner>
+                                        </Banner>
                                     )}
                                     <CodeSnippet
                                         language={Language.SQL}
@@ -417,7 +417,7 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                                         {item.query}
                                     </CodeSnippet>
                                     {typeof item.logComment.query === 'object' && item.logComment.query !== null ? (
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             size="small"
                                             fullWidth
@@ -443,7 +443,7 @@ export function DebugCHQueries({ insightId }: DebugCHQueriesProps): JSX.Element 
                                                     : 'query'}
                                             </span>{' '}
                                             in new tab
-                                        </LemonButton>
+                                        </Button>
                                     ) : null}
                                 </div>
                             )
@@ -540,7 +540,7 @@ function ProfilingStats({ item }: { item: Query }): JSX.Element | null {
                     {JSON.stringify(event, null, 2)}
                 </CodeSnippet>
             )}
-            <LemonButton
+            <Button
                 type="secondary"
                 size="xsmall"
                 onClick={() => setAreAllStatsShown(!areAllStatsShown)}
@@ -549,7 +549,7 @@ function ProfilingStats({ item }: { item: Query }): JSX.Element | null {
                 center
             >
                 {areAllStatsShown ? 'Show key stats only' : 'Show full raw stats'}
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -615,7 +615,7 @@ function QueryContext({ item }: { item: Query }): JSX.Element | null {
                         {JSON.stringify(modifiers, null, 2)}
                     </CodeSnippet>
                 ) : (
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="xsmall"
                         onClick={() => setShowModifiers(!showModifiers)}
@@ -624,7 +624,7 @@ function QueryContext({ item }: { item: Query }): JSX.Element | null {
                         center
                     >
                         {showModifiers ? 'Hide InsightsQLQueryModifiers' : 'Show InsightsQLQueryModifiers'}
-                    </LemonButton>
+                    </Button>
                 )
             ) : null}
         </div>
@@ -703,7 +703,7 @@ function Timing({ item }: { item: Query }): JSX.Element | null {
                     </tbody>
                 </table>
             )}
-            <LemonButton
+            <Button
                 type="secondary"
                 size="xsmall"
                 onClick={() => setShowFullTiming(!showFullTiming)}
@@ -712,7 +712,7 @@ function Timing({ item }: { item: Query }): JSX.Element | null {
                 center
             >
                 {showFullTiming ? 'Show slowest span only' : 'Show full timing'}
-            </LemonButton>
+            </Button>
         </div>
     )
 }

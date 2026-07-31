@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 import { useMemo } from 'react'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { urls } from 'scenes/urls'
 
 import { Group, PropertyDefinitionType } from '~/types'
@@ -28,13 +28,13 @@ export function GroupPropertiesCard({ groupData }: { groupData: Group }): JSX.El
                 embedded={false}
             />
             <div className="flex justify-end">
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     to={urls.group(groupData.group_type_index, groupData.group_key, true, 'properties')}
                 >
                     View properties
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

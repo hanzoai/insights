@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { cn } from 'lib/utils/css-classes'
 import { BREAKDOWN_NULL_STRING_LABEL } from 'scenes/insights/utils'
@@ -55,7 +55,7 @@ function BreakdownPreview({ title, property }: { title: string; property: string
             <div className="w-[70%]">
                 {responseLoading ? (
                     <div className="h-4 flex items-center justify-center">
-                        <LemonSkeleton />
+                        <Skeleton />
                     </div>
                 ) : properties.length === 0 || hasOnlyNullBreakdown ? (
                     <div className="text-muted text-xs h-4 flex items-center justify-center">No data</div>

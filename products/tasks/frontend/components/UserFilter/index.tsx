@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { taskTrackerSceneLogic } from '../../logics/taskTrackerSceneLogic'
 import { UserDisplay, UserSelect } from './UserSelect'
@@ -12,9 +12,9 @@ export const UserFilter = (): JSX.Element => {
     return (
         <UserSelect userId={createdBy} onChange={setCreatedBy}>
             {(user) => (
-                <LemonButton type="secondary" size="small">
+                <Button type="secondary" size="small">
                     <UserDisplay user={user} />
-                </LemonButton>
+                </Button>
             )}
         </UserSelect>
     )

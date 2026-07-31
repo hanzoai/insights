@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import type { gitlabSetupModalLogicType } from './gitlabSetupModalLogicType'
 
@@ -41,10 +41,10 @@ export const gitlabSetupModalLogic = kea<gitlabSetupModalLogicType>([
                         },
                     })
                     actions.loadIntegrations()
-                    lemonToast.success('GitLab integration created successfully!')
+                    toast.success('GitLab integration created successfully!')
                     props.onComplete(integration.id)
                 } catch (error: any) {
-                    lemonToast.error(error.detail || 'Failed to create GitLab integration')
+                    toast.error(error.detail || 'Failed to create GitLab integration')
                     throw error
                 }
             },

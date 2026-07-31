@@ -19,10 +19,10 @@ import {
     WebflowInstallation,
 } from '@hanzo/shared-onboarding/session-replay'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { Divider } from 'lib/elements/Divider'
+import { Tag } from 'lib/elements/Tag'
+import { Link } from 'lib/elements/Link'
 import { urls } from 'scenes/urls'
 
 import { OnboardingStepKey, SDKInstructionsMap, SDKKey } from '~/types'
@@ -161,10 +161,10 @@ export function AdvertiseMobileReplay({
 
     return (
         <div>
-            <LemonDivider className="my-8" />
-            <LemonBanner type="info">
+            <Divider className="my-8" />
+            <Banner type="info">
                 <h3>
-                    Session Replay for {platform} <LemonTag type="highlight">NEW</LemonTag>
+                    Session Replay for {platform} <Tag type="highlight">NEW</Tag>
                 </h3>
                 <div>
                     Session replay is now in general availability for {platform}.{' '}
@@ -179,7 +179,7 @@ export function AdvertiseMobileReplay({
                         Learn how to set it up
                     </Link>
                 </div>
-            </LemonBanner>
+            </Banner>
         </div>
     )
 }

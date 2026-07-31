@@ -1,22 +1,22 @@
 import { useActions } from 'kea'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { BuilderMascot3 } from 'lib/components/mascots'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
+import { Banner } from 'lib/elements/Banner'
+import { Tag } from 'lib/elements/Tag/Tag'
 
 export function BillingEarlyAccessBanner(): JSX.Element {
     const { openSupportForm } = useActions(supportLogic)
 
     return (
-        <LemonBanner type="info" hideIcon className="overflow-visible">
+        <Banner type="info" hideIcon className="overflow-visible">
             <div className="flex items-center gap-4">
                 <div className="relative flex-shrink-0 mr-2">
-                    <LemonTag type="completion" className="absolute top-2.5 left-0 transform -rotate-12">
+                    <Tag type="completion" className="absolute top-2.5 left-0 transform -rotate-12">
                         EARLY ACCESS
-                    </LemonTag>
+                    </Tag>
                     <BuilderMascot3 className="w-20 h-20 mt-6" />
                 </div>
                 <div className="text-primary">
@@ -49,6 +49,6 @@ export function BillingEarlyAccessBanner(): JSX.Element {
                     </ul>
                 </div>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

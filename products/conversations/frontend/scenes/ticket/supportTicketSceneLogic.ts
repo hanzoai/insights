@@ -1,7 +1,7 @@
 import { actions, afterMount, beforeUnmount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from '~/lib/api'
 import { PERSON_DISPLAY_NAME_COLUMN_NAME } from '~/lib/constants'
@@ -373,7 +373,7 @@ export const supportTicketSceneLogic = kea<supportTicketSceneLogicType>([
                 }, 'messagePolling')
             } catch (error) {
                 console.error('Failed to load ticket:', error)
-                lemonToast.error('Failed to load ticket')
+                toast.error('Failed to load ticket')
                 actions.setTicketLoading(false)
             }
         },
@@ -402,10 +402,10 @@ export const supportTicketSceneLogic = kea<supportTicketSceneLogicType>([
 
                 const ticket = await api.conversationsTickets.update(props.id.toString(), data)
                 actions.setTicket(ticket)
-                lemonToast.success('Ticket updated')
+                toast.success('Ticket updated')
                 actions.loadTickets()
             } catch {
-                lemonToast.error('Failed to update ticket')
+                toast.error('Failed to update ticket')
             }
         },
         loadMessages: async () => {
@@ -421,7 +421,7 @@ export const supportTicketSceneLogic = kea<supportTicketSceneLogicType>([
                 // Reverse to show oldest first (bottom = newest)
                 actions.setMessages((response.results || []).reverse())
             } catch {
-                lemonToast.error('Failed to load messages')
+                toast.error('Failed to load messages')
                 actions.setMessagesLoading(false)
             }
         },
@@ -448,7 +448,7 @@ export const supportTicketSceneLogic = kea<supportTicketSceneLogicType>([
                 actions.setOlderMessages(olderMessages)
                 actions.setHasMoreMessages(olderMessages.length > 0)
             } catch {
-                lemonToast.error('Failed to load older messages')
+                toast.error('Failed to load older messages')
                 actions.setOlderMessagesLoading(false)
             }
         },
@@ -471,7 +471,7 @@ export const supportTicketSceneLogic = kea<supportTicketSceneLogicType>([
                     },
                     {}
                 )
-                lemonToast.success(isPrivate ? 'Private message sent' : 'Message sent')
+                toast.success(isPrivate ? 'Private message sent' : 'Message sent')
                 actions.setMessageSending(false)
                 onSuccess?.()
                 if (!isPrivate) {
@@ -482,7 +482,7 @@ export const supportTicketSceneLogic = kea<supportTicketSceneLogicType>([
                 }, 300)
                 actions.loadTickets()
             } catch {
-                lemonToast.error('Failed to send message')
+                toast.error('Failed to send message')
                 actions.setMessageSending(false)
             }
         },

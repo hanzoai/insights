@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { SpinnerOverlay } from '@hanzo/lemon-ui'
+import { SpinnerOverlay } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 

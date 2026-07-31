@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconFilter, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Select } from '@hanzo/elements'
 
-import { IconWithCount } from 'lib/lemon-ui/icons'
+import { IconWithCount } from 'lib/elements/icons'
 import { getClampedFunnelStepRange } from 'scenes/funnels/funnelUtils'
 import { entityFilterLogic } from 'scenes/insights/filters/ActionFilter/entityFilterLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -62,7 +62,7 @@ export function ExclusionRowSuffix({
 
     const propertyFiltersButton = (
         <IconWithCount key="property-filter" count={exclusions?.[index]?.properties?.length || 0} showZero={false}>
-            <LemonButton
+            <Button
                 icon={<IconFilter />}
                 title="Show filters"
                 data-attr={`show-prop-filter-${index}`}
@@ -75,7 +75,7 @@ export function ExclusionRowSuffix({
     return (
         <div className="flex items-center gap-2 w-full p-1 my-1">
             <span>between</span>
-            <LemonSelect
+            <Select
                 className="min-w-0 flex-shrink"
                 size="small"
                 value={stepRange.funnelFromStep || 0}
@@ -86,7 +86,7 @@ export function ExclusionRowSuffix({
                 disabled={!isFunnelWithEnoughSteps}
             />
             <span>and</span>
-            <LemonSelect
+            <Select
                 className="min-w-0 flex-shrink"
                 size="small"
                 value={stepRange.funnelToStep || (stepRange.funnelFromStep ?? 0) + 1}
@@ -98,7 +98,7 @@ export function ExclusionRowSuffix({
             />
             <div className="flex items-center gap-1 ml-auto">
                 {propertyFiltersButton}
-                <LemonButton
+                <Button
                     size="small"
                     icon={<IconTrash />}
                     onClick={onClose}

@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconOpenSidebar } from '@hanzo/icons'
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { toSentenceCase } from 'lib/utils'
 import { resourceTypeToString } from 'lib/utils/accessControlUtils'
@@ -21,11 +21,11 @@ export const AccessControlPopoutCTA = ({ callback, resourceType }: AccessControl
     return (
         <div>
             <h3>Access control</h3>
-            <LemonBanner type="info" className="mb-4">
+            <Banner type="info" className="mb-4">
                 {toSentenceCase(resourceTypeToString(resourceType))} permissions are moving. We're rolling out our new
                 access control system. Click below to open it.
-            </LemonBanner>
-            <LemonButton
+            </Banner>
+            <Button
                 type="primary"
                 icon={<IconOpenSidebar />}
                 onClick={() => {
@@ -35,7 +35,7 @@ export const AccessControlPopoutCTA = ({ callback, resourceType }: AccessControl
                 }}
             >
                 Open access control
-            </LemonButton>
+            </Button>
         </div>
     )
 }

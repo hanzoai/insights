@@ -1,4 +1,4 @@
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 export const RunningTimeCalculatorModalFooter = ({
     onClose,
@@ -12,17 +12,17 @@ export const RunningTimeCalculatorModalFooter = ({
     return (
         <div className="flex items-center w-full">
             <div className="flex items-center gap-2 ml-auto">
-                <LemonButton form="edit-experiment-metric-form" type="secondary" onClick={onClose}>
+                <Button form="edit-experiment-metric-form" type="secondary" onClick={onClose}>
                     Cancel
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     form="edit-experiment-metric-form"
                     onClick={onSave}
                     type="primary"
                     disabledReason={disabled ? 'Calculation required before saving' : undefined}
                 >
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

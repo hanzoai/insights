@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
 import { IconInfo, IconPlusSmall, IconTrash, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonInputSelect, LemonSelect, LemonTag, LemonTextArea, Tooltip } from '@hanzo/lemon-ui'
+import { Button, InputSelect, Select, Tag, TextArea, Tooltip } from '@hanzo/elements'
 
 import { MatchField, VALID_NATIVE_MARKETING_SOURCES, externalDataSources } from '~/queries/schema/schema-general'
 
@@ -180,19 +180,19 @@ export function CampaignNameMappingsConfiguration({
                                           <td className="p-2 align-top">
                                               <div className="flex flex-wrap gap-1">
                                                   {(rawValues as string[]).map((rawValue) => (
-                                                      <LemonTag
+                                                      <Tag
                                                           key={rawValue}
                                                           size="small"
                                                           closable
                                                           onClose={() => removeUtmValue(source, cleanName, rawValue)}
                                                       >
                                                           {rawValue}
-                                                      </LemonTag>
+                                                      </Tag>
                                                   ))}
                                               </div>
                                           </td>
                                           <td className="p-2 text-right align-top">
-                                              <LemonButton
+                                              <Button
                                                   type="tertiary"
                                                   status="danger"
                                                   size="small"
@@ -208,7 +208,7 @@ export function CampaignNameMappingsConfiguration({
                         <tr className="bg-bg-light">
                             {!sourceFilter && (
                                 <td className="p-2 align-top">
-                                    <LemonSelect
+                                    <Select
                                         value={selectedSource}
                                         onChange={setSelectedSource}
                                         options={[
@@ -222,7 +222,7 @@ export function CampaignNameMappingsConfiguration({
                             )}
                             <td className="p-2 align-top min-w-[200px]">
                                 <div className="flex flex-col gap-1">
-                                    <LemonInputSelect
+                                    <InputSelect
                                         value={newCleanName ? [newCleanName] : []}
                                         onChange={(values) => setNewCleanName(values[0] || '')}
                                         options={campaignOptions}
@@ -272,7 +272,7 @@ export function CampaignNameMappingsConfiguration({
                                             </div>
                                             <div className="flex flex-wrap gap-1">
                                                 {campaignSuggestions.map((suggestion) => (
-                                                    <LemonButton
+                                                    <Button
                                                         key={suggestion.id}
                                                         type="secondary"
                                                         size="xsmall"
@@ -292,7 +292,7 @@ export function CampaignNameMappingsConfiguration({
                                                         {matchField === MatchField.CAMPAIGN_ID
                                                             ? `${suggestion.id} (${suggestion.name})`
                                                             : `${suggestion.name} (${suggestion.id})`}
-                                                    </LemonButton>
+                                                    </Button>
                                                 ))}
                                             </div>
                                         </div>
@@ -301,7 +301,7 @@ export function CampaignNameMappingsConfiguration({
                             </td>
                             <td className="p-2 align-top min-w-[200px]">
                                 <div className="flex flex-col gap-1">
-                                    <LemonTextArea
+                                    <TextArea
                                         value={newRawValues}
                                         onChange={setNewRawValues}
                                         placeholder="utm_campaign values (comma-separated)"
@@ -329,7 +329,7 @@ export function CampaignNameMappingsConfiguration({
                                             : 'Add mapping'
                                     }
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         size="small"
                                         icon={<IconPlusSmall />}

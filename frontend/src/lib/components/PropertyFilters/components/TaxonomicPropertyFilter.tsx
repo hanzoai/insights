@@ -5,7 +5,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonDropdown, Link } from '@hanzo/lemon-ui'
+import { Button, Dropdown, Link } from '@hanzo/elements'
 
 import { OperatorValueSelect } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 import { PropertyFilterInternalProps } from 'lib/components/PropertyFilters/types'
@@ -293,13 +293,13 @@ export function TaxonomicPropertyFilter({
                     <div className="TaxonomicPropertyFilter__row-items">
                         {showOperatorValueSelect && placeOperatorValueSelectOnLeft && operatorValueSelect}
                         {editable ? (
-                            <LemonDropdown
+                            <Dropdown
                                 overlay={taxonomicFilter}
                                 placement="bottom-start"
                                 visible={dropdownOpen}
                                 onClickOutside={closeDropdown}
                             >
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     icon={!valuePresent ? <IconPlusSmall /> : undefined}
                                     data-attr={'property-select-toggle-' + index}
@@ -322,8 +322,8 @@ export function TaxonomicPropertyFilter({
                                     }
                                 >
                                     {filterContent ?? (addText || 'Add filter')}
-                                </LemonButton>
-                            </LemonDropdown>
+                                </Button>
+                            </Dropdown>
                         ) : (
                             filterContent
                         )}

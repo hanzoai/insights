@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
 import { IconWarning } from '@hanzo/icons'
-import { Popover, Spinner } from '@hanzo/lemon-ui'
+import { Popover, Spinner } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Button, ButtonProps } from 'lib/elements/Button'
+import { Markdown } from 'lib/elements/Markdown'
 
-export type ExplainCSPViolationButtonProps = LemonButtonProps & {
+export type ExplainCSPViolationButtonProps = ButtonProps & {
     properties: Record<string, any>
     label: string
 }
@@ -29,7 +29,7 @@ export const ExplainCSPViolationButton = ({
             if (r) {
                 setResult(
                     <>
-                        <LemonMarkdown wrapCode={true}>{r.response}</LemonMarkdown>
+                        <Markdown wrapCode={true}>{r.response}</Markdown>
                         <div className="flex items-center mt-2 p-2 border border-border-strong rounded">
                             <IconWarning className="text-warning-dark flex-shrink-0 mr-2" />
                             <span className="text-xs text-muted">
@@ -69,9 +69,9 @@ export const ExplainCSPViolationButton = ({
             }
         >
             {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-            <LemonButton {...buttonProps} onClick={handleClick}>
+            <Button {...buttonProps} onClick={handleClick}>
                 {label}
-            </LemonButton>
+            </Button>
         </Popover>
     )
 }

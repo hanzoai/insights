@@ -1,4 +1,4 @@
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
+import { Progress } from 'lib/elements/Progress'
 import { humanFriendlyNumber } from 'lib/utils'
 
 import { InsightType, TrendExperimentVariant } from '~/types'
@@ -44,7 +44,7 @@ export function VariantTooltip({
                     <span className="text-secondary font-semibold mb-1">Win probability:</span>
                     {result?.probability?.[tooltipData.variant] !== undefined ? (
                         <span className="flex items-center justify-between flex-1 pl-6">
-                            <LemonProgress
+                            <Progress
                                 className="w-3/4 mr-4"
                                 percent={result.probability[tooltipData.variant] * 100}
                             />

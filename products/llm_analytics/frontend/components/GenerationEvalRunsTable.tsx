@@ -1,10 +1,10 @@
 import { BuiltLogic, useValues } from 'kea'
 
 import { IconCheck, IconMinus, IconWarning, IconX } from '@hanzo/icons'
-import { LemonTable, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Table, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { TableColumns } from 'lib/elements/Table'
 import { urls } from 'scenes/urls'
 
 import { EvaluationRun } from '../evaluations/types'
@@ -17,7 +17,7 @@ export function GenerationEvalRunsTable({
 }): JSX.Element {
     const { generationEvaluationRuns, generationEvaluationRunsLoading } = useValues(generationRunsLogic)
 
-    const columns: LemonTableColumns<EvaluationRun> = [
+    const columns: TableColumns<EvaluationRun> = [
         {
             title: 'Timestamp',
             key: 'timestamp',
@@ -39,32 +39,32 @@ export function GenerationEvalRunsTable({
             render: (_, run) => {
                 if (run.status === 'failed') {
                     return (
-                        <LemonTag type="danger" icon={<IconWarning />}>
+                        <Tag type="danger" icon={<IconWarning />}>
                             Error
-                        </LemonTag>
+                        </Tag>
                     )
                 }
                 if (run.status === 'running') {
-                    return <LemonTag type="primary">Running...</LemonTag>
+                    return <Tag type="primary">Running...</Tag>
                 }
                 // Handle N/A case (result is null when not applicable)
                 if (run.result === null) {
                     return (
-                        <LemonTag type="muted" icon={<IconMinus />}>
+                        <Tag type="muted" icon={<IconMinus />}>
                             N/A
-                        </LemonTag>
+                        </Tag>
                     )
                 }
                 return (
                     <div className="flex items-center gap-2">
                         {run.result ? (
-                            <LemonTag type="success" icon={<IconCheck />}>
+                            <Tag type="success" icon={<IconCheck />}>
                                 True
-                            </LemonTag>
+                            </Tag>
                         ) : (
-                            <LemonTag type="danger" icon={<IconX />}>
+                            <Tag type="danger" icon={<IconX />}>
                                 False
-                            </LemonTag>
+                            </Tag>
                         )}
                     </div>
                 )
@@ -91,7 +91,7 @@ export function GenerationEvalRunsTable({
 
     return (
         <div>
-            <LemonTable
+            <Table
                 columns={columns}
                 dataSource={generationEvaluationRuns}
                 loading={generationEvaluationRunsLoading}

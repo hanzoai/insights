@@ -4,8 +4,8 @@
         "paths": {
             "lib/*": ["src/lib/*"],
             "scenes/*": ["src/scenes/*"],
-            "@hanzo/lemon-ui": ["@hanzo/lemon-ui/src/index"],
-            "@hanzo/lemon-ui/*": ["@hanzo/lemon-ui/src/*"],
+            "@hanzo/elements": ["@hanzo/elements/src/index"],
+            "@hanzo/elements/*": ["@hanzo/elements/src/*"],
             "@hanzo/icons": ["node_modules/@hanzo/icons"],
             "@hanzo/shared-onboarding/*": ["../docs/onboarding/*"],
             "storybook/*": ["../.storybook/*"],

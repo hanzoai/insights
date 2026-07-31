@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
 import { IconLogomark } from '@hanzo/icons'
-import { LemonCard } from '@hanzo/lemon-ui'
+import { Card } from '@hanzo/elements'
 
 import { ErrorPropertiesLogicProps, errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'
 import { ErrorEventType } from 'lib/components/Errors/types'
@@ -69,7 +69,7 @@ function ExceptionCardContent({ timestamp, renderStackTraceActions, label }: Exc
     const { setCurrentTab } = useActions(exceptionCardLogic)
 
     return (
-        <LemonCard hoverEffect={false} className="p-0 relative w-full h-full border-0 rounded-none flex flex-col">
+        <Card hoverEffect={false} className="p-0 relative w-full h-full border-0 rounded-none flex flex-col">
             <TabsPrimitive value={currentTab} onValueChange={setCurrentTab} className="flex flex-col flex-1 min-h-0">
                 <div className="flex justify-between h-[2rem] items-center w-full px-2 border-b shrink-0">
                     <TabsPrimitiveList className="flex justify-between w-full h-full items-center">
@@ -100,6 +100,6 @@ function ExceptionCardContent({ timestamp, renderStackTraceActions, label }: Exc
                 <PropertiesTab value="properties" className="flex-1 min-h-0" />
                 <SessionTab value="session" timestamp={timestamp} className="flex-1 min-h-0" />
             </TabsPrimitive>
-        </LemonCard>
+        </Card>
     )
 }

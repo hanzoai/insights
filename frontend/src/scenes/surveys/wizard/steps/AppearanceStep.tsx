@@ -4,12 +4,12 @@ import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 import { useState } from 'react'
 
 import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSelect, LemonSwitch } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input, Select, Switch } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
-import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Collapse } from 'lib/elements/Collapse'
+import { Field } from 'lib/elements/Field'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import {
@@ -105,37 +105,37 @@ export function AppearanceStep(): JSX.Element {
                 <div className="space-y-2">
                     <h3 className="font-medium m-0 text-sm">Fine-tune colors</h3>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                        <LemonField.Pure label="Background" className="gap-1">
+                        <Field.Pure label="Background" className="gap-1">
                             <ColorInput
                                 value={appearance.backgroundColor}
                                 onChange={(backgroundColor) => onManualColorChange({ backgroundColor })}
                                 disabled={!surveysStylingAvailable}
                             />
-                        </LemonField.Pure>
-                        <LemonField.Pure label="Border" className="gap-1">
+                        </Field.Pure>
+                        <Field.Pure label="Border" className="gap-1">
                             <ColorInput
                                 value={appearance.borderColor}
                                 onChange={(borderColor) => onManualColorChange({ borderColor })}
                                 disabled={!surveysStylingAvailable}
                             />
-                        </LemonField.Pure>
-                        <LemonField.Pure label="Submit button" className="gap-1">
+                        </Field.Pure>
+                        <Field.Pure label="Submit button" className="gap-1">
                             <ColorInput
                                 value={appearance.submitButtonColor}
                                 onChange={(submitButtonColor) => onManualColorChange({ submitButtonColor })}
                                 disabled={!surveysStylingAvailable}
                             />
-                        </LemonField.Pure>
-                        <LemonField.Pure label="Question text" className="gap-1">
+                        </Field.Pure>
+                        <Field.Pure label="Question text" className="gap-1">
                             <ColorInput
                                 value={appearance.textColor}
                                 onChange={(textColor) => onManualColorChange({ textColor })}
                                 disabled={!surveysStylingAvailable}
                             />
-                        </LemonField.Pure>
+                        </Field.Pure>
                         {hasRatingButtons && (
                             <>
-                                <LemonField.Pure label="Rating buttons" className="gap-1">
+                                <Field.Pure label="Rating buttons" className="gap-1">
                                     <ColorInput
                                         value={appearance.ratingButtonColor}
                                         onChange={(ratingButtonColor) =>
@@ -146,8 +146,8 @@ export function AppearanceStep(): JSX.Element {
                                         }
                                         disabled={!surveysStylingAvailable}
                                     />
-                                </LemonField.Pure>
-                                <LemonField.Pure label="Selected rating" className="gap-1">
+                                </Field.Pure>
+                                <Field.Pure label="Selected rating" className="gap-1">
                                     <ColorInput
                                         value={appearance.ratingButtonActiveColor}
                                         onChange={(ratingButtonActiveColor) =>
@@ -155,14 +155,14 @@ export function AppearanceStep(): JSX.Element {
                                         }
                                         disabled={!surveysStylingAvailable}
                                     />
-                                </LemonField.Pure>
+                                </Field.Pure>
                             </>
                         )}
                     </div>
                 </div>
 
                 {/* Branding */}
-                <LemonCheckbox
+                <Checkbox
                     label="Hide Insights branding"
                     checked={appearance.whiteLabel}
                     onChange={(checked) => {
@@ -177,7 +177,7 @@ export function AppearanceStep(): JSX.Element {
                 />
 
                 {/* Advanced options */}
-                <LemonCollapse
+                <Collapse
                     panels={[
                         {
                             key: 'advanced',
@@ -186,8 +186,8 @@ export function AppearanceStep(): JSX.Element {
                             content: (
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                        <LemonField.Pure label="Position" className="gap-1">
-                                            <LemonSelect
+                                        <Field.Pure label="Position" className="gap-1">
+                                            <Select
                                                 value={appearance.position}
                                                 onChange={(position) => onAppearanceChange({ position })}
                                                 options={[
@@ -204,9 +204,9 @@ export function AppearanceStep(): JSX.Element {
                                                 fullWidth
                                                 disabled={!surveysStylingAvailable}
                                             />
-                                        </LemonField.Pure>
-                                        <LemonField.Pure label="Font family" className="gap-1">
-                                            <LemonSelect
+                                        </Field.Pure>
+                                        <Field.Pure label="Font family" className="gap-1">
+                                            <Select
                                                 value={appearance.fontFamily}
                                                 onChange={(fontFamily) => onAppearanceChange({ fontFamily })}
                                                 options={WEB_SAFE_FONTS.map((font) => ({
@@ -216,23 +216,23 @@ export function AppearanceStep(): JSX.Element {
                                                 fullWidth
                                                 disabled={!surveysStylingAvailable}
                                             />
-                                        </LemonField.Pure>
-                                        <LemonField.Pure label="Survey width" className="gap-1">
-                                            <LemonInput
+                                        </Field.Pure>
+                                        <Field.Pure label="Survey width" className="gap-1">
+                                            <Input
                                                 value={appearance.maxWidth}
                                                 onChange={(maxWidth) => onAppearanceChange({ maxWidth })}
                                                 placeholder="300px"
                                                 disabled={!surveysStylingAvailable}
                                             />
-                                        </LemonField.Pure>
-                                        <LemonField.Pure label="Border radius" className="gap-1">
-                                            <LemonInput
+                                        </Field.Pure>
+                                        <Field.Pure label="Border radius" className="gap-1">
+                                            <Input
                                                 value={appearance.borderRadius}
                                                 onChange={(borderRadius) => onAppearanceChange({ borderRadius })}
                                                 placeholder="10px"
                                                 disabled={!surveysStylingAvailable}
                                             />
-                                        </LemonField.Pure>
+                                        </Field.Pure>
                                     </div>
                                 </div>
                             ),
@@ -248,7 +248,7 @@ export function AppearanceStep(): JSX.Element {
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <h3 className="font-medium m-0 text-sm">Preview</h3>
-                        <LemonSwitch
+                        <Switch
                             checked={previewBackground === 'dark'}
                             onChange={(checked) => setPreviewBackground(checked ? 'dark' : 'light')}
                             label={previewBackground === 'dark' ? 'Dark page' : 'Light page'}
@@ -279,7 +279,7 @@ export function AppearanceStep(): JSX.Element {
                     {/* Preview navigation */}
                     {totalPreviewPages > 1 && (
                         <div className="flex items-center justify-center gap-2">
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 icon={<IconChevronLeft />}
@@ -291,7 +291,7 @@ export function AppearanceStep(): JSX.Element {
                                     ? `${previewPageIndex + 1} of ${survey.questions.length}`
                                     : 'Thank you'}
                             </span>
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 icon={<IconChevronRight />}

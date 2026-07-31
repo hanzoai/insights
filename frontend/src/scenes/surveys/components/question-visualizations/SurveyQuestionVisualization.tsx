@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { humanFriendlyNumber, pluralize } from 'lib/utils'
 import { StatelessInsightLoadingState } from 'scenes/insights/EmptyStates'
@@ -95,7 +95,7 @@ function QuestionLoadingSkeleton({ question }: { question: SurveyQuestion }): JS
                                         const randomHeight = heights[Math.floor(Math.random() * heights.length)]
                                         return (
                                             <div key={i} className="flex flex-col items-center gap-1 flex-1">
-                                                <LemonSkeleton className={`w-8 sm:w-12 ${randomHeight}`} />
+                                                <Skeleton className={`w-8 sm:w-12 ${randomHeight}`} />
                                                 <span className="text-sm text-secondary font-semibold">
                                                     {question.scale === 10 ? i : i + 1}
                                                 </span>
@@ -111,7 +111,7 @@ function QuestionLoadingSkeleton({ question }: { question: SurveyQuestion }): JS
                         </div>
                     </div>
                     {question.isNpsQuestion !== false && <NPSBreakdownSkeleton />}
-                    <LemonSkeleton className="h-9 w-full" />
+                    <Skeleton className="h-9 w-full" />
                 </>
             )
         case SurveyQuestionType.SingleChoice:
@@ -129,8 +129,8 @@ function QuestionLoadingSkeleton({ question }: { question: SurveyQuestion }): JS
                                         {choice}
                                     </div>
                                     <div className="flex-1 flex items-center gap-2">
-                                        <LemonSkeleton className={`h-6 ${width}`} />
-                                        <LemonSkeleton className="w-6 h-6 flex-shrink-0" />
+                                        <Skeleton className={`h-6 ${width}`} />
+                                        <Skeleton className="w-6 h-6 flex-shrink-0" />
                                     </div>
                                 </div>
                             )
@@ -144,14 +144,14 @@ function QuestionLoadingSkeleton({ question }: { question: SurveyQuestion }): JS
                     {Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="masonry-item border rounded">
                             <div className="px-5 py-4 space-y-2 flex flex-col items-center">
-                                <LemonSkeleton className="h-4 w-full" />
-                                <LemonSkeleton className="h-4 w-3/4" />
-                                <LemonSkeleton className="h-4 w-1/2" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-3/4" />
+                                <Skeleton className="h-4 w-1/2" />
                             </div>
                             <div className="bg-surface-primary px-5 py-4 border-t rounded-b">
                                 <div className="flex items-center gap-2 justify-center">
-                                    <LemonSkeleton className="w-6 h-6 rounded-full" />
-                                    <LemonSkeleton className="h-4 w-24" />
+                                    <Skeleton className="w-6 h-6 rounded-full" />
+                                    <Skeleton className="h-4 w-24" />
                                 </div>
                             </div>
                         </div>

@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { LemonDropdown } from '@hanzo/lemon-ui'
+import { Dropdown } from '@hanzo/elements'
 
 import { InfiniteSelectResults } from 'lib/components/TaxonomicFilter/InfiniteSelectResults'
 import { TaxonomicFilterSearchInput } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
@@ -101,7 +101,7 @@ const UniversalSearch = (): JSX.Element => {
 
     return (
         <BindLogic logic={taxonomicFilterLogic} props={taxonomicFilterLogicProps}>
-            <LemonDropdown
+            <Dropdown
                 overlay={
                     <div className="w-[400px] md:w-[600px]">
                         <InfiniteSelectResults
@@ -126,7 +126,7 @@ const UniversalSearch = (): JSX.Element => {
                     size="small"
                     fullWidth
                 />
-            </LemonDropdown>
+            </Dropdown>
         </BindLogic>
     )
 }

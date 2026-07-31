@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { HeartMascot, SurprisedMascot } from 'lib/components/mascots'
@@ -21,7 +21,7 @@ export function EmailMFAVerify(): JSX.Element {
                             <HeartMascot className="w-full h-full" />
                         </div>
                         <p className="mb-6">Click below to verify your email address.</p>
-                        <LemonButton
+                        <Button
                             type="primary"
                             size="large"
                             fullWidth
@@ -30,7 +30,7 @@ export function EmailMFAVerify(): JSX.Element {
                             loading={verifyResponseLoading}
                         >
                             Login to Insights
-                        </LemonButton>
+                        </Button>
                         <p className="text-muted text-sm mt-6">This device will be remembered for 30 days</p>
                     </>
                 ) : view === 'invalid' ? (
@@ -39,9 +39,9 @@ export function EmailMFAVerify(): JSX.Element {
                         <div className="max-w-60 mb-12">
                             <SurprisedMascot className="w-full h-full" />
                         </div>
-                        <LemonButton type="primary" to="/login" fullWidth center>
+                        <Button type="primary" to="/login" fullWidth center>
                             Back to login
-                        </LemonButton>
+                        </Button>
                     </>
                 ) : null}
             </div>

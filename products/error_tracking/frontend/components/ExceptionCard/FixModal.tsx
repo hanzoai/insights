@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
-import { LemonButton, LemonModal, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Button, Modal, SegmentedButton } from '@hanzo/elements'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { urls } from 'scenes/urls'
@@ -77,26 +77,26 @@ Insights issue: ${issueUrl}
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             title={mode === 'explain' ? 'Explain this error with AI' : 'Fix this error with AI'}
             width="50rem"
             footer={
                 <div className="flex items-center justify-end gap-2">
-                    <LemonButton type="secondary" onClick={onClose}>
+                    <Button type="secondary" onClick={onClose}>
                         Close
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={handleCopy}>
+                    </Button>
+                    <Button type="primary" onClick={handleCopy}>
                         Copy to clipboard
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
             <div className="space-y-4">
                 <div className="flex items-center gap-2">
                     <span className="text-muted">Mode:</span>
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         value={mode}
                         onChange={(newMode) => setMode(newMode)}
                         options={[
@@ -115,6 +115,6 @@ Insights issue: ${issueUrl}
                     {generatePrompt()}
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

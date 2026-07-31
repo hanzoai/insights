@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { LemonCheckbox, LemonTable, LemonTableColumn, LemonTableColumns } from '@hanzo/lemon-ui'
+import { Checkbox, Table, TableColumn, TableColumns } from '@hanzo/elements'
 
 import { getSeriesColor } from 'lib/colors'
 import { dayjs } from 'lib/dayjs'
@@ -33,7 +33,7 @@ export function BillingDataTable({
     const headerChecked: boolean | 'indeterminate' =
         hiddenSeries.length === 0 ? true : hiddenSeries.length === series.length ? false : 'indeterminate'
 
-    const dateColumns = useMemo<LemonTableColumn<BillingSeriesType, keyof BillingSeriesType | undefined>[]>(() => {
+    const dateColumns = useMemo<TableColumn<BillingSeriesType, keyof BillingSeriesType | undefined>[]>(() => {
         if (!dates || dates.length === 0) {
             return []
         }
@@ -60,7 +60,7 @@ export function BillingDataTable({
         })
     }, [dates, valueFormatter])
 
-    const totalColumn = useMemo<LemonTableColumn<BillingSeriesType, keyof BillingSeriesType | undefined>>(
+    const totalColumn = useMemo<TableColumn<BillingSeriesType, keyof BillingSeriesType | undefined>>(
         () => ({
             width: `${100 / (dates.length + 1)}%`,
             title: totalLabel,
@@ -80,12 +80,12 @@ export function BillingDataTable({
     )
 
     // Combine series checkbox column, total column, and all date columns
-    const columns: LemonTableColumns<BillingSeriesType> = useMemo(
+    const columns: TableColumns<BillingSeriesType> = useMemo(
         () => [
             {
                 title: (
                     <div className="flex items-center">
-                        <LemonCheckbox checked={headerChecked} onChange={toggleAllSeries} className="mr-2" />
+                        <Checkbox checked={headerChecked} onChange={toggleAllSeries} className="mr-2" />
                         <span>Series</span>
                     </div>
                 ),
@@ -93,7 +93,7 @@ export function BillingDataTable({
                     const isHidden = hiddenSeries.includes(record.id)
                     return (
                         <div className="flex items-center gap-1">
-                            <LemonCheckbox
+                            <Checkbox
                                 checked={!isHidden}
                                 onChange={() => toggleSeries(record.id)}
                                 className="mr-2"
@@ -116,7 +116,7 @@ export function BillingDataTable({
 
     return (
         <div className="overflow-x-auto border rounded bg-bg-light">
-            <LemonTable
+            <Table
                 data-attr="billing-data-table"
                 dataSource={series}
                 columns={columns}

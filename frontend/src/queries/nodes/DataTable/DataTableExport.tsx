@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 
 import { IconDownload } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Menu } from '@hanzo/elements'
 
 import { TriggerExportProps } from 'lib/components/ExportButton/exporter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { SaveToCohortModalContent } from 'lib/components/SaveToCohortModalContent/SaveToCohortModalContent'
 import { PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES } from 'lib/constants'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { pluralize } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -123,7 +123,7 @@ export function DataTableExport({ query, fileNameForExport }: DataTableExportPro
     const canSaveAsCohort = isActorsQuery(source)
 
     return (
-        <LemonMenu
+        <Menu
             items={[
                 {
                     label: 'Export current columns',
@@ -207,21 +207,21 @@ export function DataTableExport({ query, fileNameForExport }: DataTableExportPro
                         {
                             label: 'Save as static cohort',
                             onClick: () => {
-                                LemonDialog.openForm({
+                                Dialog.openForm({
                                     title: 'Save as static cohort',
                                     description: 'This will create a cohort with the current list of people.',
                                     initialValues: {
                                         name: '',
                                     },
                                     content: (
-                                        <LemonField name="name">
-                                            <LemonInput
+                                        <Field name="name">
+                                            <Input
                                                 type="text"
                                                 data-attr="insight-name"
                                                 placeholder="Name of the new cohort"
                                                 autoFocus
                                             />
-                                        </LemonField>
+                                        </Field>
                                     ),
                                     errors: {
                                         name: (name) => (!name ? 'You must enter a name' : undefined),
@@ -233,7 +233,7 @@ export function DataTableExport({ query, fileNameForExport }: DataTableExportPro
                         {
                             label: 'Add to existing cohort',
                             onClick: () => {
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: 'Add to existing cohort',
                                     description: 'This will add the current list of people to a static cohort.',
                                     content: (closeDialog) => (
@@ -250,9 +250,9 @@ export function DataTableExport({ query, fileNameForExport }: DataTableExportPro
                 },
             ].filter(Boolean)}
         >
-            <LemonButton type="secondary" icon={<IconDownload />} data-attr="data-table-export-menu" size="small">
+            <Button type="secondary" icon={<IconDownload />} data-attr="data-table-export-menu" size="small">
                 Export{filterCount > 0 ? ` (${pluralize(filterCount, 'filter')})` : ''}
-            </LemonButton>
-        </LemonMenu>
+            </Button>
+        </Menu>
     )
 }

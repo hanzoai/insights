@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonTextArea } from '@hanzo/lemon-ui'
+import { Button, TextArea } from '@hanzo/elements'
 
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
+import { Radio } from 'lib/elements/Radio'
 
 import { SurveyQuestionType } from '~/types'
 
@@ -26,7 +26,7 @@ export function DisableSurvey(): JSX.Element | null {
                         <div key={index}>
                             <label className="font-medium m-0">{question.question}</label>
                             {question.type === SurveyQuestionType.SingleChoice && (
-                                <LemonRadio
+                                <Radio
                                     className="mt-2"
                                     value={selectedChoice ?? undefined}
                                     onChange={setSelectedChoice}
@@ -39,7 +39,7 @@ export function DisableSurvey(): JSX.Element | null {
                             {question.type === SurveyQuestionType.Open && (
                                 <>
                                     <div className="h-2" />
-                                    <LemonTextArea
+                                    <TextArea
                                         placeholder="Share your feedback..."
                                         value={openResponse}
                                         onChange={setOpenResponse}
@@ -50,7 +50,7 @@ export function DisableSurvey(): JSX.Element | null {
                         </div>
                     ))}
                     <div>
-                        <LemonButton
+                        <Button
                             type="primary"
                             size="small"
                             disabledReason={
@@ -61,7 +61,7 @@ export function DisableSurvey(): JSX.Element | null {
                             onClick={submitResponse}
                         >
                             Submit
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             )}

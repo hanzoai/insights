@@ -3,7 +3,7 @@ import { actions, connect, events, kea, listeners, path, reducers, selectors } f
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { Params } from 'scenes/sceneTypes'
@@ -157,12 +157,12 @@ export const taskTrackerSceneLogic = kea<taskTrackerSceneLogicType>([
             const { description, repositoryConfig } = values.newTaskData
 
             if (!description.trim()) {
-                lemonToast.error('Description is required')
+                toast.error('Description is required')
                 actions.submitNewTaskFailure('Description is required')
                 return
             }
             if (!repositoryConfig.integrationId || !repositoryConfig.organization || !repositoryConfig.repository) {
-                lemonToast.error('Repository is required')
+                toast.error('Repository is required')
                 actions.submitNewTaskFailure('Repository is required')
                 return
             }
@@ -177,7 +177,7 @@ export const taskTrackerSceneLogic = kea<taskTrackerSceneLogicType>([
                 }
 
                 const newTask = await api.tasks.create(taskData)
-                lemonToast.success('Task created successfully')
+                toast.success('Task created successfully')
 
                 // Auto-run the task after creation
                 const taskWithRun = await api.tasks.run(newTask.id)
@@ -189,7 +189,7 @@ export const taskTrackerSceneLogic = kea<taskTrackerSceneLogicType>([
                 actions.closeCreateModal()
                 actions.loadTasks()
             } catch (error) {
-                lemonToast.error('Failed to create task')
+                toast.error('Failed to create task')
                 actions.submitNewTaskFailure(error instanceof Error ? error.message : 'Unknown error')
             }
         },

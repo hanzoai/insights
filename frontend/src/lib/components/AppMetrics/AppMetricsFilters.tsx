@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCalendar } from '@hanzo/icons'
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { DateFilter } from '../DateFilter/DateFilter'
 import { appMetricsLogic } from './appMetricsLogic'
@@ -17,7 +17,7 @@ export function AppMetricsFilters({ logicKey }: AppMetricsFiltersProps): JSX.Ele
 
     return (
         <div className="flex flex-row gap-2 flex-wrap">
-            <LemonSelect
+            <Select
                 options={[
                     {
                         label: 'Hourly',

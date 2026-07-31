@@ -1,4 +1,4 @@
-import { LemonBanner, Link } from '@hanzo/lemon-ui'
+import { Banner, Link } from '@hanzo/elements'
 
 import type { ResultBreakdownRenderProps } from './types'
 
@@ -12,7 +12,7 @@ export const ResultsInsightInfoBanner = ({ exposureDifference }: SafeResultsInsi
     }
 
     return (
-        <LemonBanner type="info" className="mb-4">
+        <Banner type="info" className="mb-4">
             <div className="items-center inline-flex flex-wrap">
                 <span>
                     Insight results may be slightly different from exposure results due to a difference in data
@@ -26,6 +26,6 @@ export const ResultsInsightInfoBanner = ({ exposureDifference }: SafeResultsInsi
                     .
                 </span>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

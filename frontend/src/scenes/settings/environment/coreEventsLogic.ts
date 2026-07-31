@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { CoreEvent } from '~/queries/schema/schema-general'
@@ -78,9 +78,9 @@ export const coreEventsLogic = kea<coreEventsLogicType>([
             try {
                 await api.create(`api/environments/${values.currentTeamId}/core_events/`, event)
                 actions.loadCoreEvents()
-                lemonToast.success('Core event added')
+                toast.success('Core event added')
             } catch {
-                lemonToast.error('Failed to add core event')
+                toast.error('Failed to add core event')
             }
         },
         updateCoreEvent: async ({ event }) => {
@@ -90,9 +90,9 @@ export const coreEventsLogic = kea<coreEventsLogicType>([
             try {
                 await api.update(`api/environments/${values.currentTeamId}/core_events/${event.id}/`, event)
                 actions.loadCoreEvents()
-                lemonToast.success('Core event updated')
+                toast.success('Core event updated')
             } catch {
-                lemonToast.error('Failed to update core event')
+                toast.error('Failed to update core event')
             }
         },
         removeCoreEvent: async ({ eventId }) => {
@@ -102,9 +102,9 @@ export const coreEventsLogic = kea<coreEventsLogicType>([
             try {
                 await api.delete(`api/environments/${values.currentTeamId}/core_events/${eventId}/`)
                 actions.loadCoreEvents()
-                lemonToast.success('Core event removed')
+                toast.success('Core event removed')
             } catch {
-                lemonToast.error('Failed to remove core event')
+                toast.error('Failed to remove core event')
             }
         },
     })),

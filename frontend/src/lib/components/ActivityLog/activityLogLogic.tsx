@@ -14,7 +14,7 @@ import {
     humanize,
 } from 'lib/components/ActivityLog/humanizeActivity'
 import { ACTIVITY_PAGE_SIZE } from 'lib/constants'
-import { PaginationManual } from 'lib/lemon-ui/PaginationControl'
+import { PaginationManual } from 'lib/elements/PaginationControl'
 import { actionActivityDescriber } from 'scenes/actions/actionActivityDescriber'
 import { alertConfigurationActivityDescriber } from 'scenes/alerts/activityDescriptions'
 import { annotationActivityDescriber } from 'scenes/annotations/activityDescriptions'

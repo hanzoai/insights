@@ -4,7 +4,7 @@ import { lazyLoaders, loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -909,7 +909,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
 
             // Show toast notification with human-readable label and view filters button
             const filterLabel = formatPropertyLabel(filter, {})
-            lemonToast.success(`Filter applied: ${filterLabel}`, {
+            toast.success(`Filter applied: ${filterLabel}`, {
                 toastId: `filter-applied-${propertyKey}`,
                 button: {
                     label: 'View filters',
@@ -1029,7 +1029,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                 { type: filterType, key: propertyKey, value: propertyValue, operator: PropertyOperator.Exact },
                 {}
             )
-            lemonToast.success(`${actionLabel}: ${filterLabel}`, {
+            toast.success(`${actionLabel}: ${filterLabel}`, {
                 toastId: `filter-toggled-${propertyKey}`,
                 button: {
                     label: 'View filters',
@@ -1079,7 +1079,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
             actions.maybeLoadSessionRecordings('older')
         },
         handleBulkAddToPlaylist: async ({ short_id }: { short_id: string }) => {
-            await lemonToast.promise(
+            await toast.promise(
                 (async () => {
                     try {
                         await api.recordings.bulkAddRecordingsToPlaylist(short_id, values.selectedRecordingsIds)
@@ -1109,7 +1109,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
             )
         },
         handleBulkDeleteFromPlaylist: async ({ short_id }: { short_id: string }) => {
-            await lemonToast.promise(
+            await toast.promise(
                 (async () => {
                     try {
                         await api.recordings.bulkDeleteRecordingsFromPlaylist(short_id, values.selectedRecordingsIds)
@@ -1141,7 +1141,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
             }
         },
         handleDeleteSelectedRecordings: async ({ shortId }: { shortId?: string }) => {
-            await lemonToast.promise(
+            await toast.promise(
                 (async () => {
                     try {
                         actions.setDeleteConfirmationText('')
@@ -1187,7 +1187,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
             }
         },
         handleBulkMarkAsViewed: async ({ shortId }: { shortId?: string }) => {
-            await lemonToast.promise(
+            await toast.promise(
                 (async () => {
                     try {
                         await api.recordings.bulkViewedRecordings(values.selectedRecordingsIds)
@@ -1215,7 +1215,7 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
             )
         },
         handleBulkMarkAsNotViewed: async ({ shortId }: { shortId?: string }) => {
-            await lemonToast.promise(
+            await toast.promise(
                 (async () => {
                     try {
                         await api.recordings.bulkNotViewedRecordings(values.selectedRecordingsIds)

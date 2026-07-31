@@ -3,7 +3,7 @@
 import { Meta } from '@storybook/react'
 
 const meta: Meta = {
-    title: 'Lemon UI/Mascot illustrations [removed]',
+    title: 'Elements/Mascot illustrations [removed]',
     tags: ['test-skip'],
 }
 export default meta

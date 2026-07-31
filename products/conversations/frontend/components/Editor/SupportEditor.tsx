@@ -22,14 +22,14 @@ import { RichContentNodeMention } from 'lib/components/RichContentEditor/RichCon
 import { RichContentEditorType, RichContentNodeType, TTEditor } from 'lib/components/RichContentEditor/types'
 import { createEditor } from 'lib/components/RichContentEditor/utils'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonFileInput } from 'lib/lemon-ui/LemonFileInput'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { emojiUsageLogic } from 'lib/lemon-ui/LemonTextArea/emojiUsageLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
-import { Popover } from 'lib/lemon-ui/Popover'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconBold, IconItalic, IconLink } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { FileInput } from 'lib/elements/FileInput'
+import { Input } from 'lib/elements/Input'
+import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
+import { toast } from 'lib/elements/Toast'
+import { Popover } from 'lib/elements/Popover'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconBold, IconItalic, IconLink } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
@@ -292,7 +292,7 @@ export function SupportEditor({
         },
         onError: (detail) => {
             insights.capture('rich text image upload failed', { error: detail })
-            lemonToast.error(`Error uploading image: ${detail}`)
+            toast.error(`Error uploading image: ${detail}`)
         },
     })
 
@@ -345,28 +345,28 @@ export function SupportEditor({
             />
             <div className="flex justify-between p-0.5">
                 <div className="flex items-center">
-                    <LemonButton
+                    <Button
                         size="small"
                         active={ttEditor?.isActive('bold')}
                         onClick={() => ttEditor?.chain().focus().toggleBold().run()}
                         icon={<IconBold />}
                         tooltip="Bold (Cmd+B)"
                     />
-                    <LemonButton
+                    <Button
                         size="small"
                         active={ttEditor?.isActive('italic')}
                         onClick={() => ttEditor?.chain().focus().toggleItalic().run()}
                         icon={<IconItalic />}
                         tooltip="Italic (Cmd+I)"
                     />
-                    <LemonButton
+                    <Button
                         size="small"
                         active={ttEditor?.isActive('underline')}
                         onClick={() => ttEditor?.chain().focus().toggleUnderline().run()}
                         icon={<IconUnderline />}
                         tooltip="Underline (Cmd+U)"
                     />
-                    <LemonButton
+                    <Button
                         size="small"
                         active={ttEditor?.isActive('code')}
                         onClick={() => ttEditor?.chain().focus().toggleCode().run()}
@@ -381,7 +381,7 @@ export function SupportEditor({
                         }}
                         overlay={
                             <div className="p-2 flex gap-2 items-center">
-                                <LemonInput
+                                <Input
                                     size="small"
                                     placeholder="https://..."
                                     value={linkUrl}
@@ -401,7 +401,7 @@ export function SupportEditor({
                                         }
                                     }}
                                 />
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="primary"
                                     onClick={() => {
@@ -414,9 +414,9 @@ export function SupportEditor({
                                     disabledReason={!linkUrl ? 'Enter a URL' : undefined}
                                 >
                                     Add
-                                </LemonButton>
+                                </Button>
                                 {ttEditor?.isActive('link') && (
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         type="secondary"
                                         onClick={() => {
@@ -426,12 +426,12 @@ export function SupportEditor({
                                         }}
                                     >
                                         Remove
-                                    </LemonButton>
+                                    </Button>
                                 )}
                             </div>
                         }
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             active={ttEditor?.isActive('link')}
                             onClick={() => {
@@ -445,7 +445,7 @@ export function SupportEditor({
                         />
                     </Popover>
                     <div className="w-px h-4 bg-border mx-1" />
-                    <LemonFileInput
+                    <FileInput
                         key="file-upload"
                         accept={'image/*'}
                         multiple={false}
@@ -455,7 +455,7 @@ export function SupportEditor({
                         value={filesToUpload}
                         showUploadedFiles={false}
                         callToAction={
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={
                                     uploading ? (
@@ -475,7 +475,7 @@ export function SupportEditor({
                     />
                     <EmojiPickerPopover
                         key="emoj-picker"
-                        data-attr="lemon-rich-text-editor-emoji-popover"
+                        data-attr="rich-text-editor-emoji-popover"
                         onSelect={(emoji: string) => {
                             if (ttEditor) {
                                 ttEditor.commands.insertContent(emoji)

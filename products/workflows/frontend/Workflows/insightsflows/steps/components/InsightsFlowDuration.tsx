@@ -1,4 +1,4 @@
-import { LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Input, Select } from '@hanzo/elements'
 
 const DURATION_REGEX = /^(\d*\.?\d+)([dhm])$/
 
@@ -22,7 +22,7 @@ export function InsightsFlowDuration({
 
     return (
         <div className="flex gap-2">
-            <LemonInput
+            <Input
                 type="number"
                 value={numberValue}
                 min={0}
@@ -33,7 +33,7 @@ export function InsightsFlowDuration({
                 }
             />
 
-            <LemonSelect
+            <Select
                 options={[
                     { label: 'Minute(s)', value: 'm' },
                     { label: 'Hour(s)', value: 'h' },

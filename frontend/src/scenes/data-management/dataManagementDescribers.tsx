@@ -10,8 +10,8 @@ import {
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { Link } from 'lib/lemon-ui/Link'
-import { IconVerifiedEvent } from 'lib/lemon-ui/icons'
+import { Link } from 'lib/elements/Link'
+import { IconVerifiedEvent } from 'lib/elements/icons'
 import { pluralize } from 'lib/utils'
 import { urls } from 'scenes/urls'
 

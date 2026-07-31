@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonRadio, LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
+import { Button } from 'lib/elements/Button'
+import { Radio, RadioOption } from 'lib/elements/Radio'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -13,12 +13,12 @@ import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 
 type PoEMode = NonNullable<InsightsQLQueryModifiers['personsOnEventsMode']>
 
-const POE_OPTIONS: LemonRadioOption<PoEMode>[] = [
+const POE_OPTIONS: RadioOption<PoEMode>[] = [
     {
         value: 'person_id_override_properties_on_events',
         label: (
             <span className="inline-flex items-center gap-1.5">
-                Use user properties from the time of the event<LemonTag>RECOMMENDED</LemonTag>
+                Use user properties from the time of the event<Tag>RECOMMENDED</Tag>
             </span>
         ),
         description: (
@@ -66,15 +66,15 @@ export function PersonsOnEvents(): JSX.Element {
 
     return (
         <>
-            <LemonRadio value={poeMode} onChange={setPoeMode} options={POE_OPTIONS} />
+            <Radio value={poeMode} onChange={setPoeMode} options={POE_OPTIONS} />
             <div className="mt-4">
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={() => handleChange(poeMode)}
                     disabledReason={poeMode === savedPoEMode ? 'No changes to save' : undefined}
                 >
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

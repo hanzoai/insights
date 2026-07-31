@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -36,9 +36,9 @@ export function DataPipelinesSources({ action }: { action: JSX.Element }): JSX.E
                         title={
                             <span className="flex items-center gap-2">
                                 Event sources
-                                <LemonTag type="primary" size="small">
+                                <Tag type="primary" size="small">
                                     Experimental
-                                </LemonTag>
+                                </Tag>
                             </span>
                         }
                         description="Insights can expose a webhook that you can configure however you need to receive data from a 3rd party with no in-between service necessary"

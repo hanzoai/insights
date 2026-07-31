@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
 import { IconBook, IconEllipsis, IconGear, IconInfo, IconLock, IconLogomark, IconNotebook } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonMenuItems, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Menu, MenuItems, Modal } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { Resizer } from 'lib/components/Resizer/Resizer'
@@ -208,7 +208,7 @@ export function SidePanel({
         return null
     }
 
-    const menuOptions: LemonMenuItems | undefined = extraTabs
+    const menuOptions: MenuItems | undefined = extraTabs
         ? [
               {
                   title: 'Open in side panel',
@@ -231,7 +231,7 @@ export function SidePanel({
         const supportsModal = activeTab ? !SIDE_PANEL_TABS[activeTab]?.noModalSupport : true
 
         return (
-            <LemonModal
+            <Modal
                 simple
                 isOpen={!!PanelContent && supportsModal}
                 onClose={closeSidePanel}
@@ -239,7 +239,7 @@ export function SidePanel({
                 width="40rem"
             >
                 {PanelContent ? <PanelContent /> : null}
-            </LemonModal>
+            </Modal>
         )
     }
 
@@ -293,7 +293,7 @@ export function SidePanel({
                                     const keybind = SIDE_PANEL_TAB_KEYBINDS[tab]
 
                                     const button = (
-                                        <LemonButton
+                                        <Button
                                             key={tab}
                                             icon={<Icon className="size-5" />}
                                             onClick={() =>
@@ -312,7 +312,7 @@ export function SidePanel({
                                             size="xsmall"
                                         >
                                             {label}
-                                        </LemonButton>
+                                        </Button>
                                     )
 
                                     if (keybind) {
@@ -336,9 +336,9 @@ export function SidePanel({
                     </div>
                     {menuOptions ? (
                         <div className="shrink-0 flex items-center m-2">
-                            <LemonMenu items={menuOptions}>
-                                <LemonButton size="small" icon={<IconEllipsis />} />
-                            </LemonMenu>
+                            <Menu items={menuOptions}>
+                                <Button size="small" icon={<IconEllipsis />} />
+                            </Menu>
                         </div>
                     ) : null}
                 </div>

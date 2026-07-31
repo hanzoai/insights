@@ -2,11 +2,11 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconFlag, IconRocket } from '@hanzo/icons'
-import { LemonDivider, LemonTag } from '@hanzo/lemon-ui'
+import { Divider, Tag } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { urls } from '~/scenes/urls'
@@ -65,11 +65,11 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeEarlyAccessAttr
                 <div className="flex items-center gap-2 p-3">
                     <IconRocket className="text-lg" />
                     {earlyAccessFeatureLoading ? (
-                        <LemonSkeleton className="h-6 flex-1" />
+                        <Skeleton className="h-6 flex-1" />
                     ) : (
                         <>
                             <span className="flex-1 font-semibold truncate">{earlyAccessFeature.name}</span>
-                            <LemonTag
+                            <Tag
                                 type={
                                     earlyAccessFeature.stage === EarlyAccessFeatureStage.Beta
                                         ? 'warning'
@@ -80,14 +80,14 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeEarlyAccessAttr
                                 className="uppercase"
                             >
                                 {earlyAccessFeature.stage}
-                            </LemonTag>
+                            </Tag>
                         </>
                     )}
                 </div>
 
                 {expanded ? (
                     <>
-                        <LemonDivider className="my-0" />
+                        <Divider className="my-0" />
                         {earlyAccessFeature.stage === EarlyAccessFeatureStage.Beta ? (
                             <div className="p-2">
                                 <PersonList earlyAccessFeature={earlyAccessFeature as EarlyAccessFeatureType} />

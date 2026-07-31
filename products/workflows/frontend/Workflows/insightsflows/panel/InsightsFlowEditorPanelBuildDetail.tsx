@@ -3,18 +3,18 @@ import { useEffect } from 'react'
 
 import { IconExternal, IconPlay, IconPlus, IconX } from '@hanzo/icons'
 import {
-    LemonBadge,
-    LemonBanner,
-    LemonButton,
-    LemonCollapse,
-    LemonDivider,
-    LemonInput,
-    LemonLabel,
-    LemonSelect,
-} from '@hanzo/lemon-ui'
+    Badge,
+    Banner,
+    Button,
+    Collapse,
+    Divider,
+    Input,
+    Label,
+    Select,
+} from '@hanzo/elements'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
-import { LemonField } from 'lib/lemon-ui/LemonField/LemonField'
+import { Field } from 'lib/elements/Field/Field'
 import { urls } from 'scenes/urls'
 
 import { CategorySelect } from 'products/workflows/frontend/OptOuts/CategorySelect'
@@ -78,20 +78,20 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
 
             {isOptOutEligibleAction(action) && (
                 <>
-                    <LemonDivider className="my-0" />
+                    <Divider className="my-0" />
                     <div className="flex flex-col px-2 py-1">
-                        <LemonLabel htmlFor="Message category" className="flex gap-2 justify-between items-center">
+                        <Label htmlFor="Message category" className="flex gap-2 justify-between items-center">
                             <span>Message category</span>
                             <div className="flex gap-2">
                                 {!categoriesLoading && !categories.length && (
-                                    <LemonButton
+                                    <Button
                                         to={urls.workflows('opt-outs')}
                                         targetBlank
                                         type="secondary"
                                         icon={<IconExternal />}
                                     >
                                         Configure
-                                    </LemonButton>
+                                    </Button>
                                 )}
                                 <CategorySelect
                                     onChange={(categoryId) => {
@@ -109,17 +109,17 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                     value={action.config.message_category_id}
                                 />
                             </div>
-                        </LemonLabel>
+                        </Label>
                     </div>
                 </>
             )}
 
             {!['trigger', 'exit'].includes(action.type) && (
                 <>
-                    <LemonDivider className="my-0" />
+                    <Divider className="my-0" />
 
                     <div className="flex-0">
-                        <LemonCollapse
+                        <Collapse
                             embedded
                             panels={[
                                 {
@@ -127,7 +127,7 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                     header: (
                                         <>
                                             <span className="flex-1">Output variables</span>
-                                            <LemonBadge.Number
+                                            <Badge.Number
                                                 count={mappings.filter((m) => m.key).length}
                                                 showZero={false}
                                             />
@@ -141,8 +141,8 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                     className="flex flex-col gap-1 w-full rounded border border-border p-2"
                                                 >
                                                     <div className="flex items-center gap-1">
-                                                        <LemonField.Pure label="Variable" className="flex-1">
-                                                            <LemonSelect
+                                                        <Field.Pure label="Variable" className="flex-1">
+                                                            <Select
                                                                 options={[
                                                                     { value: '', label: 'Select variable...' },
                                                                     ...(workflow.variables || [])
@@ -167,20 +167,20 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                                 }}
                                                                 size="small"
                                                             />
-                                                        </LemonField.Pure>
-                                                        <LemonButton
+                                                        </Field.Pure>
+                                                        <Button
                                                             icon={<IconX />}
                                                             size="small"
                                                             tooltip="Remove mapping"
                                                             onClick={() => removeMapping(index)}
                                                         />
                                                     </div>
-                                                    <LemonField.Pure
+                                                    <Field.Pure
                                                         label="Result path"
                                                         info="Specify a path within the step result to store, e.g. 'body.results[0].id'. Leave blank for the entire result."
                                                         className="w-full"
                                                     >
-                                                        <LemonInput
+                                                        <Input
                                                             disabledReason={
                                                                 !mapping.key ? 'Select a variable first.' : undefined
                                                             }
@@ -191,19 +191,19 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                             placeholder="body.results[0].id"
                                                             size="small"
                                                         />
-                                                    </LemonField.Pure>
+                                                    </Field.Pure>
                                                 </div>
                                             ))}
                                             <div className="flex gap-2 w-full">
-                                                <LemonButton
+                                                <Button
                                                     icon={<IconPlus />}
                                                     size="small"
                                                     type="secondary"
                                                     onClick={() => addMapping()}
                                                 >
                                                     Add mapping
-                                                </LemonButton>
-                                                <LemonButton
+                                                </Button>
+                                                <Button
                                                     icon={<IconPlay />}
                                                     size="small"
                                                     type="primary"
@@ -213,12 +213,12 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                     onClick={runOutputTest}
                                                 >
                                                     Pick from response
-                                                </LemonButton>
+                                                </Button>
                                             </div>
                                             {testError && (
-                                                <LemonBanner type="error" className="w-full">
+                                                <Banner type="error" className="w-full">
                                                     {testError}
-                                                </LemonBanner>
+                                                </Banner>
                                             )}
                                             {testResultData !== null && (
                                                 <div
@@ -255,7 +255,7 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                             <div className="flex flex-wrap gap-1">
                                                                 {mappings.map((mapping, index) =>
                                                                     mapping.key ? (
-                                                                        <LemonButton
+                                                                        <Button
                                                                             key={index}
                                                                             size="xsmall"
                                                                             type="secondary"
@@ -267,23 +267,23 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                                             }
                                                                         >
                                                                             {mapping.key}
-                                                                        </LemonButton>
+                                                                        </Button>
                                                                     ) : null
                                                                 )}
-                                                                <LemonButton
+                                                                <Button
                                                                     size="xsmall"
                                                                     type="tertiary"
                                                                     onClick={() => cancelPendingPath()}
                                                                 >
                                                                     Cancel
-                                                                </LemonButton>
+                                                                </Button>
                                                             </div>
                                                         </div>
                                                     )}
                                                 </div>
                                             )}
-                                            <LemonDivider className="my-1" />
-                                            <LemonButton
+                                            <Divider className="my-1" />
+                                            <Button
                                                 icon={<IconPlus />}
                                                 sideIcon={<IconExternal />}
                                                 size="small"
@@ -291,7 +291,7 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                 onClick={() => setMode('variables')}
                                             >
                                                 New variable
-                                            </LemonButton>
+                                            </Button>
                                         </div>
                                     ),
                                 },
@@ -300,7 +300,7 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                     header: (
                                         <>
                                             <span className="flex-1">Conditions</span>
-                                            <LemonBadge.Number count={numberOfActionFilters} showZero={false} />
+                                            <Badge.Number count={numberOfActionFilters} showZero={false} />
                                         </>
                                     ),
                                     content: (
@@ -329,7 +329,7 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                 What to do if this step fails (e.g. message could not be sent). By
                                                 default, the user will continue to the next step.
                                             </p>
-                                            <LemonSelect
+                                            <Select
                                                 options={[
                                                     { value: 'continue', label: 'Continue to next step' },
                                                     { value: 'abort', label: 'Exit the workflow' },

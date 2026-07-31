@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconSearch } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSnack, LemonTable } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input, Snack, Table } from '@hanzo/elements'
 
 import { LOGS_PORTION_LIMIT } from 'lib/constants'
 import { pluralize } from 'lib/utils'
@@ -17,7 +17,7 @@ export function PipelineNodeLogs({ id }: PipelineNodeLogsLogicProps): JSX.Elemen
 
     return (
         <div className="flex-1 ph-no-capture deprecated-space-y-2">
-            <LemonInput
+            <Input
                 type="search"
                 placeholder="Search messages or invocation ID…"
                 fullWidth
@@ -27,7 +27,7 @@ export function PipelineNodeLogs({ id }: PipelineNodeLogsLogicProps): JSX.Elemen
                     <>
                         <IconSearch />
 
-                        {instanceId && <LemonSnack onClose={() => setInstanceId(null)}>{instanceId}</LemonSnack>}
+                        {instanceId && <Snack onClose={() => setInstanceId(null)}>{instanceId}</Snack>}
                     </>
                 }
             />
@@ -35,7 +35,7 @@ export function PipelineNodeLogs({ id }: PipelineNodeLogsLogicProps): JSX.Elemen
                 <span className="mr-1">Show logs of level:</span>
                 {ALL_LOG_LEVELS.map((level) => {
                     return (
-                        <LemonCheckbox
+                        <Checkbox
                             key={level}
                             label={level}
                             checked={selectedLogLevels.includes(level)}
@@ -49,7 +49,7 @@ export function PipelineNodeLogs({ id }: PipelineNodeLogsLogicProps): JSX.Elemen
                     )
                 })}
             </div>
-            <LemonButton
+            <Button
                 onClick={revealBackground}
                 loading={logsLoading}
                 type="secondary"
@@ -60,9 +60,9 @@ export function PipelineNodeLogs({ id }: PipelineNodeLogsLogicProps): JSX.Elemen
                 {backgroundLogs.length
                     ? `Load ${pluralize(backgroundLogs.length, 'newer entry', 'newer entries')}`
                     : 'No new entries'}
-            </LemonButton>
+            </Button>
 
-            <LemonTable
+            <Table
                 dataSource={logs}
                 columns={columns}
                 loading={logsLoading}
@@ -71,7 +71,7 @@ export function PipelineNodeLogs({ id }: PipelineNodeLogsLogicProps): JSX.Elemen
                 pagination={{ pageSize: 200, hideOnSinglePage: true }}
             />
             {!!logs.length && (
-                <LemonButton
+                <Button
                     onClick={loadMoreLogs}
                     loading={logsLoading}
                     type="secondary"
@@ -80,7 +80,7 @@ export function PipelineNodeLogs({ id }: PipelineNodeLogsLogicProps): JSX.Elemen
                     disabledReason={!isThereMoreToLoad ? "There's nothing more to load" : undefined}
                 >
                     {isThereMoreToLoad ? `Load up to ${LOGS_PORTION_LIMIT} older entries` : 'No older entries'}
-                </LemonButton>
+                </Button>
             )}
         </div>
     )

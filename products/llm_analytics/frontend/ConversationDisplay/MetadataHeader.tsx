@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { lowercaseFirstLetter } from 'lib/utils'
@@ -36,7 +36,7 @@ export function MetadataHeader({
 }): JSX.Element {
     return (
         <div className={classNames('flex flex-wrap gap-2', className)}>
-            {isError && <LemonTag type="danger">Error</LemonTag>}
+            {isError && <Tag type="danger">Error</Tag>}
             {typeof latency === 'number' && (
                 <MetadataTag label="Latency">{`${Math.round(latency * 10e2) / 10e2}s latency`}</MetadataTag>
             )}

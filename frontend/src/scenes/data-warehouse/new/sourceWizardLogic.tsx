@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { router, urlToAction } from 'kea-router'
 import insights from '@hanzo/insights'
 
-import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -626,7 +626,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                     </div>
                 )
 
-                LemonDialog.open({
+                Dialog.open({
                     title: 'Confirm your table configurations',
                     content: confirmation,
                     primaryButton: {
@@ -694,7 +694,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                     source_type: values.selectedConnector.name,
                 })
 
-                lemonToast.success('New data resource created')
+                toast.success('New data resource created')
 
                 actions.setSourceId(id)
                 actions.resetSourceConnectionDetails()
@@ -702,7 +702,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                 actions.markTaskAsCompleted(SetupTaskId.ConnectSource)
                 actions.onNext()
             } catch (e: any) {
-                lemonToast.error(e.data?.message ?? e.message)
+                toast.error(e.data?.message ?? e.message)
             } finally {
                 actions.setIsLoading(false)
             }
@@ -714,7 +714,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                     source_type: source,
                 })
             } else {
-                lemonToast.error(`Something went wrong.`)
+                toast.error(`Something went wrong.`)
             }
         },
         submitSourceConnectionDetailsSuccess: () => {
@@ -758,7 +758,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                 }
 
                 if (showToast) {
-                    lemonToast.info(
+                    toast.info(
                         "We've setup some defaults for you! Please take a look to make sure you're happy with the results."
                     )
                 }
@@ -767,7 +767,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                 actions.onNext()
             } catch (e: any) {
                 const errorMessage = e.data?.message ?? e.message
-                lemonToast.error(errorMessage)
+                toast.error(errorMessage)
 
                 insights.capture('warehouse credentials invalid', {
                     sourceType: values.selectedConnector.name,
@@ -896,7 +896,7 @@ export const sourceWizardLogic = kea<sourceWizardLogicType>([
                                     })
                                     fieldPayload[name] = JSON.parse(loadedFile)
                                 } catch {
-                                    return lemonToast.error('File is not valid')
+                                    return toast.error('File is not valid')
                                 }
                             } else {
                                 fieldPayload[name] = payload['payload'][name]

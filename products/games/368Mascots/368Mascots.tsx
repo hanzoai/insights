@@ -4,8 +4,8 @@ import { useCallback, useRef, useState } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 // ==========================================================================
 export type Icon = 'icon1' | 'icon2' | 'icon3' | 'icon4'
@@ -373,9 +373,9 @@ const CritterMatchGame: React.FC = () => {
                         pointsLeft > 0 ? (
                             <>
                                 <span>Game over.</span>
-                                <LemonButton type="primary" onClick={restartGame}>
+                                <Button type="primary" onClick={restartGame}>
                                     Try again?
-                                </LemonButton>
+                                </Button>
                             </>
                         ) : (
                             '🎉 All the mascots are safe! Well done you! 🎉'

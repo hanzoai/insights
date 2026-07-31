@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
+import { Button } from 'lib/elements/Button'
+import { Switch } from 'lib/elements/Switch'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
@@ -27,7 +27,7 @@ export function PreAggregatedTablesSetting(): JSX.Element {
                 resourceType={AccessControlResourceType.WebAnalytics}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonSwitch
+                <Switch
                     checked={useWebAnalyticsPreAggregatedTables}
                     onChange={(newValue) => setUseWebAnalyticsPreAggregatedTables(newValue)}
                 />
@@ -37,7 +37,7 @@ export function PreAggregatedTablesSetting(): JSX.Element {
                     resourceType={AccessControlResourceType.WebAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => handleChange(useWebAnalyticsPreAggregatedTables)}
                         disabledReason={
@@ -45,7 +45,7 @@ export function PreAggregatedTablesSetting(): JSX.Element {
                         }
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
         </>

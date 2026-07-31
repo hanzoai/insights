@@ -1,6 +1,6 @@
 import { BindLogic, BuiltLogic, Logic, LogicWrapper, useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { DebugCHQueries } from 'lib/components/AppShortcuts/utils/DebugCHQueries'
@@ -84,18 +84,18 @@ export function InsightAsScene({ insightId, attachTo, tabId }: InsightAsScenePro
                 <InsightPageHeader insightLogicProps={insightProps} />
 
                 {hasOverrides && (
-                    <LemonBanner type="warning" className="mb-4">
+                    <Banner type="warning" className="mb-4">
                         <div className="flex flex-row items-center justify-between gap-2">
                             <span>
                                 You are viewing this insight with filter/variable overrides. Discard them to edit the
                                 insight.
                             </span>
 
-                            <LemonButton type="secondary" to={urls.insightView(insightId as InsightShortId)}>
+                            <Button type="secondary" to={urls.insightView(insightId as InsightShortId)}>
                                 Discard overrides
-                            </LemonButton>
+                            </Button>
                         </div>
-                    </LemonBanner>
+                    </Banner>
                 )}
 
                 {insightMode === ItemMode.Edit && <InsightsNav />}

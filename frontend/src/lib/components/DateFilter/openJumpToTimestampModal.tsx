@@ -1,8 +1,8 @@
 import { combineUrl, router } from 'kea-router'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
+import { Dialog } from 'lib/elements/Dialog'
 import { getDefaultEventsSceneQuery } from 'scenes/activity/explore/defaults'
 import { urls } from 'scenes/urls'
 
@@ -11,7 +11,7 @@ import { ActivityTab } from '~/types'
 import { JumpToTimestampForm } from './JumpToTimestampForm'
 
 export function openJumpToTimestampModal(): void {
-    LemonDialog.open({
+    Dialog.open({
         title: 'Jump to timestamp',
         content: (closeDialog) => <JumpToTimestampModalContent onClose={closeDialog} />,
         primaryButton: null,
@@ -39,7 +39,7 @@ function JumpToTimestampModalContent({ onClose }: { onClose: () => void }): JSX.
                         Enter a timestamp to explore events filtered to a time window around it.
                     </p>
                     <div className="flex justify-end mt-4">
-                        <LemonButton
+                        <Button
                             size="small"
                             type="primary"
                             disabledReason={!dateRange ? 'Enter a valid timestamp' : undefined}
@@ -47,7 +47,7 @@ function JumpToTimestampModalContent({ onClose }: { onClose: () => void }): JSX.
                             data-attr="jump-to-timestamp-apply"
                         >
                             Go to events
-                        </LemonButton>
+                        </Button>
                     </div>
                 </>
             )}

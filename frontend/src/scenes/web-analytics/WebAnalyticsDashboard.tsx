@@ -3,7 +3,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import React, { useEffect, useState } from 'react'
 
 import { IconExpand45, IconInfo, IconLineGraph, IconOpenSidebar, IconX } from '@hanzo/icons'
-import { LemonSegmentedButton, LemonSegmentedDropdown, LemonSkeleton } from '@hanzo/lemon-ui'
+import { SegmentedButton, SegmentedDropdown, Skeleton } from '@hanzo/elements'
 
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
@@ -11,13 +11,13 @@ import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductI
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Link, InsightsComDocsURL } from 'lib/lemon-ui/Link/Link'
-import { Popover } from 'lib/lemon-ui/Popover'
-import { IconLink, IconOpenInNew, IconTableChart } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Tabs } from 'lib/elements/Tabs'
+import { Tag } from 'lib/elements/Tag'
+import { Link, InsightsComDocsURL } from 'lib/elements/Link/Link'
+import { Popover } from 'lib/elements/Popover'
+import { IconLink, IconOpenInNew, IconTableChart } from 'lib/elements/icons'
 import { FeatureFlagsSet, featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { isNotNil } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -102,7 +102,7 @@ const QueryTileItem = ({ tile }: { tile: QueryTile }): JSX.Element => {
     const buttonsRow = [
         <WebAnalyticsExport key="export-button" query={query} insightProps={insightProps} />,
         tile.canOpenInsight ? (
-            <LemonButton
+            <Button
                 key="open-insight-button"
                 to={getNewInsightUrl(tile.tileId)}
                 icon={<IconOpenInNew />}
@@ -117,10 +117,10 @@ const QueryTileItem = ({ tile }: { tile: QueryTile }): JSX.Element => {
                 }}
             >
                 Open as new insight
-            </LemonButton>
+            </Button>
         ) : null,
         tile.canOpenModal !== false ? (
-            <LemonButton
+            <Button
                 key="open-modal-button"
                 onClick={() => openModal(tile.tileId)}
                 icon={<IconExpand45 />}
@@ -128,7 +128,7 @@ const QueryTileItem = ({ tile }: { tile: QueryTile }): JSX.Element => {
                 type="secondary"
             >
                 Show more
-            </LemonButton>
+            </Button>
         ) : null,
     ].filter(isNotNil)
 
@@ -226,7 +226,7 @@ export const SectionTileItem = ({ tile, separator }: { tile: SectionTile; separa
                     return null
                 })}
             </div>
-            {separator && <LemonDivider className="my-3" />}
+            {separator && <Divider className="my-3" />}
         </div>
     )
 }
@@ -277,7 +277,7 @@ export const WebTabs = ({
             />
         ) : null,
         activeTab?.canOpenInsight && newInsightUrl ? (
-            <LemonButton
+            <Button
                 key="open-insight-button"
                 to={newInsightUrl}
                 icon={<IconOpenInNew />}
@@ -292,10 +292,10 @@ export const WebTabs = ({
                 }}
             >
                 Open as new Insight
-            </LemonButton>
+            </Button>
         ) : null,
         activeTab?.canOpenModal !== false ? (
-            <LemonButton
+            <Button
                 key="open-modal-button"
                 onClick={() => openModal(tileId, activeTabId)}
                 icon={<IconExpand45 />}
@@ -303,7 +303,7 @@ export const WebTabs = ({
                 type="secondary"
             >
                 Show more
-            </LemonButton>
+            </Button>
         ) : null,
     ].filter(isNotNil)
 
@@ -322,7 +322,7 @@ export const WebTabs = ({
                 </h2>
 
                 {isVisualizationToggleEnabled && (
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         value={visualization || 'table'}
                         onChange={(value) => setTileVisualization(tileId, value as TileVisualizationOption)}
                         options={[
@@ -340,7 +340,7 @@ export const WebTabs = ({
                     />
                 )}
 
-                <LemonSegmentedDropdown
+                <SegmentedDropdown
                     splitIndex={tabSplitIndexMap[tileId]}
                     size="small"
                     value={activeTabId}
@@ -373,7 +373,7 @@ export const LearnMorePopover = ({ url, title, description }: LearnMorePopoverPr
                 <div className="p-4 max-w-160 max-h-160 overflow-auto">
                     <div className="flex flex-row w-full">
                         <h2 className="flex-1">{title}</h2>
-                        <LemonButton
+                        <Button
                             targetBlank
                             type="tertiary"
                             onClick={() => setIsOpen(false)}
@@ -384,20 +384,20 @@ export const LearnMorePopover = ({ url, title, description }: LearnMorePopoverPr
                     <div className="text-sm text-gray-700 dark:text-white">{description}</div>
                     {url && (
                         <div className="flex justify-end mt-4">
-                            <LemonButton
+                            <Button
                                 to={url}
                                 onClick={() => setIsOpen(false)}
                                 targetBlank={true}
                                 sideIcon={<IconOpenSidebar />}
                             >
                                 Learn more
-                            </LemonButton>
+                            </Button>
                         </div>
                     )}
                 </div>
             }
         >
-            <LemonButton onClick={() => setIsOpen(!isOpen)} size="small" icon={<IconInfo />} className="ml-1 mb-1" />
+            <Button onClick={() => setIsOpen(!isOpen)} size="small" icon={<IconInfo />} className="ml-1 mb-1" />
         </Popover>
     )
 }
@@ -578,7 +578,7 @@ const WebAnalyticsTabs = (): JSX.Element => {
     }
 
     return (
-        <LemonTabs<ProductTab>
+        <Tabs<ProductTab>
             activeKey={productTab}
             onChange={setProductTab}
             tabs={[
@@ -589,9 +589,9 @@ const WebAnalyticsTabs = (): JSX.Element => {
                     label: (
                         <div className="flex items-center gap-1">
                             Page reports
-                            <LemonTag type="warning" className="uppercase">
+                            <Tag type="warning" className="uppercase">
                                 Beta
-                            </LemonTag>
+                            </Tag>
                         </div>
                     ),
                     link: '/web/page-reports',
@@ -604,7 +604,7 @@ const WebAnalyticsTabs = (): JSX.Element => {
             rightSlot={
                 !featureFlags[FEATURE_FLAGS.WEB_ANALYTICS_FILTERS_V2] &&
                 !featureFlags[FEATURE_FLAGS.CONDENSED_FILTER_BAR] && (
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         icon={<IconLink fontSize="16" />}
@@ -636,14 +636,14 @@ const WebVitalsEmptyState = (): JSX.Element => {
                 You can always disable this feature in the settings."
                 docsURL="https://hanzo.ai/docs/web-analytics/web-vitals"
                 actionElementOverride={
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => updateCurrentTeam({ autocapture_web_vitals_opt_in: true })}
                         data-attr="web-vitals-enable"
                         disabledReason={currentTeam ? undefined : 'Loading...'}
                     >
                         Enable web vitals
-                    </LemonButton>
+                    </Button>
                 }
             />
         </div>
@@ -661,7 +661,7 @@ const getEmptyOnboardingContent = (
     }
 
     if (currentTeamLoading && !currentTeam) {
-        return <LemonSkeleton className="col-span-full w-full" />
+        return <Skeleton className="col-span-full w-full" />
     }
 
     if (productTab === ProductTab.ANALYTICS && !currentTeam?.ingested_event) {
@@ -676,7 +676,7 @@ const getEmptyOnboardingContent = (
                     description="Install Insights on your site or app to start capturing events. Head to the installation guide to get set up in just a few minutes."
                     actionElementOverride={
                         <div className="flex items-center gap-2">
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 to={urls.onboarding({
                                     productKey: ProductKey.WEB_ANALYTICS,
@@ -685,7 +685,7 @@ const getEmptyOnboardingContent = (
                                 data-attr="web-analytics-onboarding"
                             >
                                 Open installation guide
-                            </LemonButton>
+                            </Button>
                             <span className="text-muted-alt">or</span>
                             <Link target="_blank" to="/web/web-vitals">
                                 Set up web vitals while you wait

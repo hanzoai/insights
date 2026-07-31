@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { IconDatabase } from '@hanzo/icons'
 
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tabs } from 'lib/elements/Tabs'
 import { SceneExport } from 'scenes/sceneTypes'
 import { userLogic } from 'scenes/userLogic'
 
@@ -55,7 +55,7 @@ export function DeadLetterQueue(): JSX.Element {
                 }}
             />
 
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as DeadLetterQueueTab)}
                 tabs={[{ label: 'Metrics', key: DeadLetterQueueTab.Metrics }]}

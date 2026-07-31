@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 import { useState } from 'react'
 
 import { IconCopy, IconPencil, IconStack } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonDropdown, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Dialog, Dropdown, Tag } from '@hanzo/elements'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -59,7 +59,7 @@ const AddBreakdownButton = ({
     }
 
     return (
-        <LemonDropdown
+        <Dropdown
             overlay={
                 <TaxonomicFilter
                     onChange={(_, value) => {
@@ -73,15 +73,15 @@ const AddBreakdownButton = ({
             visible={dropdownOpen}
             onClickOutside={() => setDropdownOpen(false)}
         >
-            <LemonButton
+            <Button
                 tooltip="Add breakdown"
                 type="secondary"
                 size="xsmall"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
             >
                 <IconStack />
-            </LemonButton>
-        </LemonDropdown>
+            </Button>
+        </Dropdown>
     )
 }
 
@@ -127,7 +127,7 @@ export const MetricHeader = ({
                     </div>
                     <div className="flex flex-col gap-1 flex-shrink-0 items-end">
                         <div className="flex gap-1">
-                            <LemonButton
+                            <Button
                                 className="flex-shrink-0"
                                 type="secondary"
                                 size="xsmall"
@@ -165,7 +165,7 @@ export const MetricHeader = ({
                                     }
                                 }}
                             />
-                            <LemonButton
+                            <Button
                                 className="flex-shrink-0"
                                 type="secondary"
                                 size="xsmall"
@@ -177,7 +177,7 @@ export const MetricHeader = ({
                                      * after a confirmation.
                                      */
                                     if (metric.isSharedMetric) {
-                                        LemonDialog.open({
+                                        Dialog.open({
                                             title: 'Duplicate this shared metric?',
                                             content: (
                                                 <div className="text-sm text-secondary max-w-lg">
@@ -212,18 +212,18 @@ export const MetricHeader = ({
                     </div>
                 </div>
                 <div className="deprecated-space-x-1">
-                    <LemonTag type="muted" size="small">
+                    <Tag type="muted" size="small">
                         {getMetricTag(metric)}
-                    </LemonTag>
+                    </Tag>
                     {metric.goal === 'decrease' && (
-                        <LemonTag type="highlight" size="small">
+                        <Tag type="highlight" size="small">
                             Goal: Decrease
-                        </LemonTag>
+                        </Tag>
                     )}
                     {metric.isSharedMetric && (
-                        <LemonTag type="option" size="small">
+                        <Tag type="option" size="small">
                             Shared
-                        </LemonTag>
+                        </Tag>
                     )}
                 </div>
             </div>

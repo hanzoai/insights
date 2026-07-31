@@ -4,21 +4,21 @@ import { memo, useEffect, useState } from 'react'
 
 import { IconArrowRight, IconEllipsis, IconFilter, IconPlus } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonCollapse,
-    LemonCollapsePanel,
-    LemonDialog,
-    LemonInput,
-    LemonLabel,
-    LemonSelect,
-    LemonTag,
+    Banner,
+    Button,
+    Collapse,
+    CollapsePanel,
+    Dialog,
+    Input,
+    Label,
+    Select,
+    Tag,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { CyclotronJobInputs } from 'lib/components/CyclotronJob/CyclotronJobInputs'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 
@@ -76,7 +76,7 @@ export const MappingSummary = memo(function MappingSummary({
                       : humanize(firstInputValue)}
             </span>
             <span className="flex-1" />
-            {mapping.disabled ? <LemonTag type="danger">Disabled</LemonTag> : null}
+            {mapping.disabled ? <Tag type="danger">Disabled</Tag> : null}
         </span>
     )
 })
@@ -99,7 +99,7 @@ export function InsightsFunctionMapping({
         <>
             <div className="p-3 pl-10 deprecated-space-y-2">
                 {mapping.disabled ? (
-                    <LemonBanner
+                    <Banner
                         type="warning"
                         className="p-2"
                         action={{
@@ -108,9 +108,9 @@ export function InsightsFunctionMapping({
                         }}
                     >
                         This mapping is disabled. It will not trigger the function.
-                    </LemonBanner>
+                    </Banner>
                 ) : null}
-                <LemonLabel>Match events and actions</LemonLabel>
+                <Label>Match events and actions</Label>
                 <ActionFilter
                     filters={mapping.filters ?? ({} as any)}
                     setFilters={(f: any) => onChange({ ...mapping, filters: f })}
@@ -160,7 +160,7 @@ export function InsightsFunctionMapping({
                     />
                 </Group>
                 {showSource ? (
-                    <LemonButton
+                    <Button
                         icon={<IconPlus />}
                         size="small"
                         type="secondary"
@@ -181,7 +181,7 @@ export function InsightsFunctionMapping({
                         }}
                     >
                         Add input variable
-                    </LemonButton>
+                    </Button>
                 ) : null}
             </div>
         </>
@@ -204,7 +204,7 @@ export function InsightsFunctionMappings(): JSX.Element | null {
     }
 
     return (
-        <LemonField name="mappings">
+        <Field name="mappings">
             {({
                 value,
                 onChange,
@@ -260,17 +260,17 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                 }
 
                 const renameMapping = (mapping: InsightsFunctionMappingType): void => {
-                    LemonDialog.openForm({
+                    Dialog.openForm({
                         title: 'Rename mapping',
                         initialValues: { mappingName: mapping.name },
                         content: (
-                            <LemonField name="mappingName">
-                                <LemonInput
+                            <Field name="mappingName">
+                                <Input
                                     data-attr="mapping-name"
                                     placeholder="Please enter the new name"
                                     autoFocus
                                 />
-                            </LemonField>
+                            </Field>
                         ),
                         errors: {
                             mappingName: (name) => (!name ? 'You must enter a name' : undefined),
@@ -285,7 +285,7 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                 }
 
                 const addMappingButton = mappingTemplates.length ? (
-                    <LemonSelect
+                    <Select
                         placeholder="Add mapping"
                         onChange={(template) => {
                             addMapping(template)
@@ -301,7 +301,7 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                     <div className="p-3 rounded border bg-surface-primary">
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
-                                <LemonLabel>Mappings</LemonLabel>
+                                <Label>Mappings</Label>
                                 <p className="text-sm text-secondary">
                                     Configure which events should act as triggers including filters and custom
                                     transformations
@@ -313,13 +313,13 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                         <div className="deprecated-space-y-2">
                             {mappingsValue.length ? (
                                 <div className="-mx-3 border-t border-b">
-                                    <LemonCollapse
+                                    <Collapse
                                         multiple
                                         embedded
                                         activeKeys={activeKeys}
                                         onChange={(activeKeys) => setActiveKeys(activeKeys)}
                                         panels={mappingsValue.map(
-                                            (mapping, index): LemonCollapsePanel<number> => ({
+                                            (mapping, index): CollapsePanel<number> => ({
                                                 key: index,
                                                 header: {
                                                     children: <MappingSummary mapping={mapping} />,
@@ -328,25 +328,25 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                                                         dropdown: {
                                                             overlay: (
                                                                 <div className="deprecated-space-y-px">
-                                                                    <LemonButton
+                                                                    <Button
                                                                         onClick={() => toggleDisabled(mapping)}
                                                                     >
                                                                         {mapping.disabled ? 'Enable' : 'Disable'}
-                                                                    </LemonButton>
-                                                                    <LemonButton onClick={() => renameMapping(mapping)}>
+                                                                    </Button>
+                                                                    <Button onClick={() => renameMapping(mapping)}>
                                                                         Rename
-                                                                    </LemonButton>
-                                                                    <LemonButton
+                                                                    </Button>
+                                                                    <Button
                                                                         onClick={() => duplicateMapping(mapping)}
                                                                     >
                                                                         Duplicate
-                                                                    </LemonButton>
-                                                                    <LemonButton
+                                                                    </Button>
+                                                                    <Button
                                                                         status="danger"
                                                                         onClick={() => removeMapping(mapping)}
                                                                     >
                                                                         Remove
-                                                                    </LemonButton>
+                                                                    </Button>
                                                                 </div>
                                                             ),
                                                         },
@@ -377,15 +377,15 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                                     />
                                 </div>
                             ) : (
-                                <LemonBanner type="warning" className="p-2">
+                                <Banner type="warning" className="p-2">
                                     You have no mappings configured which effectively means the function is disabled as
                                     there is nothing to trigger it.
-                                </LemonBanner>
+                                </Banner>
                             )}
                         </div>
                     </div>
                 )
             }}
-        </LemonField>
+        </Field>
     )
 }

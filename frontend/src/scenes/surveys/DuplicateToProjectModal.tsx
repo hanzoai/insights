@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonModal, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Modal, Tag } from '@hanzo/elements'
 
 import { organizationLogic } from 'scenes/organizationLogic'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'
@@ -62,27 +62,27 @@ export function DuplicateToProjectModal(): JSX.Element {
     }
 
     return (
-        <LemonModal
+        <Modal
             title="Duplicate survey"
             onClose={handleCloseModal}
             isOpen={surveyToDuplicate !== null}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         disabledReason={duplicatedSurveyLoading ? 'Duplicating...' : undefined}
                         type="secondary"
                         onClick={handleCloseModal}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={handleDuplicate}
                         loading={duplicatedSurveyLoading}
                         disabledReason={selectedTeamIds.size === 0 ? 'Select at least one project' : undefined}
                     >
                         Duplicate to {selectedTeamIds.size} project{selectedTeamIds.size !== 1 ? 's' : ''}
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -95,7 +95,7 @@ export function DuplicateToProjectModal(): JSX.Element {
                     <div className="flex items-center gap-3 p-2 border-b">
                         {availableTeams.length > 1 && (
                             <>
-                                <LemonCheckbox
+                                <Checkbox
                                     checked={allSelected ? true : someSelected ? 'indeterminate' : false}
                                     onChange={handleToggleAll}
                                 />
@@ -111,7 +111,7 @@ export function DuplicateToProjectModal(): JSX.Element {
                                 htmlFor={`project-${team.id}`}
                                 className="flex items-center gap-3 p-2 rounded hover:bg-border-light cursor-pointer"
                             >
-                                <LemonCheckbox
+                                <Checkbox
                                     id={`project-${team.id}`}
                                     checked={selectedTeamIds.has(team.id)}
                                     onChange={() => handleToggleTeam(team.id)}
@@ -120,14 +120,14 @@ export function DuplicateToProjectModal(): JSX.Element {
                                     <span>{team.name}</span>
                                     <div className="flex items-center gap-2">
                                         {team.id === currentTeam?.id && (
-                                            <LemonTag size="small" type="primary" className="text-xs">
+                                            <Tag size="small" type="primary" className="text-xs">
                                                 Current
-                                            </LemonTag>
+                                            </Tag>
                                         )}
                                         {team.is_demo && (
-                                            <LemonTag size="small" type="muted">
+                                            <Tag size="small" type="muted">
                                                 <span className="text-xs">Demo</span>
-                                            </LemonTag>
+                                            </Tag>
                                         )}
                                     </div>
                                 </div>
@@ -139,6 +139,6 @@ export function DuplicateToProjectModal(): JSX.Element {
                     </div>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

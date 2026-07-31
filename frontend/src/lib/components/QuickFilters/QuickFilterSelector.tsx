@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { QuickFilterOption } from '~/types'
 
@@ -36,7 +36,7 @@ export function QuickFilterSelector({
     }, [selectedOptionId, options])
 
     return (
-        <LemonSelect
+        <Select
             value={displayValue}
             onChange={(selectedId) => {
                 if (selectedId === null) {

@@ -3,8 +3,8 @@ import { router } from 'kea-router'
 
 import { IconInfo } from '@hanzo/icons'
 
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Table } from 'lib/elements/Table'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'
 
@@ -17,7 +17,7 @@ export const ReplayActiveUsersTable = (): JSX.Element => {
 
     return (
         <div className="flex flex-col border rounded bg-surface-primary w-full px-4 py-2">
-            <LemonTable
+            <Table
                 embedded={true}
                 columns={[
                     {

@@ -6,10 +6,10 @@ import { IconPlus } from '@hanzo/icons'
 
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
 import { VerticalNestedDND } from 'lib/components/VerticalNestedDND/VerticalNestedDND'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInputSelect, LemonInputSelectOption } from 'lib/lemon-ui/LemonInputSelect'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { Link } from 'lib/lemon-ui/Link'
+import { Button } from 'lib/elements/Button'
+import { InputSelect, InputSelectOption } from 'lib/elements/InputSelect'
+import { Select } from 'lib/elements/Select'
+import { Link } from 'lib/elements/Link'
 import { UnexpectedNeverError, genericOperatorMap, uuid } from 'lib/utils'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -143,7 +143,7 @@ export function CustomChannelTypes(): JSX.Element {
 
     const [customChannelTypeRules, setCustomChannelTypeRules] = useState(savedCustomChannelTypeRules)
 
-    const channelTypeOptions = useMemo((): LemonInputSelectOption[] => {
+    const channelTypeOptions = useMemo((): InputSelectOption[] => {
         const optionsSet = new Set<string>([
             ...customChannelTypeRules.map((rule) => rule.channel_type),
             ...Object.values(DefaultChannelTypes),
@@ -195,7 +195,7 @@ export function CustomChannelTypes(): JSX.Element {
 export interface ChannelTypeEditorProps {
     handleChange: (rules: CustomChannelRule[]) => void
     initialCustomChannelTypeRules: CustomChannelRule[]
-    channelTypeOptions: LemonInputSelectOption[]
+    channelTypeOptions: InputSelectOption[]
     isSaveDisabled: boolean
     onSave: () => void
     canEdit: boolean
@@ -217,7 +217,7 @@ export function ChannelTypeEditor({
                     <div className="flex flex-col deprecated-space-y-2">
                         <div className="flex flex-row items-center deprecated-space-x-2">
                             <span>Set Channel type to</span>
-                            <LemonInputSelect
+                            <InputSelect
                                 className="flex-1"
                                 mode="single"
                                 allowCustomValues={true}
@@ -240,7 +240,7 @@ export function ChannelTypeEditor({
                                 ) : (
                                     <div className="flex flex-row items-center deprecated-space-x-2">
                                         <span>When</span>
-                                        <LemonSelect
+                                        <Select
                                             value={rule.combiner}
                                             options={combinerOptions}
                                             onChange={(combiner) => updateContainerItem({ ...rule, combiner })}
@@ -260,13 +260,13 @@ export function ChannelTypeEditor({
                 return (
                     <div className="w-full deprecated-space-y-2">
                         <div className="flex flex-row deprecated-space-x-2">
-                            <LemonSelect<CustomChannelField>
+                            <Select<CustomChannelField>
                                 value={rule.key}
                                 options={keyOptions}
                                 onChange={(key) => updateChildItem({ ...rule, key })}
                                 disabledReason={!canEdit ? 'You need editor access to modify channel types' : undefined}
                             />
-                            <LemonSelect<CustomChannelOperator>
+                            <Select<CustomChannelOperator>
                                 value={rule.op}
                                 options={opOptions}
                                 onChange={(op) => updateChildItem({ ...rule, op })}
@@ -295,27 +295,27 @@ export function ChannelTypeEditor({
             }}
             renderAddChildItem={(rule, { onAddChild }) => {
                 return canEdit ? (
-                    <LemonButton type="primary" onClick={() => onAddChild(rule.id)} icon={<IconPlus />}>
+                    <Button type="primary" onClick={() => onAddChild(rule.id)} icon={<IconPlus />}>
                         Add condition
-                    </LemonButton>
+                    </Button>
                 ) : null
             }}
             renderAddContainerItem={({ onAddContainer }) => {
                 return canEdit ? (
-                    <LemonButton type="primary" onClick={onAddContainer} icon={<IconPlus />}>
+                    <Button type="primary" onClick={onAddContainer} icon={<IconPlus />}>
                         Add rule
-                    </LemonButton>
+                    </Button>
                 ) : null
             }}
             renderAdditionalControls={() => {
                 return canEdit ? (
-                    <LemonButton
+                    <Button
                         onClick={onSave}
                         disabledReason={isSaveDisabled ? 'No changes to save' : undefined}
                         type="primary"
                     >
                         Save custom channel type rules
-                    </LemonButton>
+                    </Button>
                 ) : null
             }}
             createNewContainerItem={() => {

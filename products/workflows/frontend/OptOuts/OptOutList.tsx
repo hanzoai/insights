@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconChevronLeft, IconChevronRight, IconExternal } from '@hanzo/icons'
-import { LemonButton, LemonModal, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
+import { Button, Modal, Table, TableColumns } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { More } from 'lib/lemon-ui/LemonButton/More'
+import { More } from 'lib/elements/Button/More'
 
 import { DataTable } from '~/queries/nodes/DataTable/DataTable'
 import { ActorsQuery, DataTableNode, NodeKind } from '~/queries/schema/schema-general'
@@ -39,7 +39,7 @@ export function OptOutList({ category }: { category?: MessageCategory }): JSX.El
           }
         : null
 
-    const columns: LemonTableColumns<OptOutEntry> = [
+    const columns: TableColumns<OptOutEntry> = [
         {
             title: 'Recipient',
             dataIndex: 'identifier',
@@ -58,17 +58,17 @@ export function OptOutList({ category }: { category?: MessageCategory }): JSX.El
                     <More
                         overlay={
                             <>
-                                <LemonButton onClick={() => handleShowPersons(optOutEntry.identifier)} fullWidth>
+                                <Button onClick={() => handleShowPersons(optOutEntry.identifier)} fullWidth>
                                     Show person(s)
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     onClick={() => openPreferencesPage(optOutEntry.identifier)}
                                     loading={preferencesUrlLoading}
                                     fullWidth
                                     icon={<IconExternal />}
                                 >
                                     Manage
-                                </LemonButton>
+                                </Button>
                             </>
                         }
                     />
@@ -84,7 +84,7 @@ export function OptOutList({ category }: { category?: MessageCategory }): JSX.El
     return (
         <>
             <div className="max-h-64 overflow-y-auto">
-                <LemonTable
+                <Table
                     columns={columns}
                     dataSource={optOutPersons.results || []}
                     loading={optOutPersonsLoading}
@@ -104,7 +104,7 @@ export function OptOutList({ category }: { category?: MessageCategory }): JSX.El
                         )}
                     </div>
                     <div className="flex items-center gap-2">
-                        <LemonButton
+                        <Button
                             icon={<IconChevronLeft />}
                             size="small"
                             disabled={currentPage === 1 || optOutPersonsLoading}
@@ -113,7 +113,7 @@ export function OptOutList({ category }: { category?: MessageCategory }): JSX.El
                         <span className="text-sm">
                             Page {currentPage} of {totalPages}
                         </span>
-                        <LemonButton
+                        <Button
                             icon={<IconChevronRight />}
                             size="small"
                             disabled={!optOutPersons.next || optOutPersonsLoading}
@@ -123,7 +123,7 @@ export function OptOutList({ category }: { category?: MessageCategory }): JSX.El
                 </div>
             )}
 
-            <LemonModal
+            <Modal
                 isOpen={Boolean(selectedIdentifier)}
                 onClose={handleCloseModal}
                 title={`Persons for ${selectedIdentifier}`}
@@ -140,7 +140,7 @@ export function OptOutList({ category }: { category?: MessageCategory }): JSX.El
                         />
                     </div>
                 )}
-            </LemonModal>
+            </Modal>
         </>
     )
 }

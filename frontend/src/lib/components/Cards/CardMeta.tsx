@@ -7,10 +7,10 @@ import { Transition } from 'react-transition-group'
 import { IconPieChart } from '@hanzo/icons'
 
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconSubtitles, IconSubtitlesOff } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconSubtitles, IconSubtitlesOff } from 'lib/elements/icons'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
 
 import { InsightColor } from '~/types'
@@ -110,14 +110,14 @@ export function CardMeta({
                                 })}
                             {showDetailsControls && setAreDetailsShown && (
                                 <Tooltip title={detailsTooltip}>
-                                    <LemonButton
+                                    <Button
                                         icon={!areDetailsShown ? <IconSubtitles /> : <IconSubtitlesOff />}
                                         onClick={() => setAreDetailsShown((state) => !state)}
                                         size="small"
                                         active={areDetailsShown}
                                     >
                                         {showControlsLabels && `${!areDetailsShown ? 'Show' : 'Hide'} details`}
-                                    </LemonButton>
+                                    </Button>
                                 </Tooltip>
                             )}
                             {showEditingControls &&

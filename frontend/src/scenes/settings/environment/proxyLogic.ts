@@ -2,12 +2,12 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { LemonDialog } from '@hanzo/lemon-ui'
+import { Dialog } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { SetupTaskId } from 'lib/components/ProductSetup'
 import { globalSetupLogic } from 'lib/components/ProductSetup/globalSetupLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { isDomain } from 'lib/utils'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -95,7 +95,7 @@ export const proxyLogic = kea<proxyLogicType>([
                 const response = await api.create(`api/organizations/${values.currentOrganization?.id}/proxy_records`, {
                     domain,
                 })
-                lemonToast.success('Record created')
+                toast.success('Record created')
                 actions.completeForm()
                 return [response, ...values.proxyRecords]
             },
@@ -153,7 +153,7 @@ export const proxyLogic = kea<proxyLogicType>([
                 }
 
                 if (isRiskyDomain(domain)) {
-                    LemonDialog.open({
+                    Dialog.open({
                         title: 'This domain may be blocked by ad-blockers',
                         width: '25rem',
                         content: `The domain "${domain}" contains a word commonly associated with tracking or analytics. Ad-blockers are likely to block requests to this domain, which will cause data loss. Are you sure you want to proceed?`,

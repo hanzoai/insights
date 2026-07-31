@@ -8,7 +8,7 @@ import { IconHome } from '@hanzo/icons'
 
 import { SceneDashboardChoiceRequired } from 'lib/components/SceneDashboardChoice/SceneDashboardChoiceRequired'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { Dashboard } from 'scenes/dashboard/Dashboard'
 import { DashboardLogicProps, dashboardLogic } from 'scenes/dashboard/dashboardLogic'
@@ -54,7 +54,7 @@ function HomePageContent(): JSX.Element {
                 }}
                 actions={
                     <>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             data-attr="project-home-edit-dashboard"
@@ -63,16 +63,16 @@ function HomePageContent(): JSX.Element {
                             }}
                         >
                             View dashboard
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="secondary"
                             size="small"
                             data-attr="project-home-customize-homepage"
                             onClick={() => setIsConfigurePinnedTabsOpen(true)}
                         >
                             Customize homepage
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             data-attr="project-home-invite-team-members"
                             onClick={() => {
                                 showInviteModal()
@@ -81,7 +81,7 @@ function HomePageContent(): JSX.Element {
                             size="small"
                         >
                             Invite members
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             />

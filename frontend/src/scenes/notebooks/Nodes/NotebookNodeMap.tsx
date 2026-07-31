@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { Marker } from 'maplibre-gl'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
@@ -20,7 +20,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeMapAttributes>)
     const { person, personLoading } = useValues(logic)
 
     if (personLoading) {
-        return <LemonSkeleton className="h-6" />
+        return <Skeleton className="h-6" />
     } else if (!person) {
         return <NotFound object="person" />
     }

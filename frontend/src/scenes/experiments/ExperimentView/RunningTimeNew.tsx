@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 
 import { IconCalculator, IconCheck, IconClock, IconGear } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { LemonProgressCircle } from 'lib/lemon-ui/LemonProgressCircle/LemonProgressCircle'
+import { ProgressCircle } from 'lib/elements/ProgressCircle/ProgressCircle'
 import { Label } from 'lib/ui/Label/Label'
 
 import { Experiment } from '~/types'
@@ -66,14 +66,14 @@ export const RunningTimeNew = ({
                                 {Math.ceil(remainingDays) !== 1 ? 's' : ''}
                             </span>
                             {showProgress && (
-                                <LemonProgressCircle
+                                <ProgressCircle
                                     progress={Math.min(currentExposures / targetSampleSize, 1)}
                                     size={22}
                                 />
                             )}
                         </>
                     )}
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="xsmall"
                         onClick={onClick}

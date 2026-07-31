@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Suspense, lazy } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { BoldNumber } from 'scenes/insights/views/BoldNumber'
@@ -153,7 +153,7 @@ export function TrendInsight({ view, context, embedded, inSharedMode, editMode }
                     <div className="p-4">
                         <div className="text-secondary">
                             Breakdown limited to {breakdownFilter.breakdown_limit || 25} - more available
-                            <LemonButton
+                            <Button
                                 onClick={() =>
                                     updateBreakdownFilter({
                                         ...breakdownFilter,
@@ -166,7 +166,7 @@ export function TrendInsight({ view, context, embedded, inSharedMode, editMode }
                                 className="inline-block ml-2"
                             >
                                 Set to {(breakdownFilter.breakdown_limit || 25) * 2}
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 )}

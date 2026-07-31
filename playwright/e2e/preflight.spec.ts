@@ -33,7 +33,7 @@ test.describe('Preflight', () => {
 
         await expect(page.locator('[data-attr=preflight-refresh]')).toBeVisible()
         // expand rows
-        await page.locator('.Preflight__check-summary .LemonButton').click()
+        await page.locator('.Preflight__check-summary .Button').click()
         await expect(page.locator('.PreflightItem [data-attr=caption]')).toContainText(
             'Not required for experimentation mode'
         )

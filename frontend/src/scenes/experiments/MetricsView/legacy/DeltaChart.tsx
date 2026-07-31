@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { createContext, useContext, useState } from 'react'
 
 import { IconGraph } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { modalsLogic } from 'scenes/experiments/modalsLogic'
@@ -396,14 +396,14 @@ function ChartControls(): JSX.Element {
                     className="absolute bottom-2 left-2 flex justify-center bg-[var(--color-bg-table)] z-[101]"
                     // Chart is z-index 100, so we need to be above it
                 >
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="xsmall"
                         icon={<IconGraph />}
                         onClick={() => setIsModalOpen(true)}
                     >
                         Details
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </>

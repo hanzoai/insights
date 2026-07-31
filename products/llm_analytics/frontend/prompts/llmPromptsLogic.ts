@@ -3,9 +3,9 @@ import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
 import api, { CountedPaginatedResponse } from '~/lib/api'
-import { Sorting } from '~/lib/lemon-ui/LemonTable'
-import { lemonToast } from '~/lib/lemon-ui/LemonToast/LemonToast'
-import { PaginationManual } from '~/lib/lemon-ui/PaginationControl'
+import { Sorting } from '~/lib/elements/Table'
+import { toast } from '~/lib/elements/Toast/Toast'
+import { PaginationManual } from '~/lib/elements/PaginationControl'
 import { tabAwareActionToUrl } from '~/lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareUrlToAction } from '~/lib/logic/scenes/tabAwareUrlToAction'
 import { objectsEqual } from '~/lib/utils'
@@ -154,10 +154,10 @@ export const llmPromptsLogic = kea<llmPromptsLogicType>([
             try {
                 const promptName = values.prompts.results.find((prompt) => prompt.id === promptId)?.name
                 await api.llmPrompts.update(promptId, { deleted: true })
-                lemonToast.info(`${promptName || 'Prompt'} has been deleted.`)
+                toast.info(`${promptName || 'Prompt'} has been deleted.`)
                 await asyncActions.loadPrompts(false)
             } catch {
-                lemonToast.error('Failed to delete prompt')
+                toast.error('Failed to delete prompt')
             }
         },
     })),

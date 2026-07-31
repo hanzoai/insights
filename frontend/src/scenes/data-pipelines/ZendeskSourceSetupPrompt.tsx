@@ -1,7 +1,7 @@
 import { BuiltLogic, LogicWrapper, useValues } from 'kea'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, Spinner } from '@hanzo/lemon-ui'
+import { Button, Spinner } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { SupportHeroMascot } from 'lib/components/mascots'
@@ -50,7 +50,7 @@ function SetupPrompt({ className }: Pick<ZendeskSourceSetupPromptProps, 'classNa
             isEmpty={true}
             docsURL="https://hanzo.ai/docs/data-warehouse"
             actionElementOverride={
-                <LemonButton
+                <Button
                     icon={<IconPlusSmall />}
                     type="primary"
                     to={urls.dataWarehouseSourceNew('Zendesk')}

@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
+import { Select } from 'lib/elements/Select'
 
 import { teamLogic } from '~/scenes/teamLogic'
 
@@ -51,7 +51,7 @@ export function ExperimentRecalculationTime(): JSX.Element {
     const currentLocalHour = utcToLocalHour(currentTeam?.experiment_recalculation_time, projectTimezone)
 
     return (
-        <LemonSelect
+        <Select
             value={currentLocalHour.toString()}
             onChange={handleChange}
             options={hourOptions}

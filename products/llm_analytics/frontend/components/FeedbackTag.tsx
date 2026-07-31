@@ -1,4 +1,4 @@
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 
@@ -12,7 +12,7 @@ export function FeedbackTag({ properties }: FeedbackTagProps): JSX.Element {
     const text = feedbackText ? feedbackText : 'No feedback provided'
 
     return (
-        <LemonTag className="bg-surface-primary cursor-default">
+        <Tag className="bg-surface-primary cursor-default">
             <CopyToClipboardInline
                 iconSize="xsmall"
                 description="user feedback"
@@ -21,6 +21,6 @@ export function FeedbackTag({ properties }: FeedbackTagProps): JSX.Element {
             >
                 {`User feedback${feedbackPreview ? `: ${feedbackPreview}...` : ''}`}
             </CopyToClipboardInline>
-        </LemonTag>
+        </Tag>
     )
 }

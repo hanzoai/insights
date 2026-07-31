@@ -1,4 +1,4 @@
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 
@@ -11,11 +11,11 @@ export function BillingNoAccess({ title = 'Billing', reason }: BillingNoAccessPr
     return (
         <div className="deprecated-space-y-4">
             <h1>{title}</h1>
-            <LemonBanner type="warning">{reason}</LemonBanner>
+            <Banner type="warning">{reason}</Banner>
             <div className="flex">
-                <LemonButton type="primary" to={urls.default()}>
+                <Button type="primary" to={urls.default()}>
                     Go back home
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

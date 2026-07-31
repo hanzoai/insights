@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonInputSelect, LemonInputSelectOption, Link } from '@hanzo/lemon-ui'
+import { InputSelect, InputSelectOption, Link } from '@hanzo/elements'
 
 import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
 
@@ -11,7 +11,7 @@ import { twilioIntegrationLogic } from './twilioIntegrationLogic'
 
 const getTwilioPhoneNumberOptions = (
     twilioPhoneNumbers?: TwilioPhoneNumberType[] | null
-): LemonInputSelectOption[] | null => {
+): InputSelectOption[] | null => {
     return twilioPhoneNumbers
         ? twilioPhoneNumbers.map((x) => {
               const displayLabel = `${x.friendly_name} (${x.sid})`
@@ -73,7 +73,7 @@ export function TwilioPhoneNumberPicker({
 
     return (
         <>
-            <LemonInputSelect
+            <InputSelect
                 onChange={(val) => onChange?.(val[0] ?? null)}
                 value={value ? [value] : []}
                 onFocus={() =>

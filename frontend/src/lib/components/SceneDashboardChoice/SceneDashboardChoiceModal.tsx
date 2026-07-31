@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonDivider, LemonInput } from '@hanzo/lemon-ui'
+import { Divider, Input } from '@hanzo/elements'
 
 import { SceneIcon } from 'lib/components/SceneDashboardChoice/SceneIcon'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonRow } from 'lib/lemon-ui/LemonRow'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
+import { Row } from 'lib/elements/Row'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { cn } from 'lib/utils/css-classes'
 import { urls } from 'scenes/urls'
 
@@ -26,14 +26,14 @@ export function SceneDashboardChoiceModal({ scene }: SceneDashboardChoiceModalPr
     const { dashboardsLoading } = useValues(dashboardsModel)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={closeSceneDashboardChoiceModal}
             title={<>Select a default dashboard for {sceneDescription[scene]}</>}
             footer={
                 <div className={cn('flex gap-2 w-full', currentDashboardId ? 'justify-between' : 'justify-end')}>
                     {currentDashboardId ? (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             data-attr="scene-dashboard-choice-new-tab"
                             onClick={() => {
@@ -43,25 +43,25 @@ export function SceneDashboardChoiceModal({ scene }: SceneDashboardChoiceModalPr
                             }}
                         >
                             Reset to "new tab"
-                        </LemonButton>
+                        </Button>
                     ) : null}
-                    <LemonButton
+                    <Button
                         type="secondary"
                         data-attr="close-scene-dashboard-choice-modal"
                         onClick={closeSceneDashboardChoiceModal}
                     >
                         Close
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
             {dashboardsLoading ? (
                 <div className="deprecated-space-y-2">
-                    <LemonSkeleton.Row repeat={4} />
+                    <Skeleton.Row repeat={4} />
                 </div>
             ) : (
                 <>
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search for dashboards"
                         onChange={setSearchTerm}
@@ -70,7 +70,7 @@ export function SceneDashboardChoiceModal({ scene }: SceneDashboardChoiceModalPr
                         allowClear={true}
                         className="mb-4"
                     />
-                    <LemonDivider />
+                    <Divider />
                     <div className="deprecated-space-y-2 min-h-100">
                         {dashboards.map((dashboard) => {
                             const isCurrentChoice = dashboard.id === currentDashboardId
@@ -93,13 +93,13 @@ export function SceneDashboardChoiceModal({ scene }: SceneDashboardChoiceModalPr
                             )
                             if (isCurrentChoice) {
                                 return (
-                                    <LemonRow key={dashboard.id} fullWidth status="muted" className="dashboard-row">
+                                    <Row key={dashboard.id} fullWidth status="muted" className="dashboard-row">
                                         {rowContents}
-                                    </LemonRow>
+                                    </Row>
                                 )
                             }
                             return (
-                                <LemonButton
+                                <Button
                                     key={dashboard.id}
                                     fullWidth
                                     className="dashboard-row"
@@ -111,12 +111,12 @@ export function SceneDashboardChoiceModal({ scene }: SceneDashboardChoiceModalPr
                                     }}
                                 >
                                     {rowContents}
-                                </LemonButton>
+                                </Button>
                             )
                         })}
                     </div>
                 </>
             )}
-        </LemonModal>
+        </Modal>
     )
 }

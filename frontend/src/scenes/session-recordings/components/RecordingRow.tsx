@@ -1,9 +1,9 @@
 import clsx from 'clsx'
 import { useActions } from 'kea'
 
-import { LemonSnack } from 'lib/lemon-ui/LemonSnack'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { IconPlayCircle } from 'lib/lemon-ui/icons'
+import { Snack } from 'lib/elements/Snack'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { IconPlayCircle } from 'lib/elements/icons'
 import { humanFriendlyDuration } from 'lib/utils'
 import { asDisplay } from 'scenes/persons/person-utils'
 import { sessionPlayerModalLogic } from 'scenes/session-recordings/player/modal/sessionPlayerModalLogic'
@@ -56,7 +56,7 @@ export function ActivityScoreLabel({
         return <>{description}</>
     }
 
-    return <LemonSnack className={clsx(backgroundColor, 'text-xs')}>activity: {description}</LemonSnack>
+    return <Snack className={clsx(backgroundColor, 'text-xs')}>activity: {description}</Snack>
 }
 
 export function RecordingRow({ recording }: RecordingRowProps): JSX.Element {

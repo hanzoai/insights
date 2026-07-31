@@ -1,9 +1,9 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconSparkles } from '@hanzo/icons'
-import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
+import { Button, Divider } from '@hanzo/elements'
 
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
+import { Progress } from 'lib/elements/Progress'
 import { pluralize } from 'lib/utils'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 import { SessionSummaryComponent } from 'scenes/session-recordings/player/sidebar/PlayerSidebarSessionSummary'
@@ -30,7 +30,7 @@ export function AISessionSummary({ personId }: { personId: string }): JSX.Elemen
                         logic={sessionRecordingPlayerLogic}
                         props={{ sessionRecordingId: sessionId }}
                     >
-                        <LemonDivider className="my-4" />
+                        <Divider className="my-4" />
                         <SessionSummaryComponent.Subtitle sessionId={sessionId} />
                         <SessionSummaryComponent.OutcomeBanner sessionSummary={summary} />
                         <SessionSummaryComponent.Segments sessionSummary={summary} />
@@ -56,7 +56,7 @@ function AISummaryIdle(): JSX.Element {
             ) : (
                 <AISummaryMessage heading="AI session summary" subheading="No sessions with recordings found" />
             )}
-            <LemonButton
+            <Button
                 type="primary"
                 icon={<IconSparkles />}
                 onClick={summarizeSessions}
@@ -64,7 +64,7 @@ function AISummaryIdle(): JSX.Element {
                 data-attr="person-feed-summarize-sessions"
             >
                 Summarize sessions
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -74,7 +74,7 @@ function AISummaryLoading(): JSX.Element {
     return (
         <div className="mb-4">
             <AISummaryMessage heading="Generating AI summary" subheading={progressText} />
-            <LemonProgress percent={(numSummaries / numSessionsWithRecording) * 100} />
+            <Progress percent={(numSummaries / numSessionsWithRecording) * 100} />
         </div>
     )
 }

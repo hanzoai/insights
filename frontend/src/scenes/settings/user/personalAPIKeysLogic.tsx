@@ -3,12 +3,12 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonBanner, LemonDialog } from '@hanzo/lemon-ui'
+import { Banner, Dialog } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { FEATURE_FLAGS, OrganizationMembershipLevel } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { APIScope, API_SCOPES, scopesArrayToObject, scopesObjectToArray } from 'lib/scopes'
 import { hasMembershipLevelOrHigher, organizationAllowsPersonalApiKeysForMembers } from 'lib/utils/permissioning'
@@ -433,7 +433,7 @@ export const personalAPIKeysLogic = kea<personalAPIKeysLogicType>([
                 return
             }
 
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Personal API key ready',
                 width: 536,
                 zIndex: '1168',
@@ -445,11 +445,11 @@ export const personalAPIKeysLogic = kea<personalAPIKeysLogicType>([
                             {value}
                         </CodeSnippet>
 
-                        <LemonBanner type="warning" className="mt-4">
+                        <Banner type="warning" className="mt-4">
                             For security reasons the value above <em>will never be shown again</em>.
                             <br />
                             Copy it to your destination right away.
-                        </LemonBanner>
+                        </Banner>
                     </>
                 ),
             })
@@ -461,7 +461,7 @@ export const personalAPIKeysLogic = kea<personalAPIKeysLogicType>([
                 return
             }
 
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Personal API key rolled',
                 width: 536,
                 content: (
@@ -472,15 +472,15 @@ export const personalAPIKeysLogic = kea<personalAPIKeysLogicType>([
                             {value}
                         </CodeSnippet>
 
-                        <LemonBanner type="warning" className="mt-4">
+                        <Banner type="warning" className="mt-4">
                             Your previous key{prevMaskedValue ? ` "${prevMaskedValue}"` : ''} is no longer valid.
-                        </LemonBanner>
+                        </Banner>
                     </>
                 ),
             })
         },
         deleteKeySuccess: () => {
-            lemonToast.success(`Personal API key deleted`)
+            toast.success(`Personal API key deleted`)
         },
     })),
     urlToAction(({ actions }) => ({

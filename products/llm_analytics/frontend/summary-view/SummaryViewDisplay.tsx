@@ -5,10 +5,10 @@
  */
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Button, SegmentedButton } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Spinner } from 'lib/elements/Spinner'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 
@@ -84,7 +84,7 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                         <p>Generate an AI-powered summary of this {eventTypeName}.</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <LemonSegmentedButton
+                        <SegmentedButton
                             value={summaryMode}
                             onChange={setSummaryMode}
                             options={[
@@ -112,14 +112,14 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                                     resourceType={AccessControlResourceType.LlmAnalytics}
                                     minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         data-attr="llm-analytics-generate-summary"
                                         loading={summaryDataLoading}
                                         disabledReason="AI data processing must be approved to generate summaries"
                                     >
                                         Generate Summary
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             </AIConsentPopoverWrapper>
                         ) : (
@@ -127,14 +127,14 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                                 resourceType={AccessControlResourceType.LlmAnalytics}
                                 minAccessLevel={AccessControlLevel.Editor}
                             >
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     onClick={() => generateSummary({ mode: summaryMode })}
                                     data-attr="llm-analytics-generate-summary"
                                     loading={summaryDataLoading}
                                 >
                                     Generate Summary
-                                </LemonButton>
+                                </Button>
                             </AccessControlAction>
                         )}
                     </div>
@@ -162,7 +162,7 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                                 resourceType={AccessControlResourceType.LlmAnalytics}
                                 minAccessLevel={AccessControlLevel.Editor}
                             >
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     size="small"
                                     className="mt-4"
@@ -170,7 +170,7 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                                     disabledReason="AI data processing must be approved to generate summaries"
                                 >
                                     Try Again
-                                </LemonButton>
+                                </Button>
                             </AccessControlAction>
                         </AIConsentPopoverWrapper>
                     ) : (
@@ -178,7 +178,7 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                             resourceType={AccessControlResourceType.LlmAnalytics}
                             minAccessLevel={AccessControlLevel.Editor}
                         >
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 size="small"
                                 onClick={() => generateSummary({ mode: summaryMode })}
@@ -186,7 +186,7 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                                 loading={summaryDataLoading}
                             >
                                 Try Again
-                            </LemonButton>
+                            </Button>
                         </AccessControlAction>
                     )}
                 </div>
@@ -205,7 +205,7 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                                     resourceType={AccessControlResourceType.LlmAnalytics}
                                     minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         data-attr="llm-analytics-regenerate-summary"
@@ -213,7 +213,7 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                                         disabledReason="AI data processing must be approved to generate summaries"
                                     >
                                         Regenerate
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             </AIConsentPopoverWrapper>
                         ) : (
@@ -221,7 +221,7 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                                 resourceType={AccessControlResourceType.LlmAnalytics}
                                 minAccessLevel={AccessControlLevel.Editor}
                             >
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     size="small"
                                     onClick={() => regenerateSummary()}
@@ -229,10 +229,10 @@ export function SummaryViewDisplay({ trace, event, tree, autoGenerate }: Summary
                                     loading={summaryDataLoading}
                                 >
                                     Regenerate
-                                </LemonButton>
+                                </Button>
                             </AccessControlAction>
                         )}
-                        <LemonSegmentedButton
+                        <SegmentedButton
                             value={summaryMode}
                             onChange={setSummaryMode}
                             options={[

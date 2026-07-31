@@ -1,4 +1,4 @@
-import { LemonCheckbox, LemonInput } from '@hanzo/lemon-ui'
+import { Checkbox, Input } from '@hanzo/elements'
 
 import { SurveyValidationRule, SurveyValidationType } from '~/types'
 
@@ -53,8 +53,8 @@ export function ValidationRulesEditor({ value, onChange }: ValidationRulesEditor
 
     return (
         <div className="flex flex-row items-center gap-2">
-            <LemonCheckbox label="Validate message length" checked={hasLengthLimit} onChange={toggleLengthLimit} />
-            <LemonInput
+            <Checkbox label="Validate message length" checked={hasLengthLimit} onChange={toggleLengthLimit} />
+            <Input
                 type="number"
                 min={1}
                 max={maxLengthRule?.value}
@@ -64,7 +64,7 @@ export function ValidationRulesEditor({ value, onChange }: ValidationRulesEditor
                 className="w-16"
             />
             <span className="text-secondary">to</span>
-            <LemonInput
+            <Input
                 type="number"
                 min={minLengthRule?.value ?? 1}
                 placeholder="Max"

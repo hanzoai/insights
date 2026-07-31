@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { Query } from '~/queries/Query/Query'
 import { InsightVizNode, NodeKind } from '~/queries/schema/schema-general'
@@ -53,7 +53,7 @@ export function EvaluationMetrics(): JSX.Element {
     if (statsLoading) {
         return (
             <div className="space-y-4 mb-6">
-                <LemonSkeleton className="h-96 w-full" />
+                <Skeleton className="h-96 w-full" />
             </div>
         )
     }

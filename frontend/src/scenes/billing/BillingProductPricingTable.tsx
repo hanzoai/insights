@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconArrowRightDown, IconInfo } from '@hanzo/icons'
-import { LemonBanner, LemonTable, LemonTableColumns, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Table, TableColumns, Tooltip } from '@hanzo/elements'
 
 import {
     BillingProductV2AddonType,
@@ -23,7 +23,7 @@ import { billingProductLogic } from './billingProductLogic'
 function Subrows(props: ProductPricingTierSubrows): JSX.Element {
     return (
         <div className="px-2 pt-4 pb-6">
-            <LemonTable dataSource={props.rows} columns={props.columns} embedded showHeader={true} />
+            <Table dataSource={props.rows} columns={props.columns} embedded showHeader={true} />
         </div>
     )
 }
@@ -58,7 +58,7 @@ export const BillingProductPricingTable = ({
     // Helper to format usage values with display formatting if configured
     const formatUsage = createProductValueFormatter(product)
 
-    const tableColumns: LemonTableColumns<BillingTableTierRow> = [
+    const tableColumns: TableColumns<BillingTableTierRow> = [
         {
             title: `Priced per ${unitLabel}`,
             dataIndex: 'volume',
@@ -236,7 +236,7 @@ export const BillingProductPricingTable = ({
         <div className="pl-16 pb-8">
             {product.tiered && tableTierData ? (
                 <>
-                    <LemonTable
+                    <Table
                         stealth
                         embedded
                         size="small"
@@ -250,12 +250,12 @@ export const BillingProductPricingTable = ({
                             rowExpandable: (row) => !!row.subrows?.rows?.length,
                         }}
                     />
-                    <LemonBanner type="warning" className="text-sm pt-2 mt-2">
+                    <Banner type="warning" className="text-sm pt-2 mt-2">
                         Tier breakdowns are updated once daily and may differ from the gauge above.
-                    </LemonBanner>
+                    </Banner>
                 </>
             ) : parseFloat(product.unit_amount_usd || '0') > 0 ? (
-                <LemonTable
+                <Table
                     stealth
                     embedded
                     size="small"

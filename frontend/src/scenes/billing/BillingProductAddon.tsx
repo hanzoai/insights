@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { ReactNode, useRef } from 'react'
 
 import { IconCheckCircle, IconInfo } from '@hanzo/icons'
-import { LemonSelectOptions, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { SelectOptions, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { TRIAL_CANCELLATION_SURVEY_ID, UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
 import { humanFriendlyCurrency } from 'lib/utils'
@@ -45,7 +45,7 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
     const { toggleIsPricingModalOpen } = useActions(billingProductLogic({ product: addon }))
 
     const productType = { plural: `${addon.unit}s`, singular: addon.unit }
-    const tierDisplayOptions: LemonSelectOptions<string> = [
+    const tierDisplayOptions: SelectOptions<string> = [
         { label: `Per ${productType.singular}`, value: 'individual' },
     ]
 
@@ -85,23 +85,23 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
                                                 : ''
                                         }`}
                                     >
-                                        <LemonTag type="muted">Config option</LemonTag>
+                                        <Tag type="muted">Config option</Tag>
                                     </Tooltip>
                                 </div>
                             ) : (
                                 addon.subscribed && (
                                     <div>
-                                        <LemonTag type="primary" icon={<IconCheckCircle />}>
+                                        <Tag type="primary" icon={<IconCheckCircle />}>
                                             Subscribed
-                                        </LemonTag>
+                                        </Tag>
                                     </div>
                                 )
                             )}
                             {addon.legacy_product && (
                                 <div>
-                                    <LemonTag type="highlight" icon={<IconInfo />}>
+                                    <Tag type="highlight" icon={<IconInfo />}>
                                         Legacy add-on
-                                    </LemonTag>
+                                    </Tag>
                                 </div>
                             )}
                             {isDataPipelinesDeprecated && (
@@ -109,9 +109,9 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
                                     <Tooltip
                                         title={`Data pipelines have moved to new, usage-based pricing with a large free allowance. You can no longer upgrade to this add-on and old ingestion-based pricing ended on ${DATA_PIPELINES_CUTOFF_DATE}.`}
                                     >
-                                        <LemonTag type="warning" icon={<IconInfo />}>
+                                        <Tag type="warning" icon={<IconInfo />}>
                                             Deprecated
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 </div>
                             )}

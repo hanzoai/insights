@@ -456,7 +456,7 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
             }
 
             if (previousSearchParams['event-correlation_page'] !== searchParams['event-correlation_page']) {
-                // If a lemon table pagination param has changed, don't do anything
+                // If a table pagination param has changed, don't do anything
                 return
             }
 

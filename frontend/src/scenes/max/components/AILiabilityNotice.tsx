@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, Link } from '@hanzo/lemon-ui'
+import { Banner, Link } from '@hanzo/elements'
 
 import { organizationLogic } from 'scenes/organizationLogic'
 import { urls } from 'scenes/urls'
@@ -18,7 +18,7 @@ export function AILiabilityNotice(): JSX.Element | null {
 
     return (
         <div className="flex flex-col mb-2 max-w-160 w-full px-3">
-            <LemonBanner type="ai" onClose={dismissLiabilityNotice}>
+            <Banner type="ai" onClose={dismissLiabilityNotice}>
                 Insights AI uses third-party LLM providers (OpenAI and Anthropic). Your data will not be used for
                 training models.
                 {isAdminOrOwner && (
@@ -34,7 +34,7 @@ export function AILiabilityNotice(): JSX.Element | null {
                 <Link to="https://hanzo.ai/docs/insights-ai/faq" target="_blank" disableDocsPanel>
                     Learn more
                 </Link>
-            </LemonBanner>
+            </Banner>
         </div>
     )
 }

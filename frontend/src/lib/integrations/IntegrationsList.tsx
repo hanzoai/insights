@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { IntegrationView } from 'lib/integrations/IntegrationView'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
@@ -36,7 +36,7 @@ export function IntegrationsList({
                     ? filteredIntegrations.map((integration) => (
                           <IntegrationView key={integration.id} integration={integration} />
                       ))
-                    : integrationsLoading && <LemonSkeleton className="h-10" />}
+                    : integrationsLoading && <Skeleton className="h-10" />}
             </div>
         </div>
     )

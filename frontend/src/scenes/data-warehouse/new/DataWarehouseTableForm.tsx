@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput, LemonSelect, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Select, Link } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { ManualLinkSourceType } from '~/types'
 
@@ -64,9 +64,9 @@ export function DatawarehouseTableForm({ onUpdate }: Props): JSX.Element {
             autoComplete="off"
         >
             <div className="flex flex-col gap-2">
-                <LemonField name="name" label="Table name">
+                <Field name="name" label="Table name">
                     {({ value = '', onChange }) => (
-                        <LemonInput
+                        <Input
                             data-attr="table-name"
                             className="ph-ignore-input"
                             placeholder="Examples: stripe_invoice, hubspot_contacts, users"
@@ -78,11 +78,11 @@ export function DatawarehouseTableForm({ onUpdate }: Props): JSX.Element {
                             onChange={onChange}
                         />
                     )}
-                </LemonField>
+                </Field>
                 <div className="mb-4 text-xs text-secondary">This will be the table name used when writing queries</div>
-                <LemonField name="url_pattern" label="Files URL pattern">
+                <Field name="url_pattern" label="Files URL pattern">
                     {({ value = '', onChange }) => (
-                        <LemonInput
+                        <Input
                             data-attr="table-url-pattern"
                             className="ph-ignore-input"
                             placeholder={ProviderMappings[provider].fileUrlPatternPlaceholder}
@@ -94,13 +94,13 @@ export function DatawarehouseTableForm({ onUpdate }: Props): JSX.Element {
                             onChange={onChange}
                         />
                     )}
-                </LemonField>
+                </Field>
                 <div className="mb-4 text-xs text-secondary">
                     You can use <strong>*</strong> to select multiple files.
                 </div>
-                <LemonField name="format" label="File format" className="mb-4 w-max">
+                <Field name="format" label="File format" className="mb-4 w-max">
                     {({ value = '', onChange }) => (
-                        <LemonSelect
+                        <Select
                             data-attr="table-format"
                             options={[
                                 { label: 'Parquet (recommended)', value: 'Parquet' },
@@ -113,10 +113,10 @@ export function DatawarehouseTableForm({ onUpdate }: Props): JSX.Element {
                             onChange={onChange}
                         />
                     )}
-                </LemonField>
-                <LemonField name={['credential', 'access_key']} label={ProviderMappings[provider].accessKeyLabel}>
+                </Field>
+                <Field name={['credential', 'access_key']} label={ProviderMappings[provider].accessKeyLabel}>
                     {({ value = '', onChange }) => (
-                        <LemonInput
+                        <Input
                             data-attr="access-key"
                             className="ph-ignore-input"
                             placeholder={ProviderMappings[provider].accessKeyPlaceholder}
@@ -128,10 +128,10 @@ export function DatawarehouseTableForm({ onUpdate }: Props): JSX.Element {
                             onChange={onChange}
                         />
                     )}
-                </LemonField>
-                <LemonField name={['credential', 'access_secret']} label={ProviderMappings[provider].accessSecretLabel}>
+                </Field>
+                <Field name={['credential', 'access_secret']} label={ProviderMappings[provider].accessSecretLabel}>
                     {({ value = '', onChange }) => (
-                        <LemonInput
+                        <Input
                             data-attr="access-secret"
                             className="ph-ignore-input"
                             type="password"
@@ -144,7 +144,7 @@ export function DatawarehouseTableForm({ onUpdate }: Props): JSX.Element {
                             onChange={onChange}
                         />
                     )}
-                </LemonField>
+                </Field>
                 {provider === 'google-cloud' && (
                     <div className="text-xs text-secondary">
                         We use HMAC keys to access your Google Cloud Storage. Find more about generating them{' '}
@@ -156,9 +156,9 @@ export function DatawarehouseTableForm({ onUpdate }: Props): JSX.Element {
             </div>
             {!!onUpdate && (
                 <div className="flex justify-end">
-                    <LemonButton type="primary" onClick={onUpdate}>
+                    <Button type="primary" onClick={onUpdate}>
                         Save
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </Form>

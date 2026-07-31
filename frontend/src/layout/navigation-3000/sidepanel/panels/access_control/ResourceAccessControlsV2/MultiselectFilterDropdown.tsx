@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonInput, Link } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input, Link } from '@hanzo/elements'
 
 export function MultiSelectFilterDropdown<T extends string = string>(props: {
     title: string
@@ -33,7 +33,7 @@ export function MultiSelectFilterDropdown<T extends string = string>(props: {
                         </Link>
                     ) : null}
                 </div>
-                <LemonInput
+                <Input
                     type="search"
                     placeholder={props.placeholder}
                     value={searchTerm}
@@ -47,7 +47,7 @@ export function MultiSelectFilterDropdown<T extends string = string>(props: {
                 {filteredOptions.length > 0 ? (
                     <div className="flex flex-col gap-px">
                         {filteredOptions.map((option) => (
-                            <LemonButton
+                            <Button
                                 key={option.key}
                                 fullWidth
                                 size="small"
@@ -61,10 +61,10 @@ export function MultiSelectFilterDropdown<T extends string = string>(props: {
                                 }}
                             >
                                 <div className="flex items-center gap-2">
-                                    <LemonCheckbox checked={props.values.includes(option.key)} />
+                                    <Checkbox checked={props.values.includes(option.key)} />
                                     <span className="flex-1 truncate font-normal">{option.label}</span>
                                 </div>
-                            </LemonButton>
+                            </Button>
                         ))}
                     </div>
                 ) : (

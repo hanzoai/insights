@@ -1,5 +1,5 @@
 import { IconChevronRight } from '@hanzo/icons'
-import { LemonCollapse } from '@hanzo/lemon-ui'
+import { Collapse } from '@hanzo/elements'
 
 import { isValidRegexp } from 'lib/utils/regexp'
 
@@ -58,7 +58,7 @@ export function PathCleaningRulesDebugger({
 
     return (
         <div className="mt-3">
-            <LemonCollapse
+            <Collapse
                 panels={[
                     {
                         key: 'debug',

@@ -1,4 +1,4 @@
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { compactNumber } from 'lib/utils'
 
 import { BillingProductV2Type, BillingTierType } from '~/types'

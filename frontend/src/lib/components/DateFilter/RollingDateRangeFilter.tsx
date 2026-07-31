@@ -2,14 +2,14 @@ import './RollingDateRangeFilter.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonButtonProps, LemonInput, LemonSelect, LemonSelectOptionLeaf } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Input, Select, SelectOptionLeaf } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { DateOption, rollingDateRangeFilterLogic } from './rollingDateRangeFilterLogic'
 
-const dateOptions: LemonSelectOptionLeaf<DateOption>[] = [
+const dateOptions: SelectOptionLeaf<DateOption>[] = [
     { value: 'seconds', label: 'seconds' },
     { value: 'minutes', label: 'minutes' },
     { value: 'hours', label: 'hours' },
@@ -37,7 +37,7 @@ type RollingDateRangeFilterProps = {
     dateRangeFilterLabel?: string
     dateRangeFilterSuffixLabel?: string
     allowedDateOptions?: DateOption[]
-    fullWidth?: LemonButtonProps['fullWidth']
+    fullWidth?: ButtonProps['fullWidth']
 }
 
 export function RollingDateRangeFilter({
@@ -71,7 +71,7 @@ export function RollingDateRangeFilter({
                 >
                     -
                 </span>
-                <LemonInput
+                <Input
                     data-attr="rolling-date-range-input"
                     className="[&>input::-webkit-inner-spin-button]:appearance-none shadow-none"
                     type="number"
@@ -88,7 +88,7 @@ export function RollingDateRangeFilter({
                     +
                 </span>
             </div>
-            <LemonSelect
+            <Select
                 className="RollingDateRangeFilter__select"
                 data-attr="rolling-date-range-date-options-selector"
                 id="rolling-date-range-date-options-selector"
@@ -114,7 +114,7 @@ export function RollingDateRangeFilter({
 
     if (isButton) {
         contents = (
-            <LemonButton
+            <Button
                 className="RollingDateRangeFilter"
                 data-attr="rolling-date-range-filter"
                 onClick={select}
@@ -122,7 +122,7 @@ export function RollingDateRangeFilter({
                 fullWidth={fullWidth}
             >
                 {contents}
-            </LemonButton>
+            </Button>
         )
     }
 

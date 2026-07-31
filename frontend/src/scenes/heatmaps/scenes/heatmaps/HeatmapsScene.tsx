@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonTable, LemonTableColumn, LemonTableColumns, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Table, TableColumn, TableColumns, Link } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { TZLabel } from 'lib/components/TZLabel'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { More } from 'lib/elements/Button/More'
+import { createdByColumn } from 'lib/elements/Table/columnUtils'
 import { HeatmapsWarnings } from 'scenes/heatmaps/components/HeatmapsWarnings'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -31,7 +31,7 @@ export function HeatmapsScene(): JSX.Element {
     const { savedHeatmaps, savedHeatmapsLoading, filters, totalCount } = useValues(heatmapsSceneLogic)
     const { deleteHeatmap, setHeatmapsFilters } = useActions(heatmapsSceneLogic)
 
-    const columns: LemonTableColumns<HeatmapScreenshotType> = [
+    const columns: TableColumns<HeatmapScreenshotType> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -72,7 +72,7 @@ export function HeatmapsScene(): JSX.Element {
             },
         },
         {
-            ...(createdByColumn<HeatmapScreenshotType>() as LemonTableColumn<
+            ...(createdByColumn<HeatmapScreenshotType>() as TableColumn<
                 HeatmapScreenshotType,
                 keyof HeatmapScreenshotType | undefined
             >),
@@ -85,14 +85,14 @@ export function HeatmapsScene(): JSX.Element {
                     <More
                         overlay={
                             <>
-                                <LemonButton
+                                <Button
                                     status="danger"
                                     onClick={() => deleteHeatmap(row.short_id)}
                                     fullWidth
                                     loading={savedHeatmapsLoading}
                                 >
                                     Delete
-                                </LemonButton>
+                                </Button>
                             </>
                         }
                     />
@@ -118,7 +118,7 @@ export function HeatmapsScene(): JSX.Element {
                         interaction="click"
                         scope={Scene.Heatmaps}
                     >
-                        <LemonButton
+                        <Button
                             type="primary"
                             to={urls.heatmap('new')}
                             data-attr="heatmaps-new-heatmap-button"
@@ -127,7 +127,7 @@ export function HeatmapsScene(): JSX.Element {
                             tooltip="New heatmap"
                         >
                             New heatmap
-                        </LemonButton>
+                        </Button>
                     </AppShortcut>
                 }
             />
@@ -139,7 +139,7 @@ export function HeatmapsScene(): JSX.Element {
                     interaction="click"
                     scope={Scene.Heatmaps}
                 >
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search for heatmaps"
                         onChange={(value) => setHeatmapsFilters({ ...filters, search: value || '' })}
@@ -156,7 +156,7 @@ export function HeatmapsScene(): JSX.Element {
                 </div>
             </div>
             <div className="mb-4">
-                <LemonTable
+                <Table
                     dataSource={savedHeatmaps}
                     loading={savedHeatmapsLoading}
                     columns={columns}

@@ -1,9 +1,9 @@
 import React from 'react'
 
 import { IconCopy, IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
-import { LemonButton, LemonDropdown } from '@hanzo/lemon-ui'
+import { Button, Dropdown } from '@hanzo/elements'
 
-import { IconTableChart } from 'lib/lemon-ui/icons'
+import { IconTableChart } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { PropertyOperator } from '~/types'
@@ -28,7 +28,7 @@ export function LogsViewerCellPopover({
     const displayValue = value != null ? String(value) : '-'
 
     return (
-        <LemonDropdown
+        <Dropdown
             placement="top"
             showArrow
             trigger="hover"
@@ -36,7 +36,7 @@ export function LogsViewerCellPopover({
             overlay={
                 <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1 shrink-0">
-                        <LemonButton
+                        <Button
                             size="xsmall"
                             icon={<IconCopy />}
                             tooltip="Copy value"
@@ -44,13 +44,13 @@ export function LogsViewerCellPopover({
                         />
                         {onAddFilter && (
                             <>
-                                <LemonButton
+                                <Button
                                     size="xsmall"
                                     icon={<IconPlusSquare />}
                                     tooltip="Add as filter"
                                     onClick={() => onAddFilter(attributeKey, displayValue)}
                                 />
-                                <LemonButton
+                                <Button
                                     size="xsmall"
                                     icon={<IconMinusSquare />}
                                     tooltip="Exclude as filter"
@@ -59,7 +59,7 @@ export function LogsViewerCellPopover({
                             </>
                         )}
                         {onToggleColumn && (
-                            <LemonButton
+                            <Button
                                 size="xsmall"
                                 icon={<IconTableChart />}
                                 tooltip={isColumn ? 'Remove from columns' : 'Add as column'}
@@ -72,6 +72,6 @@ export function LogsViewerCellPopover({
             }
         >
             {children}
-        </LemonDropdown>
+        </Dropdown>
     )
 }

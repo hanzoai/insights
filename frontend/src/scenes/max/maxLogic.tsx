@@ -6,7 +6,7 @@ import { IconBook } from '@hanzo/icons'
 import api from 'lib/api'
 import { AI_AVAILABLE } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareScene } from 'lib/logic/scenes/tabAwareScene'
 import { tabAwareUrlToAction } from 'lib/logic/scenes/tabAwareUrlToAction'
@@ -423,7 +423,7 @@ export const maxLogic = kea<maxLogicType>([
                     return
                 }
 
-                lemonToast.error(err?.data?.detail || 'Failed to load the chat.')
+                toast.error(err?.data?.detail || 'Failed to load the chat.')
             }
 
             if (conversation && conversation.status === ConversationStatus.Idle) {

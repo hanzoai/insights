@@ -9,9 +9,9 @@ import { IconBug, IconCursorClick, IconHourglass, IconKeyboard, IconLive } from 
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS, SESSION_RECORDINGS_TTL_WARNING_THRESHOLD_DAYS } from 'lib/constants'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { colonDelimitedDuration } from 'lib/utils'
 import { DraggableToNotebook } from 'scenes/notebooks/AddToNotebook/DraggableToNotebook'
@@ -142,7 +142,7 @@ export function PropertyIcons({ recordingProperties, loading, iconClassNames }: 
     return (
         <div className="flex gap-x-1 ph-no-capture">
             {loading ? (
-                <LemonSkeleton className="w-16 h-3" />
+                <Skeleton className="w-16 h-3" />
             ) : (
                 recordingProperties.map(({ property, value, label }) => (
                     <Tooltip key={property} title={label}>
@@ -231,7 +231,7 @@ function ItemCheckbox({ recording }: { recording: SessionRecordingType }): JSX.E
     const { setSelectedRecordingsIds } = useActions(sessionRecordingsPlaylistLogic)
 
     return (
-        <LemonCheckbox
+        <Checkbox
             checked={selectedRecordingsIds.some((s) => s === recording.id)}
             data-attr="select-recording"
             aria-label="Select recording"
@@ -377,8 +377,8 @@ export const SessionRecordingPreview = memo(
 export function SessionRecordingPreviewSkeleton(): JSX.Element {
     return (
         <div className="p-4 flex flex-col gap-y-2">
-            <LemonSkeleton className="w-1/2 h-4" />
-            <LemonSkeleton className="w-1/3 h-4" />
+            <Skeleton className="w-1/2 h-4" />
+            <Skeleton className="w-1/3 h-4" />
         </div>
     )
 }

@@ -1,7 +1,7 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
 import { IconChevronDown, IconCopy, IconInfo, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, LemonDivider, LemonMenu, LemonSelect, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Divider, Menu, Select, Tag, Link } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
@@ -11,12 +11,12 @@ import { NotFound } from 'lib/components/NotFound'
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { TZLabel } from 'lib/components/TZLabel'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconOpenInApp } from 'lib/lemon-ui/icons'
+import { Banner } from 'lib/elements/Banner'
+import { Tabs } from 'lib/elements/Tabs'
+import { toast } from 'lib/elements/Toast/Toast'
+import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { isMobile, pluralize } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { openInAdminPanel } from 'lib/utils/person-actions'
@@ -70,18 +70,18 @@ function PersonCaption({ person }: { person: PersonType }): JSX.Element {
                     </CopyToClipboardInline>
                 </div>
                 {person.distinct_ids.length > 1 && (
-                    <LemonMenu
+                    <Menu
                         items={person.distinct_ids.slice(1).map((distinct_id: string) => ({
                             label: distinct_id,
                             sideIcon: <IconCopy className="text-primary-3000" />,
                             onClick: () => copyToClipboard(distinct_id, 'distinct id'),
                         }))}
                     >
-                        <LemonTag type="primary" className="inline-flex">
+                        <Tag type="primary" className="inline-flex">
                             <span>+{person.distinct_ids.length - 1}</span>
                             <IconChevronDown className="w-4 h-4" />
-                        </LemonTag>
-                    </LemonMenu>
+                        </Tag>
+                    </Menu>
                 )}
             </div>
             <div>
@@ -122,7 +122,7 @@ function LaunchToolbarButton({ distinctId }: LaunchToolbarButtonProps): JSX.Elem
 
     const handleLaunchToolbar = async (targetUrl: string): Promise<void> => {
         if (!currentTeam?.app_urls?.length) {
-            lemonToast.error('No authorized URLs configured. Please add a URL in Toolbar settings.')
+            toast.error('No authorized URLs configured. Please add a URL in Toolbar settings.')
             return
         }
 
@@ -137,15 +137,15 @@ function LaunchToolbarButton({ distinctId }: LaunchToolbarButtonProps): JSX.Elem
             })
 
             window.open(toolbarUrl, '_blank')
-            lemonToast.success(`Launching toolbar with ${pluralize(response.flag_count, 'feature flag override')}`)
+            toast.success(`Launching toolbar with ${pluralize(response.flag_count, 'feature flag override')}`)
         } catch (error) {
-            lemonToast.error('Failed to launch toolbar. Please try again.')
+            toast.error('Failed to launch toolbar. Please try again.')
             console.error('Error launching toolbar:', error)
         }
     }
 
     return (
-        <LemonSelect
+        <Select
             size="medium"
             icon={<IconOpenInApp />}
             data-attr="launch-toolbar-with-loaded-flags-button"
@@ -215,7 +215,7 @@ export function PersonScene(): JSX.Element | null {
                             type="secondary"
                             size="small"
                         />
-                        <LemonButton
+                        <Button
                             onClick={() => showPersonDeleteModal(person, () => loadPersons())}
                             disabled={deletedPersonLoading}
                             loading={deletedPersonLoading}
@@ -226,17 +226,17 @@ export function PersonScene(): JSX.Element | null {
                             icon={isMobile() ? <IconTrash /> : null}
                         >
                             {isMobile() ? null : 'Delete user'}
-                        </LemonButton>
+                        </Button>
 
                         {person.distinct_ids.length > 1 && (
-                            <LemonButton
+                            <Button
                                 onClick={() => setSplitMergeModalShown(true)}
                                 data-attr="merge-person-button"
                                 type="secondary"
                                 size="small"
                             >
                                 Split IDs
-                            </LemonButton>
+                            </Button>
                         )}
                     </>
                 }
@@ -246,7 +246,7 @@ export function PersonScene(): JSX.Element | null {
 
             <SceneDivider />
             <PersonDeleteModal />
-            <LemonTabs
+            <Tabs
                 activeKey={currentTab}
                 onChange={(tab) => {
                     navigateToTab(tab as PersonsTabType)
@@ -288,7 +288,7 @@ export function PersonScene(): JSX.Element | null {
                             <>
                                 {!currentTeam?.session_recording_opt_in ? (
                                     <div className="mb-4">
-                                        <LemonBanner type="info">
+                                        <Banner type="info">
                                             Session recordings are currently disabled for this project. To use this
                                             feature, please go to your{' '}
                                             <Link
@@ -304,7 +304,7 @@ export function PersonScene(): JSX.Element | null {
                                                 project settings
                                             </Link>{' '}
                                             and enable it.
-                                        </LemonBanner>
+                                        </Banner>
                                     </div>
                                 ) : null}
                                 <div className="SessionRecordingPlaylistHeightWrapper">
@@ -384,7 +384,7 @@ export function PersonScene(): JSX.Element | null {
                                                       <IconInfo className="ml-1 text-base" />
                                                   </Tooltip>
                                               </div>
-                                              <LemonSelect
+                                              <Select
                                                   value={selectedDistinctId}
                                                   onChange={(value) => value && setDistinctId(value)}
                                                   options={person.distinct_ids.map((distinct_id) => ({
@@ -397,7 +397,7 @@ export function PersonScene(): JSX.Element | null {
                                                   <LaunchToolbarButton distinctId={selectedDistinctId} />
                                               )}
                                           </div>
-                                          <LemonDivider className="mb-4" />
+                                          <Divider className="mb-4" />
                                           <RelatedFeatureFlags distinctId={selectedDistinctId} />
                                       </>
                                   )
@@ -412,10 +412,10 @@ export function PersonScene(): JSX.Element | null {
                                 scope={ActivityScope.PERSON}
                                 id={person.id}
                                 caption={
-                                    <LemonBanner type="info">
+                                    <Banner type="info">
                                         This page only shows changes made by users in the Insights site. Automatic
                                         changes from the API aren't shown here.
-                                    </LemonBanner>
+                                    </Banner>
                                 }
                             />
                         ),
@@ -428,18 +428,18 @@ export function PersonScene(): JSX.Element | null {
     )
 }
 
-function OpenInAdminPanelButton({ size = 'small' }: { size?: LemonButtonProps['size'] }): JSX.Element {
+function OpenInAdminPanelButton({ size = 'small' }: { size?: ButtonProps['size'] }): JSX.Element {
     const { person } = useValues(personsLogic)
     const disabledReason = !person?.properties.email ? 'User has no email' : undefined
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             onClick={() => openInAdminPanel(person?.properties.email)}
             disabledReason={disabledReason}
             size={size}
         >
             Open in admin panel
-        </LemonButton>
+        </Button>
     )
 }

@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react'
 
 import { IconEllipsis } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonCollapse,
-    LemonCollapsePanel,
-    LemonDialog,
-    LemonInput,
-    LemonLabel,
-    LemonSelect,
-} from '@hanzo/lemon-ui'
+    Banner,
+    Button,
+    Collapse,
+    CollapsePanel,
+    Dialog,
+    Input,
+    Label,
+    Select,
+} from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { InsightsFunctionMapping, MappingSummary } from 'scenes/insights-functions/mapping/InsightsFunctionMappings'
 
 import { InsightsFunctionConfigurationType, InsightsFunctionMappingType } from '~/types'
@@ -93,13 +93,13 @@ export function InsightsFlowFunctionMappings({
     }
 
     const renameMapping = (mapping: InsightsFunctionMappingType): void => {
-        LemonDialog.openForm({
+        Dialog.openForm({
             title: 'Rename mapping',
             initialValues: { mappingName: mapping.name },
             content: (
-                <LemonField name="mappingName">
-                    <LemonInput data-attr="mapping-name" placeholder="Please enter the new name" autoFocus />
-                </LemonField>
+                <Field name="mappingName">
+                    <Input data-attr="mapping-name" placeholder="Please enter the new name" autoFocus />
+                </Field>
             ),
             errors: {
                 mappingName: (name) => (!name ? 'You must enter a name' : undefined),
@@ -114,7 +114,7 @@ export function InsightsFlowFunctionMappings({
     }
 
     const addMappingButton = mappingTemplates.length ? (
-        <LemonSelect
+        <Select
             placeholder="Add mapping"
             onChange={(template) => {
                 addMapping(template)
@@ -130,7 +130,7 @@ export function InsightsFlowFunctionMappings({
         <div className="p-3 rounded border bg-surface-primary">
             <div className="flex justify-between items-start">
                 <div className="flex-1">
-                    <LemonLabel>Mappings</LemonLabel>
+                    <Label>Mappings</Label>
                     <p className="text-sm text-secondary">
                         Configure which events should act as triggers including filters and custom transformations
                     </p>
@@ -141,13 +141,13 @@ export function InsightsFlowFunctionMappings({
             <div className="deprecated-space-y-2">
                 {mappingsValue.length ? (
                     <div className="-mx-3 border-t border-b">
-                        <LemonCollapse
+                        <Collapse
                             multiple
                             embedded
                             activeKeys={activeKeys}
                             onChange={(activeKeys) => setActiveKeys(activeKeys)}
                             panels={mappingsValue.map(
-                                (mapping, index): LemonCollapsePanel<number> => ({
+                                (mapping, index): CollapsePanel<number> => ({
                                     key: index,
                                     header: {
                                         children: <MappingSummary mapping={mapping} />,
@@ -156,21 +156,21 @@ export function InsightsFlowFunctionMappings({
                                             dropdown: {
                                                 overlay: (
                                                     <div className="deprecated-space-y-px">
-                                                        <LemonButton onClick={() => toggleDisabled(mapping)}>
+                                                        <Button onClick={() => toggleDisabled(mapping)}>
                                                             {mapping.disabled ? 'Enable' : 'Disable'}
-                                                        </LemonButton>
-                                                        <LemonButton onClick={() => renameMapping(mapping)}>
+                                                        </Button>
+                                                        <Button onClick={() => renameMapping(mapping)}>
                                                             Rename
-                                                        </LemonButton>
-                                                        <LemonButton onClick={() => duplicateMapping(mapping)}>
+                                                        </Button>
+                                                        <Button onClick={() => duplicateMapping(mapping)}>
                                                             Duplicate
-                                                        </LemonButton>
-                                                        <LemonButton
+                                                        </Button>
+                                                        <Button
                                                             status="danger"
                                                             onClick={() => removeMapping(mapping)}
                                                         >
                                                             Remove
-                                                        </LemonButton>
+                                                        </Button>
                                                     </div>
                                                 ),
                                             },
@@ -200,10 +200,10 @@ export function InsightsFlowFunctionMappings({
                         />
                     </div>
                 ) : (
-                    <LemonBanner type="warning" className="p-2">
+                    <Banner type="warning" className="p-2">
                         You have no mappings configured which effectively means the function is disabled as there is
                         nothing to trigger it.
-                    </LemonBanner>
+                    </Banner>
                 )}
             </div>
         </div>

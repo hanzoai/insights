@@ -18,7 +18,7 @@ import { delay } from 'kea-test-utils'
 import insights from '@hanzo/insights'
 import { RefObject } from 'react'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 import { ReplayPlugin, Replayer, playerConfig } from '@hanzo/rrweb'
 import { EventType, IncrementalSource, eventWithTime } from '@hanzo/rrweb-types'
 
@@ -1122,7 +1122,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
                 if (theMountedLogic) {
                     theMountedLogic.actions.editComment(comment)
                 } else {
-                    lemonToast.error('Could not start editing that comment 😓, please refresh the page and try again.')
+                    toast.error('Could not start editing that comment 😓, please refresh the page and try again.')
                 }
             }
         },
@@ -1957,7 +1957,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
                 actions.reportRecordingExportedToFile()
             }
 
-            await lemonToast.promise(doExport(), {
+            await toast.promise(doExport(), {
                 success: 'Export complete!',
                 error: 'Export failed!',
                 pending: 'Exporting recording...',
@@ -1996,7 +1996,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
             actions.setPause()
             const iframe = values.rootFrame?.querySelector('iframe')
             if (!iframe) {
-                lemonToast.error('Cannot export recording. Please try again.')
+                toast.error('Cannot export recording. Please try again.')
                 return
             }
 
@@ -2111,7 +2111,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
                 // Reload the recording metadata to get the updated external_references
                 actions.loadRecordingData()
             } catch (error) {
-                lemonToast.error('Failed to create issue. Please try again.')
+                toast.error('Failed to create issue. Please try again.')
                 throw error
             }
         },

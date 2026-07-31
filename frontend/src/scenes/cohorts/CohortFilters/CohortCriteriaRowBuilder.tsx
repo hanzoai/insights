@@ -5,10 +5,10 @@ import { useActions } from 'kea'
 import { Field as KeaField } from 'kea-forms'
 
 import { IconCopy, IconTrash } from '@hanzo/icons'
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
 import { ROWS, renderField } from 'scenes/cohorts/CohortFilters/constants'
 import { BehavioralFilterType, CohortFieldProps, Field, FilterType } from 'scenes/cohorts/CohortFilters/types'
 import { CohortLogicProps, cohortEditLogic } from 'scenes/cohorts/cohortEditLogic'
@@ -71,9 +71,9 @@ export function CohortCriteriaRowBuilder({
                             >
                                 {kids as React.ReactNode}
                                 {error && (
-                                    <LemonBanner className="my-2" type="error">
+                                    <Banner className="my-2" type="error">
                                         {error}
-                                    </LemonBanner>
+                                    </Banner>
                                 )}
                             </div>
                         </>
@@ -113,9 +113,9 @@ export function CohortCriteriaRowBuilder({
                             </>
                         </KeaField>
                         <div className="CohortCriteriaRow__inline-divider" />
-                        <LemonButton icon={<IconCopy />} onClick={() => duplicateFilter(groupIndex, index)} />
+                        <Button icon={<IconCopy />} onClick={() => duplicateFilter(groupIndex, index)} />
                         {!hideDeleteIcon && (
-                            <LemonButton icon={<IconTrash />} onClick={() => removeFilter(groupIndex, index)} />
+                            <Button icon={<IconTrash />} onClick={() => removeFilter(groupIndex, index)} />
                         )}
                     </div>
                     <div className="flex">
@@ -165,5 +165,5 @@ export interface LogicalRowDividerProps {
 }
 
 export function LogicalRowDivider({ logicalOperator }: LogicalRowDividerProps): JSX.Element {
-    return <LemonDivider className="logical-row-divider my-4" label={logicalOperator} />
+    return <Divider className="logical-row-divider my-4" label={logicalOperator} />
 }

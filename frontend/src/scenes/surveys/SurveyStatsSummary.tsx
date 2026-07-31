@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { memo } from 'react'
 
-import { LemonSkeleton, LemonSwitch } from '@hanzo/lemon-ui'
+import { Skeleton, Switch } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { humanFriendlyNumber, percentage, pluralize } from 'lib/utils'
 import { CopySurveyLink } from 'scenes/surveys/CopySurveyLink'
 import { StackedBar, StackedBarSegment, StackedBarSkeleton } from 'scenes/surveys/components/StackedBar'
@@ -34,8 +34,8 @@ function StatRow({ items, isLoading }: { items: StatRowItem[]; isLoading?: boole
                     <div className="text-xs font-semibold uppercase text-text-secondary">{item.title}</div>
                     {isLoading ? (
                         <>
-                            <LemonSkeleton className="h-6 w-16 mt-1" />
-                            <LemonSkeleton className="h-3 w-24 mt-1" />
+                            <Skeleton className="h-6 w-16 mt-1" />
+                            <Skeleton className="h-3 w-24 mt-1" />
                         </>
                     ) : (
                         <>
@@ -197,7 +197,7 @@ function SurveyStatsContainer({ children }: { children: React.ReactNode }): JSX.
                         />
                     )}
                     {processedSurveyStats && processedSurveyStats[SurveyEventName.SHOWN].total_count > 0 && (
-                        <LemonSwitch
+                        <Switch
                             checked={filterSurveyStatsByDistinctId}
                             onChange={(checked) => setFilterSurveyStatsByDistinctId(checked)}
                             tooltip="If enabled, each user will only be counted once, even if they have multiple responses."

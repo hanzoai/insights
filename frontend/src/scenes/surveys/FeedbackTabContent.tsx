@@ -1,10 +1,10 @@
 import { BindLogic, useValues } from 'kea'
 
 import { IconArrowRight } from '@hanzo/icons'
-import { LemonBanner, LemonTable, LemonTableColumn, Link, Spinner } from '@hanzo/lemon-ui'
+import { Banner, Table, TableColumn, Link, Spinner } from '@hanzo/elements'
 
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn } from 'lib/elements/Table/columnUtils'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { SurveyResult } from 'scenes/surveys/SurveyView'
 import { SurveyStatusTag } from 'scenes/surveys/components/SurveyStatusTag'
@@ -36,9 +36,9 @@ export function FeedbackTabContent({
         return (
             <div className="flex flex-col items-center pt-5">
                 <div className="w-full max-w-5xl">
-                    <LemonBanner type="info" className="mb-6">
+                    <Banner type="info" className="mb-6">
                         {emptyStateBannerMessage}
-                    </LemonBanner>
+                    </Banner>
                     <div className="border rounded p-6 bg-bg-light">
                         <QuickSurveyForm context={context} />
                     </div>
@@ -52,12 +52,12 @@ export function FeedbackTabContent({
         return (
             <BindLogic logic={surveyLogic} props={{ id: survey.id }}>
                 <div>
-                    <LemonBanner type="info" className="mb-6">
+                    <Banner type="info" className="mb-6">
                         Showing results for survey "{survey.name}".{' '}
                         <Link to={urls.survey(survey.id)}>
                             Manage in surveys <IconArrowRight />
                         </Link>
-                    </LemonBanner>
+                    </Banner>
                     <SurveyResult />
                 </div>
             </BindLogic>
@@ -66,9 +66,9 @@ export function FeedbackTabContent({
 
     return (
         <div className="space-y-6">
-            <LemonBanner type="info">{multipleSurveysBannerMessage}</LemonBanner>
+            <Banner type="info">{multipleSurveysBannerMessage}</Banner>
 
-            <LemonTable
+            <Table
                 dataSource={surveys}
                 defaultSorting={{
                     columnKey: 'created_at',
@@ -82,7 +82,7 @@ export function FeedbackTabContent({
                         dataIndex: 'name',
                         title: 'Name',
                         render: function RenderName(_, survey) {
-                            return <LemonTableLink to={urls.survey(survey.id)} title={stringWithWBR(survey.name, 17)} />
+                            return <TableLink to={urls.survey(survey.id)} title={stringWithWBR(survey.name, 17)} />
                         },
                     },
                     {
@@ -105,7 +105,7 @@ export function FeedbackTabContent({
                             return countA - countB
                         },
                     },
-                    createdAtColumn<Survey>() as LemonTableColumn<Survey, keyof Survey | undefined>,
+                    createdAtColumn<Survey>() as TableColumn<Survey, keyof Survey | undefined>,
                     {
                         title: 'Status',
                         width: 100,

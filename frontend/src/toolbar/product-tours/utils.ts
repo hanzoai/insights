@@ -52,7 +52,7 @@ function generateUniqueSelector(element: Element): string {
  * Collect all interactive elements on the page for AI analysis.
  */
 export function getInteractiveElements(): ElementInfo[] {
-    const selectors = 'button, a, [role="button"], input, select, textarea, [data-attr], .LemonButton'
+    const selectors = 'button, a, [role="button"], input, select, textarea, [data-attr], .Button'
     const elements = document.querySelectorAll(selectors)
 
     return Array.from(elements)

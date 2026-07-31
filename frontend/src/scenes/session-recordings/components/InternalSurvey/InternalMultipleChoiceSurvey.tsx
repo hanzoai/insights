@@ -3,7 +3,7 @@
  */
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonCheckbox, LemonTextArea, Link } from '@hanzo/lemon-ui'
+import { Button, Checkbox, TextArea, Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -195,7 +195,7 @@ export function InternalMultipleChoiceSurvey({ surveyId }: InternalSurveyProps):
                                                 if (index === question.choices.length - 1 && question.hasOpenChoice) {
                                                     return (
                                                         <div className="mt-2" key={choice}>
-                                                            <LemonTextArea
+                                                            <TextArea
                                                                 placeholder="Please share any additional comments or feedback"
                                                                 onChange={setOpenChoice}
                                                                 value={openChoice ?? ''}
@@ -207,7 +207,7 @@ export function InternalMultipleChoiceSurvey({ surveyId }: InternalSurveyProps):
                                                 }
                                                 return (
                                                     <li key={choice}>
-                                                        <LemonCheckbox
+                                                        <Checkbox
                                                             onChange={(checked) => handleChoiceChange(choice, checked)}
                                                             label={choice}
                                                             className="font-normal"
@@ -221,7 +221,7 @@ export function InternalMultipleChoiceSurvey({ surveyId }: InternalSurveyProps):
                                         </ul>
                                     )}
                                     <div className="flex gap-2">
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             disabledReason={
                                                 surveyResponse.length === 0 && openChoice === null
@@ -231,9 +231,9 @@ export function InternalMultipleChoiceSurvey({ surveyId }: InternalSurveyProps):
                                             onClick={handleSurveyResponse}
                                         >
                                             {question.buttonText ?? 'Submit'}
-                                        </LemonButton>
+                                        </Button>
                                         {isHelpEnabled && (
-                                            <LemonButton
+                                            <Button
                                                 disabledReason={
                                                     !openChoice || openChoice.length < 5
                                                         ? 'Message must be at least 5 characters'
@@ -247,7 +247,7 @@ export function InternalMultipleChoiceSurvey({ surveyId }: InternalSurveyProps):
                                                 }}
                                             >
                                                 Ask Insights AI for help
-                                            </LemonButton>
+                                            </Button>
                                         )}
                                     </div>
                                 </>
@@ -263,7 +263,7 @@ export function InternalMultipleChoiceSurvey({ surveyId }: InternalSurveyProps):
                                 return null
                             }
                             return (
-                                <div key={message.title} className="mb-4 LemonBanner LemonBanner--info p-4">
+                                <div key={message.title} className="mb-4 Banner Banner--info p-4">
                                     <h4>{message.title}</h4>
                                     <div className="font-normal">{message.content}</div>
                                 </div>

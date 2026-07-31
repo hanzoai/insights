@@ -1,6 +1,6 @@
 import { Attribute, ExtendedRegExpMatchArray } from '@tiptap/core'
 
-import { LemonButtonProps } from '@hanzo/lemon-ui'
+import { ButtonProps } from '@hanzo/elements'
 
 import {
     JSONContent,
@@ -146,7 +146,7 @@ export type NotebookNodeSettings =
     // using 'any' here shouldn't be necessary but, I couldn't figure out how to set a generic on the notebookNodeLogic props
     (({ attributes, updateAttributes }: NotebookNodeAttributeProperties<any>) => JSX.Element) | null
 
-export type NotebookNodeAction = Pick<LemonButtonProps, 'icon'> & {
+export type NotebookNodeAction = Pick<ButtonProps, 'icon'> & {
     text: string
     onClick: () => void
 }

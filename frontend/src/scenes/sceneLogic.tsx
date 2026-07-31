@@ -10,8 +10,8 @@ import insights from '@hanzo/insights'
 import api from 'lib/api'
 import { TeamMembershipLevel } from 'lib/constants'
 import { trackFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { toast } from 'lib/elements/Toast/Toast'
+import { Spinner } from 'lib/elements/Spinner'
 import { getRelativeNextPath, identifierToHuman } from 'lib/utils'
 import { getAppContext, getCurrentTeamIdOrNone } from 'lib/utils/getAppContext'
 import { NEW_INTERNAL_TAB } from 'lib/utils/newInternalTab'
@@ -1162,7 +1162,7 @@ export const sceneLogic = kea<sceneLogicType>([
                                 console.warn(
                                     'Project not available and no other projects, redirecting to project creation'
                                 )
-                                lemonToast.error('You do not have access to any projects in this organization', {
+                                toast.error('You do not have access to any projects in this organization', {
                                     toastId: 'no-projects',
                                 })
                                 router.actions.replace(urls.projectCreateFirst())

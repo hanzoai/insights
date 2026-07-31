@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, props, reducers, se
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -169,14 +169,14 @@ export const twoFactorLogic = kea<twoFactorLogicType>([
     })),
     listeners(({ props, actions }) => ({
         submitTokenSuccess: () => {
-            lemonToast.success('2FA method added successfully')
+            toast.success('2FA method added successfully')
             actions.loadStatus()
             props.onSuccess?.()
         },
         disable2FA: async () => {
             try {
                 await api.create<any>('api/users/@me/two_factor_disable/')
-                lemonToast.success('2FA disabled successfully. The page will reload.')
+                toast.success('2FA disabled successfully. The page will reload.')
                 actions.loadStatus()
 
                 // Reload to avoid breaking calls on the page if enforce_2fa=True
@@ -190,7 +190,7 @@ export const twoFactorLogic = kea<twoFactorLogicType>([
             }
         },
         generateBackupCodesSuccess: () => {
-            lemonToast.success('Backup codes generated successfully')
+            toast.success('Backup codes generated successfully')
         },
         closeTwoFactorSetupModal: () => {
             // Clear the form when closing the modal

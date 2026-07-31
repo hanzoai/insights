@@ -1,7 +1,7 @@
 import equal from 'fast-deep-equal'
 import { useValues } from 'kea'
 
-import { LemonButton, LemonButtonWithDropdown } from 'lib/lemon-ui/LemonButton'
+import { Button, ButtonWithDropdown } from 'lib/elements/Button'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { getEventsQueriesForTeam } from '~/queries/nodes/DataTable/defaultEventsQuery'
@@ -33,24 +33,24 @@ export function SavedQueries({ query, setQuery }: SavedQueriesProps): JSX.Elemen
     }
 
     return (
-        <LemonButtonWithDropdown
+        <ButtonWithDropdown
             dropdown={{
                 matchWidth: false,
                 overlay: Object.entries(eventsQueries).map(([title, eventsQuery]) => (
-                    <LemonButton
+                    <Button
                         key={title}
                         fullWidth
                         active={title === selectedTitle}
                         onClick={() => setQuery?.({ ...query, source: eventsQuery })}
                     >
                         {title}
-                    </LemonButton>
+                    </Button>
                 )),
             }}
             size="small"
             type="secondary"
         >
             {selectedTitle}
-        </LemonButtonWithDropdown>
+        </ButtonWithDropdown>
     )
 }

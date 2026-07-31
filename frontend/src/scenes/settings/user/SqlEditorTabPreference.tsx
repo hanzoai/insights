@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { userPreferencesLogic } from 'lib/logic/userPreferencesLogic'
 
@@ -15,7 +15,7 @@ export function SqlEditorTabPreference(): JSX.Element {
                 clicking "New tab" can open the Insights search command (which has access to other apps, recent tabs,
                 etc.) instead.
             </p>
-            <LemonSelect
+            <Select
                 value={sqlEditorNewTabPreference}
                 onChange={setSqlEditorNewTabPreference}
                 options={[

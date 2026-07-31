@@ -22,12 +22,12 @@ import {
     IconUserPaths,
 } from '@hanzo/icons'
 import { IconCode } from '@hanzo/icons'
-import { LemonButton, LemonDivider, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Divider, toast } from '@hanzo/elements'
 
 import { EditorCommands, EditorRange } from 'lib/components/RichContentEditor/types'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Popover } from 'lib/lemon-ui/Popover'
-import { IconBold, IconItalic, IconTableChart } from 'lib/lemon-ui/icons'
+import { Popover } from 'lib/elements/Popover'
+import { IconBold, IconItalic, IconTableChart } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { selectFiles } from 'lib/utils/file-utils'
 
@@ -389,7 +389,7 @@ order by count() desc
                     return chain.insertContentAt(pos, { type: NotebookNodeType.Image, attrs: { file: files[0] } })
                 }
             } catch {
-                lemonToast.error('Something went wrong when trying to select a file.')
+                toast.error('Something went wrong when trying to select a file.')
             }
 
             return chain
@@ -582,7 +582,7 @@ export const SlashCommands = forwardRef<SlashCommandsRef, SlashCommandsProps>(fu
         <div className="deprecated-space-y-px">
             <div className="flex items-center gap-1">
                 {TEXT_CONTROLS.map((item, index) => (
-                    <LemonButton
+                    <Button
                         key={item.title}
                         size="small"
                         active={selectedIndex === -1 && selectedHorizontalIndex === index}
@@ -592,10 +592,10 @@ export const SlashCommands = forwardRef<SlashCommandsRef, SlashCommandsProps>(fu
                 ))}
             </div>
 
-            <LemonDivider />
+            <Divider />
 
             {filteredSlashCommands.map((item, index) => (
-                <LemonButton
+                <Button
                     key={item.title}
                     fullWidth
                     icon={item.icon}
@@ -603,7 +603,7 @@ export const SlashCommands = forwardRef<SlashCommandsRef, SlashCommandsProps>(fu
                     onClick={() => void execute(item)}
                 >
                     {item.title}
-                </LemonButton>
+                </Button>
             ))}
 
             {filteredSlashCommands.length === 0 && (
@@ -614,7 +614,7 @@ export const SlashCommands = forwardRef<SlashCommandsRef, SlashCommandsProps>(fu
 
             {mode === 'add' && (
                 <>
-                    <LemonDivider className="my-0" />
+                    <Divider className="my-0" />
                     <div className="text-xs text-secondary p-1">
                         You can trigger this menu by typing <KeyboardShortcut forwardslash />
                     </div>

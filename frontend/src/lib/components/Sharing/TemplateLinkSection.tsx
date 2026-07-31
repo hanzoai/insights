@@ -4,12 +4,12 @@ import { useState } from 'react'
 import { TextMorph } from 'torph/react'
 
 import { IconChevronRight, IconInfo } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { TitleWithIcon } from 'lib/components/TitleWithIcon'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 interface TemplateLinkSectionProps {
@@ -109,7 +109,7 @@ export function TemplateLinkSection({
                             )}
                         </div>
                         {copyButtonLabel ? (
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 onClick={() => {
                                     void handleCopyLink()
@@ -117,7 +117,7 @@ export function TemplateLinkSection({
                                 icon={<IconLink />}
                             >
                                 <TextMorph as="span">{copied ? 'Copied!' : copyButtonLabel}</TextMorph>
-                            </LemonButton>
+                            </Button>
                         ) : null}
                     </div>
 
@@ -126,9 +126,9 @@ export function TemplateLinkSection({
                             <div className="flex items-center justify-between">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <LemonButton type="secondary" onClick={onShortenLink} disabled={!onShortenLink}>
+                                        <Button type="secondary" onClick={onShortenLink} disabled={!onShortenLink}>
                                             Shorten URL
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>

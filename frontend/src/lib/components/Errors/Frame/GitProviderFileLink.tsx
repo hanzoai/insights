@@ -1,10 +1,10 @@
 import { useRef } from 'react'
 
 import { IconExternal, IconGitLab, IconGithub } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import useIsHovering from 'lib/hooks/useIsHovering'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 
 import { SourceData } from './framesCodeSourceLogic'
 

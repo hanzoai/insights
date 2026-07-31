@@ -1,12 +1,12 @@
 import { useActions } from 'kea'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
+import { Button, ButtonProps } from 'lib/elements/Button'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
-export function BillingUpgradeCTA({ children, ...props }: LemonButtonProps): JSX.Element {
+export function BillingUpgradeCTA({ children, ...props }: ButtonProps): JSX.Element {
     const { reportBillingCTAShown } = useActions(eventUsageLogic)
     useOnMountEffect(reportBillingCTAShown)
 
-    return <LemonButton {...props}>{children}</LemonButton>
+    return <Button {...props}>{children}</Button>
 }

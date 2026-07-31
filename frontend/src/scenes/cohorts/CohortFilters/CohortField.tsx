@@ -11,9 +11,9 @@ import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType, TaxonomicFilterValue } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import { dayjs } from 'lib/dayjs'
-import { LemonButton, LemonButtonWithDropdown } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
+import { Button, ButtonWithDropdown } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Input } from 'lib/elements/Input/Input'
 import { formatDate } from 'lib/utils'
 import { cohortFieldLogic } from 'scenes/cohorts/CohortFilters/cohortFieldLogic'
 import {
@@ -61,7 +61,7 @@ export function CohortSelectorField({
     const { onChange } = useActions(logic)
 
     return (
-        <LemonButtonWithDropdown
+        <ButtonWithDropdown
             type="secondary"
             sideIcon={undefined}
             data-attr={`cohort-selector-field-${fieldKey}`}
@@ -73,10 +73,10 @@ export function CohortSelectorField({
                         {fieldOptionGroups.map(({ label, type: groupKey, values }, i) =>
                             Object.keys(values).length != 0 ? (
                                 <div key={i}>
-                                    {i !== 0 && <LemonDivider />}
+                                    {i !== 0 && <Divider />}
                                     <h5>{label}</h5>
                                     {Object.entries(values).map(([_value, option]) => (
-                                        <LemonButton
+                                        <Button
                                             key={_value}
                                             onClick={() => {
                                                 onChange({ [fieldKey]: _value })
@@ -86,7 +86,7 @@ export function CohortSelectorField({
                                             data-attr={`cohort-${groupKey}-${_value}-type`}
                                         >
                                             {option.label}
-                                        </LemonButton>
+                                        </Button>
                                     ))}
                                 </div>
                             ) : null
@@ -98,7 +98,7 @@ export function CohortSelectorField({
             <span className="font-medium">
                 {currentOption?.label || <span className="text-secondary">{placeholder}</span>}
             </span>
-        </LemonButtonWithDropdown>
+        </ButtonWithDropdown>
     )
 }
 
@@ -311,7 +311,7 @@ export function CohortNumberField({
     const { onChange } = useActions(logic)
 
     return (
-        <LemonInput
+        <Input
             type="number"
             value={(value as number) ?? undefined}
             onChange={(nextNumber) => {

@@ -1,4 +1,4 @@
-import { InsightsComDocsURL } from 'lib/lemon-ui/Link/Link'
+import { InsightsComDocsURL } from 'lib/elements/Link/Link'
 
 import { NodeKind } from '~/queries/schema/schema-general'
 

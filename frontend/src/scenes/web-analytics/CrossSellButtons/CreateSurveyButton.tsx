@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconMessage } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -28,7 +28,7 @@ export const CreateSurveyButton = ({ value }: CreateSurveyButtonProps): JSX.Elem
     }
 
     return (
-        <LemonButton
+        <Button
             icon={<IconMessage />}
             type="tertiary"
             size="xsmall"

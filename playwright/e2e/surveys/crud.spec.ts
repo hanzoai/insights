@@ -7,7 +7,7 @@ async function deleteSurvey(page: Page, name: string): Promise<void> {
     await page.locator('[data-attr=info-actions-panel]').click()
     await page.locator('[data-attr=survey-delete]').click()
 
-    await expect(page.locator('.LemonModal__layout')).toBeVisible()
+    await expect(page.locator('.Modal__layout')).toBeVisible()
     await expect(page.getByText('Delete this survey?')).toBeVisible()
     await page.getByRole('button', { name: 'Delete' }).click()
     await expect(page.getByText('Active')).toBeVisible()
@@ -30,12 +30,12 @@ async function launchSurveyEvenIfDisabled(page: Page): Promise<void> {
     }
 
     await page.locator('[data-attr="launch-survey"]').click()
-    await expect(page.locator('.LemonModal__layout')).toBeVisible()
+    await expect(page.locator('.Modal__layout')).toBeVisible()
     await expect(page.getByText('Launch this survey?')).toBeVisible()
     const launchResponsePromise = page.waitForResponse(
         (resp) => resp.url().includes('/surveys') && resp.request().method() === 'PATCH'
     )
-    await page.locator('.LemonModal__footer').getByRole('button', { name: 'Launch' }).click()
+    await page.locator('.Modal__footer').getByRole('button', { name: 'Launch' }).click()
     await launchResponsePromise
 }
 
@@ -89,7 +89,7 @@ test.describe('CRUD Survey', () => {
         await expect(surveyForm).toContainText('Very likely')
         await expect(surveyForm.locator('.ratings-number')).toHaveCount(5)
 
-        await page.locator('.LemonCollapsePanel', { hasText: 'Display conditions' }).click()
+        await page.locator('.CollapsePanel', { hasText: 'Display conditions' }).click()
         await page.getByText('All users').click()
         await expect(page.locator('.Popover__content')).toBeVisible()
         await page.locator('.Popover__content').getByText('Users who match').click()
@@ -129,16 +129,16 @@ test.describe('CRUD Survey', () => {
         await launchSurveyEvenIfDisabled(page)
 
         await page.getByText('Stop').click()
-        await expect(page.locator('.LemonModal__layout')).toBeVisible()
+        await expect(page.locator('.Modal__layout')).toBeVisible()
         await expect(page.getByText('Stop this survey?')).toBeVisible()
-        await page.locator('.LemonModal__footer').getByRole('button', { name: 'Stop' }).click()
+        await page.locator('.Modal__footer').getByRole('button', { name: 'Stop' }).click()
 
         await page.goToMenuItem('surveys')
         await expect(page.locator('[data-attr=surveys-table]')).toContainText(name)
 
         await page.locator(`[data-row-key="${name}"]`).getByText(name).click()
 
-        await page.locator('.LemonTabs').getByText('Overview').click()
+        await page.locator('.Tabs').getByText('Overview').click()
         await expect(page.getByText('Display conditions summary')).toBeVisible()
         await expect(
             page.getByText('Surveys will be displayed to users that match the following conditions')
@@ -154,7 +154,7 @@ test.describe('CRUD Survey', () => {
 
         await page.locator('[data-attr="scene-title-textarea"]').fill(name)
 
-        await page.locator('.LemonCollapsePanel', { hasText: 'Completion conditions' }).click()
+        await page.locator('.CollapsePanel', { hasText: 'Completion conditions' }).click()
         await page.locator('[data-attr=survey-collection-until-limit]').first().click()
         await page.locator('[data-attr=survey-responses-limit-input]').fill('228')
         await page.locator('[data-attr="scene-title-textarea"]').click()
@@ -185,19 +185,19 @@ test.describe('CRUD Survey', () => {
         await page.getByText('Customization').click()
         await page.locator('[data-attr="survey-popup-delay-input"]').fill('5')
 
-        await page.locator('.LemonButton').getByText('Display conditions').click()
+        await page.locator('.Button').getByText('Display conditions').click()
         await page.locator('[data-attr="survey-display-conditions-select"]').click()
         await page.locator('[data-attr="survey-display-conditions-select-users"]').click()
 
         await expect(page.getByText('Cancel survey on events')).toBeVisible()
 
-        await page.locator('.LemonButton').getByText('Add cancel event').click()
+        await page.locator('.Button').getByText('Add cancel event').click()
         await page.locator('span[aria-label="Autocapture"]').getByText('Autocapture').click()
 
         await page.locator('[data-attr=save-survey]').first().click()
         await expect(page.locator('button[data-attr="launch-survey"]').first()).toContainText('Launch')
 
-        await page.locator('.LemonTabs__tab').getByText('Overview').click()
+        await page.locator('.Tabs__tab').getByText('Overview').click()
         await expect(page.getByText('Delay before showing: 5 seconds')).toBeVisible()
         await expect(page.getByText('Cancel survey if user sends:$autocapture')).toBeVisible()
     })

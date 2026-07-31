@@ -2,7 +2,7 @@ import _Fuse from 'fuse.js'
 import { actions, events, kea, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import type { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import type { TreeDataItem } from 'lib/elements/Tree/Tree'
 
 import {
     GitHubFileContent,

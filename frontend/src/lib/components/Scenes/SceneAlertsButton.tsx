@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 
 import { IconWarning } from '@hanzo/icons'
 
-import { IconWithCount } from 'lib/lemon-ui/icons/icons'
+import { IconWithCount } from 'lib/elements/icons/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { urls } from 'scenes/urls'
 

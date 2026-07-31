@@ -1,4 +1,4 @@
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 
@@ -6,12 +6,12 @@ import { AdvancedActivityLogFilters, ExportedAsset } from './advancedActivityLog
 
 export const getStatusTag = (exportAsset: ExportedAsset): JSX.Element => {
     if (exportAsset.exception) {
-        return <LemonTag type="danger">Failed</LemonTag>
+        return <Tag type="danger">Failed</Tag>
     }
     if (exportAsset.has_content) {
-        return <LemonTag type="success">Completed</LemonTag>
+        return <Tag type="success">Completed</Tag>
     }
-    return <LemonTag type="default">Processing</LemonTag>
+    return <Tag type="default">Processing</Tag>
 }
 
 export const getHumanReadableFormat = (format: string): string => {

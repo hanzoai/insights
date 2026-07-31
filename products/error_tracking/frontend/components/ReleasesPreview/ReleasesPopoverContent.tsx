@@ -3,7 +3,7 @@ import { P, match } from 'ts-pattern'
 
 import { IconCommit, IconGitBranch, IconGitRepository, IconShare } from '@hanzo/icons'
 import { IconComponent, IconProps } from '@hanzo/icons/dist/src/types/icon-types'
-import { LemonTag, LemonTagProps, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, TagProps, Link, Tooltip } from '@hanzo/elements'
 
 import { ErrorTrackingRelease, ReleaseGitMetadata } from 'lib/components/Errors/types'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
@@ -99,16 +99,16 @@ function PropertyDisplay({
     icon: IconComponent<IconProps>
     children: ReactNode
     tooltip?: string
-} & Omit<LemonTagProps, 'icon'>): JSX.Element {
+} & Omit<TagProps, 'icon'>): JSX.Element {
     function renderContent(): JSX.Element {
         return (
-            <LemonTag
+            <Tag
                 className={cn('bg-fill-primary cursor-pointer hover:bg-fill-secondary', tagProps.className)}
                 {...tagProps}
             >
                 {icon && createElement(icon, { className: 'text-sm text-secondary' })}
                 <span>{children}</span>
-            </LemonTag>
+            </Tag>
         )
     }
 

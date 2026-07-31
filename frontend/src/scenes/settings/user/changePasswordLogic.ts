@@ -1,7 +1,7 @@
 import { connect, kea, path, selectors } from 'kea'
 import { forms } from 'kea-forms'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { ValidatedPasswordResult, validatePassword } from 'lib/components/PasswordStrength'
@@ -55,7 +55,7 @@ export const changePasswordLogic = kea<changePasswordLogicType>([
                         current_password: '',
                         confirm_password: '',
                     })
-                    lemonToast.success(hasPassword ? 'Password changed' : 'Password set')
+                    toast.success(hasPassword ? 'Password changed' : 'Password set')
                     actions.loadUser()
                 } catch (e: any) {
                     setTimeout(() => {

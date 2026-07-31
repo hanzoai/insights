@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconArrowLeft, IconArrowRight, IconCopy } from '@hanzo/icons'
-import { LemonButton, LemonCard, LemonInput, LemonModal, LemonTabs, SpinnerOverlay } from '@hanzo/lemon-ui'
+import { Button, Card, Input, Modal, Tabs, SpinnerOverlay } from '@hanzo/elements'
 
 import { InviteMembersButton } from 'lib/components/Account/InviteMembersButton'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -43,15 +43,15 @@ export function SDKInstructionsModal({
         | undefined
 
     return (
-        <LemonModal isOpen={isOpen} onClose={onClose} simple title="">
+        <Modal isOpen={isOpen} onClose={onClose} simple title="">
             {!sdk?.key || !sdkInstructions ? (
                 <SpinnerOverlay />
             ) : (
                 <div className="flex flex-col h-full">
                     <header className="p-4 flex items-center gap-2">
-                        <LemonButton icon={<IconArrowLeft />} onClick={onClose} size="xsmall">
+                        <Button icon={<IconArrowLeft />} onClick={onClose} size="xsmall">
                             All SDKs
-                        </LemonButton>
+                        </Button>
                     </header>
                     <div className="flex-grow overflow-y-auto px-4 py-2">
                         <SDKSnippet sdk={sdk} sdkInstructions={sdkInstructions} />
@@ -65,7 +65,7 @@ export function SDKInstructionsModal({
                     </footer>
                 </div>
             )}
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -122,14 +122,14 @@ export const OnboardingInstallStep: OnboardingStepComponentType<OnboardingInstal
             <div className="flex flex-col gap-y-4 mt-6">
                 <div className="flex flex-col gap-y-2">
                     <div className="flex flex-col-reverse md:flex-row justify-between gap-4">
-                        <LemonInput
+                        <Input
                             value={searchTerm}
                             onChange={setSearchTerm}
                             placeholder="Search"
                             className="w-full max-w-[220px]"
                         />
                         <div className="flex flex-row flex-wrap gap-2">
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="primary"
                                 onClick={() => void copyToClipboard(currentTeam?.api_token || '', 'Project API key')}
@@ -137,7 +137,7 @@ export const OnboardingInstallStep: OnboardingStepComponentType<OnboardingInstal
                                 data-attr="copy-api-key"
                             >
                                 Copy API key
-                            </LemonButton>
+                            </Button>
                             <InviteMembersButton
                                 type="primary"
                                 size="small"
@@ -149,7 +149,7 @@ export const OnboardingInstallStep: OnboardingStepComponentType<OnboardingInstal
                             )}
                         </div>
                     </div>
-                    <LemonTabs
+                    <Tabs
                         activeKey={selectedTag ?? 'All'}
                         onChange={(key) => setSelectedTag(key === 'All' ? null : (key as SDKTag))}
                         tabs={tags.map((tag) => ({
@@ -159,7 +159,7 @@ export const OnboardingInstallStep: OnboardingStepComponentType<OnboardingInstal
                     />
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {(filteredSDKs ?? []).map((sdk) => (
-                            <LemonCard
+                            <Card
                                 key={sdk.key}
                                 className="p-4 cursor-pointer flex flex-col items-start justify-center"
                                 onClick={() => {
@@ -178,28 +178,28 @@ export const OnboardingInstallStep: OnboardingStepComponentType<OnboardingInstal
                                 </div>
 
                                 <strong>{sdk.name}</strong>
-                            </LemonCard>
+                            </Card>
                         ))}
 
                         {/* This will open a survey to collect feedback on the SDKs we don't support yet */}
                         {/* https://insights.hanzo.ai/project/2/surveys/019b47ab-5f19-0000-7f31-4f9681cde589 */}
                         {searchTerm && (
-                            <LemonCard className="p-4 cursor-pointer flex flex-col items-start justify-center col-span-1 sm:col-span-2">
+                            <Card className="p-4 cursor-pointer flex flex-col items-start justify-center col-span-1 sm:col-span-2">
                                 <div className="flex flex-col items-start gap-2">
                                     <span className="mb-2 text-muted">
                                         Don&apos;t see your SDK listed? We are always looking to expand our list of
                                         supported SDKs.
                                     </span>
-                                    <LemonButton
+                                    <Button
                                         data-attr="onboarding-reach-out-to-us-button"
                                         type="secondary"
                                         size="small"
                                         targetBlank
                                     >
                                         Reach out to us
-                                    </LemonButton>
+                                    </Button>
                                 </div>
-                            </LemonCard>
+                            </Card>
                         )}
                     </div>
                 </div>
@@ -244,14 +244,14 @@ const NextButton = ({ installationComplete, size = 'medium' }: NextButtonProps):
 
     if (!installationComplete) {
         return (
-            <LemonButton type="secondary" size={size} onClick={skipInstallation}>
+            <Button type="secondary" size={size} onClick={skipInstallation}>
                 Skip installation
-            </LemonButton>
+            </Button>
         )
     }
 
     return (
-        <LemonButton
+        <Button
             data-attr="sdk-continue"
             sideIcon={hasNextStep ? <IconArrowRight /> : null}
             type="primary"
@@ -259,6 +259,6 @@ const NextButton = ({ installationComplete, size = 'medium' }: NextButtonProps):
             onClick={continueInstallation}
         >
             Next
-        </LemonButton>
+        </Button>
     )
 }

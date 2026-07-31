@@ -3,14 +3,14 @@ import './InviteModal.scss'
 import { useActions, useValues } from 'kea'
 
 import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonInput, LemonSelect, LemonTextArea, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Input, Select, TextArea, Link, Tooltip } from '@hanzo/elements'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { RestrictionScope } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
 import { capitalizeFirstLetter, isEmail, pluralize } from 'lib/utils'
 import { organizationMembershipLevelIntegers } from 'lib/utils/permissioning'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -29,7 +29,7 @@ export const MAX_INVITES_AT_ONCE = 20
 
 export function EmailUnavailableForInvitesBanner(): JSX.Element {
     return (
-        <LemonBanner type="info" className="my-2">
+        <Banner type="info" className="my-2">
             <>
                 This Insights instance isn't{' '}
                 <Link to="https://hanzo.ai/docs/self-host/configure/email" target="_blank" targetBlankIcon>
@@ -38,7 +38,7 @@ export function EmailUnavailableForInvitesBanner(): JSX.Element {
                 .<br />
                 Remember to <u>share the invite link</u> with each team member you invite.
             </>
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -97,7 +97,7 @@ export function ProjectAccessSelector({ inviteIndex }: { inviteIndex: number }):
                     <IconInfo className="text-muted-alt" />
                 </Tooltip>
                 {availableProjectsToShow.length > 0 && (
-                    <LemonSelect
+                    <Select
                         icon={<IconPlus />}
                         className="bg-bg-light"
                         placeholder="Add project"
@@ -115,11 +115,11 @@ export function ProjectAccessSelector({ inviteIndex }: { inviteIndex: number }):
             </div>
 
             {isOrgLevelAdminOrOwner && selectedProjects.length > 0 && (
-                <LemonBanner type="warning" className="text-xs">
+                <Banner type="warning" className="text-xs">
                     This user will have{' '}
                     <span className="font-bold italic">{OrganizationMembershipLevel[invite.level].toLowerCase()}</span>{' '}
                     access on the organization level, which will override any project-specific access controls.
-                </LemonBanner>
+                </Banner>
             )}
 
             {selectedProjects.length > 0 && (
@@ -138,13 +138,13 @@ export function ProjectAccessSelector({ inviteIndex }: { inviteIndex: number }):
                                 <div className="p-2 bg-bg-light rounded border">
                                     {isLowerThanDefault && (
                                         <div className="mb-2">
-                                            <LemonBanner type="warning" className="text-xs">
+                                            <Banner type="warning" className="text-xs">
                                                 <strong>{project.name}</strong> has a default access level of{' '}
                                                 <span className="font-bold italic">{defaultLevel}</span>. Since you
                                                 selected <span className="font-bold italic">{access.level}</span> (which
                                                 is lower), the user will actually get{' '}
                                                 <span className="font-bold italic">{defaultLevel}</span> access.
-                                            </LemonBanner>
+                                            </Banner>
                                         </div>
                                     )}
                                     <div className="flex items-center gap-2">
@@ -152,7 +152,7 @@ export function ProjectAccessSelector({ inviteIndex }: { inviteIndex: number }):
                                             <span className="font-medium">{project.name}</span>{' '}
                                             {defaultLevel && <span>(default: {defaultLevel})</span>}
                                         </div>
-                                        <LemonSelect
+                                        <Select
                                             className="bg-bg-light"
                                             size="small"
                                             options={[
@@ -172,7 +172,7 @@ export function ProjectAccessSelector({ inviteIndex }: { inviteIndex: number }):
                                                 }
                                             }}
                                         />
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             icon={<IconTrash />}
                                             status="danger"
@@ -223,7 +223,7 @@ export function InviteRow({
         <div className="space-y-4 bg-surface-secondary py-4 px-4 rounded-md">
             <div className="flex gap-2">
                 <div className="flex-2">
-                    <LemonInput
+                    <Input
                         placeholder={`${name.toLowerCase()}@hanzo.ai`}
                         type="email"
                         className={`error-on-blur${!invitesToSend[index]?.isValid ? ' errored' : ''}`}
@@ -246,7 +246,7 @@ export function InviteRow({
                 </div>
                 {preflight?.email_service_available && (
                     <div className="flex-1 flex gap-1 items-center justify-between">
-                        <LemonInput
+                        <Input
                             placeholder={name}
                             className="flex-1"
                             value={invitesToSend[index].first_name}
@@ -263,7 +263,7 @@ export function InviteRow({
                 )}
                 {allowedLevelsOptions.length > 1 && (
                     <div className="flex-1 flex gap-1 items-center justify-between">
-                        <LemonSelect
+                        <Select
                             className="bg-bg-light"
                             fullWidth
                             data-attr="invite-row-org-member-level"
@@ -277,7 +277,7 @@ export function InviteRow({
                 )}
                 {!preflight?.email_service_available && (
                     <div className="flex-1 flex gap-1 items-center justify-between">
-                        <LemonButton
+                        <Button
                             type="primary"
                             className="flex-1"
                             disabled={!isEmail(invitesToSend[index].target_email)}
@@ -289,12 +289,12 @@ export function InviteRow({
                             data-attr="invite-generate-invite-link"
                         >
                             Submit
-                        </LemonButton>
+                        </Button>
                     </div>
                 )}
 
                 {isDeletable && (
-                    <LemonButton icon={<IconTrash />} status="danger" onClick={() => deleteInviteAtIndex(index)} />
+                    <Button icon={<IconTrash />} status="danger" onClick={() => deleteInviteAtIndex(index)} />
                 )}
             </div>
 
@@ -331,10 +331,10 @@ export function InviteTeamMatesComponent({
     return (
         <>
             {preflight?.licensed_users_available === 0 && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     You've hit the limit of team members you can invite to your Insights instance given your license.
                     Please contact <Link to="mailto:sales@hanzo.ai">sales@hanzo.ai</Link> to upgrade your license.
-                </LemonBanner>
+                </Banner>
             )}
             <div className="deprecated-space-y-4">
                 <div className="flex gap-2">
@@ -356,9 +356,9 @@ export function InviteTeamMatesComponent({
 
                 <div className="mt-2 flex justify-end">
                     {areInvitesCreatable && (
-                        <LemonButton type="secondary" icon={<IconPlus />} onClick={appendInviteRow}>
+                        <Button type="secondary" icon={<IconPlus />} onClick={appendInviteRow}>
                             Add
-                        </LemonButton>
+                        </Button>
                     )}
                 </div>
             </div>
@@ -367,7 +367,7 @@ export function InviteTeamMatesComponent({
                     <div className="mb-2">
                         <b>Message (optional)</b>
                     </div>
-                    <LemonTextArea
+                    <TextArea
                         data-attr="invite-optional-message"
                         placeholder="Tell your teammates why you're inviting them to Insights"
                         onChange={(e) => updateMessage(e)}
@@ -383,7 +383,7 @@ export function InviteTeamMatesComponent({
                         At least one invite is for an owner level member. Please type <strong>send invites</strong> to
                         confirm that you wish to send these invites.
                     </div>
-                    <LemonInput
+                    <Input
                         type="text"
                         placeholder="send invites"
                         onChange={(value) => {
@@ -414,7 +414,7 @@ export function InviteModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
 
     return (
         <div className="InviteModal">
-            <LemonModal
+            <Modal
                 isOpen={isOpen}
                 onClose={() => {
                     resetInviteRows()
@@ -440,12 +440,12 @@ export function InviteModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                 footer={
                     <>
                         {!preflight?.email_service_available ? (
-                            <LemonButton center type="secondary" onClick={onClose}>
+                            <Button center type="secondary" onClick={onClose}>
                                 Done
-                            </LemonButton>
+                            </Button>
                         ) : (
                             <>
-                                <LemonButton
+                                <Button
                                     onClick={() => {
                                         resetInviteRows()
                                         onClose()
@@ -454,8 +454,8 @@ export function InviteModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                                     disabled={isInviting}
                                 >
                                     Cancel
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     onClick={() => inviteTeamMembers()}
                                     type="primary"
                                     loading={isInviting}
@@ -471,14 +471,14 @@ export function InviteModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                                     {validInvitesCount
                                         ? `Invite ${pluralize(validInvitesCount, 'team member')}`
                                         : 'Invite team members'}
-                                </LemonButton>
+                                </Button>
                             </>
                         )}
                     </>
                 }
             >
                 <InviteTeamMatesComponent />
-            </LemonModal>
+            </Modal>
         </div>
     )
 }

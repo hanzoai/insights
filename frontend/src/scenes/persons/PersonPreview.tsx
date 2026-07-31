@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useEffect } from 'react'
 
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { getDefaultEventsSceneQuery } from 'scenes/activity/explore/defaults'
 import { NotebookSelectButton } from 'scenes/notebooks/NotebookSelectButton/NotebookSelectButton'
 import { NotebookNodeType } from 'scenes/notebooks/types'
@@ -65,14 +65,14 @@ export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
                     <Link to="https://hanzo.ai/docs/data/persons#capturing-person-profiles">here.</Link>
                 </p>
                 <div className="flex justify-center mt-2 w-fit">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         to={eventsUrl}
                         tooltip={`View events matching distinct_id=${props.distinctId}`}
                     >
                         View events
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         )
@@ -96,7 +96,7 @@ export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
                     onNotebookOpened={() => props.onClose?.()}
                     size="small"
                 />
-                <LemonButton size="small" icon={<IconOpenInNew />} to={url} />
+                <Button size="small" icon={<IconOpenInNew />} to={url} />
             </div>
 
             <ScrollableShadows direction="vertical">

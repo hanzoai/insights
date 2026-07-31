@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 
@@ -26,14 +26,14 @@ export const OrderBy = (): JSX.Element => {
     return (
         <div className="flex flex-row gap-1 items-center">
             <span>Sort by:</span>
-            <LemonSelect
+            <Select
                 placeholder="Order by"
                 options={options.map((key) => ({ value: key, label: label(key) }))}
                 value={orderBy}
                 onChange={(value) => setOrderBy(value)}
                 size="small"
             />
-            <LemonSelect
+            <Select
                 placeholder="Direction"
                 options={[
                     { value: 'asc', label: 'Ascending' },

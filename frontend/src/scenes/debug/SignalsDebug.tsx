@@ -1,12 +1,12 @@
 import { useState } from 'react'
 
 import api from 'lib/api'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Label } from 'lib/elements/Label'
+import { Slider } from 'lib/elements/Slider'
+import { TextArea } from 'lib/elements/TextArea'
+import { toast } from 'lib/elements/Toast'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 
@@ -25,7 +25,7 @@ export function SignalsDebug(): JSX.Element {
         try {
             extra = JSON.parse(extraJson)
         } catch {
-            lemonToast.error('Invalid JSON in extra field')
+            toast.error('Invalid JSON in extra field')
             setIsSubmitting(false)
             return
         }
@@ -38,9 +38,9 @@ export function SignalsDebug(): JSX.Element {
                 weight,
                 extra,
             })
-            lemonToast.success('Signal emitted successfully')
+            toast.success('Signal emitted successfully')
         } catch (error) {
-            lemonToast.error(`Failed to emit signal: ${error}`)
+            toast.error(`Failed to emit signal: ${error}`)
         } finally {
             setIsSubmitting(false)
         }
@@ -60,8 +60,8 @@ export function SignalsDebug(): JSX.Element {
                 </div>
 
                 <div>
-                    <LemonLabel>Source product</LemonLabel>
-                    <LemonInput
+                    <Label>Source product</Label>
+                    <Input
                         fullWidth
                         value={sourceProduct}
                         onChange={setSourceProduct}
@@ -70,8 +70,8 @@ export function SignalsDebug(): JSX.Element {
                 </div>
 
                 <div>
-                    <LemonLabel>Source type</LemonLabel>
-                    <LemonInput
+                    <Label>Source type</Label>
+                    <Input
                         fullWidth
                         value={sourceType}
                         onChange={setSourceType}
@@ -80,8 +80,8 @@ export function SignalsDebug(): JSX.Element {
                 </div>
 
                 <div>
-                    <LemonLabel>Description</LemonLabel>
-                    <LemonTextArea
+                    <Label>Description</Label>
+                    <TextArea
                         value={description}
                         onChange={setDescription}
                         placeholder="Describe the signal..."
@@ -90,14 +90,14 @@ export function SignalsDebug(): JSX.Element {
                 </div>
 
                 <div>
-                    <LemonLabel>Weight: {weight.toFixed(2)}</LemonLabel>
-                    <LemonSlider min={0} max={1} step={0.05} value={weight} onChange={setWeight} />
+                    <Label>Weight: {weight.toFixed(2)}</Label>
+                    <Slider min={0} max={1} step={0.05} value={weight} onChange={setWeight} />
                     <p className="text-xs text-muted mt-1">1.0 = immediate research trigger</p>
                 </div>
 
                 <div>
-                    <LemonLabel>Extra (JSON)</LemonLabel>
-                    <LemonTextArea
+                    <Label>Extra (JSON)</Label>
+                    <TextArea
                         value={extraJson}
                         onChange={setExtraJson}
                         placeholder="{}"
@@ -106,7 +106,7 @@ export function SignalsDebug(): JSX.Element {
                     />
                 </div>
 
-                <LemonButton
+                <Button
                     type="primary"
                     fullWidth
                     onClick={handleSubmit}
@@ -114,7 +114,7 @@ export function SignalsDebug(): JSX.Element {
                     disabled={!canSubmit}
                 >
                     Emit signal
-                </LemonButton>
+                </Button>
             </div>
         </SceneContent>
     )

@@ -3,9 +3,9 @@ import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
 import api, { CountedPaginatedResponse } from '~/lib/api'
-import { Sorting } from '~/lib/lemon-ui/LemonTable'
-import { lemonToast } from '~/lib/lemon-ui/LemonToast/LemonToast'
-import { PaginationManual } from '~/lib/lemon-ui/PaginationControl'
+import { Sorting } from '~/lib/elements/Table'
+import { toast } from '~/lib/elements/Toast/Toast'
+import { PaginationManual } from '~/lib/elements/PaginationControl'
 import { tabAwareActionToUrl } from '~/lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareUrlToAction } from '~/lib/logic/scenes/tabAwareUrlToAction'
 import { objectsEqual, pluralize } from '~/lib/utils'
@@ -164,10 +164,10 @@ export const llmAnalyticsDatasetsLogic = kea<llmAnalyticsDatasetsLogicType>([
             try {
                 const datasetName = values.datasets.results.find((dataset) => dataset.id === datasetId)?.name
                 await api.datasets.update(datasetId, { deleted: true })
-                lemonToast.info(`${datasetName || 'Dataset'} has been deleted.`)
+                toast.info(`${datasetName || 'Dataset'} has been deleted.`)
                 await asyncActions.loadDatasets(false)
             } catch {
-                lemonToast.error('Failed to delete dataset')
+                toast.error('Failed to delete dataset')
             }
         },
     })),

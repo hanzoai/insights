@@ -1,7 +1,7 @@
 import { ItemCategory, ItemRenderer, TimelineItem } from '..'
 
 import { IconWarning } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { ErrorTrackingException, ErrorTrackingRuntime } from 'lib/components/Errors/types'
 import { getRuntimeFromLib } from 'lib/components/Errors/utils'

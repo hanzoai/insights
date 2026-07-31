@@ -1,6 +1,6 @@
 import { BindLogic, useValues } from 'kea'
 
-import { SpinnerOverlay } from '@hanzo/lemon-ui'
+import { SpinnerOverlay } from '@hanzo/elements'
 
 import { InsightsFlowEditor } from './insightsflows/InsightsFlowEditor'
 import { WorkflowLogicProps, workflowLogic } from './workflowLogic'

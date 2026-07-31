@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Fragment, useEffect, useState } from 'react'
 
 import { IconDrag } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonDropdown, LemonInput, SpinnerOverlay } from '@hanzo/lemon-ui'
+import { Button, Divider, Dropdown, Input, SpinnerOverlay } from '@hanzo/elements'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { insightsFunctionTemplateListLogic } from 'scenes/insights-functions/list/insightsFunctionTemplateListLogic'
@@ -173,13 +173,13 @@ function InsightsFlowEditorToolbarNode({
 
     return (
         <div draggable onDragStart={onDragStart}>
-            <LemonButton
+            <Button
                 icon={<span style={{ color: step.color }}>{step.icon}</span>}
                 sideIcon={<IconDrag />}
                 fullWidth
             >
                 {children ?? action.name}
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -218,14 +218,14 @@ function InsightsFunctionTemplatesChooser(): JSX.Element {
 
     return (
         <div>
-            <LemonDropdown
+            <Dropdown
                 closeOnClickInside={false}
                 visible={popoverOpen}
                 onClickOutside={() => setPopoverOpen(false)}
                 placement="bottom-end"
                 overlay={
                     <div className="flex flex-col w-100 h-120 flex-1 overflow-hidden gap-1">
-                        <LemonInput
+                        <Input
                             placeholder="Search..."
                             value={filters.search ?? ''}
                             onChange={(e) => setFilters({ ...filters, search: e })}
@@ -264,10 +264,10 @@ function InsightsFunctionTemplatesChooser(): JSX.Element {
                     </div>
                 }
             >
-                <LemonButton fullWidth onClick={() => setPopoverOpen(!popoverOpen)}>
+                <Button fullWidth onClick={() => setPopoverOpen(!popoverOpen)}>
                     More
-                </LemonButton>
-            </LemonDropdown>
+                </Button>
+            </Dropdown>
         </div>
     )
 }
@@ -282,7 +282,7 @@ export function InsightsFlowEditorPanelBuild(): JSX.Element {
     return (
         <div className="flex overflow-y-auto flex-col gap-px p-2" data-attr="workflow-add-action">
             <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
-                Dispatch <LemonDivider className="flex-1" />
+                Dispatch <Divider className="flex-1" />
             </span>
             {ACTION_NODES_TO_SHOW.map((node, index) => (
                 <InsightsFlowEditorToolbarNode key={`${node.type}-${index}`} action={node} />
@@ -290,21 +290,21 @@ export function InsightsFlowEditorPanelBuild(): JSX.Element {
             <InsightsFunctionTemplatesChooser />
 
             <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
-                Delays <LemonDivider className="flex-1" />
+                Delays <Divider className="flex-1" />
             </span>
             {DELAY_NODES_TO_SHOW.map((action, index) => (
                 <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />
             ))}
 
             <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
-                Audience split <LemonDivider className="flex-1" />
+                Audience split <Divider className="flex-1" />
             </span>
             {LOGIC_NODES_TO_SHOW.map((action, index) => (
                 <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />
             ))}
 
             <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
-                Insights actions <LemonDivider className="flex-1" />
+                Insights actions <Divider className="flex-1" />
             </span>
             {INSIGHTS_NODES_TO_SHOW.map((action, index) => (
                 <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />
@@ -313,7 +313,7 @@ export function InsightsFlowEditorPanelBuild(): JSX.Element {
             {registeredCategories.map((cat) => (
                 <Fragment key={cat.label}>
                     <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
-                        {cat.label} <LemonDivider className="flex-1" />
+                        {cat.label} <Divider className="flex-1" />
                     </span>
                     {cat.nodes.map((action, index) => (
                         <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />

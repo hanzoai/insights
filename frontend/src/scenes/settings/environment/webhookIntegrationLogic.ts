@@ -2,7 +2,7 @@ import { kea, listeners, path, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -62,7 +62,7 @@ export const webhookIntegrationLogic = kea<webhookIntegrationLogicType>([
             }
         },
         testWebhookFailure: ({ error }) => {
-            lemonToast.error(capitalizeFirstLetter(error))
+            toast.error(capitalizeFirstLetter(error))
         },
     })),
 ])

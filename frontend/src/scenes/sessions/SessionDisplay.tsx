@@ -1,10 +1,10 @@
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
-import { Link } from 'lib/lemon-ui/Link'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Link } from 'lib/elements/Link'
+import { Popover } from 'lib/elements/Popover'
 import { useNotebookNode } from 'scenes/notebooks/Nodes/NotebookNodeContext'
 import { urls } from 'scenes/urls'
 

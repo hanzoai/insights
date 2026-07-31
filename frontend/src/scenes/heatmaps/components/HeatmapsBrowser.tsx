@@ -3,14 +3,14 @@ import { useRef } from 'react'
 
 import { IconDownload, IconGear, IconRevert } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonDivider,
-    LemonInput,
-    LemonLabel,
-    LemonSkeleton,
-    LemonTag,
-} from '@hanzo/lemon-ui'
+    Banner,
+    Button,
+    Divider,
+    Input,
+    Label,
+    Skeleton,
+    Tag,
+} from '@hanzo/elements'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType, appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -19,7 +19,7 @@ import { heatmapDataLogic } from 'lib/components/heatmaps/heatmapDataLogic'
 import { DetectiveMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { FixedReplayHeatmapBrowser } from 'scenes/heatmaps/components/FixedReplayHeatmapBrowser'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -63,7 +63,7 @@ function ExportButton({
 
     return (
         <div className="flex justify-between items-center mt-2 md:mt-0">
-            <LemonButton
+            <Button
                 size="small"
                 type="secondary"
                 onClick={handleExport}
@@ -74,11 +74,11 @@ function ExportButton({
             >
                 <div className="flex w-full gap-x-2 justify-between items-center">
                     Export{' '}
-                    <LemonTag type="warning" size="small">
+                    <Tag type="warning" size="small">
                         BETA
-                    </LemonTag>
+                    </Tag>
                 </div>
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -105,17 +105,17 @@ function UrlSearchHeader({ iframeRef }: { iframeRef?: React.MutableRefObject<HTM
                     <div className="flex-1">
                         {hasValidReplayIframeData ? (
                             <>
-                                <LemonLabel>Display URL</LemonLabel>
+                                <Label>Display URL</Label>
                                 <div className="text-xs text-muted mb-1">
                                     You're using session recording data as the background for this heatmap.
                                 </div>
                                 <div className="mt-2">
-                                    <LemonLabel>Heatmap data URL</LemonLabel>
+                                    <Label>Heatmap data URL</Label>
                                     <div className="text-xs text-muted mb-1">
                                         Same as display URL by default - add * for wildcards to aggregate data from
                                         multiple pages
                                     </div>
-                                    <LemonInput
+                                    <Input
                                         value={replayIframeData?.url}
                                         onChange={(s) => setReplayIframeDataURL(s)}
                                         className="truncate"
@@ -126,12 +126,12 @@ function UrlSearchHeader({ iframeRef }: { iframeRef?: React.MutableRefObject<HTM
                         ) : (
                             <>
                                 <div className="relative">
-                                    <LemonLabel>Display URL</LemonLabel>
+                                    <Label>Display URL</Label>
                                     <div className="text-xs text-muted mb-1">
                                         Enter a working URL from your site for iframe preview
                                     </div>
                                     <div className="flex gap-2">
-                                        <LemonInput
+                                        <Input
                                             size="small"
                                             placeholder={`e.g. ${placeholderUrl}`}
                                             value={displayUrl || browserSearchTerm || ''}
@@ -146,7 +146,7 @@ function UrlSearchHeader({ iframeRef }: { iframeRef?: React.MutableRefObject<HTM
                                             }}
                                             className="truncate flex-1"
                                         />
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             icon={<IconOpenInNew />}
                                             to={
@@ -170,7 +170,7 @@ function UrlSearchHeader({ iframeRef }: { iframeRef?: React.MutableRefObject<HTM
                                             data-attr="heatmaps-open-in-toolbar"
                                         >
                                             Open in toolbar
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                     {/* Show suggestions when there are options and user has typed something */}
                                     {!!(browserUrlSearchOptions?.length && browserSearchTerm?.length) && (
@@ -194,13 +194,13 @@ function UrlSearchHeader({ iframeRef }: { iframeRef?: React.MutableRefObject<HTM
                                     )}
                                 </div>
                                 <div className="mt-2">
-                                    <LemonLabel>Heatmap data URL</LemonLabel>
+                                    <Label>Heatmap data URL</Label>
                                     <div className="text-xs text-muted mb-1">
                                         Same as display URL by default - add * for wildcards to aggregate data from
                                         multiple pages
                                     </div>
                                     <div className="flex gap-2 justify-between">
-                                        <LemonInput
+                                        <Input
                                             size="small"
                                             placeholder="Auto-generated from display URL above"
                                             value={dataUrl || ''}
@@ -218,7 +218,7 @@ function UrlSearchHeader({ iframeRef }: { iframeRef?: React.MutableRefObject<HTM
                     </div>
                 </div>
                 {hasValidReplayIframeData ? (
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={<IconRevert />}
                         data-attr="heatmaps-reset"
@@ -229,7 +229,7 @@ function UrlSearchHeader({ iframeRef }: { iframeRef?: React.MutableRefObject<HTM
                         className="mt-2 md:mt-0"
                     >
                         Reset
-                    </LemonButton>
+                    </Button>
                 ) : null}
             </div>
         </>
@@ -267,16 +267,16 @@ function HeatmapsBrowserIntro(): JSX.Element {
 
                 <div className="gap-y-px p-2 border bg-surface-primary rounded">
                     {topUrlsLoading ? (
-                        <LemonSkeleton className="h-10" repeat={10} />
+                        <Skeleton className="h-10" repeat={10} />
                     ) : noPageviews ? (
-                        <LemonBanner type="info">
+                        <Banner type="info">
                             No pageview events have been received yet. Once you have some data, you'll see the most
                             viewed pages here.
-                        </LemonBanner>
+                        </Banner>
                     ) : (
                         <>
                             {topUrls?.map(({ url }) => (
-                                <LemonButton
+                                <Button
                                     key={url}
                                     fullWidth
                                     onClick={() => {
@@ -284,7 +284,7 @@ function HeatmapsBrowserIntro(): JSX.Element {
                                     }}
                                 >
                                     {url}
-                                </LemonButton>
+                                </Button>
                             ))}
                         </>
                     )}
@@ -301,10 +301,10 @@ function ForbiddenURL(): JSX.Element {
 
     return (
         <div className="flex-1 p-4 gap-y-4 mb-2">
-            <LemonBanner type="error">
+            <Banner type="error">
                 {dataUrl} is not an authorized URL. Please add it to the list of authorized URLs to view heatmaps on
                 this page.
-            </LemonBanner>
+            </Banner>
 
             <h2>Authorized Toolbar URLs</h2>
             <AuthorizedUrlList type={AuthorizedUrlListType.TOOLBAR_URLS} />
@@ -315,7 +315,7 @@ function ForbiddenURL(): JSX.Element {
 function InvalidURL(): JSX.Element {
     return (
         <div className="flex-1 p-4 gap-y-4 mb-2">
-            <LemonBanner type="error">Not a valid URL. Can't load a heatmap for that 😰</LemonBanner>
+            <Banner type="error">Not a valid URL. Can't load a heatmap for that 😰</Banner>
         </div>
     )
 }
@@ -327,7 +327,7 @@ function Warnings(): JSX.Element | null {
     const { openSettingsPanel } = useActions(sidePanelSettingsLogic)
 
     return !heatmapsEnabled ? (
-        <LemonBanner
+        <Banner
             type="warning"
             action={{
                 type: 'secondary',
@@ -338,7 +338,7 @@ function Warnings(): JSX.Element | null {
             dismissKey="heatmaps-might-be-disabled-warning"
         >
             You aren't collecting heatmaps data. Enable heatmaps in your project.
-        </LemonBanner>
+        </Banner>
     ) : null
 }
 
@@ -357,9 +357,9 @@ export function HeatmapsBrowser(): JSX.Element {
                 <Warnings />
                 <div className="w-full">
                     <UrlSearchHeader iframeRef={iframeRef} />
-                    <LemonDivider className="my-4" />
+                    <Divider className="my-4" />
                     <FilterPanel />
-                    <LemonDivider className="my-4" />
+                    <Divider className="my-4" />
                     <div className="relative border">
                         {hasValidReplayIframeData ? (
                             <FixedReplayHeatmapBrowser iframeRef={iframeRef} />

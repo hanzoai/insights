@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 import { getApprovalActionDescription } from 'scenes/approvals/utils'
 
@@ -22,7 +22,7 @@ export function PendingChangeRequestBanner(props: ChangeRequestsLogicProps): JSX
     const requesterName = pendingChangeRequest.created_by.first_name || pendingChangeRequest.created_by.email
 
     return (
-        <LemonBanner type="info" className="mb-4 py-4 px-2" hideIcon>
+        <Banner type="info" className="mb-4 py-4 px-2" hideIcon>
             <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                     <ProfilePicture user={pendingChangeRequest.created_by} size="lg" />
@@ -45,6 +45,6 @@ export function PendingChangeRequestBanner(props: ChangeRequestsLogicProps): JSX
                     showViewButton={true}
                 />
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

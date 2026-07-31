@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconFlask, IconPeople, IconTestTube, IconToggle } from '@hanzo/icons'
-import { LemonButton, LemonCollapse } from '@hanzo/lemon-ui'
+import { Button, Collapse } from '@hanzo/elements'
 
 import { featureFlagLogic } from './featureFlagLogic'
 
@@ -27,9 +27,9 @@ export function FeatureFlagTemplates(): JSX.Element | null {
     return (
         <>
             <div className="mb-4">
-                <LemonCollapse
+                <Collapse
                     // Use a non-matching key instead of null/undefined to force closed state,
-                    // because LemonCollapse uses `activeKey ?? localActiveKey` which falls back
+                    // because Collapse uses `activeKey ?? localActiveKey` which falls back
                     // to internal state when activeKey is nullish
                     activeKey={templateExpanded ? 'templates' : '__closed__'}
                     onChange={(key) => setTemplateExpanded(key === 'templates')}
@@ -40,7 +40,7 @@ export function FeatureFlagTemplates(): JSX.Element | null {
                             content: (
                                 <div className="flex gap-3 overflow-x-auto pt-2">
                                     {templates.map((template) => (
-                                        <LemonButton
+                                        <Button
                                             key={template.id}
                                             type="secondary"
                                             onClick={() => applyTemplate(template.id)}
@@ -54,7 +54,7 @@ export function FeatureFlagTemplates(): JSX.Element | null {
                                                     {template.description}
                                                 </div>
                                             </div>
-                                        </LemonButton>
+                                        </Button>
                                     ))}
                                 </div>
                             ),

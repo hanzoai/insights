@@ -2,7 +2,7 @@ import { actions, connect, kea, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import type { llmEvaluationExecutionLogicType } from './llmEvaluationExecutionLogicType'
@@ -56,10 +56,10 @@ export const llmEvaluationExecutionLogic = kea<llmEvaluationExecutionLogicType>(
 
                         const response = await api.evaluationRuns.create(payload)
 
-                        lemonToast.success('Evaluation started successfully')
+                        toast.success('Evaluation started successfully')
                         return response
                     } catch (error) {
-                        lemonToast.error('Failed to start evaluation')
+                        toast.error('Failed to start evaluation')
                         throw error
                     }
                 },

@@ -1,7 +1,7 @@
 import { IconLock } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
+import { Tag } from 'lib/elements/Tag/Tag'
 
 import { InstanceSetting, SystemStatusRow } from '~/types'
 
@@ -21,12 +21,12 @@ export function RenderMetricValue(
 ): JSX.Element | string {
     if (value && isSecret) {
         return (
-            <LemonTag
+            <Tag
                 className="uppercase text-secondary bg-mark"
                 icon={isSecret ? <IconLock className="text-warning" /> : undefined}
             >
                 Secret
-            </LemonTag>
+            </Tag>
         )
     }
 
@@ -39,14 +39,14 @@ export function RenderMetricValue(
 
     if (value_type === 'bool' || typeof value === 'boolean') {
         return (
-            <LemonTag className="uppercase" type={value ? 'success' : 'danger'}>
+            <Tag className="uppercase" type={value ? 'success' : 'danger'}>
                 {value ? 'Yes' : 'No'}
-            </LemonTag>
+            </Tag>
         )
     }
 
     if (value === null || value === undefined || value === '') {
-        return <LemonTag className="uppercase text-secondary">{emptyNullLabel ?? 'Unknown'}</LemonTag>
+        return <Tag className="uppercase text-secondary">{emptyNullLabel ?? 'Unknown'}</Tag>
     }
 
     if (value_type === 'int' || typeof value === 'number') {

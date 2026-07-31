@@ -4,8 +4,8 @@ import { loaders } from 'kea-loaders'
 import api, { ApiConfig } from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
-import { IconSwapHoriz } from 'lib/lemon-ui/icons'
+import { toast } from 'lib/elements/Toast/Toast'
+import { IconSwapHoriz } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { identifierToHuman, isUserLoggedIn, resolveWebhookService } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -169,7 +169,7 @@ export const teamLogic = kea<teamLogicType>([
                     const isUpdatingOnboardingTasks = Object.keys(payload).every((key) => key === 'onboarding_tasks')
 
                     if (!window.location.pathname.match(/\/(onboarding|products)/) && !isUpdatingOnboardingTasks) {
-                        lemonToast.success(message)
+                        toast.success(message)
                     }
 
                     const setupLogic = globalSetupLogic.findMounted()
@@ -349,7 +349,7 @@ export const teamLogic = kea<teamLogicType>([
             }
         },
         deleteTeamSuccess: () => {
-            lemonToast.success('Project has been deleted')
+            toast.success('Project has been deleted')
         },
     })),
     afterMount(({ actions }) => {
@@ -357,7 +357,7 @@ export const teamLogic = kea<teamLogicType>([
         const currentTeam = appContext?.current_team
         const switchedTeam = appContext?.switched_team
         if (switchedTeam) {
-            lemonToast.info(<>You've switched to&nbsp;project {currentTeam?.name}</>, {
+            toast.info(<>You've switched to&nbsp;project {currentTeam?.name}</>, {
                 button: {
                     label: 'Switch back',
                     action: () => actions.switchTeam(switchedTeam),

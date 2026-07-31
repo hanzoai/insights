@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { LemonDialog, LemonInput, LemonSelect, LemonTag, Tooltip, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, Input, Select, Tag, Tooltip, toast } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
@@ -12,14 +12,14 @@ import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { ExperimentsMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { atColumn, createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Divider } from 'lib/elements/Divider'
+import { Progress } from 'lib/elements/Progress'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { atColumn, createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { Tabs } from 'lib/elements/Tabs'
 import { pluralize } from 'lib/utils'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
@@ -82,9 +82,9 @@ const ExperimentSurveyButton = ({
     }
 
     return (
-        <LemonButton onClick={onOpenModal} size="small" fullWidth data-attr="create-survey">
+        <Button onClick={onOpenModal} size="small" fullWidth data-attr="create-survey">
             Create survey
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -113,7 +113,7 @@ const ExperimentsTableFilters = ({
                     interaction="click"
                     scope={Scene.Experiments}
                 >
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search experiments"
                         onChange={(search) => onFiltersChange({ search, page: 1 })}
@@ -124,7 +124,7 @@ const ExperimentsTableFilters = ({
                     <span>
                         <b>Status</b>
                     </span>
-                    <LemonSelect
+                    <Select
                         size="xsmall"
                         onChange={(status) => {
                             if (status === 'all') {
@@ -165,7 +165,7 @@ const ExperimentsTableFilters = ({
                     <span className="ml-1">
                         <b>Archived</b>
                     </span>
-                    <LemonSelect
+                    <Select
                         size="xsmall"
                         onChange={(value) => {
                             onFiltersChange({ archived: value === 'archived', page: 1 })
@@ -200,7 +200,7 @@ const ExperimentsTable = ({
     const startCount = count === 0 ? 0 : (page - 1) * EXPERIMENTS_PER_PAGE + 1
     const endCount = page * EXPERIMENTS_PER_PAGE < count ? page * EXPERIMENTS_PER_PAGE : count
 
-    const columns: LemonTableColumns<Experiment> = [
+    const columns: TableColumns<Experiment> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -209,33 +209,33 @@ const ExperimentsTable = ({
             width: '40%',
             render: function Render(_, experiment: Experiment) {
                 return (
-                    <LemonTableLink
+                    <TableLink
                         to={experiment.id ? urls.experiment(experiment.id) : undefined}
                         title={
                             <>
                                 {stringWithWBR(experiment.name, 17)}
                                 {experiment.type === 'web' && (
-                                    <LemonTag type="default" className="ml-1">
+                                    <Tag type="default" className="ml-1">
                                         No-code
-                                    </LemonTag>
+                                    </Tag>
                                 )}
                                 {isLegacyExperiment(experiment) && (
                                     <Tooltip
                                         title="This experiment uses the legacy engine, so some features and improvements may be missing."
                                         docLink="https://hanzo.ai/docs/experiments/new-experimentation-engine"
                                     >
-                                        <LemonTag type="warning" className="ml-1">
+                                        <Tag type="warning" className="ml-1">
                                             Legacy
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )}
                                 {isSingleVariantShipped(experiment) && (
                                     <Tooltip
                                         title={`Variant "${getShippedVariantKey(experiment)}" has been rolled out to 100% of users`}
                                     >
-                                        <LemonTag type="completion" className="ml-1">
+                                        <Tag type="completion" className="ml-1">
                                             <b className="uppercase">100% rollout</b>
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )}
                             </>
@@ -245,9 +245,9 @@ const ExperimentsTable = ({
                 )
             },
         },
-        createdByColumn<Experiment>() as LemonTableColumn<Experiment, keyof Experiment | undefined>,
-        createdAtColumn<Experiment>() as LemonTableColumn<Experiment, keyof Experiment | undefined>,
-        atColumn('start_date', 'Started') as LemonTableColumn<Experiment, keyof Experiment | undefined>,
+        createdByColumn<Experiment>() as TableColumn<Experiment, keyof Experiment | undefined>,
+        createdAtColumn<Experiment>() as TableColumn<Experiment, keyof Experiment | undefined>,
+        atColumn('start_date', 'Started') as TableColumn<Experiment, keyof Experiment | undefined>,
         {
             title: 'Duration',
             key: 'duration',
@@ -277,7 +277,7 @@ const ExperimentsTable = ({
                     return (
                         <Tooltip title="Remaining time will be calculated once the experiment has enough data">
                             <div className="w-full">
-                                <LemonProgress percent={0} bgColor="var(--border)" strokeColor="var(--border)" />
+                                <Progress percent={0} bgColor="var(--border)" strokeColor="var(--border)" />
                             </div>
                         </Tooltip>
                     )
@@ -287,7 +287,7 @@ const ExperimentsTable = ({
                     return (
                         <Tooltip title="Recommended sample size reached">
                             <div className="w-full">
-                                <LemonProgress percent={100} strokeColor="var(--success)" />
+                                <Progress percent={100} strokeColor="var(--success)" />
                             </div>
                         </Tooltip>
                     )
@@ -301,7 +301,7 @@ const ExperimentsTable = ({
                         title={`~${Math.ceil(remainingDays)} day${Math.ceil(remainingDays) !== 1 ? 's' : ''} remaining`}
                     >
                         <div className="w-full">
-                            <LemonProgress percent={progress} />
+                            <Progress percent={progress} />
                         </div>
                     </Tooltip>
                 )
@@ -333,12 +333,12 @@ const ExperimentsTable = ({
                     <More
                         overlay={
                             <>
-                                <LemonButton to={urls.experiment(`${experiment.id}`)} size="small" fullWidth>
+                                <Button to={urls.experiment(`${experiment.id}`)} size="small" fullWidth>
                                     View
-                                </LemonButton>
-                                <LemonButton onClick={() => openDuplicateModal(experiment)} size="small" fullWidth>
+                                </Button>
+                                <Button onClick={() => openDuplicateModal(experiment)} size="small" fullWidth>
                                     Duplicate
-                                </LemonButton>
+                                </Button>
                                 <ExperimentSurveyButton
                                     experiment={experiment}
                                     onOpenModal={() => {
@@ -358,9 +358,9 @@ const ExperimentsTable = ({
                                             minAccessLevel={AccessControlLevel.Editor}
                                             userAccessLevel={experiment.user_access_level}
                                         >
-                                            <LemonButton
+                                            <Button
                                                 onClick={() => {
-                                                    LemonDialog.open({
+                                                    Dialog.open({
                                                         title: 'Archive this experiment?',
                                                         content: (
                                                             <div className="text-sm text-secondary">
@@ -385,19 +385,19 @@ const ExperimentsTable = ({
                                                 fullWidth
                                             >
                                                 Archive experiment
-                                            </LemonButton>
+                                            </Button>
                                         </AccessControlAction>
                                     )}
-                                <LemonDivider />
+                                <Divider />
                                 <AccessControlAction
                                     resourceType={AccessControlResourceType.Experiment}
                                     minAccessLevel={AccessControlLevel.Editor}
                                     userAccessLevel={experiment.user_access_level}
                                 >
-                                    <LemonButton
+                                    <Button
                                         status="danger"
                                         onClick={() => {
-                                            LemonDialog.open({
+                                            Dialog.open({
                                                 title: 'Delete this experiment?',
                                                 content: (
                                                     <div className="text-sm text-secondary">
@@ -430,7 +430,7 @@ const ExperimentsTable = ({
                                         fullWidth
                                     >
                                         Delete experiment
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             </>
                         }
@@ -461,7 +461,7 @@ const ExperimentsTable = ({
                 </AccessControlAction>
             )}
             <ExperimentsTableFilters filters={filters} onFiltersChange={setExperimentsFilters} />
-            <LemonDivider className="my-0" />
+            <Divider className="my-0" />
             {count ? (
                 <div>
                     <span className="text-secondary">
@@ -471,7 +471,7 @@ const ExperimentsTable = ({
             ) : null}
 
             <div data-attr="experiments-table-container">
-                <LemonTable
+                <Table
                     dataSource={experiments.results}
                     columns={columns}
                     rowKey="id"
@@ -543,7 +543,7 @@ export function Experiments(): JSX.Element {
                                     error?: string
                                 }) => {
                                     if (toolOutput?.error || !toolOutput?.experiment_id) {
-                                        lemonToast.error(
+                                        toast.error(
                                             `Failed to create experiment: ${toolOutput?.error || 'Unknown error'}`
                                         )
                                         return
@@ -563,7 +563,7 @@ export function Experiments(): JSX.Element {
                                     interaction="click"
                                     scope={Scene.Experiments}
                                 >
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         type="primary"
                                         data-attr="create-experiment"
@@ -571,14 +571,14 @@ export function Experiments(): JSX.Element {
                                         tooltip="New experiment"
                                     >
                                         <span className="pr-3">New experiment</span>
-                                    </LemonButton>
+                                    </Button>
                                 </AppShortcut>
                             </MaxTool>
                         </AccessControlAction>
                     ) : undefined
                 }
             />
-            <LemonTabs
+            <Tabs
                 activeKey={tab}
                 onChange={(newKey) => setExperimentsTab(newKey)}
                 sceneInset

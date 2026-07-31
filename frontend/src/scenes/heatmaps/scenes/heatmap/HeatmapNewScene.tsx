@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Radio } from 'lib/elements/Radio'
+import { Link } from 'lib/elements/Link'
 import { HeatmapsForbiddenURL } from 'scenes/heatmaps/components/HeatmapsForbiddenURL'
 import { HeatmapsUrlsList } from 'scenes/heatmaps/components/HeatmapsInfo'
 import { HeatmapsInvalidURL } from 'scenes/heatmaps/components/HeatmapsInvalidURL'
@@ -56,7 +56,7 @@ export function HeatmapNewScene(): JSX.Element {
                 }}
             />
             <SceneSection title="Page URL" description="URL to your website">
-                <LemonInput value={displayUrl || ''} onChange={setDisplayUrl} placeholder="https://www.example.com" />
+                <Input value={displayUrl || ''} onChange={setDisplayUrl} placeholder="https://www.example.com" />
                 {!isDisplayUrlValid ? <HeatmapsInvalidURL /> : null}
                 {!displayUrl && <HeatmapsUrlsList />}
             </SceneSection>
@@ -65,7 +65,7 @@ export function HeatmapNewScene(): JSX.Element {
                 title="Heatmap data URL"
                 description="An exact match or a pattern for heatmap data. For example, use a pattern if you have pages with dynamic IDs. E.g. https://www.example.com/users/* will aggregate data from all pages under /users/."
             >
-                <LemonInput
+                <Input
                     size="small"
                     placeholder="https://www.example.com/*"
                     value={dataUrl ?? ''}
@@ -79,7 +79,7 @@ export function HeatmapNewScene(): JSX.Element {
             </SceneSection>
             <SceneDivider />
             <SceneSection title="Capture method" description="Choose how to display your page in the heatmap">
-                <LemonRadio
+                <Radio
                     options={[
                         {
                             label: 'Screenshot',
@@ -96,17 +96,17 @@ export function HeatmapNewScene(): JSX.Element {
                     value={type}
                     onChange={(value: HeatmapType) => setType(value)}
                 />
-                <LemonBanner type="info" className="mb-4">
+                <Banner type="info" className="mb-4">
                     You can also generate a screenshot of your site directly from{' '}
                     <Link to={urls.replay()} target="_blank">
                         session replay
                     </Link>{' '}
                     by clicking the 'view heatmap' button above a recording.
-                </LemonBanner>
+                </Banner>
             </SceneSection>
             <SceneDivider />
             <div className="flex gap-2">
-                <LemonButton
+                <Button
                     className="w-fit"
                     type="primary"
                     data-attr="save-heatmap"
@@ -123,7 +123,7 @@ export function HeatmapNewScene(): JSX.Element {
                     }
                 >
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </SceneContent>
     )

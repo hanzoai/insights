@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCard } from '@hanzo/lemon-ui'
+import { Card } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 
@@ -98,7 +98,7 @@ export const OnboardingErrorTrackingSourceMapsStep: OnboardingStepComponentType 
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {automatedSourceMapsTechnologies.map((sdk) => (
-                        <LemonCard
+                        <Card
                             key={sdk.key}
                             className={`p-4 cursor-pointer flex flex-col items-start justify-center border-2 ${selectedOption === sdk.key ? 'border-[var(--primary-3000-frame-bg-light)]' : 'border-transparent'}`}
                             onClick={() => {
@@ -114,7 +114,7 @@ export const OnboardingErrorTrackingSourceMapsStep: OnboardingStepComponentType 
                                 sdk.image
                             )}
                             <strong>{sdk.name}</strong>
-                        </LemonCard>
+                        </Card>
                     ))}
                 </div>
             </div>

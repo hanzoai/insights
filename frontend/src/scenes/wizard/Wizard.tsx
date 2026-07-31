@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { HeartMascot, SurprisedMascot } from 'lib/components/mascots'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Select } from 'lib/elements/Select'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { wizardLogic } from './wizardLogic'
@@ -32,7 +32,7 @@ export function Wizard(): JSX.Element {
                         <div className="space-y-6">
                             <div className="justify-start items-start flex flex-col">
                                 <label className="align-start block text-sm font-medium mb-3">Project</label>
-                                <LemonSelect
+                                <Select
                                     value={selectedProjectId ?? undefined}
                                     onChange={(projectId: number) => setSelectedProjectId(projectId)}
                                     options={availableProjects}
@@ -42,7 +42,7 @@ export function Wizard(): JSX.Element {
                             </div>
 
                             <div className="pt-4 flex items-center justify-center">
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     onClick={continueToAuthentication}
                                     disabledReason={
@@ -51,7 +51,7 @@ export function Wizard(): JSX.Element {
                                     className="w-auto"
                                 >
                                     Continue setup
-                                </LemonButton>
+                                </Button>
                             </div>
                         </div>
                     </div>

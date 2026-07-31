@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Dialog } from 'lib/elements/Dialog'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { timeZoneLabel } from 'lib/utils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -13,7 +13,7 @@ export function TimezoneConfig({ displayWarning = true }: { displayWarning?: boo
     const { updateCurrentTeam } = useActions(teamLogic)
 
     if (!preflight?.available_timezones || !currentTeam) {
-        return <LemonSkeleton className="w-1/2 h-4" />
+        return <Skeleton className="w-1/2 h-4" />
     }
     const options = Object.entries(preflight.available_timezones).map(([tz, offset]) => ({
         key: tz,
@@ -22,7 +22,7 @@ export function TimezoneConfig({ displayWarning = true }: { displayWarning?: boo
 
     return (
         <div className="max-w-160">
-            <LemonInputSelect
+            <InputSelect
                 mode="single"
                 placeholder="Select a time zone"
                 disabled={currentTeamLoading}
@@ -39,7 +39,7 @@ export function TimezoneConfig({ displayWarning = true }: { displayWarning?: boo
                     if (currentOffset === newOffset || !displayWarning) {
                         updateCurrentTeam({ timezone: newTimezone })
                     } else {
-                        LemonDialog.open({
+                        Dialog.open({
                             title: `Change time zone to ${timeZoneLabel(newTimezone, newOffset)}?`,
                             description: (
                                 <p className="max-w-120">

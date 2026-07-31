@@ -3,7 +3,7 @@ import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
 import clsx from 'clsx'
 import { useValues } from 'kea'
 
-import { ProfilePicture, Tooltip } from '@hanzo/lemon-ui'
+import { ProfilePicture, Tooltip } from '@hanzo/elements'
 
 import { membersLogic } from 'scenes/organization/membersLogic'
 

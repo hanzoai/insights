@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { humanFriendlyDuration, humanFriendlyNumber, humanizeBytes } from 'lib/utils'
 import { urls } from 'scenes/urls'
 

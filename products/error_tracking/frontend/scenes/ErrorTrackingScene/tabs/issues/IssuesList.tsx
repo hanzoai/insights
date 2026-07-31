@@ -1,10 +1,10 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonBanner, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Link, Tooltip } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { humanFriendlyLargeNumber } from 'lib/utils'
 import { formatCurrency } from 'lib/utils/geography/currency'
 import { teamLogic } from 'scenes/teamLogic'
@@ -135,7 +135,7 @@ export function IssuesList(): JSX.Element {
             <SceneStickyBar showBorderBottom={false}>
                 <ListOptions />
                 {orderBy === 'revenue' && (
-                    <LemonBanner
+                    <Banner
                         type="warning"
                         action={{
                             children: 'Send feedback',
@@ -153,7 +153,7 @@ export function IssuesList(): JSX.Element {
                         <Link to="https://hanzo.ai/docs/revenue-analytics">Revenue analytics</Link>. It does not yet
                         work well for customers with a large number of persons or groups. We're keen to hear feedback or
                         any issues you have using it while we work to improve the performance
-                    </LemonBanner>
+                    </Banner>
                 )}
             </SceneStickyBar>
 
@@ -172,7 +172,7 @@ const CurrencyColumn = ({ record }: { record: unknown }): JSX.Element => {
         return <>-</>
     }
 
-    return <LemonTableLink to={urls.revenueAnalytics()} title={formatCurrency(revenue, baseCurrency)} />
+    return <TableLink to={urls.revenueAnalytics()} title={formatCurrency(revenue, baseCurrency)} />
 }
 
 export const ListOptions = (): JSX.Element => {

@@ -1,7 +1,7 @@
 import { BuiltLogic, LogicWrapper } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 import { ScriptDebug } from 'scenes/debug/ScriptDebug'
 import { MarketingAnalyticsOverview } from 'scenes/web-analytics/tabs/marketing-analytics/frontend/components/MarketingAnalyticsOverview/MarketingAnalyticsOverview'
 
@@ -79,7 +79,7 @@ export interface QueryProps<Q extends Node> {
     filtersOverride?: DashboardFilter | null
     /** Dashboard variables to override the ones in the query */
     variablesOverride?: Record<string, InsightsQLVariable> | null
-    /** Passed down if implemented by the query type to e.g. set data attr on a LemonTable in a data table */
+    /** Passed down if implemented by the query type to e.g. set data attr on a Table in a data table */
     dataAttr?: string
     /** Attach ourselves to another logic, such as the scene logic */
     attachTo?: BuiltLogic | LogicWrapper
@@ -307,7 +307,7 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
                             context={queryContext}
                         />
                         <div className="my-4">
-                            <LemonDivider />
+                            <Divider />
                         </div>
                     </>
                 ) : null}

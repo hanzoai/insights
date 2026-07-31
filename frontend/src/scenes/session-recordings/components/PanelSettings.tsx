@@ -3,27 +3,27 @@ import './PanelSettings.scss'
 import { PropsWithChildren } from 'react'
 
 import {
-    LemonButton,
-    LemonButtonWithSideActionProps,
-    LemonButtonWithoutSideActionProps,
-} from 'lib/lemon-ui/LemonButton'
-import { LemonMenu, LemonMenuItem, LemonMenuProps } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+    Button,
+    ButtonWithSideActionProps,
+    ButtonWithoutSideActionProps,
+} from 'lib/elements/Button'
+import { Menu, MenuItem, MenuProps } from 'lib/elements/Menu/Menu'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { cn } from 'lib/utils/css-classes'
 
 /**
- * TODO the lemon button font only has 700 and 800 weights available.
+ * TODO the button font only has 700 and 800 weights available.
  * Ideally these buttons would use more like 400 and 500 weights.
  * or even 300 and 400 weights.
  * when inactive / active respectively.
  */
 
-interface SettingsMenuProps extends Omit<LemonMenuProps, 'items' | 'children'> {
+interface SettingsMenuProps extends Omit<MenuProps, 'items' | 'children'> {
     label?: string | React.ReactElement
-    items: LemonMenuItem[]
+    items: MenuItem[]
     icon?: JSX.Element
     isAvailable?: boolean
-    whenUnavailable?: LemonMenuItem
+    whenUnavailable?: MenuItem
     highlightWhenActive?: boolean
     closeOnClickInside?: boolean
     /**
@@ -71,13 +71,13 @@ export function SettingsMenu({
 }: SettingsMenuProps): JSX.Element {
     const active = items.some((cf) => !!cf.active)
     return (
-        <LemonMenu
+        <Menu
             buttonSize="xsmall"
             closeOnClickInside={closeOnClickInside}
             items={isAvailable ? items : whenUnavailable ? [whenUnavailable] : []}
             {...props}
         >
-            <LemonButton
+            <Button
                 className={cn(rounded ? 'rounded' : 'rounded-[0px]')}
                 status={highlightWhenActive && active ? 'danger' : 'default'}
                 size="xsmall"
@@ -85,14 +85,14 @@ export function SettingsMenu({
                 disabledReason={disabledReason}
             >
                 {label}
-            </LemonButton>
-        </LemonMenu>
+            </Button>
+        </Menu>
     )
 }
 
 type SettingsButtonProps = (
-    | Omit<LemonButtonWithoutSideActionProps, 'status' | 'className'>
-    | Omit<LemonButtonWithSideActionProps, 'status' | 'className'>
+    | Omit<ButtonWithoutSideActionProps, 'status' | 'className'>
+    | Omit<ButtonWithSideActionProps, 'status' | 'className'>
 ) & {
     title?: string
     icon?: JSX.Element | null
@@ -110,7 +110,7 @@ export function SettingsButton(props: SettingsButtonProps): JSX.Element {
 
 export function SettingsToggle({ title, icon, label, active, rounded, ...props }: SettingsToggleProps): JSX.Element {
     const button = (
-        <LemonButton
+        <Button
             className={cn(rounded ? 'rounded' : 'rounded-[0px]')}
             icon={icon}
             size="xsmall"
@@ -118,7 +118,7 @@ export function SettingsToggle({ title, icon, label, active, rounded, ...props }
             {...props}
         >
             {label}
-        </LemonButton>
+        </Button>
     )
 
     // otherwise the tooltip shows instead of the disabled reason

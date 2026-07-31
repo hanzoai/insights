@@ -8,7 +8,7 @@
     },
     "peerDependencies": {
         "@hanzo/icons": "*",
-        "@hanzo/lemon-ui": "*",
+        "@hanzo/elements": "*",
         "@types/react": "*",
         "react": "*"
     }

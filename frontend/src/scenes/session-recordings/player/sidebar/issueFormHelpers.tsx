@@ -1,9 +1,9 @@
-import { LemonDialog, LemonInput, LemonTextArea } from '@hanzo/lemon-ui'
+import { Dialog, Input, TextArea } from '@hanzo/elements'
 
 import { GitHubRepositorySelectField } from 'lib/integrations/GitHubIntegrationHelpers'
 import { JiraProjectSelectField } from 'lib/integrations/JiraIntegrationHelpers'
 import { LinearTeamSelectField } from 'lib/integrations/LinearIntegrationHelpers'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { IntegrationType } from '~/types'
 
@@ -14,7 +14,7 @@ export const createLinearIssueForm = (
     integration: IntegrationType,
     onSubmit: (integrationId: number, config: IssueConfig) => void
 ): void => {
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create Linear issue',
         shouldAwaitSubmit: true,
         initialValues: {
@@ -26,12 +26,12 @@ export const createLinearIssueForm = (
         content: (
             <div className="flex flex-col gap-y-2">
                 <LinearTeamSelectField integrationId={integration.id} />
-                <LemonField name="title" label="Title">
-                    <LemonInput data-attr="linear-issue-title" placeholder="Issue title" size="small" />
-                </LemonField>
-                <LemonField name="description" label="Description">
-                    <LemonTextArea data-attr="linear-issue-description" placeholder="Start typing..." />
-                </LemonField>
+                <Field name="title" label="Title">
+                    <Input data-attr="linear-issue-title" placeholder="Issue title" size="small" />
+                </Field>
+                <Field name="description" label="Description">
+                    <TextArea data-attr="linear-issue-description" placeholder="Start typing..." />
+                </Field>
             </div>
         ),
         errors: {
@@ -49,7 +49,7 @@ export const createGitHubIssueForm = (
     integration: IntegrationType,
     onSubmit: (integrationId: number, config: IssueConfig) => void
 ): void => {
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create GitHub issue',
         shouldAwaitSubmit: true,
         initialValues: {
@@ -61,12 +61,12 @@ export const createGitHubIssueForm = (
         content: (
             <div className="flex flex-col gap-y-2">
                 <GitHubRepositorySelectField integrationId={integration.id} />
-                <LemonField name="title" label="Title">
-                    <LemonInput data-attr="github-issue-title" placeholder="Issue title" size="small" />
-                </LemonField>
-                <LemonField name="body" label="Body">
-                    <LemonTextArea data-attr="github-issue-body" placeholder="Start typing..." />
-                </LemonField>
+                <Field name="title" label="Title">
+                    <Input data-attr="github-issue-title" placeholder="Issue title" size="small" />
+                </Field>
+                <Field name="body" label="Body">
+                    <TextArea data-attr="github-issue-body" placeholder="Start typing..." />
+                </Field>
             </div>
         ),
         errors: {
@@ -85,7 +85,7 @@ export const createGitLabIssueForm = (
     integration: IntegrationType,
     onSubmit: (integrationId: number, config: IssueConfig) => void
 ): void => {
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create GitLab issue',
         shouldAwaitSubmit: true,
         initialValues: {
@@ -95,12 +95,12 @@ export const createGitLabIssueForm = (
         },
         content: (
             <div className="flex flex-col gap-y-2">
-                <LemonField name="title" label="Title">
-                    <LemonInput data-attr="gitlab-issue-title" placeholder="Issue title" size="small" />
-                </LemonField>
-                <LemonField name="body" label="Body">
-                    <LemonTextArea data-attr="gitlab-issue-body" placeholder="Start typing..." />
-                </LemonField>
+                <Field name="title" label="Title">
+                    <Input data-attr="gitlab-issue-title" placeholder="Issue title" size="small" />
+                </Field>
+                <Field name="body" label="Body">
+                    <TextArea data-attr="gitlab-issue-body" placeholder="Start typing..." />
+                </Field>
             </div>
         ),
         errors: {
@@ -117,7 +117,7 @@ export const createJiraIssueForm = (
     integration: IntegrationType,
     onSubmit: (integrationId: number, config: IssueConfig) => void
 ): void => {
-    LemonDialog.openForm({
+    Dialog.openForm({
         title: 'Create Jira issue',
         shouldAwaitSubmit: true,
         initialValues: {
@@ -129,12 +129,12 @@ export const createJiraIssueForm = (
         content: (
             <div className="flex flex-col gap-y-2">
                 <JiraProjectSelectField integrationId={integration.id} />
-                <LemonField name="title" label="Summary">
-                    <LemonInput data-attr="jira-issue-title" placeholder="Issue summary" size="small" />
-                </LemonField>
-                <LemonField name="description" label="Description">
-                    <LemonTextArea data-attr="jira-issue-description" placeholder="Start typing..." />
-                </LemonField>
+                <Field name="title" label="Summary">
+                    <Input data-attr="jira-issue-title" placeholder="Issue summary" size="small" />
+                </Field>
+                <Field name="description" label="Description">
+                    <TextArea data-attr="jira-issue-description" placeholder="Start typing..." />
+                </Field>
             </div>
         ),
         errors: {

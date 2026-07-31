@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonTabs } from '@hanzo/lemon-ui'
+import { Tabs } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 
@@ -43,7 +43,7 @@ export function AccessControls({ projectId }: { projectId: string }): JSX.Elemen
     return (
         <>
             <div className="space-y-4">
-                <LemonTabs
+                <Tabs
                     activeKey={activeTab}
                     onChange={setActiveTab}
                     tabs={[

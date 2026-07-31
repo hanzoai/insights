@@ -3,13 +3,13 @@ import { Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 
 import { IconPencil, IconTrash } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonTabs, LemonTag, LemonTextArea, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Tabs, Tag, TextArea, Link } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { NotFound } from 'lib/components/NotFound'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -57,9 +57,9 @@ export function LLMPromptScene(): JSX.Element {
     if (shouldDisplaySkeleton) {
         return (
             <div className="flex flex-col gap-2">
-                <LemonSkeleton active className="h-4 w-2/5" />
-                <LemonSkeleton active className="h-4 w-full" />
-                <LemonSkeleton active className="h-4 w-3/5" />
+                <Skeleton active className="h-4 w-2/5" />
+                <Skeleton active className="h-4 w-full" />
+                <Skeleton active className="h-4 w-3/5" />
             </div>
         )
     }
@@ -77,7 +77,7 @@ export function LLMPromptScene(): JSX.Element {
                                 resourceType={AccessControlResourceType.LlmAnalytics}
                                 minAccessLevel={AccessControlLevel.Editor}
                             >
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     icon={<IconPencil />}
                                     onClick={() => setMode(PromptMode.Edit)}
@@ -85,14 +85,14 @@ export function LLMPromptScene(): JSX.Element {
                                     data-attr="prompt-edit-button"
                                 >
                                     Edit
-                                </LemonButton>
+                                </Button>
                             </AccessControlAction>
 
                             <AccessControlAction
                                 resourceType={AccessControlResourceType.LlmAnalytics}
                                 minAccessLevel={AccessControlLevel.Editor}
                             >
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     status="danger"
                                     icon={<IconTrash />}
@@ -101,14 +101,14 @@ export function LLMPromptScene(): JSX.Element {
                                     data-attr="prompt-delete-button"
                                 >
                                     Delete
-                                </LemonButton>
+                                </Button>
                             </AccessControlAction>
                         </>
                     }
                 />
 
                 {prompt && isPrompt(prompt) ? (
-                    <LemonTabs
+                    <Tabs
                         activeKey={activeViewTab}
                         onChange={(tab) =>
                             router.actions.replace(urls.llmAnalyticsPrompt(prompt.name), { ...searchParams, tab })
@@ -151,7 +151,7 @@ export function LLMPromptScene(): JSX.Element {
                     isLoading={promptLoading}
                     actions={
                         <>
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 onClick={() => {
                                     if (isNewPrompt) {
@@ -165,13 +165,13 @@ export function LLMPromptScene(): JSX.Element {
                                 data-attr="prompt-cancel-button"
                             >
                                 Cancel
-                            </LemonButton>
+                            </Button>
 
                             <AccessControlAction
                                 resourceType={AccessControlResourceType.LlmAnalytics}
                                 minAccessLevel={AccessControlLevel.Editor}
                             >
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     onClick={submitPromptForm}
                                     loading={isPromptFormSubmitting}
@@ -179,7 +179,7 @@ export function LLMPromptScene(): JSX.Element {
                                     data-attr={isNewPrompt ? 'prompt-create-button' : 'prompt-save-button'}
                                 >
                                     {isNewPrompt ? 'Create prompt' : 'Save'}
-                                </LemonButton>
+                                </Button>
                             </AccessControlAction>
 
                             {!isNewPrompt && (
@@ -187,7 +187,7 @@ export function LLMPromptScene(): JSX.Element {
                                     resourceType={AccessControlResourceType.LlmAnalytics}
                                     minAccessLevel={AccessControlLevel.Editor}
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         status="danger"
                                         icon={<IconTrash />}
@@ -196,7 +196,7 @@ export function LLMPromptScene(): JSX.Element {
                                         data-attr="prompt-delete-button"
                                     >
                                         Delete
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             )}
                         </>
@@ -236,9 +236,9 @@ function PromptViewDetails(): JSX.Element {
                 <div className="flex flex-wrap items-center gap-1">
                     <span className="text-xs text-secondary">Variables:</span>
                     {variables.map((v) => (
-                        <LemonTag key={v} type="highlight" size="small">
+                        <Tag key={v} type="highlight" size="small">
                             {v}
-                        </LemonTag>
+                        </Tag>
                     ))}
                 </div>
             )}
@@ -266,14 +266,14 @@ function PromptRelatedTraces(): JSX.Element {
                     </p>
                 </div>
 
-                <LemonButton
+                <Button
                     type="secondary"
                     to={viewAllTracesUrl}
                     size="small"
                     data-attr="prompt-view-all-traces-button"
                 >
                     View all traces
-                </LemonButton>
+                </Button>
             </div>
 
             {relatedTracesQuery && (
@@ -294,14 +294,14 @@ function PromptUsage({ prompt }: { prompt: LLMPrompt }): JSX.Element {
 
     return (
         <div data-attr="prompt-usage-container">
-            <LemonBanner type="info" className="mb-4">
+            <Banner type="info" className="mb-4">
                 During the alpha and beta period, each prompt fetch is currently charged as a Product analytics event.
                 See the{' '}
                 <Link to="https://hanzo.ai/pricing" target="_blank">
                     pricing page
                 </Link>
                 .
-            </LemonBanner>
+            </Banner>
 
             <div className="mb-4">
                 <b>Trend</b>
@@ -323,7 +323,7 @@ function PromptEditForm(): JSX.Element {
 
     return (
         <div className="space-y-4 max-w-3xl">
-            <LemonField
+            <Field
                 name="name"
                 label="Name"
                 help={
@@ -332,31 +332,31 @@ function PromptEditForm(): JSX.Element {
                         : 'This name is used to fetch the prompt from your code.'
                 }
             >
-                <LemonInput
+                <Input
                     placeholder="my-prompt-name"
                     fullWidth
                     disabledReason={!isNewPrompt ? 'Prompt name cannot be changed after creation' : undefined}
                 />
-            </LemonField>
+            </Field>
 
-            <LemonField
+            <Field
                 name="prompt"
                 label="Prompt"
                 help="Use {{variable_name}} to define variables that will be replaced when fetching the prompt from your backend."
             >
-                <LemonTextArea
+                <TextArea
                     placeholder="You are a helpful assistant for {{company_name}}. Help the user with their question about {{topic}}."
                     minRows={10}
                 />
-            </LemonField>
+            </Field>
 
             {promptVariables.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1">
                     <span className="text-xs text-secondary">Variables to be replaced:</span>
                     {promptVariables.map((v: string) => (
-                        <LemonTag key={v} type="highlight" size="small">
+                        <Tag key={v} type="highlight" size="small">
                             {v}
-                        </LemonTag>
+                        </Tag>
                     ))}
                 </div>
             )}

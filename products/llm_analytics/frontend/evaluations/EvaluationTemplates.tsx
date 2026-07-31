@@ -3,7 +3,7 @@ import { combineUrl, router } from 'kea-router'
 
 import { IconArrowLeft, IconEye, IconPlus, IconShield, IconTarget, IconThumbsUp, IconWarning } from '@hanzo/icons'
 import insights from '@hanzo/insights'
-import { LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Button, Tag, Link } from '@hanzo/elements'
 
 import { JudgeMascot } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -74,9 +74,9 @@ function TemplateCard({ template }: TemplateCardProps): JSX.Element {
                             {isBlank ? 'Create from scratch' : template.name}
                         </h3>
                         {!isBlank && (
-                            <LemonTag type="default" size="small">
+                            <Tag type="default" size="small">
                                 Template
-                            </LemonTag>
+                            </Tag>
                         )}
                     </div>
                     <p className="text-sm text-secondary leading-relaxed">
@@ -114,7 +114,7 @@ function TemplateGrid({
             <div className="w-full max-w-5xl px-4">
                 {showBackButton && (
                     <div className="mb-6">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             icon={<IconArrowLeft />}
                             onClick={() =>
@@ -123,7 +123,7 @@ function TemplateGrid({
                             size="small"
                         >
                             Back to Evaluations
-                        </LemonButton>
+                        </Button>
                     </div>
                 )}
                 <div className="space-y-8">

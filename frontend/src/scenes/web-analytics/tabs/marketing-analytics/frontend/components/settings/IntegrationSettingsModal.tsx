@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { LemonModal, LemonTabs } from '@hanzo/lemon-ui'
+import { Modal, Tabs } from '@hanzo/elements'
 
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 
@@ -37,7 +37,7 @@ export function IntegrationSettingsModal({
     }, [initialTab, isOpen])
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             title={
@@ -48,7 +48,7 @@ export function IntegrationSettingsModal({
             }
             width={600}
         >
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 onChange={setActiveTab}
                 tabs={[
@@ -119,6 +119,6 @@ export function IntegrationSettingsModal({
                     },
                 ]}
             />
-        </LemonModal>
+        </Modal>
     )
 }

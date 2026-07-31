@@ -21,7 +21,7 @@ import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Dayjs } from 'lib/dayjs'
 import { scrollToFormError } from 'lib/forms/scrollToFormError'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic as enabledFeaturesLogic } from 'lib/logic/featureFlagLogic'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -1285,7 +1285,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
             // For non-approval errors, let the global error handler show the toast to avoid duplicates
         },
         saveFeatureFlagSuccess: ({ featureFlag }) => {
-            lemonToast.success('Feature flag saved')
+            toast.success('Feature flag saved')
             actions.setFeatureFlag(featureFlag)
             actions.updateFlag(featureFlag)
             featureFlag.id && router.actions.replace(urls.featureFlag(featureFlag.id))
@@ -1319,13 +1319,13 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
         },
         updateFeatureFlagActiveSuccess: ({ featureFlagActiveUpdate }) => {
             if (featureFlagActiveUpdate) {
-                lemonToast.success(`Feature flag ${featureFlagActiveUpdate.active ? 'enabled' : 'disabled'}`)
+                toast.success(`Feature flag ${featureFlagActiveUpdate.active ? 'enabled' : 'disabled'}`)
                 actions.setFeatureFlag(featureFlagActiveUpdate)
                 actions.updateFlag(featureFlagActiveUpdate)
             }
         },
         saveSidebarExperimentFeatureFlagSuccess: ({ featureFlag }) => {
-            lemonToast.success('Release conditions updated')
+            toast.success('Release conditions updated')
             actions.updateFlag(featureFlag)
             actions.editFeatureFlag(false)
             actions.closeSidePanel()
@@ -1414,11 +1414,11 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                 )
                     ? 'updated'
                     : 'copied'
-                lemonToast.success(`Feature flag ${operation} successfully!`)
+                toast.success(`Feature flag ${operation} successfully!`)
                 eventUsageLogic.actions.reportFeatureFlagCopySuccess()
             } else {
                 const errorMessage = JSON.stringify(featureFlagCopy?.failed) || featureFlagCopy
-                lemonToast.error(`Error while saving feature flag: ${errorMessage}`)
+                toast.error(`Error while saving feature flag: ${errorMessage}`)
                 eventUsageLogic.actions.reportFeatureFlagCopyFailure(errorMessage)
             }
 
@@ -1428,7 +1428,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
         },
         createStaticCohortSuccess: ({ newCohort }) => {
             if (newCohort) {
-                lemonToast.success('Static cohort created successfully', {
+                toast.success('Static cohort created successfully', {
                     button: {
                         label: 'View cohort',
                         action: () => router.actions.push(urls.cohort(newCohort.id)),
@@ -1438,7 +1438,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
         },
         createSurveySuccess: ({ newSurvey }) => {
             if (newSurvey) {
-                lemonToast.success('Survey created successfully', {
+                toast.success('Survey created successfully', {
                     button: {
                         label: 'View survey',
                         action: () => router.actions.push(urls.survey(newSurvey.id)),
@@ -1448,7 +1448,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
         },
         createScheduledChangeSuccess: ({ scheduledChange }) => {
             if (scheduledChange) {
-                lemonToast.success('Change scheduled successfully')
+                toast.success('Change scheduled successfully')
                 actions.setScheduleDateMarker(null)
                 actions.setSchedulePayload(NEW_FLAG.filters, NEW_FLAG.active, {}, null, null)
                 actions.setIsRecurring(false)
@@ -1495,7 +1495,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
         },
         deleteScheduledChangeSuccess: ({ scheduledChange }) => {
             if (scheduledChange) {
-                lemonToast.success('Change has been deleted')
+                toast.success('Change has been deleted')
                 actions.loadScheduledChanges()
             }
         },
@@ -1506,10 +1506,10 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                     await api.featureFlags.updateScheduledChange(currentProjectId, scheduledChangeId, {
                         is_recurring: false,
                     })
-                    lemonToast.success('Recurring schedule has been paused')
+                    toast.success('Recurring schedule has been paused')
                     actions.loadScheduledChanges()
                 } catch {
-                    lemonToast.error('Failed to pause recurring schedule')
+                    toast.error('Failed to pause recurring schedule')
                 }
             }
         },
@@ -1520,10 +1520,10 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                     await api.featureFlags.updateScheduledChange(currentProjectId, scheduledChangeId, {
                         is_recurring: true,
                     })
-                    lemonToast.success('Recurring schedule has been resumed')
+                    toast.success('Recurring schedule has been resumed')
                     actions.loadScheduledChanges()
                 } catch {
-                    lemonToast.error('Failed to resume recurring schedule')
+                    toast.error('Failed to resume recurring schedule')
                 }
             }
         },

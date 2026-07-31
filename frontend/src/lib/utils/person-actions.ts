@@ -1,4 +1,4 @@
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -14,6 +14,6 @@ export const openInAdminPanel = async (email: string): Promise<void> => {
         window.open(`/admin/insights/user/${userId}/change/`, '_blank')
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
-        lemonToast.error(`Failed to open admin panel: ${message}`)
+        toast.error(`Failed to open admin panel: ${message}`)
     }
 }

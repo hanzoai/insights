@@ -1,10 +1,10 @@
-import { type LemonBadgeProps } from '@hanzo/lemon-ui'
+import { type BadgeProps } from '@hanzo/elements'
 
 import { TaskRunStatus } from '../types'
 
 export const TASK_STATUS_CONFIG: Record<
     TaskRunStatus | 'all' | 'not_started',
-    { status: LemonBadgeProps['status']; label: string }
+    { status: BadgeProps['status']; label: string }
 > = {
     all: { status: 'muted', label: 'All' },
 

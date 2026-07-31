@@ -3,7 +3,7 @@
  * Used for expandable sections within the main text view
  */
 import { IconExternal } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { VISIBLE_TOOLS_COUNT } from '../constants'
 import { parseTruncatedSegments } from '../parsing'

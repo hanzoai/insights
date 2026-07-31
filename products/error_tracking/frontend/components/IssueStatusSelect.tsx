@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { IconChevronDown } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import {
     DropdownMenu,
@@ -64,7 +64,7 @@ function IssueStatusDropdown({
                         className="text-base text-secondary hover:bg-fill-button-tertiary-hover hover:text-fill-button-tertiary px-1"
                         asChild
                     >
-                        <LemonButton
+                        <Button
                             fullWidth
                             onClick={() => option !== status && onChange(option)}
                             role="menuitem"
@@ -72,7 +72,7 @@ function IssueStatusDropdown({
                             active={option === status}
                         >
                             <StatusIndicator status={option} withTooltip="right" />
-                        </LemonButton>
+                        </Button>
                     </DropdownMenuItem>
                 ))}
             </DropdownMenuGroup>

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDialog, LemonModal, LemonTable } from '@hanzo/lemon-ui'
+import { Button, Dialog, Modal, Table } from '@hanzo/elements'
 
 import { VARIABLE_INSIGHT_COLUMNS } from 'scenes/data-management/variables/insightColumns'
 
@@ -18,7 +18,7 @@ export const NewVariableModal = (): JSX.Element => {
 
     const handleDelete = (): void => {
         if (variable.id) {
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Delete',
                 description:
                     'Are you sure you want to delete this variable? This cannot be undone. Queries that use this variable will no longer work.',
@@ -46,7 +46,7 @@ export const NewVariableModal = (): JSX.Element => {
     }
 
     return (
-        <LemonModal
+        <Modal
             title={title}
             isOpen={isModalOpen}
             onClose={closeModal}
@@ -55,17 +55,17 @@ export const NewVariableModal = (): JSX.Element => {
                 variable.type !== 'Date' && (
                     <div className="flex flex-1 justify-end gap-2">
                         {modalType === 'existing' && (
-                            <LemonButton type="secondary" status="danger" onClick={handleDelete}>
+                            <Button type="secondary" status="danger" onClick={handleDelete}>
                                 Delete variable
-                            </LemonButton>
+                            </Button>
                         )}
                         <div className="flex-1" />
-                        <LemonButton type="secondary" onClick={closeModal}>
+                        <Button type="secondary" onClick={closeModal}>
                             Close
-                        </LemonButton>
-                        <LemonButton type="primary" onClick={() => save()}>
+                        </Button>
+                        <Button type="primary" onClick={() => save()}>
                             Save
-                        </LemonButton>
+                        </Button>
                     </div>
                 )
             }
@@ -81,7 +81,7 @@ export const NewVariableModal = (): JSX.Element => {
             {modalType === 'existing' && (
                 <div className="mt-4">
                     <h3 className="text-base font-semibold mb-2">Insights using this variable</h3>
-                    <LemonTable
+                    <Table
                         loading={insightsLoading}
                         dataSource={insightsUsingVariable}
                         columns={VARIABLE_INSIGHT_COLUMNS}
@@ -91,6 +91,6 @@ export const NewVariableModal = (): JSX.Element => {
                     />
                 </div>
             )}
-        </LemonModal>
+        </Modal>
     )
 }

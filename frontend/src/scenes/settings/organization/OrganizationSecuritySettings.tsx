@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Dialog } from 'lib/elements/Dialog'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -29,7 +29,7 @@ export function OrganizationSecuritySettings(): JSX.Element | null {
     return (
         <>
             <PayGateMini feature={AvailableFeature.ORGANIZATION_SECURITY_SETTINGS}>
-                <LemonSwitch
+                <Switch
                     label={
                         <span>
                             Allow publicly shared resources{' '}
@@ -43,7 +43,7 @@ export function OrganizationSecuritySettings(): JSX.Element | null {
                     checked={!!currentOrganization?.allow_publicly_shared_resources}
                     onChange={(allow_publicly_shared_resources) => {
                         if (!allow_publicly_shared_resources) {
-                            LemonDialog.open({
+                            Dialog.open({
                                 title: 'Disable public sharing?',
                                 description: (
                                     <div>

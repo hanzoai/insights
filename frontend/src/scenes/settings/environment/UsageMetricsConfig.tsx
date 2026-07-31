@@ -3,23 +3,23 @@ import { Form } from 'kea-forms'
 
 import { IconEllipsis, IconPlusSmall } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonDialog,
-    LemonInput,
-    LemonLabel,
-    LemonMenu,
-    LemonModal,
-    LemonSelect,
-    LemonTable,
-    LemonTableColumns,
-} from '@hanzo/lemon-ui'
+    Button,
+    Dialog,
+    Input,
+    Label,
+    Menu,
+    Modal,
+    Select,
+    Table,
+    TableColumns,
+} from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
@@ -52,7 +52,7 @@ function UsageMetricsTable(): JSX.Element {
     const { removeUsageMetric, openModal, setUsageMetricValues } = useActions(usageMetricsConfigLogic)
     const { reportUsageMetricsUpdateButtonClicked } = useActions(eventUsageLogic)
 
-    const columns: LemonTableColumns<UsageMetric> = [
+    const columns: TableColumns<UsageMetric> = [
         {
             title: 'Name',
             key: 'name',
@@ -79,7 +79,7 @@ function UsageMetricsTable(): JSX.Element {
             width: 24,
             render: function Render(_, metric) {
                 return (
-                    <LemonMenu
+                    <Menu
                         items={[
                             {
                                 label: 'Edit',
@@ -93,7 +93,7 @@ function UsageMetricsTable(): JSX.Element {
                                 label: 'Delete',
                                 status: 'danger',
                                 onClick: () => {
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: 'Delete usage metric',
                                         description: `Are you sure you want to delete "${metric.name}"? This action cannot be undone.`,
                                         primaryButton: {
@@ -111,14 +111,14 @@ function UsageMetricsTable(): JSX.Element {
                             },
                         ]}
                     >
-                        <LemonButton size="small" icon={<IconEllipsis />} />
-                    </LemonMenu>
+                        <Button size="small" icon={<IconEllipsis />} />
+                    </Menu>
                 )
             },
         },
     ]
 
-    return <LemonTable columns={columns} dataSource={usageMetrics} loading={usageMetricsLoading} />
+    return <Table columns={columns} dataSource={usageMetrics} loading={usageMetricsLoading} />
 }
 
 function UsageMetricsForm(): JSX.Element {
@@ -132,42 +132,42 @@ function UsageMetricsForm(): JSX.Element {
         <Form id="usageMetric" logic={usageMetricsConfigLogic} formKey="usageMetric" enableFormOnSubmit>
             <div className="flex flex-col gap-2">
                 <div className="grid grid-cols-2 gap-2">
-                    <LemonField name="name" label="Name" help="This will be the title of the column in group list">
-                        <LemonInput placeholder="Events" />
-                    </LemonField>
+                    <Field name="name" label="Name" help="This will be the title of the column in group list">
+                        <Input placeholder="Events" />
+                    </Field>
 
-                    <LemonField name="interval" label="Interval">
-                        <LemonSelect
+                    <Field name="interval" label="Interval">
+                        <Select
                             options={[
                                 { value: 7, label: '7d' },
                                 { value: 30, label: '30d' },
                                 { value: 90, label: '90d' },
                             ]}
                         />
-                    </LemonField>
+                    </Field>
 
-                    <LemonField name="format" label="Format">
-                        <LemonSelect
+                    <Field name="format" label="Format">
+                        <Select
                             options={[
                                 { value: 'currency', label: 'Currency' },
                                 { value: 'numeric', label: 'Numeric' },
                             ]}
                         />
-                    </LemonField>
+                    </Field>
 
                     {/*Commenting this out as sparkline display is not supported yet*/}
-                    {/*<LemonField name="display" label="Display">
-                        <LemonSelect
+                    {/*<Field name="display" label="Display">
+                        <Select
                             options={[
                                 { value: 'number', label: 'Number' },
                                 { value: 'sparkline', label: 'Sparkline' },
                             ]}
                         />
-                    </LemonField>*/}
+                    </Field>*/}
                 </div>
 
                 <div className="grid grid-cols-1 gap-2">
-                    <LemonField
+                    <Field
                         name="filters"
                         label="Match events"
                         help="The usage metric will take into account events matching any of the above. Filters apply for all match events."
@@ -201,7 +201,7 @@ function UsageMetricsForm(): JSX.Element {
                                         buttonCopy="Add event matcher"
                                     />
                                     <div className="flex gap-2 justify-between w-full">
-                                        <LemonLabel>Filters</LemonLabel>
+                                        <Label>Filters</Label>
                                     </div>
                                     <PropertyFilters
                                         propertyFilters={(currentFilters?.properties ?? []) as AnyPropertyFilter[]}
@@ -226,7 +226,7 @@ function UsageMetricsForm(): JSX.Element {
                                 </>
                             )
                         }}
-                    </LemonField>
+                    </Field>
                 </div>
             </div>
         </Form>
@@ -250,9 +250,9 @@ export function UsageMetricsConfig(): JSX.Element {
                 Usage metrics are displayed in the person {groupsEnabled ? 'and group profiles' : 'profile'}.
             </p>
             <div className="flex flex-col gap-2 items-start">
-                <LemonButton type="primary" size="small" onClick={openModal} icon={<IconPlusSmall />}>
+                <Button type="primary" size="small" onClick={openModal} icon={<IconPlusSmall />}>
                     Add metric
-                </LemonButton>
+                </Button>
                 <UsageMetricsTable />
                 <UsageMetricsModal />
             </div>
@@ -265,21 +265,21 @@ export function UsageMetricsModal(): JSX.Element {
     const { closeModal } = useActions(usageMetricsConfigLogic)
 
     return (
-        <LemonModal
+        <Modal
             title="Add usage metric"
             isOpen={isModalOpen}
             onClose={closeModal}
             children={<UsageMetricsForm />}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         htmlType="submit"
                         form="usageMetric"
                         type="primary"
                         children="Save"
                         data-attr="create-usage-metric"
                     />
-                    <LemonButton children="Cancel" onClick={closeModal} data-attr="cancel-create-usage-metric" />
+                    <Button children="Cancel" onClick={closeModal} data-attr="cancel-create-usage-metric" />
                 </>
             }
         />

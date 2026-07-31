@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconCheck, IconWarning } from '@hanzo/icons'
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { HEALTH_CATEGORY_CONFIG } from '../healthCategories'
 import type { HealthIssueCategory } from '../healthCategories'
@@ -15,7 +15,7 @@ export const HealthIssueSummaryCards = (): JSX.Element => {
         return (
             <div className="grid grid-cols-1 @2xl/main-content:grid-cols-3 gap-4 max-w-3xl">
                 {Array.from({ length: 3 }, (_, i) => (
-                    <LemonSkeleton key={i} className="h-28 rounded" />
+                    <Skeleton key={i} className="h-28 rounded" />
                 ))}
             </div>
         )

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch, LemonTag } from '@hanzo/lemon-ui'
+import { Switch, Tag } from '@hanzo/elements'
 
 import { InsightsFunctionStatusIndicator } from 'scenes/insights-functions/misc/InsightsFunctionStatusIndicator'
 import { InsightsFunctionStatusTag } from 'scenes/insights-functions/misc/InsightsFunctionStatusTag'
@@ -17,11 +17,11 @@ export function InsightsFunctionEnabledConfig(): JSX.Element {
             {insightsFunction ? (
                 <InsightsFunctionStatusIndicator insightsFunction={insightsFunction} />
             ) : (
-                <LemonTag type={configuration.enabled ? 'success' : 'default'}>
+                <Tag type={configuration.enabled ? 'success' : 'default'}>
                     {configuration.enabled ? 'Start enabled' : 'Start paused'}
-                </LemonTag>
+                </Tag>
             )}
-            <LemonSwitch
+            <Switch
                 onChange={() => setConfigurationValue('enabled', !configuration.enabled)}
                 checked={configuration.enabled}
                 disabled={loading}

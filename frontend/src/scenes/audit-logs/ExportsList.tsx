@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconDownload } from '@hanzo/icons'
-import { LemonButton, LemonTable, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Table, Tooltip } from '@hanzo/elements'
 
 import { DetectiveMascot } from 'lib/components/mascots'
 import { humanFriendlyDetailedTime } from 'lib/utils'
@@ -65,7 +65,7 @@ export function ExportsList(): JSX.Element {
                 const disabledReason = !exportAsset.has_content && 'Export is not ready'
 
                 return (
-                    <LemonButton
+                    <Button
                         size="small"
                         type="secondary"
                         icon={<IconDownload />}
@@ -74,7 +74,7 @@ export function ExportsList(): JSX.Element {
                         data-attr={`audit-logs-download-export-${exportAsset.id}`}
                     >
                         Download
-                    </LemonButton>
+                    </Button>
                 )
             },
         },
@@ -82,7 +82,7 @@ export function ExportsList(): JSX.Element {
 
     return (
         <div className="space-y-4">
-            <LemonTable
+            <Table
                 dataSource={exports}
                 columns={columns}
                 loading={exportsLoading}

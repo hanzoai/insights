@@ -3,8 +3,8 @@ import { Fragment, useState } from 'react'
 
 import { IconCollapse, IconExpand } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
 import { inStorybook, inStorybookTestRunner, slugify } from 'lib/utils'
 
 import { InsightQueryNode } from '~/queries/schema/schema-general'
@@ -34,7 +34,7 @@ export function EditorFilterGroup({ insightProps, editorFilterGroup }: EditorFil
     return (
         <div>
             {isExpandable && (
-                <LemonButton
+                <Button
                     fullWidth
                     onClick={() => setIsRowExpanded(!isRowExpanded)}
                     sideIcon={isRowExpanded ? <IconCollapse /> : <IconExpand />}
@@ -44,7 +44,7 @@ export function EditorFilterGroup({ insightProps, editorFilterGroup }: EditorFil
                     <div className="flex items-center deprecated-space-x-2 font-semibold">
                         <span>{title}</span>
                     </div>
-                </LemonButton>
+                </Button>
             )}
 
             {isRowExpanded && (
@@ -61,13 +61,13 @@ export function EditorFilterGroup({ insightProps, editorFilterGroup }: EditorFil
                         }
                         return (
                             <Fragment key={key}>
-                                <LemonField.Pure
+                                <Field.Pure
                                     label={typeof Label === 'function' ? <Label insightProps={insightProps} /> : Label}
                                     info={tooltip}
                                     showOptional={showOptional}
                                 >
                                     {Component ? <Component insightProps={insightProps} /> : null}
-                                </LemonField.Pure>
+                                </Field.Pure>
                             </Fragment>
                         )
                     })}

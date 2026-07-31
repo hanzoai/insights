@@ -2,18 +2,18 @@ import React from 'react'
 
 import { IconInfo } from '@hanzo/icons'
 import {
-    LemonCalendarSelectInput,
-    LemonCheckbox,
-    LemonFileInput,
-    LemonInput,
-    LemonSelect,
-    LemonTextArea,
+    CalendarSelectInput,
+    Checkbox,
+    FileInput,
+    Input,
+    Select,
+    TextArea,
     Link,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { BatchExportConfigurationForm } from './types'
 
@@ -29,13 +29,13 @@ export function BatchExportGeneralEditFields({
     return (
         <div>
             {!isPipeline && (
-                <LemonField name="name" label="Name">
-                    <LemonInput placeholder="Name your workflow for future reference" />
-                </LemonField>
+                <Field name="name" label="Name">
+                    <Input placeholder="Name your workflow for future reference" />
+                </Field>
             )}
             <div className="flex flex-wrap gap-2 items-start">
                 {(!isPipeline || batchExportConfigForm.end_at) && ( // Not present in the new UI unless grandfathered in
-                    <LemonField
+                    <Field
                         name="end_at"
                         label="End date"
                         className="flex-1"
@@ -47,20 +47,20 @@ export function BatchExportGeneralEditFields({
                         }
                     >
                         {({ value, onChange }) => (
-                            <LemonCalendarSelectInput
+                            <CalendarSelectInput
                                 value={value}
                                 onChange={onChange}
                                 placeholder="Select end date (optional)"
                                 clearable
                             />
                         )}
-                    </LemonField>
+                    </Field>
                 )}
             </div>
 
             {isNew && !isPipeline ? (
-                <LemonField name="paused">
-                    <LemonCheckbox
+                <Field name="paused">
+                    <Checkbox
                         bordered
                         label={
                             <span className="flex gap-2 items-center">
@@ -79,7 +79,7 @@ export function BatchExportGeneralEditFields({
                             </span>
                         }
                     />
-                </LemonField>
+                </Field>
             ) : null}
         </div>
     )
@@ -99,11 +99,11 @@ export function BatchExportsEditFields({
             {batchExportConfigForm.destination === 'S3' ? (
                 <>
                     <div className="flex gap-4">
-                        <LemonField name="bucket_name" label="Bucket" className="flex-1">
-                            <LemonInput placeholder="e.g. my-bucket" />
-                        </LemonField>
-                        <LemonField name="region" label="Region" className="flex-1">
-                            <LemonSelect
+                        <Field name="bucket_name" label="Bucket" className="flex-1">
+                            <Input placeholder="e.g. my-bucket" />
+                        </Field>
+                        <Field name="region" label="Region" className="flex-1">
+                            <Select
                                 options={[
                                     { value: 'us-east-1', label: 'US East (N. Virginia)' },
                                     { value: 'us-east-2', label: 'US East (Ohio)' },
@@ -156,9 +156,9 @@ export function BatchExportsEditFields({
                                     { value: 'ap-south-mum', label: 'Mumbai (MUM)' },
                                 ]}
                             />
-                        </LemonField>
+                        </Field>
                     </div>
-                    <LemonField
+                    <Field
                         name="prefix"
                         label="Key prefix"
                         info={
@@ -174,25 +174,25 @@ export function BatchExportsEditFields({
                             </>
                         }
                     >
-                        <LemonInput placeholder="e.g. insights-events/" />
-                    </LemonField>
+                        <Input placeholder="e.g. insights-events/" />
+                    </Field>
 
                     <div className="flex gap-4">
-                        <LemonField
+                        <Field
                             name="file_format"
                             label="Format"
                             className="flex-1"
                             info="We recommend Parquet with zstd compression for the best performance"
                         >
-                            <LemonSelect
+                            <Select
                                 options={[
                                     { value: 'Parquet', label: 'Apache Parquet' },
                                     { value: 'JSONLines', label: 'JSON lines' },
                                 ]}
                             />
-                        </LemonField>
+                        </Field>
 
-                        <LemonField
+                        <Field
                             name="max_file_size_mb"
                             label="Max file size (MiB)"
                             showOptional
@@ -204,12 +204,12 @@ export function BatchExportsEditFields({
                                 </>
                             }
                         >
-                            <LemonInput type="number" min={0} />
-                        </LemonField>
+                            <Input type="number" min={0} />
+                        </Field>
                     </div>
 
                     <div className="flex gap-4">
-                        <LemonField name="compression" label="Compression" className="flex-1">
+                        <Field name="compression" label="Compression" className="flex-1">
                             {({ value, onChange }) => {
                                 const parquetCompressionOptions = [
                                     { value: 'zstd', label: 'zstd' },
@@ -257,7 +257,7 @@ export function BatchExportsEditFields({
                                 }, [configurationChanged, batchExportConfigForm.file_format, isNew]) // oxlint-disable-line react-hooks/exhaustive-deps
 
                                 return (
-                                    <LemonSelect
+                                    <Select
                                         options={compressionOptions}
                                         value={value}
                                         onChange={onChange}
@@ -267,49 +267,49 @@ export function BatchExportsEditFields({
                                     />
                                 )
                             }}
-                        </LemonField>
+                        </Field>
 
-                        <LemonField name="encryption" label="Encryption" className="flex-1">
-                            <LemonSelect
+                        <Field name="encryption" label="Encryption" className="flex-1">
+                            <Select
                                 options={[
                                     { value: 'AES256', label: 'AES256' },
                                     { value: 'aws:kms', label: 'aws:kms' },
                                     { value: null, label: 'No encryption' },
                                 ]}
                             />
-                        </LemonField>
+                        </Field>
                     </div>
 
                     <div className="flex gap-4">
-                        <LemonField name="aws_access_key_id" label="AWS Access Key ID" className="flex-1">
-                            <LemonInput placeholder={isNew ? 'e.g. AKIAIOSFODNN7EXAMPLE' : 'Leave unchanged'} />
-                        </LemonField>
+                        <Field name="aws_access_key_id" label="AWS Access Key ID" className="flex-1">
+                            <Input placeholder={isNew ? 'e.g. AKIAIOSFODNN7EXAMPLE' : 'Leave unchanged'} />
+                        </Field>
 
-                        <LemonField name="aws_secret_access_key" label="AWS Secret Access Key" className="flex-1">
-                            <LemonInput placeholder={isNew ? 'e.g. secret-key' : 'Leave unchanged'} type="password" />
-                        </LemonField>
+                        <Field name="aws_secret_access_key" label="AWS Secret Access Key" className="flex-1">
+                            <Input placeholder={isNew ? 'e.g. secret-key' : 'Leave unchanged'} type="password" />
+                        </Field>
 
                         {batchExportConfigForm.encryption == 'aws:kms' && (
-                            <LemonField name="kms_key_id" label="AWS KMS Key ID" className="flex-1">
-                                <LemonInput
+                            <Field name="kms_key_id" label="AWS KMS Key ID" className="flex-1">
+                                <Input
                                     placeholder={
                                         isNew ? 'e.g. 1234abcd-12ab-34cd-56ef-1234567890ab' : 'leave unchanged'
                                     }
                                 />
-                            </LemonField>
+                            </Field>
                         )}
                     </div>
 
-                    <LemonField
+                    <Field
                         name="endpoint_url"
                         label="Endpoint URL"
                         showOptional
                         info={<>Only required if exporting to an S3-compatible blob storage (like MinIO)</>}
                     >
-                        <LemonInput placeholder={isNew ? 'e.g. https://your-minio-host:9000' : 'Leave unchanged'} />
-                    </LemonField>
+                        <Input placeholder={isNew ? 'e.g. https://your-minio-host:9000' : 'Leave unchanged'} />
+                    </Field>
 
-                    <LemonField
+                    <Field
                         name="use_virtual_style_addressing"
                         label="Virtual style addressing"
                         showOptional
@@ -321,106 +321,106 @@ export function BatchExportsEditFields({
                             </>
                         }
                     >
-                        <LemonCheckbox
+                        <Checkbox
                             bordered
                             label={<span className="flex gap-2 items-center">Use virtual style addressing</span>}
                         />
-                    </LemonField>
+                    </Field>
                 </>
             ) : batchExportConfigForm.destination === 'Snowflake' ? (
                 <>
-                    <LemonField name="account" label="Account">
-                        <LemonInput placeholder="my-account" />
-                    </LemonField>
+                    <Field name="account" label="Account">
+                        <Input placeholder="my-account" />
+                    </Field>
 
-                    <LemonField name="user" label="User">
-                        <LemonInput placeholder={isNew ? 'my-user' : 'Leave unchanged'} />
-                    </LemonField>
+                    <Field name="user" label="User">
+                        <Input placeholder={isNew ? 'my-user' : 'Leave unchanged'} />
+                    </Field>
 
-                    <LemonField name="authentication_type" label="Authentication type" className="flex-1">
-                        <LemonSelect
+                    <Field name="authentication_type" label="Authentication type" className="flex-1">
+                        <Select
                             options={[
                                 { value: 'password', label: 'Password' },
                                 { value: 'keypair', label: 'Key pair' },
                             ]}
                         />
-                    </LemonField>
+                    </Field>
 
                     {batchExportConfigForm.authentication_type != 'keypair' && (
-                        <LemonField name="password" label="Password">
-                            <LemonInput placeholder={isNew ? 'my-password' : 'Leave unchanged'} type="password" />
-                        </LemonField>
+                        <Field name="password" label="Password">
+                            <Input placeholder={isNew ? 'my-password' : 'Leave unchanged'} type="password" />
+                        </Field>
                     )}
 
                     {batchExportConfigForm.authentication_type == 'keypair' && (
                         <>
-                            <LemonField name="private_key" label="Private key">
-                                <LemonTextArea
+                            <Field name="private_key" label="Private key">
+                                <TextArea
                                     className="ph-ignore-input"
                                     placeholder={isNew ? 'my-private-key' : 'Leave unchanged'}
                                     minRows={4}
                                 />
-                            </LemonField>
+                            </Field>
 
-                            <LemonField name="private_key_passphrase" label="Private key passphrase">
-                                <LemonInput placeholder={isNew ? 'my-passphrase' : 'Leave unchanged'} />
-                            </LemonField>
+                            <Field name="private_key_passphrase" label="Private key passphrase">
+                                <Input placeholder={isNew ? 'my-passphrase' : 'Leave unchanged'} />
+                            </Field>
                         </>
                     )}
 
-                    <LemonField name="database" label="Database">
-                        <LemonInput placeholder="my-database" />
-                    </LemonField>
+                    <Field name="database" label="Database">
+                        <Input placeholder="my-database" />
+                    </Field>
 
-                    <LemonField name="warehouse" label="Warehouse">
-                        <LemonInput placeholder="my-warehouse" />
-                    </LemonField>
+                    <Field name="warehouse" label="Warehouse">
+                        <Input placeholder="my-warehouse" />
+                    </Field>
 
-                    <LemonField name="schema" label="Schema">
-                        <LemonInput placeholder="my-schema" />
-                    </LemonField>
+                    <Field name="schema" label="Schema">
+                        <Input placeholder="my-schema" />
+                    </Field>
 
-                    <LemonField name="table_name" label="Table name">
-                        <LemonInput placeholder="events" />
-                    </LemonField>
+                    <Field name="table_name" label="Table name">
+                        <Input placeholder="events" />
+                    </Field>
 
-                    <LemonField name="role" label="Role" showOptional>
-                        <LemonInput placeholder="my-role" />
-                    </LemonField>
+                    <Field name="role" label="Role" showOptional>
+                        <Input placeholder="my-role" />
+                    </Field>
                 </>
             ) : batchExportConfigForm.destination === 'Postgres' ? (
                 <>
-                    <LemonField name="user" label="User">
-                        <LemonInput placeholder={isNew ? 'my-user' : 'Leave unchanged'} />
-                    </LemonField>
+                    <Field name="user" label="User">
+                        <Input placeholder={isNew ? 'my-user' : 'Leave unchanged'} />
+                    </Field>
 
-                    <LemonField name="password" label="Password">
-                        <LemonInput placeholder={isNew ? 'my-password' : 'Leave unchanged'} type="password" />
-                    </LemonField>
+                    <Field name="password" label="Password">
+                        <Input placeholder={isNew ? 'my-password' : 'Leave unchanged'} type="password" />
+                    </Field>
 
-                    <LemonField name="host" label="Host">
-                        <LemonInput placeholder="my-host" />
-                    </LemonField>
+                    <Field name="host" label="Host">
+                        <Input placeholder="my-host" />
+                    </Field>
 
-                    <LemonField name="port" label="Port">
-                        <LemonInput placeholder="5432" type="number" min="0" max="65535" />
-                    </LemonField>
+                    <Field name="port" label="Port">
+                        <Input placeholder="5432" type="number" min="0" max="65535" />
+                    </Field>
 
-                    <LemonField name="database" label="Database">
-                        <LemonInput placeholder="my-database" />
-                    </LemonField>
+                    <Field name="database" label="Database">
+                        <Input placeholder="my-database" />
+                    </Field>
 
-                    <LemonField name="schema" label="Schema">
-                        <LemonInput placeholder="public" />
-                    </LemonField>
+                    <Field name="schema" label="Schema">
+                        <Input placeholder="public" />
+                    </Field>
 
-                    <LemonField name="table_name" label="Table name">
-                        <LemonInput placeholder="events" />
-                    </LemonField>
+                    <Field name="table_name" label="Table name">
+                        <Input placeholder="events" />
+                    </Field>
 
-                    <LemonField name="has_self_signed_cert">
+                    <Field name="has_self_signed_cert">
                         {({ value, onChange }) => (
-                            <LemonCheckbox
+                            <Checkbox
                                 bordered
                                 label={
                                     <span className="flex gap-2 items-center">
@@ -434,39 +434,39 @@ export function BatchExportsEditFields({
                                 onChange={onChange}
                             />
                         )}
-                    </LemonField>
+                    </Field>
                 </>
             ) : batchExportConfigForm.destination === 'Redshift' ? (
                 <>
-                    <LemonField name="user" label="User">
-                        <LemonInput placeholder={isNew ? 'my-user' : 'Leave unchanged'} />
-                    </LemonField>
+                    <Field name="user" label="User">
+                        <Input placeholder={isNew ? 'my-user' : 'Leave unchanged'} />
+                    </Field>
 
-                    <LemonField name="password" label="Password">
-                        <LemonInput placeholder={isNew ? 'my-password' : 'Leave unchanged'} type="password" />
-                    </LemonField>
+                    <Field name="password" label="Password">
+                        <Input placeholder={isNew ? 'my-password' : 'Leave unchanged'} type="password" />
+                    </Field>
 
-                    <LemonField name="host" label="Host">
-                        <LemonInput placeholder="my-host" />
-                    </LemonField>
+                    <Field name="host" label="Host">
+                        <Input placeholder="my-host" />
+                    </Field>
 
-                    <LemonField name="port" label="Port">
-                        <LemonInput placeholder="5439" type="number" min="0" max="65535" />
-                    </LemonField>
+                    <Field name="port" label="Port">
+                        <Input placeholder="5439" type="number" min="0" max="65535" />
+                    </Field>
 
-                    <LemonField name="database" label="Database">
-                        <LemonInput placeholder="my-database" />
-                    </LemonField>
+                    <Field name="database" label="Database">
+                        <Input placeholder="my-database" />
+                    </Field>
 
-                    <LemonField name="schema" label="Schema">
-                        <LemonInput placeholder="public" />
-                    </LemonField>
+                    <Field name="schema" label="Schema">
+                        <Input placeholder="public" />
+                    </Field>
 
-                    <LemonField name="table_name" label="Table name">
-                        <LemonInput placeholder="events" />
-                    </LemonField>
+                    <Field name="table_name" label="Table name">
+                        <Input placeholder="events" />
+                    </Field>
 
-                    <LemonField
+                    <Field
                         name="properties_data_type"
                         label="Semi-structured data type"
                         info={
@@ -479,15 +479,15 @@ export function BatchExportsEditFields({
                             </>
                         }
                     >
-                        <LemonSelect
+                        <Select
                             options={[
                                 { value: 'varchar', label: 'VARCHAR(65535)' },
                                 { value: 'super', label: 'SUPER' },
                             ]}
                         />
-                    </LemonField>
+                    </Field>
 
-                    <LemonField
+                    <Field
                         name="mode"
                         label="Command"
                         className="flex-1"
@@ -499,13 +499,13 @@ export function BatchExportsEditFields({
                             </>
                         }
                     >
-                        <LemonSelect
+                        <Select
                             options={[
                                 { value: 'COPY', label: 'COPY' },
                                 { value: 'INSERT', label: 'INSERT' },
                             ]}
                         />
-                    </LemonField>
+                    </Field>
 
                     {batchExportConfigForm.mode === 'COPY' && (
                         <>
@@ -519,15 +519,15 @@ export function BatchExportsEditFields({
                             </p>
 
                             <div className="flex gap-4">
-                                <LemonField name="redshift_s3_bucket" label="S3 bucket name" className="flex-1">
-                                    <LemonInput placeholder="e.g. my-bucket" />
-                                </LemonField>
-                                <LemonField
+                                <Field name="redshift_s3_bucket" label="S3 bucket name" className="flex-1">
+                                    <Input placeholder="e.g. my-bucket" />
+                                </Field>
+                                <Field
                                     name="redshift_s3_bucket_region_name"
                                     label="S3 bucket region"
                                     className="flex-1"
                                 >
-                                    <LemonSelect
+                                    <Select
                                         options={[
                                             { value: 'us-east-1', label: 'US East (N. Virginia)' },
                                             { value: 'us-east-2', label: 'US East (Ohio)' },
@@ -558,35 +558,35 @@ export function BatchExportsEditFields({
                                             { value: 'sa-east-1', label: 'South America (São Paulo)' },
                                         ]}
                                     />
-                                </LemonField>
+                                </Field>
                             </div>
 
-                            <LemonField name="redshift_s3_key_prefix" label="S3 key prefix" className="flex-1">
-                                <LemonInput placeholder="e.g. /insights-copy-files" />
-                            </LemonField>
+                            <Field name="redshift_s3_key_prefix" label="S3 key prefix" className="flex-1">
+                                <Input placeholder="e.g. /insights-copy-files" />
+                            </Field>
 
                             <div className="flex gap-4">
-                                <LemonField
+                                <Field
                                     name="redshift_s3_bucket_aws_access_key_id"
                                     label="AWS Access Key ID"
                                     className="flex-1"
                                 >
-                                    <LemonInput placeholder={isNew ? 'e.g. AKIAIOSFODNN7EXAMPLE' : 'Leave unchanged'} />
-                                </LemonField>
+                                    <Input placeholder={isNew ? 'e.g. AKIAIOSFODNN7EXAMPLE' : 'Leave unchanged'} />
+                                </Field>
 
-                                <LemonField
+                                <Field
                                     name="redshift_s3_bucket_aws_secret_access_key"
                                     label="AWS Secret Access Key"
                                     className="flex-1"
                                 >
-                                    <LemonInput
+                                    <Input
                                         placeholder={isNew ? 'e.g. secret-key' : 'Leave unchanged'}
                                         type="password"
                                     />
-                                </LemonField>
+                                </Field>
                             </div>
 
-                            <LemonField
+                            <Field
                                 name="authorization_mode"
                                 label="Authorization"
                                 className="flex-1"
@@ -597,44 +597,44 @@ export function BatchExportsEditFields({
                                     </>
                                 }
                             >
-                                <LemonSelect
+                                <Select
                                     options={[
                                         { value: 'IAMRole', label: 'IAM Role' },
                                         { value: 'Credentials', label: 'Credentials' },
                                     ]}
                                 />
-                            </LemonField>
+                            </Field>
 
                             {batchExportConfigForm.authorization_mode === 'IAMRole' && (
                                 <>
-                                    <LemonField name="redshift_iam_role" label="IAM Role ARN" className="flex-1">
-                                        <LemonInput placeholder="e.g. arn:aws:iam::<aws-account-id>:role/<role-name>" />
-                                    </LemonField>
+                                    <Field name="redshift_iam_role" label="IAM Role ARN" className="flex-1">
+                                        <Input placeholder="e.g. arn:aws:iam::<aws-account-id>:role/<role-name>" />
+                                    </Field>
                                 </>
                             )}
 
                             {batchExportConfigForm.authorization_mode === 'Credentials' && (
                                 <div className="flex gap-4">
-                                    <LemonField
+                                    <Field
                                         name="redshift_aws_access_key_id"
                                         label="AWS Access Key ID"
                                         className="flex-1"
                                     >
-                                        <LemonInput
+                                        <Input
                                             placeholder={isNew ? 'e.g. AKIAIOSFODNN7EXAMPLE' : 'Leave unchanged'}
                                         />
-                                    </LemonField>
+                                    </Field>
 
-                                    <LemonField
+                                    <Field
                                         name="redshift_aws_secret_access_key"
                                         label="AWS Secret Access Key"
                                         className="flex-1"
                                     >
-                                        <LemonInput
+                                        <Input
                                             placeholder={isNew ? 'e.g. secret-key' : 'Leave unchanged'}
                                             type="password"
                                         />
-                                    </LemonField>
+                                    </Field>
                                 </div>
                             )}
                         </>
@@ -642,21 +642,21 @@ export function BatchExportsEditFields({
                 </>
             ) : batchExportConfigForm.destination === 'BigQuery' ? (
                 <>
-                    <LemonField name="json_config_file" label="Google Cloud JSON key file">
-                        <LemonFileInput accept=".json" multiple={false} />
-                    </LemonField>
+                    <Field name="json_config_file" label="Google Cloud JSON key file">
+                        <FileInput accept=".json" multiple={false} />
+                    </Field>
 
-                    <LemonField name="table_id" label="Table ID">
-                        <LemonInput placeholder="events" />
-                    </LemonField>
+                    <Field name="table_id" label="Table ID">
+                        <Input placeholder="events" />
+                    </Field>
 
-                    <LemonField name="dataset_id" label="Dataset ID">
-                        <LemonInput placeholder="dataset" />
-                    </LemonField>
+                    <Field name="dataset_id" label="Dataset ID">
+                        <Input placeholder="dataset" />
+                    </Field>
 
                     {isNew ? (
-                        <LemonField name="use_json_type" label="Structured fields data type">
-                            <LemonCheckbox
+                        <Field name="use_json_type" label="Structured fields data type">
+                            <Checkbox
                                 bordered
                                 label={
                                     <span className="flex gap-2 items-center">
@@ -667,41 +667,41 @@ export function BatchExportsEditFields({
                                     </span>
                                 }
                             />
-                        </LemonField>
+                        </Field>
                     ) : null}
                 </>
             ) : batchExportConfigForm.destination === 'Databricks' ? (
                 <>
-                    <LemonField name="integration_id" label="Integration">
+                    <Field name="integration_id" label="Integration">
                         {({ value, onChange }) => (
                             <IntegrationChoice integration="databricks" value={value} onChange={onChange} />
                         )}
-                    </LemonField>
+                    </Field>
 
-                    <LemonField
+                    <Field
                         name="http_path"
                         label="HTTP Path"
                         info={<>HTTP Path value for your all-purpose compute or SQL warehouse.</>}
                     >
-                        <LemonInput placeholder="/sql/1.0/warehouses/my-warehouse" />
-                    </LemonField>
+                        <Input placeholder="/sql/1.0/warehouses/my-warehouse" />
+                    </Field>
 
-                    <LemonField name="catalog" label="Catalog">
-                        <LemonInput placeholder="workspace" />
-                    </LemonField>
+                    <Field name="catalog" label="Catalog">
+                        <Input placeholder="workspace" />
+                    </Field>
 
-                    <LemonField name="schema" label="Schema">
-                        <LemonInput placeholder="default" />
-                    </LemonField>
+                    <Field name="schema" label="Schema">
+                        <Input placeholder="default" />
+                    </Field>
 
-                    <LemonField name="table_name" label="Table name">
-                        <LemonInput placeholder="my-table" />
-                    </LemonField>
+                    <Field name="table_name" label="Table name">
+                        <Input placeholder="my-table" />
+                    </Field>
 
                     {isNew ? (
-                        <LemonField name="use_variant_type">
+                        <Field name="use_variant_type">
                             {({ value, onChange }) => (
-                                <LemonCheckbox
+                                <Checkbox
                                     checked={!!value}
                                     onChange={onChange}
                                     bordered
@@ -735,18 +735,18 @@ export function BatchExportsEditFields({
                                     }
                                 />
                             )}
-                        </LemonField>
+                        </Field>
                     ) : null}
                 </>
             ) : batchExportConfigForm.destination === 'AzureBlob' ? (
                 <>
-                    <LemonField name="integration_id" label="Azure connection">
+                    <Field name="integration_id" label="Azure connection">
                         {({ value, onChange }) => (
                             <IntegrationChoice integration="azure-blob" value={value} onChange={onChange} />
                         )}
-                    </LemonField>
+                    </Field>
 
-                    <LemonField
+                    <Field
                         name="container_name"
                         label="Container name"
                         info={
@@ -756,10 +756,10 @@ export function BatchExportsEditFields({
                             </>
                         }
                     >
-                        <LemonInput placeholder="my-export-container" />
-                    </LemonField>
+                        <Input placeholder="my-export-container" />
+                    </Field>
 
-                    <LemonField
+                    <Field
                         name="prefix"
                         label="Blob prefix"
                         showOptional
@@ -770,25 +770,25 @@ export function BatchExportsEditFields({
                             </>
                         }
                     >
-                        <LemonInput placeholder="insights/events/" />
-                    </LemonField>
+                        <Input placeholder="insights/events/" />
+                    </Field>
 
                     <div className="flex gap-4">
-                        <LemonField
+                        <Field
                             name="file_format"
                             label="Format"
                             className="flex-1"
                             info="We recommend Parquet with zstd compression for the best performance"
                         >
-                            <LemonSelect
+                            <Select
                                 options={[
                                     { value: 'Parquet', label: 'Apache Parquet' },
                                     { value: 'JSONLines', label: 'JSON lines' },
                                 ]}
                             />
-                        </LemonField>
+                        </Field>
 
-                        <LemonField
+                        <Field
                             name="max_file_size_mb"
                             label="Max file size (MiB)"
                             showOptional
@@ -800,11 +800,11 @@ export function BatchExportsEditFields({
                                 </>
                             }
                         >
-                            <LemonInput type="number" min={0} />
-                        </LemonField>
+                            <Input type="number" min={0} />
+                        </Field>
                     </div>
 
-                    <LemonField name="compression" label="Compression">
+                    <Field name="compression" label="Compression">
                         {({ value, onChange }) => {
                             const parquetCompressionOptions = [
                                 { value: 'zstd', label: 'zstd' },
@@ -849,7 +849,7 @@ export function BatchExportsEditFields({
                             }, [configurationChanged, batchExportConfigForm.file_format, isNew]) // oxlint-disable-line react-hooks/exhaustive-deps
 
                             return (
-                                <LemonSelect
+                                <Select
                                     options={compressionOptions}
                                     value={value}
                                     onChange={onChange}
@@ -859,21 +859,21 @@ export function BatchExportsEditFields({
                                 />
                             )
                         }}
-                    </LemonField>
+                    </Field>
                 </>
             ) : batchExportConfigForm.destination === 'HTTP' ? (
                 <>
-                    <LemonField name="url" label="Insights region">
-                        <LemonSelect
+                    <Field name="url" label="Insights region">
+                        <Select
                             options={[
                                 { value: 'https://us.i.hanzo.ai/batch/', label: 'US' },
                                 { value: 'https://eu.i.hanzo.ai/batch/', label: 'EU' },
                             ]}
                         />
-                    </LemonField>
-                    <LemonField name="token" label="Destination project API Key">
-                        <LemonInput placeholder="e.g. hi_12345..." />
-                    </LemonField>
+                    </Field>
+                    <Field name="token" label="Destination project API Key">
+                        <Input placeholder="e.g. hi_12345..." />
+                    </Field>
                 </>
             ) : null}
         </div>

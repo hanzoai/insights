@@ -3,15 +3,15 @@ import './BillingUsage.scss'
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Select } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { Label } from 'lib/elements/Label/Label'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { ExporterFormat } from '~/types'
 
@@ -85,8 +85,8 @@ export function BillingUsage(): JSX.Element {
                 <div className="flex gap-4 items-start flex-wrap">
                     {/* Usage Types */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Products</LemonLabel>
-                        <LemonInputSelect
+                        <Label>Products</Label>
+                        <InputSelect
                             mode="multiple"
                             displayMode="count"
                             bulkActions="select-and-clear-all"
@@ -101,8 +101,8 @@ export function BillingUsage(): JSX.Element {
 
                     {/* Teams */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Projects</LemonLabel>
-                        <LemonInputSelect
+                        <Label>Projects</Label>
+                        <InputSelect
                             mode="multiple"
                             displayMode="count"
                             bulkActions="select-and-clear-all"
@@ -118,16 +118,16 @@ export function BillingUsage(): JSX.Element {
 
                     {/* Breakdowns */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Break down by</LemonLabel>
+                        <Label>Break down by</Label>
                         <div className="flex gap-2 items-center min-h-10">
                             <span className="opacity-70">
-                                <LemonCheckbox
+                                <Checkbox
                                     label="Product"
                                     checked={true}
                                     disabledReason="Breakdown by Product is required for usage volume, as summing different units (e.g., events + recordings) doesn't produce a meaningful total."
                                 />
                             </span>
-                            <LemonCheckbox
+                            <Checkbox
                                 label="Project"
                                 checked={(filters.breakdowns || []).includes('team')}
                                 onChange={toggleTeamBreakdown}
@@ -137,7 +137,7 @@ export function BillingUsage(): JSX.Element {
 
                     {/* Date Range */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Date range (UTC)</LemonLabel>
+                        <Label>Date range (UTC)</Label>
                         <div className="bg-bg-light rounded-md">
                             <DateFilter
                                 className="h-8 flex items-center"
@@ -151,9 +151,9 @@ export function BillingUsage(): JSX.Element {
 
                     {/* Interval */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Group by</LemonLabel>
+                        <Label>Group by</Label>
                         <div className="bg-bg-light rounded-md">
-                            <LemonSelect
+                            <Select
                                 className="h-10.5 flex items-center"
                                 size="small"
                                 value={filters.interval || 'day'}
@@ -169,9 +169,9 @@ export function BillingUsage(): JSX.Element {
 
                     {/* Exclude Empty Series */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>Options</LemonLabel>
+                        <Label>Options</Label>
                         <div className="flex items-center min-h-10">
-                            <LemonCheckbox
+                            <Checkbox
                                 label="Hide results with no usage"
                                 checked={excludeEmptySeries}
                                 onChange={(value) => setExcludeEmptySeries(value)}
@@ -181,15 +181,15 @@ export function BillingUsage(): JSX.Element {
 
                     {/* Clear Filters / Export */}
                     <div className="flex flex-col gap-1">
-                        <LemonLabel>&nbsp;</LemonLabel>
+                        <Label>&nbsp;</Label>
                         <div className="flex items-center gap-2">
-                            <LemonButton type="secondary" size="medium" onClick={resetFilters}>
+                            <Button type="secondary" size="medium" onClick={resetFilters}>
                                 Clear filters
-                            </LemonButton>
+                            </Button>
                             {showSeries && (
-                                <LemonButton type="secondary" size="medium" onClick={onExportCsv}>
+                                <Button type="secondary" size="medium" onClick={onExportCsv}>
                                     Export CSV
-                                </LemonButton>
+                                </Button>
                             )}
                         </div>
                     </div>

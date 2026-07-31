@@ -17,7 +17,7 @@ import { loaders } from 'kea-loaders'
 import { combineUrl, router } from 'kea-router'
 
 import api from '~/lib/api'
-import { lemonToast } from '~/lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from '~/lib/elements/Toast/Toast'
 import { tabAwareUrlToAction } from '~/lib/logic/scenes/tabAwareUrlToAction'
 import { defaultDataTableColumns } from '~/queries/nodes/DataTable/utils'
 import {
@@ -133,7 +133,7 @@ export const llmPromptLogic = kea<llmPromptLogicType>([
                             prompt: formValues.prompt,
                         })
                         llmPromptsLogic.findMounted()?.actions.loadPrompts(false)
-                        lemonToast.success('Prompt created successfully')
+                        toast.success('Prompt created successfully')
                         router.actions.replace(urls.llmAnalyticsPrompt(savedPrompt.name))
 
                         void actions.addProductIntent({
@@ -150,7 +150,7 @@ export const llmPromptLogic = kea<llmPromptLogicType>([
                         savedPrompt = await api.llmPrompts.update(currentPrompt.id, {
                             prompt: formValues.prompt,
                         })
-                        lemonToast.success('Prompt updated successfully')
+                        toast.success('Prompt updated successfully')
                         router.actions.replace(urls.llmAnalyticsPrompt(props.promptName))
                     }
 
@@ -178,7 +178,7 @@ export const llmPromptLogic = kea<llmPromptLogicType>([
                             ? error.detail
                             : 'Failed to save prompt'
 
-                    lemonToast.error(message)
+                    toast.error(message)
                     throw error
                 }
             },
@@ -356,10 +356,10 @@ export const llmPromptLogic = kea<llmPromptLogicType>([
             if (props.promptName !== 'new' && values.prompt && isPrompt(values.prompt)) {
                 try {
                     await api.llmPrompts.update(values.prompt.id, { deleted: true })
-                    lemonToast.info(`${values.prompt.name || 'Prompt'} has been deleted.`)
+                    toast.info(`${values.prompt.name || 'Prompt'} has been deleted.`)
                     router.actions.replace(urls.llmAnalyticsPrompts(), router.values.searchParams)
                 } catch {
-                    lemonToast.error('Failed to delete prompt')
+                    toast.error('Failed to delete prompt')
                 }
             }
         },

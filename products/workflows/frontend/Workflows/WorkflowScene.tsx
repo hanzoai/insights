@@ -3,11 +3,11 @@ import { useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconClock } from '@hanzo/icons'
-import { SpinnerOverlay } from '@hanzo/lemon-ui'
+import { SpinnerOverlay } from '@hanzo/elements'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { NotFound } from 'lib/components/NotFound'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tab, Tabs } from 'lib/elements/Tabs'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -59,7 +59,7 @@ export function WorkflowScene(props: WorkflowSceneLogicProps): JSX.Element {
         return <NotFound object="workflow" />
     }
 
-    const tabs: (LemonTab<WorkflowTab> | null)[] = [
+    const tabs: (Tab<WorkflowTab> | null)[] = [
         {
             label: 'Workflow',
             key: 'workflow',
@@ -109,7 +109,7 @@ export function WorkflowScene(props: WorkflowSceneLogicProps): JSX.Element {
             {!props.id || props.id === 'new' ? (
                 <Workflow {...props} />
             ) : (
-                <LemonTabs
+                <Tabs
                     activeKey={currentTab}
                     onChange={(tab) => router.actions.push(urls.workflow(props.id ?? 'new', tab))}
                     tabs={tabs}

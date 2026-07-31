@@ -1,4 +1,4 @@
-import { LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
+import { RadioOption } from 'lib/elements/Radio'
 
 import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 
@@ -6,7 +6,7 @@ import { TeamSettingRadio } from '../components/TeamSettingRadio'
 
 type SessionsV2JoinModeType = NonNullable<InsightsQLQueryModifiers['sessionsV2JoinMode']>
 
-const sessionsV2JoinModeOptions: LemonRadioOption<SessionsV2JoinModeType>[] = [
+const sessionsV2JoinModeOptions: RadioOption<SessionsV2JoinModeType>[] = [
     { value: 'string', label: 'String' },
     { value: 'uuid', label: 'UUID' },
 ]

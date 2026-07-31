@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch, Link } from '@hanzo/lemon-ui'
+import { Switch, Link } from '@hanzo/elements'
 
 import { userLogic } from 'scenes/userLogic'
 
@@ -18,7 +18,7 @@ export function AllowImpersonation(): JSX.Element {
                 </Link>
                 .
             </p>
-            <LemonSwitch
+            <Switch
                 label="Allow support to log in as me"
                 data-attr="allow-impersonation"
                 onChange={(checked) => updateUser({ allow_impersonation: checked })}

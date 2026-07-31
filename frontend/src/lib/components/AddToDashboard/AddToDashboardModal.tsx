@@ -7,11 +7,11 @@ import { IconHome } from '@hanzo/icons'
 
 import { addToDashboardModalLogic } from 'lib/components/AddToDashboard/addToDashboardModalLogic'
 import { AutoSizer } from 'lib/components/AutoSizer'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input/Input'
+import { Modal } from 'lib/elements/Modal'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { pluralize } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -62,7 +62,7 @@ const DashboardRelationRow = ({
                 </Tooltip>
             )}
             <span className="grow" />
-            <LemonButton
+            <Button
                 type="secondary"
                 status={isAlreadyOnDashboard ? 'danger' : 'default'}
                 loading={dashboardWithActiveAPICall === dashboard.id}
@@ -80,7 +80,7 @@ const DashboardRelationRow = ({
                 }}
             >
                 {isAlreadyOnDashboard ? 'Remove from dashboard' : 'Add to dashboard'}
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -154,7 +154,7 @@ export function AddToDashboardModal({
     }
 
     return (
-        <LemonModal
+        <Modal
             onClose={() => {
                 closeModal()
                 setSearchQuery('')
@@ -164,7 +164,7 @@ export function AddToDashboardModal({
             footer={
                 <>
                     <div className="flex-1">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={addNewDashboard}
                             disabledReason={
@@ -174,16 +174,16 @@ export function AddToDashboardModal({
                             }
                         >
                             Add to a new dashboard
-                        </LemonButton>
+                        </Button>
                     </div>
-                    <LemonButton type="secondary" onClick={closeModal}>
+                    <Button type="secondary" onClick={closeModal}>
                         Close
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="deprecated-space-y-2 w-192 max-w-full">
-                <LemonInput
+                <Input
                     data-attr="dashboard-searchfield"
                     type="search"
                     fullWidth
@@ -214,6 +214,6 @@ export function AddToDashboardModal({
                     />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

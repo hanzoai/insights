@@ -1,7 +1,7 @@
 import { kea, path } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -21,9 +21,9 @@ export const variableDataLogic = kea<variableDataLogicType>([
                 deleteVariable: async (variableId: string) => {
                     try {
                         await api.insightVariables.delete(variableId)
-                        lemonToast.success('Variable deleted successfully')
+                        toast.success('Variable deleted successfully')
                     } catch {
-                        lemonToast.error('Failed to delete variable')
+                        toast.error('Failed to delete variable')
                     }
                     return values.variables.filter((variable) => variable.id !== variableId)
                 },

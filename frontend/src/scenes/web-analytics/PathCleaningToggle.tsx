@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton, LemonSwitch, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Switch, Link, Tooltip } from '@hanzo/elements'
 
-import { IconBranch } from 'lib/lemon-ui/icons/icons'
+import { IconBranch } from 'lib/elements/icons/icons'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
@@ -35,7 +35,7 @@ export const PathCleaningToggle = ({
                             Learn more about path cleaning rules
                         </Link>
                     </div>
-                    <LemonButton
+                    <Button
                         icon={<IconGear />}
                         type="primary"
                         size="small"
@@ -44,15 +44,15 @@ export const PathCleaningToggle = ({
                         className="w-full"
                     >
                         Edit path cleaning settings
-                    </LemonButton>
+                    </Button>
                 </div>
             }
             placement="top"
             interactive={true}
         >
-            <LemonButton icon={<IconBranch />} onClick={() => onChange(!value)} type="secondary" size="small">
-                Path cleaning: <LemonSwitch checked={value} className="ml-1" />
-            </LemonButton>
+            <Button icon={<IconBranch />} onClick={() => onChange(!value)} type="secondary" size="small">
+                Path cleaning: <Switch checked={value} className="ml-1" />
+            </Button>
         </Tooltip>
     )
 }

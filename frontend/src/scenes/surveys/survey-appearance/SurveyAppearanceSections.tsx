@@ -2,9 +2,9 @@ import { useValues } from 'kea'
 import { DeepPartialMap, ValidationErrorType } from 'kea-forms'
 
 import { IconCheck } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Input, Select } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { WEB_SAFE_FONTS } from 'scenes/surveys/constants'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'
 
@@ -83,16 +83,16 @@ function SurveyAppearanceInput({
     const { surveysStylingAvailable } = useValues(surveysLogic)
 
     return (
-        <LemonField.Pure label={label} className="flex-1 gap-1" info={info}>
-            <LemonInput
+        <Field.Pure label={label} className="flex-1 gap-1" info={info}>
+            <Input
                 value={value}
                 onChange={onChange}
                 disabled={!surveysStylingAvailable}
                 className={IGNORE_ERROR_BORDER_CLASS}
                 placeholder={placeholder}
             />
-            {error && <LemonField.Error error={error} />}
-        </LemonField.Pure>
+            {error && <Field.Error error={error} />}
+        </Field.Pure>
     )
 }
 
@@ -134,7 +134,7 @@ export function SurveyContainerAppearance({
                 error={validationErrors?.borderRadius}
                 label="Border radius"
             />
-            <LemonField.Pure
+            <Field.Pure
                 label="Position"
                 info={
                     surveyType === SurveyType.Widget && appearance.widgetType === SurveyWidgetType.Selector
@@ -149,7 +149,7 @@ export function SurveyContainerAppearance({
                         onAppearanceChange={onAppearanceChange}
                         disabled={!surveysStylingAvailable}
                     />
-                    <LemonSelect
+                    <Select
                         value={appearance.position}
                         onChange={(position) => onAppearanceChange({ position })}
                         options={gridPositions.map((position) => ({
@@ -161,7 +161,7 @@ export function SurveyContainerAppearance({
                 </div>
                 {surveyType === SurveyType.Widget && appearance.widgetType === SurveyWidgetType.Selector && (
                     <div className="flex flex-col gap-1 items-start w-60">
-                        <LemonButton
+                        <Button
                             key={SurveyPosition.NextToTrigger}
                             type="tertiary"
                             size="small"
@@ -176,16 +176,16 @@ export function SurveyContainerAppearance({
                             {appearance.position === SurveyPosition.NextToTrigger && (
                                 <IconCheck className="ml-2 size-4" />
                             )}
-                        </LemonButton>
+                        </Button>
                     </div>
                 )}
-            </LemonField.Pure>
-            <LemonField.Pure
+            </Field.Pure>
+            <Field.Pure
                 label="Font family"
                 info="Custom font selection requires at least version 1.223.4 of insights-js"
                 className="gap-1"
             >
-                <LemonSelect
+                <Select
                     value={appearance?.fontFamily}
                     onChange={(fontFamily) => onAppearanceChange({ fontFamily })}
                     options={WEB_SAFE_FONTS.map((font) => {
@@ -197,7 +197,7 @@ export function SurveyContainerAppearance({
                     className="ignore-error-border"
                     disabled={!surveysStylingAvailable}
                 />
-            </LemonField.Pure>
+            </Field.Pure>
             <SurveyAppearanceInput
                 value={appearance.zIndex}
                 onChange={(zIndex) => onAppearanceChange({ zIndex })}

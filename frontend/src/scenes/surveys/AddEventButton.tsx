@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Popover } from 'lib/elements/Popover/Popover'
 
 export interface AddEventButtonProps {
     onEventSelect: (eventName: string) => void
@@ -44,7 +44,7 @@ export function AddEventButton({
             onClickOutside={() => setPopoverOpen(false)}
             placement="bottom-start"
         >
-            <LemonButton
+            <Button
                 type="secondary"
                 icon={<IconPlus />}
                 onClick={() => setPopoverOpen(!popoverOpen)}
@@ -52,7 +52,7 @@ export function AddEventButton({
                 className="w-fit"
             >
                 {addButtonText ?? 'Add event'}
-            </LemonButton>
+            </Button>
         </Popover>
     )
 }

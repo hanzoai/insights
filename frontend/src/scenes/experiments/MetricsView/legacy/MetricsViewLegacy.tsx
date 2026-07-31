@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonDivider, Tooltip } from '@hanzo/lemon-ui'
+import { Divider, Tooltip } from '@hanzo/elements'
 
-import { IconAreaChart } from 'lib/lemon-ui/icons'
+import { IconAreaChart } from 'lib/elements/icons'
 
 import { experimentLogic } from '../../experimentLogic'
 import { credibleIntervalForVariant } from '../../legacyExperimentCalculations'
@@ -86,7 +86,7 @@ export function MetricsViewLegacy({ isSecondary }: { isSecondary?: boolean }): J
                         )}
                         {hasSomeResults && !isSecondary && (
                             <>
-                                <LemonDivider vertical className="mx-2" />
+                                <Divider vertical className="mx-2" />
                                 <Tooltip
                                     title={
                                         <div className="p-2">

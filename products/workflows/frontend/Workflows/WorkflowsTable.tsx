@@ -1,19 +1,19 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonCollapse, LemonDivider, LemonInput, LemonSelect, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Collapse, Divider, Input, Select, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { MailMascot } from 'lib/components/mascots'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { updatedAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { updatedAtColumn } from 'lib/elements/Table/columnUtils'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -33,9 +33,9 @@ function WorkflowTypeTag({ workflow }: { workflow: InsightsFlow }): JSX.Element 
     }, [workflow.actions])
 
     if (hasMessagingAction) {
-        return <LemonTag type="completion">Messaging</LemonTag>
+        return <Tag type="completion">Messaging</Tag>
     }
-    return <LemonTag type="default">Automation</LemonTag>
+    return <Tag type="default">Automation</Tag>
 }
 
 function WorkflowActionsSummary({ workflow }: { workflow: InsightsFlow }): JSX.Element {
@@ -112,7 +112,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
         loadWorkflows()
     })
 
-    const columns: LemonTableColumns<InsightsFlow> = [
+    const columns: TableColumns<InsightsFlow> = [
         {
             title: 'Name',
             key: 'name',
@@ -123,7 +123,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                         <span className="font-semibold text-sm text-muted">{item.name}</span>
                     </Tooltip>
                 ) : (
-                    <LemonTableLink
+                    <TableLink
                         to={urls.workflow(item.id, 'workflow')}
                         title={item.name}
                         description={item.description}
@@ -146,7 +146,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
             render: (_, item) => {
                 return (
                     <Link to={urls.workflow(item.id, 'workflow') + '?node=trigger_node'}>
-                        <LemonTag type="default">{capitalizeFirstLetter(item.trigger?.type ?? 'unknown')}</LemonTag>
+                        <Tag type="default">{capitalizeFirstLetter(item.trigger?.type ?? 'unknown')}</Tag>
                     </Link>
                 )
             },
@@ -174,7 +174,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
             },
         },
         {
-            ...(updatedAtColumn() as LemonTableColumn<InsightsFlow, any>),
+            ...(updatedAtColumn() as TableColumn<InsightsFlow, any>),
             width: 0,
         },
         {
@@ -206,9 +206,9 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
             sorter: (a, b) => a.status.localeCompare(b.status),
             render: (_, item) => {
                 return (
-                    <LemonTag type={item.status === 'active' ? 'success' : 'default'}>
+                    <Tag type={item.status === 'active' ? 'success' : 'default'}>
                         {capitalizeFirstLetter(item.status)}
-                    </LemonTag>
+                    </Tag>
                 )
             },
         },
@@ -220,7 +220,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                         overlay={
                             <>
                                 {workflow.status !== 'archived' && (
-                                    <LemonButton
+                                    <Button
                                         data-attr="workflow-edit"
                                         fullWidth
                                         status={workflow.status === 'draft' ? 'default' : 'danger'}
@@ -232,17 +232,17 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                                         }
                                     >
                                         {workflow.status === 'draft' ? 'Enable' : 'Disable'}
-                                    </LemonButton>
+                                    </Button>
                                 )}
-                                <LemonButton
+                                <Button
                                     data-attr="workflow-duplicate"
                                     fullWidth
                                     onClick={() => duplicateWorkflow(workflow)}
                                 >
                                     Duplicate
-                                </LemonButton>
-                                <LemonDivider />
-                                <LemonButton
+                                </Button>
+                                <Divider />
+                                <Button
                                     data-attr="workflow-archive-restore"
                                     fullWidth
                                     status={workflow.status === 'archived' ? 'default' : 'danger'}
@@ -253,16 +253,16 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                                     }}
                                 >
                                     {workflow.status === 'archived' ? 'Restore' : 'Archive'}
-                                </LemonButton>
+                                </Button>
                                 {workflow.status === 'archived' && (
-                                    <LemonButton
+                                    <Button
                                         data-attr="workflow-delete"
                                         fullWidth
                                         status="danger"
                                         onClick={() => deleteWorkflow(workflow)}
                                     >
                                         Delete
-                                    </LemonButton>
+                                    </Button>
                                 )}
                             </>
                         }
@@ -292,7 +292,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
             )}
             {!showProductIntroduction && (
                 <div className="flex justify-between gap-2 flex-wrap mb-4">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search for workflows"
                         onChange={setSearchTerm}
@@ -301,7 +301,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                     <div className="flex items-center gap-2 flex-wrap">
                         <div className="flex items-center gap-2">
                             <span>Status:</span>
-                            <LemonSelect
+                            <Select
                                 value={filters.status || 'all'}
                                 onChange={(value) => setStatus(value === 'all' ? null : value)}
                                 options={[
@@ -323,14 +323,14 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                     </div>
                 </div>
             )}
-            <LemonTable
+            <Table
                 dataSource={filteredWorkflows}
                 loading={workflowsLoading}
                 columns={columns}
                 defaultSorting={{ columnKey: 'status', order: 1 }}
             />
             {archivedWorkflows.length > 0 && (
-                <LemonCollapse
+                <Collapse
                     className="mt-4"
                     panels={[
                         {
@@ -338,7 +338,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                             key: 'archived_workflows',
                             className: 'p-1',
                             content: (
-                                <LemonTable
+                                <Table
                                     dataSource={archivedWorkflows}
                                     loading={workflowsLoading}
                                     columns={columns}

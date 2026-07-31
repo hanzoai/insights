@@ -4,10 +4,10 @@ import { IconEllipsis, IconSearch } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonMenu, LemonMenuSection } from 'lib/lemon-ui/LemonMenu'
-import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
-import { Link } from 'lib/lemon-ui/Link'
+import { Button } from 'lib/elements/Button'
+import { Menu, MenuSection } from 'lib/elements/Menu'
+import { Switch } from 'lib/elements/Switch'
+import { Link } from 'lib/elements/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { urls } from 'scenes/urls'
@@ -42,7 +42,7 @@ export const WebAnalyticsMenu = (): JSX.Element => {
     const availableTiles = productTab === ProductTab.ANALYTICS ? ANALYTICS_TILES : []
     const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
 
-    const sections: LemonMenuSection[] = [
+    const sections: MenuSection[] = [
         {
             items: [
                 {
@@ -56,7 +56,7 @@ export const WebAnalyticsMenu = (): JSX.Element => {
             items: [
                 {
                     label: () => (
-                        <LemonSwitch
+                        <Switch
                             checked={shouldFilterTestAccounts}
                             onChange={() => {
                                 setShouldFilterTestAccounts(!shouldFilterTestAccounts)
@@ -75,7 +75,7 @@ export const WebAnalyticsMenu = (): JSX.Element => {
             title: 'Visible tiles',
             items: availableTiles.map((tileId) => ({
                 label: () => (
-                    <LemonSwitch
+                    <Switch
                         checked={!hiddenTiles.includes(tileId)}
                         onChange={() => {
                             setTileVisibility(tileId, hiddenTiles.includes(tileId))
@@ -115,7 +115,7 @@ export const WebAnalyticsMenu = (): JSX.Element => {
                             setShouldFilterTestAccounts(!shouldFilterTestAccounts)
                         }}
                     >
-                        <LemonSwitch checked={shouldFilterTestAccounts} size="xsmall" />
+                        <Switch checked={shouldFilterTestAccounts} size="xsmall" />
                         Filter out internal and test users
                     </ButtonPrimitive>
                 </ScenePanelActionsSection>
@@ -130,7 +130,7 @@ export const WebAnalyticsMenu = (): JSX.Element => {
                                     setTileVisibility(tileId, hiddenTiles.includes(tileId))
                                 }}
                             >
-                                <LemonSwitch checked={!hiddenTiles.includes(tileId)} size="xsmall" />
+                                <Switch checked={!hiddenTiles.includes(tileId)} size="xsmall" />
                                 {TILE_LABELS[tileId]}
                             </ButtonPrimitive>
                         ))}
@@ -142,9 +142,9 @@ export const WebAnalyticsMenu = (): JSX.Element => {
 
     return (
         <>
-            <LemonMenu items={sections} closeOnClickInside={false}>
-                <LemonButton icon={<IconEllipsis />} size="small" />
-            </LemonMenu>
+            <Menu items={sections} closeOnClickInside={false}>
+                <Button icon={<IconEllipsis />} size="small" />
+            </Menu>
         </>
     )
 }

@@ -1,12 +1,12 @@
 import { useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonInput, LemonSelect, LemonSelectOption, LemonSelectSection, Link } from '@hanzo/lemon-ui'
+import { Input, Select, SelectOption, SelectSection, Link } from '@hanzo/elements'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils'
 import { TIME_INTERVAL_BOUNDS } from 'scenes/funnels/funnelUtils'
 import { GroupIntroductionFooter } from 'scenes/groups/GroupsIntroduction'
@@ -47,7 +47,7 @@ export function FunnelAggregationSelect({
 
     const UNIQUE_USERS = 'person_id'
     const baseValues = [UNIQUE_USERS]
-    const optionSections: LemonSelectSection<string>[] = [
+    const optionSections: SelectSection<string>[] = [
         {
             title: 'Event Aggregation',
             options: [
@@ -105,7 +105,7 @@ export function FunnelAggregationSelect({
     return (
         <div className="flex items-center w-full gap-2">
             <span>Aggregating by</span>
-            <LemonSelect
+            <Select
                 className="flex-1"
                 value={value}
                 onChange={onChange}
@@ -128,7 +128,7 @@ export function FunnelConversionWindowFilter({
     onFunnelWindowIntervalChange: (funnelWindowInterval: number | undefined) => void
     onFunnelWindowIntervalUnitChange: (funnelWindowIntervalUnit: FunnelConversionWindowTimeUnit) => void
 }): JSX.Element {
-    const options: LemonSelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
+    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
         (unit) => ({
             label: capitalizeFirstLetter(pluralize(funnelWindowInterval ?? 7, unit, `${unit}s`, false)),
             value: unit as FunnelConversionWindowTimeUnit,
@@ -152,7 +152,7 @@ export function FunnelConversionWindowFilter({
                 </Tooltip>
             </span>
             <div className="flex items-center gap-2">
-                <LemonInput
+                <Input
                     type="number"
                     className="max-w-20"
                     fullWidth={false}
@@ -161,7 +161,7 @@ export function FunnelConversionWindowFilter({
                     value={funnelWindowInterval}
                     onChange={onFunnelWindowIntervalChange}
                 />
-                <LemonSelect
+                <Select
                     dropdownMatchSelectWidth={false}
                     value={funnelWindowIntervalUnit}
                     onChange={onFunnelWindowIntervalUnitChange}
@@ -222,7 +222,7 @@ export function FunnelAttributionSelect({
                     <IconInfo className="text-xl text-secondary shrink-0 ml-1" />
                 </Tooltip>
             </div>
-            <LemonSelect
+            <Select
                 value={value}
                 placeholder="Attribution"
                 options={[

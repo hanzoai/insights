@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
 import { IconSort, IconX } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { webAnalyticsLogic } from 'scenes/web-analytics/webAnalyticsLogic'
 
@@ -40,7 +40,7 @@ export const TableSortingIndicator = (): JSX.Element | null => {
     }
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             size="small"
             icon={<IconSort className={clsx({ 'rotate-180': tablesOrderBy[1] === 'ASC' })} />}
@@ -48,6 +48,6 @@ export const TableSortingIndicator = (): JSX.Element | null => {
             onClick={clearTablesOrderBy}
         >
             <span>Sort by: {SORT_BY_TO_LABEL[tablesOrderBy[0]]}</span>
-        </LemonButton>
+        </Button>
     )
 }

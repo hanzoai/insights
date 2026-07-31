@@ -1,5 +1,5 @@
 import { IconAIText } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 
@@ -18,7 +18,7 @@ export function EmptyState({ onGenerate, dataProcessingAccepted, loading }: Empt
                 <p className="text-muted text-sm mt-1 mb-0">Get log analysis & prioritized actions.</p>
             </div>
             <AIConsentPopoverWrapper showArrow onApprove={onGenerate} hidden={loading}>
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={dataProcessingAccepted ? onGenerate : undefined}
                     loading={loading}
@@ -27,7 +27,7 @@ export function EmptyState({ onGenerate, dataProcessingAccepted, loading }: Empt
                     }
                 >
                     Analyze this log
-                </LemonButton>
+                </Button>
             </AIConsentPopoverWrapper>
         </div>
     )

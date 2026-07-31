@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconArrowRight, IconCheck } from '@hanzo/icons'
-import { LemonButton, LemonInput, Spinner } from '@hanzo/lemon-ui'
+import { Button, Input, Spinner } from '@hanzo/elements'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { NotFound } from 'lib/components/NotFound'
 import { dayjs } from 'lib/dayjs'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Banner } from 'lib/elements/Banner'
+import { Field } from 'lib/elements/Field'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { billingProductLogic } from 'scenes/billing/billingProductLogic'
 import { paymentEntryLogic } from 'scenes/billing/paymentEntryLogic'
@@ -93,16 +93,16 @@ export function CouponRedemption({
     if (!isAdminOrOwner) {
         return (
             <div className="mx-auto w-full max-w-200 mt-6 px-4">
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     <h2 className="mb-2">Admin or owner permission required</h2>
                     <p>
                         You need to be an organization admin or owner to claim coupons. Please contact your organization
                         admin for assistance.
                     </p>
-                    <LemonButton type="primary" to={urls.projectHomepage()} className="mt-2">
+                    <Button type="primary" to={urls.projectHomepage()} className="mt-2">
                         Return to Insights
-                    </LemonButton>
-                </LemonBanner>
+                    </Button>
+                </Banner>
             </div>
         )
     }
@@ -216,20 +216,20 @@ export function CouponRedemption({
                                     renderSuccessActions()
                                 ) : (
                                     <div className="flex gap-2">
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             to={urls.organizationBilling()}
                                             disableClientSideRouting
                                         >
                                             View in billing
-                                        </LemonButton>
-                                        <LemonButton
+                                        </Button>
+                                        <Button
                                             type="secondary"
                                             to={urls.projectHomepage()}
                                             disableClientSideRouting
                                         >
                                             Return to Insights
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 )}
                             </div>
@@ -247,13 +247,13 @@ export function CouponRedemption({
                                 {renderSuccessActions ? (
                                     renderSuccessActions()
                                 ) : (
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         to={urls.organizationBilling()}
                                         disableClientSideRouting
                                     >
                                         View in billing
-                                    </LemonButton>
+                                    </Button>
                                 )}
                             </div>
                         ) : (
@@ -264,34 +264,34 @@ export function CouponRedemption({
                                 className="space-y-3"
                                 props={{ campaign }}
                             >
-                                <LemonField
+                                <Field
                                     name="organization_name"
                                     label="Insights organization"
                                     info="To claim for a different organization, switch to that organization first"
                                 >
-                                    <LemonInput disabled />
-                                </LemonField>
+                                    <Input disabled />
+                                </Field>
 
-                                <LemonField name="code" label="Coupon code">
-                                    <LemonInput placeholder="XXX-XXXXXXXXXXX" />
-                                </LemonField>
+                                <Field name="code" label="Coupon code">
+                                    <Input placeholder="XXX-XXXXXXXXXXX" />
+                                </Field>
 
                                 <div className="flex gap-2 mt-4">
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         htmlType="submit"
                                         loading={isCouponSubmitting}
                                         disabledReason={isCouponSubmitting ? 'Redeeming coupon...' : undefined}
                                     >
                                         Redeem coupon
-                                    </LemonButton>
+                                    </Button>
                                     {renderFooter && renderFooter()}
                                 </div>
 
                                 {/* Form-level error */}
-                                <LemonField name="_form">
+                                <Field name="_form">
                                     <span />
-                                </LemonField>
+                                </Field>
                             </Form>
                         )}
                     </div>

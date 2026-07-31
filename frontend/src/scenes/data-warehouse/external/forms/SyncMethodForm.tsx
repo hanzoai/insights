@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonSelect, LemonTag, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Select, Tag, toast } from '@hanzo/elements'
 
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
+import { Radio } from 'lib/elements/Radio'
 
 import { ExternalDataSourceSyncSchema } from '~/types'
 
@@ -114,7 +114,7 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
 
     return (
         <>
-            <LemonRadio
+            <Radio
                 radioPosition="top"
                 value={radioValue}
                 options={[
@@ -127,7 +127,7 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
                                 <div className="items-center flex leading-[normal] overflow-hidden mb-1">
                                     <h4 className="mb-0 mr-2 text-base font-semibold">Incremental replication</h4>
                                     {!incrementalSyncSupported.disabled && (
-                                        <LemonTag type="success">Recommended</LemonTag>
+                                        <Tag type="success">Recommended</Tag>
                                     )}
                                 </div>
                                 <p className="mb-2">
@@ -139,7 +139,7 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
                                     such as a <code>updated_at</code> timestamp.
                                 </p>
                                 {!incrementalSyncSupported.disabled && (
-                                    <LemonSelect
+                                    <Select
                                         value={incrementalFieldValue}
                                         onChange={(newValue) => setIncrementalFieldValue(newValue)}
                                         options={
@@ -148,9 +148,9 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
                                                 label: (
                                                     <>
                                                         <span className="leading-5">{n.label}</span>
-                                                        <LemonTag className="ml-2" type="success">
+                                                        <Tag className="ml-2" type="success">
                                                             {n.type}
-                                                        </LemonTag>
+                                                        </Tag>
                                                     </>
                                                 ),
                                             })) ?? []
@@ -182,7 +182,7 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
                                     <code>created_at</code> timestamp.
                                 </p>
                                 {!appendSyncSupported.disabled && (
-                                    <LemonSelect
+                                    <Select
                                         value={appendFieldValue}
                                         onChange={(newValue) => setAppendFieldValue(newValue)}
                                         options={
@@ -191,9 +191,9 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
                                                 label: (
                                                     <>
                                                         <span className="leading-5">{n.label}</span>
-                                                        <LemonTag className="ml-2" type="success">
+                                                        <Tag className="ml-2" type="success">
                                                             {n.type}
-                                                        </LemonTag>
+                                                        </Tag>
                                                     </>
                                                 ),
                                             })) ?? []
@@ -221,10 +221,10 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
                 onChange={(newValue) => setRadioValue(newValue)}
             />
             <div className="flex flex-row justify-end w-full">
-                <LemonButton className="mr-3" type="secondary" onClick={onClose}>
+                <Button className="mr-3" type="secondary" onClick={onClose}>
                     Close
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     type="primary"
                     loading={saveButtonIsLoading}
                     disabledReason={getSaveDisabledReason(radioValue, incrementalFieldValue, appendFieldValue)}
@@ -234,7 +234,7 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
                                 (n) => n.field === incrementalFieldValue
                             )
                             if (!fieldSelected) {
-                                lemonToast.error('Selected field for incremental replication not found')
+                                toast.error('Selected field for incremental replication not found')
                                 return
                             }
 
@@ -242,7 +242,7 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
                         } else if (radioValue === 'append') {
                             const fieldSelected = schema.incremental_fields.find((n) => n.field === appendFieldValue)
                             if (!fieldSelected) {
-                                lemonToast.error('Selected field for append replication not found')
+                                toast.error('Selected field for append replication not found')
                                 return
                             }
 
@@ -253,7 +253,7 @@ export const SyncMethodForm = ({ schema, onClose, onSave, saveButtonIsLoading }:
                     }}
                 >
                     Save
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

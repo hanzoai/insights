@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 
@@ -23,7 +23,7 @@ export const PriorityFilter = (): JSX.Element => {
     const options = ['all', 'low', 'normal', 'high', 'urgent']
 
     return (
-        <LemonSelect
+        <Select
             placeholder="Priority"
             options={options.map((key) => ({ value: key, label: label(key) }))}
             value={priority}

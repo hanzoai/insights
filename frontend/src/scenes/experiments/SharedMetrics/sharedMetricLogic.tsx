@@ -2,7 +2,7 @@ import { actions, connect, kea, key, listeners, path, props, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -100,7 +100,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
         createSharedMetric: async () => {
             const response = await api.create(`api/projects/@current/experiment_saved_metrics/`, values.sharedMetric)
             if (response.id) {
-                lemonToast.success('Shared metric created successfully')
+                toast.success('Shared metric created successfully')
                 actions.reportExperimentSharedMetricCreated(response as SharedMetric)
                 actions.loadSharedMetrics()
                 router.actions.push('/experiments?tab=shared-metrics')
@@ -112,7 +112,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
                 values.sharedMetric
             )
             if (response.id) {
-                lemonToast.success('Shared metric updated successfully')
+                toast.success('Shared metric updated successfully')
                 actions.loadSharedMetrics()
                 if (redirect) {
                     router.actions.push('/experiments?tab=shared-metrics')
@@ -122,11 +122,11 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
         deleteSharedMetric: async () => {
             try {
                 await api.delete(`api/projects/@current/experiment_saved_metrics/${values.sharedMetricId}`)
-                lemonToast.success('Shared metric deleted successfully')
+                toast.success('Shared metric deleted successfully')
                 actions.loadSharedMetrics()
                 router.actions.push('/experiments?tab=shared-metrics')
             } catch (error) {
-                lemonToast.error('Failed to delete shared metric')
+                toast.error('Failed to delete shared metric')
                 console.error(error)
             }
         },

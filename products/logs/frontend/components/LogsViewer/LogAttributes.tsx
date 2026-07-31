@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 
 import { IconFilter, IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
-import { LemonButton, LemonTable } from '@hanzo/lemon-ui'
+import { Button, Table } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import ViewRecordingButton, {
     RecordingPlayerType,
     ViewRecordingButtonVariant,
 } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { IconTableChart } from 'lib/lemon-ui/icons'
+import { IconTableChart } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 
@@ -47,7 +47,7 @@ export function LogAttributes({ attributes, type, logUuid, title }: LogAttribute
             <div className="px-3 py-2 bg-bg-light border-b border-border">
                 <span className="text-xs font-semibold text-muted uppercase">{title}</span>
             </div>
-            <LemonTable
+            <Table
                 embedded
                 showHeader={false}
                 size="small"
@@ -62,7 +62,7 @@ export function LogAttributes({ attributes, type, logUuid, title }: LogAttribute
                         width: 0,
                         render: (_, record) => (
                             <div className="flex gap-x-0">
-                                <LemonButton
+                                <Button
                                     tooltip="Add as filter"
                                     size="xsmall"
                                     onClick={(e) => {
@@ -71,8 +71,8 @@ export function LogAttributes({ attributes, type, logUuid, title }: LogAttribute
                                     }}
                                 >
                                     <IconPlusSquare />
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     tooltip="Exclude as filter"
                                     size="xsmall"
                                     onClick={(e) => {
@@ -81,8 +81,8 @@ export function LogAttributes({ attributes, type, logUuid, title }: LogAttribute
                                     }}
                                 >
                                     <IconMinusSquare />
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     tooltip="Show breakdown"
                                     size="xsmall"
                                     active={expandedBreakdownsForThisLog.includes(record.key)}
@@ -92,8 +92,8 @@ export function LogAttributes({ attributes, type, logUuid, title }: LogAttribute
                                     }}
                                 >
                                     <IconFilter />
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     tooltip={isAttributeColumn(record.key) ? 'Remove from columns' : 'Add as column'}
                                     size="xsmall"
                                     active={isAttributeColumn(record.key)}
@@ -104,7 +104,7 @@ export function LogAttributes({ attributes, type, logUuid, title }: LogAttribute
                                     className={isAttributeColumn(record.key) ? '' : 'opacity-30'}
                                 >
                                     <IconTableChart />
-                                </LemonButton>
+                                </Button>
                             </div>
                         ),
                     },

@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 import insights from '@hanzo/insights'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonSelect, Spinner } from '@hanzo/lemon-ui'
+import { Button, Menu, Select, Spinner } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { capitalizeFirstLetter } from 'lib/utils'
@@ -55,7 +55,7 @@ export const IssueQueryOptions = (): JSX.Element => {
                 <div className="flex items-center gap-1">
                     <span>Sort by:</span>
 
-                    <LemonMenu
+                    <Menu
                         items={[
                             {
                                 label: ORDER_BY_OPTIONS['last_seen'],
@@ -108,13 +108,13 @@ export const IssueQueryOptions = (): JSX.Element => {
                             },
                         ]}
                     >
-                        <LemonButton size="small" type="secondary">
+                        <Button size="small" type="secondary">
                             {sortByLabel(orderBy, revenueEntity, groupOptions)}
-                        </LemonButton>
-                    </LemonMenu>
+                        </Button>
+                    </Menu>
 
                     {orderBy === 'revenue' ? (
-                        <LemonSelect
+                        <Select
                             onChange={setRevenuePeriod}
                             value={revenuePeriod}
                             options={[
@@ -130,7 +130,7 @@ export const IssueQueryOptions = (): JSX.Element => {
                             size="small"
                         />
                     ) : (
-                        <LemonSelect
+                        <Select
                             onChange={setOrderDirection}
                             value={orderDirection}
                             options={[
@@ -157,7 +157,7 @@ const Reload = (): JSX.Element => {
     const { reloadData, cancelQuery } = useActions(issuesDataNodeLogic)
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             size="small"
             onClick={() => {
@@ -170,7 +170,7 @@ const Reload = (): JSX.Element => {
             icon={responseLoading ? <Spinner textColored /> : <IconRefresh />}
         >
             {responseLoading ? 'Cancel' : 'Reload'}
-        </LemonButton>
+        </Button>
     )
 }
 

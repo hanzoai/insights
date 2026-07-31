@@ -9022,7 +9022,7 @@
                     "type": "array"
                 },
                 "embedded": {
-                    "description": "Uses the embedded version of LemonTable",
+                    "description": "Uses the embedded version of Table",
                     "type": "boolean"
                 },
                 "expandable": {

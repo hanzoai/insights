@@ -6,20 +6,20 @@ import { useRef } from 'react'
 
 import { IconInfo, IconX } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonDivider,
-    LemonLabel,
-    LemonSegmentedButton,
-    LemonSwitch,
-    LemonTable,
+    Banner,
+    Button,
+    Divider,
+    Label,
+    SegmentedButton,
+    Switch,
+    Table,
     Spinner,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { More } from 'lib/elements/Button/More'
+import { Field } from 'lib/elements/Field'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 
 import { insightsFunctionConfigurationLogic } from './insightsFunctionConfigurationLogic'
@@ -203,7 +203,7 @@ export function InsightsFunctionTest(): JSX.Element {
                     </div>
 
                     {inactive ? (
-                        <LemonButton
+                        <Button
                             data-attr="expand-fn-testing"
                             type="secondary"
                             onClick={() => {
@@ -215,18 +215,18 @@ export function InsightsFunctionTest(): JSX.Element {
                             }}
                         >
                             Start testing
-                        </LemonButton>
+                        </Button>
                     ) : (
                         <>
                             {testResult ? (
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     onClick={() => setTestResult(null)}
                                     loading={isTestInvocationSubmitting}
                                     data-attr="clear-fn-test-result"
                                 >
                                     Clear test result
-                                </LemonButton>
+                                </Button>
                             ) : (
                                 <>
                                     <More
@@ -235,9 +235,9 @@ export function InsightsFunctionTest(): JSX.Element {
                                             <>
                                                 {canMockFetchRequests && (
                                                     <>
-                                                        <LemonField name="mock_async_functions">
+                                                        <Field name="mock_async_functions">
                                                             {({ value, onChange }) => (
-                                                                <LemonSwitch
+                                                                <Switch
                                                                     onChange={(v) => onChange(!v)}
                                                                     checked={!value}
                                                                     data-attr="toggle-fn-test-mocking"
@@ -261,13 +261,13 @@ export function InsightsFunctionTest(): JSX.Element {
                                                                     }
                                                                 />
                                                             )}
-                                                        </LemonField>
-                                                        <LemonDivider />
+                                                        </Field>
+                                                        <Divider />
                                                     </>
                                                 )}
                                                 {savedGlobals.map(({ name, globals }, index) => (
                                                     <div className="flex justify-between w-full" key={index}>
-                                                        <LemonButton
+                                                        <Button
                                                             data-attr="open-fn-test-data"
                                                             key={index}
                                                             onClick={() => setSampleGlobals(globals)}
@@ -275,8 +275,8 @@ export function InsightsFunctionTest(): JSX.Element {
                                                             className="flex-1"
                                                         >
                                                             {name}
-                                                        </LemonButton>
-                                                        <LemonButton
+                                                        </Button>
+                                                        <Button
                                                             data-attr="delete-fn-test-data"
                                                             size="small"
                                                             icon={<IconX />}
@@ -286,7 +286,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                                     </div>
                                                 ))}
                                                 {testInvocation.globals && (
-                                                    <LemonButton
+                                                    <Button
                                                         fullWidth
                                                         data-attr="save-fn-test-data"
                                                         onClick={() => {
@@ -305,13 +305,13 @@ export function InsightsFunctionTest(): JSX.Element {
                                                         })()}
                                                     >
                                                         Save test data
-                                                    </LemonButton>
+                                                    </Button>
                                                 )}
                                             </>
                                         }
                                     />
                                     {canLoadSampleGlobals ? (
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             onClick={() => {
                                                 if (sampleGlobalsLoadingAndNotCancelled) {
@@ -324,21 +324,21 @@ export function InsightsFunctionTest(): JSX.Element {
                                             icon={sampleGlobalsLoadingAndNotCancelled ? <Spinner /> : undefined}
                                         >
                                             {sampleGlobalsLoadingAndNotCancelled ? 'Cancel loading' : 'Load new event'}
-                                        </LemonButton>
+                                        </Button>
                                     ) : null}
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         data-attr="test-insights-function"
                                         onClick={submitTestInvocation}
                                         loading={isTestInvocationSubmitting}
                                     >
                                         Test function
-                                    </LemonButton>
+                                    </Button>
                                 </>
                             )}
 
                             {expanded && (
-                                <LemonButton
+                                <Button
                                     data-attr="hide-fn-testing"
                                     icon={<IconX />}
                                     onClick={() => toggleExpanded()}
@@ -353,7 +353,7 @@ export function InsightsFunctionTest(): JSX.Element {
                     <>
                         {testResult ? (
                             <div className="deprecated-space-y-2" data-attr="test-results">
-                                <LemonBanner
+                                <Banner
                                     type={
                                         testResult.status === 'success'
                                             ? 'success'
@@ -369,15 +369,15 @@ export function InsightsFunctionTest(): JSX.Element {
                                                 type.charAt(0).toUpperCase() + type.slice(1)
                                             } was skipped because the event did not match the filter criteria`
                                           : 'Error'}
-                                </LemonBanner>
+                                </Banner>
 
                                 {type === 'transformation' && testResult.status !== 'error' ? (
                                     <>
                                         <div className="flex gap-2 justify-between items-center">
-                                            <LemonLabel>Transformation result</LemonLabel>
+                                            <Label>Transformation result</Label>
 
                                             {sortedTestsResult?.hasDiff && (
-                                                <LemonSegmentedButton
+                                                <SegmentedButton
                                                     size="xsmall"
                                                     options={[
                                                         { value: 'raw', label: 'Output' },
@@ -392,11 +392,11 @@ export function InsightsFunctionTest(): JSX.Element {
                                         {testResult.result ? (
                                             <>
                                                 {!sortedTestsResult?.hasDiff && (
-                                                    <LemonBanner type="info">
+                                                    <Banner type="info">
                                                         {testResult.status === 'skipped'
                                                             ? 'The event was not modified as it did not match the filter criteria.'
                                                             : 'The event was unmodified by the transformation.'}
-                                                    </LemonBanner>
+                                                    </Banner>
                                                 )}
                                                 <CodeEditorResizeable
                                                     language="json"
@@ -431,17 +431,17 @@ export function InsightsFunctionTest(): JSX.Element {
                                                 />
                                             </>
                                         ) : (
-                                            <LemonBanner type="warning">
+                                            <Banner type="warning">
                                                 The event was dropped by the transformation. If this is expected then
                                                 great news! If not, you should double check the configuration.
-                                            </LemonBanner>
+                                            </Banner>
                                         )}
                                     </>
                                 ) : null}
 
-                                <LemonLabel>Test invocation logs</LemonLabel>
+                                <Label>Test invocation logs</Label>
 
-                                <LemonTable
+                                <Table
                                     dataSource={testResult.logs ?? []}
                                     columns={[
                                         {
@@ -471,7 +471,7 @@ export function InsightsFunctionTest(): JSX.Element {
                             </div>
                         ) : (
                             <div className="deprecated-space-y-2">
-                                <LemonField name="globals">
+                                <Field name="globals">
                                     {({ value, onChange }) => (
                                         <>
                                             <div className="deprecated-space-y-2">
@@ -487,14 +487,14 @@ export function InsightsFunctionTest(): JSX.Element {
                                             />
                                         </>
                                     )}
-                                </LemonField>
+                                </Field>
                             </div>
                         )}
                     </>
                 ) : null}
             </div>
 
-            {jsonError && <LemonBanner type="error">JSON Error: {jsonError}</LemonBanner>}
+            {jsonError && <Banner type="error">JSON Error: {jsonError}</Banner>}
         </Form>
     )
 }

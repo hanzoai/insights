@@ -1,5 +1,5 @@
 import { IconEllipsis } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonMenu, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Menu, toast } from '@hanzo/elements'
 
 import { getChangeRequestButtonVisibility } from 'scenes/approvals/changeRequestsLogic'
 import { urls } from 'scenes/urls'
@@ -24,7 +24,7 @@ export function ChangeRequestActions({
     const { showApproveButton, showRejectButton, showCancelButton } = getChangeRequestButtonVisibility(changeRequest)
 
     const handleApprove = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Approve this change request?',
             content: (
                 <div className="text-sm text-secondary">
@@ -46,14 +46,14 @@ export function ChangeRequestActions({
     }
 
     const handleReject = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Reject this change request?',
             content: (
                 <div>
                     <div className="text-sm text-secondary mb-2">
                         This will reject the change request and prevent it from being applied.
                     </div>
-                    <LemonInput id="reject-reason" placeholder="Reason for rejection (required)" />
+                    <Input id="reject-reason" placeholder="Reason for rejection (required)" />
                 </div>
             ),
             primaryButton: {
@@ -65,7 +65,7 @@ export function ChangeRequestActions({
                     if (reason) {
                         onReject(changeRequest.id, reason)
                     } else {
-                        lemonToast.error('Please provide a reason for rejection')
+                        toast.error('Please provide a reason for rejection')
                     }
                 },
                 size: 'small',
@@ -79,14 +79,14 @@ export function ChangeRequestActions({
     }
 
     const handleCancel = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Cancel this change request?',
             content: (
                 <div>
                     <div className="text-sm text-secondary mb-2">
                         This will cancel your change request and it will not be applied.
                     </div>
-                    <LemonInput id="cancel-reason" placeholder="Reason for canceling (optional)" />
+                    <Input id="cancel-reason" placeholder="Reason for canceling (optional)" />
                 </div>
             ),
             primaryButton: {
@@ -118,24 +118,24 @@ export function ChangeRequestActions({
     return (
         <div className="flex items-center gap-2">
             {showApproveButton && (
-                <LemonButton type="primary" size="small" onClick={handleApprove}>
+                <Button type="primary" size="small" onClick={handleApprove}>
                     Approve
-                </LemonButton>
+                </Button>
             )}
             {showRejectButton && (
-                <LemonButton type="secondary" size="small" onClick={handleReject}>
+                <Button type="secondary" size="small" onClick={handleReject}>
                     Reject
-                </LemonButton>
+                </Button>
             )}
             {showCancelButton && (
-                <LemonButton type="secondary" size="small" onClick={handleCancel}>
+                <Button type="secondary" size="small" onClick={handleCancel}>
                     Cancel
-                </LemonButton>
+                </Button>
             )}
             {menuItems.length > 0 && (
-                <LemonMenu items={menuItems}>
-                    <LemonButton type="secondary" size="small" icon={<IconEllipsis />} />
-                </LemonMenu>
+                <Menu items={menuItems}>
+                    <Button type="secondary" size="small" icon={<IconEllipsis />} />
+                </Menu>
             )}
         </div>
     )

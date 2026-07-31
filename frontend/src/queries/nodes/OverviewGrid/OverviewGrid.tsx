@@ -2,12 +2,12 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 
 import { IconTrending, IconWarning } from '@hanzo/icons'
-import { LemonBanner, LemonSkeleton, Link } from '@hanzo/lemon-ui'
+import { Banner, Skeleton, Link } from '@hanzo/elements'
 
 import { getColorVar } from 'lib/colors'
 import { PreAggregatedBadge } from 'lib/components/PreAggregatedBadge'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 import { formatPercentage, humanFriendlyDuration, humanFriendlyLargeNumber, isNotNil, range } from 'lib/utils'
 import { DEFAULT_CURRENCY, getCurrencySymbol } from 'lib/utils/geography/currency'
 import { teamLogic } from 'scenes/teamLogic'
@@ -87,11 +87,11 @@ export function OverviewGrid({
                       ))}
             </EvenlyDistributedRows>
             {samplingRate && !(samplingRate.numerator === 1 && (samplingRate.denominator ?? 1) === 1) ? (
-                <LemonBanner type="info" className="my-4">
+                <Banner type="info" className="my-4">
                     These results are using a sampling factor of {samplingRate.numerator}
                     <span>{(samplingRate.denominator ?? 1 !== 1) ? `/${samplingRate.denominator}` : ''}</span>. Sampling
                     is currently in beta.
-                </LemonBanner>
+                </Banner>
             ) : null}
         </>
     )
@@ -106,17 +106,17 @@ const OverviewItemCellSkeleton = ({ compact }: { compact: boolean }): JSX.Elemen
                     {/* Empty space for potential beta tag */}
                 </div>
                 <div className={`uppercase py-0.5 ${compact ? 'text-[10px]' : 'text-xs font-bold'}`}>
-                    <LemonSkeleton className={`w-16 ${compact ? 'h-2.5' : 'h-3'}`} />
+                    <Skeleton className={`w-16 ${compact ? 'h-2.5' : 'h-3'}`} />
                 </div>
                 <div className="flex flex-1 flex-row justify-end items-start">
                     {/* Empty space for potential action buttons */}
                 </div>
             </div>
             <div className="w-full flex-1 flex items-center justify-center">
-                <LemonSkeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-20" />
             </div>
             <div className="flex items-center justify-center">
-                <LemonSkeleton className="h-4 w-12" />
+                <Skeleton className="h-4 w-12" />
             </div>
         </div>
     )

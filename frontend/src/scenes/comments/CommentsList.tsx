@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { PhonePairMascots } from 'lib/components/mascots'
 
@@ -26,7 +26,7 @@ export const CommentsList = ({ noun = 'page', ...props }: CommentsListProps): JS
             <div className="flex flex-col">
                 {!commentsWithReplies?.length && commentsLoading ? (
                     <div className="deprecated-space-y-2">
-                        <LemonSkeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
                     </div>
                 ) : !commentsWithReplies?.length ? (
                     <div className="mx-auto p-8 max-w-160 mt-8 deprecated-space-y-4">

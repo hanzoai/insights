@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconCheck, IconFilter, IconX } from '@hanzo/icons'
-import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
+import { Skeleton, Tooltip } from '@hanzo/elements'
 
 import { humanFriendlyLargeNumber } from 'lib/utils'
 
@@ -21,9 +21,9 @@ export function StepViewMetrics({ action }: { action: InsightsFlowAction }): JSX
     if (actionMetricsByIdLoading) {
         return (
             <div className="flex items-center gap-1 h-2 px-1">
-                <LemonSkeleton className="w-full h-[6px]" />
-                <LemonSkeleton className="w-full h-[6px]" />
-                <LemonSkeleton className="w-full h-[6px]" />
+                <Skeleton className="w-full h-[6px]" />
+                <Skeleton className="w-full h-[6px]" />
+                <Skeleton className="w-full h-[6px]" />
             </div>
         )
     }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { SlashCommandsPopover } from '../Notebook/SlashCommands'
 import { InsertionSuggestion, InsertionSuggestionViewProps } from './InsertionSuggestion'
@@ -21,7 +21,7 @@ const Component = ({ editor }: InsertionSuggestionViewProps): JSX.Element => {
             getPos={editor?.getCurrentPosition}
             onClose={() => setVisible(false)}
         >
-            <LemonButton size="xsmall" icon={<IconPlus />} onClick={onClick} />
+            <Button size="xsmall" icon={<IconPlus />} onClick={onClick} />
         </SlashCommandsPopover>
     )
 }

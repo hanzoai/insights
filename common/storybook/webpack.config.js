@@ -74,7 +74,7 @@ function createEntry(entry) {
                 '~': path.resolve(__dirname, '..', '..', 'frontend', 'src'),
                 lib: path.resolve(__dirname, '..', '..', 'frontend', 'src', 'lib'),
                 scenes: path.resolve(__dirname, '..', '..', 'frontend', 'src', 'scenes'),
-                '@hanzo/lemon-ui': path.resolve(__dirname, '..', '..', 'frontend', '@insights', 'lemon-ui', 'src'),
+                '@hanzo/elements': path.resolve(__dirname, '..', '..', 'frontend', '@hanzo', 'elements', 'src'),
                 '@hanzo/shared-onboarding': path.resolve(__dirname, '..', '..', 'docs', 'onboarding'),
                 storybook: path.resolve(__dirname, '..', '..', 'frontend', '.storybook'),
                 types: path.resolve(__dirname, '..', '..', 'frontend', 'types'),

@@ -2,7 +2,7 @@ import { BuiltLogic, useActions, useValues } from 'kea'
 import { Children, MouseEvent, ReactElement, isValidElement, useCallback } from 'react'
 import { P, match } from 'ts-pattern'
 
-import { LemonButton, LemonTable, LemonTableColumn, LemonTableProps } from '@hanzo/lemon-ui'
+import { Button, Table, TableColumn, TableProps } from '@hanzo/elements'
 
 import type { DataSourceLogic } from './types'
 
@@ -10,11 +10,11 @@ export interface DataSourceTableProps<T extends Record<string, any>> {
     dataSource: BuiltLogic<DataSourceLogic<T>>
     className?: string
     children?: React.ReactNode
-    embedded?: LemonTableProps<T>['embedded']
-    stealth?: LemonTableProps<T>['stealth']
-    expandable?: LemonTableProps<T>['expandable']
+    embedded?: TableProps<T>['embedded']
+    stealth?: TableProps<T>['stealth']
+    expandable?: TableProps<T>['expandable']
     onRowClick?: (item: T, evt: MouseEvent) => void
-    rowRibbonColor?: LemonTableProps<T>['rowRibbonColor']
+    rowRibbonColor?: TableProps<T>['rowRibbonColor']
 }
 
 export function DataSourceTable<T extends Record<string, any>>({
@@ -40,7 +40,7 @@ export function DataSourceTable<T extends Record<string, any>>({
                 className: props.className,
                 render: (_, record: T, recordIndex: number, rowCount: number) =>
                     props.cellRenderer(record, recordIndex, rowCount),
-            } as LemonTableColumn<T, keyof T | undefined>
+            } as TableColumn<T, keyof T | undefined>
         })
 
     const onRow = useCallback(
@@ -58,7 +58,7 @@ export function DataSourceTable<T extends Record<string, any>>({
     )
 
     return (
-        <LemonTable
+        <Table
             dataSource={items}
             columns={columns}
             loading={itemsLoading}
@@ -81,7 +81,7 @@ export function DataSourceTableFooter<T extends Record<string, any>>({
 
     return (
         <div className="p-1">
-            <LemonButton
+            <Button
                 className="rounded-tl-none rounded-tr-none"
                 loading={itemsLoading}
                 center
@@ -95,7 +95,7 @@ export function DataSourceTableFooter<T extends Record<string, any>>({
                 {itemsLoading && <span>Loading...</span>}
                 {!itemsLoading && !canLoadNextData && <span>No more entries</span>}
                 {!itemsLoading && canLoadNextData && <span>Load More</span>}
-            </LemonButton>
+            </Button>
         </div>
     )
 }

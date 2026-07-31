@@ -1,7 +1,7 @@
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
-import { Link } from 'lib/lemon-ui/Link'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Link } from 'lib/elements/Link'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { PluginType } from '~/types'
 
@@ -15,7 +15,7 @@ type RenderAppProps = {
 
 export function RenderApp({ plugin, imageSize = 'small' }: RenderAppProps): JSX.Element {
     if (!plugin) {
-        return <LemonSkeleton className="w-15 h-15" />
+        return <Skeleton className="w-15 h-15" />
     }
 
     return (

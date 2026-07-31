@@ -1,4 +1,4 @@
-import '../../lemon-ui/Popover/Popover.scss'
+import '../../elements/Popover/Popover.scss'
 import './InfiniteList.scss'
 
 import clsx from 'clsx'
@@ -7,7 +7,7 @@ import { CSSProperties, useEffect, useState } from 'react'
 import { List, useListRef } from 'react-window'
 
 import { IconArchive, IconCheck, IconPlus, IconSearch } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { ControlledDefinitionPopover } from 'lib/components/DefinitionPopover/DefinitionPopoverContents'
@@ -23,10 +23,10 @@ import {
     TaxonomicFilterGroupValueMap,
 } from 'lib/components/TaxonomicFilter/types'
 import { dayjs } from 'lib/dayjs'
-import { LemonRow } from 'lib/lemon-ui/LemonRow'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Row } from 'lib/elements/Row'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { pluralize } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 import { isDefinitionStale } from 'lib/utils/definitions'
@@ -48,7 +48,7 @@ const staleIndicator = (parsedLastSeen: dayjs.Dayjs | null): JSX.Element => {
                 </>
             }
         >
-            <LemonTag>Stale</LemonTag>
+            <Tag>Stale</Tag>
         </Tooltip>
     )
 }
@@ -78,7 +78,7 @@ const unusedIndicator = (eventNames: string[]): JSX.Element => {
                 </>
             }
         >
-            <LemonTag>Not seen</LemonTag>
+            <Tag>Not seen</Tag>
         </Tooltip>
     )
 }
@@ -297,7 +297,7 @@ const InfiniteListRow = ({
         }
 
         return (
-            <LemonRow
+            <Row
                 fullWidth
                 style={style}
                 className={clsx(
@@ -318,11 +318,11 @@ const InfiniteListRow = ({
                 <div className="flex items-center gap-2">
                     <span className="text-muted">Select event:</span>
                     <span className="font-medium">{trimmedSearchQuery}</span>
-                    <LemonTag type="caution" size="small">
+                    <Tag type="caution" size="small">
                         Not seen yet
-                    </LemonTag>
+                    </Tag>
                 </div>
-            </LemonRow>
+            </Row>
         )
     }
 
@@ -380,9 +380,9 @@ const InfiniteListRow = ({
                     isActive,
                 })}
                 {isExactMatchItem && (
-                    <LemonTag size="small" type="highlight">
+                    <Tag size="small" type="highlight">
                         {itemGroup.name}
-                    </LemonTag>
+                    </Tag>
                 )}
             </div>
         )
@@ -418,7 +418,7 @@ const InfiniteListRow = ({
                 <div className="taxonomic-list-row-contents-icon">
                     <Spinner className="h-4 w-4" speed="0.8s" />
                 </div>
-                <LemonSkeleton className="h-4 flex-1" />
+                <Skeleton className="h-4 flex-1" />
             </div>
         </div>
     )

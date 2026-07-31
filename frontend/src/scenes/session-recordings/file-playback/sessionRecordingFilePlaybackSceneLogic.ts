@@ -2,7 +2,7 @@ import { BuiltLogic, connect, kea, listeners, path, reducers, selectors } from '
 import { loaders } from 'kea-loaders'
 import { beforeUnload } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { uuid } from 'lib/utils'
@@ -113,7 +113,7 @@ export const sessionRecordingFilePlaybackSceneLogic = kea<sessionRecordingFilePl
                     return data.data
                 } catch (error) {
                     actions.reportRecordingLoadedFromFile({ success: false, error: `${error}` })
-                    lemonToast.error(`File import failed: ${error}`)
+                    toast.error(`File import failed: ${error}`)
                     return null
                 }
             },

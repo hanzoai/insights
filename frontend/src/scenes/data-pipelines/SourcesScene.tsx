@@ -1,5 +1,5 @@
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -29,7 +29,7 @@ export function SourcesScene(): JSX.Element {
             interaction="click"
             scope={Scene.Sources}
         >
-            <LemonButton
+            <Button
                 type="primary"
                 to={urls.dataPipelinesNew('source')}
                 icon={<IconPlusSmall />}
@@ -38,7 +38,7 @@ export function SourcesScene(): JSX.Element {
                 data-attr="new-source"
             >
                 New source
-            </LemonButton>
+            </Button>
         </AppShortcut>
     )
 

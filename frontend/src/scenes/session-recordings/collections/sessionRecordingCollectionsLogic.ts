@@ -2,11 +2,11 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { Sorting } from 'lib/lemon-ui/LemonTable'
-import { PaginationManual } from 'lib/lemon-ui/PaginationControl'
+import { Sorting } from 'lib/elements/Table'
+import { PaginationManual } from 'lib/elements/PaginationControl'
 import { objectClean, objectsEqual, toParams } from 'lib/utils'
 import { removeProjectIdIfPresent } from 'lib/utils/router-utils'
 import { sessionRecordingEventUsageLogic } from 'scenes/session-recordings/sessionRecordingEventUsageLogic'
@@ -145,7 +145,7 @@ export const sessionRecordingCollectionsLogic = kea<sessionRecordingCollectionsL
                     return values.playlists
                 }
 
-                lemonToast.success('Playlist duplicated successfully')
+                toast.success('Playlist duplicated successfully')
 
                 return { ...values.playlists, results: [newPlaylist, ...values.playlists.results] }
             },

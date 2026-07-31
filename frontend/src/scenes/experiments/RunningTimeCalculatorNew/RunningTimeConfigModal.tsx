@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheck } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonInput, LemonModal, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Banner, Button, Input, Modal, SegmentedButton } from '@hanzo/elements'
 
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
+import { Slider } from 'lib/elements/Slider'
 import { Label } from 'lib/ui/Label/Label'
 
 import { Experiment } from '~/types'
@@ -61,15 +61,15 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
     const isPreLaunch = !experiment?.start_date
 
     return (
-        <LemonModal isOpen={isRunningTimeConfigModalOpen} onClose={cancel} width={480} simple>
-            <LemonModal.Header>
+        <Modal isOpen={isRunningTimeConfigModalOpen} onClose={cancel} width={480} simple>
+            <Modal.Header>
                 <h3>{isPreLaunch ? 'Estimate running time' : 'Running time configuration'}</h3>
-            </LemonModal.Header>
-            <LemonModal.Content className="flex-1 min-h-0">
+            </Modal.Header>
+            <Modal.Content className="flex-1 min-h-0">
                 <div className="space-y-6">
                     <div>
                         <Label intent="menu">Calculation mode</Label>
-                        <LemonSegmentedButton
+                        <SegmentedButton
                             className="mt-1"
                             size="small"
                             fullWidth
@@ -95,7 +95,7 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
                         <>
                             <div>
                                 <Label intent="menu">Metric type</Label>
-                                <LemonSegmentedButton
+                                <SegmentedButton
                                     className="mt-1"
                                     size="small"
                                     fullWidth
@@ -108,7 +108,7 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
                             <div>
                                 <Label intent="menu">{getBaselineLabel(config.metricType)}</Label>
                                 <div className="flex items-center gap-1 mt-1">
-                                    <LemonInput
+                                    <Input
                                         type="number"
                                         value={config.baselineValue}
                                         onChange={(value) => setConfig({ baselineValue: value as number })}
@@ -126,7 +126,7 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
                                 <Label intent="menu">Minimum detectable effect</Label>
                                 <div className="flex items-center gap-3">
                                     <div className="flex-[3]">
-                                        <LemonSlider
+                                        <Slider
                                             value={config.mde}
                                             onChange={(value) => setConfig({ mde: Math.round(value * 10) / 10 })}
                                             min={1}
@@ -135,7 +135,7 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
                                         />
                                     </div>
                                     <div className="flex-1 flex items-center gap-1">
-                                        <LemonInput
+                                        <Input
                                             type="number"
                                             value={config.mde}
                                             onChange={(value) => setConfig({ mde: Number(value) || 1 })}
@@ -156,7 +156,7 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
 
                             <div>
                                 <Label intent="menu">Expected exposures per day</Label>
-                                <LemonInput
+                                <Input
                                     type="number"
                                     value={config.exposureRate}
                                     onChange={(value) => setConfig({ exposureRate: value as number })}
@@ -172,10 +172,10 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
                     ) : (
                         <>
                             {!hasAutomaticData ? (
-                                <LemonBanner type="info">
+                                <Banner type="info">
                                     Waiting for sufficient data to calculate time estimates. Need at least 1 day and 100
                                     exposures.
-                                </LemonBanner>
+                                </Banner>
                             ) : (
                                 <>
                                     <div>
@@ -213,7 +213,7 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
                                 <Label intent="menu">Minimum detectable effect</Label>
                                 <div className="flex items-center gap-3">
                                     <div className="flex-[3]">
-                                        <LemonSlider
+                                        <Slider
                                             value={config.mde}
                                             onChange={(value) => setConfig({ mde: Math.round(value * 10) / 10 })}
                                             min={1}
@@ -222,7 +222,7 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
                                         />
                                     </div>
                                     <div className="flex-1 flex items-center gap-1">
-                                        <LemonInput
+                                        <Input
                                             type="number"
                                             value={config.mde}
                                             onChange={(value) => setConfig({ mde: Number(value) || 1 })}
@@ -243,8 +243,8 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
                         </>
                     )}
                 </div>
-            </LemonModal.Content>
-            <LemonModal.Footer className="flex-col items-stretch gap-4">
+            </Modal.Content>
+            <Modal.Footer className="flex-col items-stretch gap-4">
                 {config.mode === 'manual' && (
                     <div>
                         <Label intent="menu">Calculated results</Label>
@@ -267,14 +267,14 @@ export function RunningTimeConfigModal({ experimentId, tabId }: RunningTimeConfi
                     </div>
                 )}
                 <div className="flex items-center gap-2 justify-end w-full">
-                    <LemonButton type="secondary" onClick={cancel}>
+                    <Button type="secondary" onClick={cancel}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={save}>
+                    </Button>
+                    <Button type="primary" onClick={save}>
                         Save
-                    </LemonButton>
+                    </Button>
                 </div>
-            </LemonModal.Footer>
-        </LemonModal>
+            </Modal.Footer>
+        </Modal>
     )
 }

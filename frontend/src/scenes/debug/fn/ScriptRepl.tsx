@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { LemonButton, LemonTable, LemonTabs } from '@hanzo/lemon-ui'
+import { Button, Table, Tabs } from '@hanzo/elements'
 import { printIQLStringOutput } from '@hanzo/scriptvm'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
@@ -23,7 +23,7 @@ export function ReplResultsTable({ response }: ReplResultsTableProps): JSX.Eleme
     const [activeTab, setActiveTab] = useState<'table' | 'json'>('table')
     return (
         <div>
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 onChange={setActiveTab as any}
                 tabs={[
@@ -31,7 +31,7 @@ export function ReplResultsTable({ response }: ReplResultsTableProps): JSX.Eleme
                         key: 'table',
                         label: 'Table',
                         content: (
-                            <LemonTable
+                            <Table
                                 columns={response.columns.map((col, index) => ({ dataIndex: index, title: col }))}
                                 dataSource={response.results}
                             />
@@ -76,9 +76,9 @@ export function ReplChunk({
 }: ReplChunkProps): JSX.Element {
     return (
         <div className="pb-2 border-b border-gray-300">
-            <LemonButton size="small" type="secondary" className="float-right" onClick={editFromHere}>
+            <Button size="small" type="secondary" className="float-right" onClick={editFromHere}>
                 📝
-            </LemonButton>
+            </Button>
             <div className="flex items-start">
                 <span
                     // eslint-disable-next-line react/forbid-dom-props
@@ -186,9 +186,9 @@ export function ScriptRepl(): JSX.Element {
                             autoFocus
                         />
                     </div>
-                    <LemonButton size="small" type="primary" onClick={runCurrentCode}>
+                    <Button size="small" type="primary" onClick={runCurrentCode}>
                         ⌘⏎
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </div>

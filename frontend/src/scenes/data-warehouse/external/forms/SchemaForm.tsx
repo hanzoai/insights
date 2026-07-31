@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonModal, LemonTable, LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Modal, Table, Tag, Tooltip } from '@hanzo/elements'
 
 import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { SyncTypeLabelMap } from 'scenes/data-warehouse/utils'
@@ -33,13 +33,13 @@ export default function SchemaForm(): JSX.Element {
         <>
             <div className="flex flex-col gap-2">
                 <div>
-                    <LemonTable
+                    <Table
                         emptyState="No schemas found"
                         dataSource={databaseSchema}
                         columns={[
                             {
                                 title: (
-                                    <LemonCheckbox
+                                    <Checkbox
                                         checked={tablesAllToggledOn}
                                         onChange={(checked) => toggleAllTables(checked)}
                                     />
@@ -48,7 +48,7 @@ export default function SchemaForm(): JSX.Element {
                                 key: 'enabled',
                                 render: function RenderEnabled(_, schema) {
                                     return (
-                                        <LemonCheckbox
+                                        <Checkbox
                                             checked={schema.should_sync}
                                             onChange={(checked) => onClickCheckbox(schema, checked)}
                                         />
@@ -74,9 +74,9 @@ export default function SchemaForm(): JSX.Element {
                                             </span>
                                             {isSuggested && (
                                                 <Tooltip title={tooltip} placement="top">
-                                                    <LemonTag type="primary" className="cursor-help">
+                                                    <Tag type="primary" className="cursor-help">
                                                         Suggested
-                                                    </LemonTag>
+                                                    </Tag>
                                                 </Tooltip>
                                             )}
                                         </div>
@@ -121,9 +121,9 @@ export default function SchemaForm(): JSX.Element {
                                             return (
                                                 <>
                                                     <span className="leading-5">{field.label}</span>
-                                                    <LemonTag className="ml-2" type="success">
+                                                    <Tag className="ml-2" type="success">
                                                         {field.type}
-                                                    </LemonTag>
+                                                    </Tag>
                                                 </>
                                             )
                                         }
@@ -142,21 +142,21 @@ export default function SchemaForm(): JSX.Element {
                                     if (!schema.sync_type) {
                                         return (
                                             <div className="justify-end flex">
-                                                <LemonButton
+                                                <Button
                                                     className="my-1"
                                                     type="primary"
                                                     onClick={() => openSyncMethodModal(schema)}
                                                     size="small"
                                                 >
                                                     Configure
-                                                </LemonButton>
+                                                </Button>
                                             </div>
                                         )
                                     }
 
                                     return (
                                         <div className="justify-end flex">
-                                            <LemonButton
+                                            <Button
                                                 className="my-1"
                                                 size="small"
                                                 type="secondary"
@@ -168,7 +168,7 @@ export default function SchemaForm(): JSX.Element {
                                                 }
                                             >
                                                 {SyncTypeLabelMap[schema.sync_type]}
-                                            </LemonButton>
+                                            </Button>
                                         </div>
                                     )
                                 },
@@ -191,7 +191,7 @@ const SyncMethodModal = (): JSX.Element => {
     }
 
     return (
-        <LemonModal
+        <Modal
             title={
                 <>
                     Sync method for <span className="font-mono">{currentSyncMethodModalSchema.table}</span>
@@ -219,6 +219,6 @@ const SyncMethodModal = (): JSX.Element => {
                     cancelSyncMethodModal()
                 }}
             />
-        </LemonModal>
+        </Modal>
     )
 }

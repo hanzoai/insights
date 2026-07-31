@@ -1,14 +1,14 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconCheck, IconSort } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Menu, Tag } from '@hanzo/elements'
 
 import { InfiniteList } from 'lib/components/TaxonomicFilter/InfiniteList'
 import { infiniteListLogic } from 'lib/components/TaxonomicFilter/infiniteListLogic'
 import { taxonomicFilterPreferencesLogic } from 'lib/components/TaxonomicFilter/taxonomicFilterPreferencesLogic'
 import { TaxonomicFilterGroupType, TaxonomicFilterLogicProps } from 'lib/components/TaxonomicFilter/types'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { IconBlank } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 
 import { TaxonomicFilterEmptyState, taxonomicFilterGroupTypesWithEmptyStates } from './TaxonomicFilterEmptyState'
@@ -48,7 +48,7 @@ function CategoryPillContent({
     const showLoading = isLoading && hasRemoteDataSource
 
     return (
-        <LemonTag
+        <Tag
             type={isActive ? 'primary' : canInteract ? 'option' : 'muted'}
             data-attr={`taxonomic-tab-${groupType}`}
             onClick={canInteract ? onClick : undefined}
@@ -72,7 +72,7 @@ function CategoryPillContent({
                     </span>
                 </>
             )}
-        </LemonTag>
+        </Tag>
     )
 }
 
@@ -107,7 +107,7 @@ function TaxonomicGroupTitle({ openTab }: { openTab: TaxonomicFilterGroupType })
             {openTab === TaxonomicFilterGroupType.Events ? (
                 <>
                     <span>{taxonomicGroups.find((g) => g.type === openTab)?.name || openTab}</span>
-                    <LemonMenu
+                    <Menu
                         items={[
                             {
                                 label: (
@@ -151,7 +151,7 @@ function TaxonomicGroupTitle({ openTab }: { openTab: TaxonomicFilterGroupType })
                             },
                         ]}
                     >
-                        <LemonButton
+                        <Button
                             icon={<IconSort />}
                             size="small"
                             tooltip={`Sorting by ${
@@ -162,7 +162,7 @@ function TaxonomicGroupTitle({ openTab }: { openTab: TaxonomicFilterGroupType })
                                       : 'recently seen and then name'
                             }`}
                         />
-                    </LemonMenu>
+                    </Menu>
                 </>
             ) : (
                 <>{taxonomicGroups.find((g) => g.type === openTab)?.name || openTab}</>

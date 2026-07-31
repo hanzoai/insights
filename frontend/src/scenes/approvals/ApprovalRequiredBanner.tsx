@@ -1,6 +1,6 @@
 import { router } from 'kea-router'
 
-import { LemonBanner, LemonButton, lemonToast } from '@hanzo/lemon-ui'
+import { Banner, Button, toast } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 
@@ -16,11 +16,11 @@ export function ApprovalRequiredBanner({
     onDismiss,
 }: ApprovalRequiredBannerProps): JSX.Element {
     return (
-        <LemonBanner
+        <Banner
             type="info"
             onClose={onDismiss}
             action={
-                <LemonButton
+                <Button
                     type="primary"
                     size="small"
                     onClick={() => {
@@ -28,7 +28,7 @@ export function ApprovalRequiredBanner({
                     }}
                 >
                     View approval
-                </LemonButton>
+                </Button>
             }
         >
             <div>
@@ -39,12 +39,12 @@ export function ApprovalRequiredBanner({
                         : 'Your change request has been submitted for approval.'}
                 </div>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }
 
 export function showApprovalRequiredToast(changeRequestId: string, actionDescription?: string): void {
-    lemonToast.info(
+    toast.info(
         <div>
             <strong>Approval required</strong>
             <div className="text-sm mt-1">
@@ -52,7 +52,7 @@ export function showApprovalRequiredToast(changeRequestId: string, actionDescrip
                     ? `Your request to ${actionDescription} has been submitted for approval.`
                     : 'Your change request has been submitted for approval.'}
             </div>
-            <LemonButton
+            <Button
                 type="secondary"
                 size="small"
                 className="mt-2"
@@ -61,7 +61,7 @@ export function showApprovalRequiredToast(changeRequestId: string, actionDescrip
                 }}
             >
                 View approval
-            </LemonButton>
+            </Button>
         </div>
     )
 }

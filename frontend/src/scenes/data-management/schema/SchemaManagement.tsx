@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
 import { IconApps, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Tag, Link } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -47,9 +47,9 @@ function PropertyRow({ property }: { property: SchemaPropertyGroupProperty }): J
             </div>
             <div className="w-24">
                 {property.is_required ? (
-                    <LemonTag type="danger">Required</LemonTag>
+                    <Tag type="danger">Required</Tag>
                 ) : (
-                    <LemonTag type="muted">Optional</LemonTag>
+                    <Tag type="muted">Optional</Tag>
                 )}
             </div>
             <div className="flex-1 text-muted">{property.description || '—'}</div>
@@ -67,7 +67,7 @@ export function SchemaManagement(): JSX.Element {
         return <NotFound object="page" caption="Schema management is not available." />
     }
 
-    const columns: LemonTableColumns<SchemaPropertyGroup> = [
+    const columns: TableColumns<SchemaPropertyGroup> = [
         {
             key: 'expander',
             width: 0,
@@ -91,10 +91,10 @@ export function SchemaManagement(): JSX.Element {
             key: 'property_count',
             width: 120,
             render: (_, propertyGroup) => (
-                <LemonTag type="default">
+                <Tag type="default">
                     {propertyGroup.properties?.length || 0}{' '}
                     {propertyGroup.properties?.length === 1 ? 'property' : 'properties'}
-                </LemonTag>
+                </Tag>
             ),
         },
         {
@@ -102,7 +102,7 @@ export function SchemaManagement(): JSX.Element {
             width: 100,
             render: (_, propertyGroup) => (
                 <div className="flex gap-1">
-                    <LemonButton
+                    <Button
                         icon={<IconPencil />}
                         size="small"
                         onClick={() => {
@@ -110,7 +110,7 @@ export function SchemaManagement(): JSX.Element {
                             setPropertyGroupModalOpen(true)
                         }}
                     />
-                    <LemonButton
+                    <Button
                         icon={<IconTrash />}
                         size="small"
                         status="danger"
@@ -141,14 +141,14 @@ export function SchemaManagement(): JSX.Element {
             />
             <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search property groups..."
                         className="max-w-60"
                         value={searchTerm}
                         onChange={setSearchTerm}
                     />
-                    <LemonButton
+                    <Button
                         type="primary"
                         icon={<IconPlus />}
                         onClick={() => {
@@ -157,10 +157,10 @@ export function SchemaManagement(): JSX.Element {
                         }}
                     >
                         New Property Group
-                    </LemonButton>
+                    </Button>
                 </div>
 
-                <LemonTable
+                <Table
                     columns={columns}
                     dataSource={filteredPropertyGroups}
                     loading={propertyGroupsLoading}

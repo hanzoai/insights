@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconShare, IconX } from '@hanzo/icons'
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { colonDelimitedDuration } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -66,7 +66,7 @@ export function SessionGroupSummaryDetailsModal({ isOpen, onClose, event }: Sess
         throw new Error('Session recording id not found')
     }
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             simple
@@ -75,7 +75,7 @@ export function SessionGroupSummaryDetailsModal({ isOpen, onClose, event }: Sess
             closable={true}
             hideCloseButton={true}
         >
-            <LemonModal.Content embedded>
+            <Modal.Content embedded>
                 <div className="flex flex-col">
                     {/* Header */}
                     <header className="flex items-center justify-between p-4 border-b">
@@ -93,15 +93,15 @@ export function SessionGroupSummaryDetailsModal({ isOpen, onClose, event }: Sess
                         </div>
                         <div className="flex items-center gap-2">
                             {/* TODO: Enable thumbs up/down for feedback */}
-                            {/* <LemonButton size="small" icon={<IconThumbsUp />} />
-                            <LemonButton size="small" icon={<IconThumbsDown />} />
+                            {/* <Button size="small" icon={<IconThumbsUp />} />
+                            <Button size="small" icon={<IconThumbsDown />} />
                             <div className="h-6 w-px bg-border mx-2" /> */}
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconShare />}
                                 onClick={() => void copyToClipboard(window.location.href, 'link')}
                             />
-                            <LemonButton size="small" icon={<IconX />} onClick={onClose} />
+                            <Button size="small" icon={<IconX />} onClick={onClose} />
                         </div>
                     </header>
 
@@ -198,7 +198,7 @@ export function SessionGroupSummaryDetailsModal({ isOpen, onClose, event }: Sess
                         />
                     </div>
                 </div>
-            </LemonModal.Content>
-        </LemonModal>
+            </Modal.Content>
+        </Modal>
     )
 }

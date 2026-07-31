@@ -5,7 +5,7 @@ import { IconCheck, IconX } from '@hanzo/icons'
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { CodeEditor, CodeEditorProps } from 'lib/monaco/CodeEditor'
 import MaxTool from 'scenes/max/MaxTool'
 
@@ -113,7 +113,7 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                             style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)' }}
                         >
                             {!!diffShowRunButton && (
-                                <LemonButton
+                                <Button
                                     type="primary"
                                     icon={<IconCheck color="var(--success)" />}
                                     onClick={() => {
@@ -123,9 +123,9 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                                     size="small"
                                 >
                                     {acceptText} & run
-                                </LemonButton>
+                                </Button>
                             )}
-                            <LemonButton
+                            <Button
                                 type="tertiary"
                                 icon={<IconCheck color="var(--success)" />}
                                 onClick={() => {
@@ -135,8 +135,8 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                                 size="small"
                             >
                                 {acceptText}
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 status="danger"
                                 icon={<IconX />}
                                 onClick={() => {
@@ -146,7 +146,7 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                                 size="small"
                             >
                                 {rejectText}
-                            </LemonButton>
+                            </Button>
                         </div>
                     )}
                 </div>

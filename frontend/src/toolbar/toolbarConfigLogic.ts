@@ -1,7 +1,7 @@
 import { actions, afterMount, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { combineUrl, encodeParams } from 'kea-router'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { ToolbarProps } from '~/types'
@@ -96,7 +96,7 @@ export const toolbarConfigLogic = kea<toolbarConfigLogicType>([
             toolbarInsightsJS.capture('toolbar token expired')
             console.warn('Insights Toolbar API token expired. Clearing session.')
             if (values.props.source !== 'localstorage') {
-                lemonToast.error('Insights Toolbar API token expired.')
+                toast.error('Insights Toolbar API token expired.')
             }
             actions.persistConfig()
         },

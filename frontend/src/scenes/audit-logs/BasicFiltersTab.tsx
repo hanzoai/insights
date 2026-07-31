@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCollapse, IconExpand, IconInfo } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonSelect, Tooltip } from '@hanzo/lemon-ui'
+import { Badge, Button, Select, Tooltip } from '@hanzo/elements'
 
 import { humanizeActivity, humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 
 import { ActivityScope } from '~/types'
 
@@ -37,7 +37,7 @@ export const BasicFiltersTab = (): JSX.Element => {
 
                 <div className="flex flex-col gap-1">
                     <label className="block text-sm font-medium mb-1">User</label>
-                    <LemonInputSelect
+                    <InputSelect
                         mode="multiple"
                         displayMode="count"
                         bulkActions="select-and-clear-all"
@@ -59,7 +59,7 @@ export const BasicFiltersTab = (): JSX.Element => {
 
                 <div className="flex flex-col gap-1">
                     <label className="block text-sm font-medium mb-1">Scope</label>
-                    <LemonInputSelect
+                    <InputSelect
                         mode="multiple"
                         displayMode="count"
                         bulkActions="select-and-clear-all"
@@ -83,7 +83,7 @@ export const BasicFiltersTab = (): JSX.Element => {
 
                 <div className="flex flex-col gap-1">
                     <label className="block text-sm font-medium mb-1">Activity</label>
-                    <LemonInputSelect
+                    <InputSelect
                         mode="multiple"
                         displayMode="count"
                         bulkActions="select-and-clear-all"
@@ -107,7 +107,7 @@ export const BasicFiltersTab = (): JSX.Element => {
 
                 <div className="flex items-end justify-end mb-1">
                     <div className="relative">
-                        <LemonButton
+                        <Button
                             type="tertiary"
                             size="small"
                             icon={showMoreFilters ? <IconCollapse /> : <IconExpand />}
@@ -116,9 +116,9 @@ export const BasicFiltersTab = (): JSX.Element => {
                             className="text-muted-alt hover:text-default"
                         >
                             More filters
-                        </LemonButton>
+                        </Button>
                         {!showMoreFilters && activeAdvancedFiltersCount > 0 && (
-                            <LemonBadge
+                            <Badge
                                 content={activeAdvancedFiltersCount.toString()}
                                 size="small"
                                 className="absolute -top-1 -right-1"
@@ -138,7 +138,7 @@ export const BasicFiltersTab = (): JSX.Element => {
                                     <IconInfo className="w-4 h-4 text-muted-alt cursor-help" />
                                 </Tooltip>
                             </div>
-                            <LemonSelect
+                            <Select
                                 value={
                                     filters.was_impersonated === undefined ? 'all' : filters.was_impersonated.toString()
                                 }
@@ -164,7 +164,7 @@ export const BasicFiltersTab = (): JSX.Element => {
                                     <IconInfo className="w-4 h-4 text-muted-alt cursor-help" />
                                 </Tooltip>
                             </div>
-                            <LemonSelect
+                            <Select
                                 value={filters.is_system === undefined ? 'all' : filters.is_system.toString()}
                                 onChange={(value) =>
                                     setFilters({ is_system: value === 'all' ? undefined : value === 'true' })
@@ -188,7 +188,7 @@ export const BasicFiltersTab = (): JSX.Element => {
                                     <IconInfo className="w-4 h-4 text-muted-alt cursor-help" />
                                 </Tooltip>
                             </div>
-                            <LemonInputSelect
+                            <InputSelect
                                 mode="multiple"
                                 displayMode="count"
                                 bulkActions="select-and-clear-all"

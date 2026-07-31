@@ -5,7 +5,7 @@ import { router, urlToAction } from 'kea-router'
 
 import api, { ApiConfig } from 'lib/api'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { urls } from 'scenes/urls'
 
 import { FileSystemIconType } from '~/queries/schema/schema-general'
@@ -190,29 +190,29 @@ export const managedMigrationLogic = kea<managedMigrationLogicType>([
         },
         submitManagedMigrationFailure: async ({ error }) => {
             if (error?.message) {
-                lemonToast.error(error.message)
+                toast.error(error.message)
             } else {
-                lemonToast.error('Failed to create migration. Please try again.')
+                toast.error('Failed to create migration. Please try again.')
             }
         },
         pauseMigration: async ({ id }) => {
             try {
                 const projectId = ApiConfig.getCurrentProjectId()
                 await api.create(`api/projects/${projectId}/managed_migrations/${id}/pause/`)
-                lemonToast.success('Migration paused successfully')
+                toast.success('Migration paused successfully')
                 actions.loadMigrations()
             } catch (error: any) {
-                lemonToast.error(error?.message || 'Failed to pause migration')
+                toast.error(error?.message || 'Failed to pause migration')
             }
         },
         resumeMigration: async ({ id }) => {
             try {
                 const projectId = ApiConfig.getCurrentProjectId()
                 await api.create(`api/projects/${projectId}/managed_migrations/${id}/resume/`)
-                lemonToast.success('Migration resumed successfully')
+                toast.success('Migration resumed successfully')
                 actions.loadMigrations()
             } catch (error: any) {
-                lemonToast.error(error?.message || 'Failed to resume migration')
+                toast.error(error?.message || 'Failed to resume migration')
             }
         },
         loadMigrationsSuccess: () => {

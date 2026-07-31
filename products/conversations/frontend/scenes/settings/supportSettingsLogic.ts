@@ -1,7 +1,7 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { UserBasicType } from '~/types'
@@ -119,7 +119,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         generateNewToken: async () => {
             const response = await api.projects.generateConversationsPublicToken(values.currentTeam?.id)
             actions.updateCurrentTeam(response)
-            lemonToast.success('New token generated')
+            toast.success('New token generated')
         },
         saveDomain: ({ value, editingIndex }) => {
             const trimmedValue = value.trim()

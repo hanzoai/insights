@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
 
 import { MRRBreakdownChart } from './MRRBreakdownChart'
 import { mrrBreakdownModalLogic } from './mrrBreakdownModalLogic'
@@ -61,7 +61,7 @@ export function MRRBreakdownModal(): JSX.Element | null {
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isModalOpen}
             onClose={closeModal}
             simple={false}
@@ -70,10 +70,10 @@ export function MRRBreakdownModal(): JSX.Element | null {
             fullScreen={false}
             closable={true}
         >
-            <LemonModal.Content embedded>
+            <Modal.Content embedded>
                 <MRRBreakdownModalContent />
-            </LemonModal.Content>
-        </LemonModal>
+            </Modal.Content>
+        </Modal>
     )
 }
 

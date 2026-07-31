@@ -3,7 +3,7 @@ import insights from '@hanzo/insights'
 import { useCallback, useMemo } from 'react'
 
 import { IconArrowRight, IconWrench } from '@hanzo/icons'
-import { LemonSelect, LemonSelectSection, LemonTag } from '@hanzo/lemon-ui'
+import { Select, SelectSection, Tag } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { identifierToHuman } from 'lib/utils'
@@ -43,9 +43,9 @@ function buildModeTooltip(description: string, tools: ToolDefinition[]): JSX.Ele
                                     <strong className="italic">
                                         {tool.name}
                                         {tool.beta && (
-                                            <LemonTag size="small" type="warning" className="ml-1 not-italic">
+                                            <Tag size="small" type="warning" className="ml-1 not-italic">
                                                 BETA
-                                            </LemonTag>
+                                            </Tag>
                                         )}
                                     </strong>
                                     {tool.description?.replace(tool.name, '')}
@@ -92,9 +92,9 @@ function buildGeneralTooltip(description: string, defaultTools: ToolDefinition[]
                                     <strong className="italic">
                                         {tool.name}
                                         {tool.beta && (
-                                            <LemonTag size="small" type="warning" className="ml-1 not-italic">
+                                            <Tag size="small" type="warning" className="ml-1 not-italic">
                                                 BETA
-                                            </LemonTag>
+                                            </Tag>
                                         )}
                                     </strong>
                                     {tool.description?.replace(tool.name, '')}
@@ -121,9 +121,9 @@ function buildGeneralTooltip(description: string, defaultTools: ToolDefinition[]
                                             <strong className="italic">
                                                 {tool.name}
                                                 {tool.beta && (
-                                                    <LemonTag size="small" type="warning" className="ml-1 not-italic">
+                                                    <Tag size="small" type="warning" className="ml-1 not-italic">
                                                         BETA
-                                                    </LemonTag>
+                                                    </Tag>
                                                 )}
                                             </strong>
                                             {tool.description?.replace(tool.name, '')}
@@ -158,7 +158,7 @@ function getModeOptions({
     surveyModeEnabled,
     hasExistingMessages,
     flagsModeEnabled,
-}: GetModeOptionsParams): LemonSelectSection<ModeValue>[] {
+}: GetModeOptionsParams): SelectSection<ModeValue>[] {
     const specialOptions = [
         {
             value: null as ModeValue,
@@ -174,9 +174,9 @@ function getModeOptions({
                 <span className="flex items-center gap-1">
                     {SPECIAL_MODES.plan.name}
                     {SPECIAL_MODES.plan.beta && (
-                        <LemonTag size="small" type="warning">
+                        <Tag size="small" type="warning">
                             BETA
-                        </LemonTag>
+                        </Tag>
                     )}
                 </span>
             ),
@@ -192,9 +192,9 @@ function getModeOptions({
                 <span className="flex items-center gap-1">
                     {SPECIAL_MODES.research.name}
                     {SPECIAL_MODES.research.beta && (
-                        <LemonTag size="small" type="warning">
+                        <Tag size="small" type="warning">
                             BETA
-                        </LemonTag>
+                        </Tag>
                     )}
                 </span>
             ),
@@ -224,9 +224,9 @@ function getModeOptions({
                 label: def.beta ? (
                     <span className="flex items-center gap-1">
                         {def.name}
-                        <LemonTag size="small" type="warning">
+                        <Tag size="small" type="warning">
                             BETA
-                        </LemonTag>
+                        </Tag>
                     </span>
                 ) : (
                     def.name
@@ -286,7 +286,7 @@ export function ModeSelector(): JSX.Element | null {
     const isDeepResearch = conversation?.type === ConversationType.DeepResearch
 
     return (
-        <LemonSelect
+        <Select
             value={isDeepResearch ? 'research' : agentMode}
             onChange={handleChange}
             options={modeOptions}

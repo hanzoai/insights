@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconCollapse, IconExpand, IconSort } from '@hanzo/icons'
-import { LemonButton, LemonCard } from '@hanzo/lemon-ui'
+import { Button, Card } from '@hanzo/elements'
 
 import { RecordingEventType, SessionEventType } from '~/types'
 
@@ -71,26 +71,26 @@ export function SessionEventsList(): JSX.Element {
 
     if (isInitialLoading) {
         return (
-            <LemonCard className="p-6">
+            <Card className="p-6">
                 <div className="text-muted-alt text-center">Loading events...</div>
-            </LemonCard>
+            </Card>
         )
     }
 
     if (!sessionEvents || sessionEvents?.length === 0) {
         return (
-            <LemonCard className="p-6">
+            <Card className="p-6">
                 <div className="text-muted-alt text-center">No events found</div>
-            </LemonCard>
+            </Card>
         )
     }
 
     return (
-        <LemonCard className="overflow-hidden p-0" hoverEffect={false}>
+        <Card className="overflow-hidden p-0" hoverEffect={false}>
             {/* Header */}
             <div className="flex items-center justify-between bg-surface-primary p-3">
                 <div className="flex items-center gap-2">
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={eventsListFolded ? <IconExpand /> : <IconCollapse />}
                         onClick={() => setEventsListFolded(!eventsListFolded)}
@@ -104,17 +104,17 @@ export function SessionEventsList(): JSX.Element {
                     </h3>
                 </div>
                 <div className="flex gap-2">
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={<IconSort className={clsx({ 'rotate-180': sortOrder === 'asc' })} />}
                         onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                         tooltip={sortOrder === 'asc' ? 'Sorted: Oldest first' : 'Sorted: Newest first'}
                     >
                         {sortOrder === 'asc' ? 'Oldest first' : 'Newest first'}
-                    </LemonButton>
-                    <LemonButton size="small" onClick={handleCollapseAll}>
+                    </Button>
+                    <Button size="small" onClick={handleCollapseAll}>
                         Collapse All
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
 
@@ -144,6 +144,6 @@ export function SessionEventsList(): JSX.Element {
                     )}
                 </div>
             )}
-        </LemonCard>
+        </Card>
     )
 }

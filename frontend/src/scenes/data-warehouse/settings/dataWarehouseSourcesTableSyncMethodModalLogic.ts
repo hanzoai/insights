@@ -1,7 +1,7 @@
 import { actions, connect, kea, key, listeners, path, props, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -36,7 +36,7 @@ export const dataWarehouseSourcesTableSyncMethodModalLogic = kea<dataWarehouseSo
                     try {
                         return await api.externalDataSchemas.incremental_fields(schemaId)
                     } catch (e: any) {
-                        lemonToast.error(e?.message ?? e)
+                        toast.error(e?.message ?? e)
                         throw e
                     }
                 },

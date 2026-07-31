@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
@@ -26,20 +26,20 @@ export function WebAnalyticsEnablePreAggregatedTables(): JSX.Element {
                 resourceType={AccessControlResourceType.WebAnalytics}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonSwitch checked={enableNewQueryEngine} onChange={(enabled) => setEnableNewQueryEngine(enabled)} />
+                <Switch checked={enableNewQueryEngine} onChange={(enabled) => setEnableNewQueryEngine(enabled)} />
             </AccessControlAction>
             <div className="mt-4">
                 <AccessControlAction
                     resourceType={AccessControlResourceType.WebAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={handleSave}
                         disabledReason={enableNewQueryEngine === savedSetting ? 'No changes to save' : undefined}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
         </>

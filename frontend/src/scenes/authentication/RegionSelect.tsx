@@ -3,10 +3,10 @@ import { router } from 'kea-router'
 import { useState } from 'react'
 
 import { IconCheckCircle } from '@hanzo/icons'
-import { LemonModal, LemonSelect } from '@hanzo/lemon-ui'
+import { Modal, Select } from '@hanzo/elements'
 
 import { CLOUD_HOSTNAMES } from 'lib/constants'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { Region } from '~/types'
@@ -32,7 +32,7 @@ const sections = [
 
 function WhyCloudModal({ setOpen, open }: { setOpen: (open: boolean) => void; open: boolean }): JSX.Element {
     return (
-        <LemonModal
+        <Modal
             title="Which region would you like to choose?"
             description="It's possible to migrate to another region later."
             isOpen={open}
@@ -63,7 +63,7 @@ function WhyCloudModal({ setOpen, open }: { setOpen: (open: boolean) => void; op
                     )
                 })}
             </ul>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -77,8 +77,8 @@ const RegionSelect = (): JSX.Element | null => {
 
     return (
         <>
-            <LemonField.Pure label="Data region" onExplanationClick={() => setRegionModalOpen(true)}>
-                <LemonSelect
+            <Field.Pure label="Data region" onExplanationClick={() => setRegionModalOpen(true)}>
+                <Select
                     onChange={(region) => {
                         if (!region) {
                             return
@@ -100,7 +100,7 @@ const RegionSelect = (): JSX.Element | null => {
                     ]}
                     fullWidth
                 />
-            </LemonField.Pure>
+            </Field.Pure>
 
             <WhyCloudModal open={regionModalOpen} setOpen={setRegionModalOpen} />
         </>

@@ -7,9 +7,9 @@ import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { dayjs } from 'lib/dayjs'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonMenuItem } from 'lib/lemon-ui/LemonMenu'
-import { IconUnverifiedEvent } from 'lib/lemon-ui/icons'
+import { Input } from 'lib/elements/Input'
+import { MenuItem } from 'lib/elements/Menu'
+import { IconUnverifiedEvent } from 'lib/elements/icons'
 import { SettingsBar, SettingsMenu } from 'scenes/session-recordings/components/PanelSettings'
 
 import { eventDebugMenuLogic } from '~/toolbar/debug/eventDebugMenuLogic'
@@ -23,7 +23,7 @@ function checkableMenuItem(
     icon: JSX.Element | null,
     isActive: boolean,
     onClick: () => void
-): LemonMenuItem {
+): MenuItem {
     return {
         label: (
             <div className="w-full flex flex-row justify-between items-center">
@@ -117,7 +117,7 @@ export const EventDebugMenu = (): JSX.Element => {
             <ToolbarMenu.Header>
                 <div className="flex flex-col pb-2 deprecated-space-y-1">
                     <div className="flex justify-center flex-col">
-                        <LemonInput
+                        <Input
                             autoFocus={true}
                             fullWidth={true}
                             placeholder="Search"

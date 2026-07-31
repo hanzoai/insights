@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import { ChartDataset as ChartJsDataset } from 'lib/Chart'
 import api from 'lib/api'
 import { getSeriesColor } from 'lib/colors'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { hexToRGBA, pluralize } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
@@ -100,17 +100,17 @@ export const experimentTimeseriesLogic = kea<experimentTimeseriesLogicType>([
 
                         if (response.ok) {
                             if (response.status === 201) {
-                                lemonToast.success('Recalculation started successfully')
+                                toast.success('Recalculation started successfully')
                                 actions.reportExperimentTimeseriesRecalculated(
                                     props.experiment.id as ExperimentIdType,
                                     metric
                                 )
                             } else if (response.status === 200) {
-                                lemonToast.info('Recalculation already in progress')
+                                toast.info('Recalculation already in progress')
                             }
                         }
                     } catch (error) {
-                        lemonToast.error('Failed to start recalculation')
+                        toast.error('Failed to start recalculation')
                         throw error
                     }
 

@@ -1,7 +1,7 @@
 import { BuiltLogic, LogicWrapper, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { humanFriendlyDuration, humanFriendlyNumber, humanizeBytes } from 'lib/utils'
@@ -122,7 +122,7 @@ export function EndpointsUsageOverviewNode(props: {
 
 const ItemCell = ({ item, isPrimary }: { item: Item; isPrimary: boolean }): JSX.Element => {
     const value: React.ReactNode = item.loading ? (
-        <LemonSkeleton className="w-1/3 h-6" />
+        <Skeleton className="w-1/3 h-6" />
     ) : (
         <div
             className={cn(

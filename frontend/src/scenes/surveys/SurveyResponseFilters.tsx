@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
 import { IconCode, IconCopy, IconFilter, IconRefresh, IconX } from '@hanzo/icons'
-import { LemonButton, LemonSelect, LemonSelectOptions, LemonSwitch } from '@hanzo/lemon-ui'
+import { Button, Select, SelectOptions, Switch } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 import { allOperatorsMapping } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { QUESTION_TYPE_ICON_MAP, SurveyQuestionLabel } from 'scenes/surveys/constants'
@@ -146,9 +146,9 @@ export const SurveyResponseFilters = React.memo(function SurveyResponseFilters()
         <div className="deprecated-space-y-2">
             <div className="flex justify-between items-center">
                 <h3 className="m-0">Filter survey results</h3>
-                <LemonButton size="small" type="secondary" icon={<IconCode />} onClick={() => setSqlHelperOpen(true)}>
+                <Button size="small" type="secondary" icon={<IconCode />} onClick={() => setSqlHelperOpen(true)}>
                     Get SQL Query
-                </LemonButton>
+                </Button>
             </div>
             <div className="flex gap-2 justify-between">
                 <div className="flex gap-2 flex-wrap">
@@ -158,7 +158,7 @@ export const SurveyResponseFilters = React.memo(function SurveyResponseFilters()
                         onChange={(dateFrom, dateTo) => setDateRange({ date_from: dateFrom, date_to: dateTo })}
                     />
                     {questionWithFiltersAvailable.length > 0 && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             icon={<IconFilter />}
@@ -168,7 +168,7 @@ export const SurveyResponseFilters = React.memo(function SurveyResponseFilters()
                         >
                             Filter by response
                             {activeAnswerFiltersCount > 0 && ` (${activeAnswerFiltersCount})`}
-                        </LemonButton>
+                        </Button>
                     )}
                     <PropertyFilters
                         propertyFilters={propertyFilters}
@@ -186,12 +186,12 @@ export const SurveyResponseFilters = React.memo(function SurveyResponseFilters()
                     />
                 </div>
                 <div className="flex gap-2 items-center">
-                    <LemonSwitch
+                    <Switch
                         checked={showArchivedResponses}
                         onChange={setShowArchivedResponses}
                         label="Show archived"
                     />
-                    <LemonButton
+                    <Button
                         size="small"
                         type="secondary"
                         icon={<IconRefresh />}
@@ -199,7 +199,7 @@ export const SurveyResponseFilters = React.memo(function SurveyResponseFilters()
                         className="self-start"
                     >
                         Reset all filters
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
 
@@ -215,7 +215,7 @@ export const SurveyResponseFilters = React.memo(function SurveyResponseFilters()
 
                         return (
                             <React.Fragment key={question.id}>
-                                {index > 0 && <LemonDivider className="my-0" label={FilterLogicalOperator.And} />}
+                                {index > 0 && <Divider className="my-0" label={FilterLogicalOperator.And} />}
                                 <div className="grid grid-cols-6 gap-2 p-2 items-center">
                                     <div className="col-span-3">
                                         <span className="font-medium">{question.question}</span>
@@ -228,10 +228,10 @@ export const SurveyResponseFilters = React.memo(function SurveyResponseFilters()
                                         </div>
                                     </div>
                                     <div>
-                                        <LemonSelect
+                                        <Select
                                             value={currentFilter?.operator}
                                             onChange={(val) => handleUpdateFilter(question.id ?? '', 'operator', val)}
-                                            options={operators as LemonSelectOptions<PropertyOperator>}
+                                            options={operators as SelectOptions<PropertyOperator>}
                                             className="w-full"
                                         />
                                     </div>

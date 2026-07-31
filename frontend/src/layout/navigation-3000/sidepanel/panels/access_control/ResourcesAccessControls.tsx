@@ -4,18 +4,18 @@ import { useMemo, useState } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInputSelect,
-    LemonModal,
-    LemonSelect,
-    LemonTable,
-    LemonTableColumns,
-    LemonTag,
+    Button,
+    InputSelect,
+    Modal,
+    Select,
+    Table,
+    TableColumns,
+    Tag,
     Link,
     ProfileBubbles,
     ProfilePicture,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { UserSelectItem } from 'lib/components/UserSelectItem'
@@ -55,10 +55,10 @@ const SummarizeAccessLevels = ({
     return (
         <div className="flex gap-2 flex-wrap">
             {entries.map(({ resource, level }) => (
-                <LemonTag key={resource} type="default">
+                <Tag key={resource} type="default">
                     {capitalizeFirstLetter(pluralizeResource(resource as APIScopeObject))}:{' '}
                     {capitalizeFirstLetter(level)}
-                </LemonTag>
+                </Tag>
             ))}
         </div>
     )
@@ -90,7 +90,7 @@ export function ResourcesAccessControls(): JSX.Element {
     } = useActions(resourcesAccessControlLogic)
 
     // Default table
-    const defaultColumns: LemonTableColumns<DefaultResourceAccessControls> = [
+    const defaultColumns: TableColumns<DefaultResourceAccessControls> = [
         {
             title: '',
             key: 'default',
@@ -111,20 +111,20 @@ export function ResourcesAccessControls(): JSX.Element {
             align: 'right',
             render: () => {
                 return (
-                    <LemonButton
+                    <Button
                         size="small"
                         onClick={openDefaultModal}
                         disabledReason={!canEditRoleBasedAccessControls ? 'You cannot edit this' : undefined}
                     >
                         Edit
-                    </LemonButton>
+                    </Button>
                 )
             },
         },
     ]
 
     // Members table
-    const memberColumns: LemonTableColumns<MemberResourceAccessControls> = [
+    const memberColumns: TableColumns<MemberResourceAccessControls> = [
         {
             title: 'User',
             key: 'member',
@@ -155,20 +155,20 @@ export function ResourcesAccessControls(): JSX.Element {
             align: 'right',
             render: (_, member) => {
                 return (
-                    <LemonButton
+                    <Button
                         size="small"
                         onClick={() => openMemberModal(member)}
                         disabledReason={!canEditRoleBasedAccessControls ? 'You cannot edit this' : undefined}
                     >
                         Edit
-                    </LemonButton>
+                    </Button>
                 )
             },
         },
     ]
 
     // Roles table
-    const roleColumns: LemonTableColumns<RoleResourceAccessControls> = [
+    const roleColumns: TableColumns<RoleResourceAccessControls> = [
         {
             title: 'Role',
             key: 'role',
@@ -214,13 +214,13 @@ export function ResourcesAccessControls(): JSX.Element {
             align: 'right',
             render: (_, role) => {
                 return (
-                    <LemonButton
+                    <Button
                         size="small"
                         onClick={() => openRoleModal(role)}
                         disabledReason={!canEditRoleBasedAccessControls ? 'You cannot edit this' : undefined}
                     >
                         Edit
-                    </LemonButton>
+                    </Button>
                 )
             },
         },
@@ -239,7 +239,7 @@ export function ResourcesAccessControls(): JSX.Element {
                     {/* Default permissions table */}
                     <div className="space-y-2">
                         <h3>Project defaults</h3>
-                        <LemonTable columns={defaultColumns} dataSource={[defaultResourceAccessControls]} />
+                        <Table columns={defaultColumns} dataSource={[defaultResourceAccessControls]} />
                     </div>
 
                     {/* Members permissions table */}
@@ -382,7 +382,7 @@ function ResourcesAccessControlMembers({
     openMemberModal,
 }: {
     memberResourceAccessControls: MemberResourceAccessControls[]
-    memberColumns: LemonTableColumns<MemberResourceAccessControls>
+    memberColumns: TableColumns<MemberResourceAccessControls>
     canEditRoleBasedAccessControls: boolean | null
     openMemberModal: () => void
 }): JSX.Element {
@@ -390,18 +390,18 @@ function ResourcesAccessControlMembers({
         <div className="space-y-2">
             <div className="flex gap-2 items-center justify-between">
                 <h3 className="mb-0">Members</h3>
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={() => openMemberModal()}
                     disabledReason={!canEditRoleBasedAccessControls ? 'You cannot edit this' : undefined}
                 >
                     Add
-                </LemonButton>
+                </Button>
             </div>
             {memberResourceAccessControls.length > 0 ? (
-                <LemonTable columns={memberColumns} dataSource={memberResourceAccessControls} />
+                <Table columns={memberColumns} dataSource={memberResourceAccessControls} />
             ) : (
-                <LemonTable columns={memberColumns} dataSource={[]} emptyState="No member specific permissions" />
+                <Table columns={memberColumns} dataSource={[]} emptyState="No member specific permissions" />
             )}
         </div>
     )
@@ -414,7 +414,7 @@ function ResourcesAccessControlRoles({
     openRoleModal,
 }: {
     roleResourceAccessControls: RoleResourceAccessControls[]
-    roleColumns: LemonTableColumns<RoleResourceAccessControls>
+    roleColumns: TableColumns<RoleResourceAccessControls>
     canEditRoleBasedAccessControls: boolean | null
     openRoleModal: () => void
 }): JSX.Element {
@@ -422,18 +422,18 @@ function ResourcesAccessControlRoles({
         <div className="space-y-2">
             <div className="flex gap-2 items-center justify-between">
                 <h3 className="mb-0">Roles</h3>
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={() => openRoleModal()}
                     disabledReason={!canEditRoleBasedAccessControls ? 'You cannot edit this' : undefined}
                 >
                     Add
-                </LemonButton>
+                </Button>
             </div>
             {roleResourceAccessControls.length > 0 ? (
-                <LemonTable columns={roleColumns} dataSource={roleResourceAccessControls} />
+                <Table columns={roleColumns} dataSource={roleResourceAccessControls} />
             ) : (
-                <LemonTable columns={roleColumns} dataSource={[]} emptyState="No role specific permissions" />
+                <Table columns={roleColumns} dataSource={[]} emptyState="No role specific permissions" />
             )}
         </div>
     )
@@ -564,7 +564,7 @@ function ResourceAccessControlModal(props: {
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={props.modalOpen || false}
             onClose={props.loading ? undefined : props.setModalOpen}
             title={getModalTitle()}
@@ -572,17 +572,17 @@ function ResourceAccessControlModal(props: {
             description={`Set resource access levels for ${props.type === 'member' ? 'members' : 'roles'}`}
             footer={
                 <div className="flex items-center justify-end gap-2">
-                    <LemonButton type="secondary" onClick={props.setModalOpen} disabled={props.loading}>
+                    <Button type="secondary" onClick={props.setModalOpen} disabled={props.loading}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={onSubmit}
                         disabledReason={getValidationMessage()}
                         loading={props.loading}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
@@ -592,7 +592,7 @@ function ResourceAccessControlModal(props: {
                 ) : (
                     <div className="flex gap-2 items-center w-full">
                         <div className="min-w-[16rem] w-full">
-                            <LemonInputSelect
+                            <InputSelect
                                 placeholder={props.placeholder}
                                 value={items}
                                 onChange={(newValues: string[]) => setItems(newValues)}
@@ -637,7 +637,7 @@ function ResourceAccessControlModal(props: {
                                     )}
                                 </div>
                                 <div className="min-w-[8rem]">
-                                    <LemonSelect
+                                    <Select
                                         placeholder="No override"
                                         value={resourceLevels[resource]}
                                         onChange={(newValue) =>
@@ -652,7 +652,7 @@ function ResourceAccessControlModal(props: {
                     })}
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -720,7 +720,7 @@ function DefaultResourceAccessControlModal(props: {
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={props.modalOpen || false}
             onClose={props.loading ? undefined : props.setModalOpen}
             title="Edit project defaults"
@@ -728,17 +728,17 @@ function DefaultResourceAccessControlModal(props: {
             description="Set default resource access levels for all roles and members"
             footer={
                 <div className="flex items-center justify-end gap-2">
-                    <LemonButton type="secondary" onClick={props.setModalOpen} disabled={props.loading}>
+                    <Button type="secondary" onClick={props.setModalOpen} disabled={props.loading}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={onSubmit}
                         disabledReason={getValidationMessage()}
                         loading={props.loading}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
@@ -775,7 +775,7 @@ function DefaultResourceAccessControlModal(props: {
                                 )}
                             </div>
                             <div className="min-w-[8rem]">
-                                <LemonSelect
+                                <Select
                                     placeholder="No override"
                                     value={resourceLevels[resource]}
                                     onChange={(newValue) =>
@@ -789,6 +789,6 @@ function DefaultResourceAccessControlModal(props: {
                     )
                 })}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

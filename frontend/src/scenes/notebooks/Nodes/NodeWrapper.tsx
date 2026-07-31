@@ -12,10 +12,10 @@ import {
 } from '@tiptap/react'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
-import { IconDragHandle, IconLink } from 'lib/lemon-ui/icons'
-import { LemonButton, LemonMenu, LemonMenuItems } from '@hanzo/lemon-ui'
+import { IconDragHandle, IconLink } from 'lib/elements/icons'
+import { Button, Menu, MenuItems } from '@hanzo/elements'
 import './NodeWrapper.scss'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { notebookLogic } from '../Notebook/notebookLogic'
 import { hashCodeForString } from 'lib/utils'
@@ -223,7 +223,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         kernelIsRunning
     const insightsqlSqlIsStale = insightsqlSqlHasExecution && !insightsqlSqlIsFresh
 
-    const defaultMenuItems: LemonMenuItems = [
+    const defaultMenuItems: MenuItems = [
         !NON_COPYABLE_NODES.includes(nodeType)
             ? {
                   label: 'Copy',
@@ -281,12 +281,12 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                 {!inView ? (
                                     <>
                                         <div className="h-10 p-2 flex justify-between">
-                                            <LemonSkeleton className="w-1/4" />
-                                            <LemonSkeleton className="w-20" />
+                                            <Skeleton className="w-1/4" />
+                                            <Skeleton className="w-20" />
                                         </div>
                                         {/* eslint-disable-next-line react/forbid-dom-props */}
                                         <div className="flex items-center p-2" style={{ height: heightEstimate }}>
-                                            <LemonSkeleton className="w-full h-full" />
+                                            <Skeleton className="w-full h-full" />
                                         </div>
                                     </>
                                 ) : (
@@ -301,7 +301,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
 
                                             <div className="flex deprecated-space-x-1">
                                                 {parsedHref && (
-                                                    <LemonButton size="small" icon={<IconLink />} to={parsedHref} />
+                                                    <Button size="small" icon={<IconLink />} to={parsedHref} />
                                                 )}
 
                                                 {isPythonNode ? (
@@ -337,7 +337,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                 ) : null}
 
                                                 {(isEditable || isInCanvas) && Settings ? (
-                                                    <LemonButton
+                                                    <Button
                                                         onClick={() => toggleEditing()}
                                                         size="small"
                                                         icon={<IconPencil />}
@@ -346,7 +346,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                 ) : null}
 
                                                 {expandable && (
-                                                    <LemonButton
+                                                    <Button
                                                         onClick={() => setExpanded(!expanded)}
                                                         size="small"
                                                         icon={expanded ? <IconCollapse /> : <IconExpand />}
@@ -354,9 +354,9 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                 )}
 
                                                 {hasMenu ? (
-                                                    <LemonMenu items={menuItems} placement="bottom-end">
-                                                        <LemonButton icon={<IconEllipsis />} size="small" />
-                                                    </LemonMenu>
+                                                    <Menu items={menuItems} placement="bottom-end">
+                                                        <Button icon={<IconEllipsis />} size="small" />
+                                                    </Menu>
                                                 ) : null}
                                             </div>
                                         </div>
@@ -410,7 +410,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                         visible={slashCommandsPopoverVisible}
                                         onClose={() => setSlashCommandsPopoverVisible(false)}
                                     >
-                                        <LemonButton
+                                        <Button
                                             size="xsmall"
                                             type="secondary"
                                             icon={<IconPlus />}
@@ -421,7 +421,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                         />
                                     </SlashCommandsPopover>
                                     {actions.map((x, i) => (
-                                        <LemonButton
+                                        <Button
                                             key={i}
                                             size="xsmall"
                                             type="secondary"
@@ -432,7 +432,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                             }}
                                         >
                                             {x.text}
-                                        </LemonButton>
+                                        </Button>
                                     ))}
                                 </>
                             ) : null}

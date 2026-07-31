@@ -1,13 +1,13 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -49,12 +49,12 @@ export function ProductTourComponent({ id }: ProductTourLogicProps): JSX.Element
     return (
         <div>
             {!id ? (
-                <LemonSkeleton />
+                <Skeleton />
             ) : (
                 <BindLogic logic={productTourLogic} props={{ id }}>
                     {isEditingProductTour ? <ProductTourEdit id={id} /> : <ProductTourView id={id} />}
 
-                    <LemonModal
+                    <Modal
                         title={toolbarMode === 'edit' ? 'Edit in toolbar' : 'Preview product tour'}
                         description="Select a URL to launch the toolbar"
                         isOpen={isToolbarModalOpen}
@@ -69,7 +69,7 @@ export function ProductTourComponent({ id }: ProductTourLogicProps): JSX.Element
                                 userIntent={toolbarMode === 'edit' ? 'edit-product-tour' : 'preview-product-tour'}
                             />
                         </div>
-                    </LemonModal>
+                    </Modal>
                 </BindLogic>
             )}
         </div>

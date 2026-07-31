@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -11,10 +11,10 @@ export function HeatmapsForbiddenURL(): JSX.Element {
 
     return (
         <div className="flex-1 gap-y-4 my-2">
-            <LemonBanner type="error">
+            <Banner type="error">
                 {dataUrl} is not an authorized URL. Please add it to the list of authorized URLs to view heatmaps on
                 this page.
-            </LemonBanner>
+            </Banner>
             <h4 className="my-4">Authorized Toolbar URLs</h4>
             <AuthorizedUrlList type={AuthorizedUrlListType.TOOLBAR_URLS} />
         </div>

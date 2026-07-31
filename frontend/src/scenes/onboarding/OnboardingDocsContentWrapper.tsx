@@ -5,11 +5,11 @@ import { StepProps, StepsProps } from '@hanzo/shared-onboarding/steps'
 import { StepDefinition, StepModifier } from '@hanzo/shared-onboarding/steps'
 
 import { CodeSnippet, getLanguage } from 'lib/components/CodeSnippet'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Markdown } from 'lib/elements/Markdown'
+import { Tabs } from 'lib/elements/Tabs'
+import { Tag } from 'lib/elements/Tag'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -94,12 +94,12 @@ function Step({
             <div className="flex items-center gap-2">
                 <h3 className="m-0">{numberedTitle}</h3>
                 {badge && (
-                    <LemonTag
+                    <Tag
                         type={badge === 'required' ? 'default' : badge === 'recommended' ? 'success' : 'option'}
                         className="text-xs"
                     >
                         {badge}
-                    </LemonTag>
+                    </Tag>
                 )}
             </div>
             {subtitle && <p className="text-muted text-sm m-0">{subtitle}</p>}
@@ -193,7 +193,7 @@ function CodeBlock({
     return (
         <div className="space-y-2">
             {uniqueFiles.length > 1 && (
-                <LemonTabs
+                <Tabs
                     activeKey={selectedFile || uniqueFiles[0]}
                     onChange={(key) => setSelectedFile(key as string)}
                     tabs={uniqueFiles.map((file) => ({
@@ -220,10 +220,10 @@ function CalloutBox({
     const bannerType = type === 'caution' ? 'warning' : type === 'action' ? 'info' : 'info'
 
     return (
-        <LemonBanner type={bannerType} className="my-4 [&>*]:font-normal">
+        <Banner type={bannerType} className="my-4 [&>*]:font-normal">
             {title && <strong>{title}</strong>}
             {children}
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -249,20 +249,20 @@ function ProductScreenshot({
 }
 
 function OSButton(props: any): JSX.Element {
-    return <LemonButton {...props} />
+    return <Button {...props} />
 }
 
 function Markdown({ children }: { children: string | ReactNode }): JSX.Element {
     const content = typeof children === 'string' ? children : String(children)
 
-    return <LemonMarkdown disableDocsRedirect={true}>{content}</LemonMarkdown>
+    return <Markdown disableDocsRedirect={true}>{content}</Markdown>
 }
 
 function Blockquote({ children }: { children: ReactNode }): JSX.Element {
     return (
-        <LemonBanner type="info" className="my-4 [&>*]:font-normal">
+        <Banner type="info" className="my-4 [&>*]:font-normal">
             {children}
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -274,7 +274,7 @@ function TabGroup({ tabs, children }: { tabs: string[]; children: ReactNode }): 
     return (
         <TabContext.Provider value={{ activeTab, setActiveTab }}>
             <div>
-                <LemonTabs
+                <Tabs
                     activeKey={String(activeTab)}
                     onChange={(key) => setActiveTab(Number(key))}
                     tabs={tabs.map((tab, idx) => ({ key: String(idx), label: tab }))}

@@ -1,6 +1,6 @@
 import { JSONContent } from '@tiptap/core'
 
-import { LemonCard } from '@hanzo/lemon-ui'
+import { Card } from '@hanzo/elements'
 
 import type { ChatMessage, Ticket } from '../../types'
 import { MessageInput } from './MessageInput'
@@ -45,7 +45,7 @@ export function ChatView({
     const listMaxHeight = maxHeight ?? '600px'
 
     return (
-        <LemonCard hoverEffect={false} className="flex flex-col overflow-hidden p-3">
+        <Card hoverEffect={false} className="flex flex-col overflow-hidden p-3">
             {header}
             <MessageList
                 messages={messages}
@@ -66,6 +66,6 @@ export function ChatView({
                     showPrivateOption={showPrivateOption}
                 />
             </div>
-        </LemonCard>
+        </Card>
     )
 }

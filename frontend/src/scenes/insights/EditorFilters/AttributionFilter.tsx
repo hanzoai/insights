@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 
@@ -24,7 +24,7 @@ export function Attribution({ insightProps }: EditorFilterProps): JSX.Element {
               : breakdownAttributionType
 
     return (
-        <LemonSelect
+        <Select
             value={currentValue}
             placeholder="Attribution"
             options={[

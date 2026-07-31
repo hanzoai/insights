@@ -3,9 +3,9 @@ import { useMemo, useState } from 'react'
 
 import { IconPencil } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Modal } from 'lib/elements/Modal'
 
 import { experimentsTabLogic } from './experimentsTabLogic'
 
@@ -34,7 +34,7 @@ export function SelectorEditor({ selector, variant, transformIndex }: SelectorEd
 
     return (
         <>
-            <LemonButton
+            <Button
                 size="xsmall"
                 icon={<IconPencil />}
                 tooltip="Edit selector"
@@ -44,14 +44,14 @@ export function SelectorEditor({ selector, variant, transformIndex }: SelectorEd
                     setEditSelectorOpen(true)
                 }}
             />
-            <LemonModal
+            <Modal
                 isOpen={editSelectorOpen}
                 onClose={() => setEditSelectorOpen(false)}
                 title="Edit selector"
                 footer={
                     <>
-                        <LemonButton onClick={() => setEditSelectorOpen(false)}>Cancel</LemonButton>
-                        <LemonButton
+                        <Button onClick={() => setEditSelectorOpen(false)}>Cancel</Button>
+                        <Button
                             type="primary"
                             onClick={() => {
                                 setEditSelectorOpen(false)
@@ -69,12 +69,12 @@ export function SelectorEditor({ selector, variant, transformIndex }: SelectorEd
                             }
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
-                <LemonInput value={editSelectorValue} onChange={(value) => setEditSelectorValue(value)} />
-            </LemonModal>
+                <Input value={editSelectorValue} onChange={(value) => setEditSelectorValue(value)} />
+            </Modal>
         </>
     )
 }

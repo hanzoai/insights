@@ -1,5 +1,5 @@
 import { IconCheckCircle, IconX } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { BillingFeatureType } from '~/types'
 

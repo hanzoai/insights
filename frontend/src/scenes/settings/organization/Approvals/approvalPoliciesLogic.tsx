@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers } from 'ke
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -53,10 +53,10 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
                     throw new Error('No team selected')
                 }
                 await api.create(`api/environments/${teamId}/approval_policies/`, policy)
-                lemonToast.success('Approval policy created')
+                toast.success('Approval policy created')
                 actions.loadPolicies()
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to create approval policy')
+                toast.error(error.detail || 'Failed to create approval policy')
             }
         },
         updatePolicy: async ({ id, policy }) => {
@@ -66,10 +66,10 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
                     throw new Error('No team selected')
                 }
                 await api.update(`api/environments/${teamId}/approval_policies/${id}/`, policy)
-                lemonToast.success('Approval policy updated')
+                toast.success('Approval policy updated')
                 actions.loadPolicies()
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to update approval policy')
+                toast.error(error.detail || 'Failed to update approval policy')
             }
         },
         deletePolicy: async ({ id }) => {
@@ -79,10 +79,10 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
                     throw new Error('No team selected')
                 }
                 await api.delete(`api/environments/${teamId}/approval_policies/${id}/`)
-                lemonToast.success('Approval policy deleted')
+                toast.success('Approval policy deleted')
                 actions.loadPolicies()
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to delete approval policy')
+                toast.error(error.detail || 'Failed to delete approval policy')
             }
         },
     })),

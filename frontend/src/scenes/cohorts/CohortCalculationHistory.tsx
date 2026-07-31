@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconClock } from '@hanzo/icons'
-import { LemonSkeleton, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
+import { Skeleton, Table, TableColumns } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -56,7 +56,7 @@ export function CohortCalculationHistory(props: CohortCalculationHistoryProps): 
         return <NotFound object="cohort" />
     }
 
-    const columns: LemonTableColumns<CohortCalculationHistoryRecord> = [
+    const columns: TableColumns<CohortCalculationHistoryRecord> = [
         {
             title: 'Started',
             dataIndex: 'started_at',
@@ -131,13 +131,13 @@ export function CohortCalculationHistory(props: CohortCalculationHistoryProps): 
 
             {calculationHistoryResponseLoading ? (
                 <div className="space-y-4">
-                    <LemonSkeleton className="h-8" />
-                    <LemonSkeleton className="h-8" />
-                    <LemonSkeleton className="h-8" />
-                    <LemonSkeleton className="h-8" />
+                    <Skeleton className="h-8" />
+                    <Skeleton className="h-8" />
+                    <Skeleton className="h-8" />
+                    <Skeleton className="h-8" />
                 </div>
             ) : (
-                <LemonTable
+                <Table
                     columns={columns}
                     dataSource={calculationHistory}
                     pagination={{

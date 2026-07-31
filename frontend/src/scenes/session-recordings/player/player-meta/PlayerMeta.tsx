@@ -3,13 +3,13 @@ import './PlayerMeta.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect, LemonSelectOption, Link } from '@hanzo/lemon-ui'
+import { Select, SelectOption, Link } from '@hanzo/elements'
 
 import { Logo } from 'lib/brand/Logo'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { isObject } from 'lib/utils'
 import { DraggableToNotebook } from 'scenes/notebooks/AddToNotebook/DraggableToNotebook'
 import { IconWindow } from 'scenes/session-recordings/player/icons'
@@ -123,7 +123,7 @@ export function PlayerMeta(): JSX.Element {
         )
     }
 
-    const windowOptions: LemonSelectOption<number | null>[] = [
+    const windowOptions: SelectOption<number | null>[] = [
         {
             label: <IconWindow value={currentWindowIndex} className="text-secondary" />,
             value: null,
@@ -153,10 +153,10 @@ export function PlayerMeta(): JSX.Element {
             >
                 <div className="flex flex-row items-center justify-between gap-x-1 whitespace-nowrap overflow-hidden px-1 py-0.5 text-xs">
                     {loading ? (
-                        <LemonSkeleton className="w-1/3 h-4 my-1" />
+                        <Skeleton className="w-1/3 h-4 my-1" />
                     ) : (
                         <>
-                            <LemonSelect
+                            <Select
                                 size="xsmall"
                                 options={windowOptions}
                                 value={trackedWindow}

@@ -1,7 +1,7 @@
 import { actions, connect, kea, path } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { userLogic } from 'scenes/userLogic'
@@ -21,7 +21,7 @@ export const optOutSceneLogic = kea<optOutSceneLogicType>([
             __default: null as string | null,
             openPreferencesPage: async (recipient?: string): Promise<string | null> => {
                 if (!values.user?.email) {
-                    lemonToast.error('User email not found')
+                    toast.error('User email not found')
                     return null
                 }
 
@@ -30,13 +30,13 @@ export const optOutSceneLogic = kea<optOutSceneLogicType>([
                         recipient ?? values.user.email
                     )
                     if (!newPreferencesUrl) {
-                        lemonToast.error('Failed to generate workflows preferences link')
+                        toast.error('Failed to generate workflows preferences link')
                         return null
                     }
                     window.open(newPreferencesUrl, '_blank')
                     return newPreferencesUrl
                 } catch {
-                    lemonToast.error('Failed to generate workflows preferences link')
+                    toast.error('Failed to generate workflows preferences link')
                     return null
                 }
             },

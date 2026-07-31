@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonInputSelect, LemonInputSelectOption } from '@hanzo/lemon-ui'
+import { InputSelect, InputSelectOption } from '@hanzo/elements'
 
 import { IntegrationType } from '~/types'
 
@@ -9,7 +9,7 @@ import { clickupIntegrationLogic } from './clickupIntegrationLogic'
 
 const getClickUpSpaceOptions = (
     clickUpSpaces?: { id: string; name: string }[] | null
-): LemonInputSelectOption[] | null => {
+): InputSelectOption[] | null => {
     return clickUpSpaces
         ? clickUpSpaces.map((space) => ({
               key: space.id,
@@ -25,7 +25,7 @@ const getClickUpSpaceOptions = (
 
 const getClickUpWorkspaceOptions = (
     clickUpWorkspaces?: { id: string; name: string }[] | null
-): LemonInputSelectOption[] | null => {
+): InputSelectOption[] | null => {
     return clickUpWorkspaces
         ? clickUpWorkspaces.map((workspace) => ({
               key: workspace.id,
@@ -41,7 +41,7 @@ const getClickUpWorkspaceOptions = (
 
 const getClickUpListOptions = (
     clickUpLists?: { id: string; name: string }[] | null
-): LemonInputSelectOption[] | null => {
+): InputSelectOption[] | null => {
     return clickUpLists
         ? clickUpLists.map(({ id, name }) => ({
               key: id,
@@ -83,7 +83,7 @@ export function ClickUpSpacePicker({
 
     return (
         <>
-            <LemonInputSelect
+            <InputSelect
                 onChange={(val) => onChange?.(val[0] ?? null)}
                 value={value ? [value] : []}
                 onFocus={() =>
@@ -125,7 +125,7 @@ export function ClickUpWorkspacePicker({ onChange, value, integration, disabled 
 
     return (
         <>
-            <LemonInputSelect
+            <InputSelect
                 onChange={(val) => onChange?.(val[0] ?? null)}
                 value={value ? [value] : []}
                 onFocus={() => !clickUpWorkspaces && !clickUpWorkspacesLoading && loadClickUpWorkspaces()}
@@ -170,7 +170,7 @@ export function ClickUpListPicker({
 
     return (
         <>
-            <LemonInputSelect
+            <InputSelect
                 onChange={(val) => onChange?.(val[0] ?? null)}
                 value={value ? [value] : []}
                 onFocus={() =>

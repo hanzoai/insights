@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 
-import { LemonLabel } from '@hanzo/lemon-ui'
+import { Label } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { TeamSelector } from './TeamSelector'
 import type { OrganizationOption, TeamOption } from './types'
@@ -20,9 +20,9 @@ export const RequiredTeamAccessSelector = ({
 }: RequiredTeamAccessSelectorProps): JSX.Element => {
     return (
         <div className="flex flex-col gap-2">
-            <LemonLabel>Select project</LemonLabel>
+            <Label>Select project</Label>
             <p className="text-sm text-muted mb-2">This application requires access to a specific project.</p>
-            <LemonField name="scoped_teams">
+            <Field name="scoped_teams">
                 {({ value, onChange }) => {
                     const arrayValue = Array.isArray(value) ? value : []
 
@@ -42,7 +42,7 @@ export const RequiredTeamAccessSelector = ({
                         />
                     )
                 }}
-            </LemonField>
+            </Field>
         </div>
     )
 }

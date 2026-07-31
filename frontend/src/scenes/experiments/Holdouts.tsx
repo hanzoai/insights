@@ -3,18 +3,18 @@ import { useState } from 'react'
 
 import { IconPencil, IconTrash } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonDialog,
-    LemonDivider,
-    LemonInput,
-    LemonLabel,
-    LemonModal,
-    LemonTable,
-    LemonTableColumns,
-} from '@hanzo/lemon-ui'
+    Banner,
+    Button,
+    Dialog,
+    Divider,
+    Input,
+    Label,
+    Modal,
+    Table,
+    TableColumns,
+} from '@hanzo/elements'
 
-import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
+import { Slider } from 'lib/elements/Slider'
 
 import { ExperimentHoldoutType } from '~/types'
 
@@ -85,19 +85,19 @@ export function Holdouts(): JSX.Element {
             key: 'actions',
             render: (_: any, record: ExperimentHoldoutType) => (
                 <div className="flex gap-2">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="xsmall"
                         icon={<IconPencil />}
                         onClick={() => openEditModal(record)}
                     />
-                    <LemonButton
+                    <Button
                         type="secondary"
                         icon={<IconTrash />}
                         size="xsmall"
                         status="danger"
                         onClick={() => {
-                            LemonDialog.open({
+                            Dialog.open({
                                 title: 'Delete this holdout?',
                                 content: (
                                     <div className="text-sm">
@@ -127,14 +127,14 @@ export function Holdouts(): JSX.Element {
 
     return (
         <div className="deprecated-space-y-4">
-            <LemonModal
+            <Modal
                 isOpen={isHoldoutModalOpen}
                 onClose={closeModal}
                 title={editingHoldout ? 'Edit holdout' : 'Add holdout'}
                 footer={
                     <>
-                        <LemonButton onClick={closeModal}>Cancel</LemonButton>
-                        <LemonButton
+                        <Button onClick={closeModal}>Cancel</Button>
+                        <Button
                             type="primary"
                             onClick={() => {
                                 if (editingHoldout) {
@@ -147,39 +147,39 @@ export function Holdouts(): JSX.Element {
                             disabledReason={getDisabledReason()}
                         >
                             {editingHoldout ? 'Update' : 'Save'}
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             >
                 <div className="deprecated-space-y-4">
                     <div>
-                        <LemonLabel>Name</LemonLabel>
-                        <LemonInput
+                        <Label>Name</Label>
+                        <Input
                             value={holdout.name}
                             onChange={(name) => setHoldout({ name })}
                             placeholder="e.g. 'Frontend holdout group 1'"
                         />
                     </div>
                     <div>
-                        <LemonLabel>Description</LemonLabel>
-                        <LemonInput
+                        <Label>Description</Label>
+                        <Input
                             value={holdout.description || ''}
                             onChange={(description) => setHoldout({ description })}
                         />
                     </div>
                     <div>
-                        <LemonDivider />
-                        <LemonBanner type="info">
+                        <Divider />
+                        <Banner type="info">
                             <div className="deprecated-space-y-2">
                                 <div>
                                     Specify the percentage population that should be included in this holdout group.
                                     This is stable across experiments.
                                 </div>
                             </div>
-                        </LemonBanner>
+                        </Banner>
                         <div className="mt-4 flex flex-wrap items-center gap-1">
                             Roll out to{' '}
-                            <LemonSlider
+                            <Slider
                                 value={holdout.filters?.[0]?.rollout_percentage || 100}
                                 onChange={(rollout_percentage) =>
                                     setHoldout({
@@ -191,7 +191,7 @@ export function Holdouts(): JSX.Element {
                                 step={1}
                                 className="ml-1.5 w-20"
                             />
-                            <LemonInput
+                            <Input
                                 data-attr="rollout-percentage"
                                 type="number"
                                 className="ml-2 mr-1.5 max-w-30"
@@ -210,9 +210,9 @@ export function Holdouts(): JSX.Element {
                         </div>
                     </div>
                 </div>
-            </LemonModal>
+            </Modal>
 
-            <LemonBanner type="info">
+            <Banner type="info">
                 <div className="deprecated-space-y-2">
                     <div>
                         Holdouts are stable groups of users excluded from experiment variations.They act as a baseline,
@@ -221,14 +221,14 @@ export function Holdouts(): JSX.Element {
                         can apply it to an experiment during creation.
                     </div>
                 </div>
-            </LemonBanner>
+            </Banner>
             <div className="flex justify-end">
-                <LemonButton type="primary" onClick={openCreateModal} data-attr="add-holdout">
+                <Button type="primary" onClick={openCreateModal} data-attr="add-holdout">
                     New holdout
-                </LemonButton>
+                </Button>
             </div>
 
-            <LemonTable
+            <Table
                 emptyState={
                     <div className="py-4 text-secondary text-sm text-center">
                         You have not created any holdouts yet.
@@ -236,7 +236,7 @@ export function Holdouts(): JSX.Element {
                 }
                 loading={holdoutsLoading}
                 dataSource={holdouts}
-                columns={columns as LemonTableColumns<ExperimentHoldoutType>}
+                columns={columns as TableColumns<ExperimentHoldoutType>}
             />
         </div>
     )

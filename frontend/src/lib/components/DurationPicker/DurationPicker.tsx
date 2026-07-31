@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Input, Select } from '@hanzo/elements'
 
 import { Duration, SmallTimeUnit } from '~/types'
 
@@ -55,7 +55,7 @@ export function DurationPicker({ value, onChange, autoFocus }: DurationPickerPro
 
     return (
         <div className="flex items-center gap-2">
-            <LemonInput
+            <Input
                 type="number"
                 value={localTimeValue}
                 placeholder="0"
@@ -64,7 +64,7 @@ export function DurationPicker({ value, onChange, autoFocus }: DurationPickerPro
                 step={1}
                 onChange={(val) => _onChange({ newTimeValue: val, newUnit: unit })}
             />
-            <LemonSelect
+            <Select
                 value={unit}
                 onChange={(newValue) => _onChange({ newUnit: newValue as SmallTimeUnit, newTimeValue: localTimeValue })}
                 options={durationOptions.map((value) => ({ value, label: value }))}

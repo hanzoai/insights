@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useState } from 'react'
 
 import { IconCheckCircle, IconCorrelationAnalysis, IconPencil, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonCollapse, LemonTable, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Collapse, Table, Spinner, Tooltip } from '@hanzo/elements'
 
 import { getSeriesBackgroundColor, getSeriesColor } from 'lib/colors'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -309,7 +309,7 @@ export function Exposures(): JSX.Element {
     }
 
     return (
-        <LemonCollapse
+        <Collapse
             onChange={handleCollapseChange}
             panels={[
                 {
@@ -331,7 +331,7 @@ export function Exposures(): JSX.Element {
                                             Exposures will appear here once the first participant has been exposed.
                                         </p>
                                         <div className="flex justify-center mt-4">
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconPencil fontSize="12" />}
                                                 size="xsmall"
                                                 className="flex items-center gap-2"
@@ -339,7 +339,7 @@ export function Exposures(): JSX.Element {
                                                 onClick={() => openExposureCriteriaModal()}
                                             >
                                                 Edit exposure criteria
-                                            </LemonButton>
+                                            </Button>
                                         </div>
                                     </div>
                                 </div>
@@ -356,7 +356,7 @@ export function Exposures(): JSX.Element {
                                     <div className="text-sm font-semibold">
                                         {getExposureCriteriaLabel(exposureCriteria)}
                                     </div>
-                                    <LemonButton
+                                    <Button
                                         icon={<IconPencil fontSize="12" />}
                                         size="xsmall"
                                         className="flex items-center gap-2"
@@ -368,7 +368,7 @@ export function Exposures(): JSX.Element {
                             {exposures?.timeseries.length > 0 && (
                                 <div>
                                     <h3 className="card-secondary">Total exposures</h3>
-                                    <LemonTable
+                                    <Table
                                         dataSource={[
                                             ...(exposures?.timeseries || []).filter(
                                                 (series: ExperimentExposureTimeSeries) =>

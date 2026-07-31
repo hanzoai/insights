@@ -1,9 +1,9 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconOpenSidebar, IconShare } from '@hanzo/icons'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { sceneLogic } from 'scenes/sceneLogic'
 import { urls } from 'scenes/urls'
@@ -41,7 +41,7 @@ export function AiFirstMaxInstance({ tabId }: AiFirstMaxInstanceProps): JSX.Elem
                     <div className="flex flex-col grow overflow-hidden">
                         <div className="flex w-full gap-2 py-2 border-b border-primary items-center justify-end px-2">
                             {tabId && conversationId ? (
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="secondary"
                                     sideIcon={<IconShare />}
@@ -53,10 +53,10 @@ export function AiFirstMaxInstance({ tabId }: AiFirstMaxInstanceProps): JSX.Elem
                                     }}
                                 >
                                     Copy link to chat
-                                </LemonButton>
+                                </Button>
                             ) : undefined}
                             {tabId ? (
-                                <LemonButton
+                                <Button
                                     size="small"
                                     type="secondary"
                                     sideIcon={<IconOpenSidebar />}
@@ -66,7 +66,7 @@ export function AiFirstMaxInstance({ tabId }: AiFirstMaxInstanceProps): JSX.Elem
                                     }}
                                 >
                                     Open in context panel
-                                </LemonButton>
+                                </Button>
                             ) : undefined}
                         </div>
                         <ChatArea
@@ -111,14 +111,14 @@ function ChatArea({ threadVisible, conversation, onStartNewConversation }: ChatA
                 <ThreadAutoScroller>
                     {conversation?.has_unsupported_content && (
                         <div className="px-4 pt-4">
-                            <LemonBanner type="warning">
+                            <Banner type="warning">
                                 <div className="flex items-center justify-between gap-4">
                                     <span>This thread contains content that is no longer supported.</span>
-                                    <LemonButton type="primary" onClick={onStartNewConversation}>
+                                    <Button type="primary" onClick={onStartNewConversation}>
                                         Start a new thread
-                                    </LemonButton>
+                                    </Button>
                                 </div>
-                            </LemonBanner>
+                            </Banner>
                         </div>
                     )}
                     <Thread className="p-3" />

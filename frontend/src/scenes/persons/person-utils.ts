@@ -1,8 +1,8 @@
 import './PersonDisplay.scss'
 
 import { PERSON_DEFAULT_DISPLAY_NAME_PROPERTIES } from 'lib/constants'
-import { NUM_LETTERMARK_STYLES } from 'lib/lemon-ui/Lettermark/Lettermark'
-import { ProfilePictureProps } from 'lib/lemon-ui/ProfilePicture'
+import { NUM_LETTERMARK_STYLES } from 'lib/elements/Lettermark/Lettermark'
+import { ProfilePictureProps } from 'lib/elements/ProfilePicture'
 import { isUUIDLike, midEllipsis } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'

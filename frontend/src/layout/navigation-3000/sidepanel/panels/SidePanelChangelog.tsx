@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { SidePanelPaneHeader } from '../components/SidePanelPaneHeader'
 import { SidePanelDocsSkeleton } from './SidePanelDocs'
@@ -15,7 +15,7 @@ export function SidePanelChangelog(): JSX.Element {
         <>
             <SidePanelPaneHeader>
                 <div className="flex-1" />
-                <LemonButton
+                <Button
                     size="small"
                     targetBlank
                     onClick={() => {
@@ -24,7 +24,7 @@ export function SidePanelChangelog(): JSX.Element {
                     }}
                 >
                     Open in new tab
-                </LemonButton>
+                </Button>
             </SidePanelPaneHeader>
             <div className="relative flex-1 overflow-hidden">
                 <iframe

@@ -2,10 +2,10 @@ import { useValues } from 'kea'
 import { router } from 'kea-router'
 import { SurveyQuestionType } from '@hanzo/insights'
 
-import { LemonButton, LemonDivider, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Divider, Modal } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
 import { urls } from 'scenes/urls'
 
@@ -79,7 +79,7 @@ LIMIT
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             title="SQL Query Helper"
@@ -106,7 +106,7 @@ LIMIT
                         language={Language.SQL}
                         compact
                         actions={
-                            <LemonButton
+                            <Button
                                 icon={<IconOpenInNew />}
                                 size="small"
                                 onClick={() => openInInsight(generateFullSurveyQuery())}
@@ -119,7 +119,7 @@ LIMIT
                     </CodeSnippet>
                 </div>
 
-                <LemonDivider />
+                <Divider />
 
                 <div className="flex flex-col gap-2">
                     <h4>Individual Question Queries</h4>
@@ -133,7 +133,7 @@ LIMIT
                                     language={Language.SQL}
                                     compact
                                     actions={
-                                        <LemonButton
+                                        <Button
                                             icon={<IconOpenInNew />}
                                             size="small"
                                             onClick={() => openInInsight(generateSingleQuestionQuery(question, index))}
@@ -149,6 +149,6 @@ LIMIT
                     </div>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

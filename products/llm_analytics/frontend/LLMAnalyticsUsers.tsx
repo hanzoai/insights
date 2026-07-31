@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { DataTable } from '~/queries/nodes/DataTable/DataTable'
 import { isInsightsQLQuery } from '~/queries/utils'

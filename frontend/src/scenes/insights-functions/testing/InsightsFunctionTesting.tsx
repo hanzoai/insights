@@ -5,17 +5,17 @@ import { useState } from 'react'
 
 import { IconEllipsis, IconRefresh } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonCheckbox,
-    LemonDialog,
-    LemonDropdown,
-    LemonMenu,
-    LemonTable,
-    LemonTag,
-    LemonTagType,
+    Banner,
+    Button,
+    Checkbox,
+    Dialog,
+    Dropdown,
+    Menu,
+    Table,
+    Tag,
+    TagType,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -81,12 +81,12 @@ export function InsightsFunctionTesting(): JSX.Element | null {
     return (
         <BindLogic logic={insightsFunctionTestingLogic} props={{ id }}>
             <div className="deprecated-space-y-3">
-                <LemonBanner type="info">
+                <Banner type="info">
                     <span>
                         This is a list of all events matching your filters. You can run the function using these
                         historical events.
                     </span>
-                </LemonBanner>
+                </Banner>
                 <div className="flex items-center gap-2 justify-bewtween">
                     <div className="flex items-center gap-2 flex-1">
                         <RunsFilters />
@@ -122,12 +122,12 @@ function TestRunnerOptions(): JSX.Element {
     return (
         <>
             {!selectingMany ? (
-                <LemonButton size="small" type="secondary" onClick={() => setSelectingMany(true)}>
+                <Button size="small" type="secondary" onClick={() => setSelectingMany(true)}>
                     Select invocations
-                </LemonButton>
+                </Button>
             ) : (
                 <>
-                    <LemonButton
+                    <Button
                         size="small"
                         type="secondary"
                         onClick={() => {
@@ -136,8 +136,8 @@ function TestRunnerOptions(): JSX.Element {
                         }}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         size="small"
                         type="secondary"
                         onClick={() =>
@@ -149,12 +149,12 @@ function TestRunnerOptions(): JSX.Element {
                         <span>
                             {selectedForRetry.length === eventsWithRetries.length ? 'Deselect all' : 'Select all'}
                         </span>
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         size="small"
                         type="primary"
                         onClick={() => {
-                            LemonDialog.open({
+                            Dialog.open({
                                 title: 'Test selected events',
                                 content: `Are you sure you want to test the selected events? Please don't close the window until the invocations have completed.`,
                                 secondaryButton: {
@@ -189,7 +189,7 @@ function TestRunnerOptions(): JSX.Element {
                         }
                     >
                         Test selected
-                    </LemonButton>
+                    </Button>
                 </>
             )}
         </>
@@ -209,7 +209,7 @@ function RunsFilters(): JSX.Element {
 
     return (
         <>
-            <LemonButton
+            <Button
                 onClick={handleRefresh}
                 loading={eventsLoading}
                 type="secondary"
@@ -217,13 +217,13 @@ function RunsFilters(): JSX.Element {
                 size="small"
             >
                 Refresh
-            </LemonButton>
+            </Button>
             <DateFilter
                 dateFrom={baseEventsQuery?.after ?? undefined}
                 dateTo={baseEventsQuery?.before ?? undefined}
                 onChange={changeDateRange}
             />
-            <LemonDropdown
+            <Dropdown
                 visible={dropdownOpen}
                 closeOnClickInside={false}
                 matchWidth={false}
@@ -237,17 +237,17 @@ function RunsFilters(): JSX.Element {
                     >
                         <InsightsFunctionFilters embedded={true} showTriggerOptions={false} />
                         <div className="flex justify-end mt-2">
-                            <LemonButton size="small" type="primary" onClick={() => setDropdownOpen(false)}>
+                            <Button size="small" type="primary" onClick={() => setDropdownOpen(false)}>
                                 Done
-                            </LemonButton>
+                            </Button>
                         </div>
                     </Form>
                 }
             >
-                <LemonButton size="small" type="secondary" onClick={() => setDropdownOpen((v) => !v)}>
+                <Button size="small" type="secondary" onClick={() => setDropdownOpen((v) => !v)}>
                     Filters
-                </LemonButton>
-            </LemonDropdown>
+                </Button>
+            </Dropdown>
         </>
     )
 }
@@ -277,7 +277,7 @@ function TestingEventsList(): JSX.Element | null {
     const { setSampleGlobals, toggleExpanded } = useActions(insightsFunctionTestLogic(logicProps))
 
     return (
-        <LemonTable
+        <Table
             dataSource={eventsWithRetries}
             loading={eventsLoading}
             loadingSkeletonRows={5}
@@ -297,7 +297,7 @@ function TestingEventsList(): JSX.Element | null {
                 noIndent: true,
                 expandedRowRender: ([, , , retries]) => {
                     return (
-                        <LemonTable
+                        <Table
                             dataSource={retries.reduce(
                                 (acc: LogEntry[], group: CyclotronJobTestInvocationResultWithEventId) =>
                                     acc.concat(group.logs),
@@ -321,7 +321,7 @@ function TestingEventsList(): JSX.Element | null {
                                     key: 'level',
                                     dataIndex: 'level',
                                     render: (_, { level }) => (
-                                        <LemonTag type={tagTypeForLevel(level)}>{level.toUpperCase()}</LemonTag>
+                                        <Tag type={tagTypeForLevel(level)}>{level.toUpperCase()}</Tag>
                                     ),
                                 },
                                 {
@@ -343,7 +343,7 @@ function TestingEventsList(): JSX.Element | null {
                     render: (_, row) => {
                         const eventId = row[0].uuid
 
-                        const getStatus = (): { text: string; type: LemonTagType } => {
+                        const getStatus = (): { text: string; type: TagType } => {
                             if (loadingRetries.includes(eventId)) {
                                 return {
                                     text: 'Running',
@@ -374,7 +374,7 @@ function TestingEventsList(): JSX.Element | null {
                         return (
                             <div className="flex gap-2 items-center">
                                 {selectingMany ? (
-                                    <LemonCheckbox
+                                    <Checkbox
                                         checked={selectedForRetry.includes(eventId)}
                                         onChange={(checked) => {
                                             if (checked) {
@@ -386,9 +386,9 @@ function TestingEventsList(): JSX.Element | null {
                                     />
                                 ) : null}
 
-                                <LemonTag type={getStatus().type}>{capitalizeFirstLetter(getStatus().text)}</LemonTag>
+                                <Tag type={getStatus().type}>{capitalizeFirstLetter(getStatus().text)}</Tag>
 
-                                <LemonMenu
+                                <Menu
                                     items={[
                                         eventId
                                             ? {
@@ -425,12 +425,12 @@ function TestingEventsList(): JSX.Element | null {
                                         },
                                     ]}
                                 >
-                                    <LemonButton
+                                    <Button
                                         size="xsmall"
                                         icon={<IconEllipsis className="rotate-90" />}
                                         loading={loadingRetries.includes(eventId) ? true : undefined}
                                     />
-                                </LemonMenu>
+                                </Menu>
                             </div>
                         )
                     },

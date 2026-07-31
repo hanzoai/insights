@@ -1,10 +1,10 @@
 import { useValues } from 'kea'
 
-import { LemonCheckbox, LemonDialog, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
+import { Checkbox, Dialog, Divider, Input } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { defaultSurveyAppearance } from 'scenes/surveys/constants'
 import { SurveyAppearanceModal } from 'scenes/surveys/survey-appearance/SurveyAppearanceModal'
 import {
@@ -58,7 +58,7 @@ export function Customization({
                             validationErrors={validationErrors}
                             surveyType={survey.type}
                         />
-                        <LemonDivider />
+                        <Divider />
                     </>
                 )}
                 <SurveyColorsAppearance
@@ -68,9 +68,9 @@ export function Customization({
                     customizeRatingButtons={hasRatingButtons}
                     customizePlaceholderText={hasPlaceholderText}
                 />
-                <LemonDivider />
+                <Divider />
                 <div className="flex flex-col gap-1">
-                    <LemonCheckbox
+                    <Checkbox
                         label={
                             <div className="flex items-center">
                                 <span>Hide Insights branding</span>
@@ -88,7 +88,7 @@ export function Customization({
                         checked={survey.appearance?.whiteLabel}
                     />
                     <div className="flex flex-col gap-2">
-                        <LemonCheckbox
+                        <Checkbox
                             disabledReason={surveyShufflingQuestionsDisabledReason}
                             label={
                                 <div className="flex items-center">
@@ -99,7 +99,7 @@ export function Customization({
                                 if (checked && hasBranchingLogic) {
                                     onAppearanceChange({ shuffleQuestions: false })
 
-                                    LemonDialog.open({
+                                    Dialog.open({
                                         title: 'Your survey has active branching logic',
                                         description: (
                                             <p className="py-2">
@@ -129,9 +129,9 @@ export function Customization({
                         />
                     </div>
                     {survey.type !== SurveyType.ExternalSurvey && (
-                        <LemonField.Pure>
+                        <Field.Pure>
                             <div className="flex flex-row gap-2 items-center font-medium">
-                                <LemonCheckbox
+                                <Checkbox
                                     checked={!!survey.appearance?.surveyPopupDelaySeconds}
                                     onChange={(checked) => {
                                         const surveyPopupDelaySeconds = checked ? 5 : undefined
@@ -139,7 +139,7 @@ export function Customization({
                                     }}
                                 />
                                 Delay survey popup by at least{' '}
-                                <LemonInput
+                                <Input
                                     type="number"
                                     data-attr="survey-popup-delay-input"
                                     size="small"
@@ -157,7 +157,7 @@ export function Customization({
                                 />{' '}
                                 seconds once the display conditions are met.
                             </div>
-                        </LemonField.Pure>
+                        </Field.Pure>
                     )}
                 </div>
             </div>

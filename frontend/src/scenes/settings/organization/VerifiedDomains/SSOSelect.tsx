@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSelect, LemonSelectOptions } from '@hanzo/lemon-ui'
+import { Select, SelectOptions } from '@hanzo/elements'
 
 import { SocialLoginIcon } from 'lib/components/SocialLoginButton/SocialLoginIcon'
 import { SSO_PROVIDER_NAMES } from 'lib/constants'
@@ -30,7 +30,7 @@ export function SSOSelect({
     }
 
     const authProviders = Object.keys(preflight.available_social_auth_providers) as SSOProvider[]
-    const options: LemonSelectOptions<SSOProvider | ''> = [{ value: '', label: "Don't enforce" }]
+    const options: SelectOptions<SSOProvider | ''> = [{ value: '', label: "Don't enforce" }]
 
     authProviders.forEach((key) => {
         options.push({
@@ -51,7 +51,7 @@ export function SSOSelect({
     })
 
     return (
-        <LemonSelect
+        <Select
             value={value}
             options={options}
             loading={loading}

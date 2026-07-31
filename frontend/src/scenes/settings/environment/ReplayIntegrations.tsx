@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { PropsWithChildren, useMemo, useState } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -53,9 +53,9 @@ function GitLabIntegration(): JSX.Element {
     const [isOpen, setIsOpen] = useState<boolean>(false)
     return (
         <Integration kind="gitlab">
-            <LemonButton type="secondary" onClick={() => setIsOpen(true)}>
+            <Button type="secondary" onClick={() => setIsOpen(true)}>
                 Connect project
-            </LemonButton>
+            </Button>
             <GitLabSetupModal isOpen={isOpen} onComplete={() => setIsOpen(false)} />
         </Integration>
     )
@@ -73,9 +73,9 @@ const OAuthIntegration = ({ kind, connectText }: { kind: IntegrationKind; connec
 
     return (
         <Integration kind={kind}>
-            <LemonButton type="secondary" disableClientSideRouting to={authorizationUrl}>
+            <Button type="secondary" disableClientSideRouting to={authorizationUrl}>
                 {connectText}
-            </LemonButton>
+            </Button>
         </Integration>
     )
 }

@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 
 import { IconEllipsis, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Input, Tag } from '@hanzo/elements'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonMenu } from 'lib/lemon-ui/LemonMenu'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { atColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { Link } from 'lib/lemon-ui/Link'
+import { Banner } from 'lib/elements/Banner'
+import { Menu } from 'lib/elements/Menu'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { atColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { Link } from 'lib/elements/Link'
 import { ContainsTypeFilters } from 'scenes/notebooks/NotebooksTable/ContainsTypeFilter'
 import { notebooksTableLogic } from 'scenes/notebooks/NotebooksTable/notebooksTableLogic'
 import { urls } from 'scenes/urls'
@@ -19,7 +19,7 @@ import { notebooksModel } from '~/models/notebooksModel'
 import { notebookPanelLogic } from '../NotebookPanel/notebookPanelLogic'
 import { NotebookListItemType } from '../types'
 
-function titleColumn(): LemonTableColumn<NotebookListItemType, 'title'> {
+function titleColumn(): TableColumn<NotebookListItemType, 'title'> {
     return {
         title: 'Title',
         dataIndex: 'title',
@@ -32,7 +32,7 @@ function titleColumn(): LemonTableColumn<NotebookListItemType, 'title'> {
                     className="font-semibold flex items-center gap-2"
                 >
                     {title || 'Untitled'}
-                    {is_template && <LemonTag type="highlight">TEMPLATE</LemonTag>}
+                    {is_template && <Tag type="highlight">TEMPLATE</Tag>}
                 </Link>
             )
         },
@@ -48,18 +48,18 @@ export function NotebooksTable(): JSX.Element {
 
     useOnMountEffect(loadNotebooks)
 
-    const columns: LemonTableColumns<NotebookListItemType> = [
-        titleColumn() as LemonTableColumn<NotebookListItemType, keyof NotebookListItemType | undefined>,
+    const columns: TableColumns<NotebookListItemType> = [
+        titleColumn() as TableColumn<NotebookListItemType, keyof NotebookListItemType | undefined>,
 
-        createdByColumn<NotebookListItemType>() as LemonTableColumn<
+        createdByColumn<NotebookListItemType>() as TableColumn<
             NotebookListItemType,
             keyof NotebookListItemType | undefined
         >,
-        atColumn<NotebookListItemType>('created_at', 'Created') as LemonTableColumn<
+        atColumn<NotebookListItemType>('created_at', 'Created') as TableColumn<
             NotebookListItemType,
             keyof NotebookListItemType | undefined
         >,
-        atColumn<NotebookListItemType>('last_modified_at', 'Last modified') as LemonTableColumn<
+        atColumn<NotebookListItemType>('last_modified_at', 'Last modified') as TableColumn<
             NotebookListItemType,
             keyof NotebookListItemType | undefined
         >,
@@ -69,7 +69,7 @@ export function NotebooksTable(): JSX.Element {
                     return null
                 }
                 return (
-                    <LemonMenu
+                    <Menu
                         items={[
                             {
                                 label: 'Delete',
@@ -82,8 +82,8 @@ export function NotebooksTable(): JSX.Element {
                             },
                         ]}
                     >
-                        <LemonButton aria-label="more" icon={<IconEllipsis />} size="small" />
-                    </LemonMenu>
+                        <Button aria-label="more" icon={<IconEllipsis />} size="small" />
+                    </Menu>
                 )
             },
         },
@@ -91,7 +91,7 @@ export function NotebooksTable(): JSX.Element {
 
     return (
         <div className="deprecated-space-y-4">
-            <LemonBanner
+            <Banner
                 type="info"
                 action={{
                     onClick: () => {
@@ -103,9 +103,9 @@ export function NotebooksTable(): JSX.Element {
             >
                 <b>Welcome to Notebooks</b> - a great way to bring Insights, Replays, Feature Flags and many more
                 Insights products together into one place.
-            </LemonBanner>
+            </Banner>
             <div className="flex justify-between gap-2 flex-wrap">
-                <LemonInput
+                <Input
                     type="search"
                     placeholder="Search for notebooks"
                     onChange={(s) => {
@@ -125,7 +125,7 @@ export function NotebooksTable(): JSX.Element {
                     </div>
                 </div>
             </div>
-            <LemonTable
+            <Table
                 data-attr="notebooks-table"
                 pagination={pagination}
                 dataSource={notebooksAndTemplates}

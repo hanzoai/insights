@@ -1,5 +1,5 @@
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -29,7 +29,7 @@ export function TransformationsScene(): JSX.Element {
             interaction="click"
             scope={Scene.Transformations}
         >
-            <LemonButton
+            <Button
                 type="primary"
                 to={urls.dataPipelinesNew('transformation')}
                 icon={<IconPlusSmall />}
@@ -38,7 +38,7 @@ export function TransformationsScene(): JSX.Element {
                 data-attr="new-transformation"
             >
                 New transformation
-            </LemonButton>
+            </Button>
         </AppShortcut>
     )
 

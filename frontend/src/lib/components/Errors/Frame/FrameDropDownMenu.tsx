@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { IconCopy, IconExternal, IconGitLab, IconGithub } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {

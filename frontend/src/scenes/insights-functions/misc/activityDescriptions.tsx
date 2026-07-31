@@ -6,8 +6,8 @@ import {
     defaultDescriber,
     userNameForLogItem,
 } from 'lib/components/ActivityLog/humanizeActivity'
-import { LemonDropdown } from 'lib/lemon-ui/LemonDropdown'
-import { Link } from 'lib/lemon-ui/Link'
+import { Dropdown } from 'lib/elements/Dropdown'
+import { Link } from 'lib/elements/Link'
 import { initScriptLanguage } from 'lib/monaco/languages/script'
 import { urls } from 'scenes/urls'
 
@@ -63,7 +63,7 @@ export interface DiffLinkProps extends DiffProps {
 
 export function DiffLink({ before, after, language, children }: DiffLinkProps): JSX.Element {
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             overlay={
                 <div className="w-[50vw] min-w-[300px]">
@@ -72,7 +72,7 @@ export function DiffLink({ before, after, language, children }: DiffLinkProps): 
             }
         >
             <span className="Link">{children}</span>
-        </LemonDropdown>
+        </Dropdown>
     )
 }
 

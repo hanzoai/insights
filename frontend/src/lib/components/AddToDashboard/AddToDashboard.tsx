@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 
 import { IconDashboard } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconWithCount } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconWithCount } from 'lib/elements/icons'
 
 import { dashboardsModel } from '~/models/dashboardsModel'
 import { QueryBasedInsightModel } from '~/types'
@@ -19,7 +19,7 @@ export function AddToDashboard({ insight, setOpenModal }: SaveToDashboardProps):
 
     return (
         <span className="save-to-dashboard" data-attr="save-to-dashboard-button">
-            <LemonButton
+            <Button
                 onClick={() => setOpenModal(true)}
                 type="secondary"
                 icon={
@@ -30,7 +30,7 @@ export function AddToDashboard({ insight, setOpenModal }: SaveToDashboardProps):
                 tooltip={dashboards.length === 0 ? 'Add to dashboard' : 'Manage dashboards'}
             >
                 Dashboards
-            </LemonButton>
+            </Button>
         </span>
     )
 }

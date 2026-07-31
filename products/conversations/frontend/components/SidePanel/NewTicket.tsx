@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconArrowLeft } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { MessageInput } from '../Chat/MessageInput'
 import { sidepanelTicketsLogic } from './sidepanelTicketsLogic'
@@ -13,7 +13,7 @@ export function NewTicket(): JSX.Element {
     return (
         <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
-                <LemonButton
+                <Button
                     icon={<IconArrowLeft />}
                     size="small"
                     onClick={() => setView('list')}

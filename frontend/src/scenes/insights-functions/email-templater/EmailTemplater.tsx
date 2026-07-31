@@ -7,13 +7,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import EmailEditor, { EditorRef } from 'react-email-editor'
 
 import { IconChevronDown, IconChevronLeft, IconChevronRight, IconExternal } from '@hanzo/icons'
-import { LemonButton, LemonLabel, LemonModal, LemonSelect, LemonTabs } from '@hanzo/lemon-ui'
+import { Button, Label, Modal, Select, Tabs } from '@hanzo/elements'
 
 import { CyclotronJobTemplateSuggestionsButton } from 'lib/components/CyclotronJob/CyclotronJobTemplateSuggestions'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input/Input'
+import { TextArea } from 'lib/elements/TextArea'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { urls } from 'scenes/urls'
@@ -75,7 +75,7 @@ function PlainTextEditor(): JSX.Element {
     const { setTemplatingEngine } = useActions(emailTemplaterLogic)
 
     return (
-        <LemonField name="text" className="flex flex-col flex-1">
+        <Field name="text" className="flex flex-col flex-1">
             {({ value, onChange }: ChildFunctionProps) => (
                 <div className="flex flex-col flex-1 relative group">
                     <span className="absolute top-1 right-2 z-20 p-px opacity-0 transition-opacity group-hover:opacity-100">
@@ -105,7 +105,7 @@ function PlainTextEditor(): JSX.Element {
                     />
                 </div>
             )}
-        </LemonField>
+        </Field>
     )
 }
 
@@ -123,7 +123,7 @@ function DestinationEmailTemplaterForm({ mode }: { mode: EmailEditorMode }): JSX
                 formKey="emailTemplate"
             >
                 {EMAIL_TYPE_SUPPORTED_FIELDS[logicProps.type].map((field) => (
-                    <LemonField
+                    <Field
                         key={field.key}
                         name={field.key}
                         className="gap-1 pl-2 border-b shrink-0"
@@ -132,13 +132,13 @@ function DestinationEmailTemplaterForm({ mode }: { mode: EmailEditorMode }): JSX
                     >
                         {({ value, onChange, error }: ChildFunctionProps) => (
                             <div className="flex gap-2 items-center">
-                                <LemonLabel
+                                <Label
                                     className={error ? 'text-danger' : ''}
                                     info={field.helpText}
                                     showOptional={field.optional}
                                 >
                                     {field.label}
-                                </LemonLabel>
+                                </Label>
                                 <CodeEditorInline
                                     embedded
                                     className="flex-1"
@@ -148,12 +148,12 @@ function DestinationEmailTemplaterForm({ mode }: { mode: EmailEditorMode }): JSX
                                 />
                             </div>
                         )}
-                    </LemonField>
+                    </Field>
                 ))}
 
                 {mode === 'full' ? (
                     <>
-                        <LemonTabs
+                        <Tabs
                             activeKey={activeContentTab}
                             onChange={(key) => setActiveContentTab(key as 'visual' | 'plaintext')}
                             tabs={[
@@ -189,20 +189,20 @@ function DestinationEmailTemplaterForm({ mode }: { mode: EmailEditorMode }): JSX
                         </div>
                     </>
                 ) : (
-                    <LemonField name="html" className="flex relative flex-col">
+                    <Field name="html" className="flex relative flex-col">
                         {({ value }: ChildFunctionProps) => (
                             <>
                                 <div className="flex absolute inset-0 justify-center items-end p-2 opacity-0 transition-opacity hover:opacity-100">
                                     <div className="absolute inset-0 opacity-50 bg-surface-primary" />
-                                    <LemonButton type="primary" size="small" onClick={() => setIsModalOpen(true)}>
+                                    <Button type="primary" size="small" onClick={() => setIsModalOpen(true)}>
                                         Click to modify content
-                                    </LemonButton>
+                                    </Button>
                                 </div>
 
                                 <iframe srcDoc={value} sandbox="" title="Email template preview" className="flex-1" />
                             </>
                         )}
-                    </LemonField>
+                    </Field>
                 )}
             </Form>
         </>
@@ -237,7 +237,7 @@ function NativeEmailIntegrationChoice({
         return (
             <div className="flex gap-2 justify-end items-center">
                 <span className="text-muted">No email senders configured yet</span>
-                <LemonButton
+                <Button
                     size="small"
                     type="tertiary"
                     to={urls.workflows('channels')}
@@ -246,14 +246,14 @@ function NativeEmailIntegrationChoice({
                     icon={<IconExternal />}
                 >
                     Connect email sender
-                </LemonButton>
+                </Button>
             </div>
         )
     }
 
     return (
         <>
-            <LemonSelect
+            <Select
                 className="m-1 flex-1"
                 type="tertiary"
                 placeholder="Choose email sender"
@@ -373,7 +373,7 @@ function TemplateSlider({
                 <IconChevronDown className={clsx('w-4 h-4 transition-transform', !expanded && '-rotate-90')} />
                 <span className="flex-1 text-sm text-secondary">Start from a template (optional)</span>
                 {onSaveAsTemplate && (
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         type="secondary"
                         onClick={(e) => {
@@ -382,12 +382,12 @@ function TemplateSlider({
                         }}
                     >
                         Save as new template
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
             {expanded && (
                 <div ref={containerRef} className="flex items-center gap-1 px-1 pb-2">
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={<IconChevronLeft />}
                         disabled={clampedPage === 0}
@@ -408,7 +408,7 @@ function TemplateSlider({
                             </div>
                         ))}
                     </div>
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={<IconChevronRight />}
                         disabled={clampedPage >= totalPages - 1}
@@ -443,7 +443,7 @@ function NativeEmailTemplaterForm({
                 formKey="emailTemplate"
             >
                 {EMAIL_TYPE_SUPPORTED_FIELDS[logicProps.type].map((field) => (
-                    <LemonField
+                    <Field
                         key={field.key}
                         name={field.key}
                         className="gap-1 pl-2 border-b shrink-0"
@@ -453,13 +453,13 @@ function NativeEmailTemplaterForm({
                     >
                         {({ value, onChange, error }: ChildFunctionProps) => (
                             <div className="flex gap-2 items-center">
-                                <LemonLabel
+                                <Label
                                     className={error ? 'text-danger' : ''}
                                     info={field.helpText}
                                     showOptional={field.optional}
                                 >
                                     {field.label}
-                                </LemonLabel>
+                                </Label>
                                 {field.key === 'from' ? (
                                     <NativeEmailIntegrationChoice value={value} onChange={onChange} />
                                 ) : field.key === 'to' ? (
@@ -481,7 +481,7 @@ function NativeEmailTemplaterForm({
                                 )}
                             </div>
                         )}
-                    </LemonField>
+                    </Field>
                 ))}
 
                 {mode === 'full' ? (
@@ -493,7 +493,7 @@ function NativeEmailTemplaterForm({
                                 onSaveAsTemplate={onSaveAsTemplate}
                             />
                         )}
-                        <LemonTabs
+                        <Tabs
                             activeKey={activeContentTab}
                             onChange={(key) => setActiveContentTab(key as 'visual' | 'plaintext')}
                             tabs={[
@@ -547,7 +547,7 @@ function NativeEmailTemplaterForm({
                             </div>
                             {activeContentTab === 'plaintext' && <PlainTextEditor />}
                         </div>
-                        <LemonModal
+                        <Modal
                             isOpen={!!previewTemplate}
                             onClose={() => setPreviewTemplate(null)}
                             title={`Preview: ${previewTemplate?.name}`}
@@ -561,10 +561,10 @@ function NativeEmailTemplaterForm({
                                     className="w-full h-full border-0"
                                 />
                             </div>
-                        </LemonModal>
+                        </Modal>
                     </>
                 ) : (
-                    <LemonField name="html" className="flex relative flex-col">
+                    <Field name="html" className="flex relative flex-col">
                         {({ value }: ChildFunctionProps) => (
                             <>
                                 <div
@@ -574,15 +574,15 @@ function NativeEmailTemplaterForm({
                                     )}
                                 >
                                     <div className="absolute inset-0 opacity-50 bg-surface-primary" />
-                                    <LemonButton type="primary" size="small" onClick={() => setIsModalOpen(true)}>
+                                    <Button type="primary" size="small" onClick={() => setIsModalOpen(true)}>
                                         Click to modify content
-                                    </LemonButton>
+                                    </Button>
                                 </div>
 
                                 <iframe srcDoc={value} sandbox="" title="Email template preview" className="flex-1" />
                             </>
                         )}
-                    </LemonField>
+                    </Field>
                 )}
             </Form>
         </>
@@ -626,15 +626,15 @@ function SaveTemplateModal({
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={handleClose}
             title="Save as template"
             description="Create a reusable template from this email"
             footer={
                 <>
-                    <LemonButton onClick={handleClose}>Cancel</LemonButton>
-                    <LemonButton
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button
                         type="primary"
                         onClick={() => {
                             if (templateName) {
@@ -646,14 +646,14 @@ function SaveTemplateModal({
                         disabledReason={!templateName ? 'Please enter a template name' : undefined}
                     >
                         Save template
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
-                    <LemonLabel>Template name</LemonLabel>
-                    <LemonInput
+                    <Label>Template name</Label>
+                    <Input
                         placeholder="My Email Template"
                         value={templateName}
                         onChange={setTemplateName}
@@ -661,8 +661,8 @@ function SaveTemplateModal({
                     />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <LemonLabel showOptional>Description</LemonLabel>
-                    <LemonTextArea
+                    <Label showOptional>Description</Label>
+                    <TextArea
                         placeholder="Describe when to use this template..."
                         value={templateDescription}
                         onChange={setTemplateDescription}
@@ -670,7 +670,7 @@ function SaveTemplateModal({
                     />
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -682,7 +682,7 @@ function EmailTemplaterModal(): JSX.Element {
 
     return (
         <>
-            <LemonModal
+            <Modal
                 isOpen={isModalOpen}
                 width="90vw"
                 onClose={() => closeWithConfirmation()}
@@ -696,18 +696,18 @@ function EmailTemplaterModal(): JSX.Element {
                         <EmailTemplaterForm mode="full" onSaveAsTemplate={() => setIsSaveTemplateModalOpen(true)} />
                         <div className="flex gap-2 items-center mt-2">
                             <div className="flex-1" />
-                            <LemonButton onClick={() => closeWithConfirmation()}>Discard changes</LemonButton>
-                            <LemonButton
+                            <Button onClick={() => closeWithConfirmation()}>Discard changes</Button>
+                            <Button
                                 type="primary"
                                 onClick={() => submitEmailTemplate()}
                                 disabledReason={isEmailEditorReady ? undefined : 'Loading email editor...'}
                             >
                                 Save
-                            </LemonButton>
+                            </Button>
                         </div>
                     </div>
                 </div>
-            </LemonModal>
+            </Modal>
             <SaveTemplateModal
                 isOpen={isSaveTemplateModalOpen}
                 onClose={() => setIsSaveTemplateModalOpen(false)}

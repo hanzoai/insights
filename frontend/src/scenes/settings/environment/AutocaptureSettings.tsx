@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { SupportedWebVitalsMetrics } from '@hanzo/insights'
 
-import { LemonDivider, LemonSwitch } from '@hanzo/lemon-ui'
+import { Divider, Switch } from '@hanzo/elements'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -13,7 +13,7 @@ function WebVitalsAllowedMetricSwitch({ metric }: { metric: SupportedWebVitalsMe
     const { updateCurrentTeam } = useActions(teamLogic)
 
     return (
-        <LemonSwitch
+        <Switch
             label={`Capture ${metric}`}
             bordered
             checked={
@@ -60,7 +60,7 @@ export function AutocaptureSettings(): JSX.Element {
     return (
         <>
             <div className="deprecated-space-y-2">
-                <LemonSwitch
+                <Switch
                     id="insights-autocapture-switch"
                     onChange={(checked) => {
                         updateCurrentTeam({
@@ -85,7 +85,7 @@ export function WebVitalsAutocaptureSettings(): JSX.Element {
 
     return (
         <>
-            <LemonSwitch
+            <Switch
                 id="insights-autocapture-web-vitals-switch"
                 onChange={(checked) => {
                     updateCurrentTeam({
@@ -97,7 +97,7 @@ export function WebVitalsAutocaptureSettings(): JSX.Element {
                 label="Enable web vitals autocapture"
                 bordered
             />
-            <LemonDivider />
+            <Divider />
             <p>
                 You can also choose to only capture specific web vitals metrics. By default, all four core web vitals
                 metrics are captured: CLS, FCP, LCP, and INP.

@@ -4,7 +4,7 @@ import { useMemo, useRef } from 'react'
 import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import markup from 'react-syntax-highlighter/dist/esm/languages/prism/markup'
 
-import { LemonBanner, LemonTabs, LemonTextArea } from '@hanzo/lemon-ui'
+import { Banner, Tabs, TextArea } from '@hanzo/elements'
 
 import { darkTheme, lightTheme } from 'lib/components/CodeSnippet/theme'
 
@@ -184,7 +184,7 @@ export function HTMLEditor({
 }): JSX.Element {
     return (
         <>
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 onChange={onTabChange}
                 tabs={[
@@ -192,7 +192,7 @@ export function HTMLEditor({
                         key: 'text',
                         label: <span className="text-sm">Text</span>,
                         content: (
-                            <LemonTextArea
+                            <TextArea
                                 minRows={2}
                                 value={value}
                                 onChange={(v) => onChange(v)}
@@ -210,10 +210,10 @@ export function HTMLEditor({
                 ]}
             />
             {value && value?.toLowerCase().includes('<script') && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     Scripts won't run in the survey popover and we'll remove these on save. Use the API question mode to
                     run your own scripts in surveys.
-                </LemonBanner>
+                </Banner>
             )}
         </>
     )

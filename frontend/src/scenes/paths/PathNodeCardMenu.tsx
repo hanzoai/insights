@@ -1,9 +1,9 @@
 import { MouseEventHandler } from 'react'
 
 import { IconClock } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/lemon-ui/icons'
+import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/elements/icons'
 import { humanFriendlyDuration } from 'lib/utils'
 
 import { PATH_NODE_CARD_WIDTH } from './constants'
@@ -87,12 +87,12 @@ type CountButtonProps = {
 
 function CountButton({ count, percentage, onClick }: CountButtonProps): JSX.Element {
     return (
-        <LemonButton size="small" onClick={onClick}>
+        <Button size="small" onClick={onClick}>
             <span className="text-xs">
                 {count}
                 <span className="text-secondary ml-2">({percentage}%)</span>
             </span>
-        </LemonButton>
+        </Button>
     )
 }
 

@@ -1,4 +1,4 @@
-import { LemonInput, LemonInputSelect, LemonSegmentedButton, LemonSelect } from '@hanzo/lemon-ui'
+import { Input, InputSelect, SegmentedButton, Select } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 
@@ -51,7 +51,7 @@ export interface DirectFieldProps<T extends Variable = Variable> {
 }
 
 export const StringField = ({ variable, updateVariable }: DirectFieldProps<StringVariable>): JSX.Element => (
-    <LemonInput
+    <Input
         placeholder="Default value"
         value={variable.default_value}
         onChange={(value) => updateVariable({ ...variable, default_value: value })}
@@ -59,7 +59,7 @@ export const StringField = ({ variable, updateVariable }: DirectFieldProps<Strin
 )
 
 export const NumberField = ({ variable, updateVariable }: DirectFieldProps<NumberVariable>): JSX.Element => (
-    <LemonInput
+    <Input
         placeholder="Default value"
         type="number"
         value={variable.default_value}
@@ -68,7 +68,7 @@ export const NumberField = ({ variable, updateVariable }: DirectFieldProps<Numbe
 )
 
 export const BooleanField = ({ variable, updateVariable }: DirectFieldProps<BooleanVariable>): JSX.Element => (
-    <LemonSegmentedButton
+    <SegmentedButton
         className="w-full"
         value={variable.default_value ? 'true' : 'false'}
         onChange={(value) => updateVariable({ ...variable, default_value: value === 'true' })}
@@ -80,7 +80,7 @@ export const BooleanField = ({ variable, updateVariable }: DirectFieldProps<Bool
 )
 
 export const ListValuesField = ({ variable, updateVariable }: DirectFieldProps<ListVariable>): JSX.Element => (
-    <LemonInputSelect
+    <InputSelect
         value={variable.values}
         onChange={(value) => updateVariable({ ...variable, values: value })}
         placeholder="Options..."
@@ -92,7 +92,7 @@ export const ListValuesField = ({ variable, updateVariable }: DirectFieldProps<L
 )
 
 export const ListDefaultField = ({ variable, updateVariable }: DirectFieldProps<ListVariable>): JSX.Element => (
-    <LemonSelect
+    <Select
         className="w-full"
         placeholder="Select default value"
         value={variable.default_value}
@@ -108,7 +108,7 @@ export const DateField = ({ variable, updateVariable, onSave }: DirectFieldProps
         value={dayjs(variable.default_value)}
         updateVariable={(date) => {
             updateVariable({ ...variable, default_value: date })
-            // calendar is a special case to reuse LemonCalendarSelect
+            // calendar is a special case to reuse CalendarSelect
             onSave()
         }}
     />

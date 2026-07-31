@@ -2,11 +2,11 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback, useEffect } from 'react'
 
 import { IconQuestion } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonSkeleton, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Divider, Skeleton, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Markdown } from 'lib/elements/Markdown'
 import { nonInsightsFunctionTemplatesLogic } from 'scenes/data-pipelines/utils/nonInsightsFunctionTemplatesLogic'
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 import { InsightsFunctionTemplateList } from 'scenes/insights-functions/list/InsightsFunctionTemplateList'
@@ -36,7 +36,7 @@ export function NewSourceWizardScene(): JSX.Element {
     const { availableSources, availableSourcesLoading } = useValues(availableSourcesDataLogic)
 
     if (availableSourcesLoading || availableSources === null) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
@@ -55,7 +55,7 @@ function InternalNewSourceWizardScene(): JSX.Element {
                 name="New data warehouse source"
                 resourceType={{ type: 'data_pipeline' }}
                 actions={
-                    <LemonButton
+                    <Button
                         type="secondary"
                         center
                         data-attr="source-form-cancel-button"
@@ -63,7 +63,7 @@ function InternalNewSourceWizardScene(): JSX.Element {
                         size="small"
                     >
                         Cancel
-                    </LemonButton>
+                    </Button>
                 }
             />
             <InternalSourcesWizard />
@@ -82,7 +82,7 @@ export function NewSourcesWizard(props: NewSourcesWizardProps): JSX.Element {
     const { availableSources, availableSourcesLoading } = useValues(availableSourcesDataLogic)
 
     if (availableSourcesLoading || availableSources === null) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
@@ -130,7 +130,7 @@ function InternalSourcesWizard(props: NewSourcesWizardProps): JSX.Element {
         }
 
         const nextButton = (disabledReason?: string | false): JSX.Element => (
-            <LemonButton
+            <Button
                 loading={isLoading || manualLinkIsLoading}
                 disabledReason={disabledReason || (!canGoNext && 'You cant click next yet')}
                 type="primary"
@@ -139,13 +139,13 @@ function InternalSourcesWizard(props: NewSourcesWizardProps): JSX.Element {
                 data-attr="source-link"
             >
                 {nextButtonText}
-            </LemonButton>
+            </Button>
         )
 
         return (
             <div className="flex flex-row gap-2 justify-end mt-4">
                 {!props.hideBackButton && (
-                    <LemonButton
+                    <Button
                         type="secondary"
                         center
                         data-attr="source-modal-back-button"
@@ -153,7 +153,7 @@ function InternalSourcesWizard(props: NewSourcesWizardProps): JSX.Element {
                         disabledReason={!canGoBack && 'You cant go back from here'}
                     >
                         Back
-                    </LemonButton>
+                    </Button>
                 )}
                 {isSelfManagedSource ? (
                     nextButton()
@@ -257,20 +257,20 @@ function SecondStep(): JSX.Element {
     return selectedConnector ? (
         <div className="space-y-4">
             {selectedConnector.caption && (
-                <LemonMarkdown className="text-sm">{selectedConnector.caption}</LemonMarkdown>
+                <Markdown className="text-sm">{selectedConnector.caption}</Markdown>
             )}
 
             <div className="flex flex-row gap-1">
                 {selectedConnector.permissionsCaption && (
                     <Tooltip
                         title={
-                            <LemonMarkdown className="text-sm">{selectedConnector.permissionsCaption}</LemonMarkdown>
+                            <Markdown className="text-sm">{selectedConnector.permissionsCaption}</Markdown>
                         }
                         interactive
                     >
-                        <LemonTag type="muted" size="small">
+                        <Tag type="muted" size="small">
                             Permissions required <IconQuestion />
-                        </LemonTag>
+                        </Tag>
                     </Tooltip>
                 )}
                 {selectedConnector.permissionsCaption && selectedConnector.docsUrl && <span>&nbsp;|&nbsp;</span>}
@@ -281,7 +281,7 @@ function SecondStep(): JSX.Element {
                 )}
             </div>
 
-            <LemonDivider />
+            <Divider />
 
             <SourceForm sourceConfig={selectedConnector} />
         </div>

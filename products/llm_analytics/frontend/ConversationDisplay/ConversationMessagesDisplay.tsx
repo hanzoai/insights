@@ -2,12 +2,12 @@ import clsx from 'clsx'
 import React from 'react'
 
 import { IconCode, IconEye, IconMarkdown, IconMarkdownFilled } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { HighlightedJSONViewer } from 'lib/components/HighlightedJSONViewer'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
-import { IconExclamation, IconEyeHidden } from 'lib/lemon-ui/icons'
+import { Markdown } from 'lib/elements/Markdown'
+import { IconExclamation, IconEyeHidden } from 'lib/elements/icons'
 import { isObject } from 'lib/utils'
 
 import { LLMInputOutput } from '../LLMInputOutput'
@@ -27,7 +27,7 @@ import {
     looksLikeXml,
     parsePartialJSON,
 } from '../utils'
-import { HighlightedLemonMarkdown } from './HighlightedLemonMarkdown'
+import { HighlightedMarkdown } from './HighlightedMarkdown'
 import { HighlightedXMLViewer } from './HighlightedXMLViewer'
 import { MessageActionsMenu } from './MessageActionsMenu'
 import { XMLViewer } from './XMLViewer'
@@ -133,22 +133,22 @@ export function ConversationMessagesDisplay({
     const inputButtons =
         inputNormalized.length > 0 ? (
             <div className="flex items-center gap-1">
-                <LemonButton
+                <Button
                     size="xsmall"
                     onClick={() => showAllMessages('input')}
                     icon={<IconEye />}
                     disabledReason={allInputsExpanded ? 'All inputs are already expanded' : undefined}
                 >
                     Expand all
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     size="xsmall"
                     onClick={() => hideAllMessages('input')}
                     icon={<IconEyeHidden />}
                     disabledReason={allInputsCollapsed ? 'All inputs are already collapsed' : undefined}
                 >
                     Collapse all
-                </LemonButton>
+                </Button>
             </div>
         ) : undefined
 
@@ -158,22 +158,22 @@ export function ConversationMessagesDisplay({
     const outputButtons =
         outputNormalized.length > 0 ? (
             <div className="flex items-center gap-1">
-                <LemonButton
+                <Button
                     size="xsmall"
                     onClick={() => showAllMessages('output')}
                     icon={<IconEye />}
                     disabledReason={allOutputsExpanded ? 'All outputs are already expanded' : undefined}
                 >
                     Expand all
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     size="xsmall"
                     onClick={() => hideAllMessages('output')}
                     icon={<IconEyeHidden />}
                     disabledReason={allOutputsCollapsed ? 'All outputs are already collapsed' : undefined}
                 >
                     Collapse all
-                </LemonButton>
+                </Button>
             </div>
         ) : undefined
 
@@ -560,11 +560,11 @@ export const LLMMessageDisplay = React.memo(
                         try {
                             // pre-wrap, because especially in system prompts, we want to preserve newlines even if they aren't fully Markdown-style
                             return searchQuery?.trim() ? (
-                                <HighlightedLemonMarkdown className="whitespace-pre-wrap" searchQuery={searchQuery}>
+                                <HighlightedMarkdown className="whitespace-pre-wrap" searchQuery={searchQuery}>
                                     {escapedContent}
-                                </HighlightedLemonMarkdown>
+                                </HighlightedMarkdown>
                             ) : (
-                                <LemonMarkdown className="whitespace-pre-wrap">{escapedContent}</LemonMarkdown>
+                                <Markdown className="whitespace-pre-wrap">{escapedContent}</Markdown>
                             )
                         } catch {
                             // If markdown still fails, fall back to plain text
@@ -581,11 +581,11 @@ export const LLMMessageDisplay = React.memo(
                     } else {
                         // pre-wrap, because especially in system prompts, we want to preserve newlines even if they aren't fully Markdown-style
                         return searchQuery?.trim() ? (
-                            <HighlightedLemonMarkdown className="whitespace-pre-wrap" searchQuery={searchQuery}>
+                            <HighlightedMarkdown className="whitespace-pre-wrap" searchQuery={searchQuery}>
                                 {content}
-                            </HighlightedLemonMarkdown>
+                            </HighlightedMarkdown>
                         ) : (
-                            <LemonMarkdown className="whitespace-pre-wrap">{content}</LemonMarkdown>
+                            <Markdown className="whitespace-pre-wrap">{content}</Markdown>
                         )
                     }
                 } else {
@@ -640,7 +640,7 @@ export const LLMMessageDisplay = React.memo(
                         <span className="grow">{role}</span>
                         {(content || Object.keys(additionalKwargsEntries).length > 0) && (
                             <>
-                                <LemonButton
+                                <Button
                                     size="small"
                                     noPadding
                                     icon={show ? <IconEyeHidden /> : <IconEye />}
@@ -648,7 +648,7 @@ export const LLMMessageDisplay = React.memo(
                                     onClick={onToggle}
                                 />
                                 {isMarkdownCandidate && (
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         noPadding
                                         icon={resolvedIsRenderingMarkdown ? <IconMarkdownFilled /> : <IconMarkdown />}
@@ -657,7 +657,7 @@ export const LLMMessageDisplay = React.memo(
                                     />
                                 )}
                                 {isXmlCandidate && role !== 'tool' && role !== 'tools' && (
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         noPadding
                                         icon={<IconCode />}

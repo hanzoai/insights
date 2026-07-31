@@ -1,7 +1,7 @@
 import { cloneElement } from 'react'
 
 import { IconChevronDown, IconComment } from '@hanzo/icons'
-import { LemonDropdown } from '@hanzo/lemon-ui'
+import { Dropdown } from '@hanzo/elements'
 
 import { SurveyQuestionType } from '~/types'
 
@@ -20,7 +20,7 @@ interface QuestionTypeChipProps {
 
 export function QuestionTypeChip({ type, onChange }: QuestionTypeChipProps): JSX.Element {
     return (
-        <LemonDropdown
+        <Dropdown
             overlay={
                 <div className="p-1 space-y-0.5">
                     {QUESTION_TYPE_OPTIONS.map((option) => (
@@ -48,6 +48,6 @@ export function QuestionTypeChip({ type, onChange }: QuestionTypeChipProps): JSX
                 <span>{SurveyQuestionLabel[type]}</span>
                 <IconChevronDown className="text-secondary text-xs" />
             </button>
-        </LemonDropdown>
+        </Dropdown>
     )
 }

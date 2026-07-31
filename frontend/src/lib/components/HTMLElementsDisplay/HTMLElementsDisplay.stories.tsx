@@ -32,13 +32,13 @@ export const EXAMPLE_ELEMENTS: ElementType[] = [
     {
         text: undefined,
         tag_name: 'span',
-        attr_class: ['LemonButton__content', 'flex', 'items-center'],
+        attr_class: ['Button__content', 'flex', 'items-center'],
         href: undefined,
         attr_id: null,
         nth_child: 2,
         nth_of_type: 2,
         attributes: {
-            attr__class: 'LemonButton__content flex items-center',
+            attr__class: 'Button__content flex items-center',
         },
         order: 1,
     },
@@ -46,12 +46,12 @@ export const EXAMPLE_ELEMENTS: ElementType[] = [
         text: undefined,
         tag_name: 'a',
         attr_class: [
-            'LemonButton',
-            'LemonButton--full-width',
-            'LemonButton--has-icon',
-            'LemonButton--has-side-icon',
-            'LemonButton--status-stealth',
-            'LemonButton--tertiary',
+            'Button',
+            'Button--full-width',
+            'Button--has-icon',
+            'Button--has-side-icon',
+            'Button--status-stealth',
+            'Button--tertiary',
         ],
         href: '/insights',
         attr_id: null,
@@ -59,7 +59,7 @@ export const EXAMPLE_ELEMENTS: ElementType[] = [
         nth_of_type: 1,
         attributes: {
             attr__class:
-                'LemonButton LemonButton--tertiary LemonButton--status-stealth LemonButton--full-width LemonButton--has-icon LemonButton--has-side-icon',
+                'Button Button--tertiary Button--status-stealth Button--full-width Button--has-icon Button--has-side-icon',
             'attr__data-attr': 'menu-item-savedinsights',
             attr__href: '/insights',
             attr__type: 'button',
@@ -69,13 +69,13 @@ export const EXAMPLE_ELEMENTS: ElementType[] = [
     {
         text: undefined,
         tag_name: 'div',
-        attr_class: ['LemonButtonWithSideAction'],
+        attr_class: ['ButtonWithSideAction'],
         href: undefined,
         attr_id: null,
         nth_child: 1,
         nth_of_type: 1,
         attributes: {
-            attr__class: 'LemonButtonWithSideAction',
+            attr__class: 'ButtonWithSideAction',
         },
         order: 3,
     },
@@ -201,10 +201,10 @@ export function EditableDisplayWithPreselection(): JSX.Element {
     return (
         <>
             <h4>
-                preselect using <pre>'div div.SideBar .LemonButton__content span.text-default'</pre>
+                preselect using <pre>'div div.SideBar .Button__content span.text-default'</pre>
             </h4>
             <HTMLElementsDisplay
-                startingSelector="div div.SideBar .LemonButton__content span.text-default"
+                startingSelector="div div.SideBar .Button__content span.text-default"
                 elements={EXAMPLE_ELEMENTS}
                 highlight={false}
                 editable={true}

@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner, Link } from '@hanzo/lemon-ui'
+import { Banner, Link } from '@hanzo/elements'
 
 import { SurveyFeatureWarning } from 'scenes/surveys/surveyVersionRequirements'
 import { surveysSdkLogic } from 'scenes/surveys/surveysSdkLogic'
@@ -30,7 +30,7 @@ export function SdkVersionWarnings({ warnings }: { warnings: SurveyFeatureWarnin
         .join(', ')
 
     return (
-        <LemonBanner type="warning" hideIcon className="mt-2">
+        <Banner type="warning" hideIcon className="mt-2">
             <div className="flex items-start gap-2">
                 <div>
                     <p className="font-semibold mb-1">SDK warnings</p>
@@ -72,6 +72,6 @@ export function SdkVersionWarnings({ warnings }: { warnings: SurveyFeatureWarnin
                     )}
                 </div>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

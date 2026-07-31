@@ -3,11 +3,11 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import insights from '@hanzo/insights'
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { DetectiveMascot, JudgeMascot, SpaceMascot, ThreeBearsMascots } from 'lib/components/mascots'
-import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
+import { Button } from 'lib/elements/Button'
 import { membersPlatformAddonAdLogic } from 'scenes/settings/organization/membersPlatformAddonAdLogic'
 import { urls } from 'scenes/urls'
 
@@ -25,7 +25,7 @@ const platformAddonAdIllustrations: Record<MembersPagePlatformAddonAdKey, typeof
 const dismissKey = 'organization-members-platform-addon-ad-3'
 
 export function MembersPlatformAddonAd(): JSX.Element | null {
-    const bannerLogic = lemonBannerLogic({ dismissKey })
+    const bannerLogic = bannerLogic({ dismissKey })
     const { shouldShowPlatformAddonAd, platformAddonAdConfig } = useValues(membersPlatformAddonAdLogic)
     const { isDismissed } = useValues(bannerLogic)
     const { dismiss } = useActions(bannerLogic)
@@ -58,23 +58,23 @@ export function MembersPlatformAddonAd(): JSX.Element | null {
     }
 
     return (
-        <LemonBanner type="info" hideIcon>
+        <Banner type="info" hideIcon>
             <div className="flex flex-row gap-8 px-8 items-center justify-evenly">
                 <div>
                     <h3 className="mb-1 text-lg font-semibold">{platformAddonAdConfig.title}</h3>
                     <p className="mb-3">{platformAddonAdConfig.description}</p>
                     <div className="flex flex-row gap-2">
-                        <LemonButton
+                        <Button
                             type="primary"
                             className="w-fit"
                             to={urls.organizationBilling([ProductKey.PLATFORM_AND_SUPPORT])}
                             onClick={handleCtaClick}
                         >
                             {platformAddonAdConfig.cta}
-                        </LemonButton>
-                        <LemonButton type="tertiary" onClick={handleDismiss}>
+                        </Button>
+                        <Button type="tertiary" onClick={handleDismiss}>
                             I'm not interested
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
                 <PlatformAddonAdIllustration
@@ -82,6 +82,6 @@ export function MembersPlatformAddonAd(): JSX.Element | null {
                     alt={platformAddonAdConfig.alt}
                 />
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

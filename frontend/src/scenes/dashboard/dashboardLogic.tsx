@@ -18,14 +18,14 @@ import { subscriptions } from 'kea-subscriptions'
 import uniqBy from 'lodash.uniqby'
 import { Layout, Layouts } from 'react-grid-layout'
 
-import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, toast } from '@hanzo/elements'
 
 import api, { ApiMethodOptions, getJSONOrNull } from 'lib/api'
 import { DataColorTheme } from 'lib/colors'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Dayjs, dayjs, now } from 'lib/dayjs'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { clearDOMTextSelection, getJSHeapMemory, shouldCancelQuery, toParams, uuid } from 'lib/utils'
 import { accessLevelSatisfied } from 'lib/utils/accessControlUtils'
@@ -379,7 +379,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                         actions.resetUrlVariables()
                         return getQueryBasedDashboard(dashboard)
                     } catch (e) {
-                        lemonToast.error('Could not update dashboard: ' + String(e))
+                        toast.error('Could not update dashboard: ' + String(e))
                         return values.dashboard
                     }
                 },
@@ -408,7 +408,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                             tiles: values.tiles.filter((t) => t.id !== tile.id),
                         } as DashboardType<QueryBasedInsightModel>
                     } catch (e) {
-                        lemonToast.error('Could not remove tile from dashboard: ' + String(e))
+                        toast.error('Could not remove tile from dashboard: ' + String(e))
                         return values.dashboard
                     }
                 },
@@ -447,7 +447,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                         )
                         return getQueryBasedDashboard(dashboard)
                     } catch (e) {
-                        lemonToast.error('Could not duplicate tile: ' + String(e))
+                        toast.error('Could not duplicate tile: ' + String(e))
                         return values.dashboard
                     }
                 },
@@ -1402,7 +1402,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
             } else {
                 // Show error toast for other errors (500s, network issues, etc.)
                 const errorMessage = error?.message || 'Dashboard streaming failed'
-                lemonToast.error(`Failed to load dashboard: ${errorMessage}`)
+                toast.error(`Failed to load dashboard: ${errorMessage}`)
             }
         },
 
@@ -1448,7 +1448,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
             if (updatedTile) {
                 dashboardsModel.actions.tileMovedToDashboard(updatedTile, payload.toDashboard)
 
-                lemonToast.success(
+                toast.success(
                     <>
                         Insight moved to{' '}
                         <b>
@@ -1918,7 +1918,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
             const tileLogicProps = { dashboardId: props.id, tileId: tile.id, filtersOverrides: tile.filters_overrides }
             const logic = tileLogic(tileLogicProps)
 
-            LemonDialog.openForm({
+            Dialog.openForm({
                 title: 'Override Tile Filters',
                 initialValues: {},
                 content: (
@@ -1942,7 +1942,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
 
                     tile.filters_overrides = tileFilterOverrides
                     actions.refreshDashboardItem({ tile })
-                    lemonToast.success('Tile filters saved')
+                    toast.success('Tile filters saved')
                 },
             })
         },
@@ -1952,7 +1952,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
         dashboardMode: (dashboardMode, previousDashboardMode) => {
             if (previousDashboardMode !== DashboardMode.Edit && dashboardMode === DashboardMode.Edit) {
                 clearDOMTextSelection()
-                lemonToast.info('Now editing the dashboard – save to persist changes')
+                toast.info('Now editing the dashboard – save to persist changes')
             }
         },
     })),

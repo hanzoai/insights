@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput } from '@hanzo/lemon-ui'
+import { Input } from '@hanzo/elements'
 
 import { logsViewerFiltersLogic } from 'products/logs/frontend/components/LogsViewer/Filters/logsViewerFiltersLogic'
 
@@ -10,7 +10,7 @@ export const SearchTermFilter = (): JSX.Element => {
     const { setSearchTerm } = useActions(logsViewerFiltersLogic)
 
     return (
-        <LemonInput
+        <Input
             size="small"
             value={searchTerm}
             onChange={(value) => {

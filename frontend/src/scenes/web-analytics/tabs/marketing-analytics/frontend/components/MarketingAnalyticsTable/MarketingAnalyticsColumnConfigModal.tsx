@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useMemo, useRef } from 'react'
 
 import { IconEye, IconHide, IconPin, IconPinFilled } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Modal, Select } from '@hanzo/elements'
 
-import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
+import { IconArrowDown, IconArrowUp } from 'lib/elements/icons'
 
 import { MarketingAnalyticsTableQuery } from '~/queries/schema/schema-general'
 import { DataTableNode } from '~/queries/schema/schema-general'
@@ -205,14 +205,14 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
     }, [marketingQuery, rawQuery, setQuery, sortedColumns])
 
     return (
-        <LemonModal
+        <Modal
             isOpen={columnConfigModalVisible}
             onClose={hideColumnConfigModal}
             title="Configure columns"
             width={600}
             footer={
                 <div className="flex justify-between items-center w-full">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={resetColumnConfigToDefaults}
                         disabledReason={
@@ -225,11 +225,11 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
                         }
                     >
                         Reset to defaults
-                    </LemonButton>
+                    </Button>
                     <div className="flex items-center gap-1">
-                        <LemonButton type="secondary" onClick={hideColumnConfigModal}>
+                        <Button type="secondary" onClick={hideColumnConfigModal}>
                             Close
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             }
@@ -280,7 +280,7 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
                         <div className="flex items-center gap-1">
                             <label className="text-sm font-medium text-muted min-w-20">Sort by:</label>
                             <div className="flex-1">
-                                <LemonSelect
+                                <Select
                                     value={currentSortColumn}
                                     onChange={(value) => {
                                         if (value === null) {
@@ -302,7 +302,7 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
                         <div className="flex items-center gap-1">
                             <label className="text-sm font-medium text-muted min-w-20">Direction:</label>
                             <div className="flex-1">
-                                <LemonSelect
+                                <Select
                                     value={currentSortDirection}
                                     onChange={(value) => {
                                         if (value === null) {
@@ -343,7 +343,7 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
                                     className="flex items-center justify-between p-1 border rounded hover:bg-bg-light transition-colors"
                                 >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                        <LemonCheckbox
+                                        <Checkbox
                                             checked={!isHidden}
                                             onChange={() => toggleColumnVisibility(columnName)}
                                             label={<span className="flex items-center gap-1">{columnName}</span>}
@@ -352,7 +352,7 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
                                     </div>
                                     <div className="flex items-center gap-1 flex-shrink-0">
                                         {/* Sort buttons */}
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             icon={<IconArrowUp />}
                                             onClick={() => handleSortToggle(columnName, 'ASC')}
@@ -361,7 +361,7 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
                                             }
                                             type={isSortedByThisColumn && isAscending ? 'primary' : 'secondary'}
                                         />
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             icon={<IconArrowDown />}
                                             onClick={() => handleSortToggle(columnName, 'DESC')}
@@ -371,7 +371,7 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
                                             type={isSortedByThisColumn && !isAscending ? 'primary' : 'secondary'}
                                         />
                                         {/* Pin button */}
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             icon={isPinned ? <IconPinFilled /> : <IconPin />}
                                             onClick={() => toggleColumnPinning(columnName)}
@@ -379,7 +379,7 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
                                             type={isPinned ? 'primary' : 'secondary'}
                                         />
                                         {/* Visibility button */}
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             icon={isHidden ? <IconHide /> : <IconEye />}
                                             onClick={() => toggleColumnVisibility(columnName)}
@@ -393,6 +393,6 @@ export function MarketingAnalyticsColumnConfigModal({ query: rawQuery }: { query
                     </div>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { PROPERTY_DEFINITIONS_PER_EVENT } from 'lib/constants'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { eventDefinitionsTableLogic } from 'scenes/data-management/events/eventDefinitionsTableLogic'
 import { urls } from 'scenes/urls'
 
@@ -21,7 +21,7 @@ export function EventDefinitionProperties({ definition }: { definition: EventDef
 
     useOnMountEffect(() => loadPropertiesForEvent(definition))
 
-    const columns: LemonTableColumns<PropertyDefinition> = [
+    const columns: TableColumns<PropertyDefinition> = [
         {
             title: 'Property',
             key: 'property',
@@ -39,7 +39,7 @@ export function EventDefinitionProperties({ definition }: { definition: EventDef
             title: 'Type',
             key: 'type',
             render: function Render(_, _definition: PropertyDefinition) {
-                return <LemonTag type="muted">{_definition.property_type ?? '—'}</LemonTag>
+                return <Tag type="muted">{_definition.property_type ?? '—'}</Tag>
             },
         },
         {
@@ -48,16 +48,16 @@ export function EventDefinitionProperties({ definition }: { definition: EventDef
             render: function Render(_, _definition: PropertyDefinition) {
                 return <ObjectTags tags={_definition.tags ?? []} staticOnly />
             },
-        } as LemonTableColumn<PropertyDefinition, keyof PropertyDefinition | undefined>,
+        } as TableColumn<PropertyDefinition, keyof PropertyDefinition | undefined>,
         {
             title: 'Example',
             key: 'example',
             align: 'right',
             render: function Render(_, _definition: PropertyDefinition) {
                 return (
-                    <LemonTag className="font-mono" type="muted">
+                    <Tag className="font-mono" type="muted">
                         {_definition.example !== undefined ? JSON.stringify(_definition.example) : '—'}
-                    </LemonTag>
+                    </Tag>
                 )
             },
         },
@@ -68,7 +68,7 @@ export function EventDefinitionProperties({ definition }: { definition: EventDef
             title="Top properties"
             description="Please note that description and tags are shared across events. Insights properties are excluded from this list."
         >
-            <LemonTable
+            <Table
                 id={`event-properties-definition-table-${definition.id}`}
                 data-attr="event-properties-definition-nested-table"
                 columns={columns}

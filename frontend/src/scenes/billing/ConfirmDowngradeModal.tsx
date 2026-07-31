@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal, LemonTable, LemonTableColumns, Link } from '@hanzo/lemon-ui'
+import { Button, Modal, Table, TableColumns, Link } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { dayjs } from 'lib/dayjs'
@@ -58,7 +58,7 @@ export function ConfirmDowngradeModal({ product }: { product: BillingProductV2Ad
         },
     ]
 
-    const columns: LemonTableColumns<BillingInvoiceItemRow> = [
+    const columns: TableColumns<BillingInvoiceItemRow> = [
         {
             title: 'Description',
             dataIndex: 'description',
@@ -78,23 +78,23 @@ export function ConfirmDowngradeModal({ product }: { product: BillingProductV2Ad
     ]
 
     return (
-        <LemonModal
+        <Modal
             onClose={hideConfirmDowngradeModal}
             isOpen={confirmDowngradeModalOpen}
             closable={false}
             title={`Downgrade to ${targetPlan.name}?`}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={hideConfirmDowngradeModal}
                         disabledReason={isLoading ? 'Subscription update in progress, do not close this modal' : ''}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={confirmProductDowngrade} loading={isLoading}>
+                    </Button>
+                    <Button type="primary" onClick={confirmProductDowngrade} loading={isLoading}>
                         Confirm
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -106,7 +106,7 @@ export function ConfirmDowngradeModal({ product }: { product: BillingProductV2Ad
 
                 <AddonFeatureLossNotice product={currentPlatformAddon} />
 
-                <LemonTable dataSource={rows} columns={columns} className="mt-4" uppercaseHeader={false} />
+                <Table dataSource={rows} columns={columns} className="mt-4" uppercaseHeader={false} />
 
                 {creditCoversNextInvoice && (
                     <div className="mt-2 text-sm">
@@ -124,6 +124,6 @@ export function ConfirmDowngradeModal({ product }: { product: BillingProductV2Ad
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

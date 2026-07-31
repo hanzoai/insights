@@ -3,7 +3,7 @@ import './Login.scss'
 import { useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 

@@ -185,9 +185,9 @@ test.describe('Trends insights', () => {
         await test.step('use custom fixed date range', async () => {
             await insight.trends.dateRangeButton.click()
             await page.getByText('Custom fixed date range').click()
-            // In LemonCalendarRange, click start date then end date directly (no Start:/End: buttons)
-            await page.locator('.LemonCalendar').getByRole('button', { name: '1', exact: true }).first().click()
-            await page.locator('.LemonCalendar').getByRole('button', { name: '15', exact: true }).first().click()
+            // In CalendarRange, click start date then end date directly (no Start:/End: buttons)
+            await page.locator('.Calendar').getByRole('button', { name: '1', exact: true }).first().click()
+            await page.locator('.Calendar').getByRole('button', { name: '15', exact: true }).first().click()
             await page.getByRole('button', { name: 'Apply' }).click()
             await insight.trends.waitForChart()
             await expect(insight.trends.chart).toBeVisible()
@@ -351,12 +351,12 @@ test.describe('Trends insights', () => {
             const ciToggle = page.getByRole('switch', { name: 'Show confidence intervals' })
             await expect(ciToggle).toBeEnabled({ timeout: 10000 })
             await ciToggle.click()
-            await expect(ciToggle.locator('..')).toHaveClass(/LemonSwitch--checked/)
+            await expect(ciToggle.locator('..')).toHaveClass(/Switch--checked/)
 
             const maToggle = page.getByRole('switch', { name: 'Show moving average' })
             await expect(maToggle).toBeVisible()
             await maToggle.click()
-            await expect(maToggle.locator('..')).toHaveClass(/LemonSwitch--checked/)
+            await expect(maToggle.locator('..')).toHaveClass(/Switch--checked/)
         })
 
         await test.step('add a goal line with value and label', async () => {

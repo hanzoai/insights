@@ -4,26 +4,26 @@ import { Form } from 'kea-forms'
 
 import { IconEllipsis, IconInfo } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonCheckbox,
-    LemonDialog,
-    LemonInput,
-    LemonMenu,
-    LemonTable,
-    LemonTableColumns,
-    LemonTabs,
+    Banner,
+    Button,
+    Checkbox,
+    Dialog,
+    Input,
+    Menu,
+    Table,
+    TableColumns,
+    Tabs,
     Spinner,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { DomainConnectBanner } from 'lib/components/DomainConnect'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
-import { Link } from 'lib/lemon-ui/Link'
+import { Field } from 'lib/elements/Field'
+import { Markdown } from 'lib/elements/Markdown'
+import { Link } from 'lib/elements/Link'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { ProxyRecord, proxyLogic } from './proxyLogic'
@@ -50,7 +50,7 @@ export function ManagedReverseProxy(): JSX.Element {
 
     const recordsWithMessages = proxyRecords.filter((record) => !!record.message)
 
-    const columns: LemonTableColumns<ProxyRecord> = [
+    const columns: TableColumns<ProxyRecord> = [
         {
             title: 'Domain',
             dataIndex: 'domain',
@@ -98,13 +98,13 @@ export function ManagedReverseProxy(): JSX.Element {
                 return (
                     status != 'deleting' &&
                     !restrictionReason && (
-                        <LemonMenu
+                        <Menu
                             items={[
                                 {
                                     label: 'Delete',
                                     status: 'danger',
                                     onClick: () => {
-                                        LemonDialog.open({
+                                        Dialog.open({
                                             title: 'Delete managed proxy',
                                             width: '20rem',
                                             content:
@@ -122,8 +122,8 @@ export function ManagedReverseProxy(): JSX.Element {
                                 },
                             ]}
                         >
-                            <LemonButton size="small" icon={<IconEllipsis className="text-secondary" />} />
-                        </LemonMenu>
+                            <Button size="small" icon={<IconEllipsis className="text-secondary" />} />
+                        </Menu>
                     )
                 )
             },
@@ -140,11 +140,11 @@ export function ManagedReverseProxy(): JSX.Element {
     return (
         <div className="flex flex-col gap-2">
             {recordsWithMessages.map((r) => (
-                <LemonBanner type="warning" key={r.id}>
-                    <LemonMarkdown>{`**${r.domain}**\n ${r.message}`}</LemonMarkdown>
-                </LemonBanner>
+                <Banner type="warning" key={r.id}>
+                    <Markdown>{`**${r.domain}**\n ${r.message}`}</Markdown>
+                </Banner>
             ))}
-            <LemonTable
+            <Table
                 loading={proxyRecords.length === 0 && proxyRecordsLoading}
                 columns={columns}
                 dataSource={proxyRecords}
@@ -157,14 +157,14 @@ export function ManagedReverseProxy(): JSX.Element {
 
             {formState === 'collapsed' ? (
                 maxRecordsReached ? (
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         There is a maximum of {maxProxyRecords} records allowed per organization.
-                    </LemonBanner>
+                    </Banner>
                 ) : (
                     <div className="flex">
-                        <LemonButton onClick={showForm} type="primary" disabledReason={restrictionReason}>
+                        <Button onClick={showForm} type="primary" disabledReason={restrictionReason}>
                             Add managed proxy
-                        </LemonButton>
+                        </Button>
                     </div>
                 )
             ) : (
@@ -221,12 +221,12 @@ function CloudflareOptInBanner({
                 </p>
             </div>
             <div className="space-y-3">
-                <LemonCheckbox
+                <Checkbox
                     checked={cloudflareOptInChecked}
                     onChange={setCloudflareOptInChecked}
                     label="I have read and agree to the above terms"
                 />
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={onAcknowledge}
                     disabled={!cloudflareOptInChecked}
@@ -235,7 +235,7 @@ function CloudflareOptInBanner({
                     }
                 >
                     Enable Managed Proxy
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )
@@ -244,7 +244,7 @@ function CloudflareOptInBanner({
 const ExpandedRow = ({ record }: { record: ProxyRecord }): JSX.Element => {
     return (
         <div className="pb-4 pr-4 space-y-2">
-            <LemonTabs
+            <Tabs
                 size="small"
                 activeKey="cname"
                 tabs={[
@@ -284,7 +284,7 @@ function CreateRecordForm(): JSX.Element {
                     enableFormOnSubmit
                     className="w-full deprecated-space-y-2"
                 >
-                    <LemonBanner type="warning">
+                    <Banner type="warning">
                         <p className="font-semibold mb-1">
                             Avoid domains that ad-blockers may flag as analytics or advertising related.
                         </p>
@@ -300,30 +300,30 @@ function CreateRecordForm(): JSX.Element {
                                 <code>app.mydomain.com</code> instead.
                             </li>
                         </ul>
-                    </LemonBanner>
-                    <LemonField name="domain" label="Domain">
-                        <LemonInput
+                    </Banner>
+                    <Field name="domain" label="Domain">
+                        <Input
                             autoFocus
                             placeholder="Enter a domain (e.g. t.mydomain.com)"
                             data-attr="domain-input"
                         />
-                    </LemonField>
+                    </Field>
                     <div className="flex justify-end gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={collapseForm}
                             disabledReason={proxyRecordsLoading ? 'Saving' : undefined}
                         >
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             htmlType="submit"
                             type="primary"
                             data-attr="domain-save"
                             loading={proxyRecordsLoading}
                         >
                             Add
-                        </LemonButton>
+                        </Button>
                     </div>
                 </Form>
             )}

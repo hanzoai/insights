@@ -17,7 +17,7 @@ export const GenerationEvent = (): JSX.Element => {
                 `}
             </Markdown>
 
-            <div className="LemonMarkdown">
+            <div className="Markdown">
                 <table className="my-4">
                     <thead>
                         <tr>
@@ -299,7 +299,7 @@ export const GenerationEvent = (): JSX.Element => {
                 `}
             </Markdown>
 
-            <div className="LemonMarkdown">
+            <div className="Markdown">
                 <table className="my-4">
                     <thead>
                         <tr>
@@ -364,7 +364,7 @@ export const GenerationEvent = (): JSX.Element => {
 
             <Markdown>#### Custom pricing</Markdown>
 
-            <div className="LemonMarkdown">
+            <div className="Markdown">
                 <table className="my-4">
                     <thead>
                         <tr>
@@ -462,7 +462,7 @@ export const GenerationEvent = (): JSX.Element => {
 
             <Markdown>### Cache properties</Markdown>
 
-            <div className="LemonMarkdown">
+            <div className="Markdown">
                 <table className="my-4">
                     <thead>
                         <tr>
@@ -497,7 +497,7 @@ export const GenerationEvent = (): JSX.Element => {
 
             <Markdown>### Model parameters</Markdown>
 
-            <div className="LemonMarkdown">
+            <div className="Markdown">
                 <table className="my-4">
                     <thead>
                         <tr>

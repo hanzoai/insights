@@ -6,13 +6,13 @@ import { router } from 'kea-router'
 import React from 'react'
 
 import { IconChevronDown, IconChevronRight, IconExternal } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonButtonProps, LemonDivider, LemonInput, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, ButtonProps, Divider, Input, Link } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { SupportedPlatforms } from 'lib/components/SupportedPlatforms/SupportedPlatforms'
 import { TimeSensitiveAuthenticationArea } from 'lib/components/TimeSensitiveAuthentication/TimeSensitiveAuthentication'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { IconLink } from 'lib/elements/icons'
 import { inStorybookTestRunner } from 'lib/utils'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { teamLogic } from 'scenes/teamLogic'
@@ -229,7 +229,7 @@ export function Settings({
                         <div className="Settings__sections">
                             {!settingsInSidebar && (
                                 <div className="Settings__sections__search">
-                                    <LemonInput
+                                    <Input
                                         type="search"
                                         placeholder="Search settings..."
                                         value={searchTerm}
@@ -252,18 +252,18 @@ export function Settings({
                             </div>
                         </div>
                     ) : (
-                        <LemonButton fullWidth sideIcon={<IconChevronRight />} onClick={() => openCompactNavigation()}>
+                        <Button fullWidth sideIcon={<IconChevronRight />} onClick={() => openCompactNavigation()}>
                             {compactNavigationContent}
-                        </LemonButton>
+                        </Button>
                     )}
-                    {isCompact ? <LemonDivider /> : null}
+                    {isCompact ? <Divider /> : null}
                 </>
             )}
 
             <AuthenticationAreaComponent>
                 <div className="flex-1 w-full min-w-0 min-h-screen space-y-2 self-start">
                     {!hideSections && selectedLevel === 'project' && (
-                        <LemonBanner type="info">
+                        <Banner type="info">
                             These settings only apply to the current project{' '}
                             {currentTeam?.name ? (
                                 <>
@@ -271,7 +271,7 @@ export function Settings({
                                 </>
                             ) : null}
                             .
-                        </LemonBanner>
+                        </Banner>
                     )}
 
                     <SettingsRenderer {...props} handleLocally={handleLocally} />
@@ -304,7 +304,7 @@ function SearchResults({
                     </li>
                     {group.results.map((result) => (
                         <li key={`${result.sectionId}-${result.settingId}`}>
-                            <LemonButton
+                            <Button
                                 fullWidth
                                 size="small"
                                 onClick={
@@ -318,7 +318,7 @@ function SearchResults({
                                 data-attr={`settings-search-result-${result.settingId}`}
                             >
                                 {result.settingTitle}
-                            </LemonButton>
+                            </Button>
                         </li>
                     ))}
                 </React.Fragment>
@@ -344,7 +344,7 @@ function SettingsRenderer(props: SettingsLogicProps & { handleLocally: boolean }
                             <h2 id={x.id} className="flex gap-2 items-center text-base font-semibold mb-0">
                                 {x.title}
                                 {props.logicKey === 'settingsScene' && (
-                                    <LemonButton
+                                    <Button
                                         icon={<IconLink />}
                                         size="small"
                                         to={urls.settings(selectedSectionId ?? selectedLevel, x.id)}
@@ -410,7 +410,7 @@ const OptionButton = ({
     sideIcon,
     disabledReason,
     'data-attr': dataAttr,
-}: Pick<LemonButtonProps, 'to' | 'children' | 'active' | 'disabledReason'> & {
+}: Pick<ButtonProps, 'to' | 'children' | 'active' | 'disabledReason'> & {
     handleLocally: boolean
     onClick: () => void
     isLink?: boolean
@@ -419,7 +419,7 @@ const OptionButton = ({
     'data-attr'?: string
 }): JSX.Element => {
     return (
-        <LemonButton
+        <Button
             to={to}
             onClick={
                 handleLocally
@@ -438,7 +438,7 @@ const OptionButton = ({
             data-attr={dataAttr}
         >
             {children}
-        </LemonButton>
+        </Button>
     )
 }
 

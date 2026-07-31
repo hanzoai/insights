@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPulse } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
 import { SidePanelTab } from '~/types'
@@ -20,7 +20,7 @@ export function MetalyticsSummary(): JSX.Element | null {
 
     return (
         <span className="relative inline-flex">
-            <LemonButton
+            <Button
                 loading={viewCountLoading}
                 icon={<IconPulse />}
                 size="small"

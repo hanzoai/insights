@@ -1,7 +1,7 @@
 import { Meta, StoryFn } from '@storybook/react'
 import { CapturedNetworkRequest } from '@hanzo/insights'
 
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 import { mapRRWebNetworkRequest } from 'scenes/session-recordings/apm/performance-event-utils'
 import {
     BodyDisplay,
@@ -34,7 +34,7 @@ const BasicTemplate: StoryFn<typeof ItemPerformanceEvent> = (props: Partial<Item
         <div className="flex flex-col gap-2 min-w-96">
             <h3>Collapsed</h3>
             <ItemPerformanceEvent {...propsToUse} />
-            <LemonDivider />
+            <Divider />
             <h3>Expanded</h3>
             <ItemPerformanceEventDetail {...propsToUse} />
         </div>

@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconCheckCircle } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput, LemonModal, LemonTable, Link } from '@hanzo/lemon-ui'
+import { Button, Divider, Input, Modal, Table, Link } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
+import { Field } from 'lib/elements/Field'
+import { Radio } from 'lib/elements/Radio'
 
 import { BillingGauge } from './BillingGauge'
 import { billingLogic } from './billingLogic'
@@ -58,20 +58,20 @@ export const PurchaseCreditsModal = (): JSX.Element | null => {
     const maxDiscount = Math.max(...creditBrackets.map((b) => b.discount))
 
     return (
-        <LemonModal
+        <Modal
             onClose={() => showPurchaseCreditsModal(false)}
             width="max(44vw)"
             title="Prepay for usage credits and get a discount"
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={() => showPurchaseCreditsModal(false)}
                         disabled={isCreditFormSubmitting}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={() => submitCreditForm()} loading={isCreditFormSubmitting}>
+                    </Button>
+                    <Button type="primary" onClick={() => submitCreditForm()} loading={isCreditFormSubmitting}>
                         Buy{' '}
                         {creditForm.creditInput
                             ? `$${Math.round(creditInputValue).toLocaleString('en-US', {
@@ -80,7 +80,7 @@ export const PurchaseCreditsModal = (): JSX.Element | null => {
                               })}`
                             : ''}{' '}
                         credits {creditDiscount > 0 ? `at ${floatDiscountToText(creditDiscount)} off` : ''}
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -111,14 +111,14 @@ export const PurchaseCreditsModal = (): JSX.Element | null => {
                         credits for the year.
                     </p>
 
-                    <LemonField
+                    <Field
                         name="creditInput"
                         label="How many credits do you want to purchase?"
                         help="Credits are dispersed monthly and roll over to the next month. If you use more than the available credits in any month, you'll pay for the usage at the standard rate. Credits expire after 1 year from purchase."
                     >
                         {({ value, onChange, error }) => (
                             <div className="max-w-40">
-                                <LemonInput
+                                <Input
                                     type="number"
                                     fullWidth={false}
                                     status={error ? 'danger' : 'default'}
@@ -133,7 +133,7 @@ export const PurchaseCreditsModal = (): JSX.Element | null => {
                                 />
                             </div>
                         )}
-                    </LemonField>
+                    </Field>
 
                     <BillingGauge
                         items={billingGaugeItems}
@@ -147,9 +147,9 @@ export const PurchaseCreditsModal = (): JSX.Element | null => {
                         <p className="mb-1 text-md font-semibold">Payment details</p>
                         <p className="mb-0">Choose how you'd like to pay for your credits.</p>
                     </div>
-                    <LemonField name="collectionMethod">
+                    <Field name="collectionMethod">
                         {({ value, onChange }) => (
-                            <LemonRadio
+                            <Radio
                                 value={value}
                                 onChange={onChange}
                                 options={[
@@ -168,15 +168,15 @@ export const PurchaseCreditsModal = (): JSX.Element | null => {
                                 ]}
                             />
                         )}
-                    </LemonField>
+                    </Field>
 
-                    <LemonDivider />
+                    <Divider />
 
                     <div>
                         <p className="mb-1 text-md font-semibold">Summary</p>
                         <p className="mb-0">Here's a summary of what you'll pay.</p>
                     </div>
-                    <LemonTable
+                    <Table
                         showHeader={false}
                         columns={[
                             {
@@ -244,6 +244,6 @@ export const PurchaseCreditsModal = (): JSX.Element | null => {
                     </div>
                 </div>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

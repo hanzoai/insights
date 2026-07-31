@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconGear, IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, LemonInput, LemonMenu } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Input, Menu } from '@hanzo/elements'
 
 import { dataVisualizationLogic } from '../../dataVisualizationLogic'
 import { NewVariableModal } from './NewVariableModal'
@@ -35,7 +35,7 @@ export const AddVariableButton = ({
     buttonProps,
 }: {
     title?: string
-    buttonProps?: Pick<LemonButtonProps, 'type' | 'size' | 'sideIcon'>
+    buttonProps?: Pick<ButtonProps, 'type' | 'size' | 'sideIcon'>
 }): JSX.Element => {
     const { showEditingUI } = useValues(dataVisualizationLogic)
     const { openNewVariableModal, openExistingVariableModal } = useActions(variableModalLogic)
@@ -90,7 +90,7 @@ export const AddVariableButton = ({
                           label: () => (
                               <>
                                   <div className="pb-1">
-                                      <LemonInput
+                                      <Input
                                           data-attr="insight-variable-search"
                                           type="search"
                                           placeholder="Search variables"
@@ -161,11 +161,11 @@ export const AddVariableButton = ({
 
     return (
         <>
-            <LemonMenu items={menuItems}>
-                <LemonButton type="secondary" icon={<IconPlus />} sideIcon={null} {...buttonProps}>
+            <Menu items={menuItems}>
+                <Button type="secondary" icon={<IconPlus />} sideIcon={null} {...buttonProps}>
                     {title}
-                </LemonButton>
-            </LemonMenu>
+                </Button>
+            </Menu>
             <NewVariableModal />
         </>
     )

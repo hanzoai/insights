@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 import { ReactNode } from 'react'
 
 import { IconDirectedGraph, IconOpenSidebar } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { getRuntimeFromLib } from 'lib/components/Errors/utils'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -65,7 +65,7 @@ export default function SimilarIssueCard({
 function OpenInNewTabAction({ issueId }: { issueId: string }): JSX.Element {
     const { newTab } = useActions(sceneLogic)
     return (
-        <LemonButton
+        <Button
             type="secondary"
             size="xsmall"
             icon={<IconOpenSidebar />}
@@ -77,7 +77,7 @@ function OpenInNewTabAction({ issueId }: { issueId: string }): JSX.Element {
 
 export function MergeAction({ onClick }: { onClick: () => void }): JSX.Element {
     return (
-        <LemonButton
+        <Button
             type="primary"
             size="xsmall"
             icon={<IconDirectedGraph />}

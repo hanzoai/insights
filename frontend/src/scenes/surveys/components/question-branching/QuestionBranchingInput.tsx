@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonDialog, LemonSelect } from '@hanzo/lemon-ui'
+import { Dialog, Select } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { truncate } from 'lib/utils'
 import { NPS_DETRACTOR_LABEL, NPS_PASSIVE_LABEL, NPS_PROMOTER_LABEL } from 'scenes/surveys/constants'
 
@@ -93,7 +93,7 @@ export function QuestionBranchingInput({
 
         // Show warning if shuffle is enabled and user is adding branching logic
         if (survey.appearance?.shuffleQuestions) {
-            LemonDialog.open({
+            Dialog.open({
                 title: 'Your survey has question shuffling enabled',
                 description: (
                     <p className="py-2">
@@ -119,15 +119,15 @@ export function QuestionBranchingInput({
 
     return (
         <>
-            <LemonField name="branching" label="After this question, go to:" className="max-w-80">
-                <LemonSelect
+            <Field name="branching" label="After this question, go to:" className="max-w-80">
+                <Select
                     className="max-w-80 whitespace-nowrap"
                     value={branchingDropdownValue}
                     data-attr={`survey-question-${questionIndex}-branching-select`}
                     onSelect={handleBranchingSelection}
                     options={dropdownOptions}
                 />
-            </LemonField>
+            </Field>
             {/* Show response-based branching UI when that option is selected */}
             {branchingDropdownValue === SurveyQuestionBranchingType.ResponseBased && hasResponseBasedBranching && (
                 <QuestionResponseBasedBranchingInput question={question} questionIndex={questionIndex} />
@@ -242,7 +242,7 @@ function QuestionResponseBasedBranchingInput({
                         </div>
                     </div>
                     <div className="w-1/3 flex justify-end">
-                        <LemonSelect
+                        <Select
                             className="w-full whitespace-nowrap"
                             value={getResponseBasedBranchingDropdownValue(questionIndex, question, value)}
                             data-attr={`survey-question-${questionIndex}-branching-response_based-select-${i}`}

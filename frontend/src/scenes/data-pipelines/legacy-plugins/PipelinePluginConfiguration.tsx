@@ -4,23 +4,23 @@ import React, { useState } from 'react'
 
 import { IconLock, IconPencil } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonDialog,
-    LemonFileInput,
-    LemonInput,
-    LemonSelect,
-    LemonSwitch,
-    LemonTextArea,
+    Banner,
+    Button,
+    Dialog,
+    FileInput,
+    Input,
+    Select,
+    Switch,
+    TextArea,
     SpinnerOverlay,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 import { PluginConfigSchema } from '@hanzo/plugin-scaffold/src/types'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { NotFound } from 'lib/components/NotFound'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
+import { Field } from 'lib/elements/Field'
+import { Markdown } from 'lib/elements/Markdown'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 import {
     SECRET_FIELD_VALUE,
@@ -70,7 +70,7 @@ export function PipelinePluginConfiguration({
             fieldConfig.type &&
             isValidField(fieldConfig) &&
             !hiddenFields.includes(fieldConfig.key) ? (
-                <LemonField
+                <Field
                     name={fieldConfig.key}
                     label={
                         <>
@@ -82,15 +82,15 @@ export function PipelinePluginConfiguration({
                                     <IconLock />
                                 </Tooltip>
                             )}
-                            {fieldConfig.markdown && <LemonMarkdown>{fieldConfig.markdown}</LemonMarkdown>}
+                            {fieldConfig.markdown && <Markdown>{fieldConfig.markdown}</Markdown>}
                             {fieldConfig.name || fieldConfig.key}
                         </>
                     }
-                    help={fieldConfig.hint && <LemonMarkdown className="mt-0.5">{fieldConfig.hint}</LemonMarkdown>}
+                    help={fieldConfig.hint && <Markdown className="mt-0.5">{fieldConfig.hint}</Markdown>}
                     showOptional={!requiredFields.includes(fieldConfig.key)}
                 >
                     <PluginField fieldConfig={fieldConfig} disabled={loadingOrSubmitting} />
-                </LemonField>
+                </Field>
             ) : (
                 <>
                     {fieldConfig.type ? (
@@ -105,7 +105,7 @@ export function PipelinePluginConfiguration({
 
     const buttons = (
         <>
-            <LemonButton
+            <Button
                 type="secondary"
                 htmlType="reset"
                 onClick={() => resetConfiguration(savedConfiguration || {})}
@@ -114,15 +114,15 @@ export function PipelinePluginConfiguration({
                 }
             >
                 Clear changes
-            </LemonButton>
-            <LemonButton
+            </Button>
+            <Button
                 type="primary"
                 htmlType="submit"
                 onClick={submitConfiguration}
                 loading={isConfigurationSubmitting}
             >
                 {isNew ? 'Create' : 'Save'}
-            </LemonButton>
+            </Button>
         </>
     )
 
@@ -133,12 +133,12 @@ export function PipelinePluginConfiguration({
             </div>
 
             {plugin?.insights_function_migration_available && (
-                <LemonBanner
+                <Banner
                     type="error"
                     action={{
                         children: 'Upgrade to new version',
                         onClick: () =>
-                            LemonDialog.open({
+                            Dialog.open({
                                 title: 'Upgrade destination',
                                 width: '30rem',
                                 description:
@@ -157,7 +157,7 @@ export function PipelinePluginConfiguration({
                     }}
                 >
                     <b>New version available!</b> This destination is part of our legacy system. Click to upgrade.
-                </LemonBanner>
+                </Banner>
             )}
 
             <Form
@@ -177,16 +177,16 @@ export function PipelinePluginConfiguration({
                                     </div>
                                     {plugin.description ? (
                                         <div className="mt-1 text-xs text-tertiary">
-                                            <LemonMarkdown className="max-w-[30rem]" lowKeyHeadings>
+                                            <Markdown className="max-w-[30rem]" lowKeyHeadings>
                                                 {plugin.description}
-                                            </LemonMarkdown>
+                                            </Markdown>
                                         </div>
                                     ) : null}
                                 </div>
 
-                                <LemonField name="enabled">
+                                <Field name="enabled">
                                     {({ value, onChange }) => (
-                                        <LemonSwitch
+                                        <Switch
                                             label="Enabled"
                                             onChange={() => onChange(!value)}
                                             checked={value}
@@ -194,22 +194,22 @@ export function PipelinePluginConfiguration({
                                             bordered
                                         />
                                     )}
-                                </LemonField>
+                                </Field>
                             </div>
-                            <LemonField
+                            <Field
                                 name="name"
                                 label="Name"
                                 info="Customising the name can be useful if multiple instances of the same type are used."
                             >
-                                <LemonInput type="text" disabled={loadingOrSubmitting} />
-                            </LemonField>
-                            <LemonField
+                                <Input type="text" disabled={loadingOrSubmitting} />
+                            </Field>
+                            <Field
                                 name="description"
                                 label="Description"
                                 info="Add a description to share context with other team members"
                             >
-                                <LemonTextArea disabled={loadingOrSubmitting} />
-                            </LemonField>
+                                <TextArea disabled={loadingOrSubmitting} />
+                            </Field>
                         </div>{' '}
                     </div>
 
@@ -252,7 +252,7 @@ function PluginField({
         (value === SECRET_FIELD_VALUE || value.name === SECRET_FIELD_VALUE)
     ) {
         return (
-            <LemonButton
+            <Button
                 type="secondary"
                 icon={<IconPencil />}
                 onClick={() => {
@@ -262,14 +262,14 @@ function PluginField({
                 disabled={disabled}
             >
                 Reset secret {fieldConfig.type === 'attachment' ? 'attachment' : 'field'}
-            </LemonButton>
+            </Button>
         )
     }
 
     return fieldConfig.type === 'attachment' ? (
         <>
             {value?.name ? <span>Selected file: {value.name}</span> : null}
-            <LemonFileInput
+            <FileInput
                 accept="*"
                 multiple={false}
                 onChange={(files) => onChange?.(files[0])}
@@ -278,7 +278,7 @@ function PluginField({
             />
         </>
     ) : fieldConfig.type === 'string' ? (
-        <LemonInput
+        <Input
             value={value}
             onChange={onChange}
             autoFocus={editingSecret}
@@ -288,7 +288,7 @@ function PluginField({
     ) : fieldConfig.type === 'json' ? (
         <JsonConfigField value={value} onChange={onChange} autoFocus={editingSecret} className="ph-no-capture" />
     ) : fieldConfig.type === 'choice' ? (
-        <LemonSelect
+        <Select
             fullWidth
             value={value}
             className="ph-no-capture"

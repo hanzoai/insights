@@ -1,4 +1,4 @@
-import { LemonTag, LemonTagType } from '@hanzo/lemon-ui'
+import { Tag, TagType } from '@hanzo/elements'
 
 import { getSurveyStatus } from 'scenes/surveys/surveysLogic'
 
@@ -9,11 +9,11 @@ export function SurveyStatusTag({ survey }: { survey: Pick<Survey, 'start_date' 
         running: 'success',
         draft: 'default',
         complete: 'completion',
-    } as Record<ProgressStatus, LemonTagType>
+    } as Record<ProgressStatus, TagType>
     const status = getSurveyStatus(survey)
     return (
-        <LemonTag type={statusColors[status]} className="font-semibold" data-attr="status">
+        <Tag type={statusColors[status]} className="font-semibold" data-attr="status">
             {status.toUpperCase()}
-        </LemonTag>
+        </Tag>
     )
 }

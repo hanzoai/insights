@@ -1,5 +1,5 @@
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
+import { Label } from 'lib/elements/Label'
+import { Select } from 'lib/elements/Select'
 
 import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 
@@ -20,9 +20,9 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
     const labelClassName = 'flex flex-col gap-1 items-start'
     return (
         <div className="flex gap-2">
-            <LemonLabel className={labelClassName}>
+            <Label className={labelClassName}>
                 <div>POE:</div>
-                <LemonSelect
+                <Select
                     options={[
                         { value: 'disabled', label: 'Disabled' },
                         {
@@ -46,10 +46,10 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                     }
                     value={query.modifiers?.personsOnEventsMode ?? response?.modifiers?.personsOnEventsMode}
                 />
-            </LemonLabel>
-            <LemonLabel className={labelClassName}>
+            </Label>
+            <Label className={labelClassName}>
                 <div>Persons ArgMax:</div>
-                <LemonSelect
+                <Select
                     options={[
                         { value: 'v1', label: 'V1' },
                         { value: 'v2', label: 'V2' },
@@ -62,10 +62,10 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                     }
                     value={query.modifiers?.personsArgMaxVersion ?? response?.modifiers?.personsArgMaxVersion}
                 />
-            </LemonLabel>
-            <LemonLabel className={labelClassName}>
+            </Label>
+            <Label className={labelClassName}>
                 <div>In Cohort Via:</div>
-                <LemonSelect
+                <Select
                     options={[
                         { value: 'auto', label: 'auto' },
                         { value: 'leftjoin', label: 'leftjoin' },
@@ -80,10 +80,10 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                     }
                     value={query.modifiers?.inCohortVia ?? response?.modifiers?.inCohortVia}
                 />
-            </LemonLabel>
-            <LemonLabel className={labelClassName}>
+            </Label>
+            <Label className={labelClassName}>
                 <div>Materialization Mode:</div>
-                <LemonSelect
+                <Select
                     options={[
                         { value: 'auto', label: 'auto' },
                         { value: 'legacy_null_as_string', label: 'legacy_null_as_string' },
@@ -98,10 +98,10 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                     }
                     value={query.modifiers?.materializationMode ?? response?.modifiers?.materializationMode}
                 />
-            </LemonLabel>
-            <LemonLabel className={labelClassName}>
+            </Label>
+            <Label className={labelClassName}>
                 <div>Optimize joined filters:</div>
-                <LemonSelect
+                <Select
                     options={[
                         { value: true, label: 'true' },
                         { value: false, label: 'false' },
@@ -114,10 +114,10 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                     }
                     value={query.modifiers?.optimizeJoinedFilters ?? response?.modifiers?.optimizeJoinedFilters}
                 />
-            </LemonLabel>
-            <LemonLabel className={labelClassName}>
+            </Label>
+            <Label className={labelClassName}>
                 <div>Projection pushdown:</div>
-                <LemonSelect
+                <Select
                     options={[
                         { value: true, label: 'true' },
                         { value: false, label: 'false' },
@@ -130,10 +130,10 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                     }
                     value={query.modifiers?.optimizeProjections ?? response?.modifiers?.optimizeProjections}
                 />
-            </LemonLabel>
-            <LemonLabel className={labelClassName}>
+            </Label>
+            <Label className={labelClassName}>
                 <div>Use preaggregated intermediate:</div>
-                <LemonSelect
+                <Select
                     options={[
                         { value: true, label: 'true' },
                         { value: false, label: 'false' },
@@ -149,10 +149,10 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                         response?.modifiers?.usePreaggregatedIntermediateResults
                     }
                 />
-            </LemonLabel>
-            <LemonLabel className={labelClassName}>
+            </Label>
+            <Label className={labelClassName}>
                 <div>Property Groups:</div>
-                <LemonSelect
+                <Select
                     options={[
                         { value: 'enabled', label: 'Enabled' },
                         { value: 'disabled', label: 'Disabled' },
@@ -166,11 +166,11 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                     }
                     value={query.modifiers?.propertyGroupsMode ?? response?.modifiers?.propertyGroupsMode}
                 />
-            </LemonLabel>
+            </Label>
 
-            <LemonLabel className={labelClassName}>
+            <Label className={labelClassName}>
                 <div>Pre-aggregation transformation:</div>
-                <LemonSelect
+                <Select
                     options={[
                         { value: true, label: 'true' },
                         { value: false, label: 'false' },
@@ -186,11 +186,11 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                         response?.modifiers?.usePreaggregatedTableTransforms
                     }
                 />
-            </LemonLabel>
+            </Label>
 
-            <LemonLabel className={labelClassName}>
+            <Label className={labelClassName}>
                 <div>Session table version:</div>
-                <LemonSelect<Exclude<InsightsQLQueryModifiers['sessionTableVersion'], undefined>>
+                <Select<Exclude<InsightsQLQueryModifiers['sessionTableVersion'], undefined>>
                     options={[
                         { value: 'auto', label: 'auto' },
                         { value: 'v1', label: 'v1' },
@@ -205,7 +205,7 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
                     }
                     value={query.modifiers?.sessionTableVersion ?? response?.modifiers?.sessionTableVersion ?? 'auto'}
                 />
-            </LemonLabel>
+            </Label>
         </div>
     )
 }

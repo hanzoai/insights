@@ -3,7 +3,7 @@ import { Form } from 'kea-forms'
 import { useState } from 'react'
 
 import { IconFilter, IconGlobe, IconPhone, IconPlus } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonDivider, LemonInput, LemonSelect, Popover, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Button, Divider, Input, Select, Popover, Tooltip } from '@hanzo/elements'
 
 import { baseModifier } from 'lib/components/AppShortcuts/shortcuts'
 import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
@@ -19,9 +19,9 @@ import {
     isWebAnalyticsPropertyFilter,
 } from 'lib/components/PropertyFilters/utils'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonSegmentedSelect } from 'lib/lemon-ui/LemonSegmentedSelect'
-import { IconLink, IconMonitor, IconWithCount } from 'lib/lemon-ui/icons/icons'
+import { Field } from 'lib/elements/Field'
+import { SegmentedSelect } from 'lib/elements/SegmentedSelect'
+import { IconLink, IconMonitor, IconWithCount } from 'lib/elements/icons/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import MaxTool from 'scenes/max/MaxTool'
@@ -208,7 +208,7 @@ const WebAnalyticsDomainSelector = (): JSX.Element => {
     const { featureFlags } = useValues(featureFlagLogic)
 
     return (
-        <LemonSelect
+        <Select
             className="grow md:grow-0"
             size="small"
             value={hasHostFilter ? 'host' : (validatedDomainFilter ?? 'all')}
@@ -288,7 +288,7 @@ const WebAnalyticsDeviceToggle = (): JSX.Element => {
 
     if (featureFlags[FEATURE_FLAGS.WEB_ANALYTICS_FILTERS_V2] || featureFlags[FEATURE_FLAGS.CONDENSED_FILTER_BAR]) {
         return (
-            <LemonSelect
+            <Select
                 size="small"
                 value={deviceTypeFilter ?? undefined}
                 allowClear={true}
@@ -318,7 +318,7 @@ const WebAnalyticsDeviceToggle = (): JSX.Element => {
     }
 
     return (
-        <LemonSegmentedSelect
+        <SegmentedSelect
             size="small"
             value={deviceTypeFilter ?? undefined}
             onChange={(value) => setDeviceTypeFilter(value !== deviceTypeFilter ? value : null)}
@@ -347,7 +347,7 @@ const WebVitalsPercentileToggle = (): JSX.Element | null => {
     }
 
     return (
-        <LemonSegmentedSelect
+        <SegmentedSelect
             value={webVitalsPercentile}
             onChange={setWebVitalsPercentile}
             options={[
@@ -392,7 +392,7 @@ const ShareButton = (): JSX.Element => {
     }
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             size="small"
             icon={<IconLink />}
@@ -447,13 +447,13 @@ function FiltersPopover(): JSX.Element {
                     />
                 </div>
 
-                <LemonDivider />
+                <Divider />
                 <div className="text-xs font-semibold text-muted uppercase mb-2">Device filters</div>
                 <WebAnalyticsDeviceToggle />
 
                 {showConversionGoal && (
                     <>
-                        <LemonDivider />
+                        <Divider />
                         <div>
                             <div className="text-xs font-semibold text-muted uppercase mb-2">Conversion goal</div>
                             <WebConversionGoal value={conversionGoal} onChange={setConversionGoal} />
@@ -471,7 +471,7 @@ function FiltersPopover(): JSX.Element {
             placement="bottom-end"
             overlay={filtersContent}
         >
-            <LemonButton
+            <Button
                 icon={
                     <IconWithCount count={activeFilterCount} showZero={false}>
                         <IconFilter />
@@ -483,7 +483,7 @@ function FiltersPopover(): JSX.Element {
                 onClick={() => setDisplayFilters(!displayFilters)}
             >
                 Filters
-            </LemonButton>
+            </Button>
         </Popover>
     )
 
@@ -508,21 +508,21 @@ const AddAuthorizedUrlForm = (): JSX.Element => {
             enableFormOnSubmit
         >
             <div className="p-2 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
-                <LemonField name="url">
-                    <LemonInput
+                <Field name="url">
+                    <Input
                         size="small"
                         placeholder="https://example.com"
                         autoFocus
                         data-attr="web-authorized-url-input"
                     />
-                </LemonField>
+                </Field>
                 <div className="flex gap-2 justify-end">
-                    <LemonButton size="small" type="secondary" onClick={cancelProposingAuthorizedUrl}>
+                    <Button size="small" type="secondary" onClick={cancelProposingAuthorizedUrl}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton size="small" type="primary" htmlType="submit" loading={isProposedUrlSubmitting}>
+                    </Button>
+                    <Button size="small" type="primary" htmlType="submit" loading={isProposedUrlSubmitting}>
                         Add
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </Form>
@@ -543,16 +543,16 @@ const AddSuggestedAuthorizedUrlList = (): JSX.Element => {
                             <span className="text-xs truncate flex-1" title={suggestion.url}>
                                 {suggestion.url}
                             </span>
-                            <LemonButton size="xsmall" type="primary" onClick={() => addAuthorizedUrl(suggestion.url)}>
+                            <Button size="xsmall" type="primary" onClick={() => addAuthorizedUrl(suggestion.url)}>
                                 Add
-                            </LemonButton>
+                            </Button>
                         </div>
                     ))}
                 </div>
             )}
-            <LemonButton size="small" icon={<IconPlus />} onClick={newAuthorizedUrl} fullWidth>
+            <Button size="small" icon={<IconPlus />} onClick={newAuthorizedUrl} fullWidth>
                 Add authorized URL
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -570,7 +570,7 @@ const IncompatibleFiltersWarning = (): JSX.Element | null => {
         .join(', ')
 
     return (
-        <LemonBanner
+        <Banner
             type="warning"
             className="mb-2"
             action={{ children: 'Remove unsupported filters', onClick: removeIncompatibleFilters }}
@@ -582,6 +582,6 @@ const IncompatibleFiltersWarning = (): JSX.Element | null => {
                     down: <strong>{filterNames}</strong>
                 </div>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

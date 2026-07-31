@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import { LemonButton, LemonInput, SpinnerOverlay } from '@hanzo/lemon-ui'
+import { Button, Input, SpinnerOverlay } from '@hanzo/elements'
 
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
@@ -77,9 +77,9 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeEmbedAttributes
             ) : (
                 <div className="flex-1 flex flex-col justify-center items-center">
                     {src ? <p>The given URL is not valid.</p> : <p>No URL configured</p>}
-                    <LemonButton type="primary" onClick={() => toggleEditing(true)}>
+                    <Button type="primary" onClick={() => toggleEditing(true)}>
                         Configure
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </>
@@ -111,7 +111,7 @@ const Settings = ({
 
     return (
         <div className="p-3 flex items-center flex-wrap gap-2">
-            <LemonInput
+            <Input
                 value={localUrl}
                 onChange={setLocalUrl}
                 onPressEnter={save}
@@ -119,9 +119,9 @@ const Settings = ({
                 className="flex-1"
                 autoFocus
             />
-            <LemonButton type="primary" onClick={save} disabledReason={!hasChanges ? 'Not changed' : null}>
+            <Button type="primary" onClick={save} disabledReason={!hasChanges ? 'Not changed' : null}>
                 Save
-            </LemonButton>
+            </Button>
         </div>
     )
 }

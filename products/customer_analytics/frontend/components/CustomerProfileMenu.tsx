@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonMenuSection, LemonSwitch } from '@hanzo/lemon-ui'
+import { Button, Menu, MenuSection, Switch } from '@hanzo/elements'
 
 import { customerProfileLogic } from '../customerProfileLogic'
 
@@ -16,12 +16,12 @@ export function CustomerProfileMenu(): JSX.Element | null {
         checked ? addNode(nodeType) : removeNode(nodeType)
     }
 
-    const items: LemonMenuSection[] = [
+    const items: MenuSection[] = [
         {
             title: 'Visible tiles',
             items: defaultContent.map((node) => ({
                 label: () => (
-                    <LemonSwitch
+                    <Switch
                         key={node.type}
                         label={node?.attrs?.title || node.type}
                         checked={content.some((c) => c.type === node.type)}
@@ -39,19 +39,19 @@ export function CustomerProfileMenu(): JSX.Element | null {
 
     return (
         <div className="flex flex-row items-center">
-            <LemonMenu items={items} closeOnClickInside={false}>
-                <LemonButton type="secondary" icon={<IconGear />} children="Edit profile" sideIcon={null} />
-            </LemonMenu>
+            <Menu items={items} closeOnClickInside={false}>
+                <Button type="secondary" icon={<IconGear />} children="Edit profile" sideIcon={null} />
+            </Menu>
             {changed && (
                 <>
-                    <LemonButton
+                    <Button
                         type="primary"
                         className="ml-2"
                         children="Save changes"
                         sideIcon={null}
                         onClick={() => saveChanges()}
                     />
-                    <LemonButton
+                    <Button
                         type="secondary"
                         className="ml-2"
                         children="Cancel"

@@ -1,7 +1,7 @@
 import './ImagePreview.scss'
 
 import { IconShare } from '@hanzo/icons'
-import { LemonButton, LemonMenu, Link } from '@hanzo/lemon-ui'
+import { Button, Menu, Link } from '@hanzo/elements'
 
 import { ErrorDisplay, idFrom } from 'lib/components/Errors/ErrorDisplay'
 import { ErrorEventType } from 'lib/components/Errors/types'
@@ -11,8 +11,8 @@ import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TitledSnack } from 'lib/components/TitledSnack'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { autoCaptureEventToDescription, capitalizeFirstLetter, isString } from 'lib/utils'
 import { AutocapturePreviewImage } from 'lib/utils/autocapture-previews'
 import { insightUrlForEvent } from 'scenes/insights/utils'
@@ -122,7 +122,7 @@ export function ItemEventMenu({ item }: ItemEventProps): JSX.Element {
     const traceUrl = traceId ? urls.llmAnalyticsTrace(traceId, traceParams) : null
 
     return (
-        <LemonMenu
+        <Menu
             items={[
                 {
                     label: 'View event in the activity feed',
@@ -160,8 +160,8 @@ export function ItemEventMenu({ item }: ItemEventProps): JSX.Element {
             ]}
             buttonSize="xsmall"
         >
-            <LemonButton size="xsmall" icon={<IconShare />} className="recordings-event-share-actions" />
-        </LemonMenu>
+            <Button size="xsmall" icon={<IconShare />} className="recordings-event-share-actions" />
+        </Menu>
     )
 }
 

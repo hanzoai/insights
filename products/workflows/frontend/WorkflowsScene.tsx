@@ -1,12 +1,12 @@
 import { actions, kea, path, props, reducers, selectors, useActions, useValues } from 'kea'
 
 import { IconLetter, IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonMenuItems } from '@hanzo/lemon-ui'
+import { Button, Menu, MenuItems } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { IconSlack, IconTwilio } from 'lib/lemon-ui/icons'
+import { Tab, Tabs } from 'lib/elements/Tabs'
+import { IconSlack, IconTwilio } from 'lib/elements/icons'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareScene } from 'lib/logic/scenes/tabAwareScene'
 import { tabAwareUrlToAction } from 'lib/logic/scenes/tabAwareUrlToAction'
@@ -103,7 +103,7 @@ export function WorkflowsScene(props: WorkflowsSceneProps = {}): JSX.Element {
     const { openNewCategoryModal } = useActions(optOutCategoriesLogic)
     const { showNewWorkflowModal } = useActions(newWorkflowLogic)
 
-    const newChannelMenuItems: LemonMenuItems = [
+    const newChannelMenuItems: MenuItems = [
         {
             label: (
                 <div className="flex gap-1 items-center">
@@ -135,7 +135,7 @@ export function WorkflowsScene(props: WorkflowsSceneProps = {}): JSX.Element {
         },
     ]
 
-    const tabs: LemonTab<WorkflowsSceneTab>[] = [
+    const tabs: Tab<WorkflowsSceneTab>[] = [
         {
             label: 'Workflows',
             key: 'workflows',
@@ -175,7 +175,7 @@ export function WorkflowsScene(props: WorkflowsSceneProps = {}): JSX.Element {
                 actions={
                     <>
                         {currentTab === 'workflows' && (
-                            <LemonButton
+                            <Button
                                 data-attr="new-workflow"
                                 onClick={() => {
                                     void addProductIntent({
@@ -188,32 +188,32 @@ export function WorkflowsScene(props: WorkflowsSceneProps = {}): JSX.Element {
                                 size="small"
                             >
                                 New workflow
-                            </LemonButton>
+                            </Button>
                         )}
                         {currentTab === 'library' && (
-                            <LemonButton
+                            <Button
                                 data-attr="new-message-button"
                                 to={urls.workflowsLibraryTemplateNew()}
                                 type="primary"
                                 size="small"
                             >
                                 New template
-                            </LemonButton>
+                            </Button>
                         )}
                         {currentTab === 'channels' && (
-                            <LemonMenu items={newChannelMenuItems} matchWidth>
-                                <LemonButton
+                            <Menu items={newChannelMenuItems} matchWidth>
+                                <Button
                                     data-attr="new-channel-button"
                                     icon={<IconPlusSmall />}
                                     size="small"
                                     type="primary"
                                 >
                                     New channel
-                                </LemonButton>
-                            </LemonMenu>
+                                </Button>
+                            </Menu>
                         )}
                         {currentTab === 'opt-outs' && (
-                            <LemonButton
+                            <Button
                                 data-attr="new-optout-category"
                                 icon={<IconPlusSmall />}
                                 size="small"
@@ -221,12 +221,12 @@ export function WorkflowsScene(props: WorkflowsSceneProps = {}): JSX.Element {
                                 onClick={() => openNewCategoryModal()}
                             >
                                 New category
-                            </LemonButton>
+                            </Button>
                         )}
                     </>
                 }
             />
-            <LemonTabs activeKey={currentTab} tabs={tabs} sceneInset />
+            <Tabs activeKey={currentTab} tabs={tabs} sceneInset />
             <NewWorkflowModal />
         </SceneContent>
     )

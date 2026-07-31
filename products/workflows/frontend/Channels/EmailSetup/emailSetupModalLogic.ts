@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 
 import api, { ApiError } from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import { IntegrationType } from '~/types'
 
@@ -126,7 +126,7 @@ export const emailSetupModalLogic = kea<emailSetupModalLogicType>([
                     return config
                 } catch (error) {
                     if (error instanceof ApiError || (error && typeof error === 'object' && 'detail' in error)) {
-                        lemonToast.error(`Failed to create email sender: ${error.detail || 'Please try again.'}`)
+                        toast.error(`Failed to create email sender: ${error.detail || 'Please try again.'}`)
                     }
                     throw error
                 }

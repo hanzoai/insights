@@ -3,15 +3,15 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { IconInfo, IconPlus, IconX } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonCheckbox,
-    LemonCollapse,
-    LemonInput,
-    LemonInputSelect,
-    LemonSegmentedButton,
-    LemonSelect,
+    Button,
+    Checkbox,
+    Collapse,
+    Input,
+    InputSelect,
+    SegmentedButton,
+    Select,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
@@ -104,7 +104,7 @@ function EventTriggerContent({ id }: { id: string }): JSX.Element {
                             event.propertyFilters && Object.keys(event.propertyFilters).length > 0
 
                         return (
-                            <LemonCollapse
+                            <Collapse
                                 key={`event-${event.name}-${index}`}
                                 panels={[
                                     {
@@ -123,7 +123,7 @@ function EventTriggerContent({ id }: { id: string }): JSX.Element {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <LemonButton
+                                                    <Button
                                                         size="xsmall"
                                                         icon={<IconX />}
                                                         onClick={(e) => {
@@ -269,7 +269,7 @@ export function AutoShowSection({ id }: { id: string }): JSX.Element | null {
                 <h5 className="font-semibold mb-2">Where to show</h5>
                 <div className="flex gap-2 items-center">
                     <span className="text-sm whitespace-nowrap">URL</span>
-                    <LemonSelect
+                    <Select
                         value={conditions.urlMatchType || SurveyMatchType.Contains}
                         onChange={(value) => {
                             onChange({
@@ -279,7 +279,7 @@ export function AutoShowSection({ id }: { id: string }): JSX.Element | null {
                         }}
                         options={urlMatchTypeOptions}
                     />
-                    <LemonInputSelect
+                    <InputSelect
                         className="flex-1"
                         mode="single"
                         value={conditions.url ? [conditions.url] : []}
@@ -310,7 +310,7 @@ export function AutoShowSection({ id }: { id: string }): JSX.Element | null {
                         data-attr="product-tour-url-input"
                     />
                     {conditions.url && (
-                        <LemonButton
+                        <Button
                             icon={<IconX />}
                             size="small"
                             type="tertiary"
@@ -338,7 +338,7 @@ export function AutoShowSection({ id }: { id: string }): JSX.Element | null {
                         <IconInfo />
                     </Tooltip>
                 </h5>
-                <LemonSelect
+                <Select
                     value={triggerType}
                     onChange={handleTriggerTypeChange}
                     options={triggerOptions}
@@ -363,16 +363,16 @@ export function AutoShowSection({ id }: { id: string }): JSX.Element | null {
                             selectedItems={conditions.actions?.values || []}
                             selectedEvents={conditions.actions?.values?.map((v) => v.name) ?? []}
                             addElement={
-                                <LemonButton size="small" type="secondary" icon={<IconPlus />} sideIcon={null}>
+                                <Button size="small" type="secondary" icon={<IconPlus />} sideIcon={null}>
                                     Add action
-                                </LemonButton>
+                                </Button>
                             }
                         />
                     </div>
                 )}
 
                 <div className="flex flex-row gap-2 items-center mt-4">
-                    <LemonCheckbox
+                    <Checkbox
                         checked={!!conditions.autoShowDelaySeconds}
                         onChange={(checked) => {
                             onChange({
@@ -382,7 +382,7 @@ export function AutoShowSection({ id }: { id: string }): JSX.Element | null {
                         }}
                     />
                     <span className="text-sm">Wait</span>
-                    <LemonInput
+                    <Input
                         type="number"
                         size="small"
                         min={1}
@@ -404,7 +404,7 @@ export function AutoShowSection({ id }: { id: string }): JSX.Element | null {
             <div>
                 <h5 className="font-semibold mb-2">How often to show</h5>
                 {isAnnouncement(productTour) ? (
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         value={displayFrequency ?? getDefaultDisplayFrequency(productTour).value}
                         onChange={(value) =>
                             setProductTourFormValue('content', {

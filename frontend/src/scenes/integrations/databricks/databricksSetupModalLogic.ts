@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import { IntegrationType } from '~/types'
 
@@ -44,10 +44,10 @@ export const databricksSetupModalLogic = kea<databricksSetupModalLogicType>([
                         },
                     })
                     actions.loadIntegrations()
-                    lemonToast.success('Databricks integration created successfully!')
+                    toast.success('Databricks integration created successfully!')
                     props.onComplete(integration.id)
                 } catch (error: any) {
-                    lemonToast.error(error.detail || 'Failed to create Databricks integration')
+                    toast.error(error.detail || 'Failed to create Databricks integration')
                     throw error
                 }
             },

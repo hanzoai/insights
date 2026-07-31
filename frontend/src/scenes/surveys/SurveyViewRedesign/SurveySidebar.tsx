@@ -3,7 +3,7 @@ import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 import { ReactNode } from 'react'
 
 import { IconDownload, IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonMenu, LemonSelect, LemonSkeleton, LemonSwitch, Link } from '@hanzo/lemon-ui'
+import { Button, Menu, Select, Skeleton, Switch, Link } from '@hanzo/elements'
 
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -107,7 +107,7 @@ export function SurveyDetailsPanel(): JSX.Element {
                                 }}
                             />
                         </div>
-                        <LemonSelect
+                        <Select
                             size="xsmall"
                             fullWidth
                             value={selectedPageIndex || 0}
@@ -220,8 +220,8 @@ export function SurveyNotificationsPanel(): JSX.Element {
     if (surveyNotificationsLoading) {
         return (
             <div className="flex flex-col gap-2">
-                <LemonSkeleton className="h-12" />
-                <LemonSkeleton className="h-12" />
+                <Skeleton className="h-12" />
+                <Skeleton className="h-12" />
             </div>
         )
     }
@@ -236,7 +236,7 @@ export function SurveyNotificationsPanel(): JSX.Element {
                             <div key={fn.id} className="flex items-center gap-2 rounded border p-2">
                                 <InsightsFunctionIcon src={fn.icon_url} size="small" />
                                 <div className="flex-1 min-w-0">
-                                    <LemonButton
+                                    <Button
                                         type="tertiary"
                                         size="xsmall"
                                         to={urls.insightsFunction(fn.id)}
@@ -244,10 +244,10 @@ export function SurveyNotificationsPanel(): JSX.Element {
                                         noPadding
                                     >
                                         <span className="truncate">{fn.name}</span>
-                                    </LemonButton>
+                                    </Button>
                                     {description && <div className="text-xs text-muted truncate">{description}</div>}
                                 </div>
-                                <LemonSwitch
+                                <Switch
                                     checked={fn.enabled}
                                     onChange={() => toggleSurveyNotificationEnabled(fn.id, !fn.enabled)}
                                     size="small"
@@ -259,7 +259,7 @@ export function SurveyNotificationsPanel(): JSX.Element {
             ) : (
                 <p className="text-xs text-muted m-0">No notifications configured yet.</p>
             )}
-            <LemonButton
+            <Button
                 type="secondary"
                 size="small"
                 icon={<IconPlus />}
@@ -267,7 +267,7 @@ export function SurveyNotificationsPanel(): JSX.Element {
                 fullWidth
             >
                 New notification
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -292,7 +292,7 @@ export function SurveyExportPanel(): JSX.Element {
     return (
         <PanelSection title="Export" description="Download survey responses">
             {dataTableQuery ? (
-                <LemonMenu
+                <Menu
                     items={[
                         {
                             label: 'Export as CSV',
@@ -304,7 +304,7 @@ export function SurveyExportPanel(): JSX.Element {
                         },
                     ]}
                 >
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         fullWidth
@@ -312,8 +312,8 @@ export function SurveyExportPanel(): JSX.Element {
                         data-attr="export-survey-responses"
                     >
                         Export responses
-                    </LemonButton>
-                </LemonMenu>
+                    </Button>
+                </Menu>
             ) : (
                 <p className="text-xs text-muted m-0">No responses to export yet.</p>
             )}

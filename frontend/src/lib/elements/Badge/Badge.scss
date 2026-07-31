@@ -1,0 +1,128 @@
+.Badge {
+    --badge-color: var(--color-accent);
+    --badge-size: 1.5rem;
+    --badge-font-size: 0.75rem;
+    --badge-position-offset: 0.5rem;
+    --badge-border-width: 0.125rem;
+
+    position: absolute;
+    z-index: 1; // Make sure it is at least in front of non-absolute items
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-width: var(--badge-size); // This is a minimum to accomodate multiple digits
+    height: var(--badge-size);
+
+    // Just enough so the overall size is unaffected with a single digit (i.e. badge stays round)
+    padding: calc(var(--badge-size) / 8);
+    font-size: var(--badge-font-size);
+    font-weight: 700;
+    line-height: var(--badge-size);
+    color: var(--color-bg-surface-primary);
+    pointer-events: none;
+    user-select: none;
+    background: var(--badge-color);
+    border: var(--badge-border-width) solid var(--color-bg-surface-primary);
+    border-radius: calc(var(--badge-size) / 2);
+
+    > * {
+        // For non-text content, make sure that content fills up the whole badge, and that the badge stays round
+        width: calc(var(--badge-size) - var(--badge-border-width) * 2);
+        height: calc(var(--badge-size) - var(--badge-border-width) * 2);
+        margin: calc(-1 * var(--badge-size) / 8);
+    }
+
+    &.Badge--success {
+        --badge-color: var(--success);
+    }
+
+    &.Badge--warning {
+        --badge-color: var(--warning);
+    }
+
+    &.Badge--danger {
+        --badge-color: var(--danger);
+    }
+
+    &.Badge--muted {
+        --badge-color: var(--color-text-secondary);
+    }
+
+    &.Badge--data {
+        --badge-color: var(--data-color-1);
+    }
+
+    &.Badge--position-none {
+        position: relative;
+    }
+
+    &.Badge--position-top-left {
+        top: calc(var(--badge-position-offset) * -1);
+        left: calc(var(--badge-position-offset) * -1);
+    }
+
+    &.Badge--position-top-right {
+        top: calc(var(--badge-position-offset) * -1);
+        right: calc(var(--badge-position-offset) * -1);
+    }
+
+    &.Badge--position-bottom-left {
+        bottom: calc(var(--badge-position-offset) * -1);
+        left: calc(var(--badge-position-offset) * -1);
+    }
+
+    &.Badge--position-bottom-right {
+        right: calc(var(--badge-position-offset) * -1);
+        bottom: calc(var(--badge-position-offset) * -1);
+    }
+
+    &.Badge--xsmall {
+        --badge-size: 0.875rem;
+        --badge-font-size: 0.425rem;
+    }
+
+    &.Badge--small {
+        --badge-size: 1.125rem;
+        --badge-font-size: 0.625rem;
+    }
+
+    &.Badge--large {
+        --badge-size: 1.75rem;
+        --badge-font-size: 0.875rem;
+    }
+
+    &.Badge--dot {
+        width: calc(var(--badge-size) * 0.5 + var(--badge-border-width));
+        min-width: 0;
+        height: calc(var(--badge-size) * 0.5 + var(--badge-border-width));
+    }
+
+    &.Badge--active {
+        z-index: var(--z-raised); // In croweded badge situation, show active ones above the rest
+        outline: calc(var(--badge-font-size) / 5) solid var(--badge-color);
+    }
+
+    &.Badge--enter {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    &.Badge--enter-active {
+        opacity: 1;
+        transition: all 200ms ease-out;
+        transform: scale(1);
+    }
+
+    &.Badge--exit {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    &.Badge--exit-active {
+        opacity: 0;
+        transition: all 200ms ease-in;
+        transform: scale(0.5);
+    }
+}

@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
 import { IconBottomPanel, IconSidePanel, IconX } from '@hanzo/icons'
-import { LemonButton, LemonTabs } from '@hanzo/lemon-ui'
+import { Button, Tabs } from '@hanzo/elements'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
@@ -95,7 +95,7 @@ export function PlayerSidebar(): JSX.Element {
                 <div className="SessionRecordingPlayer__sidebar__content">
                     <div className="flex bg-surface-primary pt-[1px]">
                         <div className="w-2.5 border-b shrink-0" />
-                        <LemonTabs
+                        <Tabs
                             activeKey={activeTab}
                             onChange={(tabId) => setTab(tabId)}
                             tabs={sidebarTabs.map((tabId) => {
@@ -117,7 +117,7 @@ export function PlayerSidebar(): JSX.Element {
                         />
                         <div className="flex flex-1 border-b shrink-0" />
                         <div className="flex gap-1 border-b end">
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={isVerticallyStacked ? <IconSidePanel /> : <IconBottomPanel />}
                                 onClick={() =>
@@ -129,7 +129,7 @@ export function PlayerSidebar(): JSX.Element {
                                 }
                                 tooltip={`Dock to ${isVerticallyStacked ? 'right' : 'bottom'}`}
                             />
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconX />}
                                 onClick={() => setSidebarOpen(false)}

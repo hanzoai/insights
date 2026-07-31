@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton, LemonTab, LemonTabs } from '@hanzo/lemon-ui'
+import { Button, Tab, Tabs } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -69,7 +69,7 @@ export function CustomerAnalyticsScene({ tabId }: { tabId?: string }): JSX.Eleme
             </>
         )
 
-    const tabs: LemonTab<string>[] = [
+    const tabs: Tab<string>[] = [
         {
             key: 'dashboard',
             label: 'Dashboard',
@@ -104,7 +104,7 @@ export function CustomerAnalyticsScene({ tabId }: { tabId?: string }): JSX.Eleme
                             interaction="click"
                             scope={Scene.CustomerAnalytics}
                         >
-                            <LemonButton
+                            <Button
                                 icon={<IconGear />}
                                 size="small"
                                 type="secondary"
@@ -126,7 +126,7 @@ export function CustomerAnalyticsScene({ tabId }: { tabId?: string }): JSX.Eleme
                 />
                 <FeedbackBanner feedbackButtonId="dashboard" />
                 {tabs.length > 1 ? (
-                    <LemonTabs activeKey={activeTab} data-attr="customer-analytics-tabs" tabs={tabs} sceneInset />
+                    <Tabs activeKey={activeTab} data-attr="customer-analytics-tabs" tabs={tabs} sceneInset />
                 ) : (
                     dashboardContent
                 )}

@@ -1,4 +1,4 @@
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { TASK_STATUS_CONFIG } from '../lib/task-status'
 import { TaskRun } from '../types'
@@ -15,5 +15,5 @@ export function TaskRunStatusBadge({ run }: { run: TaskRun }): JSX.Element {
     const config = TASK_STATUS_CONFIG[run.status]
     const tagType = STATUS_TO_TAG_TYPE[config.status || 'muted'] || 'default'
 
-    return <LemonTag type={tagType}>{config.label}</LemonTag>
+    return <Tag type={tagType}>{config.label}</Tag>
 }

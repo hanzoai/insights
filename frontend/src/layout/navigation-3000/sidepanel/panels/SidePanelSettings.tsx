@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
 import { IconArrowLeft, IconExternal } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 import { useOpenAi } from 'scenes/max/useOpenAi'
@@ -63,7 +63,7 @@ export const SidePanelSettings = (): JSX.Element => {
                 title={
                     <>
                         {cameFromMax && (
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={<IconArrowLeft />}
                                 onClick={() => {
@@ -78,14 +78,14 @@ export const SidePanelSettings = (): JSX.Element => {
                     </>
                 }
             >
-                <LemonButton
+                <Button
                     size="small"
                     to={urls.settings(settings.sectionId ?? settings.settingLevelId, settings.settingId)}
                     onClick={() => closeSidePanel()}
                     sideIcon={<IconExternal />}
                 >
                     All settings
-                </LemonButton>
+                </Button>
             </SidePanelPaneHeader>
             <div className="flex-1 p-3 overflow-y-auto" ref={scrollContainerRef}>
                 <Settings hideSections {...settingsLogicProps} />

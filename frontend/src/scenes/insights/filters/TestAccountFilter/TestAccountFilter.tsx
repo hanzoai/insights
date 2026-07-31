@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonSwitch, LemonSwitchProps } from 'lib/lemon-ui/LemonSwitch/LemonSwitch'
+import { Button } from 'lib/elements/Button'
+import { Switch, SwitchProps } from 'lib/elements/Switch/Switch'
 import { filterTestAccountsDefaultsLogic } from 'scenes/settings/environment/filterTestAccountDefaultsLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -17,7 +17,7 @@ export function TestAccountFilter({
     disabledReason,
 }: {
     filters: Partial<FilterType>
-    size?: LemonSwitchProps['size']
+    size?: SwitchProps['size']
     onChange: (filters: Partial<FilterType>) => void
     disabledReason?: string | null | false
 }): JSX.Element | null {
@@ -26,7 +26,7 @@ export function TestAccountFilter({
     const { setLocalDefault } = useActions(filterTestAccountsDefaultsLogic)
 
     return (
-        <LemonSwitch
+        <Switch
             checked={hasFilters ? !!filters.filter_test_accounts : false}
             onChange={(checked: boolean) => {
                 onChange({ filter_test_accounts: checked })
@@ -37,7 +37,7 @@ export function TestAccountFilter({
             label={
                 <div className="flex items-center whitespace-nowrap">
                     <span>Filter out internal and test users</span>
-                    <LemonButton
+                    <Button
                         icon={<IconGear />}
                         to={urls.settings('project-product-analytics', 'internal-user-filtering')}
                         size="small"

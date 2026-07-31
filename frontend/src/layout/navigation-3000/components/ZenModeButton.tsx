@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { navigation3000Logic } from '../navigationLogic'
 
@@ -14,7 +14,7 @@ export function ZenModeButton(): JSX.Element | null {
     }
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             size="small"
             icon={<IconX />}
@@ -22,6 +22,6 @@ export function ZenModeButton(): JSX.Element | null {
             tooltip="Exit zen mode"
         >
             Exit zen mode
-        </LemonButton>
+        </Button>
     )
 }

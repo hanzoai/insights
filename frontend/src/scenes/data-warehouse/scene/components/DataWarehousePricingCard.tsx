@@ -1,4 +1,4 @@
-import { LemonCard } from '@hanzo/lemon-ui'
+import { Card } from '@hanzo/elements'
 
 import { compactNumber } from 'lib/utils'
 
@@ -26,7 +26,7 @@ const HISTORICAL_ROWS_ADDON_KEY = 'data_warehouse_historical'
 export function DataWarehousePricingCard({ product }: { product: BillingProductV2Type | null }): JSX.Element {
     if (!product || !product.tiers || product.tiers.length === 0) {
         return (
-            <LemonCard className="hover:transform-none">
+            <Card className="hover:transform-none">
                 <div>
                     <h2 className="text-xl font-semibold mb-3">Cost breakdown</h2>
                     <div className="py-8 text-center text-muted">
@@ -34,7 +34,7 @@ export function DataWarehousePricingCard({ product }: { product: BillingProductV
                         <div className="text-xs">Cost breakdown will appear when you have usage data</div>
                     </div>
                 </div>
-            </LemonCard>
+            </Card>
         )
     }
 
@@ -46,7 +46,7 @@ export function DataWarehousePricingCard({ product }: { product: BillingProductV
     const historicalAddon = product.addons?.find((addon) => addon.type === HISTORICAL_ROWS_ADDON_KEY)
 
     return (
-        <LemonCard className="hover:transform-none p-4">
+        <Card className="hover:transform-none p-4">
             <div className="pb-4">
                 <h2 className="text-lg font-medium mb-3">Cost breakdown</h2>
                 <div className="flex items-center justify-between py-3 px-4 bg-bg-3000 rounded border">
@@ -64,6 +64,6 @@ export function DataWarehousePricingCard({ product }: { product: BillingProductV
             </div>
             {historicalAddon && <FreeRowsDisplay addon={historicalAddon} />}
             <DataWarehouseTierBreakdown product={product} />
-        </LemonCard>
+        </Card>
     )
 }

@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { humanFriendlyNumber } from 'lib/utils'
 
 const formatCount = (count: number, total: number): string => {
@@ -39,15 +39,15 @@ export function StackedBarSkeleton({
     return (
         <div className={clsx('flex flex-col gap-2', className)}>
             <div className={clsx('relative w-full flex mx-auto', sizeClasses.bar)}>
-                <LemonSkeleton className={clsx('w-1/4 rounded-r-none opacity-60', sizeClasses.bar)} />
-                <LemonSkeleton className={clsx('w-1/2 rounded-none opacity-80', sizeClasses.bar)} />
-                <LemonSkeleton className={clsx('w-1/4 rounded-l-none opacity-100', sizeClasses.bar)} />
+                <Skeleton className={clsx('w-1/4 rounded-r-none opacity-60', sizeClasses.bar)} />
+                <Skeleton className={clsx('w-1/2 rounded-none opacity-80', sizeClasses.bar)} />
+                <Skeleton className={clsx('w-1/4 rounded-l-none opacity-100', sizeClasses.bar)} />
             </div>
             <div className="flex items-center gap-4 justify-center">
                 {Array.from({ length: 3 }).map((_, index) => (
                     <div key={index} className="flex items-center gap-2">
-                        <LemonSkeleton className="size-3 rounded-full" />
-                        <LemonSkeleton className="h-4 w-20" />
+                        <Skeleton className="size-3 rounded-full" />
+                        <Skeleton className="h-4 w-20" />
                     </div>
                 ))}
             </div>

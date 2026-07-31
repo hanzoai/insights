@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -229,7 +229,7 @@ export const earlyAccessFeatureLogic = kea<earlyAccessFeatureLogicType>([
     })),
     listeners(({ actions, values }) => ({
         saveEarlyAccessFeatureSuccess: ({ earlyAccessFeature: _earlyAccessFeature }) => {
-            lemonToast.success('Early access feature saved')
+            toast.success('Early access feature saved')
             earlyAccessFeaturesLogic.findMounted()?.actions.loadEarlyAccessFeatures()
             if (_earlyAccessFeature.id) {
                 refreshTreeItem('early_access_feature', _earlyAccessFeature.id)
@@ -240,8 +240,8 @@ export const earlyAccessFeatureLogic = kea<earlyAccessFeatureLogicType>([
             }
         },
         showGAPromotionConfirmation: async ({ onConfirm }) => {
-            const { LemonDialog } = await import('lib/lemon-ui/LemonDialog')
-            LemonDialog.open({
+            const { Dialog } = await import('lib/elements/Dialog')
+            Dialog.open({
                 title: 'Promote to General Availability?',
                 description:
                     'Once promoted to General Availability, this feature cannot be edited anymore. Users will have access to the stable version.',
@@ -274,7 +274,7 @@ export const earlyAccessFeatureLogic = kea<earlyAccessFeatureLogicType>([
         deleteEarlyAccessFeature: async ({ earlyAccessFeatureId }) => {
             try {
                 await api.earlyAccessFeatures.delete(earlyAccessFeatureId)
-                lemonToast.info(
+                toast.info(
                     'Early access feature deleted. Remember to delete corresponding feature flag if necessary'
                 )
                 earlyAccessFeaturesLogic
@@ -285,7 +285,7 @@ export const earlyAccessFeatureLogic = kea<earlyAccessFeatureLogicType>([
                 deleteFromTree('early_access_feature', earlyAccessFeatureId)
                 router.actions.push(urls.earlyAccessFeatures())
             } catch (e) {
-                lemonToast.error(`Error deleting Early Access Feature: ${e}`)
+                toast.error(`Error deleting Early Access Feature: ${e}`)
             }
         },
     })),

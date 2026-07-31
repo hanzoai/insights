@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconWrench } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
@@ -105,10 +105,10 @@ export function CustomCssScene(): JSX.Element {
                 }}
                 actions={
                     <>
-                        <LemonButton type="secondary" onClick={onPreview} size="small">
+                        <Button type="secondary" onClick={onPreview} size="small">
                             Preview
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             onClick={() => {
                                 saveCustomCss()
@@ -117,7 +117,7 @@ export function CustomCssScene(): JSX.Element {
                             size="small"
                         >
                             Save and set
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             />

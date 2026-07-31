@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
 import { projectLogic } from 'scenes/projectLogic'
 
@@ -13,15 +13,15 @@ export function ProjectDisplayName(): JSX.Element {
 
     return (
         <div className="deprecated-space-y-4 max-w-160">
-            <LemonInput value={name} onChange={setName} disabled={currentProjectLoading} />
-            <LemonButton
+            <Input value={name} onChange={setName} disabled={currentProjectLoading} />
+            <Button
                 type="primary"
                 onClick={() => updateCurrentProject({ name })}
                 disabled={!name || !currentProject || name === currentProject.name}
                 loading={currentProjectLoading}
             >
                 Rename project
-            </LemonButton>
+            </Button>
         </div>
     )
 }

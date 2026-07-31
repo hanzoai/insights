@@ -1,12 +1,12 @@
 import { Meta } from '@storybook/react'
 import { useRef } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { ScrollableShadows } from './ScrollableShadows'
 
 const meta: Meta<typeof ScrollableShadows> = {
-    title: 'Lemon UI/Scrollable Shadows',
+    title: 'Elements/Scrollable Shadows',
     component: ScrollableShadows,
     tags: ['autodocs'],
 }
@@ -30,20 +30,20 @@ export const Horizontal = (): JSX.Element => {
                 </div>
             </ScrollableShadows>
             <div className="flex gap-2 mt-4">
-                <LemonButton
+                <Button
                     onClick={() => {
                         scrollRef.current?.scrollBy({ left: -100, behavior: 'smooth' })
                     }}
                 >
                     Scroll Left
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     onClick={() => {
                         scrollRef.current?.scrollBy({ left: 100, behavior: 'smooth' })
                     }}
                 >
                     Scroll Right
-                </LemonButton>
+                </Button>
             </div>
         </>
     )
@@ -67,20 +67,20 @@ export const Vertical = (): JSX.Element => {
                 </div>
             </ScrollableShadows>
             <div className="flex gap-2 mt-4">
-                <LemonButton
+                <Button
                     onClick={() => {
                         scrollRef.current?.scrollBy({ top: -100, behavior: 'smooth' })
                     }}
                 >
                     Scroll Up
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     onClick={() => {
                         scrollRef.current?.scrollBy({ top: 100, behavior: 'smooth' })
                     }}
                 >
                     Scroll Down
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

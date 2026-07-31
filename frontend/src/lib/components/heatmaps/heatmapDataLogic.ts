@@ -19,7 +19,7 @@ import {
     HeatmapJsData,
     HeatmapJsDataPoint,
 } from 'lib/components/heatmaps/types'
-import { LemonSelectOption } from 'lib/lemon-ui/LemonSelect'
+import { SelectOption } from 'lib/elements/Select'
 import { dateFilterToText } from 'lib/utils'
 
 import { toolbarConfigLogic, toolbarFetch } from '~/toolbar/toolbarConfigLogic'
@@ -28,7 +28,7 @@ import { FilterType } from '~/types'
 
 import type { heatmapDataLogicType } from './heatmapDataLogicType'
 
-export const HEATMAP_COLOR_PALETTE_OPTIONS: LemonSelectOption<string>[] = [
+export const HEATMAP_COLOR_PALETTE_OPTIONS: SelectOption<string>[] = [
     { value: 'default', label: 'Default (multicolor)' },
     { value: 'red', label: 'Red (monocolor)' },
     { value: 'green', label: 'Green (monocolor)' },

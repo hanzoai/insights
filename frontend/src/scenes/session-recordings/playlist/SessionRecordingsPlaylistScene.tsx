@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 import { useEffect, useMemo } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { SceneDuplicate } from 'lib/components/Scenes/SceneDuplicate'
@@ -11,7 +11,7 @@ import { SceneMetalyticsSummaryButton } from 'lib/components/Scenes/SceneMetalyt
 import { ScenePin } from 'lib/components/Scenes/ScenePin'
 import { SceneActivityIndicator } from 'lib/components/Scenes/SceneUpdateActivityInfo'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { SceneExport } from 'scenes/sceneTypes'
 import { playerSettingsLogic } from 'scenes/session-recordings/player/playerSettingsLogic'
@@ -43,21 +43,21 @@ export const scene: SceneExport<SessionRecordingsPlaylistLogicProps> = {
 function PlaylistSceneLoadingSkeleton(): JSX.Element {
     return (
         <div className="gap-y-4 mt-6">
-            <LemonSkeleton className="h-10 w-1/4" />
-            <LemonSkeleton className="h-4 w-1/3" />
-            <LemonSkeleton className="h-4 w-1/4" />
+            <Skeleton className="h-10 w-1/4" />
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-4 w-1/4" />
 
             <div className="flex justify-between mt-4">
-                <LemonSkeleton.Button />
+                <Skeleton.Button />
                 <div className="flex gap-4">
-                    <LemonSkeleton.Button />
-                    <LemonSkeleton.Button />
+                    <Skeleton.Button />
+                    <Skeleton.Button />
                 </div>
             </div>
 
             <div className="flex justify-between gap-4 mt-8">
                 <div className="gap-y-8 w-1/4">
-                    <LemonSkeleton className="h-10" repeat={10} />
+                    <Skeleton className="h-10" repeat={10} />
                 </div>
                 <div className="flex-1" />
             </div>
@@ -160,7 +160,7 @@ export function SessionRecordingsPlaylistScene(): JSX.Element {
                     renameDebounceMs={1000}
                     actions={
                         !playlist.is_synthetic ? (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 disabledReason={showFilters && !hasChanges ? 'No changes to save' : undefined}
                                 loading={hasChanges && playlistLoading}
@@ -170,7 +170,7 @@ export function SessionRecordingsPlaylistScene(): JSX.Element {
                                 size="small"
                             >
                                 {showFilters ? <>Save changes</> : <>Edit</>}
-                            </LemonButton>
+                            </Button>
                         ) : undefined
                     }
                 />

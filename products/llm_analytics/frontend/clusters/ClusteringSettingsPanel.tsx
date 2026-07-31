@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Banner, Button, Modal } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -12,7 +12,7 @@ export function ClusteringSettingsPanel(): JSX.Element {
     const { closeSettingsPanel, setLocalEventFilters, saveEventFilters } = useActions(clusteringConfigLogic)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isSettingsPanelOpen}
             onClose={closeSettingsPanel}
             title="Clustering settings"
@@ -20,17 +20,17 @@ export function ClusteringSettingsPanel(): JSX.Element {
             footer={
                 <>
                     <div className="flex-1" />
-                    <LemonButton type="secondary" onClick={closeSettingsPanel} data-attr="clustering-settings-cancel">
+                    <Button type="secondary" onClick={closeSettingsPanel} data-attr="clustering-settings-cancel">
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={saveEventFilters}
                         loading={configLoading}
                         data-attr="clustering-settings-save"
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -54,11 +54,11 @@ export function ClusteringSettingsPanel(): JSX.Element {
                         sendAllKeyUpdates
                         allowRelativeDateOptions={false}
                     />
-                    <LemonBanner type="info" className="mt-3">
+                    <Banner type="info" className="mt-3">
                         Saved filters will be applied on the next automated clustering and summarization run.
-                    </LemonBanner>
+                    </Banner>
                 </div>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

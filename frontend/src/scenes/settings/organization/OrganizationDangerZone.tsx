@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Dispatch, SetStateAction, useState } from 'react'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Input, Modal } from '@hanzo/elements'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -29,15 +29,15 @@ export function DeleteOrganizationModal({
     const isDeletionInProgress = !!organization && organizationBeingDeleted === organization.id
 
     return (
-        <LemonModal
+        <Modal
             title="Delete the entire organization?"
             onClose={!isDeletionInProgress ? () => setIsOpen(false) : undefined}
             footer={
                 <>
-                    <LemonButton disabled={isDeletionInProgress} type="secondary" onClick={() => setIsOpen(false)}>
+                    <Button disabled={isDeletionInProgress} type="secondary" onClick={() => setIsOpen(false)}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="secondary"
                         status="danger"
                         disabled={!isDeletionConfirmed}
@@ -48,7 +48,7 @@ export function DeleteOrganizationModal({
                                 ? () => deleteOrganization({ organizationId: organization.id, redirectPath })
                                 : undefined
                         }
-                    >{`Delete ${organization ? organization.name : 'the current organization'}`}</LemonButton>
+                    >{`Delete ${organization ? organization.name : 'the current organization'}`}</Button>
                 </>
             }
             isOpen={isOpen}
@@ -60,7 +60,7 @@ export function DeleteOrganizationModal({
             <p>
                 Please type <strong>{organization ? organization.name : "this organization's name"}</strong> to confirm.
             </p>
-            <LemonInput
+            <Input
                 type="text"
                 onChange={(value) => {
                     if (organization) {
@@ -69,7 +69,7 @@ export function DeleteOrganizationModal({
                 }}
                 data-attr="delete-organization-confirmation-input"
             />
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -90,7 +90,7 @@ export function OrganizationDangerZone(): JSX.Element {
                         This is <b>irreversible</b>. Please be certain.
                     </p>
                 )}
-                <LemonButton
+                <Button
                     status="danger"
                     type="secondary"
                     onClick={() => setIsModalVisible(true)}
@@ -99,7 +99,7 @@ export function OrganizationDangerZone(): JSX.Element {
                     disabledReason={restrictionReason}
                 >
                     Delete {currentOrganization?.name || 'the current organization'}
-                </LemonButton>
+                </Button>
             </div>
             {currentOrganization && (
                 <DeleteOrganizationModal

@@ -6,8 +6,8 @@ import { createPortal } from 'react-dom'
 
 import { IconTrending } from '@hanzo/icons'
 
-import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
-import { IconTrendingDown } from 'lib/lemon-ui/icons'
+import { Collapse } from 'lib/elements/Collapse'
+import { IconTrendingDown } from 'lib/elements/icons'
 import { humanFriendlyLargeNumber } from 'lib/utils'
 import { VariantTag } from 'scenes/experiments/ExperimentView/components'
 import { BreakdownTag } from 'scenes/insights/filters/BreakdownFilter/BreakdownTag'
@@ -172,7 +172,7 @@ function CollapsibleBreakdownSection({
     return (
         <tr ref={mainTableRef} data-breakdown-row className="hover:bg-bg-hover group [&:last-child>td]:border-b-0">
             <td colSpan={7} className={`p-0 border-t border-b ${isAlternatingRow ? 'bg-bg-table' : 'bg-bg-light'}`}>
-                <LemonCollapse
+                <Collapse
                     multiple={false}
                     embedded
                     className={`breakdown-collapse breakdown-collapse--${isAlternatingRow ? 'alt-row' : 'normal-row'}`}

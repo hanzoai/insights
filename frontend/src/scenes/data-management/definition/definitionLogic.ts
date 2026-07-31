@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 
 import api from 'lib/api'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -189,16 +189,16 @@ export const definitionLogic = kea<definitionLogicType>([
             }
         },
         createMediaPreviewSuccess: () => {
-            lemonToast.success('Preview image added')
+            toast.success('Preview image added')
         },
         createMediaPreviewFailure: () => {
-            lemonToast.error('Failed to add image')
+            toast.error('Failed to add image')
         },
         deleteMediaPreviewSuccess: () => {
-            lemonToast.success('Image deleted')
+            toast.success('Image deleted')
         },
         deleteMediaPreviewFailure: () => {
-            lemonToast.error('Failed to delete image')
+            toast.error('Failed to delete image')
         },
     })),
     afterMount(({ actions, values, props }) => {

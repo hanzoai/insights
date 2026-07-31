@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FilterBar } from 'lib/components/FilterBar'
 import { XRayMascot2 } from 'lib/components/mascots'
-import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
+import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 
 import { Tiles } from './WebAnalyticsDashboard'
 import { WebAnalyticsCompareFilter } from './WebAnalyticsFilters'
@@ -42,7 +42,7 @@ export function PageReportsFilters({ tabs }: { tabs: JSX.Element }): JSX.Element
                 <div className="flex flex-row gap-2 items-center flex-1 min-w-0 w-full">
                     <DateFilter dateFrom={dateFilter.dateFrom} dateTo={dateFilter.dateTo} onChange={setDates} />
                     <WebAnalyticsCompareFilter />
-                    <LemonInputSelect
+                    <InputSelect
                         allowCustomValues={true}
                         fullWidth={true}
                         placeholder="Click or type to see top pages, or paste a URL"

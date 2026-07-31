@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonButton, LemonCheckbox, LemonSelect, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Select, Table, TableColumns } from '@hanzo/elements'
 
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -43,7 +43,7 @@ export function ErrorTrackingIssueFingerprintsScene(): JSX.Element {
             key: 'actions',
             dataIndex: 'fingerprint',
             render: (fingerprint: string) => (
-                <LemonCheckbox
+                <Checkbox
                     checked={selectedFingerprints.includes(fingerprint)}
                     onChange={(checked) => {
                         const newSelectedFingerprints = checked
@@ -60,7 +60,7 @@ export function ErrorTrackingIssueFingerprintsScene(): JSX.Element {
             ),
             width: '30px',
             title: (
-                <LemonCheckbox
+                <Checkbox
                     checked={fingerprintSamples.length > 0 && selectedFingerprints.length === fingerprintSamples.length}
                     disabledReason={
                         fingerprintSamples.length === 1
@@ -94,7 +94,7 @@ export function ErrorTrackingIssueFingerprintsScene(): JSX.Element {
                 ),
         },
         { title: 'Count', dataIndex: 'count' },
-    ] as LemonTableColumns<ErrorTrackingFingerprintSamples>
+    ] as TableColumns<ErrorTrackingFingerprintSamples>
 
     const disabledReason =
         selectedFingerprints.length === fingerprintSamples.length
@@ -114,16 +114,16 @@ export function ErrorTrackingIssueFingerprintsScene(): JSX.Element {
                 </div>
 
                 {selectedFingerprints.length <= 1 ? (
-                    <LemonButton
+                    <Button
                         size="small"
                         type="primary"
                         disabledReason={disabledReason}
                         onClick={() => split(true)}
                     >
                         Split
-                    </LemonButton>
+                    </Button>
                 ) : (
-                    <LemonSelect
+                    <Select
                         size="small"
                         type="primary"
                         placeholder="Split"
@@ -135,7 +135,7 @@ export function ErrorTrackingIssueFingerprintsScene(): JSX.Element {
                         disabledReason={disabledReason}
                     />
                 )}
-                <LemonTable<ErrorTrackingFingerprintSamples>
+                <Table<ErrorTrackingFingerprintSamples>
                     className="w-full"
                     loading={isLoading}
                     dataSource={fingerprintSamples}
@@ -144,7 +144,7 @@ export function ErrorTrackingIssueFingerprintsScene(): JSX.Element {
                         noIndent: true,
                         rowExpandable: (record) => record.samples.length > 1,
                         expandedRowRender: (record) => (
-                            <LemonTable
+                            <Table
                                 className="w-full"
                                 loading={false}
                                 embedded={true}

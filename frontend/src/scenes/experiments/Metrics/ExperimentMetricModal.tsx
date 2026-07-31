@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDialog, LemonInput, LemonLabel, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Label, Modal } from '@hanzo/elements'
 
 import type { ExperimentExposureCriteria, ExperimentMetric } from '~/queries/schema/schema-general'
 import type { Experiment } from '~/types'
@@ -29,18 +29,18 @@ export function ExperimentMetricModal({
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isModalOpen}
             onClose={closeExperimentMetricModal}
             title={isCreateMode ? 'Create experiment metric' : 'Edit experiment metric'}
             footer={
                 <div className="flex items-center w-full">
                     {isEditMode && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             status="danger"
                             onClick={() => {
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: 'Delete this metric?',
                                     content: <div className="text-sm text-muted">This action cannot be undone.</div>,
                                     primaryButton: {
@@ -58,31 +58,31 @@ export function ExperimentMetricModal({
                             }}
                         >
                             Delete
-                        </LemonButton>
+                        </Button>
                     )}
                     <div className="flex items-center gap-2 ml-auto">
-                        <LemonButton
+                        <Button
                             form="edit-experiment-metric-form"
                             type="secondary"
                             onClick={closeExperimentMetricModal}
                         >
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             form="edit-experiment-metric-form"
                             onClick={() => onSave(metric, context)}
                             type="primary"
                             data-attr="save-experiment-metric"
                         >
                             {isCreateMode ? 'Create' : 'Save'}
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             }
         >
             <div className="mb-4">
-                <LemonLabel className="mb-1">Name (optional)</LemonLabel>
-                <LemonInput
+                <Label className="mb-1">Name (optional)</Label>
+                <Input
                     value={metric.name}
                     onChange={(newName) => {
                         setModalMetric({
@@ -99,6 +99,6 @@ export function ExperimentMetricModal({
                 exposureCriteria={exposureCriteria}
                 openExposureCriteriaModal={openExposureCriteriaModal}
             />
-        </LemonModal>
+        </Modal>
     )
 }

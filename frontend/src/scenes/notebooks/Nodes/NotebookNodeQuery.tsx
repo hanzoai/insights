@@ -2,7 +2,7 @@ import { JSONContent } from '@tiptap/core'
 import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { insightDataLogic } from 'scenes/insights/insightDataLogic'
@@ -229,7 +229,7 @@ export const Settings = ({
             </div>
 
             <div className="deprecated-space-y-2">
-                <LemonButton
+                <Button
                     center={true}
                     type="secondary"
                     fullWidth
@@ -237,8 +237,8 @@ export const Settings = ({
                     to={urls.insightEdit(attributes.query.shortId)}
                 >
                     Edit the insight
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     center={true}
                     fullWidth
                     type="secondary"
@@ -246,7 +246,7 @@ export const Settings = ({
                     onClick={detachSavedInsight}
                 >
                     Detach from insight
-                </LemonButton>
+                </Button>
             </div>
         </div>
     ) : (

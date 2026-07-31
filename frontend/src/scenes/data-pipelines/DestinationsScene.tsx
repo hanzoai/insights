@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonTabs } from '@hanzo/lemon-ui'
+import { Button, Tabs } from '@hanzo/elements'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
@@ -36,7 +36,7 @@ export function DestinationsScene(): JSX.Element {
             interaction="click"
             scope={Scene.Destinations}
         >
-            <LemonButton
+            <Button
                 type="primary"
                 to={urls.dataPipelinesNew('destination')}
                 icon={<IconPlusSmall />}
@@ -45,7 +45,7 @@ export function DestinationsScene(): JSX.Element {
                 data-attr="new-destination"
             >
                 New destination
-            </LemonButton>
+            </Button>
         </AppShortcut>
     )
 
@@ -78,7 +78,7 @@ export function DestinationsScene(): JSX.Element {
                 }}
                 actions={action}
             />
-            <LemonTabs
+            <Tabs
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as 'all' | 'history')}
                 tabs={tabs}

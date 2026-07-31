@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonSelect, Tooltip } from '@hanzo/lemon-ui'
+import { Select, Tooltip } from '@hanzo/elements'
 
 import { experimentLogic } from '../experimentLogic'
 
@@ -24,7 +24,7 @@ export function HoldoutSelector(): JSX.Element {
                 </Tooltip>
             </div>
             <div className="mt-1">
-                <LemonSelect
+                <Select
                     disabledReason={
                         isExperimentRunning &&
                         !experiment.end_date &&
