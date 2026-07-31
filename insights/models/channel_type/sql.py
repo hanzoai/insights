@@ -3,8 +3,9 @@ import json
 
 from insights.datastore.client import sync_execute
 from insights.datastore.cluster import ON_CLUSTER_CLAUSE
+from insights.datastore.dictionaries import dictionary_source
 from insights.datastore.table_engines import MergeTreeEngine, ReplicationScheme
-from insights.settings import DATASTORE_CLUSTER, DATASTORE_PASSWORD
+from insights.settings import DATASTORE_CLUSTER
 
 CHANNEL_DEFINITION_TABLE_NAME = "channel_definition"
 CHANNEL_DEFINITION_DICTIONARY_NAME = "channel_definition_dict"
@@ -60,10 +61,18 @@ INSERT INTO channel_definition (domain, kind, domain_type, type_if_paid, type_if
 """
 )
 
-# Use COMPLEX_KEY_HASHED, as we have a composite key
+# Use COMPLEX_KEY_HASHED, as we have a composite key.
+#
+# OR REPLACE, not IF NOT EXISTS: the definition is the thing that changes. A
+# dictionary that already exists with a stale source — one that authenticates
+# as an account this deployment does not have, say — is exactly the case a
+# re-run has to repair, and IF NOT EXISTS returns success without reading the
+# body, so the repair silently does nothing. OR REPLACE is idempotent for the
+# fresh case and corrective for the live one, which keeps this one statement
+# the only way the dictionary is ever defined.
 CHANNEL_DEFINITION_DICTIONARY_SQL = (
     lambda on_cluster=True: f"""
-CREATE DICTIONARY IF NOT EXISTS {CHANNEL_DEFINITION_DICTIONARY_NAME} {ON_CLUSTER_CLAUSE(on_cluster)} (
+CREATE OR REPLACE DICTIONARY {CHANNEL_DEFINITION_DICTIONARY_NAME} {ON_CLUSTER_CLAUSE(on_cluster)} (
     domain String,
     kind String,
     domain_type Nullable(String),
@@ -71,7 +80,7 @@ CREATE DICTIONARY IF NOT EXISTS {CHANNEL_DEFINITION_DICTIONARY_NAME} {ON_CLUSTER
     type_if_organic Nullable(String)
 )
 PRIMARY KEY domain, kind
-SOURCE(DATASTORE(TABLE '{CHANNEL_DEFINITION_TABLE_NAME}' PASSWORD '{DATASTORE_PASSWORD}'))
+{dictionary_source(table=CHANNEL_DEFINITION_TABLE_NAME)}
 LIFETIME(MIN 3000 MAX 3600)
 LAYOUT(COMPLEX_KEY_HASHED())
 """
