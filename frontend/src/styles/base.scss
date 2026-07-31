@@ -983,8 +983,13 @@
     // #000, not the 8%-lightness neutral — the app ground is true black and
     // every surface above it layers up. Same value as --color-bg-3000-dark.
     --color-bg-primary: #000;
-    --color-bg-surface-primary: var(--color-neutral-cool-850);
-    --color-bg-surface-secondary: var(--color-neutral-cool-900);
+    // The RAISED content panel — the one surface the eye reads as "the page".
+    // #262626, a step ABOVE the #212121 it sits on, which is itself a step above
+    // the black ground. It was pinned straight to neutral-cool-850 (#212121), so
+    // the panel and the surface beneath it were the same value and the panel had
+    // no edge: the ladder existed in the tokens but not on screen.
+    --color-bg-surface-primary: #262626;
+    --color-bg-surface-secondary: var(--color-neutral-cool-850);
     // TRUE BLACK, not the 8% neutral. tertiary is the CHROME layer -- the left nav
     // and the shell behind the tab strip both carry bg-surface-tertiary -- and chrome
     // sits AT the ground, not above it. At 8% it read as a grey slab framing the app,
