@@ -1007,14 +1007,6 @@ export const getTreeItemsNew = (): FileSystemImport[] => [
         ] as FileSystemIconColor,
     },
     {
-        path: `Experiment`,
-        type: 'experiment',
-        href: urls.experiment('new'),
-        iconType: 'experiment',
-        iconColor: ['var(--color-product-experiments-light)'] as FileSystemIconColor,
-        sceneKeys: ['Experiments', 'Experiment'],
-    },
-    {
         path: `Feature flag`,
         type: 'feature_flag',
         href: urls.featureFlag('new'),
@@ -1279,17 +1271,6 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
             'LLMAnalyticsClusters',
             'LLMAnalyticsCluster',
         ],
-    },
-    {
-        path: `Experiments`,
-        intents: [ProductKey.EXPERIMENTS],
-        category: 'Features',
-        type: 'experiment',
-        href: urls.experiments(),
-        iconType: 'experiment',
-        iconColor: ['var(--color-product-experiments-light)'] as FileSystemIconColor,
-        sceneKey: 'Experiments',
-        sceneKeys: ['Experiments', 'Experiment'],
     },
     {
         path: `Feature flags`,
