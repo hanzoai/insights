@@ -80,4 +80,52 @@ describe('logsViewerDataLogic', () => {
             expect(toast.error).toHaveBeenCalledWith('Failed to load more logs: Network error')
         })
     })
+
+    describe('loading state on failure', () => {
+        // A real failure ends the request with nothing to replace it, so the spinner has to come
+        // down. Latching it on left the viewer spinning forever whenever the backend errored.
+        it.each([['Network error'], ['Server returned 500'], ['Timeout exceeded']])(
+            'stops the logs spinner after real failure "%s"',
+            async (error) => {
+                logic.actions.fetchLogs()
+                expect(logic.values.logsLoading).toBe(true)
+
+                logic.actions.fetchLogsFailure(error)
+                expect(logic.values.logsLoading).toBe(false)
+            }
+        )
+
+        it.each([['new query started'], ['Fetch is aborted'], ['ABORTED']])(
+            'keeps the logs spinner up when superseded by "%s"',
+            async (error) => {
+                logic.actions.fetchLogs()
+                logic.actions.fetchLogsFailure(error)
+
+                expect(logic.values.logsLoading).toBe(true)
+            }
+        )
+
+        it('stops the pagination spinner after a real failure', async () => {
+            logic.actions.fetchNextLogsPage()
+            expect(logic.values.logsLoading).toBe(true)
+
+            logic.actions.fetchNextLogsPageFailure('Server returned 500')
+            expect(logic.values.logsLoading).toBe(false)
+        })
+
+        it('stops the sparkline spinner after a real failure', async () => {
+            logic.actions.fetchSparkline()
+            expect(logic.values.sparklineLoading).toBe(true)
+
+            logic.actions.fetchSparklineFailure('Server returned 500')
+            expect(logic.values.sparklineLoading).toBe(false)
+        })
+
+        it('keeps the sparkline spinner up when superseded', async () => {
+            logic.actions.fetchSparkline()
+            logic.actions.fetchSparklineFailure('new query started')
+
+            expect(logic.values.sparklineLoading).toBe(true)
+        })
+    })
 })
