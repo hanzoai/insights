@@ -1,8 +1,8 @@
 {
-    "page_title": "Insights",
-    "page_url": "https://www.insightsstatus.com/",
-    "ongoing_incidents": [
-    ],
+    "page_title": "Hanzo status",
+    "page_url": "https://status.hanzo.ai",
+    "ongoing_incidents": [],
     "in_progress_maintenances": [],
-    "scheduled_maintenances": []
-  }
+    "scheduled_maintenances": [],
+    "checked_at": "2026-07-31T12:00:00Z"
+}
