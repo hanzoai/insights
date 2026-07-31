@@ -4,6 +4,8 @@ import { Link } from '@hanzo/lemon-ui'
 
 import { cn } from 'lib/utils/css-classes'
 
+import { STATUS_PAGE_URL } from '~/layout/navigation-3000/sidepanel/panels/sidePanelStatusIncidentIoLogic'
+
 import { healthMenuLogic } from '../HealthMenu/healthMenuLogic'
 
 export function InsightsStatusShownOnlyIfNotOperational({
@@ -31,7 +33,7 @@ export function InsightsStatusShownOnlyIfNotOperational({
                     iconOnly: iconOnly,
                     menuItem: !iconOnly,
                 }}
-                to="https://insightsstatus.com"
+                to={STATUS_PAGE_URL}
                 tooltip={!iconOnly ? tooltipText : undefined}
                 tooltipCloseDelayMs={0}
                 target="_blank"

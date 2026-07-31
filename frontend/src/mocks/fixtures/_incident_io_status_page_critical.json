@@ -1,31 +1,41 @@
 {
-  "page_title": "Insights",
-  "page_url": "https://www.insightsstatus.com/",
-  "ongoing_incidents": [
-    {
-      "name": "Major service outage",
-      "status": "identified",
-      "url": "https://www.insightsstatus.com//incidents/01KA9JH0ZB14TFA8VD4CFC3AYN",
-      "id": "01KA9JH0ZB14TFA8VD4CFC3AYN",
-      "current_worst_impact": "full_outage",
-      "affected_components": [
+    "page_title": "Hanzo status",
+    "page_url": "https://status.hanzo.ai",
+    "ongoing_incidents": [
         {
-          "id": "01K71VKZT2KGM8GT11MP0ZQ0YF",
-          "name": "API /query Endpoint",
-          "group_name": "US Cloud \ud83c\uddfa\ud83c\uddf8",
-          "current_status": "full_outage"
+            "id": "service-iam",
+            "name": "iam is not responding",
+            "status": "investigating",
+            "url": "https://status.hanzo.ai",
+            "current_worst_impact": "full_outage",
+            "affected_components": [
+                {
+                    "id": "iam",
+                    "name": "iam",
+                    "current_status": "full_outage"
+                }
+            ],
+            "last_update_at": "2026-07-31T12:00:00Z",
+            "last_update_message": "iam did not answer its health check."
         },
         {
-          "id": "01K71VKZT2VTS72819TYJXMP2G",
-          "name": "App",
-          "group_name": "US Cloud \ud83c\uddfa\ud83c\uddf8",
-          "current_status": "full_outage"
+            "id": "service-search",
+            "name": "search is not responding",
+            "status": "investigating",
+            "url": "https://status.hanzo.ai",
+            "current_worst_impact": "full_outage",
+            "affected_components": [
+                {
+                    "id": "search",
+                    "name": "search",
+                    "current_status": "full_outage"
+                }
+            ],
+            "last_update_at": "2026-07-31T12:00:00Z",
+            "last_update_message": "search did not answer its health check."
         }
-      ],
-      "last_update_at": "2025-11-17T18:51:36.404Z",
-      "last_update_message": "We have identified the issue causing service disruption and are working on a fix."
-    }
-  ],
-  "in_progress_maintenances": [],
-  "scheduled_maintenances": []
+    ],
+    "in_progress_maintenances": [],
+    "scheduled_maintenances": [],
+    "checked_at": "2026-07-31T12:00:00Z"
 }

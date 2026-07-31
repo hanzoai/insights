@@ -7,7 +7,7 @@ import { LemonBadgeProps, Tooltip } from '@hanzo/lemon-ui'
 import { IconWithBadge } from 'lib/lemon-ui/icons'
 
 import { sidePanelLogic } from '../sidePanelLogic'
-import { INCIDENT_IO_STATUS_PAGE_BASE, sidePanelStatusIncidentIoLogic } from './sidePanelStatusIncidentIoLogic'
+import { STATUS_PAGE_URL, sidePanelStatusIncidentIoLogic } from './sidePanelStatusIncidentIoLogic'
 
 export const SidePanelStatusIcon = (props: { className?: string; size?: LemonBadgeProps['size'] }): JSX.Element => {
     const { status, statusDescription } = useValues(sidePanelStatusIncidentIoLogic)
@@ -38,8 +38,9 @@ export const SidePanelStatus = (): JSX.Element => {
     const { closeSidePanel } = useActions(sidePanelLogic)
 
     useEffect(() => {
-        // Redirect to the external status page
-        window.open(INCIDENT_IO_STATUS_PAGE_BASE, '_blank')?.focus()
+        // Send the reader to the human status page, not to the JSON endpoint the
+        // panel polls — these are two different addresses on purpose.
+        window.open(STATUS_PAGE_URL, '_blank')?.focus()
         closeSidePanel()
     }, [closeSidePanel])
 
