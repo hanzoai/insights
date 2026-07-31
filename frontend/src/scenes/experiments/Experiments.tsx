@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { Dialog, Input, Select, Tag, Tooltip, toast } from '@hanzo/elements'
+import { Banner, Dialog, Input, Select, Tag, Tooltip, toast } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
@@ -192,8 +192,17 @@ const ExperimentsTable = ({
     openDuplicateModal: (experiment: Experiment) => void
     openSurveyModal: (experiment: Experiment) => void
 }): JSX.Element => {
-    const { currentProjectId, experiments, experimentsLoading, tab, shouldShowEmptyState, filters, count, pagination } =
-        useValues(experimentsLogic)
+    const {
+        currentProjectId,
+        experiments,
+        experimentsLoading,
+        experimentsLoadFailed,
+        tab,
+        shouldShowEmptyState,
+        filters,
+        count,
+        pagination,
+    } = useValues(experimentsLogic)
     const { loadExperiments, archiveExperiment, setExperimentsFilters } = useActions(experimentsLogic)
 
     const page = filters.page || 1
@@ -442,6 +451,17 @@ const ExperimentsTable = ({
 
     return (
         <SceneContent>
+            {/*
+             * Experiments has no REST layer in this deployment, so the list request fails rather
+             * than returning an empty list. Saying "create your first experiment" on top of that
+             * would invite the user into a flow whose every request 404s. Report the failure.
+             */}
+            {experimentsLoadFailed && (
+                <Banner type="error" action={{ children: 'Retry', onClick: () => loadExperiments() }}>
+                    Couldn't load experiments — the request failed, so we can't show what exists. This is not the same
+                    as having no experiments.
+                </Banner>
+            )}
             {tab === ExperimentsTabs.All && (
                 <AccessControlAction
                     resourceType={AccessControlResourceType.Experiment}
