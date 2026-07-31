@@ -208,6 +208,14 @@ urlpatterns = [
     # Test setup endpoint (only available in TEST mode)
     path("api/setup_test/<str:test_name>/", csrf_exempt(playwright_setup.setup_test)),
     re_path(r"^api.+", api_not_found),
+    # /flags/ is the SDK's feature-flag evaluation endpoint. Feature flags are not served by this
+    # deployment, so there is no view for it and it used to fall through to the SPA catch-all at the
+    # bottom of this file -- a session view, which answered every SDK POST with a 403 CSRF page.
+    # That reads as an auth/CSRF fault and sent us hunting through trusted origins; the truth is
+    # simply that the endpoint is not here. Say so, in the same JSON shape unknown /api/ paths use.
+    # csrf_exempt because the SDK posts cross-origin with an API key and no session token, so
+    # without it the CSRF middleware would answer 403 before this view could answer 404.
+    opt_slash_path("flags", csrf_exempt(api_not_found)),
     path("authorize_and_redirect/", login_required(authorize_and_redirect)),
     path(
         "shared_dashboard/<str:access_token>",
