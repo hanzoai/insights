@@ -1580,6 +1580,20 @@
 
     html {
         text-size-adjust: 100%;
+
+        // Paint black BEFORE the bundle runs. useThemedHtml sets
+        // document.body[theme] from a React hook, so until that fires the page
+        // shows the UA default -- white -- and dark-mode users get a flash of it
+        // on every load. The theme is a stored preference the server does not
+        // know at first byte, so the honest fix is to make the FIRST paint the
+        // dark ground and let light mode override once the theme resolves.
+        background: #000;
+    }
+
+    // Light mode wins the moment the attribute lands.
+    body[theme='light'],
+    body[theme='light'] ~ * {
+        background: var(--color-bg-primary);
     }
 
     input::placeholder,
