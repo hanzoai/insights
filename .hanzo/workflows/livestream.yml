@@ -1,0 +1,194 @@
+# insights livestream — the live-events broker image, on Hanzo's own forge.
+#
+#   git.hanzo.ai push → act_runner (in-cluster git-runner, privileged dind)
+#   → docker build livestream/ → ghcr.io/hanzoai/insights-livestream:<semver>
+#   → charts/app values in hanzoai/universe → Hanzo CD
+#
+# GitHub Actions is disabled account-wide, so `.github/workflows/*` cannot
+# build. This is the real pipeline. No GitHub builders.
+#
+# This is a SECOND image out of this one repo, not a second pipeline: it is
+# deploy.yml's scheme applied to a different build context. Everything load
+# bearing there is load bearing here for the same reasons — read that file
+# first; only the differences are argued below.
+#
+# WHY ITS OWN WORKFLOW AND NOT A JOB IN deploy.yml. The two images version
+# independently. Sharing a workflow would either give them one version counter
+# (so a Django-only change burns a livestream patch and vice versa, and the tag
+# stops meaning "this is what changed") or need two counters in one job anyway.
+# Separate files also let the path filter below do its work.
+#
+# PATH FILTER. deploy.yml deliberately triggers on every push to main because
+# the monolith is built from the whole tree. This image is built from
+# `livestream/` alone, so a push that does not touch it produces a byte
+# identical image under a NEW tag — a version that says something changed when
+# nothing did, and a wasted slot in the shared FIFO runner queue. Scoped to the
+# build context plus this file.
+#
+# SEMVER, NEVER SHA, and the next patch is derived from the REGISTRY rather than
+# from `git tag`: git's tags describe the monolith and say nothing about this
+# image, so they are not merely a second opinion here, they are the wrong
+# question. What is published is the only authority on what has been used.
+name: livestream
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'livestream/**'
+      - '.hanzo/workflows/livestream.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    # The live runner fleet advertises `hanzo-build-linux-amd64`. Any other
+    # label matches no runner and the job queues forever instead of failing.
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+
+      # The next patch is derived from what is PUBLISHED, then proven unused
+      # before anything is pushed. Both halves matter: the first stops us
+      # colliding with a tag git does not know about, the second stops us
+      # overwriting one at all.
+      - name: Next patch semver
+        id: ver
+        env:
+          GHCR_USER: ${{ secrets.GHCR_USER }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(curl -fsSL -u "$GHCR_USER:$GHCR_TOKEN" \
+            "https://ghcr.io/token?scope=repository:hanzoai/insights-livestream:pull&service=ghcr.io" | jq -r .token)
+
+          # An unpublished repository has no tag list to read, and on GHCR the
+          # pull scope for one is granted but every read against it 404s. That is
+          # indistinguishable at the HTTP layer from a broken token, so the tag
+          # list is fetched WITHOUT -f: a 404 yields empty output and is allowed
+          # to mean "nothing published yet", while a genuine auth or network
+          # failure is caught by the guard below, which refuses to push unless it
+          # gets a positive 404 for the exact tag it is about to write.
+          LAST=$(curl -sSL -H "Authorization: Bearer $TOKEN" \
+            "https://ghcr.io/v2/hanzoai/insights-livestream/tags/list?n=10000" \
+            | jq -r '.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' \
+            | sort -V | tail -1)
+
+          # FIRST PUBLISH is the one case deploy.yml cannot have: it guards an
+          # image that already exists, so for it an empty tag list can only mean
+          # something is wrong and refusing is right. Here an empty list is the
+          # expected state exactly once. Seeding 1.0.0 is not a guess — the
+          # immutability guard below still has to prove the tag is free, so the
+          # worst case of being wrong is a refused build, never a moved tag.
+          if [ -z "${LAST:-}" ]; then
+            NEXT="1.0.0"
+            echo "no published semver tags — seeding first publish $NEXT"
+          else
+            IFS=. read -r MAJ MIN PAT <<<"$LAST"
+            NEXT="$MAJ.$MIN.$((PAT + 1))"
+            echo "last published $LAST -> building $NEXT"
+          fi
+
+          # Immutability guard. 404 is the ONLY acceptable answer: anything else
+          # means the tag is taken (200) or we cannot tell (network/auth), and
+          # pushing on either would risk a second digest behind an existing name.
+          # This is also what makes the 1.0.0 seed safe.
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
+            -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json' \
+            "https://ghcr.io/v2/hanzoai/insights-livestream/manifests/$NEXT")
+          if [ "$CODE" != "404" ]; then
+            echo "::error::refusing to push $NEXT — manifest probe returned $CODE, expected 404 (tag taken, or existence unverifiable)"
+            exit 1
+          fi
+
+          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
+
+      # docker, not buildctl: the runner image (catthehacker/ubuntu:act-24.04)
+      # ships a docker client against the privileged dind sidecar and carries no
+      # buildctl-daemonless.sh. Same shape as deploy.yml, which is proven green.
+      #
+      # The build context is `livestream/`, not the repo root: that directory is
+      # its own Go module and its Dockerfile copies `. ./`, so building from the
+      # root would ship the whole monolith into the builder and still not find
+      # go.mod where it expects it.
+      - name: Build + push
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.ver.outputs.version }}"
+          IMAGE="ghcr.io/hanzoai/insights-livestream:${VERSION}"
+          # The commit rides the image, so dropping it from the tag loses nothing:
+          # `docker inspect` still answers which source built this.
+          docker build -f livestream/Dockerfile \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --label "org.opencontainers.image.version=${VERSION}" \
+            --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
+            -t "$IMAGE" livestream
+          docker push "$IMAGE"
+          echo "built $IMAGE (revision ${GITHUB_SHA})"
+
+      # THE DEPLOY. Everything above this PUBLISHES an image; this is the step
+      # that makes production run it. cd.hanzo.ai watches hanzoai/universe, not
+      # the registry, so an image nothing points at is just bytes in ghcr.
+      #
+      # Only this service is pinned. deploy.yml pins insights-web and
+      # insights-worker together because they are one codebase against one
+      # database and a version skew between them is a migration hazard. This
+      # image shares no code and no schema with them — it is a separate module
+      # that reads Kafka — so it versions and ships alone.
+      #
+      # On the FIRST run the values file already reads the version being built,
+      # and pin.sh exits 0 without a commit when the pin already matches, so
+      # bootstrapping needs no special case here.
+      - name: Ship it
+        env:
+          KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+          KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+          KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://kms.hanzo.ai' }}
+          KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
+          KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+          # pin.sh probes the registry before it moves anything; these let it
+          # read a private manifest instead of falling back to anonymous.
+          GHCR_USER: ${{ secrets.GHCR_USER }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.ver.outputs.version }}"
+
+          # Secrets come from KMS, never from a file or a repo variable.
+          KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
+            -H 'Content-Type: application/json' \
+            -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+            | jq -r '.accessToken // empty')
+          [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+
+          PIN_TOKEN=$(curl -fsS \
+            "${KMS_ENDPOINT}/v1/kms/orgs/${KMS_ORG}/secrets/deploy/UNIVERSE_PIN_TOKEN?env=${KMS_SECRET_ENV}" \
+            -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.secret.value // empty')
+          [ -n "$PIN_TOKEN" ] || { echo "::error::UNIVERSE_PIN_TOKEN missing in KMS at ${KMS_ORG}/deploy (env ${KMS_SECRET_ENV})"; exit 1; }
+          echo "::add-mask::${PIN_TOKEN}"
+
+          # Shallow: universe is ~600MB of history and this needs one file from
+          # the tip.
+          git clone --quiet --depth 1 \
+            "https://x-access-token:${PIN_TOKEN}@git.hanzo.ai/hanzo/universe" /tmp/universe
+
+          # Another service can land its own pin between our clone and our push.
+          # That is a normal race on a shared tree, not a failure — but a shallow
+          # clone has no common history to rebase onto, so RE-APPLY rather than
+          # merge: reset to the new tip and pin again. Pinning is idempotent and
+          # derives everything from the file it finds, so the retry also re-checks
+          # the monotonic guard against whatever just landed.
+          for attempt in 1 2 3 4 5; do
+            /tmp/universe/charts/app/pin.sh insights-livestream "$VERSION"
+
+            if git -C /tmp/universe push --quiet origin HEAD:main 2>/dev/null; then
+              echo "pinned insights-livestream to ${VERSION}"; exit 0
+            fi
+
+            echo "universe moved under us (attempt ${attempt}/5) — re-applying on the new tip"
+            git -C /tmp/universe fetch --quiet --depth 1 origin main
+            git -C /tmp/universe reset --hard --quiet FETCH_HEAD
+          done
+          echo "::error::could not push the pin after 5 attempts"; exit 1
