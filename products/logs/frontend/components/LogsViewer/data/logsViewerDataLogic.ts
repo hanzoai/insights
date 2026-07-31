@@ -30,6 +30,20 @@ export const DEFAULT_INITIAL_LOGS_LIMIT = null as number | null
 const NEW_QUERY_STARTED_ERROR_MESSAGE = 'new query started' as const
 const DEFAULT_LIVE_TAIL_POLL_INTERVAL_MAX_MS = 5000
 
+/**
+ * A fetch fails for two very different reasons and only one of them means "nothing is running".
+ *
+ * A SUPERSEDED fetch was aborted because a newer query took its place — another request is already
+ * in flight, so the spinner should stay up and no toast is warranted. Every OTHER failure is real:
+ * the request is over and nothing replaces it, so the spinner has to come down and the user has to
+ * be told. Conflating the two is what left the viewer spinning forever whenever the logs backend
+ * returned an error. One definition, used by both the loading reducers and the toast listeners.
+ */
+const isSupersededFetch = (error: unknown): boolean => {
+    const errorStr = String(error).toLowerCase()
+    return error === NEW_QUERY_STARTED_ERROR_MESSAGE || errorStr.includes('abort')
+}
+
 const stringifyLogAttributes = (attributes: Record<string, any>): Record<string, string> => {
     const result: Record<string, string> = {}
     for (const attributeKey of Object.keys(attributes)) {
@@ -148,10 +162,10 @@ export const logsViewerDataLogic = kea<logsViewerDataLogicType>([
             {
                 fetchLogs: () => true,
                 fetchLogsSuccess: () => false,
-                fetchLogsFailure: () => true,
+                fetchLogsFailure: (_, { error }) => isSupersededFetch(error),
                 fetchNextLogsPage: () => true,
                 fetchNextLogsPageSuccess: () => false,
-                fetchNextLogsPageFailure: () => true,
+                fetchNextLogsPageFailure: (_, { error }) => isSupersededFetch(error),
             },
         ],
         sparklineLoading: [
@@ -159,7 +173,7 @@ export const logsViewerDataLogic = kea<logsViewerDataLogicType>([
             {
                 fetchSparkline: () => true,
                 fetchSparklineSuccess: () => false,
-                fetchSparklineFailure: () => true,
+                fetchSparklineFailure: (_, { error }) => isSupersededFetch(error),
             },
         ],
         liveTailRunning: [
@@ -417,14 +431,12 @@ export const logsViewerDataLogic = kea<logsViewerDataLogicType>([
             actions.fetchSparkline()
         },
         fetchLogsFailure: ({ error }) => {
-            const errorStr = String(error).toLowerCase()
-            if (error !== NEW_QUERY_STARTED_ERROR_MESSAGE && !errorStr.includes('abort')) {
+            if (!isSupersededFetch(error)) {
                 toast.error(`Failed to load logs: ${error}`)
             }
         },
         fetchNextLogsPageFailure: ({ error }) => {
-            const errorStr = String(error).toLowerCase()
-            if (error !== NEW_QUERY_STARTED_ERROR_MESSAGE && !errorStr.includes('abort')) {
+            if (!isSupersededFetch(error)) {
                 toast.error(`Failed to load more logs: ${error}`)
             }
         },
