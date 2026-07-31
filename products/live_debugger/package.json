@@ -5,7 +5,7 @@
     },
     "peerDependencies": {
         "@hanzo/icons": "*",
-        "@hanzo/elements": "*",
+        "@hanzo/elements": "workspace:*",
         "@types/react": "*",
         "@types/react-dom": "*",
         "clsx": "*",

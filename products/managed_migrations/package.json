@@ -8,7 +8,7 @@
     },
     "peerDependencies": {
         "@hanzo/icons": "*",
-        "@hanzo/elements": "*",
+        "@hanzo/elements": "workspace:*",
         "@types/react": "*",
         "react": "*"
     }
