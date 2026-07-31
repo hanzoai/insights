@@ -131,7 +131,7 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
                 channel=channel,
                 user=slack_user_id,
                 thread_ts=thread_ts,
-                text="Hold your mascots! Looks like this Insights AI is already in flight in this Slack thread – wait for the answer first.",
+                text="Hold on! Looks like this Insights AI is already in flight in this Slack thread – wait for the answer first.",
             )
             return
 

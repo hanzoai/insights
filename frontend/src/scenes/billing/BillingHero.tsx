@@ -8,31 +8,10 @@ import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 
 import { BillingPlan, BillingProductV2Type, StartupProgramLabel } from '~/types'
 
-import planEnterprise from 'public/plan_enterprise.png'
-import planFree from 'public/plan_free.svg'
-import planPaid from 'public/plan_paid.svg'
-import planStartup from 'public/plan_startup.svg'
-import planTeams from 'public/plan_teams.png'
-import planYc from 'public/plan_yc.svg'
-
 import { PlanComparisonModal } from './PlanComparison'
 import { billingLogic } from './billingLogic'
 import { billingProductLogic } from './billingProductLogic'
 import { paymentEntryLogic } from './paymentEntryLogic'
-
-const PLAN_BADGES: Record<BillingPlan, string> = {
-    [BillingPlan.Free]: planFree,
-    [BillingPlan.Paid]: planPaid,
-    [BillingPlan.Teams]: planTeams, // Legacy
-    [BillingPlan.Boost]: planTeams, // TODO: Add Boost badge
-    [BillingPlan.Scale]: planTeams, // TODO: Add Scale badge
-    [BillingPlan.Enterprise]: planEnterprise,
-}
-
-const STARTUP_PROGRAM_BADGES: Record<StartupProgramLabel, string> = {
-    [StartupProgramLabel.YC]: planYc,
-    [StartupProgramLabel.Startup]: planStartup,
-}
 
 interface CopyVariation {
     title: string | null
@@ -167,22 +146,10 @@ export const BillingHero = ({ product }: { product: BillingProductV2Type }): JSX
     const copyVariation =
         (startupProgramLabelCurrent ? BADGE_CONFIG[startupProgramLabelCurrent] : BADGE_CONFIG[billingPlan]) ||
         BADGE_CONFIG[BillingPlan.Paid]
-    const planBadge =
-        (startupProgramLabelCurrent ? STARTUP_PROGRAM_BADGES[startupProgramLabelCurrent] : PLAN_BADGES[billingPlan]) ||
-        PLAN_BADGES[BillingPlan.Paid]
 
     return (
         <div className={`relative rounded-lg ${copyVariation.backgroundColor}`}>
             <div className="@container p-4 relative">
-                <img
-                    src={planBadge}
-                    alt={
-                        startupProgramLabelCurrent
-                            ? `${startupProgramLabelCurrent} plan badge`
-                            : `${billingPlan} plan badge`
-                    }
-                    className="float-right w-[33cqw] min-w-32 max-w-48 ml-6 mb-4"
-                />
                 {copyVariation.title && <h1 className="mb-0">{copyVariation.title}</h1>}
                 {copyVariation.subtitle && <h1 className="text-danger leading-tight">{copyVariation.subtitle}</h1>}
                 <div className="mt-2">{copyVariation.getDescription(billingPlan, scrollToProduct)}</div>
