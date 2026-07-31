@@ -64,7 +64,7 @@ a { color: inherit; }
 header { border-bottom: 1px solid var(--edge); }
 .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; }
 .mark { display: flex; align-items: center; gap: .625rem; font-weight: 600; letter-spacing: -.02em; text-decoration: none; }
-.mark span { width: 1.5rem; height: 1.5rem; border-radius: var(--radius-card); background: var(--solid); color: var(--solid-ink); display: grid; place-items: center; font-size: .8125rem; font-weight: 700; }
+.mark svg { width: 1.5rem; height: 1.5rem; fill: currentColor; }
 
 /* ── hero ────────────────────────────────────────────────────────────── */
 .hero { padding: 5rem 0 4rem; }
@@ -104,7 +104,7 @@ footer { border-top: 1px solid var(--edge); padding: 2rem 0 3rem; color: var(--i
 
 <header>
   <div class="wrap bar">
-    <a class="mark" href="/"><span>H</span>Insights</a>
+    <a class="mark" href="/"><svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hanzo"><path d="M22.21 67V44.6369H0V67H22.21Z"/><path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"/><path d="M22.21 0H0V22.3184H22.21V0Z"/><path d="M66.7198 0H44.5098V22.3184H66.7198V0Z"/><path d="M66.7198 67V44.6369H44.5098V67H66.7198Z"/></svg>Insights</a>
     <a class="btn btn-ghost" href="{{ login_url }}">Sign in</a>
   </div>
 </header>

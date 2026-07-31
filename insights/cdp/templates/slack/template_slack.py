@@ -56,7 +56,7 @@ if (res.status != 200 or res.body.ok == false) {
             "key": "icon_emoji",
             "type": "string",
             "label": "Emoji icon",
-            "default": ":mascot:",
+            "default": ":bar_chart:",
             "required": False,
             "secret": False,
             "hidden": False,
