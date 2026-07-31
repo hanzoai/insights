@@ -1108,7 +1108,12 @@
     --glass-bg-3000: var(--glass-bg-3000-dark);
     --glass-border-3000: var(--glass-border-3000-dark);
     --color-bg-light: var(--color-accent-3000);
-    --color-bg-table: #232429;
+    // The rows sit ON the panel, so they are the next step UP: #2e2e2e above the
+    // panel's #262626, above #212121, above the black ground. It read #232429 —
+    // DARKER than the panel it sits on, which inverted the ladder and made the
+    // table look sunken into the page. That value was also blue (B 0x29 against
+    // R 0x23); the chrome is monochrome.
+    --color-bg-table: #2e2e2e;
     --brand-key: #fff; // In dark mode the black in Insights's logo is replaced with white for proper contrast
     --link: var(--link-3000-dark);
     --shadow-elevation-3000: var(--shadow-elevation-3000-dark);
