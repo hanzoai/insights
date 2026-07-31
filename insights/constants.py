@@ -315,7 +315,17 @@ GENERATED_DASHBOARD_PREFIX = "Generated Dashboard"
 
 ENRICHED_DASHBOARD_INSIGHT_IDENTIFIER = "Feature Viewed"
 
-PERMITTED_FORUM_DOMAINS = ["localhost", "insights.com"]
+# Hosts a signed-in user may be handed to on ?forum_login=true.
+#
+# This allowlisted insights.com — a live third party at 51.152.91.38 that Hanzo
+# does not own — because a debrand rewrote the upstream project's own forum
+# domain into our vocabulary without asking whether we run a forum. We do not.
+# An allowlist naming somebody else's host is the opposite of an allowlist.
+#
+# Empty, so the ?forum_login=true branch admits nothing. localhost went too: it
+# is only reachable from a developer's own machine, and keeping a lone dev entry
+# invites the next reader to add a "real" one beside it.
+PERMITTED_FORUM_DOMAINS: list[str] = []
 
 INVITE_DAYS_VALIDITY = 3  # number of days for which team invites are valid
 
