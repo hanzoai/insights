@@ -209,3 +209,45 @@ the squash.
   applied). Live intentionally stays on `1.51.10` (identical schema, old history);
   the operator CR pins an explicit tag so it won't auto-move to a squash image
   without this step.
+
+## The build ships itself now — and the trap that hid it
+
+A push to `main` builds the next patch semver and pins it in `hanzoai/universe`;
+cd.hanzo.ai reconciles from there. `.hanzo/workflows/deploy.yml` ends in a
+"Ship it" step that calls `charts/app/pin.sh` in universe with a forge token read
+from KMS (`orgs/hanzo/secrets/deploy/UNIVERSE_PIN_TOKEN?env=prod`). There is no
+manual step, and no second mechanism: pin.sh is the one place a deploy is
+decided, and it refuses a non-semver version, an image the registry cannot serve,
+a version older than the current pin, and a repository the caller chose rather
+than the one the values file declares.
+
+**`@hanzo/elements` must be `workspace:*`, never `"*"`.** Three products under
+`products/` depend on the design system. A plain `"*"` range makes pnpm resolve
+it against the npm REGISTRY, and `@hanzo/elements` is not published there — so
+`pnpm --filter=@hanzo/frontend... install` fails with `ERR_PNPM_FETCH_404` and
+the image never builds. This is easy to reintroduce and hard to spot, for two
+reasons: the failure is silent from the repo's point of view (a build that never
+ran looks the same as a build nobody pushed), and it survived undetected for
+years because the OLD name, `@hanzo/lemon-ui`, IS published to npm — so `"*"`
+resolved from the registry by accident. Renaming the package did not break the
+link; it revealed there had never been one.
+
+`pnpm-workspace.yaml` must also list `frontend/@hanzo/*` under `packages:`.
+Listing `frontend` alone does not include packages nested inside it.
+
+Before changing either, run the exact line the Dockerfile runs:
+
+    CI=1 pnpm --filter=@hanzo/frontend... install --no-frozen-lockfile
+
+## Verify a deploy by the POD image, never the Deployment spec
+
+`kubectl get deploy ... -o jsonpath='{.spec.template...image}'` reports the
+DESIRED image. It updates the instant a pin lands and says nothing about whether
+the image pulled or the container started — an unpullable or crash-looping image
+looks identical to success. Read `.status.containerStatuses[].image` on the pods,
+and note that a multi-container pod may carry sidecars pinned to other versions,
+so `containerStatuses[0]` is not necessarily the app.
+
+Registry tag lists are paginated: `/tags/list?n=10000` can return nothing at all.
+To ask whether a specific version exists, probe its manifest — 200 or 404 — which
+is also the only way to catch a phantom tag (listed, but with no image behind it).
