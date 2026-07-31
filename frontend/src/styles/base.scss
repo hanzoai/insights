@@ -258,7 +258,11 @@
     --color-neutral-cool-700: hsl(0deg 0% 30%);
     --color-neutral-cool-750: hsl(0deg 0% 25%);
     --color-neutral-cool-800: hsl(0deg 0% 20%);
-    --color-neutral-cool-850: hsl(0deg 0% 15%);
+    // #212121, the raised step. This is the scene canvas (canvasBackground scenes
+    // resolve --scene-layout-background to surface-primary), the popover and the
+    // border, so moving it moves the whole raised layer at once -- one value, not
+    // four call sites. 15% sat a shade too hot against the #000 ground.
+    --color-neutral-cool-850: #212121;
     --color-neutral-cool-900: hsl(0deg 0% 10%);
     --color-neutral-cool-950: hsl(0deg 0% 8%);
 
@@ -843,7 +847,7 @@
     --color-bg-3000-dark: #000;
     --border-3000-dark: #373737;
     --border-bold-3000-dark: #3f4046;
-    --glass-bg-3000-dark: #24262a99;
+    --glass-bg-3000-dark: #212121e6; // monochrome: was #24262a99, a blue cast
     --glass-border-3000-dark: var(--border-3000-dark);
     --link-3000-dark: #ffffff;
     // The primary action is WHITE — the one high-contrast surface in a black UI.
