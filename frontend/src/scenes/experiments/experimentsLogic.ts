@@ -180,6 +180,17 @@ export const experimentsLogic = kea<experimentsLogicType>([
                 setExperimentsTab: (state, { tabKey }) => tabKey ?? state,
             },
         ],
+        // kea-loaders keeps the previous value on failure, and the previous value here is the empty
+        // default -- so without this the scene cannot tell "this project has no experiments" from
+        // "the request never succeeded", and renders the create-your-first prompt either way.
+        experimentsLoadFailed: [
+            false,
+            {
+                loadExperiments: () => false,
+                loadExperimentsSuccess: () => false,
+                loadExperimentsFailure: () => true,
+            },
+        ],
     }),
     listeners(({ actions, values }) => ({
         setExperimentsFilters: async (_, breakpoint) => {
@@ -358,9 +369,14 @@ export const experimentsLogic = kea<experimentsLogicType>([
             },
         ],
         shouldShowEmptyState: [
-            (s) => [s.experimentsLoading, s.experiments, s.filters],
-            (experimentsLoading, experiments, filters): boolean => {
-                return !experimentsLoading && experiments.results.length === 0 && objectsEqual(filters, DEFAULT_FILTERS)
+            (s) => [s.experimentsLoading, s.experimentsLoadFailed, s.experiments, s.filters],
+            (experimentsLoading, experimentsLoadFailed, experiments, filters): boolean => {
+                return (
+                    !experimentsLoading &&
+                    !experimentsLoadFailed &&
+                    experiments.results.length === 0 &&
+                    objectsEqual(filters, DEFAULT_FILTERS)
+                )
             },
         ],
         pagination: [

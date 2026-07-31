@@ -71,13 +71,6 @@
             "intents": ["error_tracking"]
         },
         {
-            "path": "Experiments",
-            "category": "Features",
-            "iconType": "experiment",
-            "type": "experiment",
-            "intents": ["experiments"]
-        },
-        {
             "path": "Feature flags",
             "category": "Features",
             "iconType": null,
