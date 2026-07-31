@@ -1,13 +1,17 @@
 import { getAppContext } from './getAppContext'
 
 export function apiHostOrigin(): string {
-    const appOrigin = window.location.origin
-    if (appOrigin === 'https://insights.hanzo.ai') {
-        return 'https://us.i.hanzo.ai'
-    } else if (appOrigin === 'https://insights.hanzo.ai') {
-        return 'https://eu.i.hanzo.ai'
+    // ONE endpoint. Upstream shipped a us/eu region split (us.posthog.com,
+    // eu.posthog.com); the debrand rewrote both hosts but not the branching, so
+    // this ended up testing the SAME origin twice — the second arm was dead code
+    // and neither host exists in our stack. The snippet it generated told every
+    // customer to POST to us.i.hanzo.ai, which resolves nowhere.
+    //
+    // Hanzo has one API front door for every property and every region.
+    if (window.location.origin === 'https://insights.hanzo.ai') {
+        return 'https://api.hanzo.ai'
     }
-    return appOrigin
+    return window.location.origin
 }
 
 export function liveEventsHostOrigin(): string | null {
