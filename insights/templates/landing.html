@@ -21,14 +21,21 @@
 
 /* The app's own tokens, so the marketing surface and the product agree. */
 :root {
-  --ground: #f5f5f5; --raised: #fff; --ink: #111; --ink-dim: rgb(17 17 17 / 70%);
-  --edge: #e0e0e0; --solid: #111; --solid-ink: #fff;
+  /* Black ground, LIGHTER raised. On a true-black canvas a panel reads as raised
+     by carrying more light than what is behind it, so elevation goes up the scale,
+     never down. The old default was the inverse of this — a light ground with white
+     cards — and its dark variant lifted a panel only 5% (#0c0c0c on #000), which is
+     below the threshold where an edge is visible at all. */
+  --ground: #000; --raised: #16161a; --ink: #fff; --ink-dim: rgb(255 255 255 / 70%);
+  --edge: #2c2c32; --solid: #fff; --solid-ink: #000;
   --radius: 0.625rem; --radius-card: 0.5rem; --radius-lg: 0.75rem;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --ground: #000; --raised: #0c0c0c; --ink: #fff; --ink-dim: rgb(255 255 255 / 70%);
-    --edge: #373737; --solid: #fff; --solid-ink: #000;
+    /* Same ladder; the media query is now a no-op kept so an explicit dark
+       preference cannot fall back to something lighter. */
+    --ground: #000; --raised: #16161a; --ink: #fff; --ink-dim: rgb(255 255 255 / 70%);
+    --edge: #2c2c32; --solid: #fff; --solid-ink: #000;
   }
 }
 
