@@ -1,10 +1,10 @@
-import { LemonInputSelect } from '@hanzo/lemon-ui'
+import { InputSelect } from '@hanzo/elements'
 
 import type { TeamSelectorProps } from './types'
 import { createTeamOption } from './utils'
 
 export const TeamSelector = ({ teams, organizations, mode, value, onChange }: TeamSelectorProps): JSX.Element => (
-    <LemonInputSelect
+    <InputSelect
         mode={mode}
         data-attr="teams"
         value={value}

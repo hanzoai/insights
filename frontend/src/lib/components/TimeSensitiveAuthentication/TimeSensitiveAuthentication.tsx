@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonDivider, LemonInput, LemonModal, SpinnerOverlay } from '@hanzo/lemon-ui'
+import { Button, Divider, Input, Modal, SpinnerOverlay } from '@hanzo/elements'
 
 import passkeyLogo from 'lib/components/SocialLoginButton/passkey.svg'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { SSOEnforcedLoginButton, SocialLoginButtons } from '../SocialLoginButton/SocialLoginButton'
 import { timeSensitiveAuthenticationLogic } from './timeSensitiveAuthenticationLogic'
@@ -36,7 +36,7 @@ export function TimeSensitiveAuthenticationModal(): JSX.Element {
     }
 
     return (
-        <LemonModal
+        <Modal
             zIndex="1169" // The re-authentication modal should be above the all popovers, including the AI consent popover
             title="Re-authenticate for security"
             isOpen={showAuthenticationModal}
@@ -53,14 +53,14 @@ export function TimeSensitiveAuthenticationModal(): JSX.Element {
                         />
                     </span>
                 ) : showPassword ? (
-                    <LemonButton
+                    <Button
                         type="primary"
                         form="reauthentication"
                         loading={isReauthenticationSubmitting}
                         onClick={submitReauthentication}
                     >
                         Re-authenticate
-                    </LemonButton>
+                    </Button>
                 ) : undefined
             }
         >
@@ -77,22 +77,22 @@ export function TimeSensitiveAuthenticationModal(): JSX.Element {
                     enableFormOnSubmit
                 >
                     {!twoFactorRequired ? (
-                        <LemonField name="password" label="Re-enter password">
-                            <LemonInput
+                        <Field name="password" label="Re-enter password">
+                            <Input
                                 type="password"
                                 className="ph-ignore-input"
                                 data-attr="password"
                                 autoComplete="current-password"
                                 autoFocus
                             />
-                        </LemonField>
+                        </Field>
                     ) : null}
 
                     {twoFactorRequired ? (
                         <>
                             {passkeysAvailable && (
                                 <>
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         htmlType="button"
                                         onClick={() => beginPasskey2FA()}
@@ -105,14 +105,14 @@ export function TimeSensitiveAuthenticationModal(): JSX.Element {
                                         }
                                     >
                                         Use passkey
-                                    </LemonButton>
-                                    {totpAvailable && <LemonDivider className="my-4" label="Or" />}
+                                    </Button>
+                                    {totpAvailable && <Divider className="my-4" label="Or" />}
                                 </>
                             )}
 
                             {totpAvailable && (
-                                <LemonField name="token" label="Authenticator token">
-                                    <LemonInput
+                                <Field name="token" label="Authenticator token">
+                                    <Input
                                         className="ph-ignore-input"
                                         autoFocus={!passkeysAvailable}
                                         data-attr="token"
@@ -120,7 +120,7 @@ export function TimeSensitiveAuthenticationModal(): JSX.Element {
                                         inputMode="numeric"
                                         autoComplete="one-time-code"
                                     />
-                                </LemonField>
+                                </Field>
                             )}
 
                             {!passkeysAvailable && !totpAvailable && (
@@ -150,7 +150,7 @@ export function TimeSensitiveAuthenticationModal(): JSX.Element {
                 </div>
             ) : null}
             {precheckResponseLoading && <SpinnerOverlay />}
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -166,9 +166,9 @@ export function TimeSensitiveAuthenticationArea({ children }: { children: JSX.El
 
             <p>This area requires that you re-authenticate.</p>
 
-            <LemonButton type="primary" onClick={() => setDismissedReauthentication(false)}>
+            <Button type="primary" onClick={() => setDismissedReauthentication(false)}>
                 Re-authenticate
-            </LemonButton>
+            </Button>
         </div>
     ) : (
         children

@@ -1,4 +1,4 @@
-import { LemonTag, LemonTagType } from 'lib/lemon-ui/LemonTag'
+import { Tag, TagType } from 'lib/elements/Tag'
 
 import { LogMessage } from '~/queries/schema/schema-general'
 
@@ -11,8 +11,8 @@ export const LogTag = ({ level }: { level: LogMessage['severity_text'] }): JSX.E
                 warn: 'warning',
                 error: 'danger',
                 fatal: 'danger',
-            } as Record<LogMessage['severity_text'], LemonTagType>
+            } as Record<LogMessage['severity_text'], TagType>
         )[level] ?? 'muted'
 
-    return <LemonTag type={type}>{level}</LemonTag>
+    return <Tag type={type}>{level}</Tag>
 }

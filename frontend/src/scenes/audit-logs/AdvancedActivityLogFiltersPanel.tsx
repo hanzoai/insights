@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconDownload } from '@hanzo/icons'
-import { LemonButton, LemonDropdown } from '@hanzo/lemon-ui'
+import { Button, Dropdown } from '@hanzo/elements'
 
 import { BasicFiltersTab } from './BasicFiltersTab'
 import { advancedActivityLogsLogic } from './advancedActivityLogsLogic'
@@ -14,10 +14,10 @@ export function AdvancedActivityLogFiltersPanel(): JSX.Element {
         <div className="border rounded-md p-4 bg-bg-light">
             <div className="flex items-center justify-end">
                 <div className="flex gap-2">
-                    <LemonDropdown
+                    <Dropdown
                         overlay={
                             <div className="space-y-1 p-1">
-                                <LemonButton
+                                <Button
                                     size="small"
                                     fullWidth
                                     onClick={() => exportLogs('csv')}
@@ -25,8 +25,8 @@ export function AdvancedActivityLogFiltersPanel(): JSX.Element {
                                     data-attr="audit-logs-export-csv"
                                 >
                                     Export as CSV
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     size="small"
                                     fullWidth
                                     onClick={() => exportLogs('xlsx')}
@@ -34,22 +34,22 @@ export function AdvancedActivityLogFiltersPanel(): JSX.Element {
                                     data-attr="audit-logs-export-xlsx"
                                 >
                                     Export as Excel
-                                </LemonButton>
+                                </Button>
                             </div>
                         }
                         placement="bottom-end"
                         data-attr="audit-logs-export-dropdown"
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             type="secondary"
                             icon={<IconDownload />}
                             data-attr="audit-logs-export-button"
                         >
                             Export
-                        </LemonButton>
-                    </LemonDropdown>
-                    <LemonButton
+                        </Button>
+                    </Dropdown>
+                    <Button
                         size="small"
                         type="secondary"
                         disabledReason={!hasActiveFilters ? 'No active filters' : undefined}
@@ -57,7 +57,7 @@ export function AdvancedActivityLogFiltersPanel(): JSX.Element {
                         data-attr="audit-logs-clear-filters"
                     >
                         Clear all
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
 

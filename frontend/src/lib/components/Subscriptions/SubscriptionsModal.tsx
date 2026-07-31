@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, LemonButtonWithDropdown } from '@hanzo/lemon-ui'
+import { Button, ButtonWithDropdown } from '@hanzo/elements'
 
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Modal } from 'lib/elements/Modal'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature } from '~/types'
@@ -30,7 +30,7 @@ export function SubscriptionsModal(props: SubscriptionsModalProps): JSX.Element 
         return <Spinner className="text-2xl" />
     }
     return (
-        <LemonModal onClose={closeModal} isOpen={isOpen} width={600} simple title="" inline={inline}>
+        <Modal onClose={closeModal} isOpen={isOpen} width={600} simple title="" inline={inline}>
             <PayGateMini
                 feature={AvailableFeature.SUBSCRIPTIONS}
                 handleSubmit={closeModal}
@@ -55,7 +55,7 @@ export function SubscriptionsModal(props: SubscriptionsModalProps): JSX.Element 
                     />
                 )}
             </PayGateMini>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -63,7 +63,7 @@ export function SubscribeButton(props: SubscriptionBaseProps): JSX.Element {
     const { push } = useActions(router)
 
     return (
-        <LemonButtonWithDropdown
+        <ButtonWithDropdown
             fullWidth
             dropdown={{
                 actionable: true,
@@ -71,17 +71,17 @@ export function SubscribeButton(props: SubscriptionBaseProps): JSX.Element {
                 placement: 'right-start',
                 overlay: (
                     <>
-                        <LemonButton onClick={() => push(urlForSubscription('new', props))} fullWidth>
+                        <Button onClick={() => push(urlForSubscription('new', props))} fullWidth>
                             New subscription
-                        </LemonButton>
-                        <LemonButton onClick={() => push(urlForSubscriptions(props))} fullWidth>
+                        </Button>
+                        <Button onClick={() => push(urlForSubscriptions(props))} fullWidth>
                             Manage subscriptions
-                        </LemonButton>
+                        </Button>
                     </>
                 ),
             }}
         >
             Subscribe
-        </LemonButtonWithDropdown>
+        </ButtonWithDropdown>
     )
 }

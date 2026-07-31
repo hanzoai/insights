@@ -1,5 +1,5 @@
 import { IconCheckCircle, IconWarning } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { cn } from 'lib/utils/css-classes'
 

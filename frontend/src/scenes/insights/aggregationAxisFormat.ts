@@ -1,4 +1,4 @@
-import { LemonSelectOptionLeaf } from 'lib/lemon-ui/LemonSelect'
+import { SelectOptionLeaf } from 'lib/elements/Select'
 import { humanFriendlyCurrency, humanFriendlyDuration, humanFriendlyNumber, percentage } from 'lib/utils'
 
 import { TrendsFilter } from '~/queries/schema/schema-general'
@@ -7,7 +7,7 @@ import { ChartDisplayType, TrendsFilterType } from '~/types'
 const formats = ['numeric', 'duration', 'duration_ms', 'percentage', 'percentage_scaled', 'currency'] as const
 export type AggregationAxisFormat = (typeof formats)[number]
 
-export const INSIGHT_UNIT_OPTIONS: LemonSelectOptionLeaf<AggregationAxisFormat>[] = [
+export const INSIGHT_UNIT_OPTIONS: SelectOptionLeaf<AggregationAxisFormat>[] = [
     { value: 'numeric', label: 'None' },
     { value: 'duration', label: 'Duration (s)' },
     { value: 'duration_ms', label: 'Duration (ms)' },

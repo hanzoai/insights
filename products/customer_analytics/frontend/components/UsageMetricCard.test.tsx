@@ -1,7 +1,7 @@
 import { IconTrending } from '@hanzo/icons'
 
 import { getColorVar } from 'lib/colors'
-import { IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'
+import { IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 
 import { UsageMetric } from '~/queries/schema/schema-general'
 

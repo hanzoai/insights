@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonRadio, LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
+import { Button } from 'lib/elements/Button'
+import { Radio, RadioOption } from 'lib/elements/Radio'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -12,7 +12,7 @@ import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 type BounceRatePageViewMode = NonNullable<InsightsQLQueryModifiers['bounceRatePageViewMode']>
 
-const bounceRatePageViewModeOptions: LemonRadioOption<BounceRatePageViewMode>[] = [
+const bounceRatePageViewModeOptions: RadioOption<BounceRatePageViewMode>[] = [
     {
         value: 'count_pageviews',
         label: (
@@ -73,7 +73,7 @@ export function BounceRatePageViewModeSetting(): JSX.Element {
                 resourceType={AccessControlResourceType.WebAnalytics}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonRadio
+                <Radio
                     value={bounceRatePageViewMode}
                     onChange={setBounceRatePageViewMode}
                     options={bounceRatePageViewModeOptions}
@@ -84,7 +84,7 @@ export function BounceRatePageViewModeSetting(): JSX.Element {
                     resourceType={AccessControlResourceType.WebAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => handleChange(bounceRatePageViewMode)}
                         disabledReason={
@@ -92,7 +92,7 @@ export function BounceRatePageViewModeSetting(): JSX.Element {
                         }
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
         </>

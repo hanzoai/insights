@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconExternal } from '@hanzo/icons'
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { DomainConnectProviderName } from '~/queries/schema/schema-general'
 
@@ -41,7 +41,7 @@ export function DomainConnectBanner(props: DomainConnectLogicProps & { className
 
     if (autoDetected && providerName) {
         return (
-            <LemonBanner type="info" className={props.className}>
+            <Banner type="info" className={props.className}>
                 <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                         <ProviderLogo name={providerName} />
@@ -50,7 +50,7 @@ export function DomainConnectBanner(props: DomainConnectLogicProps & { className
                             configuration.
                         </span>
                     </div>
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="small"
                         onClick={() => openDomainConnect()}
@@ -58,15 +58,15 @@ export function DomainConnectBanner(props: DomainConnectLogicProps & { className
                         targetBlank
                     >
                         Configure automatically
-                    </LemonButton>
+                    </Button>
                 </div>
-            </LemonBanner>
+            </Banner>
         )
     }
 
     if (availableProviders.length > 0) {
         return (
-            <LemonBanner type="info" className={props.className}>
+            <Banner type="info" className={props.className}>
                 <div className="space-y-2">
                     <span>
                         If your DNS provider supports automatic configuration, you can set up these records with a
@@ -74,7 +74,7 @@ export function DomainConnectBanner(props: DomainConnectLogicProps & { className
                     </span>
                     <div className="flex gap-2 flex-wrap">
                         {availableProviders.map((provider: DomainConnectProvider) => (
-                            <LemonButton
+                            <Button
                                 key={provider.endpoint}
                                 type="secondary"
                                 size="small"
@@ -83,11 +83,11 @@ export function DomainConnectBanner(props: DomainConnectLogicProps & { className
                                 sideIcon={<IconExternal />}
                             >
                                 I use {provider.name}
-                            </LemonButton>
+                            </Button>
                         ))}
                     </div>
                 </div>
-            </LemonBanner>
+            </Banner>
         )
     }
 

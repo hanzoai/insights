@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { forwardRef, useRef, useState } from 'react'
 
 import { IconCalendar, IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, LemonDivider, LemonSwitch, Popover } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Divider, Switch, Popover } from '@hanzo/elements'
 
 import {
     CUSTOM_OPTION_DESCRIPTION,
@@ -14,9 +14,9 @@ import {
     NO_OVERRIDE_RANGE_PLACEHOLDER,
 } from 'lib/components/DateFilter/types'
 import { dayjs } from 'lib/dayjs'
-import { LemonCalendarSelect, LemonCalendarSelectProps } from 'lib/lemon-ui/LemonCalendar/LemonCalendarSelect'
-import { LemonCalendarRange } from 'lib/lemon-ui/LemonCalendarRange/LemonCalendarRange'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { CalendarSelect, CalendarSelectProps } from 'lib/elements/Calendar/CalendarSelect'
+import { CalendarRange } from 'lib/elements/CalendarRange/CalendarRange'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { dateFilterToText, dateMapping, uuid } from 'lib/utils'
 import { formatResolvedDateRange } from 'lib/utils/dateTimeUtils'
 import { teamLogic } from 'scenes/teamLogic'
@@ -41,8 +41,8 @@ export interface DateFilterProps {
     disabledReason?: string | null
     dateOptions?: DateMappingOption[]
     isDateFormatted?: boolean
-    size?: LemonButtonProps['size']
-    type?: LemonButtonProps['type']
+    size?: ButtonProps['size']
+    type?: ButtonProps['type']
     dropdownPlacement?: Placement
     /* True when we're not dealing with ranges, but a single date / relative date */
     isFixedDateMode?: boolean
@@ -64,7 +64,7 @@ interface RawDateFilterProps extends DateFilterProps {
      * but can be overridden to force a specific granularity.
      * For example, set to 'day' to never show the time picker.
      */
-    forceGranularity?: LemonCalendarSelectProps['granularity']
+    forceGranularity?: CalendarSelectProps['granularity']
     /** Use 24-hour format instead of 12-hour with AM/PM */
     use24HourFormat?: boolean
     explicitDate?: boolean
@@ -146,7 +146,7 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
     const { weekStartDay } = useValues(teamLogic)
     const optionsRef = useRef<HTMLDivElement | null>(null)
     const rollingDateRangeRef = useRef<HTMLDivElement | null>(null)
-    const [granularity, setGranularity] = useState<LemonCalendarSelectProps['granularity']>(
+    const [granularity, setGranularity] = useState<CalendarSelectProps['granularity']>(
         forceGranularity ?? (dateFromHasTimePrecision ? 'minute' : 'day')
     )
 
@@ -165,7 +165,7 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
                     onToggleTime={(includeTime) => setFixedRangeGranularity(includeTime ? 'minute' : 'day')}
                 />
             ) : (
-                <LemonCalendarRange
+                <CalendarRange
                     value={[rangeDateFrom ?? dayjs(), rangeDateTo ?? dayjs()]}
                     onChange={([from, to]) => {
                         setRangeDateFrom(from)
@@ -188,7 +188,7 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
                 use24HourFormat={use24HourFormat}
             />
         ) : view === DateFilterView.DateToNow ? (
-            <LemonCalendarSelect
+            <CalendarSelect
                 value={rangeDateFrom ?? dayjs()}
                 onChange={(date) => {
                     setRangeDateFrom(date)
@@ -250,7 +250,7 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
 
                     return (
                         <Tooltip key={key} title={makeLabel ? makeLabel(dateValue, startOfRangeDateValue) : undefined}>
-                            <LemonButton
+                            <Button
                                 key={key}
                                 data-attr={`date-filter-${key.toLowerCase().replace(/\s+/g, '-')}`}
                                 onClick={() => setDate(values[0] || null, values[1] || null, false, explicitDate)}
@@ -258,7 +258,7 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
                                 fullWidth
                             >
                                 {key === CUSTOM_OPTION_KEY ? NO_OVERRIDE_RANGE_PLACEHOLDER : key}
-                            </LemonButton>
+                            </Button>
                         </Tooltip>
                     )
                 })}
@@ -284,25 +284,25 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
                         fullWidth
                     />
                 )}
-                <LemonDivider />
+                <Divider />
                 {isFixedDateMode ? (
-                    <LemonButton onClick={openFixedDate} active={isFixedDate} fullWidth>
+                    <Button onClick={openFixedDate} active={isFixedDate} fullWidth>
                         Custom date...
-                    </LemonButton>
+                    </Button>
                 ) : (
                     <>
-                        <LemonButton onClick={openDateToNow} active={isDateToNow} fullWidth>
+                        <Button onClick={openDateToNow} active={isDateToNow} fullWidth>
                             From custom date until now…
-                        </LemonButton>
-                        <LemonButton onClick={openFixedRange} active={isFixedRange} fullWidth>
+                        </Button>
+                        <Button onClick={openFixedRange} active={isFixedRange} fullWidth>
                             Custom fixed date range…
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
                 {showExplicitDateToggle && (
                     <>
-                        <LemonDivider />
-                        <div className="LemonSwitch pb-2 pt-2 LemonSwitch--medium LemonSwitch--full-width">
+                        <Divider />
+                        <div className="Switch pb-2 pt-2 Switch--medium Switch--full-width">
                             <label className="flex items-center gap-1">
                                 <span>Exact time range</span>
                                 <Tooltip
@@ -320,7 +320,7 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
                                     <IconInfo className="text-muted-alt w-4 h-4" />
                                 </Tooltip>
                             </label>
-                            <LemonSwitch
+                            <Switch
                                 checked={explicitDate ?? false}
                                 onChange={(checked) => {
                                     setExplicitDate(checked)
@@ -331,10 +331,10 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
                 )}
                 {showJumpToTimestamp && (
                     <>
-                        <LemonDivider />
-                        <LemonButton onClick={openJumpToTimestamp} fullWidth data-attr="jump-to-timestamp-option">
+                        <Divider />
+                        <Button onClick={openJumpToTimestamp} fullWidth data-attr="jump-to-timestamp-option">
                             Jump to timestamp…
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
             </div>
@@ -350,7 +350,7 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
             onClickOutside={close}
             closeParentPopoverOnClickInside={false}
         >
-            <LemonButton
+            <Button
                 ref={ref}
                 id="daterange_selector"
                 size={size ?? 'small'}
@@ -363,7 +363,7 @@ export const DateFilter = forwardRef<HTMLButtonElement, RawDateFilterProps>(func
                 tooltip={formatResolvedDateRange(resolvedDateRange)}
             >
                 <span className={clsx('text-nowrap', className)}>{label}</span>
-            </LemonButton>
+            </Button>
         </Popover>
     )
 })

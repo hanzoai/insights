@@ -22,10 +22,10 @@
     border: none;
     transform: translate(-50%, -50%);
 
-    > .LemonBadge {
+    > .Badge {
         border-color: var(--color-bg-surface-primary); // Matching the chart background
-        transition: transform 200ms ease; // Same as LemonBadge's transition
-        // Override .LemonBadge--position-self-centered
+        transition: transform 200ms ease; // Same as Badge's transition
+        // Override .Badge--position-self-centered
         transform: scale(var(--annotations-badge-scale));
         transform-origin: center;
     }
@@ -40,7 +40,7 @@
         opacity 100ms ease,
         transform 100ms ease;
 
-    .LemonModal {
+    .Modal {
         min-width: var(--annotations-popover-width);
         max-width: var(--annotations-popover-width);
         min-height: 100%;

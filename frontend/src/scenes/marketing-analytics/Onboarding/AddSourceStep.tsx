@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconArrowRight, IconCheckCircle } from '@hanzo/icons'
-import { LemonButton, LemonCard, Link } from '@hanzo/lemon-ui'
+import { Button, Card, Link } from '@hanzo/elements'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { cn } from 'lib/utils/css-classes'
@@ -74,7 +74,7 @@ export function AddSourceStep({ onContinue, hasSources }: AddSourceStepProps): J
     const totalConnected = validNativeSources.length + validExternalTables.length
 
     return (
-        <LemonCard hoverEffect={false}>
+        <Card hoverEffect={false}>
             <div className="space-y-3">
                 {/* Header */}
                 <div className="flex items-center justify-between">
@@ -133,7 +133,7 @@ export function AddSourceStep({ onContinue, hasSources }: AddSourceStepProps): J
                     >
                         View docs
                     </Link>
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="small"
                         onClick={onContinue}
@@ -141,10 +141,10 @@ export function AddSourceStep({ onContinue, hasSources }: AddSourceStepProps): J
                         disabledReason={!hasSources ? 'Connect at least one source' : undefined}
                     >
                         Continue
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
-        </LemonCard>
+        </Card>
     )
 }
 

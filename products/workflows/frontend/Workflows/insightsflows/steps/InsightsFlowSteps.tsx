@@ -14,7 +14,7 @@ import {
     IconWebhooks,
 } from '@hanzo/icons'
 
-import { IconTwilio } from 'lib/lemon-ui/icons'
+import { IconTwilio } from 'lib/elements/icons'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import { InsightsFunctionTemplateType } from '~/types'
@@ -120,7 +120,7 @@ const InsightsFlowStepConfigs: Partial<{
 
             const template = insightsFunctionTemplatesById[action.config.template_id]
             return template?.icon_url ? (
-                <img className="LemonIcon rounded" src={template.icon_url} alt={template.name} />
+                <img className="Icon rounded" src={template.icon_url} alt={template.name} />
             ) : (
                 <IconBolt />
             )

@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 
 import type { AnyPropertyFilter } from '~/types'
 
@@ -125,7 +125,7 @@ export const clustersAdminLogic = kea<clustersAdminLogicType>([
         },
 
         triggerClusteringRunSuccess: ({ clusteringRun }) => {
-            lemonToast.success(`Clustering workflow started`, {
+            toast.success(`Clustering workflow started`, {
                 toastId: `clustering-run-${clusteringRun?.workflow_id}`,
                 button: {
                     label: 'Copy workflow ID',

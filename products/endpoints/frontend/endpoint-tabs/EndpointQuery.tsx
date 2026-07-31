@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPencil } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Field } from 'lib/elements/Field'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
 import { sceneLogic } from 'scenes/sceneLogic'
@@ -73,9 +73,9 @@ export function EndpointQuery({ tabId }: EndpointQueryProps): JSX.Element {
                 <div className="flex-1 flex flex-col gap-2">
                     <CodeEditor value={insightsqlQuery.query} language="insightsQL" height="300px" options={{ readOnly: true }} />
                     <div>
-                        <LemonButton type="secondary" onClick={handleEditQuery} sideIcon={<IconOpenInNew />}>
+                        <Button type="secondary" onClick={handleEditQuery} sideIcon={<IconOpenInNew />}>
                             Edit query in SQL Editor
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
                 {Object.keys(variables).length > 0 && (
@@ -86,7 +86,7 @@ export function EndpointQuery({ tabId }: EndpointQueryProps): JSX.Element {
                                 {Object.values(variables).map((variable) => {
                                     const { text, isPlaceholder } = formatVariableValue(variable)
                                     return (
-                                        <LemonField.Pure key={variable.variableId} label={variable.code_name}>
+                                        <Field.Pure key={variable.variableId} label={variable.code_name}>
                                             <div className="flex items-center gap-1">
                                                 <div
                                                     className={`text-sm border rounded px-2 py-1 flex-1 ${
@@ -95,7 +95,7 @@ export function EndpointQuery({ tabId }: EndpointQueryProps): JSX.Element {
                                                 >
                                                     {text}
                                                 </div>
-                                                <LemonButton
+                                                <Button
                                                     icon={<IconPencil />}
                                                     size="small"
                                                     type="tertiary"
@@ -103,7 +103,7 @@ export function EndpointQuery({ tabId }: EndpointQueryProps): JSX.Element {
                                                     tooltip="Edit variable"
                                                 />
                                             </div>
-                                        </LemonField.Pure>
+                                        </Field.Pure>
                                     )
                                 })}
                             </div>

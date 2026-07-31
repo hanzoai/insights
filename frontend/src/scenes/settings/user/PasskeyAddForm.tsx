@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonBanner, LemonButton, LemonInput, Spinner } from '@hanzo/lemon-ui'
+import { Banner, Button, Input, Spinner } from '@hanzo/elements'
 
 import { passkeySettingsLogic } from './passkeySettingsLogic'
 
@@ -16,19 +16,19 @@ function RegistrationBanners(): JSX.Element | null {
     return (
         <>
             {error && (
-                <LemonBanner type="error" onClose={clearError}>
+                <Banner type="error" onClose={clearError}>
                     {error}
-                </LemonBanner>
+                </Banner>
             )}
 
             {registrationStep === 'complete' && (
-                <LemonBanner type="success">Passkey added and verified successfully!</LemonBanner>
+                <Banner type="success">Passkey added and verified successfully!</Banner>
             )}
 
             {registrationStep === 'verifying' && (
-                <LemonBanner type="info" icon={<Spinner />}>
+                <Banner type="info" icon={<Spinner />}>
                     Please verify your passkey to complete registration...
-                </LemonBanner>
+                </Banner>
             )}
         </>
     )
@@ -55,14 +55,14 @@ export function PasskeyAddFormEmpty(): JSX.Element {
                     Passkeys provide a faster, more seamless sign-in experience. Use your device's biometric
                     authentication or a security key to sign in without passwords.
                 </p>
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={handleAddPasskey}
                     loading={isRegistering}
                     disabledReason={isRegistering ? 'Registration in progress...' : undefined}
                 >
                     {registrationStep === 'verifying' ? 'Verifying...' : 'Add passkey'}
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )
@@ -89,7 +89,7 @@ export function PasskeyAddForm(): JSX.Element {
             <div className="flex gap-2 items-end">
                 <div className="flex-1">
                     <label className="font-medium text-sm mb-1 block">Add a new passkey</label>
-                    <LemonInput
+                    <Input
                         placeholder="Passkey name (optional)"
                         value={newPasskeyLabel}
                         onChange={setNewPasskeyLabel}
@@ -98,14 +98,14 @@ export function PasskeyAddForm(): JSX.Element {
                         maxLength={200}
                     />
                 </div>
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={handleAddPasskey}
                     loading={isRegistering}
                     disabledReason={isRegistering ? 'Registration in progress...' : undefined}
                 >
                     {registrationStep === 'verifying' ? 'Verifying...' : 'Add passkey'}
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

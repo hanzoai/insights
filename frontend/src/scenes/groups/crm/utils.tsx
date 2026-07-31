@@ -1,5 +1,5 @@
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { humanFriendlyNumber } from 'lib/utils'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { currencyFormatter } from 'scenes/billing/billing-utils'
@@ -20,7 +20,7 @@ export function getCRMColumns(groupTypeName: string, groupTypeIndex: number): Qu
                 const groupKey = (record as string[])[1]
                 return (
                     <div className="min-w-40">
-                        <LemonTableLink to={urls.group(groupTypeIndex, groupKey)} title={value as string} />
+                        <TableLink to={urls.group(groupTypeIndex, groupKey)} title={value as string} />
                         <CopyToClipboardInline
                             explicitValue={groupKey}
                             iconStyle={{ color: 'var(--color-accent)' }}
@@ -66,7 +66,7 @@ function renderCurrency({ value }: { value: unknown }): JSX.Element {
     if (!value || isNaN(Number(value))) {
         return <>—</>
     }
-    return <LemonTableLink to={urls.revenueAnalytics()} title={currencyFormatter(value as number)} />
+    return <TableLink to={urls.revenueAnalytics()} title={currencyFormatter(value as number)} />
 }
 
 function renderPerson({ value }: { value: unknown }): JSX.Element {
@@ -106,7 +106,7 @@ function renderLink({ value, columnName }: { value: unknown; columnName: string 
 
     return (
         <div className="min-w-30">
-            <LemonTableLink to={cellData.url} title={cellData.title} description={cellData.description} />
+            <TableLink to={cellData.url} title={cellData.title} description={cellData.description} />
         </div>
     )
 }

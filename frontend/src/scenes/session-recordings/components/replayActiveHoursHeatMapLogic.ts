@@ -5,7 +5,7 @@ import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { Dayjs, now } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { urls } from 'scenes/urls'
 import { CalendarHeatMapProps } from 'scenes/web-analytics/CalendarHeatMap/CalendarHeatMap'
 
@@ -197,7 +197,7 @@ export const replayActiveHoursHeatMapLogic = kea<replayActiveHoursHeatMapLogicTy
     })),
     listeners(() => ({
         loadRecordingsPerHourFailed: async () => {
-            lemonToast.error('Failed to load recordings activity for heatmap')
+            toast.error('Failed to load recordings activity for heatmap')
         },
     })),
 ])

@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { IconChevronRight, IconSearch } from '@hanzo/icons'
 
-import { Link } from 'lib/lemon-ui/Link/Link'
+import { Link } from 'lib/elements/Link/Link'
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,

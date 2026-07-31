@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import { IntegrationView } from 'lib/integrations/IntegrationView'
 import { getIntegrationConfig } from 'lib/integrations/organizationIntegrationConfig'
@@ -15,8 +15,8 @@ export function OrganizationIntegrations(): JSX.Element | null {
     if (organizationIntegrationsLoading) {
         return (
             <div className="space-y-2">
-                <LemonSkeleton className="h-16" />
-                <LemonSkeleton className="h-16" />
+                <Skeleton className="h-16" />
+                <Skeleton className="h-16" />
             </div>
         )
     }

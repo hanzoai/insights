@@ -23,11 +23,11 @@
 import { insights } from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
 import { getCookie } from 'lib/api'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
+import { Progress } from 'lib/elements/Progress'
 import { roundToDecimal } from 'lib/utils'
 
 // cookie values
@@ -141,18 +141,18 @@ export function RedirectIfLoggedInOtherInstance(): JSX.Element | null {
     const secondsLeft = REDIRECT_TIMEOUT_SECONDS * (1 - redirectProgress / 100)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             title="Redirecting to your logged-in account"
             footer={
                 redirectProgress < 100 && (
                     <div className="flex items-center justify-end gap-2">
-                        <LemonButton type="secondary" onClick={() => setIsOpen(false)}>
+                        <Button type="secondary" onClick={() => setIsOpen(false)}>
                             Cancel redirect
-                        </LemonButton>
-                        <LemonButton type="primary" onClick={() => window.location.assign(redirectUrl.href)}>
+                        </Button>
+                        <Button type="primary" onClick={() => window.location.assign(redirectUrl.href)}>
                             Let's go to the {regionFromSubdomain(loggedInSubdomainValue)} region now
-                        </LemonButton>
+                        </Button>
                     </div>
                 )
             }
@@ -169,8 +169,8 @@ export function RedirectIfLoggedInOtherInstance(): JSX.Element | null {
                         ? 'now.'
                         : `in ${roundToDecimal(secondsLeft, secondsLeft > 1 ? 0 : 1)} seconds...`}
                 </p>
-                <LemonProgress percent={redirectProgress} smoothing={false} />
+                <Progress percent={redirectProgress} smoothing={false} />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

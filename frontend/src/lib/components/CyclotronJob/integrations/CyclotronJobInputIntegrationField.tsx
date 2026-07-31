@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSkeleton } from '@hanzo/lemon-ui'
+import { Skeleton } from '@hanzo/elements'
 
 import {
     ClickUpListPicker,
@@ -53,7 +53,7 @@ export function CyclotronJobInputIntegrationField({
     const { integrationsLoading, integrations } = useValues(integrationsLogic)
 
     if (integrationsLoading) {
-        return <LemonSkeleton className="h-10" />
+        return <Skeleton className="h-10" />
     }
 
     const relatedSchemaIntegration = combinedInputsSchema.find((input) => input.key === schema.integration_key)

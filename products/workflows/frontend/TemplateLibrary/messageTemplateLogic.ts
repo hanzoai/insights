@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { urls } from 'scenes/urls'
 
@@ -99,11 +99,11 @@ export const messageTemplateLogic = kea<messageTemplateLogicType>([
         submitTemplateFailure: () => {
             const errors = values.templateAllErrors
             if (errors?.content?.email?.subject) {
-                lemonToast.error('Subject is required')
+                toast.error('Subject is required')
             }
         },
         saveTemplateSuccess: async ({ template }) => {
-            lemonToast.success('Template saved')
+            toast.success('Template saved')
             template.id && router.actions.replace(urls.workflowsLibraryTemplate(template.id))
             actions.resetTemplate(template)
             actions.setOriginalTemplate(template)
@@ -122,7 +122,7 @@ export const messageTemplateLogic = kea<messageTemplateLogicType>([
         },
         duplicateTemplate: async () => {
             if (values.templateChanged) {
-                lemonToast.error('Please save your changes before duplicating')
+                toast.error('Please save your changes before duplicating')
                 return
             }
             const template = values.template
@@ -132,10 +132,10 @@ export const messageTemplateLogic = kea<messageTemplateLogicType>([
                     description: template.description,
                     content: template.content,
                 })
-                lemonToast.success('Template duplicated successfully')
+                toast.success('Template duplicated successfully')
                 router.actions.push(urls.workflowsLibraryTemplate(duplicatedTemplate.id))
             } catch {
-                lemonToast.error('Failed to duplicate template')
+                toast.error('Failed to duplicate template')
             }
         },
         deleteTemplate: async () => {

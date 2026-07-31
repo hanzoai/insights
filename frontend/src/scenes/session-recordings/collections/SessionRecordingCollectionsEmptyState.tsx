@@ -3,8 +3,8 @@ import { useValues } from 'kea'
 import { IconPlus } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
 
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
@@ -14,7 +14,7 @@ import { sessionRecordingCollectionsLogic } from './sessionRecordingCollectionsL
 export function SessionRecordingCollectionsEmptyState(): JSX.Element {
     const { loadPlaylistsFailed } = useValues(sessionRecordingCollectionsLogic)
     return loadPlaylistsFailed ? (
-        <LemonBanner type="error">Error while trying to load playlist.</LemonBanner>
+        <Banner type="error">Error while trying to load playlist.</Banner>
     ) : (
         <div className="flex items-center justify-center">
             <div className="max-w-248 mt-12 flex flex-col items-center">
@@ -24,14 +24,14 @@ export function SessionRecordingCollectionsEmptyState(): JSX.Element {
                     resourceType={AccessControlResourceType.SessionRecording}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="primary"
                         data-attr="add-session-playlist-button-empty-state"
                         icon={<IconPlus />}
                         onClick={() => void createPlaylist({ type: 'collection' }, true)}
                     >
                         New collection
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </div>
         </div>

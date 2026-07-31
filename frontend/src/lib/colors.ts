@@ -3,7 +3,7 @@ import insights from '@hanzo/insights'
 import { RevenueAnalyticsMRRQueryResultItem } from '~/queries/schema/schema-general'
 import { LifecycleToggle } from '~/types'
 
-import { LemonTagType } from './lemon-ui/LemonTag'
+import { TagType } from './elements/Tag'
 
 /*
  * Data colors.
@@ -133,7 +133,7 @@ export function getGraphColors(): Record<string, string | null> {
  * Tag colors.
  */
 
-export const tagColors: LemonTagType[] = [
+export const tagColors: TagType[] = [
     'primary',
     'highlight',
     'warning',

@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonCard } from '@hanzo/lemon-ui'
+import { Card } from '@hanzo/elements'
 
 import { StopSignMascot } from 'lib/components/mascots'
 import { SupportModalButton } from 'scenes/authentication/SupportModalButton'
@@ -17,13 +17,13 @@ export function OrganizationDeactivated(): JSX.Element {
 
     return (
         <div className="max-w-[600px] mx-auto px-2 py-8">
-            <LemonCard>
+            <Card>
                 <div className="flex flex-col gap-4 items-center text-center">
                     <StopSignMascot className="w-52 h-52" />
                     <h3>Your organization has been deactivated. {isNotActiveReason}</h3>
                     <SupportModalButton kind="support" target_area="billing" label="Contact support" />
                 </div>
-            </LemonCard>
+            </Card>
         </div>
     )
 }

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { IconInfo, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { Query } from '~/queries/Query/Query'
@@ -27,9 +27,9 @@ function PropertyRow({ property }: { property: SchemaPropertyGroupProperty }): J
             </div>
             <div className="w-24">
                 {property.is_required ? (
-                    <LemonTag type="danger">Required</LemonTag>
+                    <Tag type="danger">Required</Tag>
                 ) : (
-                    <LemonTag type="muted">Optional</LemonTag>
+                    <Tag type="muted">Optional</Tag>
                 )}
             </div>
             <div className="flex-1 text-muted">{property.description || '—'}</div>
@@ -71,19 +71,19 @@ function PropertyGroupCard({
             <div className="flex items-center justify-between p-4 bg-bg-light border-b">
                 <div className="flex items-center gap-2">
                     <span className="font-semibold">{schema.property_group.name}</span>
-                    <LemonTag type="default">
+                    <Tag type="default">
                         {schema.property_group.properties?.length || 0}{' '}
                         {schema.property_group.properties?.length === 1 ? 'property' : 'properties'}
-                    </LemonTag>
+                    </Tag>
                 </div>
                 <div className="flex gap-1">
-                    <LemonButton
+                    <Button
                         icon={<IconPencil />}
                         size="small"
                         onClick={onEdit}
                         tooltip="Edit this property group"
                     />
-                    <LemonButton
+                    <Button
                         icon={<IconTrash />}
                         size="small"
                         status="danger"
@@ -155,7 +155,7 @@ export function EventDefinitionSchema({ definition }: { definition: EventDefinit
             description="Define which property groups this event should have. Property groups establish a schema that helps document expected properties."
             actions={
                 <>
-                    <LemonCheckbox
+                    <Checkbox
                         label={
                             <span className="flex items-center gap-1">
                                 Reject invalid events
@@ -177,14 +177,14 @@ export function EventDefinitionSchema({ definition }: { definition: EventDefinit
                             !hasPropertyGroups ? 'Define a schema before enabling schema enforcement' : undefined
                         }
                     />
-                    <LemonButton
+                    <Button
                         type="primary"
                         icon={<IconPlus />}
                         onClick={() => setIsModalOpen(true)}
                         disabled={eventSchemasLoading}
                     >
                         Add Property Group
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >

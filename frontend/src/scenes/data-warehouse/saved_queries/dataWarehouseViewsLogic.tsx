@@ -2,7 +2,7 @@ import { actions, connect, events, kea, listeners, path, reducers, selectors } f
 import { loaders } from 'kea-loaders'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { PaginatedResponse } from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -78,7 +78,7 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
                 ) => {
                     const newView = await api.dataWarehouseSavedQueries.create(view)
 
-                    lemonToast.success(`${newView.name ?? 'View'} successfully created`)
+                    toast.success(`${newView.name ?? 'View'} successfully created`)
                     globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.CreateSavedView)
 
                     return [...values.dataWarehouseSavedQueries, newView]
@@ -167,50 +167,50 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
             // Toast is handled by dataWarehouseSettingsSceneLogic when needed
         },
         updateDataWarehouseSavedQueryError: () => {
-            lemonToast.error('Failed to update view')
+            toast.error('Failed to update view')
         },
         deleteDataWarehouseSavedQuerySuccess: () => {
-            lemonToast.success('View deleted')
+            toast.success('View deleted')
         },
         runDataWarehouseSavedQuery: async ({ viewId }) => {
             try {
                 await api.dataWarehouseSavedQueries.run(viewId)
-                lemonToast.success('Materialization started')
+                toast.success('Materialization started')
                 actions.loadDataWarehouseSavedQueries()
             } catch {
-                lemonToast.error(`Failed to run materialization`)
+                toast.error(`Failed to run materialization`)
             }
         },
         cancelDataWarehouseSavedQuery: async ({ viewId }) => {
             try {
                 await api.dataWarehouseSavedQueries.cancel(viewId)
-                lemonToast.success('Materialization cancelled')
+                toast.success('Materialization cancelled')
                 actions.loadDataWarehouseSavedQueries()
             } catch {
-                lemonToast.error(`Failed to cancel materialization`)
+                toast.error(`Failed to cancel materialization`)
             }
         },
         materializeDataWarehouseSavedQuery: async ({ viewId }) => {
             try {
                 await api.dataWarehouseSavedQueries.materialize(viewId)
-                lemonToast.success('View materialized successfully')
+                toast.success('View materialized successfully')
                 insights.capture('materialized view created', {
                     sync_frequency: '24hour',
                 })
                 actions.loadDataWarehouseSavedQueries()
                 actions.loadDatabase()
             } catch {
-                lemonToast.error(`Failed to materialize view`)
+                toast.error(`Failed to materialize view`)
             }
         },
         revertMaterialization: async ({ viewId }) => {
             try {
                 await api.dataWarehouseSavedQueries.revertMaterialization(viewId)
-                lemonToast.success('Materialization reverted')
+                toast.success('Materialization reverted')
                 actions.loadDataWarehouseSavedQueries()
                 actions.loadDatabase()
             } catch {
-                lemonToast.error(`Failed to revert materialization`)
+                toast.error(`Failed to revert materialization`)
             }
         },
     })),

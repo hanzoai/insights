@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonInput, ProfilePicture } from '@hanzo/lemon-ui'
+import { Button, Input, ProfilePicture } from '@hanzo/elements'
 
 import { UserAssignee, userSelectLogic } from './userSelectLogic'
 
@@ -21,7 +21,7 @@ export function UserDropdown({ userId, onChange }: UserDropdownProps): JSX.Eleme
 
     return (
         <div className="max-w-100 deprecated-space-y-2 overflow-hidden">
-            <LemonInput
+            <Input
                 type="search"
                 placeholder="Search users"
                 autoFocus
@@ -32,7 +32,7 @@ export function UserDropdown({ userId, onChange }: UserDropdownProps): JSX.Eleme
             <ul className="deprecated-space-y-px">
                 {userId && (
                     <li>
-                        <LemonButton
+                        <Button
                             fullWidth
                             role="menuitem"
                             size="small"
@@ -40,13 +40,13 @@ export function UserDropdown({ userId, onChange }: UserDropdownProps): JSX.Eleme
                             onClick={() => onChange(null)}
                         >
                             Clear filter
-                        </LemonButton>
+                        </Button>
                     </li>
                 )}
 
                 {users.map((user) => (
                     <li key={user.id}>
-                        <LemonButton
+                        <Button
                             fullWidth
                             role="menuitem"
                             size="small"
@@ -55,7 +55,7 @@ export function UserDropdown({ userId, onChange }: UserDropdownProps): JSX.Eleme
                             active={userId === user.id}
                         >
                             <span className="truncate">{user.user.first_name || user.user.email}</span>
-                        </LemonButton>
+                        </Button>
                     </li>
                 ))}
 

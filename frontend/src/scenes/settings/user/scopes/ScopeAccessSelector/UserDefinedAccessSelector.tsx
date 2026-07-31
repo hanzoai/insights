@@ -1,7 +1,7 @@
-import { LemonLabel } from '@hanzo/lemon-ui'
+import { Label } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonSegmentedButton } from 'lib/lemon-ui/LemonSegmentedButton'
+import { Field } from 'lib/elements/Field'
+import { SegmentedButton } from 'lib/elements/SegmentedButton'
 
 import { OrganizationSelector } from './OrganizationSelector'
 import { TeamSelector } from './TeamSelector'
@@ -20,11 +20,11 @@ export const UserDefinedAccessSelector = ({
 }: UserDefinedAccessSelectorProps): JSX.Element => {
     return (
         <div className="flex flex-col gap-2">
-            <LemonField name="access_type" className="mt-4 mb-2">
+            <Field name="access_type" className="mt-4 mb-2">
                 {({ value, onChange }) => (
                     <div className="flex flex-col gap-2 md:flex-row items-start md:items-center justify-between">
-                        <LemonLabel>Organization & project access</LemonLabel>
-                        <LemonSegmentedButton
+                        <Label>Organization & project access</Label>
+                        <SegmentedButton
                             onChange={onChange}
                             value={value}
                             options={[
@@ -42,7 +42,7 @@ export const UserDefinedAccessSelector = ({
                         />
                     </div>
                 )}
-            </LemonField>
+            </Field>
 
             {accessType === 'all' ? (
                 <p className="mb-0">This will allow access to all organizations and projects you're in.</p>
@@ -52,14 +52,14 @@ export const UserDefinedAccessSelector = ({
                         This will only allow access to selected organizations and all projects within them.
                     </p>
 
-                    <LemonField name="scoped_organizations">
+                    <Field name="scoped_organizations">
                         <OrganizationSelector organizations={organizations} mode="multiple" />
-                    </LemonField>
+                    </Field>
                 </>
             ) : accessType === 'teams' ? (
                 <>
                     <p className="mb-2">This will only allow access to selected projects.</p>
-                    <LemonField name="scoped_teams">
+                    <Field name="scoped_teams">
                         {({ value, onChange }) => (
                             <TeamSelector
                                 teams={teams || []}
@@ -69,7 +69,7 @@ export const UserDefinedAccessSelector = ({
                                 onChange={(val: string[]) => onChange(val.map((x) => parseInt(x)))}
                             />
                         )}
-                    </LemonField>
+                    </Field>
                 </>
             ) : null}
         </div>

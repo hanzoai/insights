@@ -4,14 +4,14 @@ Scene to enter a new password from a received reset link
 import { useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import PasswordStrength from 'lib/components/PasswordStrength'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { IconErrorOutline } from 'lib/lemon-ui/icons'
+import { Banner } from 'lib/elements/Banner'
+import { Field } from 'lib/elements/Field'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -51,10 +51,10 @@ function NewPasswordForm(): JSX.Element {
         <>
             <div className="text-center mb-4">Please enter a new password for your account.</div>
             {!isPasswordResetSubmitting && passwordResetManualErrors.generic && (
-                <LemonBanner type="error">
+                <Banner type="error">
                     {passwordResetManualErrors.generic?.detail ||
                         'Could not complete your password reset request. Please try again.'}
-                </LemonBanner>
+                </Banner>
             )}
             <Form
                 logic={passwordResetLogic}
@@ -62,7 +62,7 @@ function NewPasswordForm(): JSX.Element {
                 className="deprecated-space-y-4"
                 enableFormOnSubmit
             >
-                <LemonField
+                <Field
                     name="password"
                     label={
                         <div className="flex flex-1 items-center justify-between">
@@ -71,26 +71,26 @@ function NewPasswordForm(): JSX.Element {
                         </div>
                     }
                 >
-                    <LemonInput
+                    <Input
                         autoComplete="new-password"
                         type="password"
                         className="ph-ignore-input"
                         placeholder="••••••••••"
                         data-attr="password"
                     />
-                </LemonField>
+                </Field>
 
-                <LemonField name="passwordConfirm" label="Confirm Password">
-                    <LemonInput
+                <Field name="passwordConfirm" label="Confirm Password">
+                    <Input
                         autoComplete="new-password"
                         type="password"
                         className="ph-ignore-input"
                         placeholder="••••••••••"
                         data-attr="password-confirm"
                     />
-                </LemonField>
+                </Field>
 
-                <LemonButton
+                <Button
                     fullWidth
                     type="primary"
                     center
@@ -99,7 +99,7 @@ function NewPasswordForm(): JSX.Element {
                     loading={isPasswordResetSubmitting}
                 >
                     Change my password
-                </LemonButton>
+                </Button>
             </Form>
         </>
     )
@@ -110,9 +110,9 @@ function ResetInvalid(): JSX.Element {
         <div className="text-center">
             The provided link is <b>invalid or has expired</b>. Please request a new link.
             <div className="mt-4">
-                <LemonButton fullWidth type="primary" center data-attr="back-to-login" to={urls.passwordReset()}>
+                <Button fullWidth type="primary" center data-attr="back-to-login" to={urls.passwordReset()}>
                     Request new link
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

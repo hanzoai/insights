@@ -1,7 +1,7 @@
 import { IconFilter } from '@hanzo/icons'
-import { LemonMenu } from '@hanzo/lemon-ui'
+import { Menu } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { ALL_LOG_LEVELS } from 'scenes/insights-functions/logs/logsViewerLogic'
 
@@ -38,7 +38,7 @@ export function LogLevelsPicker({
             : 'All levels'
 
     return (
-        <LemonMenu
+        <Menu
             closeOnClickInside={false}
             items={ALL_LOG_LEVELS.map((level) => ({
                 label: humanReadableLevel(level),
@@ -46,9 +46,9 @@ export function LogLevelsPicker({
                 active: value.includes(level),
             }))}
         >
-            <LemonButton icon={<IconFilter />} size="small" type="secondary" className="whitespace-nowrap">
+            <Button icon={<IconFilter />} size="small" type="secondary" className="whitespace-nowrap">
                 {displayLevels}
-            </LemonButton>
-        </LemonMenu>
+            </Button>
+        </Menu>
     )
 }

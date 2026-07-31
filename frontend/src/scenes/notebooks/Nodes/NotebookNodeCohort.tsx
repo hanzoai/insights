@@ -3,10 +3,10 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
 import { IconPeople, IconPerson, IconTrends } from '@hanzo/icons'
-import { LemonDivider, LemonTag } from '@hanzo/lemon-ui'
+import { Divider, Tag } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { cohortEditLogic } from 'scenes/cohorts/cohortEditLogic'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { urls } from 'scenes/urls'
@@ -133,20 +133,20 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeCohortAttribute
         <div className="flex flex-col overflow-hidden">
             <div className={clsx('p-4 gap-2', !expanded && 'cursor-pointer')}>
                 {cohortLoading ? (
-                    <LemonSkeleton className="h-6" />
+                    <Skeleton className="h-6" />
                 ) : (
                     <div className="flex items-center gap-2">
                         <IconPeople className="text-secondary text-lg" />
                         <span className="flex-1 font-semibold truncate">{cohort.name}</span>
                         <span className="italic text-secondary">({cohort.count} persons)</span>
-                        <LemonTag>{cohort.is_static ? 'Static' : 'Dynamic'}</LemonTag>
+                        <Tag>{cohort.is_static ? 'Static' : 'Dynamic'}</Tag>
                     </div>
                 )}
             </div>
 
             {expanded ? (
                 <>
-                    <LemonDivider className="my-0" />
+                    <Divider className="my-0" />
                     <Query query={modifiedQuery} setQuery={setQuery} />
                 </>
             ) : null}

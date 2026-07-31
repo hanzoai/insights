@@ -1,7 +1,7 @@
 import { actions, kea, listeners, path, props, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import { toolbarConfigLogic, toolbarFetch } from '~/toolbar/toolbarConfigLogic'
 import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
@@ -87,7 +87,7 @@ export const screenshotUploadLogic = kea<screenshotUploadLogicType>([
                 submitUpload: async (_, breakpoint) => {
                     const { previewUrl, selectedDefinition } = screenshotUploadLogic.values
                     if (!previewUrl || !selectedDefinition) {
-                        lemonToast.error('Please select an event')
+                        toast.error('Please select an event')
                         return null
                     }
 
@@ -123,12 +123,12 @@ export const screenshotUploadLogic = kea<screenshotUploadLogicType>([
         },
         submitUploadSuccess: () => {
             toolbarInsightsJS.capture('media preview uploaded', { source: 'toolbar' })
-            lemonToast.success('Screenshot uploaded successfully')
+            toast.success('Screenshot uploaded successfully')
             actions.closeModal()
             props.onSuccess?.()
         },
         submitUploadFailure: ({ error }) => {
-            lemonToast.error(`Failed to upload screenshot: ${error}`)
+            toast.error(`Failed to upload screenshot: ${error}`)
         },
     })),
 ])

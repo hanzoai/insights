@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCursorClick, IconPlus, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSegmentedButton, LemonSlider, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Input, SegmentedButton, Slider, Tooltip } from '@hanzo/elements'
 
 import { PositionSelector } from 'scenes/surveys/survey-appearance/SurveyAppearancePositionSelector'
 
@@ -21,9 +21,9 @@ function ElementEmptyState({ onClick }: { onClick: () => void }): JSX.Element {
     return (
         <div className="flex items-center gap-3 p-3 border border-dashed rounded text-muted text-sm">
             <span>Add an element from your page to display this step as a tooltip.</span>
-            <LemonButton size="small" type="secondary" icon={<IconPlus />} onClick={onClick}>
+            <Button size="small" type="secondary" icon={<IconPlus />} onClick={onClick}>
                 Add element
-            </LemonButton>
+            </Button>
         </div>
     )
 }
@@ -59,7 +59,7 @@ function ElementSettings({ tourId }: StepSettingsPanelProps): JSX.Element | null
                                     Targeting Mode
                                 </label>
                             </Tooltip>
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 size="small"
                                 value={step.elementTargeting ?? 'auto'}
                                 onChange={(value) => updateSelectedStep({ elementTargeting: value })}
@@ -79,7 +79,7 @@ function ElementSettings({ tourId }: StepSettingsPanelProps): JSX.Element | null
                                     Next step on...
                                 </label>
                             </Tooltip>
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 size="small"
                                 value={step.progressionTrigger || 'button'}
                                 onChange={(value) => updateSelectedStep({ progressionTrigger: value })}
@@ -104,7 +104,7 @@ function ElementSettings({ tourId }: StepSettingsPanelProps): JSX.Element | null
                                             Text matching
                                         </label>
                                     </Tooltip>
-                                    <LemonSegmentedButton
+                                    <SegmentedButton
                                         size="small"
                                         value={step.inferenceData?.excludeText ? 'dynamic' : 'static'}
                                         onChange={(value) =>
@@ -132,7 +132,7 @@ function ElementSettings({ tourId }: StepSettingsPanelProps): JSX.Element | null
                                         Precision
                                     </label>
                                 </Tooltip>
-                                <LemonSlider
+                                <Slider
                                     min={0}
                                     max={1}
                                     step={0.1}
@@ -168,7 +168,7 @@ function ElementSettings({ tourId }: StepSettingsPanelProps): JSX.Element | null
                     <label className="text-[0.6875rem] font-medium text-muted uppercase tracking-wide">
                         CSS Selector
                     </label>
-                    <LemonInput
+                    <Input
                         value={step.selector || ''}
                         onChange={(value) => updateSelectedStep({ selector: value })}
                         placeholder="#my-element"
@@ -183,16 +183,16 @@ function ElementSettings({ tourId }: StepSettingsPanelProps): JSX.Element | null
                 <div className="flex flex-col gap-1">
                     <label className="text-[0.6875rem] font-medium text-muted uppercase tracking-wide">Element</label>
                     <div className="flex gap-2">
-                        <LemonButton
+                        <Button
                             size="small"
                             type="secondary"
                             icon={<IconCursorClick />}
                             onClick={() => openToolbarModal('edit')}
                         >
                             {step.inferenceData ? 'Change' : 'Select element in Toolbar'}
-                        </LemonButton>
+                        </Button>
                         {step.inferenceData && (
-                            <LemonButton
+                            <Button
                                 size="small"
                                 type="secondary"
                                 status="danger"
@@ -208,7 +208,7 @@ function ElementSettings({ tourId }: StepSettingsPanelProps): JSX.Element | null
                                 }
                             >
                                 Remove
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -221,7 +221,7 @@ function ElementSettings({ tourId }: StepSettingsPanelProps): JSX.Element | null
                             ? 'Choose an element on your page with the Toolbar, or use a CSS selector instead.'
                             : 'Enter a CSS selector above, or swap to "Auto" and choose an element on your page with the Toolbar.'}
                     </span>
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         type="secondary"
                         status="danger"
@@ -238,7 +238,7 @@ function ElementSettings({ tourId }: StepSettingsPanelProps): JSX.Element | null
                         }
                     >
                         Remove element
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </div>

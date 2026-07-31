@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonInput, LemonSelect, LemonSelectOption } from '@hanzo/lemon-ui'
+import { Input, Select, SelectOption } from '@hanzo/elements'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { TIME_INTERVAL_BOUNDS } from 'scenes/funnels/funnelUtils'
@@ -23,7 +23,7 @@ export function FunnelConversionWindowFilter({ insightProps }: Pick<EditorFilter
     const displayUnit = conversionWindowUnit ?? conversionWindow.funnelWindowIntervalUnit
     const intervalBounds = TIME_INTERVAL_BOUNDS[displayUnit]
 
-    const options: LemonSelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
+    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
         (unit) => ({
             label: capitalizeFirstLetter(
                 pluralize(conversionWindow.funnelWindowInterval ?? 7, unit, `${unit}s`, false)
@@ -51,7 +51,7 @@ export function FunnelConversionWindowFilter({ insightProps }: Pick<EditorFilter
                 </Tooltip>
             </span>
             <div className="flex items-center gap-2">
-                <LemonInput
+                <Input
                     type="number"
                     className="max-w-20"
                     fullWidth={false}
@@ -62,7 +62,7 @@ export function FunnelConversionWindowFilter({ insightProps }: Pick<EditorFilter
                     onBlur={commitConversionWindow}
                     onPressEnter={commitConversionWindow}
                 />
-                <LemonSelect
+                <Select
                     dropdownMatchSelectWidth={false}
                     value={displayUnit}
                     onChange={(funnelWindowIntervalUnit: FunnelConversionWindowTimeUnit | null) => {

@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useRef } from 'react'
 
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Field } from 'lib/elements/Field'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { BillingProductV2Type } from '~/types'
 
@@ -62,34 +62,34 @@ export const BillingLimit = ({ product }: { product: BillingProductV2Type }): JS
                                             </Tooltip>
                                         )}
 
-                                        <LemonButton
+                                        <Button
                                             onClick={() => setIsEditingBillingLimit(true)}
                                             status="danger"
                                             size="small"
                                         >
                                             Edit limit
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 ) : (
                                     <>
                                         <span className="text-sm" data-attr={`billing-limit-not-set-${product.type}`}>
                                             You do not have a billing limit set for {product?.name?.toLowerCase()}.
                                         </span>
-                                        <LemonButton
+                                        <Button
                                             onClick={() => setIsEditingBillingLimit(true)}
                                             status="danger"
                                             size="small"
                                         >
                                             Set a billing limit
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 )}
                             </>
                         ) : (
                             <div className="flex items-start justify-start gap-2.5">
-                                <LemonField name="input" className="max-w-52">
+                                <Field name="input" className="max-w-52">
                                     {({ value, onChange, error }) => (
-                                        <LemonInput
+                                        <Input
                                             inputRef={limitInputRef}
                                             type="number"
                                             fullWidth={false}
@@ -105,9 +105,9 @@ export const BillingLimit = ({ product }: { product: BillingProductV2Type }): JS
                                             size="small"
                                         />
                                     )}
-                                </LemonField>
+                                </Field>
 
-                                <LemonButton
+                                <Button
                                     loading={billingLoading}
                                     type="primary"
                                     size="small"
@@ -115,8 +115,8 @@ export const BillingLimit = ({ product }: { product: BillingProductV2Type }): JS
                                     data-attr={`save-billing-limit-${product.type}`}
                                 >
                                     Save
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     onClick={() => {
                                         setIsEditingBillingLimit(false)
                                     }}
@@ -125,9 +125,9 @@ export const BillingLimit = ({ product }: { product: BillingProductV2Type }): JS
                                     size="small"
                                 >
                                     Cancel
-                                </LemonButton>
+                                </Button>
                                 {hasCustomLimitSet ? (
-                                    <LemonButton
+                                    <Button
                                         status="danger"
                                         size="small"
                                         data-attr={`remove-billing-limit-${product.type}`}
@@ -138,7 +138,7 @@ export const BillingLimit = ({ product }: { product: BillingProductV2Type }): JS
                                         }}
                                     >
                                         Remove limit
-                                    </LemonButton>
+                                    </Button>
                                 ) : null}
                             </div>
                         )}
@@ -148,14 +148,14 @@ export const BillingLimit = ({ product }: { product: BillingProductV2Type }): JS
                             <span className="text-sm xl:text-right">
                                 Your limit for next period: <b>${billingLimitNextPeriod.toLocaleString()}</b>.
                             </span>
-                            <LemonButton
+                            <Button
                                 size="small"
                                 status="danger"
                                 onClick={() => removeBillingLimitNextPeriod(product.type)}
                                 data-attr={`remove-billing-limit-next-period-${product.type}`}
                             >
                                 Remove limit for next period
-                            </LemonButton>
+                            </Button>
                         </div>
                     ) : null}
                 </div>

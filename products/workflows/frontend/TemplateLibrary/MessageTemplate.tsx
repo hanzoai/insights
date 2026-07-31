@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import { IconCode } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput, LemonTextArea, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Divider, Input, TextArea, Spinner, Tooltip } from '@hanzo/elements'
 
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { More } from 'lib/elements/Button/More'
+import { Field } from 'lib/elements/Field'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { EmailTemplater } from 'scenes/insights-functions/email-templater/EmailTemplater'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -50,7 +50,7 @@ export function MessageTemplate(props: MessageTemplateSceneLogicProps): JSX.Elem
                                         size="small"
                                         overlay={
                                             <>
-                                                <LemonButton
+                                                <Button
                                                     data-attr="duplicate-message-template"
                                                     fullWidth
                                                     onClick={duplicateTemplate}
@@ -61,33 +61,33 @@ export function MessageTemplate(props: MessageTemplateSceneLogicProps): JSX.Elem
                                                     }
                                                 >
                                                     Duplicate
-                                                </LemonButton>
-                                                <LemonDivider />
-                                                <LemonButton
+                                                </Button>
+                                                <Divider />
+                                                <Button
                                                     data-attr="delete-message-template"
                                                     status="danger"
                                                     fullWidth
                                                     onClick={deleteTemplate}
                                                 >
                                                     Delete
-                                                </LemonButton>
+                                                </Button>
                                             </>
                                         }
                                     />
-                                    <LemonDivider vertical />
+                                    <Divider vertical />
                                 </>
                             )}
                             {templateChanged && (
-                                <LemonButton
+                                <Button
                                     data-attr="cancel-message-template"
                                     type="secondary"
                                     onClick={() => resetTemplate(originalTemplate)}
                                     size="small"
                                 >
                                     Discard changes
-                                </LemonButton>
+                                </Button>
                             )}
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 htmlType="submit"
                                 form="template"
@@ -97,25 +97,25 @@ export function MessageTemplate(props: MessageTemplateSceneLogicProps): JSX.Elem
                                 size="small"
                             >
                                 {props.id === 'new' ? 'Create' : 'Save'}
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                 />
 
                 <div className="flex flex-wrap gap-4 items-start">
                     <div className="flex-1 self-start p-3 space-y-2 rounded border min-w-100 bg-surface-primary">
-                        <LemonField name="name" label="Name">
-                            <LemonInput disabled={messageLoading} />
-                        </LemonField>
+                        <Field name="name" label="Name">
+                            <Input disabled={messageLoading} />
+                        </Field>
 
-                        <LemonField
+                        <Field
                             name="description"
                             label="Description"
                             showOptional
                             info="Add a description to share context with other team members"
                         >
-                            <LemonTextArea disabled={messageLoading} />
-                        </LemonField>
+                            <TextArea disabled={messageLoading} />
+                        </Field>
                     </div>
 
                     <div className="p-3 space-y-2 rounded border flex-2 min-w-100 bg-surface-primary">

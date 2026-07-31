@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Modal } from 'lib/elements/Modal'
 
 import { screenshotUploadLogic } from '~/toolbar/screenshot-upload/screenshotUploadLogic'
 
@@ -21,27 +21,27 @@ export const ScreenshotUploadModal = (): JSX.Element => {
         useActions(screenshotUploadLogic)
 
     return (
-        <LemonModal
+        <Modal
             forceAbovePopovers={true}
             title="Upload event screenshot"
             description="Add a screenshot to an event definition"
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={closeModal}
                         disabledReason={uploadResultLoading ? 'Upload in progress' : null}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={submitUpload}
                         loading={uploadResultLoading}
                         disabledReason={!selectedDefinition ? 'Select an event first' : null}
                     >
                         Upload
-                    </LemonButton>
+                    </Button>
                 </>
             }
             onClose={closeModal}
@@ -50,7 +50,7 @@ export const ScreenshotUploadModal = (): JSX.Element => {
             <div className="flex flex-col gap-4">
                 <div className="relative">
                     <label className="text-sm font-semibold mb-1 block">Event name</label>
-                    <LemonInput
+                    <Input
                         placeholder="Type to search events..."
                         value={eventName}
                         onChange={setEventName}
@@ -95,6 +95,6 @@ export const ScreenshotUploadModal = (): JSX.Element => {
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

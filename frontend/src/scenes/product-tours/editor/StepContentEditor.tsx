@@ -15,15 +15,15 @@ import insights from '@hanzo/insights'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { IconCode, IconImage, IconList, IconVideoCamera } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonInput, LemonMenu, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Divider, Input, Menu, Modal } from '@hanzo/elements'
 
 import { ResizableElement } from 'lib/components/ResizeElement/ResizeElement'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
-import { LemonFileInput } from 'lib/lemon-ui/LemonFileInput'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
-import { Popover } from 'lib/lemon-ui/Popover'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { IconBold, IconItalic, IconLink } from 'lib/lemon-ui/icons'
+import { FileInput } from 'lib/elements/FileInput'
+import { toast } from 'lib/elements/Toast'
+import { Popover } from 'lib/elements/Popover'
+import { Spinner } from 'lib/elements/Spinner'
+import { IconBold, IconItalic, IconLink } from 'lib/elements/icons'
 
 import { DEFAULT_APPEARANCE } from '../constants'
 import { productTourLogic } from '../productTourLogic'
@@ -162,7 +162,7 @@ export function StepContentEditor({
             insights.capture('product tour image uploaded', { name: fileName })
         },
         onError: (detail) => {
-            lemonToast.error(`Error uploading image: ${detail}`)
+            toast.error(`Error uploading image: ${detail}`)
         },
     })
 
@@ -183,7 +183,7 @@ export function StepContentEditor({
                     insights.capture('product tour image uploaded', { name: fileName })
                 } catch (error) {
                     const detail = (error as Error).message || 'Upload failed'
-                    lemonToast.error(`Error uploading image: ${detail}`)
+                    toast.error(`Error uploading image: ${detail}`)
                 } finally {
                     setCustomUploading(false)
                 }
@@ -301,56 +301,56 @@ export function StepContentEditor({
         <div className="flex flex-wrap gap-0.5 items-center">
             {!isBanner && (
                 <>
-                    <LemonButton
+                    <Button
                         size="small"
                         active={editor.isActive('heading', { level: 1 })}
                         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
                         tooltip="Heading 1"
                     >
                         H1
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         size="small"
                         active={editor.isActive('heading', { level: 2 })}
                         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
                         tooltip="Heading 2"
                     >
                         H2
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         size="small"
                         active={editor.isActive('heading', { level: 3 })}
                         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
                         tooltip="Heading 3"
                     >
                         H3
-                    </LemonButton>
-                    <LemonDivider vertical className="mx-1 self-stretch" />
+                    </Button>
+                    <Divider vertical className="mx-1 self-stretch" />
                 </>
             )}
 
-            <LemonButton
+            <Button
                 size="small"
                 active={editor.isActive('bold')}
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 icon={<IconBold />}
                 tooltip="Bold"
             />
-            <LemonButton
+            <Button
                 size="small"
                 active={editor.isActive('italic')}
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 icon={<IconItalic />}
                 tooltip="Italic"
             />
-            <LemonButton
+            <Button
                 size="small"
                 active={editor.isActive('underline')}
                 onClick={() => editor.chain().focus().toggleUnderline().run()}
                 icon={<IconUnderline />}
                 tooltip="Underline"
             />
-            <LemonButton
+            <Button
                 size="small"
                 active={editor.isActive('code')}
                 onClick={() => editor.chain().focus().toggleCode().run()}
@@ -370,7 +370,7 @@ export function StepContentEditor({
                                 onChange={(e) => applyTextColor(e.target.value)}
                                 className="w-8 h-8 cursor-pointer border border-border rounded"
                             />
-                            <LemonInput
+                            <Input
                                 size="small"
                                 placeholder="#000000"
                                 value={textColor}
@@ -385,14 +385,14 @@ export function StepContentEditor({
                             />
                         </div>
                         {hasTextColor && (
-                            <LemonButton size="small" status="danger" onClick={removeTextColor} fullWidth>
+                            <Button size="small" status="danger" onClick={removeTextColor} fullWidth>
                                 Remove color
-                            </LemonButton>
+                            </Button>
                         )}
                     </div>
                 }
             >
-                <LemonButton
+                <Button
                     size="small"
                     active={!!hasTextColor}
                     onClick={openColorPicker}
@@ -407,12 +407,12 @@ export function StepContentEditor({
                     >
                         A
                     </span>
-                </LemonButton>
+                </Button>
             </Popover>
             {!isBanner && (
                 <>
-                    <LemonDivider vertical className="mx-1 self-stretch" />
-                    <LemonMenu
+                    <Divider vertical className="mx-1 self-stretch" />
+                    <Menu
                         items={[
                             {
                                 label: 'Bullet list',
@@ -428,14 +428,14 @@ export function StepContentEditor({
                             },
                         ]}
                     >
-                        <LemonButton
+                        <Button
                             size="small"
                             active={editor.isActive('bulletList') || editor.isActive('orderedList')}
                             icon={editor.isActive('orderedList') ? <IconListNumbers /> : <IconList />}
                             tooltip="Lists"
                         />
-                    </LemonMenu>
-                    <LemonMenu
+                    </Menu>
+                    <Menu
                         items={[
                             {
                                 label: 'Align left',
@@ -457,14 +457,14 @@ export function StepContentEditor({
                             },
                         ]}
                     >
-                        <LemonButton size="small" icon={getAlignmentIcon(editor)} tooltip="Text alignment" />
-                    </LemonMenu>
+                        <Button size="small" icon={getAlignmentIcon(editor)} tooltip="Text alignment" />
+                    </Menu>
                     <Popover
                         visible={showLinkPopover}
                         onClickOutside={() => setShowLinkPopover(false)}
                         overlay={
                             <div className="p-2 flex flex-col gap-2 min-w-64">
-                                <LemonInput
+                                <Input
                                     size="small"
                                     placeholder="https://..."
                                     value={linkUrl}
@@ -475,23 +475,23 @@ export function StepContentEditor({
                                 />
                                 <div className="flex gap-2 justify-end">
                                     {hasExistingLink && (
-                                        <LemonButton size="small" status="danger" onClick={removeLink}>
+                                        <Button size="small" status="danger" onClick={removeLink}>
                                             Remove
-                                        </LemonButton>
+                                        </Button>
                                     )}
-                                    <LemonButton
+                                    <Button
                                         size="small"
                                         type="primary"
                                         onClick={setLink}
                                         disabledReason={!linkUrl ? 'Enter a URL' : undefined}
                                     >
                                         {hasExistingLink ? 'Update' : 'Set'}
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             </div>
                         }
                     >
-                        <LemonButton
+                        <Button
                             ref={linkButtonRef}
                             size="small"
                             active={editor.isActive('link')}
@@ -500,8 +500,8 @@ export function StepContentEditor({
                             tooltip="Link"
                         />
                     </Popover>
-                    <LemonDivider vertical className="mx-1 self-stretch" />
-                    <LemonFileInput
+                    <Divider vertical className="mx-1 self-stretch" />
+                    <FileInput
                         accept="image/*"
                         multiple={false}
                         alternativeDropTargetRef={dropRef}
@@ -509,14 +509,14 @@ export function StepContentEditor({
                         loading={uploading}
                         showUploadedFiles={false}
                         callToAction={
-                            <LemonButton
+                            <Button
                                 size="small"
                                 icon={uploading ? <Spinner className="text-sm" textColored /> : <IconImage />}
                                 tooltip="Upload image (or drag & drop)"
                             />
                         }
                     />
-                    <LemonButton
+                    <Button
                         size="small"
                         icon={<IconVideoCamera />}
                         tooltip="Embed video"
@@ -565,28 +565,28 @@ export function StepContentEditor({
             )}
 
             {!isBanner && (
-                <LemonModal
+                <Modal
                     isOpen={showVideoModal}
                     onClose={closeVideoModal}
                     title="Embed video"
                     footer={
                         <>
-                            <LemonButton type="secondary" onClick={closeVideoModal}>
+                            <Button type="secondary" onClick={closeVideoModal}>
                                 Cancel
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 type="primary"
                                 onClick={insertEmbed}
                                 disabledReason={!videoUrl ? 'Enter a URL' : undefined}
                             >
                                 Embed
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                 >
                     <div className="space-y-2">
                         <p className="text-muted text-sm">Paste a YouTube, Vimeo, or Loom URL</p>
-                        <LemonInput
+                        <Input
                             placeholder="https://www.youtube.com/watch?v=..."
                             value={videoUrl}
                             onChange={setVideoUrl}
@@ -595,7 +595,7 @@ export function StepContentEditor({
                             fullWidth
                         />
                     </div>
-                </LemonModal>
+                </Modal>
             )}
         </div>
     )

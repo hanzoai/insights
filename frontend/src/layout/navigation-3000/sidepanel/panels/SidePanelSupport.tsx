@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import React from 'react'
 
 import { IconFeatures, IconHelmet, IconMap, IconWarning } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { SupportForm } from 'lib/components/Support/SupportForm'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -268,7 +268,7 @@ function SupportFormBlock({
     return (
         <Section title="Email an engineer">
             <SupportForm />
-            <LemonButton
+            <Button
                 form="support-modal-form"
                 htmlType="submit"
                 type="primary"
@@ -278,8 +278,8 @@ function SupportFormBlock({
                 className="mt-4"
             >
                 Submit
-            </LemonButton>
-            <LemonButton
+            </Button>
+            <Button
                 form="support-modal-form"
                 type="secondary"
                 onClick={onCancel}
@@ -288,7 +288,7 @@ function SupportFormBlock({
                 className="mt-2 mb-4"
             >
                 Cancel
-            </LemonButton>
+            </Button>
 
             <br />
 
@@ -383,7 +383,7 @@ export function SidePanelSupport(): JSX.Element {
                                             Let Insights AI read 100s of pages of docs for you, write SQL queries and
                                             expressions, regex patterns, etc.
                                         </p>
-                                        <LemonButton
+                                        <Button
                                             type="primary"
                                             fullWidth
                                             center
@@ -394,7 +394,7 @@ export function SidePanelSupport(): JSX.Element {
                                             className="mt-2"
                                         >
                                             Chat with Insights AI
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 </Section>
                             )}
@@ -411,7 +411,7 @@ export function SidePanelSupport(): JSX.Element {
                                 <Section title="Contact us">
                                     <StatusPageAlert />
                                     <p>Can't find what you need and Insights AI unable to help?</p>
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         fullWidth
                                         center
@@ -420,7 +420,7 @@ export function SidePanelSupport(): JSX.Element {
                                         disabled={billingLoading}
                                     >
                                         {billingLoading ? 'Loading...' : 'Email our support engineers'}
-                                    </LemonButton>
+                                    </Button>
                                 </Section>
                             )}
 
@@ -440,7 +440,7 @@ export function SidePanelSupport(): JSX.Element {
                                     Questions about features, how-tos, or use cases? There are thousands of discussions
                                     in our community forums.
                                 </p>
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     fullWidth
                                     center
@@ -449,7 +449,7 @@ export function SidePanelSupport(): JSX.Element {
                                     className="mt-2"
                                 >
                                     Ask the community
-                                </LemonButton>
+                                </Button>
                             </Section>
 
                             {/* Add support hours and table */}
@@ -469,7 +469,7 @@ export function SidePanelSupport(): JSX.Element {
                             <Section title="Share feedback">
                                 <ul>
                                     <li>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             status="alt"
                                             to="https://hanzo.ai/wip"
@@ -477,10 +477,10 @@ export function SidePanelSupport(): JSX.Element {
                                             targetBlank
                                         >
                                             See what we're building
-                                        </LemonButton>
+                                        </Button>
                                     </li>
                                     <li>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             status="alt"
                                             to="https://hanzo.ai/roadmap"
@@ -488,10 +488,10 @@ export function SidePanelSupport(): JSX.Element {
                                             targetBlank
                                         >
                                             Vote on our roadmap
-                                        </LemonButton>
+                                        </Button>
                                     </li>
                                     <li>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             status="alt"
                                             to="https://github.com/hanzoai/insights/issues/new?&labels=enhancement&template=feature_request.yml"
@@ -499,7 +499,7 @@ export function SidePanelSupport(): JSX.Element {
                                             targetBlank
                                         >
                                             Request a feature
-                                        </LemonButton>
+                                        </Button>
                                     </li>
                                 </ul>
                             </Section>

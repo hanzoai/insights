@@ -3,7 +3,7 @@ import Papa from 'papaparse'
 import insights from '@hanzo/insights'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
@@ -113,9 +113,9 @@ export const logsExportLogic = kea<logsExportLogicType>([
                     columns: getExportColumns(values.attributeColumns),
                 })
                 actions.openSidePanel(SidePanelTab.Exports)
-                lemonToast.info('Export starting...')
+                toast.info('Export starting...')
             } catch (e) {
-                lemonToast.error(`Export failed: ${e instanceof Error ? e.message : String(e)}`)
+                toast.error(`Export failed: ${e instanceof Error ? e.message : String(e)}`)
             }
         },
     })),

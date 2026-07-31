@@ -2,11 +2,11 @@ import './TimelineSeekbar.scss'
 
 import clsx from 'clsx'
 
-import { LemonBadge } from '@hanzo/lemon-ui'
+import { Badge } from '@hanzo/elements'
 
 import { Dayjs } from 'lib/dayjs'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { humanFriendlyDetailedTime, pluralize } from 'lib/utils'
 
 export interface TimelinePoint {
@@ -148,7 +148,7 @@ export function TimelineSeekbar({
                                                 onPointSelection(index)
                                         }
                                     >
-                                        <LemonBadge.Number
+                                        <Badge.Number
                                             count={count}
                                             size="small"
                                             active={index === selectedPointIndex}

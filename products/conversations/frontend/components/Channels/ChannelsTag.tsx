@@ -1,7 +1,7 @@
 import { IconComment, IconLetter } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
-import { IconSlack } from 'lib/lemon-ui/icons'
+import { IconSlack } from 'lib/elements/icons'
 
 import type { TicketChannel } from '../../types'
 
@@ -18,10 +18,10 @@ interface ChannelsTagProps {
 export function ChannelsTag({ channel }: ChannelsTagProps): JSX.Element {
     return (
         <div className="flex items-center gap-1 text-muted-alt text-xs">
-            <LemonTag type="muted">
+            <Tag type="muted">
                 <span className="mr-1">{channelIcon[channel]}</span>
                 {channel}
-            </LemonTag>
+            </Tag>
         </div>
     )
 }

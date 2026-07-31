@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { TextMorph } from 'torph/react'
 
 import { IconCheck, IconCopy, IconWarning, IconX } from '@hanzo/icons'
-import { LemonButton, LemonCollapse, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Collapse, Modal } from '@hanzo/elements'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
@@ -131,15 +131,15 @@ export function BulkDeleteResultsModal(): JSX.Element | null {
     }
 
     return (
-        <LemonModal
+        <Modal
             isOpen={resultsModalVisible}
             onClose={hideResultsModal}
             title="Bulk deletion results"
             width={600}
             footer={
-                <LemonButton type="primary" onClick={hideResultsModal}>
+                <Button type="primary" onClick={hideResultsModal}>
                     Done
-                </LemonButton>
+                </Button>
             }
         >
             <div className="space-y-4">
@@ -175,7 +175,7 @@ export function BulkDeleteResultsModal(): JSX.Element | null {
                 )}
 
                 {deleted.length > 0 && (
-                    <LemonCollapse
+                    <Collapse
                         panels={[
                             {
                                 key: 'cleanup',
@@ -194,14 +194,14 @@ export function BulkDeleteResultsModal(): JSX.Element | null {
                                         <pre className="text-xs bg-bg-3000 p-3 rounded overflow-x-auto whitespace-pre-wrap">
                                             {cleanupPrompt}
                                         </pre>
-                                        <LemonButton
+                                        <Button
                                             type="secondary"
                                             size="small"
                                             icon={copied ? <IconCheck /> : <IconCopy />}
                                             onClick={handleCopyPrompt}
                                         >
                                             <TextMorph as="span">{copied ? 'Copied prompt!' : 'Copy prompt'}</TextMorph>
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 ),
                             },
@@ -209,7 +209,7 @@ export function BulkDeleteResultsModal(): JSX.Element | null {
                     />
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 

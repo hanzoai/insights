@@ -1,5 +1,5 @@
 import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
-import { LemonButton, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { getSeriesColor } from 'lib/colors'
 import { urls } from 'scenes/urls'
@@ -78,9 +78,9 @@ export function ClusterCard({
                             >
                                 {cluster.title}
                             </Link>
-                            <LemonTag type={isOutlierCluster ? 'caution' : 'muted'}>
+                            <Tag type={isOutlierCluster ? 'caution' : 'muted'}>
                                 {cluster.size} {itemLabel} ({percentage}%)
-                            </LemonTag>
+                            </Tag>
                         </div>
                         <ClusterDescription description={cluster.description} />
                         {/* Cluster Metrics */}
@@ -95,45 +95,45 @@ export function ClusterCard({
                             <div className="flex flex-row flex-wrap items-center gap-2 mt-2">
                                 {metrics.avgCost !== null && (
                                     <Tooltip title={`Average cost per ${clusteringLevel}`}>
-                                        <LemonTag type="muted" size="small">
+                                        <Tag type="muted" size="small">
                                             Avg Cost: {formatLLMCost(metrics.avgCost)}
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )}
                                 {metrics.avgLatency !== null && (
                                     <Tooltip title={`Average latency per ${clusteringLevel}`}>
-                                        <LemonTag type="muted" size="small">
+                                        <Tag type="muted" size="small">
                                             Avg Latency: {formatLLMLatency(metrics.avgLatency)}
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )}
                                 {metrics.avgTokens !== null && (
                                     <Tooltip title={`Average tokens (input + output) per ${clusteringLevel}`}>
-                                        <LemonTag type="muted" size="small">
+                                        <Tag type="muted" size="small">
                                             Avg Tokens: {formatTokens(metrics.avgTokens)}
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )}
                                 {metrics.errorRate !== null && (
                                     <Tooltip
                                         title={`Error rate: ${metrics.errorCount} of ${metrics.itemCount} ${itemLabel} had errors`}
                                     >
-                                        <LemonTag type={metrics.errorRate > 0 ? 'danger' : 'muted'} size="small">
+                                        <Tag type={metrics.errorRate > 0 ? 'danger' : 'muted'} size="small">
                                             Errors: {formatErrorRate(metrics.errorRate)}
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )}
                                 {metrics.totalCost !== null && (
                                     <Tooltip title={`Total cost across all ${itemLabel} in this cluster`}>
-                                        <LemonTag type="muted" size="small">
+                                        <Tag type="muted" size="small">
                                             Total Cost: {formatLLMCost(metrics.totalCost)}
-                                        </LemonTag>
+                                        </Tag>
                                     </Tooltip>
                                 )}
                             </div>
                         )}
                     </div>
-                    <LemonButton
+                    <Button
                         size="small"
                         noPadding
                         icon={isExpanded ? <IconChevronDown /> : <IconChevronRight />}

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconChevronRight, IconExpand } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonSkeleton, LemonTag, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Badge, Button, Skeleton, Tag, Spinner, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
@@ -26,7 +26,7 @@ function ArtefactCard({ artefact }: { artefact: SignalReportArtefact }): JSX.Ele
     return (
         <div className="border rounded p-3 bg-surface-primary">
             <div className="flex items-center gap-2 mb-1">
-                <LemonTag size="small">{artefact.type}</LemonTag>
+                <Tag size="small">{artefact.type}</Tag>
                 <TZLabel time={artefact.created_at} />
                 {artefact.type === 'video_segment' && content.session_id && (
                     <ViewRecordingButton
@@ -81,7 +81,7 @@ function ReportRow({ report }: { report: SignalReport }): JSX.Element {
 
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                        <LemonTag size="small">Weight: {report.total_weight.toFixed(2)}</LemonTag>
+                        <Tag size="small">Weight: {report.total_weight.toFixed(2)}</Tag>
                         <h3 className="text-sm font-semibold m-0 truncate flex-1">
                             {report.title || 'Untitled report'}
                         </h3>
@@ -101,7 +101,7 @@ function ReportRow({ report }: { report: SignalReport }): JSX.Element {
                         </span>
                     )}
                     {report.artefact_count > 0 && (
-                        <LemonBadge.Number count={report.artefact_count} maxDigits={3} size="small" />
+                        <Badge.Number count={report.artefact_count} maxDigits={3} size="small" />
                     )}
                     <TZLabel time={report.updated_at} />
                 </div>
@@ -160,12 +160,12 @@ function InboxSkeleton(): JSX.Element {
             {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="border rounded-lg px-4 py-3 bg-surface-primary">
                     <div className="flex items-center gap-3">
-                        <LemonSkeleton className="w-4 h-4" />
+                        <Skeleton className="w-4 h-4" />
                         <div className="flex-1">
-                            <LemonSkeleton className="w-1/3 h-4 mb-2" />
-                            <LemonSkeleton className="w-2/3 h-3" />
+                            <Skeleton className="w-1/3 h-4 mb-2" />
+                            <Skeleton className="w-2/3 h-3" />
                         </div>
-                        <LemonSkeleton className="w-16 h-3" />
+                        <Skeleton className="w-16 h-3" />
                     </div>
                 </div>
             ))}
@@ -193,7 +193,7 @@ export function InboxScene(): JSX.Element {
                     <div className="flex items-center gap-2">
                         {isDev && (
                             <Tooltip title="Analyze the last 7 days of sessions">
-                                <LemonButton
+                                <Button
                                     type="secondary"
                                     onClick={() => runSessionAnalysis()}
                                     loading={isRunningSessionAnalysis}
@@ -201,17 +201,17 @@ export function InboxScene(): JSX.Element {
                                     data-attr="run-session-analysis-button"
                                 >
                                     Run session analysis
-                                </LemonButton>
+                                </Button>
                             </Tooltip>
                         )}
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={() => loadReports()}
                             loading={reportsLoading}
                             size="small"
                         >
                             Refresh
-                        </LemonButton>
+                        </Button>
                     </div>
                 }
             />

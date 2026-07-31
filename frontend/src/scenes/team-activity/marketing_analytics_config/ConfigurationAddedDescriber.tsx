@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { urls } from 'scenes/urls'
 import {
     ExternalTable,

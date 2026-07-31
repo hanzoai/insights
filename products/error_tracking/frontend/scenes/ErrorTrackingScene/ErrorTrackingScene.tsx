@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonBanner, LemonButton, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Link } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -146,35 +146,35 @@ const Header = (): JSX.Element => {
                     <>
                         {isDev ? (
                             <>
-                                <LemonButton
+                                <Button
                                     size="small"
                                     onClick={() => {
                                         insights.captureException(new Error('Kaboom !'))
                                     }}
                                 >
                                     Send an exception
-                                </LemonButton>
-                                <LemonButton size="small" onClick={onClick}>
+                                </Button>
+                                <Button size="small" onClick={onClick}>
                                     Start exception loop
-                                </LemonButton>
+                                </Button>
                             </>
                         ) : null}
-                        <LemonButton
+                        <Button
                             size="small"
                             to="https://hanzo.ai/docs/error-tracking"
                             type="secondary"
                             targetBlank
                         >
                             Documentation
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             size="small"
                             to={urls.errorTrackingConfiguration()}
                             type="secondary"
                             icon={<IconGear />}
                         >
                             Configure
-                        </LemonButton>
+                        </Button>
                     </>
                 }
             />
@@ -184,7 +184,7 @@ const Header = (): JSX.Element => {
 
 const IngestionStatusCheck = (): JSX.Element | null => {
     return (
-        <LemonBanner type="warning" className="my-2">
+        <Banner type="warning" className="my-2">
             <p>
                 <strong>No Exception events have been detected!</strong>
             </p>
@@ -195,6 +195,6 @@ const IngestionStatusCheck = (): JSX.Element | null => {
                 </Link>{' '}
                 (otherwise it'll be a little empty!)
             </p>
-        </LemonBanner>
+        </Banner>
     )
 }

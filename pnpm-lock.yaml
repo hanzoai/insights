@@ -1825,7 +1825,7 @@ importers:
       '@hanzo/insights':
         specifier: 'catalog:'
         version: 1.358.1
-      '@hanzo/lemon-ui':
+      '@hanzo/elements':
         specifier: '*'
         version: 0.0.2
       '@tiptap/core':
@@ -2246,7 +2246,7 @@ importers:
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
-      '@hanzo/lemon-ui':
+      '@hanzo/elements':
         specifier: '*'
         version: 0.0.2
       '@types/react':
@@ -2441,7 +2441,7 @@ importers:
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.6
         version: '@hanzo/insights-icons@0.36.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
-      '@hanzo/lemon-ui':
+      '@hanzo/elements':
         specifier: '*'
         version: 0.0.2
       '@types/react':
@@ -5758,7 +5758,7 @@ packages:
   '@hanzo/insights@1.358.1':
     resolution: {integrity: sha512-eZ5zfEkLGRLpLkxTCp/xOUwyIU9LoJXAMz+ZnDix905mKKqopj3ivy5rG/SjIfs4U9ZBJw+UZ82Ye+p9DqAyLQ==}
 
-  '@hanzo/lemon-ui@0.0.2':
+  '@hanzo/elements@0.0.2':
     resolution: {integrity: sha512-kCdfOzGopmJLKM22L8RIj5LFZrBFx/q6q7ffJMOLw7t0G/U6eGBMoYsPorIqJRONKpqUfB4YAKdJxj0AmbV7vA==}
 
   '@hanzo/logo@1.0.13':
@@ -25526,7 +25526,7 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.1.0
 
-  '@hanzo/lemon-ui@0.0.2': {}
+  '@hanzo/elements@0.0.2': {}
 
   '@hanzo/logo@1.0.13(react@18.3.1)':
     optionalDependencies:

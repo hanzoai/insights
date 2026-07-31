@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonInput, Link } from '@hanzo/lemon-ui'
+import { Input, Link } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { PathCleanFilterAddItemButton } from 'lib/components/PathCleanFilters/PathCleanFilterAddItemButton'
@@ -83,7 +83,7 @@ export function PathCleaningFiltersConfig(): JSX.Element | null {
 
             <p className="mt-4">Wanna test what your cleaned path will look like? Try them out here.</p>
             <div className="flex flex-col sm:flex-row gap-2 items-center justify-center">
-                <LemonInput
+                <Input
                     value={testValue}
                     onChange={setTestValue}
                     placeholder="Enter a path to test"

@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 
-import { LemonButton, LemonSelect, LemonTable, Spinner } from '@hanzo/lemon-ui'
+import { Button, Select, Table, Spinner } from '@hanzo/elements'
 
-import { LemonTableColumn } from 'lib/lemon-ui/LemonTable'
+import { TableColumn } from 'lib/elements/Table'
 
 import { NotebookDataframeResult } from '../pythonExecution'
 
@@ -44,7 +44,7 @@ export const NotebookDataframeTable = ({
     onPreviousPage,
     onPageSizeChange,
 }: NotebookDataframeTableProps): JSX.Element => {
-    const columns = useMemo<LemonTableColumn<Record<string, any>, keyof Record<string, any> | undefined>[]>(() => {
+    const columns = useMemo<TableColumn<Record<string, any>, keyof Record<string, any> | undefined>[]>(() => {
         return (
             result?.columns.map((column, index) => ({
                 title: column,
@@ -82,7 +82,7 @@ export const NotebookDataframeTable = ({
 
     return (
         <div className="flex flex-col gap-2">
-            <LemonTable
+            <Table
                 className="border-b border-primary"
                 data-attr="notebook-dataframe-table"
                 columns={columns}
@@ -97,7 +97,7 @@ export const NotebookDataframeTable = ({
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
                 <div className="flex items-center gap-2 pl-3">
                     <span>Rows per page</span>
-                    <LemonSelect
+                    <Select
                         size="small"
                         value={pageSize}
                         onChange={(value) => onPageSizeChange(value ?? pageSize)}
@@ -109,20 +109,20 @@ export const NotebookDataframeTable = ({
                 </div>
                 <div className="flex items-center gap-2 pr-2">
                     <span>{rowCount === 0 ? 'No rows' : `${startIndex}-${endIndex} of ${rowCount}`}</span>
-                    <LemonButton
+                    <Button
                         size="small"
                         onClick={onPreviousPage}
                         disabledReason={hasPrevious ? undefined : 'No previous page'}
                     >
                         Prev
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         size="small"
                         onClick={onNextPage}
                         disabledReason={hasNext ? undefined : 'No next page'}
                     >
                         Next
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </div>

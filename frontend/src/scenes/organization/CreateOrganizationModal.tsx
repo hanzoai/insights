@@ -1,9 +1,9 @@
 import { useActions } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Modal, Link } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { organizationLogic } from 'scenes/organizationLogic'
 
 export function CreateOrganizationModal({
@@ -32,7 +32,7 @@ export function CreateOrganizationModal({
     }
 
     return (
-        <LemonModal
+        <Modal
             width={440}
             title="Create an organization"
             description={
@@ -47,26 +47,26 @@ export function CreateOrganizationModal({
             footer={
                 <>
                     {onClose && (
-                        <LemonButton type="secondary" onClick={() => onClose()}>
+                        <Button type="secondary" onClick={() => onClose()}>
                             Cancel
-                        </LemonButton>
+                        </Button>
                     )}
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() => handleSubmit()}
                         disabledReason={!name ? 'Think of a name!' : null}
                         data-attr="create-organization-ok"
                     >
                         Create organization
-                    </LemonButton>
+                    </Button>
                 </>
             }
             onClose={closeModal}
             isOpen={isVisible}
             inline={inline}
         >
-            <LemonField.Pure label="Organization name">
-                <LemonInput
+            <Field.Pure label="Organization name">
+                <Input
                     placeholder="Acme Inc."
                     maxLength={64}
                     autoFocus
@@ -79,7 +79,7 @@ export function CreateOrganizationModal({
                     }}
                     data-attr="organization-name-input"
                 />
-            </LemonField.Pure>
-        </LemonModal>
+            </Field.Pure>
+        </Modal>
     )
 }

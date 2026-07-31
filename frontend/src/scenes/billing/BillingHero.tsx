@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
-import { Link } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
+import { Link } from '@hanzo/elements'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -199,13 +199,13 @@ export const BillingHero = ({ product }: { product: BillingProductV2Type }): JSX
                         >
                             Upgrade now
                         </BillingUpgradeCTA>
-                        <LemonButton
+                        <Button
                             className="inline-block"
                             onClick={() => toggleIsPlanComparisonModalOpen()}
                             type="primary"
                         >
                             Compare plans
-                        </LemonButton>
+                        </Button>
                     </div>
                 )}
             </div>

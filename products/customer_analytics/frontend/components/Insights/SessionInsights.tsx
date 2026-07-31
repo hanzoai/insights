@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { urls } from 'scenes/urls'
 
 import { ActivityTab } from '~/types'
@@ -18,7 +18,7 @@ export function SessionInsights(): JSX.Element {
         <div className="space-y-2">
             <div className="flex items-center gap-2">
                 <h2 className="mb-0 ml-1">Session insights</h2>
-                <LemonButton
+                <Button
                     size="small"
                     noPadding
                     targetBlank

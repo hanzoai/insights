@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { FEATURE_FLAGS } from 'lib/constants'

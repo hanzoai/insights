@@ -4,8 +4,8 @@ import { match } from 'ts-pattern'
 
 import { ActivityChange } from 'lib/components/ActivityLog/humanizeActivity'
 import { dayjs } from 'lib/dayjs'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Link } from 'lib/lemon-ui/Link'
+import { Tag } from 'lib/elements/Tag'
+import { Link } from 'lib/elements/Link'
 import { CONCLUSION_DISPLAY_CONFIG } from 'scenes/experiments/constants'
 import { getExposureConfigDisplayName } from 'scenes/experiments/utils'
 import { urls } from 'scenes/urls'
@@ -150,7 +150,7 @@ export const getExperimentChangeDescription = (
                             const displayName = getExposureConfigDisplayName(afterConfig)
                             return (
                                 <span>
-                                    set the exposure configuration to <LemonTag color="purple">{displayName}</LemonTag>
+                                    set the exposure configuration to <Tag color="purple">{displayName}</Tag>
                                 </span>
                             )
                         }
@@ -163,7 +163,7 @@ export const getExperimentChangeDescription = (
             if (typedBefore?.exposure_config && !typedAfter?.exposure_config) {
                 changes.push(
                     <span>
-                        set the exposure configuration to the <LemonTag color="purple">$feature_flag_called</LemonTag>{' '}
+                        set the exposure configuration to the <Tag color="purple">$feature_flag_called</Tag>{' '}
                         default
                     </span>
                 )

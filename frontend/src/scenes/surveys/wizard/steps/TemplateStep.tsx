@@ -18,7 +18,7 @@ import {
     IconTrending,
     IconWarning,
 } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { SurveyTemplate, SurveyTemplateType } from '../../constants'
 import { surveyWizardLogic } from '../surveyWizardLogic'
@@ -109,13 +109,13 @@ export function TemplateStep(): JSX.Element {
             {/* Other templates - collapsible */}
             {otherTemplates.length > 0 && (
                 <div className="border-t border-border pt-6 space-y-4">
-                    <LemonButton
+                    <Button
                         type="tertiary"
                         onClick={() => setShowOthers(!showOthers)}
                         icon={showOthers ? <IconChevronDown /> : <IconChevronRight />}
                     >
                         More templates ({otherTemplates.length})
-                    </LemonButton>
+                    </Button>
 
                     {showOthers && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

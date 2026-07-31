@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, LemonDropdown, Popover } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Dropdown, Popover } from '@hanzo/elements'
 
 import { OperatorValueSelectProps } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 
@@ -148,14 +148,14 @@ const Value = ({
     )
 }
 
-const AddFilterButton = (props: Omit<LemonButtonProps, 'onClick' | 'sideAction' | 'icon'>): JSX.Element => {
+const AddFilterButton = (props: Omit<ButtonProps, 'onClick' | 'sideAction' | 'icon'>): JSX.Element => {
     const [dropdownOpen, setDropdownOpen] = useState<boolean>(false)
 
     const { taxonomicGroupTypes } = useValues(universalFiltersLogic)
     const { addGroupFilter } = useActions(universalFiltersLogic)
 
     return (
-        <LemonDropdown
+        <Dropdown
             overlay={
                 <TaxonomicFilter
                     onChange={(taxonomicGroup, value, item, originalQuery) => {
@@ -168,15 +168,15 @@ const AddFilterButton = (props: Omit<LemonButtonProps, 'onClick' | 'sideAction' 
             visible={dropdownOpen}
             onClickOutside={() => setDropdownOpen(false)}
         >
-            <LemonButton
+            <Button
                 icon={<IconPlusSmall />}
                 sideIcon={null}
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 {...props}
             >
                 {props?.title || 'Add filter'}
-            </LemonButton>
-        </LemonDropdown>
+            </Button>
+        </Dropdown>
     )
 }
 

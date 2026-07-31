@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonFileInput, LemonModal, LemonSkeleton, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Divider, FileInput, Modal, Skeleton, toast } from '@hanzo/elements'
 
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 
@@ -38,7 +38,7 @@ export function VariantScreenshot({
                 return
             }
             if (mediaIds.length >= 5) {
-                lemonToast.error('Maximum of 5 images allowed')
+                toast.error('Maximum of 5 images allowed')
                 return
             }
 
@@ -55,7 +55,7 @@ export function VariantScreenshot({
             })
         },
         onError: (detail) => {
-            lemonToast.error(`Error uploading image: ${detail}`)
+            toast.error(`Error uploading image: ${detail}`)
         },
     })
 
@@ -109,7 +109,7 @@ export function VariantScreenshot({
                                 <div
                                     className={`relative flex overflow-hidden select-none ${widthClass} h-16 rounded before:absolute before:inset-0 before:border before:rounded`}
                                 >
-                                    {loadingImages[mediaId] && <LemonSkeleton className="absolute inset-0" />}
+                                    {loadingImages[mediaId] && <Skeleton className="absolute inset-0" />}
                                     <img
                                         className="w-full h-full object-cover"
                                         src={mediaId.startsWith('data:') ? mediaId : `/uploaded_media/${mediaId}`}
@@ -119,7 +119,7 @@ export function VariantScreenshot({
                                     />
                                 </div>
                                 <div className="absolute -inset-2 group">
-                                    <LemonButton
+                                    <Button
                                         icon={<IconX />}
                                         onClick={(e) => {
                                             e.stopPropagation()
@@ -139,7 +139,7 @@ export function VariantScreenshot({
 
                 {mediaIds.length < 5 && (
                     <div className={`relative ${widthClass} h-16`}>
-                        <LemonFileInput
+                        <FileInput
                             accept="image/*"
                             multiple={false}
                             onChange={setFilesToUpload}
@@ -155,13 +155,13 @@ export function VariantScreenshot({
                 )}
             </div>
 
-            <LemonModal
+            <Modal
                 isOpen={selectedImageIndex !== null}
                 onClose={() => setSelectedImageIndex(null)}
                 title={
                     <div className="flex items-center gap-2">
                         <span>Screenshot {selectedImageIndex !== null ? selectedImageIndex + 1 : ''}</span>
-                        <LemonDivider className="my-0 mx-1" vertical />
+                        <Divider className="my-0 mx-1" vertical />
                         <VariantTag variantKey={variantKey} />
                         {rolloutPercentage !== undefined && (
                             <span className="text-secondary text-sm">({rolloutPercentage}% rollout)</span>
@@ -180,7 +180,7 @@ export function VariantScreenshot({
                         className="max-w-full max-h-[80vh] overflow-auto"
                     />
                 )}
-            </LemonModal>
+            </Modal>
         </div>
     )
 }

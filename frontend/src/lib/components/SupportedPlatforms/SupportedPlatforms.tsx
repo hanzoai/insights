@@ -1,7 +1,7 @@
 import { Fragment, memo } from 'react'
 
 import { IconCheck, IconInfo, IconX } from '@hanzo/icons'
-import { LemonDivider, Tooltip } from '@hanzo/lemon-ui'
+import { Divider, Tooltip } from '@hanzo/elements'
 
 import { isObject } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
@@ -69,7 +69,7 @@ export const SupportedPlatforms = memo(function SupportedPlatforms({
             </Tooltip>
             {platforms.map((platform) => (
                 <Fragment key={platform}>
-                    <LemonDivider vertical className="h-full" />
+                    <Divider vertical className="h-full" />
                     <SupportedPlatform platform={config[platform]} label={PLATFORM_LABELS[platform] || platform} />
                 </Fragment>
             ))}

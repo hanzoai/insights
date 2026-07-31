@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { urls } from 'scenes/urls'
@@ -45,7 +45,7 @@ const Component = (props: NodeViewProps): JSX.Element => {
             as="span"
             className={clsx('NotebookRecordingTimestamp', props.selected && 'NotebookRecordingTimestamp--selected')}
         >
-            <LemonButton
+            <Button
                 size="small"
                 noPadding
                 active
@@ -59,7 +59,7 @@ const Component = (props: NodeViewProps): JSX.Element => {
                 }
             >
                 <span className="p-1">{formatTimestamp(playbackTime)}</span>
-            </LemonButton>
+            </Button>
         </NodeViewWrapper>
     )
 }

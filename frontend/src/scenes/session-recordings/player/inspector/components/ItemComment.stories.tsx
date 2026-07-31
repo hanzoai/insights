@@ -2,7 +2,7 @@ import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import { BindLogic } from 'kea'
 
 import { now } from 'lib/dayjs'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 import {
     ItemAnyComment,
     ItemAnyCommentDetail,
@@ -100,10 +100,10 @@ const BasicTemplate: StoryFn<typeof ItemAnyComment> = (props: Partial<ItemCommen
             <div className="flex flex-col gap-2 min-w-96">
                 <h3>Collapsed</h3>
                 <ItemAnyComment {...propsToUse} />
-                <LemonDivider />
+                <Divider />
                 <h3>Expanded</h3>
                 <ItemAnyCommentDetail {...propsToUse} />
-                <LemonDivider />
+                <Divider />
                 <h3>Expanded with overflowing comment</h3>
                 <div className="w-52">
                     <ItemAnyCommentDetail
@@ -120,7 +120,7 @@ const BasicTemplate: StoryFn<typeof ItemAnyComment> = (props: Partial<ItemCommen
                         }
                     />
                 </div>
-                <LemonDivider />
+                <Divider />
                 <h3>Collapsed with overflowing comment</h3>
                 <div className="w-52">
                     <ItemAnyComment

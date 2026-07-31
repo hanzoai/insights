@@ -1,6 +1,6 @@
 import { router } from 'kea-router'
 
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { getSeriesColor } from 'lib/colors'
 import { urls } from 'scenes/urls'

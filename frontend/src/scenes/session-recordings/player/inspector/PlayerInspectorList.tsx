@@ -6,7 +6,7 @@ import { CSSProperties, useCallback, useEffect, useRef } from 'react'
 import { List, useDynamicRowHeight, useListRef } from 'react-window'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 
 import { sessionRecordingPlayerLogic } from '../sessionRecordingPlayerLogic'
 import { PlayerInspectorListItem } from './components/PlayerInspectorListItem'
@@ -116,7 +116,7 @@ export function PlayerInspectorList(): JSX.Element {
                 </div>
             ) : isLoading ? (
                 <div className="p-2">
-                    <LemonSkeleton className="my-1 h-8" repeat={20} fade />
+                    <Skeleton className="my-1 h-8" repeat={20} fade />
                 </div>
             ) : isReady ? (
                 // If we are "ready" but with no results this must mean some results are filtered out

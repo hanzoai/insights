@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { IconChevronLeft, IconChevronRight, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDialog, Spinner } from '@hanzo/lemon-ui'
+import { Button, Dialog, Spinner } from '@hanzo/elements'
 
 interface ImageCarouselProps {
     imageUrls: string[]
@@ -43,13 +43,13 @@ export function ImageCarousel({ imageUrls, loading, onDelete }: ImageCarouselPro
             )}
 
             {onDelete && !loading && (
-                <LemonButton
+                <Button
                     icon={<IconTrash />}
                     type="secondary"
                     status="danger"
                     size="small"
                     onClick={() =>
-                        LemonDialog.open({
+                        Dialog.open({
                             title: 'Delete image',
                             description: 'Are you sure you want to delete this image?',
                             primaryButton: {
@@ -69,14 +69,14 @@ export function ImageCarousel({ imageUrls, loading, onDelete }: ImageCarouselPro
 
             {showArrows && !loading && (
                 <>
-                    <LemonButton
+                    <Button
                         icon={<IconChevronLeft />}
                         size="small"
                         type="secondary"
                         onClick={goToPrevious}
                         className="absolute top-1/2 left-[2%] -translate-y-1/2 bg-surface-primary/80 opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
                     />
-                    <LemonButton
+                    <Button
                         icon={<IconChevronRight />}
                         size="small"
                         type="secondary"

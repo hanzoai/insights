@@ -1,4 +1,4 @@
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Tag } from 'lib/elements/Tag'
 import { SelectableCard } from 'scenes/experiments/components/SelectableCard'
 
 import type { Experiment } from '~/types'
@@ -20,9 +20,9 @@ export const ExperimentTypePanel = ({ experiment, setExperimentType }: Experimen
             title={
                 <span>
                     No-Code experiment&nbsp;
-                    <LemonTag type="option" size="small">
+                    <Tag type="option" size="small">
                         Beta
-                    </LemonTag>
+                    </Tag>
                 </span>
             }
             description="Define variants on your website using the Insights toolbar, no coding required."

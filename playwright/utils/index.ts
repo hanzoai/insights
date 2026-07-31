@@ -5,16 +5,16 @@ export function randomString(prefix = ''): string {
     return `${prefix}-${id}`
 }
 
-export async function getLemonSwitchValue(page: Page, label: string): Promise<boolean | null> {
+export async function getSwitchValue(page: Page, label: string): Promise<boolean | null> {
     const button = page.getByLabel(label)
     const parent = button.locator('..')
     const classNames = await parent.getAttribute('class')
-    return classNames?.includes('LemonSwitch--checked') || null
+    return classNames?.includes('Switch--checked') || null
 }
 
-export async function setLemonSwitchValue(page: Page, label: string, value: boolean): Promise<void> {
+export async function setSwitchValue(page: Page, label: string, value: boolean): Promise<void> {
     const button = page.getByLabel(label)
-    const currentValue = await getLemonSwitchValue(page, label)
+    const currentValue = await getSwitchValue(page, label)
 
     if (value !== currentValue) {
         await button.click()

@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
 import { IconChat } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { EventType } from '~/types'
 
@@ -52,7 +52,7 @@ export function ConversationDisplay({ eventProperties, eventId }: ConversationDi
                 />
 
                 {showPlaygroundButton && (
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         icon={<IconChat />}
@@ -61,7 +61,7 @@ export function ConversationDisplay({ eventProperties, eventId }: ConversationDi
                         data-attr="try-in-playground-conversation"
                     >
                         Try in Playground
-                    </LemonButton>
+                    </Button>
                 )}
             </header>
             {isLoading ? (

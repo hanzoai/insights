@@ -3,7 +3,7 @@ import './AggregationColumn.scss'
 import { useActions, useValues } from 'kea'
 
 import { IconChevronDown } from '@hanzo/icons'
-import { LemonMenu, LemonMenuItem } from '@hanzo/lemon-ui'
+import { Menu, MenuItem } from '@hanzo/elements'
 
 import { average, median } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -40,7 +40,7 @@ export function AggregationColumnTitle({
         return <span>{CALC_COLUMN_LABELS.total}</span>
     }
 
-    const items: LemonMenuItem[] = Object.entries(CALC_COLUMN_LABELS).map(([key, label]) => ({
+    const items: MenuItem[] = Object.entries(CALC_COLUMN_LABELS).map(([key, label]) => ({
         label,
         onClick: () => {
             setAggregationType(key as CalcColumnState)
@@ -49,9 +49,9 @@ export function AggregationColumnTitle({
     }))
 
     return (
-        <LemonMenu items={items}>
+        <Menu items={items}>
             <span
-                className="AggregationColumn__title LemonTable__header--no-hover flex cursor-pointer whitespace-nowrap"
+                className="AggregationColumn__title Table__header--no-hover flex cursor-pointer whitespace-nowrap"
                 onClick={(e) => {
                     e.stopPropagation()
                 }}
@@ -59,7 +59,7 @@ export function AggregationColumnTitle({
                 {CALC_COLUMN_LABELS[aggregation]}
                 <IconChevronDown className="text-lg" />
             </span>
-        </LemonMenu>
+        </Menu>
     )
 }
 

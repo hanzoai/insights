@@ -112,7 +112,7 @@ describe('PropertyFilters', () => {
         expect(screen.getByText(/Mac/)).toBeInTheDocument()
 
         const firstRow = screen.getByTestId('property-filter-0')
-        const closeButton = firstRow.querySelector('.PropertyFilterButton--closeable .LemonButton')
+        const closeButton = firstRow.querySelector('.PropertyFilterButton--closeable .Button')
         userEvent.click(closeButton!)
 
         await waitFor(() => {

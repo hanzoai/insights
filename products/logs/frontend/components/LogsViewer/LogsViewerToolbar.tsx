@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Checkbox, SegmentedButton } from '@hanzo/elements'
 
 import { humanFriendlyNumber } from 'lib/utils'
 
@@ -29,7 +29,7 @@ export const LogsViewerToolbar = ({
     return (
         <div className="flex justify-between flex-wrap gap-2">
             <div className="flex gap-2 flex-wrap">
-                <LemonSegmentedButton
+                <SegmentedButton
                     value={orderBy}
                     onChange={onChangeOrderBy}
                     options={[
@@ -44,8 +44,8 @@ export const LogsViewerToolbar = ({
                     ]}
                     size="small"
                 />
-                <LemonCheckbox checked={wrapBody} bordered onChange={setWrapBody} label="Wrap message" size="small" />
-                <LemonCheckbox
+                <Checkbox checked={wrapBody} bordered onChange={setWrapBody} label="Wrap message" size="small" />
+                <Checkbox
                     checked={prettifyJson}
                     bordered
                     onChange={setPrettifyJson}

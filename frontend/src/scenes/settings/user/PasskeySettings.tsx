@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Banner, Skeleton } from '@hanzo/elements'
 
 import { userLogic } from 'scenes/userLogic'
 
@@ -22,8 +22,8 @@ export function PasskeySettings(): JSX.Element {
     if (passkeysLoading) {
         return (
             <div className="space-y-4">
-                <LemonSkeleton className="h-32" />
-                <LemonSkeleton className="h-24" />
+                <Skeleton className="h-32" />
+                <Skeleton className="h-24" />
             </div>
         )
     }
@@ -34,9 +34,9 @@ export function PasskeySettings(): JSX.Element {
     return (
         <div className="space-y-4">
             {hasSSOEnforcement && (
-                <LemonBanner type="warning">
+                <Banner type="warning">
                     Passkeys can't be added because your organization requires SSO.
-                </LemonBanner>
+                </Banner>
             )}
             {!hasSSOEnforcement && (hasExistingPasskeys ? <PasskeyAddForm /> : <PasskeyAddFormEmpty />)}
             {hasExistingPasskeys && <PasskeyList />}

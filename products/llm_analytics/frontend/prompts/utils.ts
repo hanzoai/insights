@@ -1,7 +1,7 @@
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
+import { Dialog } from 'lib/elements/Dialog'
 
 export function openDeletePromptDialog(onDelete: () => void): void {
-    LemonDialog.open({
+    Dialog.open({
         title: 'Delete prompt?',
         description:
             'This action cannot be undone. If you have any code currently fetching this prompt, it will no longer be able to retrieve it.',

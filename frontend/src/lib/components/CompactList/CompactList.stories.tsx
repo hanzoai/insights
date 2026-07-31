@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/react'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'
 
@@ -38,9 +38,9 @@ export function CompactList_({ loading }: { loading: boolean }): JSX.Element {
                         { properties: { name: 'Person 8' } },
                     ]}
                     renderRow={(person, index) => (
-                        <LemonButton key={index} fullWidth>
+                        <Button key={index} fullWidth>
                             <PersonDisplay withIcon person={person} />
-                        </LemonButton>
+                        </Button>
                     )}
                 />
             </div>
@@ -57,9 +57,9 @@ export function CompactList_({ loading }: { loading: boolean }): JSX.Element {
                     }}
                     items={[]}
                     renderRow={(person, index) => (
-                        <LemonButton key={index} fullWidth>
+                        <Button key={index} fullWidth>
                             <PersonDisplay withIcon person={person} />
-                        </LemonButton>
+                        </Button>
                     )}
                 />
             </div>

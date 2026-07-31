@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheckCircle, IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonButtonProps, LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Tag, Tooltip } from '@hanzo/elements'
 
 import { FEATURE_FLAGS, TRIAL_CANCELLATION_SURVEY_ID, UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { More } from 'lib/lemon-ui/LemonButton/More'
+import { More } from 'lib/elements/Button/More'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { toSentenceCase } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -20,7 +20,7 @@ import { DATA_PIPELINES_CUTOFF_DATE } from './constants'
 interface BillingProductAddonActionsProps {
     addon: BillingProductV2AddonType
     productRef?: React.RefObject<HTMLDivElement>
-    buttonSize?: LemonButtonProps['size']
+    buttonSize?: ButtonProps['size']
     ctaTextOverride?: string
 }
 
@@ -59,7 +59,7 @@ export const BillingProductAddonActions = ({
         return (
             <More
                 overlay={
-                    <LemonButton
+                    <Button
                         fullWidth
                         disabledReason={
                             (switchPlanLoading ? 'Switching plans...' : undefined) ||
@@ -73,7 +73,7 @@ export const BillingProductAddonActions = ({
                         }}
                     >
                         Remove add-on
-                    </LemonButton>
+                    </Button>
                 }
             />
         )
@@ -92,13 +92,13 @@ export const BillingProductAddonActions = ({
                     </p>
                 }
             >
-                <LemonTag type="completion" icon={<IconCheckCircle />}>
+                <Tag type="completion" icon={<IconCheckCircle />}>
                     You're on a trial for this add-on
-                </LemonTag>
+                </Tag>
             </Tooltip>
             {/* Hide Cancel button only for Enterprise 'standard' trials (typically sales-managed) */}
             {(addon.type !== 'enterprise' || billing?.trial?.type === 'autosubscribe') && (
-                <LemonButton
+                <Button
                     type="primary"
                     size="small"
                     onClick={() => {
@@ -109,7 +109,7 @@ export const BillingProductAddonActions = ({
                     className="mt-1"
                 >
                     Cancel trial
-                </LemonButton>
+                </Button>
             )}
         </div>
     )
@@ -128,13 +128,13 @@ export const BillingProductAddonActions = ({
                         )}
                     </h4>
                 ) : (
-                    <LemonButton type="secondary" onClick={toggleIsPricingModalOpen}>
+                    <Button type="secondary" onClick={toggleIsPricingModalOpen}>
                         View pricing
-                    </LemonButton>
+                    </Button>
                 )}
 
                 {!addon.inclusion_only && !isDataPipelinesDeprecated && (
-                    <LemonButton
+                    <Button
                         type="primary"
                         icon={<IconPlus />}
                         size={buttonSize || 'small'}
@@ -151,7 +151,7 @@ export const BillingProductAddonActions = ({
                         }
                     >
                         {ctaTextOverride ?? (isTrialEligible ? 'Start trial' : 'Add')}
-                    </LemonButton>
+                    </Button>
                 )}
             </>
         )
@@ -216,7 +216,7 @@ export const BillingProductAddonActions = ({
         return (
             <More
                 overlay={
-                    <LemonButton
+                    <Button
                         fullWidth
                         disabledReason={switchPlanLoading ? 'Switching plans...' : undefined}
                         onClick={() => {
@@ -225,7 +225,7 @@ export const BillingProductAddonActions = ({
                         }}
                     >
                         Downgrade
-                    </LemonButton>
+                    </Button>
                 }
             />
         )
@@ -246,7 +246,7 @@ export const BillingProductAddonActions = ({
                     </h4>
                 )}
 
-                <LemonButton
+                <Button
                     type="primary"
                     disabledReason={switchPlanLoading ? 'Switching plans...' : undefined}
                     onClick={() => {
@@ -255,7 +255,7 @@ export const BillingProductAddonActions = ({
                     }}
                 >
                     Upgrade
-                </LemonButton>
+                </Button>
             </>
         )
     }
@@ -265,18 +265,18 @@ export const BillingProductAddonActions = ({
         content = renderSubscribedActions()
     } else if (addon.included_with_main_product) {
         content = (
-            <LemonTag type="completion" icon={<IconCheckCircle />}>
+            <Tag type="completion" icon={<IconCheckCircle />}>
                 Included with plan
-            </LemonTag>
+            </Tag>
         )
     } else if (billing?.trial && billing?.trial?.target === addon.type) {
         // Current trial on this addon
         content = renderTrialActions()
     } else if (addon.contact_support) {
         content = (
-            <LemonButton type="secondary" to="https://hanzo.ai/talk-to-a-human">
+            <Button type="secondary" to="https://hanzo.ai/talk-to-a-human">
                 Contact support
-            </LemonButton>
+            </Button>
         )
     } else if (!billing?.trial && !isSubscribedToAnotherAddon) {
         // Customer is not subscribed to any trial

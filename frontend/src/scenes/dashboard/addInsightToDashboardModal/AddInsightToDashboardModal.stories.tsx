@@ -61,7 +61,7 @@ const meta: Meta<typeof AddInsightToDashboardModal> = {
         layout: 'fullscreen',
         viewMode: 'story',
         mockDate: '2023-02-01',
-        testOptions: { waitForSelector: '.LemonModal' },
+        testOptions: { waitForSelector: '.Modal' },
     },
 }
 export default meta

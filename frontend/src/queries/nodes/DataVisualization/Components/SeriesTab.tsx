@@ -3,21 +3,21 @@ import { Form } from 'kea-forms'
 
 import { IconGear, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonColorGlyph,
-    LemonColorPicker,
-    LemonInput,
-    LemonLabel,
-    LemonSegmentedButton,
-    LemonSelect,
-    LemonSwitch,
-    LemonTabs,
-    LemonTag,
+    Button,
+    ColorGlyph,
+    ColorPicker,
+    Input,
+    Label,
+    SegmentedButton,
+    Select,
+    Switch,
+    Tabs,
+    Tag,
     Popover,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { getSeriesColor, getSeriesColorPalette } from 'lib/colors'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { ChartDisplayType } from '~/types'
 
@@ -54,7 +54,7 @@ export const SeriesTab = (): JSX.Element => {
     if (showTableSettings) {
         return (
             <div className="flex flex-col w-full p-3">
-                <LemonLabel>Columns</LemonLabel>
+                <Label>Columns</Label>
                 {tabularColumns.map((series, index) => (
                     <YSeries series={series} index={index} key={`${series.column.name}-${index}`} />
                 ))}
@@ -67,17 +67,17 @@ export const SeriesTab = (): JSX.Element => {
         label: (
             <div className="items-center flex-1">
                 {name}
-                <LemonTag className="ml-2" type="default">
+                <Tag className="ml-2" type="default">
                     {type.name}
-                </LemonTag>
+                </Tag>
             </div>
         ),
     }))
 
     return (
         <div className="flex flex-col w-full p-3">
-            <LemonLabel className="mb-1">X-axis</LemonLabel>
-            <LemonSelect
+            <Label className="mb-1">X-axis</Label>
+            <Select
                 className="w-full"
                 value={xData !== null ? xData.column.name : 'None'}
                 options={options}
@@ -90,7 +90,7 @@ export const SeriesTab = (): JSX.Element => {
                 }}
             />
             {!hideAddSeriesBreakdown && (
-                <LemonButton
+                <Button
                     className="mt-1"
                     type="tertiary"
                     onClick={() => addSeriesBreakdown(null)}
@@ -98,16 +98,16 @@ export const SeriesTab = (): JSX.Element => {
                     fullWidth
                 >
                     Add series breakdown
-                </LemonButton>
+                </Button>
             )}
             {showSeriesBreakdown && <SeriesBreakdownSelector />}
 
-            <LemonLabel className="mt-4 mb-1">Y-axis</LemonLabel>
+            <Label className="mt-4 mb-1">Y-axis</Label>
             {yData.map((series, index) => (
                 <YSeries series={series} index={index} key={`${series?.column.name}-${index}`} />
             ))}
             {!hideAddYSeries && (
-                <LemonButton
+                <Button
                     className="mt-1"
                     type="tertiary"
                     onClick={() => addYSeries()}
@@ -115,7 +115,7 @@ export const SeriesTab = (): JSX.Element => {
                     fullWidth
                 >
                     Add Y-series
-                </LemonButton>
+                </Button>
             )}
         </div>
     )
@@ -141,18 +141,18 @@ const YSeries = ({ series, index }: { series: AxisSeries<number>; index: number 
         value: name,
         label: (
             <div className="items-center flex flex-1">
-                {showSeriesColor && <LemonColorGlyph className="mr-2" color={seriesColor} />}
+                {showSeriesColor && <ColorGlyph className="mr-2" color={seriesColor} />}
                 {series.settings?.display?.label && series.column.name === name ? series.settings.display.label : name}
-                <LemonTag className="ml-2" type="default">
+                <Tag className="ml-2" type="default">
                     {type.name}
-                </LemonTag>
+                </Tag>
             </div>
         ),
     }))
 
     return (
         <div className="flex gap-1 mb-1">
-            <LemonSelect
+            <Select
                 className="grow flex-1 break-all"
                 value={series !== null ? series.column.name : 'None'}
                 options={options}
@@ -167,7 +167,7 @@ const YSeries = ({ series, index }: { series: AxisSeries<number>; index: number 
             <Popover
                 overlay={
                     <div className="m-2">
-                        <LemonTabs
+                        <Tabs
                             activeKey={activeSettingsTab}
                             barClassName="justify-around"
                             onChange={(tab) => setSettingsTab(tab as YSeriesSettingsTab)}
@@ -186,7 +186,7 @@ const YSeries = ({ series, index }: { series: AxisSeries<number>; index: number 
                     submitDisplay()
                 }}
             >
-                <LemonButton
+                <Button
                     key="seriesSettings"
                     icon={<IconGear />}
                     noPadding
@@ -195,7 +195,7 @@ const YSeries = ({ series, index }: { series: AxisSeries<number>; index: number 
                 />
             </Popover>
             {!showTableSettings && (
-                <LemonButton
+                <Button
                     key="delete"
                     icon={<IconTrash />}
                     status="danger"
@@ -212,26 +212,26 @@ const YSeriesFormattingTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSerie
     return (
         <Form logic={ySeriesLogic} props={ySeriesLogicProps} formKey="formatting" className="deprecated-space-y-4">
             {ySeriesLogicProps.series.column.type.isNumerical && (
-                <LemonField name="style" label="Style" className="gap-1">
-                    <LemonSelect
+                <Field name="style" label="Style" className="gap-1">
+                    <Select
                         options={[
                             { value: 'none', label: 'None' },
                             { value: 'number', label: 'Number' },
                             { value: 'percent', label: 'Percentage' },
                         ]}
                     />
-                </LemonField>
+                </Field>
             )}
-            <LemonField name="prefix" label="Prefix">
-                <LemonInput placeholder="$" />
-            </LemonField>
-            <LemonField name="suffix" label="Suffix">
-                <LemonInput placeholder="USD" />
-            </LemonField>
+            <Field name="prefix" label="Prefix">
+                <Input placeholder="$" />
+            </Field>
+            <Field name="suffix" label="Suffix">
+                <Input placeholder="USD" />
+            </Field>
             {ySeriesLogicProps.series.column.type.isNumerical && (
-                <LemonField name="decimalPlaces" label="Decimal places">
-                    <LemonInput type="number" min={0} />
-                </LemonField>
+                <Field name="decimalPlaces" label="Decimal places">
+                    <Input type="number" min={0} />
+                </Field>
             )}
         </Form>
     )
@@ -250,9 +250,9 @@ const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLo
             {(showColorPicker || showLabelInput) && (
                 <div className="flex gap-3">
                     {showColorPicker && (
-                        <LemonField name="color" label="Color">
+                        <Field name="color" label="Color">
                             {({ value, onChange }) => (
-                                <LemonColorPicker
+                                <ColorPicker
                                     selectedColor={value}
                                     onSelectColor={(color) => {
                                         onChange(color)
@@ -273,12 +273,12 @@ const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLo
                                     customColorValue={value}
                                 />
                             )}
-                        </LemonField>
+                        </Field>
                     )}
                     {showLabelInput && (
-                        <LemonField name="label" label="Label">
+                        <Field name="label" label="Label">
                             {({ value, onChange }) => (
-                                <LemonInput
+                                <Input
                                     value={value}
                                     onChange={(label) => {
                                         onChange(label)
@@ -294,16 +294,16 @@ const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLo
                                     }}
                                 />
                             )}
-                        </LemonField>
+                        </Field>
                     )}
                 </div>
             )}
             {!showTableSettings && (
                 <>
                     {!selectedSeriesBreakdownColumn && (
-                        <LemonField name="trendLine" label="Trend line">
+                        <Field name="trendLine" label="Trend line">
                             {({ value, onChange }) => (
-                                <LemonSwitch
+                                <Switch
                                     checked={value}
                                     onChange={(newValue) => {
                                         onChange(newValue)
@@ -319,11 +319,11 @@ const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLo
                                     }}
                                 />
                             )}
-                        </LemonField>
+                        </Field>
                     )}
-                    <LemonField name="yAxisPosition" label="Y-axis position">
+                    <Field name="yAxisPosition" label="Y-axis position">
                         {({ value, onChange }) => (
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 value={value}
                                 className="w-full"
                                 options={[
@@ -350,10 +350,10 @@ const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLo
                                 }}
                             />
                         )}
-                    </LemonField>
-                    <LemonField name="displayType" label="Display type">
+                    </Field>
+                    <Field name="displayType" label="Display type">
                         {({ value, onChange }) => (
-                            <LemonSegmentedButton
+                            <SegmentedButton
                                 value={value}
                                 className="w-full"
                                 options={[
@@ -384,7 +384,7 @@ const YSeriesDisplayTab = ({ ySeriesLogicProps }: { ySeriesLogicProps: YSeriesLo
                                 }}
                             />
                         )}
-                    </LemonField>
+                    </Field>
                 </>
             )}
         </Form>
@@ -414,9 +414,9 @@ export const SeriesBreakdownSelector = (): JSX.Element => {
             label: (
                 <div className="items-center flex-1">
                     {name}
-                    <LemonTag className="ml-2" type="default">
+                    <Tag className="ml-2" type="default">
                         {type.name}
-                    </LemonTag>
+                    </Tag>
                 </div>
             ),
         }))
@@ -425,7 +425,7 @@ export const SeriesBreakdownSelector = (): JSX.Element => {
     return (
         <>
             <div className="flex gap-1 my-1">
-                <LemonSelect
+                <Select
                     className="grow"
                     value={selectedSeriesBreakdownColumn !== null ? selectedSeriesBreakdownColumn : 'None'}
                     options={seriesBreakdownOptions}
@@ -437,7 +437,7 @@ export const SeriesBreakdownSelector = (): JSX.Element => {
                         }
                     }}
                 />
-                <LemonButton
+                <Button
                     key="delete"
                     icon={<IconTrash />}
                     status="danger"
@@ -465,7 +465,7 @@ const BreakdownSeries = ({ series, index }: { series: AxisBreakdownSeries<number
     return (
         <div className="flex gap-1 mb-2">
             <div className="flex gap-2">
-                <LemonColorGlyph color={seriesColor} className="mr-2" />
+                <ColorGlyph color={seriesColor} className="mr-2" />
                 <span>{series.name ? series.name : '[No value]'}</span>
             </div>
             {/* For now let's keep things simple and not allow too much configuration */}

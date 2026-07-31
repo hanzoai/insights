@@ -2,11 +2,11 @@ import { useActions, useAsyncActions, useValues } from 'kea'
 import { useLayoutEffect, useState } from 'react'
 
 import { IconBell, IconCheck } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonSwitch, LemonTextArea, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Switch, TextArea, Link } from '@hanzo/elements'
 
 import { BasicCard } from 'lib/components/Cards/BasicCard'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner'
-import { IconLink } from 'lib/lemon-ui/icons'
+import { SpinnerOverlay } from 'lib/elements/Spinner'
+import { IconLink } from 'lib/elements/icons'
 import { Label } from 'lib/ui/Label/Label'
 
 import { EnrichedEarlyAccessFeature, featurePreviewsLogic } from './featurePreviewsLogic'
@@ -27,7 +27,7 @@ export function FeaturePreviews(): JSX.Element {
     return (
         <div className="flex flex-col gap-2">
             {failedToLoadFeaturePreviews && (
-                <LemonBanner type="warning" className="mb-2">
+                <Banner type="warning" className="mb-2">
                     <div className="flex flex-col gap-2">
                         <span>
                             We couldn't load our internal feature flags. This could be due to the presence of adblockers
@@ -42,7 +42,7 @@ export function FeaturePreviews(): JSX.Element {
                             .
                         </span>
                     </div>
-                </LemonBanner>
+                </Banner>
             )}
             {rawEarlyAccessFeaturesLoading ? (
                 <SpinnerOverlay />
@@ -118,7 +118,7 @@ function ConceptPreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
             title={
                 <div className="flex items-center gap-1">
                     <h4 className="font-bold mb-0">{name}</h4>
-                    <LemonButton
+                    <Button
                         icon={<IconLink />}
                         size="xsmall"
                         onClick={() => copyExternalFeaturePreviewLink(flagKey)}
@@ -132,7 +132,7 @@ function ConceptPreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
             }
             actions={
                 <div className="flex flex-col gap-2">
-                    <LemonButton
+                    <Button
                         type="primary"
                         disabledReason={
                             enabled && "You have already expressed your interest. We'll contact you when it's ready"
@@ -143,7 +143,7 @@ function ConceptPreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
                         className="w-fit"
                     >
                         {enabled ? 'Registered' : 'Get notified'}
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         />
@@ -171,7 +171,7 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
             title={
                 <div className="flex items-center gap-1">
                     <Label className="flex items-center gap-2 cursor-pointer" htmlFor={`${feature.flagKey}-switch`}>
-                        <LemonSwitch
+                        <Switch
                             checked={enabled}
                             onChange={(newChecked) =>
                                 updateEarlyAccessFeatureEnrollment(flagKey, newChecked, feature.stage)
@@ -180,7 +180,7 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
                         />
                         <h4 className="font-bold mb-0">{name}</h4>
                     </Label>
-                    <LemonButton
+                    <Button
                         icon={<IconLink />}
                         size="xsmall"
                         onClick={() => copyExternalFeaturePreviewLink(flagKey)}
@@ -210,7 +210,7 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
         >
             {isFeedbackActive && (
                 <div className="flex flex-col gap-2 max-w-prose">
-                    <LemonTextArea
+                    <TextArea
                         autoFocus
                         placeholder={`What's your experience with ${name} been like?`}
                         className="mt-2"
@@ -229,7 +229,7 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
                         }}
                     />
                     <div className="flex items-center gap-2">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={() => {
                                 cancelEarlyAccessFeatureFeedback()
@@ -237,8 +237,8 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
                             }}
                         >
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="primary"
                             onClick={() => {
                                 void submitEarlyAccessFeatureFeedback(feedback).then(() => {
@@ -250,7 +250,7 @@ function FeaturePreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
                             center
                         >
                             Submit feedback
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             )}

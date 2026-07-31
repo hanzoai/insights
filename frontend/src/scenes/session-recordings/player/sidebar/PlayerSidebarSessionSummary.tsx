@@ -17,11 +17,11 @@ import {
     IconThumbsUp,
     IconWarning,
 } from '@hanzo/icons'
-import { LemonBanner, LemonDivider, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Divider, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Spinner } from 'lib/elements/Spinner'
 import { playerMetaLogic } from 'scenes/session-recordings/player/player-meta/playerMetaLogic'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 import { urls } from 'scenes/urls'
@@ -120,13 +120,13 @@ function SessionSegmentCollapse({
     const { height: contentHeight, ref: contentRef } = useResizeObserver({ box: 'border-box' })
 
     return (
-        <div className={clsx('LemonCollapse', className)}>
-            <div className="LemonCollapsePanel" aria-expanded={isExpanded}>
-                <LemonButton
+        <div className={clsx('Collapse', className)}>
+            <div className="CollapsePanel" aria-expanded={isExpanded}>
+                <Button
                     fullWidth
                     className={clsx(
-                        'LemonCollapsePanel__header hover:bg-primary-alt-highlight border-l-[5px]',
-                        !actionsPresent && 'LemonCollapsePanel__header--disabled',
+                        'CollapsePanel__header hover:bg-primary-alt-highlight border-l-[5px]',
+                        !actionsPresent && 'CollapsePanel__header--disabled',
                         isFailed && 'border-l-danger'
                     )}
                     onClick={actionsPresent ? () => setIsExpanded(!isExpanded) : undefined}
@@ -135,11 +135,11 @@ function SessionSegmentCollapse({
                     disabled={!actionsPresent}
                 >
                     {header}
-                </LemonButton>
+                </Button>
                 <Transition in={isExpanded} timeout={200} mountOnEnter unmountOnExit>
                     {(status) => (
                         <div
-                            className="LemonCollapsePanel__body"
+                            className="CollapsePanel__body"
                             // eslint-disable-next-line react/forbid-dom-props
                             style={
                                 status === ENTERING || status === ENTERED
@@ -150,7 +150,7 @@ function SessionSegmentCollapse({
                             }
                             aria-busy={status.endsWith('ing')}
                         >
-                            <div className="LemonCollapsePanel__content" ref={contentRef}>
+                            <div className="CollapsePanel__content" ref={contentRef}>
                                 {content}
                             </div>
                         </div>
@@ -221,23 +221,23 @@ function getIssueTags(event: SessionKeyAction): JSX.Element[] {
     const tags: JSX.Element[] = []
     if (event.abandonment) {
         tags.push(
-            <LemonTag key="abandonment" size="small" type="warning">
+            <Tag key="abandonment" size="small" type="warning">
                 abandoned
-            </LemonTag>
+            </Tag>
         )
     }
     if (event.confusion) {
         tags.push(
-            <LemonTag key="confusion" size="small" type="warning">
+            <Tag key="confusion" size="small" type="warning">
                 confusion
-            </LemonTag>
+            </Tag>
         )
     }
     if (event.exception) {
         tags.push(
-            <LemonTag key="exception" size="small" type={event.exception === 'blocking' ? 'danger' : 'warning'}>
+            <Tag key="exception" size="small" type={event.exception === 'blocking' ? 'danger' : 'warning'}>
                 {event.exception}
-            </LemonTag>
+            </Tag>
         )
     }
     return tags
@@ -262,9 +262,9 @@ function SessionSegmentView({
                             {segmentOutcome && Object.keys(segmentOutcome).length > 0 ? (
                                 <div>
                                     {segmentOutcome.success ? null : (
-                                        <LemonTag size="small" type="default">
+                                        <Tag size="small" type="default">
                                             failed
-                                        </LemonTag>
+                                        </Tag>
                                     )}
                                 </div>
                             ) : (
@@ -357,9 +357,9 @@ function SessionSummaryKeyActions({
                                 <div className="text-xs break-words">{event.description}</div>
                                 <div className="flex flex-wrap gap-1 mt-2">
                                     {event.milliseconds_since_start === 0 && (
-                                        <LemonTag size="small" type="default">
+                                        <Tag size="small" type="default">
                                             before start
-                                        </LemonTag>
+                                        </Tag>
                                     )}
                                     {getIssueTags(event).map((tag, i) => (
                                         <React.Fragment key={i}>{tag}</React.Fragment>
@@ -420,9 +420,9 @@ function SessionSummaryTitle(): JSX.Element {
         <h3 className="text-lg font-semibold mt-2 flex items-center gap-2">
             <IconAIText />
             AI summary
-            <LemonTag type="warning" size="medium">
+            <Tag type="warning" size="medium">
                 BETA
-            </LemonTag>
+            </Tag>
         </h3>
     )
 }
@@ -442,11 +442,11 @@ function SessionSummarySubtitle({ sessionId }: { sessionId: string }): JSX.Eleme
 
 function SessionSummaryOutcomeBanner({ sessionSummary }: { sessionSummary: SessionSummaryContent }): JSX.Element {
     return (
-        <LemonBanner type={sessionSummary?.session_outcome?.success ? 'success' : 'error'} className="mb-4">
+        <Banner type={sessionSummary?.session_outcome?.success ? 'success' : 'error'} className="mb-4">
             <div className="text-sm font-normal">
                 <strong>Session outcome:</strong> {sessionSummary?.session_outcome?.description}
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }
 
@@ -489,7 +489,7 @@ function SessionSummaryFeedback(): JSX.Element {
         <div className="text-right mb-2 mt-4">
             <p>Is this a good summary?</p>
             <div className="flex flex-row gap-2 justify-end">
-                <LemonButton
+                <Button
                     size="xsmall"
                     type="primary"
                     icon={<IconThumbsUp />}
@@ -498,7 +498,7 @@ function SessionSummaryFeedback(): JSX.Element {
                         sessionSummaryFeedback('good')
                     }}
                 />
-                <LemonButton
+                <Button
                     size="xsmall"
                     type="primary"
                     icon={<IconThumbsDown />}
@@ -623,7 +623,7 @@ function SessionSummary(): JSX.Element {
                                 />
                             </div>
                         )}
-                        <LemonDivider />
+                        <Divider />
                     </div>
                     <SessionSummaryComponent.Segments sessionSummary={sessionSummary} />
                     <SessionSummaryComponent.Feedback />
@@ -654,7 +654,7 @@ function LoadSessionSummaryButton(): JSX.Element {
 
     return (
         <div className="space-y-2">
-            <LemonButton
+            <Button
                 size="small"
                 type="primary"
                 icon={<IconMagicWand />}
@@ -665,7 +665,7 @@ function LoadSessionSummaryButton(): JSX.Element {
                 onClick={summarizeSession}
             >
                 Use AI to summarise this session
-            </LemonButton>
+            </Button>
 
             {loading ? (
                 <div className="text-sm">

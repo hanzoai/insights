@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDivider, Link } from '@hanzo/lemon-ui'
+import { Button, Divider, Link } from '@hanzo/elements'
 
 import { playerSettingsLogic } from '../player/playerSettingsLogic'
 import { sessionRecordingsPlaylistLogic } from './sessionRecordingsPlaylistLogic'
@@ -17,7 +17,7 @@ export const SessionRecordingsPlaylistTroubleshooting = (): JSX.Element => {
                 <ul className="deprecated-space-y-1">
                     {hiddenRecordingsCount > 0 && (
                         <li>
-                            <LemonButton
+                            <Button
                                 type="secondary"
                                 fullWidth={true}
                                 size="xsmall"
@@ -28,11 +28,11 @@ export const SessionRecordingsPlaylistTroubleshooting = (): JSX.Element => {
                                 }}
                             >
                                 Show {hiddenRecordingsCount} hidden recordings
-                            </LemonButton>
+                            </Button>
                         </li>
                     )}
                     <li>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             fullWidth={true}
                             size="xsmall"
@@ -40,15 +40,15 @@ export const SessionRecordingsPlaylistTroubleshooting = (): JSX.Element => {
                             onClick={() => setFilters({ date_from: '-30d' })}
                         >
                             Search over the last 30 days
-                        </LemonButton>
+                        </Button>
                     </li>
-                    <LemonDivider dashed={true} />
+                    <Divider dashed={true} />
                     <li>
                         <Link to="https://hanzo.ai/docs/session-replay/data-retention" target="_blank">
                             Recordings might be outside the retention period
                         </Link>
                     </li>
-                    <LemonDivider dashed={true} />
+                    <Divider dashed={true} />
                     <li>
                         <Link
                             to="https://hanzo.ai/docs/session-replay/troubleshooting#4-adtracking-blockers"

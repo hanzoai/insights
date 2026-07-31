@@ -5,7 +5,7 @@ import { useValues } from 'kea'
 import React from 'react'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton, PopoverReferenceContext, Tooltip } from '@hanzo/lemon-ui'
+import { Button, PopoverReferenceContext, Tooltip } from '@hanzo/elements'
 
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
 import { midEllipsis } from 'lib/utils'
@@ -72,7 +72,7 @@ export const PropertyFilterButton = React.forwardRef<HTMLElement, PropertyFilter
                 {closable && !disabledReason && (
                     // The context below prevents close button from going into active status when filter popover is open
                     <PopoverReferenceContext.Provider value={null}>
-                        <LemonButton
+                        <Button
                             size="xsmall"
                             icon={<IconX />}
                             onClick={(e) => {

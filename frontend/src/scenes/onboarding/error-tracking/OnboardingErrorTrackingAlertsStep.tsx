@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonButtonProps, LemonInput, LemonSelect, LemonTable, Link } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Input, Select, Table, Link } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { InsightsFunctionIcon } from 'scenes/insights-functions/configuration/InsightsFunctionIcon'
 
 import { IntegrationType, OnboardingStepKey } from '~/types'
@@ -67,7 +67,7 @@ export const OnboardingErrorTrackingAlertsStep: OnboardingStepComponentType = ()
         >
             <p>Get notified when a new issue occurs. Don't worry this can always be reconfigured later.</p>
             {integration === null ? (
-                <LemonTable
+                <Table
                     showHeader={false}
                     columns={[
                         {
@@ -103,12 +103,12 @@ export const OnboardingErrorTrackingAlertsStep: OnboardingStepComponentType = ()
                         selectedSlackIntegration={selectedSlackIntegration}
                     />
                     <div className="flex justify-end gap-2">
-                        <LemonButton center type="secondary" onClick={() => setIntegration(null)}>
+                        <Button center type="secondary" onClick={() => setIntegration(null)}>
                             Back
-                        </LemonButton>
-                        <LemonButton type="primary" center htmlType="submit" loading={isConnectionConfigSubmitting}>
+                        </Button>
+                        <Button type="primary" center htmlType="submit" loading={isConnectionConfigSubmitting}>
                             Next
-                        </LemonButton>
+                        </Button>
                     </div>
                 </Form>
             )}
@@ -128,7 +128,7 @@ const FormFields = ({
     selectedSlackIntegration?: IntegrationType
 }): JSX.Element | null => {
     return integration === 'discord' ? (
-        <LemonField
+        <Field
             name="discordWebhookUrl"
             label="Webhook URL"
             help={
@@ -140,10 +140,10 @@ const FormFields = ({
                 </p>
             }
         >
-            <LemonInput />
-        </LemonField>
+            <Input />
+        </Field>
     ) : integration === 'microsoft-teams' ? (
-        <LemonField
+        <Field
             name="microsoftTeamsWebhookUrl"
             label="Webhook URL"
             help={
@@ -155,31 +155,31 @@ const FormFields = ({
                 </p>
             }
         >
-            <LemonInput />
-        </LemonField>
+            <Input />
+        </Field>
     ) : integration === 'slack' && slackIntegrations ? (
         <>
-            <LemonField name="slackWorkspaceId" label="Workspace">
-                <LemonSelect
+            <Field name="slackWorkspaceId" label="Workspace">
+                <Select
                     options={slackIntegrations.map((integration) => ({
                         label: integration.display_name,
                         value: integration.id,
                     }))}
                 />
-            </LemonField>
+            </Field>
             {selectedSlackIntegration && (
-                <LemonField name="slackChannelId" label="Channel">
+                <Field name="slackChannelId" label="Channel">
                     {({ value, onChange }) => (
                         <SlackChannelPicker value={value} onChange={onChange} integration={selectedSlackIntegration} />
                     )}
-                </LemonField>
+                </Field>
             )}
         </>
     ) : null
 }
 
-const ConnectButton = (buttonProps: Pick<LemonButtonProps, 'onClick' | 'to'>): JSX.Element => (
-    <LemonButton {...buttonProps} className="py-1" fullWidth type="primary" size="small">
+const ConnectButton = (buttonProps: Pick<ButtonProps, 'onClick' | 'to'>): JSX.Element => (
+    <Button {...buttonProps} className="py-1" fullWidth type="primary" size="small">
         Connect
-    </LemonButton>
+    </Button>
 )

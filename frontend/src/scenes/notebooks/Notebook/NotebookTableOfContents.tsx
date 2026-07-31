@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonWidget, Link } from '@hanzo/lemon-ui'
+import { Widget, Link } from '@hanzo/elements'
 
 import { notebookLogic } from './notebookLogic'
 import { notebookSettingsLogic } from './notebookSettingsLogic'
@@ -18,7 +18,7 @@ export function NotebookTableOfContents(): JSX.Element {
     }
 
     return (
-        <LemonWidget title="Table of Contents" onClose={() => setShowTableOfContents(false)}>
+        <Widget title="Table of Contents" onClose={() => setShowTableOfContents(false)}>
             {tableOfContents.length === 0 ? (
                 <div>Start editing your Notebook to see the outline.</div>
             ) : (
@@ -30,6 +30,6 @@ export function NotebookTableOfContents(): JSX.Element {
                     </div>
                 ))
             )}
-        </LemonWidget>
+        </Widget>
     )
 }

@@ -13,7 +13,7 @@ import {
 } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconQuestionAnswer, IconRobot } from 'lib/lemon-ui/icons'
+import { IconQuestionAnswer, IconRobot } from 'lib/elements/icons'
 import { Scene } from 'scenes/sceneTypes'
 
 import { iconForType } from '~/layout/panel-layout/ProjectTree/defaultTree'

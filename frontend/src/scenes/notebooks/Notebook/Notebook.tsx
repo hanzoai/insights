@@ -9,7 +9,7 @@ import { NotFound } from 'lib/components/NotFound'
 import { EditorFocusPosition, JSONContent } from 'lib/components/RichContentEditor/types'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
+import { Banner } from 'lib/elements/Banner'
 import { NotebookLogicProps, notebookLogic } from 'scenes/notebooks/Notebook/notebookLogic'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
@@ -104,7 +104,7 @@ export function Notebook({
                     ref={ref}
                 >
                     {isTemplate && (
-                        <LemonBanner
+                        <Banner
                             type="info"
                             action={{
                                 onClick: duplicateNotebook,
@@ -113,11 +113,11 @@ export function Notebook({
                             className="mb-6"
                         >
                             <b>This is a template.</b> You can create a copy of it to edit and use as your own.
-                        </LemonBanner>
+                        </Banner>
                     )}
                     <NotebookHistoryWarning />
                     {shortId === SCRATCHPAD_NOTEBOOK.short_id ? (
-                        <LemonBanner
+                        <Banner
                             type="info"
                             action={{
                                 children: 'Convert to notebook',
@@ -127,7 +127,7 @@ export function Notebook({
                         >
                             This is your scratchpad. It is only visible to you and is persisted only in this browser.
                             It's a great place to gather ideas before turning into a saved Notebook!
-                        </LemonBanner>
+                        </Banner>
                     ) : null}
 
                     <div className="Notebook_content">

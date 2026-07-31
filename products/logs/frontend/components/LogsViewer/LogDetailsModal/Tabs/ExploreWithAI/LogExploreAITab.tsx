@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { BindLogic } from 'kea'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { EmptyState } from './EmptyState'
 import { ExplanationContent } from './ExplanationContent'
@@ -38,9 +38,9 @@ function LogExploreAITabContent({
 
     if (explanationError) {
         return (
-            <LemonBanner type="error" className="m-4">
+            <Banner type="error" className="m-4">
                 {explanationError}
-            </LemonBanner>
+            </Banner>
         )
     }
 

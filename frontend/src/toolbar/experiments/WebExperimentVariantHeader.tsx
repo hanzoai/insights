@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 
 import { IconTrash } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Button } from 'lib/elements/Button'
+import { Tag } from 'lib/elements/Tag'
 
 import { experimentsTabLogic } from '~/toolbar/experiments/experimentsTabLogic'
 
@@ -19,13 +19,13 @@ export function WebExperimentVariantHeader({ variant }: WebExperimentVariantHead
             <div className="flex items-center gap-2">
                 <h2>{variant}</h2>
                 {selectedVariant === variant && (
-                    <LemonTag className="px-1 py-0.5 font-semibold" size="small" type="success">
+                    <Tag className="px-1 py-0.5 font-semibold" size="small" type="success">
                         Currently applied
-                    </LemonTag>
+                    </Tag>
                 )}
             </div>
             <div className="flex items-center gap-2">
-                <LemonTag className="px-1 py-0.5 font-semibold" size="small" type="muted">
+                <Tag className="px-1 py-0.5 font-semibold" size="small" type="muted">
                     <span>
                         {`Rollout: ${
                             experimentForm.variants && experimentForm.variants[variant]
@@ -33,9 +33,9 @@ export function WebExperimentVariantHeader({ variant }: WebExperimentVariantHead
                                 : 0
                         } %`}
                     </span>
-                </LemonTag>
+                </Tag>
                 {removeVariantAvailable && variant !== 'control' && (
-                    <LemonButton
+                    <Button
                         icon={<IconTrash />}
                         size="small"
                         className="shrink"

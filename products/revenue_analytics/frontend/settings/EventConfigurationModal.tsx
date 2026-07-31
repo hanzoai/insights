@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonInput, LemonModal, LemonSelect, LemonSwitch, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Input, Modal, Select, Switch, Link } from '@hanzo/elements'
 
 import { CurrencyDropdown } from 'lib/components/BaseCurrency/CurrencyDropdown'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -99,18 +99,18 @@ export function EventConfigurationModal({ event, onClose }: EventConfigurationMo
     }
 
     return (
-        <LemonModal isOpen onClose={handleClose} width={800}>
-            <LemonModal.Header>
+        <Modal isOpen onClose={handleClose} width={800}>
+            <Modal.Header>
                 <h3>{originalEvent ? `Edit Event: ${originalEvent?.eventName}` : 'Add Revenue Event'}</h3>
-            </LemonModal.Header>
+            </Modal.Header>
 
-            <LemonModal.Content>
+            <Modal.Content>
                 <div className="space-y-4">
                     {!originalEvent && (
-                        <LemonBanner type="info" className="text-sm">
+                        <Banner type="info" className="text-sm">
                             <strong>How it works:</strong> Insights will track this event and use these properties for
                             revenue calculations. You can always modify these settings later.
-                        </LemonBanner>
+                        </Banner>
                     )}
 
                     {/* Event Selection */}
@@ -239,7 +239,7 @@ export function EventConfigurationModal({ event, onClose }: EventConfigurationMo
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <LemonSwitch
+                        <Switch
                             checked={currentEvent?.currencyAwareDecimal || false}
                             onChange={(checked) => {
                                 if (currentEvent?.eventName) {
@@ -331,7 +331,7 @@ export function EventConfigurationModal({ event, onClose }: EventConfigurationMo
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <label className="text-sm font-medium">Dropoff Days</label>
-                                <LemonInput
+                                <Input
                                     type="number"
                                     min={1}
                                     max={365}
@@ -353,7 +353,7 @@ export function EventConfigurationModal({ event, onClose }: EventConfigurationMo
 
                             <div className="space-y-1">
                                 <label className="text-sm font-medium">Dropoff Mode</label>
-                                <LemonSelect<SubscriptionDropoffMode>
+                                <Select<SubscriptionDropoffMode>
                                     value={currentEvent?.subscriptionDropoffMode || 'last_event'}
                                     onChange={(value) => {
                                         if (currentEvent?.eventName && value) {
@@ -376,18 +376,18 @@ export function EventConfigurationModal({ event, onClose }: EventConfigurationMo
                         </div>
                     </div>
                 </div>
-            </LemonModal.Content>
+            </Modal.Content>
 
-            <LemonModal.Footer>
+            <Modal.Footer>
                 <div className="flex justify-end gap-2">
-                    <LemonButton type="secondary" onClick={handleClose}>
+                    <Button type="secondary" onClick={handleClose}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={handleSave} disabledReason={saveEventsDisabledReason}>
+                    </Button>
+                    <Button type="primary" onClick={handleSave} disabledReason={saveEventsDisabledReason}>
                         {originalEvent ? 'Update Event' : 'Add Event'}
-                    </LemonButton>
+                    </Button>
                 </div>
-            </LemonModal.Footer>
-        </LemonModal>
+            </Modal.Footer>
+        </Modal>
     )
 }

@@ -1,6 +1,6 @@
 import { BreakPointFunction } from 'kea'
 
-import { InsightsComDocsURL } from 'lib/lemon-ui/Link/Link'
+import { InsightsComDocsURL } from 'lib/elements/Link/Link'
 import { UnexpectedNeverError, getDefaultInterval } from 'lib/utils'
 
 import { insightsqlQuery } from '~/queries/query'

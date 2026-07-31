@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { API_KEY_SCOPE_PRESETS } from 'lib/scopes'
 import { personalAPIKeysLogic } from 'scenes/settings/user/personalAPIKeysLogic'
@@ -22,14 +22,14 @@ export function SourceMapsAPIKeyBanner(): JSX.Element {
     }
 
     return (
-        <LemonBanner type="info" className="mb-4">
+        <Banner type="info" className="mb-4">
             <div className="flex items-center gap-2 justify-between">
                 The project API key used to initialize Insights is not the same as the personal API key required to
                 upload source maps. If you want to upload source maps, you can create a personal API key here.
-                <LemonButton type="primary" onClick={openAPIKeyModal}>
+                <Button type="primary" onClick={openAPIKeyModal}>
                     Create personal API key
-                </LemonButton>
+                </Button>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

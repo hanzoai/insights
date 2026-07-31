@@ -35,7 +35,7 @@
         }
 
         &__tabs {
-            & .LemonTabs__tab-content {
+            & .Tabs__tab-content {
                 padding: 10px 0;
             }
         }
@@ -104,7 +104,7 @@
         }
     }
 
-    .LemonModal & {
+    .Modal & {
         .SessionRecordingPlayer__body {
             height: calc(90vh - 15rem);
         }

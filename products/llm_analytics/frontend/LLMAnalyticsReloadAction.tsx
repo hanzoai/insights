@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Spinner } from 'lib/elements/Spinner'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 
 import { dataNodeCollectionLogic } from '~/queries/nodes/DataNode/dataNodeCollectionLogic'
@@ -58,7 +58,7 @@ export function LLMAnalyticsReloadAction(): JSX.Element {
     }
 
     return (
-        <LemonButton
+        <Button
             onClick={handleRefresh}
             type="secondary"
             icon={isLoading ? <Spinner textColored /> : <IconRefresh />}
@@ -91,6 +91,6 @@ export function LLMAnalyticsReloadAction(): JSX.Element {
                     'Refresh'
                 )}
             </span>
-        </LemonButton>
+        </Button>
     )
 }

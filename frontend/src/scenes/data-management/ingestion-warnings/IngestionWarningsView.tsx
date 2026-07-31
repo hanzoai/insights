@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput } from '@hanzo/lemon-ui'
+import { Input } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Sparkline } from 'lib/components/Sparkline'
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import { ReadingMascot } from 'lib/components/mascots'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { Link } from 'lib/lemon-ui/Link'
+import { Table } from 'lib/elements/Table'
+import { Link } from 'lib/elements/Link'
 import { Scene } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
 import { urls } from 'scenes/urls'
@@ -301,14 +301,14 @@ export function IngestionWarningsView(): JSX.Element {
                 }}
             />
             <SceneSection>
-                <LemonInput
+                <Input
                     fullWidth
                     value={searchQuery}
                     onChange={setSearchQuery}
                     type="search"
                     placeholder="Try pasting a person or session id or an ingestion warning type"
                 />
-                <LemonTable
+                <Table
                     dataSource={data}
                     loading={dataLoading}
                     columns={[
@@ -382,7 +382,7 @@ export function IngestionWarningsView(): JSX.Element {
 
 function RenderNestedWarnings(warningSummary: IngestionWarningSummary): JSX.Element {
     return (
-        <LemonTable
+        <Table
             dataSource={warningSummary.warnings}
             columns={[
                 {

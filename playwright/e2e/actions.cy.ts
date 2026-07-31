@@ -4,7 +4,7 @@ import { expect, test } from '../utils/playwright-test-base'
 
 const createAction = async (page: Page, actionName: string): Promise<void> => {
     await page.locator('[data-attr=create-action]').first().click()
-    await expect(page.locator('.LemonButton')).toContainText('From event or pageview')
+    await expect(page.locator('.Button')).toContainText('From event or pageview')
     await page.locator('[data-attr=new-action-pageview]').click({ force: true })
     await expect(page.locator('input[name="item-name-large"]')).toBeVisible()
 

@@ -1,4 +1,4 @@
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 
@@ -11,16 +11,16 @@ export interface InsightsFunctionStatusTagProps {
 export function InsightsFunctionStatusTag({ status }: InsightsFunctionStatusTagProps): JSX.Element | null {
     switch (status) {
         case 'alpha':
-            return <LemonTag type="danger">Experimental</LemonTag>
+            return <Tag type="danger">Experimental</Tag>
         case 'beta':
-            return <LemonTag type="completion">Beta</LemonTag>
+            return <Tag type="completion">Beta</Tag>
         case 'stable':
             return null
         case 'coming_soon':
-            return <LemonTag type="muted">Roadmap</LemonTag>
+            return <Tag type="muted">Roadmap</Tag>
         case 'hidden':
-            return <LemonTag type="muted">Hidden</LemonTag>
+            return <Tag type="muted">Hidden</Tag>
         default:
-            return status ? <LemonTag type="highlight">{capitalizeFirstLetter(status)}</LemonTag> : null
+            return status ? <Tag type="highlight">{capitalizeFirstLetter(status)}</Tag> : null
     }
 }

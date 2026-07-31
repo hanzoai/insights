@@ -4,10 +4,10 @@ import { IconGear } from '@hanzo/icons'
 
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
 import { SettingsSnapshot } from 'lib/components/SettingsSnapshot'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { Popover } from 'lib/lemon-ui/Popover'
+import { Button } from 'lib/elements/Button'
+import { Collapse } from 'lib/elements/Collapse'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Popover } from 'lib/elements/Popover'
 import { playerMetaLogic } from 'scenes/session-recordings/player/player-meta/playerMetaLogic'
 
 import { PropertyOperator, UniversalFiltersGroup } from '~/types'
@@ -88,7 +88,7 @@ export function PlayerSidebarOverviewGrid({
             <div className="rounded border bg-surface-primary">
                 {loading ? (
                     <div className="flex flex-col deprecated-space-y-1">
-                        <LemonSkeleton.Row repeat={6} className="h-5" />
+                        <Skeleton.Row repeat={6} className="h-5" />
                     </div>
                 ) : (
                     <OverviewGrid>
@@ -98,7 +98,7 @@ export function PlayerSidebarOverviewGrid({
                             overlay={<PlayerSidebarEditPinnedPropertiesPopover />}
                             placement="bottom"
                         >
-                            <LemonButton
+                            <Button
                                 icon={<IconGear />}
                                 onClick={() => setIsPropertyPopoverOpen(!isPropertyPopoverOpen)}
                                 fullWidth
@@ -106,7 +106,7 @@ export function PlayerSidebarOverviewGrid({
                                 type="secondary"
                             >
                                 Edit pinned overview properties
-                            </LemonButton>
+                            </Button>
                         </Popover>
                         {displayOverviewItems.map((item) => {
                             const isFilterable =
@@ -150,7 +150,7 @@ export function PlayerSidebarOverviewGrid({
                         })}
                     </OverviewGrid>
                 )}
-                <LemonCollapse
+                <Collapse
                     panels={[
                         {
                             key: 'replay-settings',

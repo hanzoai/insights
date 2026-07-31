@@ -1,6 +1,6 @@
 import { connect, kea, path, props, selectors } from 'kea'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS, type FeatureFlagKey } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { QueryCard } from 'lib/components/Cards/InsightCard/QueryCard'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { Dashboard } from 'scenes/dashboard/Dashboard'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
@@ -65,7 +65,7 @@ export function GroupDashboardCard(): JSX.Element {
         <div className="flex flex-col gap-4">
             <div className="flex flex-row justify-between items-center">
                 <h2>Insights</h2>
-                <LemonButton
+                <Button
                     type="secondary"
                     disabled={creatingDetailDashboard}
                     onClick={() => {
@@ -75,7 +75,7 @@ export function GroupDashboardCard(): JSX.Element {
                     }}
                 >
                     Customize
-                </LemonButton>
+                </Button>
             </div>
             <div className="grid grid-cols-2 gap-2">
                 <QueryCard

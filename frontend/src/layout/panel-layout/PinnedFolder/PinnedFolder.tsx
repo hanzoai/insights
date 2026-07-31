@@ -4,7 +4,7 @@ import { IconCheck, IconGear, IconPencil, IconPlusSmall } from '@hanzo/icons'
 
 import { ItemSelectModalButton } from 'lib/components/FileSystem/ItemSelectModal/ItemSelectModal'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { IconBlank } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {

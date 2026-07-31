@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconDirectedGraph, IconList } from '@hanzo/icons'
-import { LemonInput, LemonSegmentedButton, Spinner } from '@hanzo/lemon-ui'
+import { Input, SegmentedButton, Spinner } from '@hanzo/elements'
 
 import { dataModelingLogic } from './dataModelingLogic'
 import { GraphView } from './modeling/GraphView'
@@ -13,10 +13,10 @@ function ToolBar(): JSX.Element {
     return (
         <div className="flex gap-2 items-center">
             {(viewNodes.length > 0 || searchTerm) && (
-                <LemonInput type="search" placeholder="Search models..." onChange={setSearchTerm} value={searchTerm} />
+                <Input type="search" placeholder="Search models..." onChange={setSearchTerm} value={searchTerm} />
             )}
             <div className="flex gap-2 ml-auto">
-                <LemonSegmentedButton
+                <SegmentedButton
                     value={viewMode}
                     onChange={(value) => setViewMode(value)}
                     options={[

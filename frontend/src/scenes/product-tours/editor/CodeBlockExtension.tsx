@@ -2,7 +2,7 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { NodeViewContent, NodeViewProps, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
 import { common, createLowlight } from 'lowlight'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 const lowlight = createLowlight(common)
 lowlight.register('plaintext', () => ({ contains: [] }))
@@ -36,7 +36,7 @@ function CodeBlockComponent({ node, updateAttributes }: NodeViewProps): JSX.Elem
     return (
         <NodeViewWrapper className="code-block-wrapper">
             <div className="code-block-lang-select" contentEditable={false}>
-                <LemonSelect
+                <Select
                     size="xsmall"
                     value={language}
                     onChange={(value) => updateAttributes({ language: value || '' })}

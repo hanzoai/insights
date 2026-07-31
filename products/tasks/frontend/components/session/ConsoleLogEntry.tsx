@@ -1,4 +1,4 @@
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { LogLevel } from '../../lib/parse-logs'
 
@@ -23,9 +23,9 @@ export function ConsoleLogEntry({ level, message, timestamp }: ConsoleLogEntryPr
             {timestamp && (
                 <span className="text-xs text-muted shrink-0">{new Date(timestamp).toLocaleTimeString()}</span>
             )}
-            <LemonTag type={config.type} size="small" className="shrink-0 uppercase">
+            <Tag type={config.type} size="small" className="shrink-0 uppercase">
                 {level}
-            </LemonTag>
+            </Tag>
             <span className="text-sm flex-1 break-words">{message}</span>
         </div>
     )

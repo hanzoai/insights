@@ -5,20 +5,20 @@ import { useRef } from 'react'
 
 import { IconInfo, IconX } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonDivider,
-    LemonInput,
-    LemonLabel,
-    LemonSelect,
-    LemonSkeleton,
-    LemonSwitch,
-    LemonTag,
+    Banner,
+    Button,
+    Divider,
+    Input,
+    Label,
+    Select,
+    Skeleton,
+    Switch,
+    Tag,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 
 import { insightsFunctionConfigurationLogic } from '../insightsFunctionConfigurationLogic'
@@ -62,7 +62,7 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                     </div>
 
                     {!expanded ? (
-                        <LemonButton
+                        <Button
                             data-attr="expand-fn-testing"
                             type="secondary"
                             disabledReason={
@@ -77,12 +77,12 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                             }}
                         >
                             Start testing
-                        </LemonButton>
+                        </Button>
                     ) : (
                         <>
-                            <LemonField name="mock_request">
+                            <Field name="mock_request">
                                 {({ value, onChange }) => (
-                                    <LemonSwitch
+                                    <Switch
                                         onChange={(v) => onChange(!v)}
                                         checked={!value}
                                         data-attr="toggle-fn-test-mocking"
@@ -104,10 +104,10 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                                         }
                                     />
                                 )}
-                            </LemonField>
+                            </Field>
 
                             {expanded && (
-                                <LemonButton
+                                <Button
                                     data-attr="hide-fn-testing"
                                     icon={<IconX />}
                                     onClick={() => toggleExpanded()}
@@ -120,27 +120,27 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
 
                 {expanded ? (
                     <>
-                        <LemonBanner type={configurationChanged ? 'warning' : 'info'} className="mb-2">
+                        <Banner type={configurationChanged ? 'warning' : 'info'} className="mb-2">
                             {configurationChanged ? <span>You have unsaved changes.</span> : null}
                             <span>
                                 Testing is performed against the latest saved configuration and will create real events.
                             </span>
-                        </LemonBanner>
+                        </Banner>
 
                         <div className="flex flex-col gap-2">
-                            <LemonField name="method" label="HTTP method">
-                                <LemonSelect
+                            <Field name="method" label="HTTP method">
+                                <Select
                                     options={[
                                         { label: 'POST', value: 'POST' },
                                         { label: 'GET', value: 'GET' },
                                     ]}
                                 />
-                            </LemonField>
+                            </Field>
 
-                            <LemonField name="query" label="HTTP Query Parameters">
-                                <LemonInput placeholder="e.g. ph_event=event&ph_distinct_id=my-distinct-id" />
-                            </LemonField>
-                            <LemonField name="headers" label="HTTP Headers">
+                            <Field name="query" label="HTTP Query Parameters">
+                                <Input placeholder="e.g. ph_event=event&ph_distinct_id=my-distinct-id" />
+                            </Field>
+                            <Field name="headers" label="HTTP Headers">
                                 {({ value, onChange }) => (
                                     <CodeEditorResizeable
                                         language="json"
@@ -149,9 +149,9 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                                         maxHeight={200}
                                     />
                                 )}
-                            </LemonField>
+                            </Field>
                             {testInvocation.method !== 'GET' && (
-                                <LemonField name="body" label="HTTP Body">
+                                <Field name="body" label="HTTP Body">
                                     {({ value, onChange }) => (
                                         <CodeEditorResizeable
                                             language="json"
@@ -160,16 +160,16 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                                             maxHeight={200}
                                         />
                                     )}
-                                </LemonField>
+                                </Field>
                             )}
-                            <LemonDivider className="my-4" />
+                            <Divider className="my-4" />
                             <div className="flex flex-col gap-2">
                                 <div className="flex gap-2 justify-between items-center">
-                                    <LemonLabel className="flex-1">
+                                    <Label className="flex-1">
                                         Response
                                         {testResult && (
                                             <>
-                                                <LemonTag
+                                                <Tag
                                                     type={
                                                         testResult.status >= 200 && testResult.status < 300
                                                             ? 'success'
@@ -177,16 +177,16 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                                                     }
                                                 >
                                                     {testResult.status}
-                                                </LemonTag>
+                                                </Tag>
                                             </>
                                         )}
-                                    </LemonLabel>
+                                    </Label>
                                     {testResult ? (
-                                        <LemonButton type="secondary" size="small" onClick={() => setTestResult(null)}>
+                                        <Button type="secondary" size="small" onClick={() => setTestResult(null)}>
                                             Clear
-                                        </LemonButton>
+                                        </Button>
                                     ) : null}
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         data-attr="test-fn-webhook"
                                         onClick={submitTestInvocation}
@@ -194,7 +194,7 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                                         size="small"
                                     >
                                         Test webhook
-                                    </LemonButton>
+                                    </Button>
                                 </div>
 
                                 {testResult ? (
@@ -202,14 +202,14 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
                                         <CodeSnippet thing="Response body">{testResult.body}</CodeSnippet>
                                     </div>
                                 ) : isTestInvocationSubmitting ? (
-                                    <LemonSkeleton className="h-12" />
+                                    <Skeleton className="h-12" />
                                 ) : (
                                     <p>No response yet</p>
                                 )}
                             </div>
                         </div>
 
-                        <LemonDivider className="my-4" />
+                        <Divider className="my-4" />
 
                         {/* Show an example curl request */}
                         <CodeSnippet thing="Example request">{exampleCurlRequest}</CodeSnippet>

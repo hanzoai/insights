@@ -1,7 +1,7 @@
 import { BuiltLogic, useActions, useMountedLogic, useValues } from 'kea'
 
 import { IconCheckCircle, IconRefresh } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonSelect } from '@hanzo/lemon-ui'
+import { Banner, Button, Select } from '@hanzo/elements'
 
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 
@@ -60,13 +60,13 @@ function EvalsTabContentInner({
 
     return (
         <div className="py-4">
-            <LemonBanner type="info" className="mb-4">
+            <Banner type="info" className="mb-4">
                 Manually triggered evaluations typically appear within seconds, but may take a few minutes to process.
                 Click Refresh to see new results.
-            </LemonBanner>
+            </Banner>
             <div className="flex justify-between items-center mb-4">
                 <div className="flex gap-2">
-                    <LemonSelect
+                    <Select
                         value={selectedEvaluationId}
                         onChange={setSelectedEvaluationId}
                         options={
@@ -81,7 +81,7 @@ function EvalsTabContentInner({
                         loading={evaluationsLoading}
                         className="w-80"
                     />
-                    <LemonButton
+                    <Button
                         type="primary"
                         size="small"
                         icon={<IconCheckCircle />}
@@ -95,9 +95,9 @@ function EvalsTabContentInner({
                         data-attr="run-evaluation-manual"
                     >
                         Run Evaluation
-                    </LemonButton>
+                    </Button>
                 </div>
-                <LemonButton
+                <Button
                     type="secondary"
                     icon={<IconRefresh />}
                     onClick={refreshGenerationEvaluationRuns}
@@ -105,7 +105,7 @@ function EvalsTabContentInner({
                     size="small"
                 >
                     Refresh
-                </LemonButton>
+                </Button>
             </div>
             <GenerationEvalRunsTable generationRunsLogic={generationRunsLogic} />
         </div>

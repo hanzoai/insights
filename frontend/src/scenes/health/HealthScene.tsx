@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheck, IconCode, IconDatabase, IconEllipsis, IconRefresh, IconWarning } from '@hanzo/icons'
-import { LemonButton, LemonMenu, Link } from '@hanzo/lemon-ui'
+import { Button, Menu, Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -94,7 +94,7 @@ const UnifiedHealthScene = (): JSX.Element => {
             <div className="flex items-center justify-between -mt-2 mb-2">
                 <p className="text-sm mb-0">See an at-a-glance view of the health of your project.</p>
                 <div className="flex items-center gap-1">
-                    <LemonButton
+                    <Button
                         icon={<IconRefresh />}
                         type="tertiary"
                         size="small"
@@ -102,7 +102,7 @@ const UnifiedHealthScene = (): JSX.Element => {
                         loading={healthIssuesLoading}
                         onClick={() => refreshHealthData()}
                     />
-                    <LemonMenu
+                    <Menu
                         items={[
                             {
                                 label: 'Show dismissed',
@@ -112,8 +112,8 @@ const UnifiedHealthScene = (): JSX.Element => {
                         ]}
                         placement="bottom-end"
                     >
-                        <LemonButton icon={<IconEllipsis />} type="tertiary" size="small" />
-                    </LemonMenu>
+                        <Button icon={<IconEllipsis />} type="tertiary" size="small" />
+                    </Menu>
                 </div>
             </div>
 

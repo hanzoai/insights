@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { SpinnerOverlay } from 'lib/lemon-ui/Spinner'
+import { Banner } from 'lib/elements/Banner'
+import { SpinnerOverlay } from 'lib/elements/Spinner'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { cliLiveLogic } from './cliLiveLogic'
@@ -23,10 +23,10 @@ export function CLILive(): JSX.Element {
             <BridgePage view="login" mascot>
                 <div className="text-center space-y-4">
                     <h2>Missing port parameter</h2>
-                    <LemonBanner type="error">
+                    <Banner type="error">
                         This page should be opened from the Insights Live TUI. Please run <code>insights-live</code> in
                         your terminal.
-                    </LemonBanner>
+                    </Banner>
                 </div>
             </BridgePage>
         )
@@ -37,11 +37,11 @@ export function CLILive(): JSX.Element {
             <BridgePage view="login" mascot={false}>
                 <div className="text-center space-y-4">
                     <h2>Authorization complete</h2>
-                    <LemonBanner type="success">
+                    <Banner type="success">
                         <div className="space-y-2">
                             <p className="font-semibold">You can close this tab and return to your terminal.</p>
                         </div>
-                    </LemonBanner>
+                    </Banner>
                 </div>
             </BridgePage>
         )
@@ -52,7 +52,7 @@ export function CLILive(): JSX.Element {
             <BridgePage view="login" mascot>
                 <div className="text-center space-y-4">
                     <h2>Authorization failed</h2>
-                    <LemonBanner type="error">{error}</LemonBanner>
+                    <Banner type="error">{error}</Banner>
                 </div>
             </BridgePage>
         )
@@ -84,7 +84,7 @@ export function CLILive(): JSX.Element {
             <div className="space-y-4">
                 <h2>Select a project</h2>
                 <p className="text-muted text-sm">Choose which project to stream live events from.</p>
-                <LemonSelect
+                <Select
                     data-attr="cli-live-project-select"
                     placeholder="Select a project"
                     value={selectedProjectId}

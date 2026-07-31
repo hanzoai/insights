@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInputSelect } from '@hanzo/lemon-ui'
+import { InputSelect } from '@hanzo/elements'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { fullName } from 'lib/utils'
@@ -29,7 +29,7 @@ export function MemberSelectMultiple({ idKey, value, onChange }: MemberSelectMul
     }))
 
     return (
-        <LemonInputSelect
+        <InputSelect
             placeholder="Search for team members to add…"
             value={value.map((v) => v.toString())}
             loading={membersLoading}

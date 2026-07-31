@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconArchive } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { surveyLogic } from '../surveyLogic'
 
@@ -17,7 +17,7 @@ export function ArchiveSurveyButton({ surveyId, responseUuid }: ArchiveSurveyBut
     const isArchived = archivedResponseUuids?.has(responseUuid) ?? false
 
     return (
-        <LemonButton
+        <Button
             onClick={() => {
                 if (responseUuid) {
                     isArchived ? unarchiveResponse(responseUuid) : archiveResponse(responseUuid)
@@ -28,6 +28,6 @@ export function ArchiveSurveyButton({ surveyId, responseUuid }: ArchiveSurveyBut
             data-attr="events-table-archive-survey"
         >
             {isArchived ? 'Unarchive' : 'Archive'} response
-        </LemonButton>
+        </Button>
     )
 }

@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useState } from 'react'
 
 import { IconFilter } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { SceneStickyBar } from '~/layout/scenes/components/SceneStickyBar'
 
@@ -28,7 +28,7 @@ export const FilterBar = ({ top, left, right, className, showBorderBottom }: Fil
                             {left}
                         </div>
 
-                        <LemonButton
+                        <Button
                             type="secondary"
                             size="small"
                             className="sm:hidden"

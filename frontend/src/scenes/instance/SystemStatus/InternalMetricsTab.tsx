@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Table, TableColumns } from '@hanzo/elements'
 
-import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
+import { Collapse } from 'lib/elements/Collapse'
 import { systemStatusLogic } from 'scenes/instance/SystemStatus/systemStatusLogic'
 
 import { QuerySummary } from '~/types'
@@ -26,7 +26,7 @@ export function InternalMetricsTab(): JSX.Element {
 
     return (
         <>
-            <LemonCollapse
+            <Collapse
                 activeKeys={openSections}
                 className="bg-surface-primary"
                 onChange={(keys) => setOpenSections(keys)}
@@ -38,19 +38,19 @@ export function InternalMetricsTab(): JSX.Element {
                         content: (
                             <>
                                 <div className="flex mb-4 float-right deprecated-space-x-2">
-                                    <LemonCheckbox
+                                    <Checkbox
                                         checked={showIdle}
                                         onChange={setShowIdle}
                                         label="Show idle queries"
                                     />
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         icon={<IconRefresh />}
                                         onClick={reloadQueries}
                                     >
                                         Reload Queries
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                                 <QueryTable queries={postgresQueries} loading={queriesLoading} />
                             </>
@@ -62,14 +62,14 @@ export function InternalMetricsTab(): JSX.Element {
                         content: (
                             <>
                                 <div className="flex mb-4 float-right">
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         icon={<IconRefresh />}
                                         onClick={reloadQueries}
                                     >
                                         Reload Queries
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                                 <QueryTable queries={queries?.datastore_running} loading={queriesLoading} />
                             </>
@@ -81,14 +81,14 @@ export function InternalMetricsTab(): JSX.Element {
                         content: (
                             <>
                                 <div className="flex mb-4 float-right">
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         icon={<IconRefresh />}
                                         onClick={reloadQueries}
                                     >
                                         Reload Queries
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                                 <QueryTable queries={queries?.datastore_slow_log} loading={queriesLoading} />
                             </>
@@ -105,7 +105,7 @@ function QueryTable(props: {
     loading: boolean
     columnExtra?: Record<string, any>
 }): JSX.Element {
-    const columns: LemonTableColumns<QuerySummary> = [
+    const columns: TableColumns<QuerySummary> = [
         {
             title: 'duration',
             dataIndex: 'duration',
@@ -131,7 +131,7 @@ function QueryTable(props: {
     }
 
     return (
-        <LemonTable
+        <Table
             dataSource={props.queries || []}
             columns={columns}
             loading={props.loading}

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
@@ -67,7 +67,7 @@ export function SidePanelPaneHeader({
             )}
 
             {!isRemovingSidePanelFlag && (
-                <LemonButton
+                <Button
                     size="small"
                     sideIcon={<IconX />}
                     onClick={() => {

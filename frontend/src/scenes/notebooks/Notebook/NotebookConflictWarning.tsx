@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import { notebookLogic } from './notebookLogic'
 
@@ -16,9 +16,9 @@ export function NotebookConflictWarning(): JSX.Element {
                 see the latest version.
             </p>
 
-            <LemonButton type="primary" onClick={loadNotebook}>
+            <Button type="primary" onClick={loadNotebook}>
                 Reload to see the latest content
-            </LemonButton>
+            </Button>
         </div>
     )
 }

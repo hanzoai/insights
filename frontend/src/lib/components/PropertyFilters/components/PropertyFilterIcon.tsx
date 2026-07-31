@@ -1,7 +1,7 @@
 import { IconBuilding, IconPeople, IconPerson, IconPiggyBank } from '@hanzo/icons'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconUnverifiedEvent } from 'lib/lemon-ui/icons'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconUnverifiedEvent } from 'lib/elements/icons'
 
 import { PropertyFilterType } from '~/types'
 

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
@@ -186,10 +186,10 @@ export function LegacySharedFunnelsMetricForm(): JSX.Element {
                 />
             </div>
 
-            <LemonBanner type="info" className="mt-3 mb-3">
+            <Banner type="info" className="mt-3 mb-3">
                 Preview insights are generated based on {EXPERIMENT_DEFAULT_DURATION} days of data. This can cause a
                 mismatch between the preview and the actual results.
-            </LemonBanner>
+            </Banner>
 
             <div className="mt-4">
                 <Query

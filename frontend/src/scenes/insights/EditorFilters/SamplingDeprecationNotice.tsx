@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
@@ -21,7 +21,7 @@ export function SamplingDeprecationNotice({ insightProps }: SamplingDeprecationN
     }
 
     return (
-        <LemonBanner type="warning">
+        <Banner type="warning">
             <span>
                 This insight currently uses {(querySource.samplingFactor! * 100).toFixed(0)}% sampling. Sampling is
                 being deprecated and will be removed in a future release.{' '}
@@ -35,6 +35,6 @@ export function SamplingDeprecationNotice({ insightProps }: SamplingDeprecationN
                 </button>{' '}
                 and run on full data.
             </span>
-        </LemonBanner>
+        </Banner>
     )
 }

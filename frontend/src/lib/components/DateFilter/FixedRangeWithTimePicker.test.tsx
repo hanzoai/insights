@@ -60,7 +60,7 @@ describe('FixedRangeWithTimePicker', () => {
             />
         )
 
-        const footer = container.querySelector('[data-attr="lemon-calendar-range-with-time-footer"]') as HTMLElement
+        const footer = container.querySelector('[data-attr="calendar-range-with-time-footer"]') as HTMLElement
         userEvent.click(within(footer).getByText(/apply/i))
         expect(setDate).toHaveBeenCalledWith('2024-01-15T10:00:00', '2024-01-15T11:00:00', false, true)
     })
@@ -75,7 +75,7 @@ describe('FixedRangeWithTimePicker', () => {
             />
         )
 
-        const footer = container.querySelector('[data-attr="lemon-calendar-range-with-time-footer"]') as HTMLElement
+        const footer = container.querySelector('[data-attr="calendar-range-with-time-footer"]') as HTMLElement
         userEvent.click(within(footer).getByText(/apply/i))
         expect(setDate).toHaveBeenCalledWith('2024-01-15T10:00:00', '2024-01-15T14:00:00', false, true)
     })
@@ -90,7 +90,7 @@ describe('FixedRangeWithTimePicker', () => {
             />
         )
 
-        const footer = container.querySelector('[data-attr="lemon-calendar-range-with-time-footer"]') as HTMLElement
+        const footer = container.querySelector('[data-attr="calendar-range-with-time-footer"]') as HTMLElement
         userEvent.click(within(footer).getByText(/apply/i))
         expect(setDate).toHaveBeenCalledWith('2024-01-15T14:30:00', '2024-01-15T16:00:00', false, true)
     })
@@ -116,7 +116,7 @@ describe('FixedRangeWithTimePicker', () => {
         userEvent.click(pmButton)
 
         // Apply and verify end was adjusted (start 12:00 PM, end should be 1:00 PM)
-        const footer = container.querySelector('[data-attr="lemon-calendar-range-with-time-footer"]') as HTMLElement
+        const footer = container.querySelector('[data-attr="calendar-range-with-time-footer"]') as HTMLElement
         userEvent.click(within(footer).getByText(/apply/i))
 
         // The handleApply swaps if needed, so result should be valid
@@ -157,7 +157,7 @@ describe('FixedRangeWithTimePicker', () => {
             expect(hourButton).toBeTruthy()
             userEvent.click(hourButton)
 
-            const footer = container.querySelector('[data-attr="lemon-calendar-range-with-time-footer"]') as HTMLElement
+            const footer = container.querySelector('[data-attr="calendar-range-with-time-footer"]') as HTMLElement
             userEvent.click(within(footer).getByText(/apply/i))
 
             expect(setDate).toHaveBeenCalledWith('2024-01-15T20:00:00', '2024-01-15T22:00:00', false, true)
@@ -179,7 +179,7 @@ describe('FixedRangeWithTimePicker', () => {
             expect(hourButton).toBeTruthy()
             userEvent.click(hourButton)
 
-            const footer = container.querySelector('[data-attr="lemon-calendar-range-with-time-footer"]') as HTMLElement
+            const footer = container.querySelector('[data-attr="calendar-range-with-time-footer"]') as HTMLElement
             userEvent.click(within(footer).getByText(/apply/i))
 
             expect(setDate).toHaveBeenCalledWith('2024-01-15T00:00:00', '2024-01-15T11:00:00', false, true)

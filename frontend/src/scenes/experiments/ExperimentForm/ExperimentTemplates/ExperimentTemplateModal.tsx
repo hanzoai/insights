@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Banner, Button, Modal } from '@hanzo/elements'
 
 import { experimentTemplateModalLogic } from './experimentTemplateModalLogic'
 
@@ -19,30 +19,30 @@ export const ExperimentTemplateModal = ({ onApply }: ExperimentTemplateModalProp
     const canApplyTemplate = true
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isModalOpen}
             onClose={closeTemplateModal}
             title={`Configure: ${template.name}`}
             footer={
                 <div className="flex items-center w-full justify-end gap-2">
-                    <LemonButton type="secondary" onClick={closeTemplateModal}>
+                    <Button type="secondary" onClick={closeTemplateModal}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={onApply}
                         disabledReason={!canApplyTemplate ? 'Please fill in all required event fields' : undefined}
                         data-attr="apply-experiment-template"
                     >
                         Apply Template
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
             <div className="space-y-4">
-                <LemonBanner type="info">
+                <Banner type="info">
                     <strong>Goal:</strong> {template.experimentGoal}
-                </LemonBanner>
+                </Banner>
 
                 <div className="space-y-4">
                     {template.metrics.map((metric) => (
@@ -50,11 +50,11 @@ export const ExperimentTemplateModal = ({ onApply }: ExperimentTemplateModalProp
                     ))}
                 </div>
 
-                <LemonBanner type="success">
+                <Banner type="success">
                     This will add {template.metrics.length} metrics:{' '}
                     {template.metrics.map((metric) => metric.name).join(', ')}
-                </LemonBanner>
+                </Banner>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

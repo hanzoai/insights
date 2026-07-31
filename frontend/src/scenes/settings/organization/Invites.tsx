@@ -1,17 +1,17 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { RestrictionScope } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { Button } from 'lib/elements/Button'
+import { Dialog } from 'lib/elements/Dialog'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 
@@ -36,7 +36,7 @@ function makeActionsComponent(
 ): (_: any, invite: any) => JSX.Element {
     return function ActionsComponent(_, invite: OrganizationInviteType): JSX.Element {
         return (
-            <LemonButton
+            <Button
                 title="Cancel the invite"
                 data-attr="invite-delete"
                 icon={<IconX />}
@@ -44,7 +44,7 @@ function makeActionsComponent(
                 onClick={() => {
                     invite.is_expired
                         ? deleteInvite(invite)
-                        : LemonDialog.open({
+                        : Dialog.open({
                               title: 'Cancel invite',
                               description: `Do you want to cancel the invite for ${invite.target_email}?`,
                               primaryButton: {
@@ -71,7 +71,7 @@ export function InvitesTable(): JSX.Element {
         scope: RestrictionScope.Organization,
     })
 
-    const columns: LemonTableColumns<OrganizationInviteType> = [
+    const columns: TableColumns<OrganizationInviteType> = [
         {
             key: 'user_profile_picture',
             render: function ProfilePictureRender(_, invite) {
@@ -100,12 +100,12 @@ export function InvitesTable(): JSX.Element {
             dataIndex: 'level',
             render: function LevelRender(_, invite) {
                 return (
-                    <LemonTag data-attr="invite-membership-level">{OrganizationMembershipLevel[invite.level]}</LemonTag>
+                    <Tag data-attr="invite-membership-level">{OrganizationMembershipLevel[invite.level]}</Tag>
                 )
             },
         },
-        createdByColumn() as LemonTableColumn<OrganizationInviteType, keyof OrganizationInviteType | undefined>,
-        createdAtColumn() as LemonTableColumn<OrganizationInviteType, keyof OrganizationInviteType | undefined>,
+        createdByColumn() as TableColumn<OrganizationInviteType, keyof OrganizationInviteType | undefined>,
+        createdAtColumn() as TableColumn<OrganizationInviteType, keyof OrganizationInviteType | undefined>,
         {
             title: 'Invite Link',
             dataIndex: 'id',
@@ -120,7 +120,7 @@ export function InvitesTable(): JSX.Element {
         },
     ]
     return (
-        <LemonTable
+        <Table
             dataSource={invites}
             columns={columns}
             rowKey="id"
@@ -147,14 +147,14 @@ export function Invites(): JSX.Element {
         <div className="deprecated-space-y-4">
             {!preflight?.email_service_available && <EmailUnavailableForInvitesBanner />}
             <InvitesTable />
-            <LemonButton
+            <Button
                 type="primary"
                 onClick={showInviteModal}
                 data-attr="invite-teammate-button"
                 disabledReason={userCannotInvite && "You don't have permissions to invite others."}
             >
                 Invite team member
-            </LemonButton>
+            </Button>
         </div>
     )
 }

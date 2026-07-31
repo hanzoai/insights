@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconRefresh } from '@hanzo/icons'
-import { LemonButton, LemonTable, LemonTableColumns, Spinner } from '@hanzo/lemon-ui'
+import { Button, Table, TableColumns, Spinner } from '@hanzo/elements'
 
 import { humanFriendlyLargeNumber } from 'lib/utils'
 import { InsightEmptyState } from 'scenes/insights/EmptyStates'
@@ -37,7 +37,7 @@ export function ImpactList(): JSX.Element | null {
 const Table = (): JSX.Element => {
     const { issues, issuesLoading } = useValues(errorTrackingImpactListLogic)
 
-    const columns: LemonTableColumns<ErrorTrackingCorrelatedIssue> = [
+    const columns: TableColumns<ErrorTrackingCorrelatedIssue> = [
         {
             title: <IssueListTitleHeader results={issues} />,
             render: function RenderTitle(_, record, recordIndex) {
@@ -69,7 +69,7 @@ const Table = (): JSX.Element => {
     ]
 
     return (
-        <LemonTable
+        <Table
             columns={columns}
             loading={issuesLoading}
             dataSource={issues}
@@ -83,7 +83,7 @@ const Table = (): JSX.Element => {
                 noIndent: true,
                 expandedRowRender: function RenderExpandedRow(record) {
                     return (
-                        <LemonTable
+                        <Table
                             embedded
                             stealth
                             columns={[
@@ -127,7 +127,7 @@ const Reload = (): JSX.Element => {
     const { loadIssues } = useActions(errorTrackingImpactListLogic)
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             size="small"
             onClick={() => loadIssues()}
@@ -135,7 +135,7 @@ const Reload = (): JSX.Element => {
             icon={issuesLoading ? <Spinner textColored /> : <IconRefresh />}
         >
             {issuesLoading ? 'Cancel' : 'Reload'}
-        </LemonButton>
+        </Button>
     )
 }
 

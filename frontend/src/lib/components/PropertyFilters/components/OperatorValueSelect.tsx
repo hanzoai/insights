@@ -2,12 +2,12 @@ import { useValues } from 'kea'
 import { RE2JS } from 're2js'
 import { useEffect, useState } from 'react'
 
-import { LemonBanner, LemonDropdownProps, LemonSelect, LemonSelectProps } from '@hanzo/lemon-ui'
+import { Banner, DropdownProps, Select, SelectProps } from '@hanzo/elements'
 
 import { allOperatorsToHumanName } from 'lib/components/DefinitionPopover/utils'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import {
     allOperatorsMapping,
@@ -42,13 +42,13 @@ export interface OperatorValueSelectProps {
     placeholder?: string
     endpoint?: string
     onChange: (operator: PropertyOperator, value: PropertyFilterValue) => void
-    operatorSelectProps?: Partial<Omit<LemonSelectProps<any>, 'onChange'>>
+    operatorSelectProps?: Partial<Omit<SelectProps<any>, 'onChange'>>
     eventNames?: string[]
     propertyDefinitions: PropertyDefinition[]
     addRelativeDateTimeOptions?: boolean
     groupTypeIndex?: GroupTypeIndex
     size?: 'xsmall' | 'small' | 'medium'
-    startVisible?: LemonDropdownProps['startVisible']
+    startVisible?: DropdownProps['startVisible']
     /**
      * in some contexts you want to externally limit the available operators
      * this won't add an operator if it isn't valid
@@ -61,11 +61,11 @@ export interface OperatorValueSelectProps {
     forceSingleSelect?: boolean
 }
 
-interface OperatorSelectProps extends Omit<LemonSelectProps<any>, 'options'> {
+interface OperatorSelectProps extends Omit<SelectProps<any>, 'options'> {
     operator: PropertyOperator
     operators: Array<PropertyOperator>
     onChange: (operator: PropertyOperator) => void
-    startVisible?: LemonDropdownProps['startVisible']
+    startVisible?: DropdownProps['startVisible']
 }
 
 function getRegexValidationError(operator: PropertyOperator, value: any): string | null {
@@ -273,7 +273,7 @@ export function OperatorValueSelect({
             )}
             {validationError && (
                 <div className="basis-full w-full">
-                    <LemonBanner type="warning" hideIcon>
+                    <Banner type="warning" hideIcon>
                         {validationError}
                         {isOperatorRegex(currentOperator) && (
                             <>
@@ -283,7 +283,7 @@ export function OperatorValueSelect({
                                 </Link>
                             </>
                         )}
-                    </LemonBanner>
+                    </Banner>
                 </div>
             )}
         </>
@@ -303,7 +303,7 @@ export function OperatorSelect({
         value: op || PropertyOperator.Exact,
     }))
     return (
-        <LemonSelect
+        <Select
             options={operatorOptions}
             value={operator || '='}
             placeholder="Property key"

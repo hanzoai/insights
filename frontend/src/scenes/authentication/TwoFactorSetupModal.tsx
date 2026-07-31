@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonBanner, LemonDivider } from '@hanzo/lemon-ui'
+import { Banner, Divider } from '@hanzo/elements'
 
 import { OrganizationMenu } from 'lib/components/Account/OrganizationMenu'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Modal } from 'lib/elements/Modal'
 import { membersLogic } from 'scenes/organization/membersLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -22,7 +22,7 @@ export function TwoFactorSetupModal(): JSX.Element {
     const title = isSetupMode ? 'Set up two-factor authentication' : 'Two-factor authentication required'
 
     return (
-        <LemonModal
+        <Modal
             title={title}
             isOpen={isTwoFactorSetupModalOpen || forceOpenTwoFactorSetupModal}
             onClose={!forceOpenTwoFactorSetupModal ? () => closeTwoFactorSetupModal() : undefined}
@@ -30,11 +30,11 @@ export function TwoFactorSetupModal(): JSX.Element {
         >
             <div className="max-w-md">
                 {forceOpenTwoFactorSetupModal && (
-                    <LemonBanner className="mb-4" type="warning">
+                    <Banner className="mb-4" type="warning">
                         {isSetupMode
                             ? 'Your organization requires you to set up 2FA.'
                             : 'Your organization requires two-factor authentication. Please verify using your authenticator app.'}
-                    </LemonBanner>
+                    </Banner>
                 )}
                 <p>
                     {isSetupMode
@@ -49,7 +49,7 @@ export function TwoFactorSetupModal(): JSX.Element {
                     }}
                 />
 
-                <LemonDivider />
+                <Divider />
 
                 {canSwitchOrg && (
                     <div className="flex flex-col items-center gap-1 mt-4">
@@ -67,6 +67,6 @@ export function TwoFactorSetupModal(): JSX.Element {
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

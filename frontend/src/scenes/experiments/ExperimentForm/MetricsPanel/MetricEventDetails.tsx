@@ -2,7 +2,7 @@ import { match } from 'ts-pattern'
 
 import { IconArrowRight } from '@hanzo/icons'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import type { ExperimentMetric } from '~/queries/schema/schema-general'
 import type {

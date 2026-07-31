@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { CloseOverlayAction } from './storiesMap'
 
@@ -35,9 +35,9 @@ export const PizzaSurveyOverlayComponent = ({ closeOverlay }: PizzaSurveyOverlay
     return (
         <div className="flex flex-col h-full bg-primary p-8">
             <div className="flex-1 flex items-start justify-center">
-                <LemonButton id="insightstok-pineapple-pizza-poll-button" type="secondary">
+                <Button id="insightstok-pineapple-pizza-poll-button" type="secondary">
                     Take survey
-                </LemonButton>
+                </Button>
             </div>
 
             <div className="flex-1 flex items-center justify-center text-3xl">
@@ -47,9 +47,9 @@ export const PizzaSurveyOverlayComponent = ({ closeOverlay }: PizzaSurveyOverlay
             </div>
 
             <div className="flex-1 flex items-end justify-center">
-                <LemonButton onClick={() => closeOverlay(CloseOverlayAction.Modal)} status="danger">
+                <Button onClick={() => closeOverlay(CloseOverlayAction.Modal)} status="danger">
                     Close
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

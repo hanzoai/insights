@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCalculator, IconPencil } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
+import { Progress } from 'lib/elements/Progress'
 import { humanFriendlyNumber } from 'lib/utils'
 
 import { experimentLogic } from '../experimentLogic'
@@ -22,7 +22,7 @@ export function RunningTime(): JSX.Element {
             <div className="flex items-center deprecated-space-x-2 mb-2">
                 <h2 className="mb-0 font-semibold text-lg leading-6">Running time</h2>
                 {recommendedRunningTime ? (
-                    <LemonButton
+                    <Button
                         icon={<IconPencil fontSize="12" />}
                         size="xsmall"
                         className="flex items-center gap-2"
@@ -38,7 +38,7 @@ export function RunningTime(): JSX.Element {
                             <IconCalculator className="text-3xl mb-2 text-tertiary" />
                             <div className="text-md font-semibold leading-tight mb-3">No running time yet</div>
                             <div className="flex justify-center">
-                                <LemonButton
+                                <Button
                                     icon={<IconPencil fontSize="12" />}
                                     size="xsmall"
                                     className="flex items-center gap-2"
@@ -46,13 +46,13 @@ export function RunningTime(): JSX.Element {
                                     onClick={() => openCalculateRunningTimeModal()}
                                 >
                                     Calculate running time
-                                </LemonButton>
+                                </Button>
                             </div>
                         </div>
                     </div>
                 ) : (
                     <>
-                        <LemonProgress
+                        <Progress
                             className="w-full border"
                             bgColor="var(--color-bg-table)"
                             size="medium"

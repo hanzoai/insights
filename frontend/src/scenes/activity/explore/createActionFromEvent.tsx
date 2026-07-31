@@ -2,8 +2,8 @@ import { router } from 'kea-router'
 
 import { CLICK_TARGETS, elementToSelector, matchesDataAttribute } from 'lib/actionUtils'
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
-import { Link } from 'lib/lemon-ui/Link'
+import { toast } from 'lib/elements/Toast/Toast'
+import { Link } from 'lib/elements/Link'
 import { autoCaptureEventToDescription } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -109,7 +109,7 @@ export async function createActionFromEvent(
         if (response.data?.type === 'validation_error' && response.data?.code === 'unique' && increment < 30) {
             return recurse(teamId, event, increment + 1, dataAttributes, createInFolder, recurse)
         }
-        lemonToast.error(
+        toast.error(
             <>
                 Couldn't create this action. You can try{' '}
                 <Link to={urls.createAction()}>manually creating an action instead.</Link>
@@ -119,6 +119,6 @@ export async function createActionFromEvent(
     }
     if (action.id) {
         router.actions.push(urls.action(action.id))
-        lemonToast.success('Action created')
+        toast.success('Action created')
     }
 }

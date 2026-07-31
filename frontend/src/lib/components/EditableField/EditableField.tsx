@@ -8,10 +8,10 @@ import TextareaAutosize from 'react-textarea-autosize'
 import { IconMarkdownFilled, IconPencil } from '@hanzo/icons'
 
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { RawInputAutosize } from 'lib/lemon-ui/LemonInput/RawInputAutosize'
-import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Button } from 'lib/elements/Button'
+import { RawInputAutosize } from 'lib/elements/Input/RawInputAutosize'
+import { Markdown } from 'lib/elements/Markdown'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { pluralize } from 'lib/utils'
 
 import { AvailableFeature } from '~/types'
@@ -243,7 +243,7 @@ export function EditableField({
                                         </span>
                                     </Tooltip>
                                 )}
-                                <LemonButton
+                                <Button
                                     title="Cancel editing"
                                     size={typeof compactButtons === 'string' ? compactButtons : 'small'}
                                     onClick={cancel}
@@ -251,8 +251,8 @@ export function EditableField({
                                     onMouseDown={mouseDownOnCancelButton}
                                 >
                                     Cancel
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     title={
                                         !minLength
                                             ? 'Save'
@@ -268,14 +268,14 @@ export function EditableField({
                                     type="primary"
                                 >
                                     {saveButtonText}
-                                </LemonButton>
+                                </Button>
                             </div>
                         )}
                     </>
                 ) : (
                     <>
                         {localTentativeValue && markdown ? (
-                            <LemonMarkdown lowKeyHeadings>{localTentativeValue}</LemonMarkdown>
+                            <Markdown lowKeyHeadings>{localTentativeValue}</Markdown>
                         ) : (
                             <Tooltip
                                 title={isDisplayTooltipNeeded ? localTentativeValue : undefined}
@@ -299,7 +299,7 @@ export function EditableField({
                                         'opacity-0 group-hover/editable:opacity-100 transition-opacity'
                                 )}
                             >
-                                <LemonButton
+                                <Button
                                     title="Edit"
                                     icon={<IconPencil className={compactIcon ? 'w-3 h-3' : undefined} />}
                                     size={compactButtons ? 'small' : undefined}

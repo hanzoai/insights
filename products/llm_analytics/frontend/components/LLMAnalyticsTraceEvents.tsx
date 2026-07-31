@@ -1,4 +1,4 @@
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Spinner } from 'lib/elements/Spinner'
 
 import { LLMTrace } from '~/queries/schema/schema-general'
 

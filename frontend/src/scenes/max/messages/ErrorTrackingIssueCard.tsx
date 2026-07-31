@@ -1,8 +1,8 @@
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { getRuntimeFromLib } from 'lib/components/Errors/utils'
 import { TZLabel } from 'lib/components/TZLabel'
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 import { urls } from 'scenes/urls'
 
 import { MaxErrorTrackingIssuePreview } from '~/queries/schema/schema-assistant-error-tracking'
@@ -28,9 +28,9 @@ export function ErrorTrackingIssueCard({ issue, showUserCount = true }: ErrorTra
                     <div className="font-medium truncate">{issue.name || 'Unnamed issue'}</div>
                     {issue.description && <div className="text-xs text-muted truncate mt-0.5">{issue.description}</div>}
                     <div className="flex items-center gap-2 flex-wrap mt-1">
-                        <LemonTag size="small" type={issue.status === 'active' ? 'warning' : 'default'}>
+                        <Tag size="small" type={issue.status === 'active' ? 'warning' : 'default'}>
                             {issue.status}
-                        </LemonTag>
+                        </Tag>
                         <span className="text-xs text-muted">{issue.occurrences.toLocaleString()} occurrences</span>
                         {showUserCount && (
                             <span className="text-xs text-muted">{issue.users.toLocaleString()} users</span>

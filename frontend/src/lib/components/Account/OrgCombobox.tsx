@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 
 import { IconCheck, IconPlusSmall } from '@hanzo/icons'
 
-import { UploadedLogo } from 'lib/lemon-ui/UploadedLogo'
-import { IconBlank } from 'lib/lemon-ui/icons'
+import { UploadedLogo } from 'lib/elements/UploadedLogo'
+import { IconBlank } from 'lib/elements/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { Combobox } from 'lib/ui/Combobox/Combobox'
 import { DropdownMenuSeparator } from 'lib/ui/DropdownMenu/DropdownMenu'

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconArrowLeft, IconCheckCircle } from '@hanzo/icons'
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
 import { sidepanelTicketsLogic } from './sidepanelTicketsLogic'
 
@@ -19,7 +19,7 @@ export function RestoreTickets(): JSX.Element {
                 <p className="text-sm text-muted-alt m-0 max-w-xs">
                     If we found conversations matching that email, we've sent a recovery link. It expires in 1 hour.
                 </p>
-                <LemonButton
+                <Button
                     type="secondary"
                     onClick={() => {
                         setRestoreState('idle')
@@ -27,7 +27,7 @@ export function RestoreTickets(): JSX.Element {
                     }}
                 >
                     Back to tickets
-                </LemonButton>
+                </Button>
             </div>
         )
     }
@@ -35,7 +35,7 @@ export function RestoreTickets(): JSX.Element {
     return (
         <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
-                <LemonButton
+                <Button
                     icon={<IconArrowLeft />}
                     size="small"
                     onClick={() => setView('list')}
@@ -57,7 +57,7 @@ export function RestoreTickets(): JSX.Element {
                 }}
                 className="flex flex-col gap-2"
             >
-                <LemonInput
+                <Input
                     type="email"
                     placeholder="you@example.com"
                     value={email}
@@ -66,7 +66,7 @@ export function RestoreTickets(): JSX.Element {
                     autoFocus
                 />
                 {restoreState === 'error' && restoreError && <p className="text-danger text-sm m-0">{restoreError}</p>}
-                <LemonButton
+                <Button
                     type="primary"
                     htmlType="submit"
                     fullWidth
@@ -75,7 +75,7 @@ export function RestoreTickets(): JSX.Element {
                     disabledReason={!email.trim() ? 'Enter your email address' : undefined}
                 >
                     Send recovery link
-                </LemonButton>
+                </Button>
             </form>
         </div>
     )

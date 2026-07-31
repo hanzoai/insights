@@ -1,6 +1,6 @@
 import { IconBolt } from '@hanzo/icons'
 
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 export function PreAggregatedBadge(): JSX.Element {
     return (

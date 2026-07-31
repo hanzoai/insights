@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -14,7 +14,7 @@ export function OrganizationAI(): JSX.Element {
 
     return (
         <div className="max-w-160">
-            <LemonSwitch
+            <Switch
                 label="Enable Hanzo AI data analysis features"
                 data-attr="organization-ai-enabled"
                 onChange={(checked) => {

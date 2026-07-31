@@ -2,14 +2,14 @@ import { BindLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 
 import { IconBook, IconPlusSmall } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { BigLeaguesMascot } from 'lib/components/mascots'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Banner } from 'lib/elements/Banner'
+import { Tab, Tabs } from 'lib/elements/Tabs'
 import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -40,7 +40,7 @@ export const scene: SceneExport = {
 export function EndpointsScene({ tabId }: { tabId?: string }): JSX.Element {
     const { activeTab } = useValues(endpointsLogic({ tabId: tabId || '' }))
 
-    const tabs: LemonTab<string>[] = [
+    const tabs: Tab<string>[] = [
         {
             key: 'endpoints',
             label: 'Endpoints',
@@ -73,7 +73,7 @@ export function EndpointsScene({ tabId }: { tabId?: string }): JSX.Element {
                                     interaction="click"
                                     scope={Scene.EndpointsScene}
                                 >
-                                    <LemonButton
+                                    <Button
                                         type="primary"
                                         to={urls.sqlEditor({ outputTab: OutputTab.Endpoint })}
                                         sideAction={{
@@ -90,11 +90,11 @@ export function EndpointsScene({ tabId }: { tabId?: string }): JSX.Element {
                                         icon={<IconPlusSmall />}
                                     >
                                         New
-                                    </LemonButton>
+                                    </Button>
                                 </AppShortcut>
                             }
                         />
-                        <LemonBanner
+                        <Banner
                             type="warning"
                             dismissKey="endpoints-beta-banner"
                             action={{ children: 'Send feedback', id: 'endpoints-feedback-button' }}
@@ -104,8 +104,8 @@ export function EndpointsScene({ tabId }: { tabId?: string }): JSX.Element {
                                 it may change while we work with you on what works best. Please let us know what you'd
                                 like to see here and/or report any issues directly to us!
                             </p>
-                        </LemonBanner>
-                        <LemonBanner
+                        </Banner>
+                        <Banner
                             type="success"
                             dismissKey="endpoints-docs-upgrade-banner"
                             action={{
@@ -117,7 +117,7 @@ export function EndpointsScene({ tabId }: { tabId?: string }): JSX.Element {
                         >
                             We've leveled up our endpoints documentation. Check out the new docs for detailed guides and
                             examples.
-                        </LemonBanner>
+                        </Banner>
                         <ProductIntroduction
                             productName="endpoints"
                             productKey={ProductKey.ENDPOINTS}
@@ -132,7 +132,7 @@ export function EndpointsScene({ tabId }: { tabId?: string }): JSX.Element {
                             isEmpty={false}
                             action={() => router.actions.push(urls.sqlEditor({ outputTab: OutputTab.Endpoint }))}
                         />
-                        <LemonTabs activeKey={activeTab} data-attr="endpoints-tabs" tabs={tabs} sceneInset />
+                        <Tabs activeKey={activeTab} data-attr="endpoints-tabs" tabs={tabs} sceneInset />
                         <InsightPickerEndpointModal tabId={tabId || ''} />
                     </SceneContent>
                 </BindLogic>

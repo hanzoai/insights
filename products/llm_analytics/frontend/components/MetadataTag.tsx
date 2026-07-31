@@ -1,4 +1,4 @@
-import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Tooltip } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 
@@ -20,5 +20,5 @@ export function MetadataTag({ children, label, textToCopy }: MetadataTagProps): 
         wrappedChildren = <Tooltip title={label}>{children}</Tooltip>
     }
 
-    return <LemonTag className="bg-surface-primary cursor-default">{wrappedChildren}</LemonTag>
+    return <Tag className="bg-surface-primary cursor-default">{wrappedChildren}</Tag>
 }

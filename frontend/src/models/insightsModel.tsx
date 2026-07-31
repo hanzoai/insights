@@ -1,9 +1,9 @@
 import { actions, connect, kea, listeners, path } from 'kea'
 
-import { LemonDialog, LemonInput } from '@hanzo/lemon-ui'
+import { Dialog, Input } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { Field } from 'lib/elements/Field'
+import { toast } from 'lib/elements/Toast/Toast'
 import { insightsApi } from 'scenes/insights/utils/api'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -27,20 +27,20 @@ export const insightsModel = kea<insightsModelType>([
     })),
     listeners(({ actions }) => ({
         renameInsight: async ({ item }) => {
-            LemonDialog.openForm({
+            Dialog.openForm({
                 title: 'Rename insight',
                 initialValues: { insightName: item.name },
                 content: (
-                    <LemonField name="insightName">
-                        <LemonInput data-attr="insight-name" placeholder="Please enter the new name" autoFocus />
-                    </LemonField>
+                    <Field name="insightName">
+                        <Input data-attr="insight-name" placeholder="Please enter the new name" autoFocus />
+                    </Field>
                 ),
                 errors: {
                     insightName: (name) => (!name ? 'You must enter a name' : undefined),
                 },
                 onSubmit: async ({ insightName }) => {
                     const updatedItem = await insightsApi.update(item.id, { name: insightName })
-                    lemonToast.success(
+                    toast.success(
                         <>
                             Renamed insight from <b>{item.name}</b> to <b>{insightName}</b>
                         </>
@@ -56,7 +56,7 @@ export const insightsModel = kea<insightsModelType>([
             const addedItem = await insightsApi.duplicate(insight!)
 
             actions.duplicateInsightSuccess(addedItem)
-            lemonToast.success('Insight duplicated')
+            toast.success('Insight duplicated')
         },
     })),
 ])

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -60,11 +60,11 @@ export function DataWarehouseManagedViewsetsScene(): JSX.Element {
 
         try {
             await api.dataWarehouseManagedViewsets.toggle(kind, false)
-            lemonToast.success(`${VIEWSET_TITLES[kind]} viewset disabled and views deleted successfully`)
+            toast.success(`${VIEWSET_TITLES[kind]} viewset disabled and views deleted successfully`)
             loadCurrentTeam()
             return true
         } catch (error: any) {
-            lemonToast.error(`Failed to disable ${kind} viewset: ${error.message || 'Unknown error'}`)
+            toast.error(`Failed to disable ${kind} viewset: ${error.message || 'Unknown error'}`)
             return false
         }
     }

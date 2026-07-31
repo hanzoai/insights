@@ -1,4 +1,4 @@
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 
 export const ResultsBreakdownSkeleton = (): JSX.Element => {
     /**

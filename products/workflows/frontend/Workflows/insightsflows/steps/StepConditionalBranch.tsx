@@ -4,10 +4,10 @@ import { useMemo } from 'react'
 
 import { IconPlus, IconX } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
+import { Label } from 'lib/elements/Label'
 
 import { InsightsFlowPropertyFilters } from '../filters/InsightsFlowFilters'
 import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
@@ -92,8 +92,8 @@ export function StepConditionalBranchConfiguration({
             {conditions.map((condition, index) => (
                 <div key={index} className="flex flex-col gap-2 p-2 rounded border">
                     <div className="flex justify-between items-center">
-                        <LemonLabel>Condition {index + 1}</LemonLabel>
-                        <LemonButton
+                        <Label>Condition {index + 1}</Label>
+                        <Button
                             size="xsmall"
                             icon={<IconX />}
                             onClick={() => removeCondition(index)}
@@ -114,20 +114,20 @@ export function StepConditionalBranchConfiguration({
                         typeKey={`workflow-trigger-${index}`}
                     />
 
-                    <LemonField.Pure label="Condition name (optional)">
-                        <LemonInput
+                    <Field.Pure label="Condition name (optional)">
+                        <Input
                             value={localConditionNames[index] || ''}
                             onChange={(value) => handleNameChange(index, value)}
                             placeholder={`If condition #${index + 1} matches`}
                             size="small"
                         />
-                    </LemonField.Pure>
+                    </Field.Pure>
                 </div>
             ))}
 
-            <LemonButton type="secondary" icon={<IconPlus />} onClick={() => addCondition()}>
+            <Button type="secondary" icon={<IconPlus />} onClick={() => addCondition()}>
                 Add condition
-            </LemonButton>
+            </Button>
         </>
     )
 }

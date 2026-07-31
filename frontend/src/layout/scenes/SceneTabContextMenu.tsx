@@ -13,7 +13,7 @@ import {
     IconX,
 } from '@hanzo/icons'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     ContextMenu,
@@ -83,9 +83,9 @@ export function SceneTabContextMenu({ tab, children, onConfigurePinnedTabs }: Sc
                                     navigator.clipboard.writeText(
                                         `${window.location.origin}${tab.pathname}${tab.search}${tab.hash}`
                                     )
-                                    lemonToast.success('URL copied to clipboard')
+                                    toast.success('URL copied to clipboard')
                                 } catch (error) {
-                                    lemonToast.error(`Failed to copy URL to clipboard ${error}`)
+                                    toast.error(`Failed to copy URL to clipboard ${error}`)
                                 }
                             }}
                         >

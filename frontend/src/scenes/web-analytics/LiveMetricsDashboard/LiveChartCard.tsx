@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 
-import { Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Spinner, Tooltip } from '@hanzo/elements'
 
 interface LiveChartCardProps {
     title: string

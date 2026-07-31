@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { Field, Form } from 'kea-forms'
 
 import { textCardModalLogic } from 'lib/components/Cards/TextCard/textCardModalLogic'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonTextAreaMarkdown } from 'lib/lemon-ui/LemonTextArea'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
+import { TextAreaMarkdown } from 'lib/elements/TextArea'
 
 import { DashboardType, QueryBasedInsightModel } from '~/types'
 
@@ -29,21 +29,21 @@ export function TextCardModal({
     }
 
     return (
-        <LemonModal
+        <Modal
             closable={true}
             isOpen={isOpen}
             title=""
             onClose={handleClose}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         disabledReason={isTextTileSubmitting ? 'Cannot cancel card creation in progress' : null}
                         type="secondary"
                         onClick={handleClose}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         disabledReason={textTileValidationErrors.body as string | null}
                         loading={isTextTileSubmitting}
                         form="text-tile-form"
@@ -53,7 +53,7 @@ export function TextCardModal({
                         data-attr={textTileId === 'new' ? 'save-new-text-tile' : 'edit-text-tile-text'}
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -66,9 +66,9 @@ export function TextCardModal({
                 enableFormOnSubmit
             >
                 <Field name="body" label="">
-                    <LemonTextAreaMarkdown maxLength={4000} data-attr="text-card-edit-area" />
+                    <TextAreaMarkdown maxLength={4000} data-attr="text-card-edit-area" />
                 </Field>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

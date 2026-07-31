@@ -1,6 +1,6 @@
 import { DraggableSyntheticListeners } from '@dnd-kit/core'
 
-import { SortableDragIcon } from 'lib/lemon-ui/icons'
+import { SortableDragIcon } from 'lib/elements/icons'
 
 interface SurveyDragHandleProps {
     listeners: DraggableSyntheticListeners | undefined

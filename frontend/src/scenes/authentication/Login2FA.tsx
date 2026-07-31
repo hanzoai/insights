@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Divider, Input } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import passkeyLogo from 'lib/components/SocialLoginButton/passkey.svg'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Banner } from 'lib/elements/Banner'
+import { Field } from 'lib/elements/Field'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -35,7 +35,7 @@ export function Login2FA(): JSX.Element {
 
                 {passkeysAvailable && (
                     <>
-                        <LemonButton
+                        <Button
                             type="primary"
                             htmlType="button"
                             onClick={() => beginPasskey2FA()}
@@ -46,8 +46,8 @@ export function Login2FA(): JSX.Element {
                             icon={<img src={passkeyLogo} alt="Passkey" className="object-contain w-6 h-6" />}
                         >
                             Use passkey
-                        </LemonButton>
-                        {totpAvailable && <LemonDivider className="my-4" label="Or" />}
+                        </Button>
+                        {totpAvailable && <Divider className="my-4" label="Or" />}
                     </>
                 )}
 
@@ -58,9 +58,9 @@ export function Login2FA(): JSX.Element {
                         enableFormOnSubmit
                         className="deprecated-space-y-4"
                     >
-                        {generalError && <LemonBanner type="error">{generalError.detail}</LemonBanner>}
-                        <LemonField name="token" label="Authenticator token">
-                            <LemonInput
+                        {generalError && <Banner type="error">{generalError.detail}</Banner>}
+                        <Field name="token" label="Authenticator token">
+                            <Input
                                 className="ph-ignore-input"
                                 autoFocus={!passkeysAvailable}
                                 data-attr="token"
@@ -68,8 +68,8 @@ export function Login2FA(): JSX.Element {
                                 inputMode="numeric"
                                 autoComplete="one-time-code"
                             />
-                        </LemonField>
-                        <LemonButton
+                        </Field>
+                        <Button
                             type="primary"
                             status="alt"
                             htmlType="submit"
@@ -80,14 +80,14 @@ export function Login2FA(): JSX.Element {
                             size="large"
                         >
                             Login
-                        </LemonButton>
+                        </Button>
                     </Form>
                 )}
 
                 {!passkeysAvailable && !totpAvailable && (
-                    <LemonBanner type="error">
+                    <Banner type="error">
                         No 2FA methods available. Please contact support if you believe this is an error.
-                    </LemonBanner>
+                    </Banner>
                 )}
             </div>
         </BridgePage>

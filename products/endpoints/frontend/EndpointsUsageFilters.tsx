@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInputSelect, LemonSelect } from '@hanzo/lemon-ui'
+import { InputSelect, Select } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FilterBar } from 'lib/components/FilterBar'
@@ -69,7 +69,7 @@ const EndpointNameFilter = ({ tabId }: { tabId: string }): JSX.Element => {
     }))
 
     return (
-        <LemonInputSelect
+        <InputSelect
             title="Endpoints"
             autoWidth={false}
             popoverClassName="max-h-60 max-w-s overflow-y-auto"
@@ -95,7 +95,7 @@ const MaterializationTypeFilter = ({ tabId }: { tabId: string }): JSX.Element =>
     const { setMaterializationType } = useActions(endpointsUsageLogic({ tabId }))
 
     return (
-        <LemonSelect
+        <Select
             value={materializationType}
             onChange={setMaterializationType}
             options={[
@@ -115,7 +115,7 @@ const IntervalFilter = ({ tabId }: { tabId: string }): JSX.Element => {
     const { setInterval } = useActions(endpointsUsageLogic({ tabId }))
 
     return (
-        <LemonSelect
+        <Select
             value={interval}
             onChange={setInterval}
             options={[
@@ -136,7 +136,7 @@ const BreakdownFilter = ({ tabId }: { tabId: string }): JSX.Element => {
     const { setBreakdownBy } = useActions(endpointsUsageLogic({ tabId }))
 
     return (
-        <LemonSelect
+        <Select
             value={breakdownBy}
             onChange={setBreakdownBy}
             options={[

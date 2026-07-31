@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Skeleton } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SourceFormComponent } from 'scenes/data-warehouse/external/forms/SourceForm'
@@ -21,7 +21,7 @@ export const SourceConfiguration = ({ id }: SourceConfigurationProps): JSX.Eleme
     const { availableSources, availableSourcesLoading } = useValues(availableSourcesDataLogic)
 
     if (availableSourcesLoading || availableSources === null) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
@@ -56,7 +56,7 @@ function UpdateSourceConnectionFormContainer(): JSX.Element {
     ])
 
     if (!sourceFieldConfig || !source) {
-        return <LemonSkeleton />
+        return <Skeleton />
     }
 
     return (
@@ -76,7 +76,7 @@ function UpdateSourceConnectionFormContainer(): JSX.Element {
                         minAccessLevel={AccessControlLevel.Editor}
                         userAccessLevel={source.user_access_level}
                     >
-                        <LemonButton
+                        <Button
                             loading={sourceConfigLoading}
                             type="primary"
                             center
@@ -84,7 +84,7 @@ function UpdateSourceConnectionFormContainer(): JSX.Element {
                             data-attr="source-update"
                         >
                             Save
-                        </LemonButton>
+                        </Button>
                     </AccessControlAction>
                 </div>
             </Form>

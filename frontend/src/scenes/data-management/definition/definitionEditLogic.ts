@@ -5,7 +5,7 @@ import { beforeUnload, router } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { DefinitionLogicProps, definitionLogic } from 'scenes/data-management/definition/definitionLogic'
 import { eventDefinitionsTableLogic } from 'scenes/data-management/events/eventDefinitionsTableLogic'
@@ -77,7 +77,7 @@ export const definitionEditLogic = kea<definitionEditLogicType>([
                     }
                     breakpoint()
 
-                    lemonToast.success(`${capitalizeFirstLetter(values.singular)} saved`)
+                    toast.success(`${capitalizeFirstLetter(values.singular)} saved`)
                     // Update table values
                     if (values.isEvent) {
                         actions.setLocalEventDefinition(definition)

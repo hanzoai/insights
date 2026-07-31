@@ -1,16 +1,16 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import SignupReferralSource from 'lib/components/SignupReferralSource'
 import SignupRoleSelect from 'lib/components/SignupRoleSelect'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input/Input'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -64,26 +64,26 @@ export function ConfirmOrganization(): JSX.Element {
                 enableFormOnSubmit
                 className="deprecated-space-y-4"
             >
-                <LemonField name="email" label="Email">
-                    <LemonInput className="ph-ignore-input" value={email} disabled />
-                </LemonField>
+                <Field name="email" label="Email">
+                    <Input className="ph-ignore-input" value={email} disabled />
+                </Field>
 
-                <LemonField name="first_name" label="Your name">
-                    <LemonInput className="ph-ignore-input" placeholder="Jane Doe" />
-                </LemonField>
+                <Field name="first_name" label="Your name">
+                    <Input className="ph-ignore-input" placeholder="Jane Doe" />
+                </Field>
 
-                <LemonField
+                <Field
                     name="organization_name"
                     label="Organization name"
                     help="You can always rename your organization later"
                 >
-                    <LemonInput className="ph-ignore-input" placeholder="Acme Inc" />
-                </LemonField>
+                    <Input className="ph-ignore-input" placeholder="Acme Inc" />
+                </Field>
 
                 <SignupRoleSelect />
                 <SignupReferralSource disabled={isConfirmOrganizationSubmitting} />
 
-                <LemonButton
+                <Button
                     htmlType="submit"
                     fullWidth
                     center
@@ -91,7 +91,7 @@ export function ConfirmOrganization(): JSX.Element {
                     loading={isConfirmOrganizationSubmitting}
                 >
                     Create organization
-                </LemonButton>
+                </Button>
             </Form>
 
             <div className="text-center terms-and-conditions-text mt-4 text-secondary">
@@ -105,7 +105,7 @@ export function ConfirmOrganization(): JSX.Element {
                 </Link>
                 .
             </div>
-            <LemonDivider thick dashed className="my-6" />
+            <Divider thick dashed className="my-6" />
             <div className="text-center terms-and-conditions-text mt-4 text-secondary">
                 Have questions?{' '}
                 <Link to="https://hanzo.ai/support" target="_blank" disableDocsPanel>

@@ -3,7 +3,7 @@ import './Billing.scss'
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonTabs } from '@hanzo/lemon-ui'
+import { Tabs } from '@hanzo/elements'
 
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -63,7 +63,7 @@ export function BillingSection(): JSX.Element {
 
     return (
         <div className="flex flex-col">
-            <LemonTabs activeKey={section} onChange={handleTabChange} tabs={tabs} />
+            <Tabs activeKey={section} onChange={handleTabChange} tabs={tabs} />
 
             {section === 'overview' && <Billing />}
             {section === 'usage' && <BillingUsage />}

@@ -5,7 +5,7 @@ import { mathjax } from 'mathjax-full/js/mathjax.js'
 import { SVG } from 'mathjax-full/js/output/svg.js'
 import { useEffect, useRef, useState } from 'react'
 
-import { LemonTextArea } from '@hanzo/lemon-ui'
+import { TextArea } from '@hanzo/elements'
 
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
@@ -100,7 +100,7 @@ const LatexComponent = ({
 
             {editing && (
                 <div className="p-2 w-full" data-nodrag="true">
-                    <LemonTextArea
+                    <TextArea
                         ref={textareaRef}
                         value={localContent}
                         onChange={(value: string) => setLocalContent(value)}

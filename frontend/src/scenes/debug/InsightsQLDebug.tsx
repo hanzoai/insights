@@ -1,6 +1,6 @@
 import { BindLogic, useValues } from 'kea'
 
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Divider } from 'lib/elements/Divider'
 import { Modifiers } from 'scenes/debug/Modifiers'
 
 import { DateRange } from '~/queries/nodes/DataNode/DateRange'
@@ -35,7 +35,7 @@ export function InsightsQLDebug({ query, setQuery, queryKey, modifiers }: Insigh
             <div className="deprecated-space-y-2">
                 <InsightsQLQueryEditor query={query} setQuery={setQuery} />
                 <Modifiers setQuery={setQuery} query={query} response={response} />
-                <LemonDivider className="my-4" />
+                <Divider className="my-4" />
                 <div className="flex flex-wrap gap-2 ">
                     <Reload />
                     <DateRange key="date-range" query={query} setQuery={setQuery} />

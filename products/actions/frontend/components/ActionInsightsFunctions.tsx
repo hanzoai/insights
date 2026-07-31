@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { cn } from 'lib/utils/css-classes'
 import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
@@ -27,7 +27,7 @@ const Functions = ({ action }: { action: ActionType }): JSX.Element => {
             description="Actions can be used as filters for destinations such as Slack or Webhook delivery"
         >
             {showCohortDisablesFunctionsWarning ? (
-                <LemonBanner type="error">Adding a cohort filter will disable all connected destinations!</LemonBanner>
+                <Banner type="error">Adding a cohort filter will disable all connected destinations!</Banner>
             ) : null}
 
             <LinkedInsightsFunctions

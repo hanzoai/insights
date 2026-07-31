@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Button } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
 import { TimeLineView, convertForTimelineView } from 'scenes/session-recordings/apm/waterfall/TimeLineView'
 
 import { PerformanceEvent } from '~/types'
@@ -29,7 +29,7 @@ export const NetworkRequestTiming = ({
     return (
         <div className="flex flex-col deprecated-space-y-2">
             <div className="flex flex-row justify-end">
-                <LemonButton
+                <Button
                     type="secondary"
                     size="xsmall"
                     onClick={() => setTimelineMode(!timelineMode)}
@@ -39,9 +39,9 @@ export const NetworkRequestTiming = ({
                     }
                 >
                     {timelineMode && isValidForTimelineView ? 'Table view' : 'Timeline view'}
-                </LemonButton>
+                </Button>
             </div>
-            <LemonDivider dashed={true} />
+            <Divider dashed={true} />
             {timelineMode && isValidForTimelineView ? (
                 <TimeLineView performanceEvent={performanceEvent} />
             ) : (

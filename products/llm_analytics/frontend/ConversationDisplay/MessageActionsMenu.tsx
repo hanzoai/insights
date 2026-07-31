@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconEllipsis } from '@hanzo/icons'
-import { LemonMenu, LemonMenuItems } from '@hanzo/lemon-ui'
+import { Menu, MenuItems } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { commentsLogic } from 'scenes/comments/commentsLogic'
@@ -79,7 +79,7 @@ export const MessageActionsMenu = ({ content, traceId }: MessageActionsMenuProps
         AccessControlLevel.Editor
     )
 
-    const menuItems: LemonMenuItems = [
+    const menuItems: MenuItems = [
         ...(showDiscussions
             ? [
                   {
@@ -118,9 +118,9 @@ export const MessageActionsMenu = ({ content, traceId }: MessageActionsMenuProps
 
     return (
         <>
-            <LemonMenu items={menuItems} placement="bottom-end">
-                <LemonButton size="small" noPadding icon={<IconEllipsis />} tooltip="More actions" />
-            </LemonMenu>
+            <Menu items={menuItems} placement="bottom-end">
+                <Button size="small" noPadding icon={<IconEllipsis />} tooltip="More actions" />
+            </Menu>
 
             {/* AI consent popover - shown first if user hasn't consented */}
             <AIConsentPopoverWrapper

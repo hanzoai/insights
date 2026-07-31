@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 
@@ -57,7 +57,7 @@ export const AddonFeatureLossNotice = ({ product }: AddonFeatureLossNoticeProps)
     }
 
     return (
-        <LemonBanner type="warning" hideIcon className="p-3">
+        <Banner type="warning" hideIcon className="p-3">
             <div>
                 <div className="flex items-center gap-2 cursor-pointer font-semibold" onClick={handleToggle}>
                     You'll lose access to {featuresToLose.length} features, click here to find out which ones.
@@ -72,6 +72,6 @@ export const AddonFeatureLossNotice = ({ product }: AddonFeatureLossNoticeProps)
                     </div>
                 </AnimatedCollapsible>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

@@ -1,4 +1,4 @@
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
 
 import { Survey } from '~/types'
 
@@ -13,10 +13,10 @@ interface SurveyBranchingFlowModalProps {
 
 export function SurveyBranchingFlowModal({ survey, isOpen, onClose }: SurveyBranchingFlowModalProps): JSX.Element {
     return (
-        <LemonModal title="Survey flow" isOpen={isOpen} onClose={onClose} width="90vw">
+        <Modal title="Survey flow" isOpen={isOpen} onClose={onClose} width="90vw">
             <div className="h-[70vh]">
                 <SurveyBranchingFlow survey={survey} />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

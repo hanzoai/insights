@@ -1,4 +1,4 @@
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { Feature, PlatformSupportConfig } from './types'
 

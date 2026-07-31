@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonButtonProps, LemonDropdown, LemonDropdownProps, LemonInput } from '@hanzo/lemon-ui'
+import { Button, ButtonProps, Dropdown, DropdownProps, Input } from '@hanzo/elements'
 
 import { tagSelectLogic } from './tagSelectLogic'
 
@@ -8,7 +8,7 @@ export type TagSelectProps = {
     defaultLabel?: string
     value: string[]
     onChange: (value: string[]) => void
-    children?: (selectedTags: string[]) => LemonDropdownProps['children']
+    children?: (selectedTags: string[]) => DropdownProps['children']
 }
 
 export function TagSelect({
@@ -17,7 +17,7 @@ export function TagSelect({
     onChange,
     children,
     ...buttonProps
-}: TagSelectProps & Pick<LemonButtonProps, 'type' | 'size'>): JSX.Element {
+}: TagSelectProps & Pick<ButtonProps, 'type' | 'size'>): JSX.Element {
     const { filteredTags, search, showPopover } = useValues(tagSelectLogic)
     const { setSearch, setShowPopover } = useActions(tagSelectLogic)
 
@@ -44,7 +44,7 @@ export function TagSelect({
     const buttonClass = selectedCount > 0 ? 'min-w-26' : 'w-26'
 
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             visible={showPopover}
             matchWidth={false}
@@ -52,7 +52,7 @@ export function TagSelect({
             onVisibilityChange={setShowPopover}
             overlay={
                 <div className="max-w-100 deprecated-space-y-2">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search tags"
                         autoFocus
@@ -64,7 +64,7 @@ export function TagSelect({
                     <ul className="deprecated-space-y-px">
                         {filteredTags.map((tag: string) => (
                             <li key={tag}>
-                                <LemonButton
+                                <Button
                                     fullWidth
                                     role="menuitem"
                                     size="small"
@@ -81,7 +81,7 @@ export function TagSelect({
                                             <span>{tag}</span>
                                         </span>
                                     </span>
-                                </LemonButton>
+                                </Button>
                             </li>
                         ))}
 
@@ -95,7 +95,7 @@ export function TagSelect({
                             <>
                                 <div className="my-1 border-t" />
                                 <li>
-                                    <LemonButton
+                                    <Button
                                         fullWidth
                                         role="menuitem"
                                         size="small"
@@ -103,7 +103,7 @@ export function TagSelect({
                                         type="secondary"
                                     >
                                         Clear selection
-                                    </LemonButton>
+                                    </Button>
                                 </li>
                             </>
                         )}
@@ -114,10 +114,10 @@ export function TagSelect({
             {children ? (
                 children(value)
             ) : (
-                <LemonButton size="small" type="secondary" className={buttonClass} {...buttonProps}>
+                <Button size="small" type="secondary" className={buttonClass} {...buttonProps}>
                     {selectedCount > 0 ? `${selectedCount} selected` : defaultLabel}
-                </LemonButton>
+                </Button>
             )}
-        </LemonDropdown>
+        </Dropdown>
     )
 }

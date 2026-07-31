@@ -4,17 +4,17 @@ import { P, match } from 'ts-pattern'
 
 import { IconCheckCircle, IconRevert, IconSort, IconTrash, IconUpload, IconWarning } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonDialog,
-    LemonSegmentedButton,
-    LemonTable,
-    LemonTableColumns,
+    Button,
+    Dialog,
+    SegmentedButton,
+    Table,
+    TableColumns,
     Link,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { ErrorTrackingSymbolSet, SymbolSetStatusFilter } from 'lib/components/Errors/types'
-import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
+import { IconArrowDown, IconArrowUp } from 'lib/elements/icons'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 
 import { ReleasePreviewPill } from 'products/error_tracking/frontend/components/ReleasesPreview/ReleasePreviewPill'
@@ -59,7 +59,7 @@ export function SymbolSets(): JSX.Element {
             <div className="space-y-2">
                 <div className="flex justify-end items-center gap-2">
                     <span className="mb-0">Status:</span>
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         size="xsmall"
                         value={symbolSetStatusFilter}
                         options={SYMBOL_SET_FILTER_OPTIONS}
@@ -78,7 +78,7 @@ const SymbolSetTable = (): JSX.Element => {
     const { pagination, symbolSets, symbolSetResponseLoading, symbolSetOrder } = useValues(symbolSetLogic)
     const { deleteSymbolSet, setUploadSymbolSetId, setSymbolSetOrder } = useActions(symbolSetLogic)
 
-    const columns: LemonTableColumns<ErrorTrackingSymbolSet> = [
+    const columns: TableColumns<ErrorTrackingSymbolSet> = [
         {
             title: 'Reference',
             width: 200,
@@ -139,20 +139,20 @@ const SymbolSetTable = (): JSX.Element => {
             render: (_, { id, failure_reason }) => {
                 return (
                     <div className="flex justify-end items-center gap-1">
-                        <LemonButton
+                        <Button
                             type={failure_reason ? 'primary' : 'tertiary'}
                             size="xsmall"
                             tooltip={failure_reason ? 'Upload symbol set' : 'Replace symbol set'}
                             icon={failure_reason ? <IconUpload /> : <IconRevert />}
                             onClick={() => setUploadSymbolSetId(id)}
                         />
-                        <LemonButton
+                        <Button
                             type="tertiary"
                             size="xsmall"
                             tooltip="Delete symbol set"
                             icon={<IconTrash />}
                             onClick={() =>
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: 'Delete symbol set',
                                     description: 'Are you sure you want to delete this symbol set?',
                                     secondaryButton: {
@@ -184,7 +184,7 @@ const SymbolSetTable = (): JSX.Element => {
     )
 
     return (
-        <LemonTable
+        <Table
             id="symbol-sets"
             pagination={pagination}
             columns={columns}

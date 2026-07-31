@@ -509,7 +509,7 @@
                 width: var(--notebook-column-left-width);
                 transform: translateX(-100%);
 
-                > .LemonWidget .LemonWidget__content {
+                > .Widget .Widget__content {
                     max-height: var(--notebook-sidebar-height);
                     overflow: auto;
                 }
@@ -568,13 +568,13 @@
         margin-bottom: -0.2rem;
         box-shadow: 0 4px 10px 0 rgb(0 0 0 / 10%);
 
-        .LemonInput {
+        .Input {
             min-height: 0;
             border: 0;
         }
     }
 
-    .LemonTable__content > table > thead {
+    .Table__content > table > thead {
         position: sticky;
         top: 0;
         z-index: 1;

@@ -3,12 +3,12 @@ import './InsightLabel.scss'
 import clsx from 'clsx'
 import { useValues } from 'kea'
 
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { SeriesLetter } from 'lib/components/SeriesGlyph'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { capitalizeFirstLetter, hexToRGBA, midEllipsis } from 'lib/utils'
 import { formatEventName } from 'scenes/insights/utils'
 import { mathsLogic } from 'scenes/trends/mathsLogic'
@@ -61,24 +61,24 @@ function MathTag({ math, mathProperty, mathInsightsQL, mathGroupTypeIndex }: Mat
     const { aggregationLabel } = useValues(groupsModel)
 
     if (!math || math === 'total') {
-        return <LemonTag>Total</LemonTag>
+        return <Tag>Total</Tag>
     }
     if (math === 'dau') {
-        return <LemonTag>Unique</LemonTag>
+        return <Tag>Unique</Tag>
     }
     if (math === 'unique_group' && mathGroupTypeIndex != undefined) {
-        return <LemonTag>Unique {aggregationLabel(mathGroupTypeIndex).plural}</LemonTag>
+        return <Tag>Unique {aggregationLabel(mathGroupTypeIndex).plural}</Tag>
     }
     if (math === 'weekly_active' && mathGroupTypeIndex != undefined) {
-        return <LemonTag>Weekly active {aggregationLabel(mathGroupTypeIndex).plural}</LemonTag>
+        return <Tag>Weekly active {aggregationLabel(mathGroupTypeIndex).plural}</Tag>
     }
     if (math === 'monthly_active' && mathGroupTypeIndex != undefined) {
-        return <LemonTag>Monthly active {aggregationLabel(mathGroupTypeIndex).plural}</LemonTag>
+        return <Tag>Monthly active {aggregationLabel(mathGroupTypeIndex).plural}</Tag>
     }
     if (math && ['sum', 'avg', 'min', 'max', 'median', 'p75', 'p90', 'p95', 'p99'].includes(math)) {
         return (
             <>
-                <LemonTag>{(mathDefinitions as any)[math]?.name || capitalizeFirstLetter(math)}</LemonTag>
+                <Tag>{(mathDefinitions as any)[math]?.name || capitalizeFirstLetter(math)}</Tag>
                 {mathProperty && (
                     <>
                         <span>of</span>
@@ -89,10 +89,10 @@ function MathTag({ math, mathProperty, mathInsightsQL, mathGroupTypeIndex }: Mat
         )
     }
     if (math === 'insightsql') {
-        return <LemonTag className="max-w-60 text-ellipsis overflow-hidden">{String(mathInsightsQL) || 'SQL'}</LemonTag>
+        return <Tag className="max-w-60 text-ellipsis overflow-hidden">{String(mathInsightsQL) || 'SQL'}</Tag>
     }
     // Use mathDefinitions first, then fall back to capitalizing the math string
-    return <LemonTag>{(mathDefinitions as any)[math]?.name || capitalizeFirstLetter(math)}</LemonTag>
+    return <Tag>{(mathDefinitions as any)[math]?.name || capitalizeFirstLetter(math)}</Tag>
 }
 
 export function InsightLabel({
@@ -200,12 +200,12 @@ export function InsightLabel({
                         <div className="flex flex-wrap gap-1">
                             {pillValues.map((pill) => (
                                 <Tooltip title={pill} key={pill}>
-                                    <LemonTag className="tag-pill">
+                                    <Tag className="tag-pill">
                                         {/* eslint-disable-next-line react/forbid-dom-props */}
                                         <span className="truncate" style={{ maxWidth: pillMaxWidth }}>
                                             {pillMidEllipsis ? midEllipsis(String(pill), 50) : pill}
                                         </span>
-                                    </LemonTag>
+                                    </Tag>
                                 </Tooltip>
                             ))}
                         </div>

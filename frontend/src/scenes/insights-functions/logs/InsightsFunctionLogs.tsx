@@ -3,9 +3,9 @@ import { router } from 'kea-router'
 import { useMemo } from 'react'
 
 import { IconEllipsis } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonDialog, LemonMenu, LemonTag, Link } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Dialog, Menu, Tag, Link } from '@hanzo/elements'
 
-import { LemonTableColumns } from 'lib/lemon-ui/LemonTable'
+import { TableColumns } from 'lib/elements/Table'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { urls } from 'scenes/urls'
 
@@ -60,17 +60,17 @@ export function InsightsFunctionLogs(): JSX.Element | null {
             {selectingMany ? (
                 <div className="flex gap-2 items-center mb-2 justify-end">
                     <>
-                        <LemonButton size="small" type="secondary" onClick={() => setSelectingMany(false)}>
+                        <Button size="small" type="secondary" onClick={() => setSelectingMany(false)}>
                             Cancel
-                        </LemonButton>
-                        <LemonButton size="small" type="secondary" onClick={() => selectAllForRetry()}>
+                        </Button>
+                        <Button size="small" type="secondary" onClick={() => selectAllForRetry()}>
                             Select all
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             size="small"
                             type="primary"
                             onClick={() => {
-                                LemonDialog.open({
+                                Dialog.open({
                                     title: 'Retry invocations',
                                     content: `Are you sure you want to retry the selected events? Please don't close the window until the invocations have completed.`,
                                     secondaryButton: {
@@ -92,7 +92,7 @@ export function InsightsFunctionLogs(): JSX.Element | null {
                             }
                         >
                             Retry selected
-                        </LemonButton>
+                        </Button>
                     </>
                 </div>
             ) : null}
@@ -101,7 +101,7 @@ export function InsightsFunctionLogs(): JSX.Element | null {
                 sourceId={id}
                 renderColumns={(columns) => {
                     // Add in custom columns for handling retries
-                    const newColumns: LemonTableColumns<GroupedLogEntry> = [
+                    const newColumns: TableColumns<GroupedLogEntry> = [
                         {
                             title: 'Status',
                             key: 'status',
@@ -167,17 +167,17 @@ function InsightsFunctionLogsStatus({
     return (
         <div className="flex items-center gap-2">
             {selectingMany ? (
-                <LemonCheckbox
+                <Checkbox
                     checked={selectedForRetry[record.instanceId] ?? false}
                     onChange={(checked) => setSelectedForRetry({ [record.instanceId]: checked })}
                 />
             ) : null}
-            <LemonTag type={status === 'success' ? 'success' : status === 'failure' ? 'danger' : 'warning'}>
+            <Tag type={status === 'success' ? 'success' : status === 'failure' ? 'danger' : 'warning'}>
                 {capitalizeFirstLetter(status)}
-            </LemonTag>
+            </Tag>
 
             {!internalEvent && (
-                <LemonMenu
+                <Menu
                     items={[
                         eventId
                             ? {
@@ -209,12 +209,12 @@ function InsightsFunctionLogsStatus({
                         },
                     ]}
                 >
-                    <LemonButton
+                    <Button
                         size="xsmall"
                         icon={<IconEllipsis className="rotate-90" />}
                         loading={thisRetry === 'pending'}
                     />
-                </LemonMenu>
+                </Menu>
             )}
         </div>
     )

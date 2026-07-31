@@ -1,11 +1,11 @@
 import { useValues } from 'kea'
 
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { Language } from 'lib/components/CodeSnippet'
 import { CodeSnippet } from 'lib/components/CodeSnippet'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Banner } from 'lib/elements/Banner'
+import { Tag } from 'lib/elements/Tag'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { Region } from '~/types'
@@ -35,9 +35,9 @@ const SetupWizardBanner = ({
     return (
         <>
             <h2>Automated installation</h2>
-            <LemonBanner type="info" hideIcon={true}>
+            <Banner type="info" hideIcon={true}>
                 <h3 className="flex items-center gap-2 pb-1">
-                    <LemonTag type="warning">BETA</LemonTag> AI setup wizard
+                    <Tag type="warning">BETA</Tag> AI setup wizard
                 </h3>
                 <div className="flex flex-col p-2">
                     <p className="font-normal pb-1">Try using the AI setup wizard to automatically install Insights.</p>
@@ -46,8 +46,8 @@ const SetupWizardBanner = ({
                     </p>
                     <CodeSnippet language={Language.Bash}>{wizardCommand}</CodeSnippet>
                 </div>
-            </LemonBanner>
-            <LemonDivider label="OR" />
+            </Banner>
+            <Divider label="OR" />
             <h2>Manual installation</h2>
         </>
     )

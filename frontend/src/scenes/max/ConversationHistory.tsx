@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
 import { IconExternal, IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton, LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
+import { Button, Skeleton, Tag, Link, Spinner } from '@hanzo/elements'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { urls } from 'scenes/urls'
@@ -38,9 +38,9 @@ export function ConversationHistory({ sidePanel = false, compact = false }: Conv
                     ))
                 ) : conversationHistoryLoading ? (
                     <div className="flex flex-col gap-1">
-                        <LemonSkeleton className="h-8" />
-                        <LemonSkeleton className="h-8 opacity-60" />
-                        <LemonSkeleton className="h-8 opacity-30" />
+                        <Skeleton className="h-8" />
+                        <Skeleton className="h-8 opacity-60" />
+                        <Skeleton className="h-8 opacity-30" />
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center text-center py-8 text-muted">
@@ -64,13 +64,13 @@ export function ConversationHistory({ sidePanel = false, compact = false }: Conv
                 ))
             ) : conversationHistoryLoading ? (
                 <>
-                    <LemonSkeleton className="h-14" />
-                    <LemonSkeleton className="h-14 opacity-80" />
-                    <LemonSkeleton className="h-14 opacity-60" />
-                    <LemonSkeleton className="h-14 opacity-40" />
-                    <LemonSkeleton className="h-14 opacity-20" />
-                    <LemonSkeleton className="h-14 opacity-10" />
-                    <LemonSkeleton className="h-14 opacity-5" />
+                    <Skeleton className="h-14" />
+                    <Skeleton className="h-14 opacity-80" />
+                    <Skeleton className="h-14 opacity-60" />
+                    <Skeleton className="h-14 opacity-40" />
+                    <Skeleton className="h-14 opacity-20" />
+                    <Skeleton className="h-14 opacity-10" />
+                    <Skeleton className="h-14 opacity-5" />
                 </>
             ) : (
                 <div className="flex items-center flex-1">
@@ -83,7 +83,7 @@ export function ConversationHistory({ sidePanel = false, compact = false }: Conv
                         description="Insights AI is an agent that answers data questions, gets things done in UI, and provides insights from Insights's documentation."
                         docsURL="https://hanzo.ai/docs/data/max-ai"
                         actionElementOverride={
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 icon={<IconPlus />}
                                 onClick={() => {
@@ -92,7 +92,7 @@ export function ConversationHistory({ sidePanel = false, compact = false }: Conv
                                 }}
                             >
                                 Send your first message
-                            </LemonButton>
+                            </Button>
                         }
                     />
                 </div>
@@ -121,10 +121,10 @@ function ConversationCard({ conversation, openConversation, sidePanel }: Convers
         >
             <div className="flex items-center gap-2">
                 <span className="flex-1 line-clamp-1">{conversation.title}</span>
-                {conversation.is_internal && <LemonTag type="muted">Impersonated</LemonTag>}
-                {conversation.type === ConversationType.DeepResearch && <LemonTag>Research</LemonTag>}
+                {conversation.is_internal && <Tag type="muted">Impersonated</Tag>}
+                {conversation.type === ConversationType.DeepResearch && <Tag>Research</Tag>}
                 {conversation.slack_thread_key && (
-                    <LemonTag>
+                    <Tag>
                         <Link
                             to={getSlackThreadUrl(conversation.slack_thread_key, conversation.slack_workspace_domain)}
                             target="_blank"
@@ -134,7 +134,7 @@ function ConversationCard({ conversation, openConversation, sidePanel }: Convers
                         >
                             Slack thread <IconExternal />
                         </Link>
-                    </LemonTag>
+                    </Tag>
                 )}
             </div>
             {conversation.status === ConversationStatus.InProgress ? (

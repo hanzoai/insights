@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton, LemonSwitch } from '@hanzo/lemon-ui'
+import { Banner, Button, Switch } from '@hanzo/elements'
 
 import { browserNotificationLogic } from '../../browserNotificationLogic'
 
@@ -23,23 +23,23 @@ export function BrowserNotificationsSection(): JSX.Element | null {
                     </p>
                 </div>
                 {isPermissionDenied ? (
-                    <LemonBanner type="info">
+                    <Banner type="info">
                         Browser notifications are blocked. To enable them, click the lock icon in your browser's address
                         bar and allow notifications for this site.
-                    </LemonBanner>
+                    </Banner>
                 ) : permission === 'default' ? (
-                    <LemonButton type="secondary" onClick={requestPermission}>
+                    <Button type="secondary" onClick={requestPermission}>
                         Enable browser notifications
-                    </LemonButton>
+                    </Button>
                 ) : (
-                    <LemonSwitch checked={enabled} onChange={setEnabled} />
+                    <Switch checked={enabled} onChange={setEnabled} />
                 )}
             </div>
             {enabled && (
-                <LemonBanner type="info" className="mb-2">
+                <Banner type="info" className="mb-2">
                     Not seeing notifications? Make sure notifications are enabled for your browser in your operating
                     system settings (e.g., macOS System Settings → Notifications → Chrome).
-                </LemonBanner>
+                </Banner>
             )}
         </>
     )

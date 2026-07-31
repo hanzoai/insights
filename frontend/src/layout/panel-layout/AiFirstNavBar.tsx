@@ -4,7 +4,7 @@ import { router } from 'kea-router'
 import { useRef, useState } from 'react'
 
 import { IconChevronRight, IconPlusSmall, IconSidebarClose, IconSidebarOpen } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { AccountMenu } from 'lib/components/Account/AccountMenu'
 import { RenderKeybind } from 'lib/components/AppShortcuts/AppShortcutMenu'
@@ -13,7 +13,7 @@ import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
 import { DebugNotice } from 'lib/components/DebugNotice'
 import { NavPanelAdvertisement } from 'lib/components/NavPanelAdvertisement/NavPanelAdvertisement'
 import { Resizer } from 'lib/components/Resizer/Resizer'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { Label } from 'lib/ui/Label/Label'
 import { cn } from 'lib/utils/css-classes'
@@ -125,7 +125,7 @@ export function AiFirstNavBar(): JSX.Element {
                                         'items-center': isLayoutNavCollapsed,
                                     })}
                                 >
-                                    <LemonButton
+                                    <Button
                                         tooltip={
                                             <>
                                                 <span>New chat</span> <RenderKeybind keybind={[keyBinds.newChat]} />
@@ -134,11 +134,11 @@ export function AiFirstNavBar(): JSX.Element {
                                         tooltipPlacement="right"
                                         onClick={() => router.actions.push(urls.ai())}
                                         type="secondary"
-                                        className="[--lemon-button-padding-horizontal:0.5rem] [--lemon-button-gap:1rem]"
+                                        className="[--button-padding-horizontal:0.5rem] [--button-gap:1rem]"
                                     >
                                         <IconPlusSmall className="size-4 text-secondary" />
                                         <span className="pl-[2px]">New chat</span>
-                                    </LemonButton>
+                                    </Button>
 
                                     <div className="flex flex-col gap-1">
                                         <Label intent="menu" className="text-xxs px-2 text-tertiary">

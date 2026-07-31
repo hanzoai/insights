@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonColorButton } from '@hanzo/lemon-ui'
+import { ColorButton } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { trendsDataLogic } from 'scenes/trends/trendsDataLogic'
@@ -20,7 +20,7 @@ export function ColorCustomizationColumnItem({ item }: { item: IndexedTrendResul
     const color = getTrendsColor(item)
 
     return (
-        <LemonColorButton
+        <ColorButton
             color={color}
             onClick={(e) => {
                 e.preventDefault()

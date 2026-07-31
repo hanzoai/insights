@@ -98,7 +98,7 @@
         top: 0;
         bottom: 0;
         left: 0;
-        z-index: var(--z-lemon-sidebar);
+        z-index: var(--z-sidebar);
     }
 
     &.Navbar3000--hidden {
@@ -114,8 +114,8 @@
         overflow-y: auto;
         background: var(--color-bg-surface-secondary);
 
-        .LemonButton__chrome {
-            --lemon-button-padding-horizontal: 0.25rem !important;
+        .Button__chrome {
+            --button-padding-horizontal: 0.25rem !important;
         }
 
         .Navbar3000__top,
@@ -172,7 +172,7 @@
             content: '•';
         }
 
-        .LemonButton__icon {
+        .Button__icon {
             color: var(--text-3000);
             transform: translateY(-0.25rem);
         }
@@ -238,7 +238,7 @@
         font-weight: 700;
     }
 
-    .LemonInput--type-search {
+    .Input--type-search {
         max-width: none;
         height: 100%;
         border-color: transparent; // Only show border on focus here
@@ -410,7 +410,7 @@
         background: var(--color-border-primary);
     }
 
-    > .LemonIcon {
+    > .Icon {
         flex-shrink: 0;
         margin-right: calc(var(--accordion-inset-expandable) - var(--accordion-arrow-size));
         font-size: var(--accordion-arrow-size);
@@ -467,7 +467,7 @@
         background: var(--color-border-primary);
     }
 
-    > .LemonIcon {
+    > .Icon {
         flex-shrink: 0;
         margin-right: calc(var(--accordion-inset-expandable) - var(--accordion-arrow-size));
         font-size: var(--accordion-arrow-size);

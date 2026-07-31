@@ -1,4 +1,4 @@
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import defaultLogo from 'public/hanzo-logo.svg'
 

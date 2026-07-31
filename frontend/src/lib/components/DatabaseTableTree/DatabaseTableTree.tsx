@@ -1,4 +1,4 @@
-import { LemonMenuItem } from '@hanzo/lemon-ui'
+import { MenuItem } from '@hanzo/elements'
 
 import { DatabaseSchemaTable } from '~/queries/schema/schema-general'
 
@@ -32,7 +32,7 @@ export interface TreeItemLeaf {
     name: string
     type: string
     icon?: React.ReactNode
-    menuItems?: LemonMenuItem[]
+    menuItems?: MenuItem[]
 }
 
 export function DatabaseTableTree({ items, onSelectRow, selectedRow, depth = 1, className }: TreeProps): JSX.Element {

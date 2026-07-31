@@ -3,9 +3,9 @@ import insights from '@hanzo/insights'
 import { useMemo } from 'react'
 
 import { IconSparkles, IconWarning } from '@hanzo/icons'
-import { Spinner } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/elements'
 
-import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
+import { Button, ButtonProps } from 'lib/elements/Button'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 
@@ -13,8 +13,8 @@ import { fixSQLErrorsLogic } from '../fixSQLErrorsLogic'
 import { sqlEditorLogic } from '../sqlEditorLogic'
 
 interface FixErrorButtonProps {
-    type: LemonButtonProps['type']
-    size?: LemonButtonProps['size']
+    type: ButtonProps['type']
+    size?: ButtonProps['size']
     contentOverride?: string
     source: 'action-bar' | 'query-error'
 }
@@ -64,7 +64,7 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
     }, [fixErrorsError, fixInsightsQLErrorsLoading, contentOverride])
 
     return (
-        <LemonButton
+        <Button
             type={type}
             size={size}
             disabledReason={disabledReason}
@@ -75,6 +75,6 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
             }}
         >
             {content}
-        </LemonButton>
+        </Button>
     )
 }

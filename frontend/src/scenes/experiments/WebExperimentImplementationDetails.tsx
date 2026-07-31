@@ -1,8 +1,8 @@
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
-import { IconOpenInApp } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Dialog } from 'lib/elements/Dialog'
+import { IconOpenInApp } from 'lib/elements/icons'
 
 import { Experiment } from '~/types'
 
@@ -11,7 +11,7 @@ interface WebExperimentImplementationDetails {
 }
 export function WebExperimentImplementationDetails({ experiment }: WebExperimentImplementationDetails): JSX.Element {
     const onSelectElement = (): void => {
-        LemonDialog.open({
+        Dialog.open({
             title: 'Select a domain',
             description: experiment?.id
                 ? 'Choose the domain on which to edit this experiment'
@@ -39,14 +39,14 @@ export function WebExperimentImplementationDetails({ experiment }: WebExperiment
                         Use our toolbar to select elements and apply transformations for each variant.
                     </div>
                     <div>
-                        <LemonButton
+                        <Button
                             size="small"
                             type="secondary"
                             onClick={onSelectElement}
                             sideIcon={<IconOpenInApp />}
                         >
                             Launch toolbar on your website
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </div>

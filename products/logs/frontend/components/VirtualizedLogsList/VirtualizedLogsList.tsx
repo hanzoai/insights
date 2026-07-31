@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react'
 import { List, getScrollbarSize, useDynamicRowHeight, useListRef } from 'react-window'
 
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { SizeProps } from 'lib/components/AutoSizer/AutoSizer'
@@ -308,9 +308,9 @@ export function VirtualizedLogsList({
                     </Link>
                 </div>
                 {onExpandTimeRange && (
-                    <LemonButton type="secondary" size="small" onClick={onExpandTimeRange}>
+                    <Button type="secondary" size="small" onClick={onExpandTimeRange}>
                         Expand time range
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
         )

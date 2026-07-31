@@ -3,17 +3,17 @@ import { BindLogic, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
 import {
-    LemonBanner,
-    LemonButton,
-    LemonDropdown,
-    LemonLabel,
-    LemonSwitch,
-    LemonTag,
+    Banner,
+    Button,
+    Dropdown,
+    Label,
+    Switch,
+    Tag,
     SpinnerOverlay,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 import { insightsFunctionConfigurationLogic } from 'scenes/insights-functions/configuration/insightsFunctionConfigurationLogic'
 import { InsightsFunctionFilters } from 'scenes/insights-functions/filters/InsightsFunctionFilters'
 import { InsightsFunctionMappings } from 'scenes/insights-functions/mapping/InsightsFunctionMappings'
@@ -75,17 +75,17 @@ export function InsightsFunctionConfiguration({
         insightsFunction?.template?.code_language === 'fn' &&
         insightsFunction?.template &&
         !insightsFunction.template.id.startsWith('template-blank-') ? (
-            <LemonDropdown showArrow overlay={<InsightsFunctionTemplateOptions />}>
-                <LemonButton type="tertiary" size="small" className="border border-dashed" fullWidth>
+            <Dropdown showArrow overlay={<InsightsFunctionTemplateOptions />}>
+                <Button type="tertiary" size="small" className="border border-dashed" fullWidth>
                     <span className="flex flex-wrap flex-1 gap-1 items-center">
                         Built from template:
                         <span className="font-semibold">{insightsFunction?.template.name}</span>
                         <InsightsFunctionStatusTag status={insightsFunction.template.status} />
                         <div className="flex-1" />
-                        {templateHasChanged ? <LemonTag type="success">Modified</LemonTag> : null}
+                        {templateHasChanged ? <Tag type="success">Modified</Tag> : null}
                     </span>
-                </LemonButton>
-            </LemonDropdown>
+                </Button>
+            </Dropdown>
         ) : null
 
     return (
@@ -93,9 +93,9 @@ export function InsightsFunctionConfiguration({
             <BindLogic logic={insightsFunctionConfigurationLogic} props={logicProps}>
                 {insightsFunction?.filters?.bytecode_error ? (
                     <div>
-                        <LemonBanner type="error">
+                        <Banner type="error">
                             <b>Error saving filters:</b> {insightsFunction.filters.bytecode_error}
-                        </LemonBanner>
+                        </Banner>
                     </div>
                 ) : [
                       'template-google-ads',
@@ -111,7 +111,7 @@ export function InsightsFunctionConfiguration({
                   template?.status === 'alpha' ||
                   insightsFunction?.template?.status === 'alpha' ? (
                     <div>
-                        <LemonBanner type="warning">
+                        <Banner type="warning">
                             <p>
                                 This {humanizeInsightsFunctionType(type)} is currently in an experimental state. For many
                                 cases this will work just fine but for others there may be unexpected issues and we do
@@ -130,7 +130,7 @@ export function InsightsFunctionConfiguration({
                                     Make sure to enable the `opt_in_site_apps` flag in your `insights.init` config.
                                 </span>
                             ) : null}
-                        </LemonBanner>
+                        </Banner>
                     </div>
                 ) : null}
 
@@ -144,12 +144,12 @@ export function InsightsFunctionConfiguration({
                         <div className="flex flex-col flex-1 gap-4 min-w-100">
                             <div className={clsx('p-3 rounded border deprecated-space-y-2 bg-surface-primary')}>
                                 <div className="flex items-center justify-between">
-                                    <LemonLabel>Status</LemonLabel>
+                                    <Label>Status</Label>
                                     {insightsFunction && <InsightsFunctionStatusIndicator insightsFunction={insightsFunction} />}
                                 </div>
-                                <LemonField name="enabled">
+                                <Field name="enabled">
                                     {({ value, onChange }) => (
-                                        <LemonSwitch
+                                        <Switch
                                             onChange={() => onChange(!value)}
                                             checked={value}
                                             disabled={loading}
@@ -169,7 +169,7 @@ export function InsightsFunctionConfiguration({
                                             }
                                         />
                                     )}
-                                </LemonField>
+                                </Field>
 
                                 {templateInfo}
                             </div>
@@ -182,11 +182,11 @@ export function InsightsFunctionConfiguration({
                         <div className="deprecated-space-y-4 flex-2 min-w-100">
                             {mightDropEvents && (
                                 <div>
-                                    <LemonBanner type="info">
+                                    <Banner type="info">
                                         <b>Warning:</b> This transformation can filter out events, dropping them
                                         irreversibly. Make sure to double check your configuration, and use filters to
                                         limit the events that this transformation is applied to.
-                                    </LemonBanner>
+                                    </Banner>
                                 </div>
                             )}
                             <InsightsFunctionInputs />

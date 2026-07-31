@@ -5,9 +5,9 @@ import { router } from 'kea-router'
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { AlertType } from 'lib/components/Alerts/types'
 import { dayjs } from 'lib/dayjs'
-import { Sorting } from 'lib/lemon-ui/LemonTable'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
-import { PaginationManual } from 'lib/lemon-ui/PaginationControl'
+import { Sorting } from 'lib/elements/Table'
+import { toast } from 'lib/elements/Toast/Toast'
+import { PaginationManual } from 'lib/elements/PaginationControl'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareScene } from 'lib/logic/scenes/tabAwareScene'
 import { tabAwareUrlToAction } from 'lib/logic/scenes/tabAwareUrlToAction'
@@ -426,7 +426,7 @@ export const savedInsightsLogic = kea<savedInsightsLogicType>([
                         hashParams.edit ? urls.insightEdit(insight.short_id) : urls.insightView(insight.short_id)
                     )
                 } catch {
-                    lemonToast.error(`Insight ID ${insightNumericId} couldn't be retrieved`)
+                    toast.error(`Insight ID ${insightNumericId} couldn't be retrieved`)
                     router.actions.push(urls.savedInsights())
                 }
                 return

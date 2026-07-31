@@ -1,5 +1,5 @@
 import { IconArrowRight } from '@hanzo/icons'
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { FeedbackTabContent } from 'scenes/surveys/FeedbackTabContent'
 import { QuickSurveyType } from 'scenes/surveys/quick-create/types'

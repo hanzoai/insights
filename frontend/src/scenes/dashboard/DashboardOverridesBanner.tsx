@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
+import { Banner, Button } from '@hanzo/elements'
 
 import { DashboardEventSource } from 'lib/utils/eventUsageLogic'
 
@@ -17,28 +17,28 @@ export const DashboardOverridesBanner = (): JSX.Element | null => {
     }
 
     return (
-        <LemonBanner type="info" className="mt-4 mb-2">
+        <Banner type="info" className="mt-4 mb-2">
             <div className="flex flex-row items-center justify-between gap-2">
                 <span>You are viewing this dashboard with filter overrides.</span>
 
                 <div className="flex gap-2">
-                    <LemonButton
+                    <Button
                         type="primary"
                         onClick={() =>
                             setDashboardMode(DashboardMode.Edit, DashboardEventSource.DashboardHeaderOverridesBanner)
                         }
                     >
                         Edit dashboard
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="secondary"
                         onClick={() => setDashboardMode(null, DashboardEventSource.DashboardHeaderOverridesBanner)}
                         loading={cancellingPreview}
                     >
                         Discard overrides
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }

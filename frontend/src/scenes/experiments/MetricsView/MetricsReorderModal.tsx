@@ -7,7 +7,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { IconDrag } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonModal, LemonTag } from '@hanzo/lemon-ui'
+import { Badge, Button, Modal, Tag } from '@hanzo/elements'
 
 import { ExperimentMetric } from '~/queries/schema/schema-general'
 
@@ -43,19 +43,19 @@ const MetricItem = ({
             {...listeners}
         >
             <IconDrag className="text-orange-500 flex-shrink-0 text-lg" />
-            <LemonBadge.Number count={order + 1} maxDigits={3} status="muted" />
+            <Badge.Number count={order + 1} maxDigits={3} status="muted" />
             <div className="flex-1 min-w-0 flex flex-col gap-1">
                 <div className="font-semibold">
                     <MetricTitle metric={metric} />
                 </div>
                 <div className="flex gap-1">
-                    <LemonTag type="muted" size="small">
+                    <Tag type="muted" size="small">
                         {getMetricTag(metric)}
-                    </LemonTag>
+                    </Tag>
                     {metric.isSharedMetric && (
-                        <LemonTag type="option" size="small">
+                        <Tag type="option" size="small">
                             Shared
-                        </LemonTag>
+                        </Tag>
                     )}
                 </div>
             </div>
@@ -140,7 +140,7 @@ export function MetricsReorderModal({ isSecondary = false }: { isSecondary?: boo
     }
 
     return (
-        <LemonModal
+        <Modal
             onClose={closeModal}
             isOpen={isOpen}
             width={600}
@@ -153,12 +153,12 @@ export function MetricsReorderModal({ isSecondary = false }: { isSecondary?: boo
             }
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={closeModal}>
+                    <Button type="secondary" onClick={closeModal}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={handleSaveOrder}>
+                    </Button>
+                    <Button type="primary" onClick={handleSaveOrder}>
                         Save order
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -180,6 +180,6 @@ export function MetricsReorderModal({ isSecondary = false }: { isSecondary?: boo
                     </SortableContext>
                 </DndContext>
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

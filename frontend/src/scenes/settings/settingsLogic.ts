@@ -5,7 +5,7 @@ import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { organizationIntegrationsLogic } from 'scenes/settings/organization/organizationIntegrationsLogic'
@@ -188,7 +188,7 @@ export const settingsLogic = kea<settingsLogicType>([
                           ? [scope]
                           : undefined
                     if (!at) {
-                        lemonToast.warning('A timestamp is required to load settings at a point in time')
+                        toast.warning('A timestamp is required to load settings at a point in time')
                         return {}
                     }
                     return await api.teamSettings.asOf(at, scopeArray)

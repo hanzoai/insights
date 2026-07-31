@@ -2,16 +2,16 @@ import useSize from '@react-hook/size'
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { LemonTag, lemonToast } from '@hanzo/lemon-ui'
+import { Tag, toast } from '@hanzo/elements'
 
 import MonacoDiffEditor from 'lib/components/MonacoDiffEditor'
 import { NotFound } from 'lib/components/NotFound'
 import { dayjs } from 'lib/dayjs'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
-import { Link } from 'lib/lemon-ui/Link'
-import { ProfilePicture } from 'lib/lemon-ui/ProfilePicture'
+import { Divider } from 'lib/elements/Divider'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Tabs } from 'lib/elements/Tabs'
+import { Link } from 'lib/elements/Link'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { getApprovalActionLabel, getApprovalResourceName, getApprovalResourceUrl } from 'scenes/approvals/utils'
 import { membersLogic } from 'scenes/organization/membersLogic'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -49,7 +49,7 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
     if (changeRequestLoading || !changeRequest) {
         return (
             <SceneContent>
-                <LemonSkeleton />
+                <Skeleton />
             </SceneContent>
         )
     }
@@ -70,7 +70,7 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
                             if (reason) {
                                 rejectChangeRequest(reason)
                             } else {
-                                lemonToast.error('Please provide a reason for rejection')
+                                toast.error('Please provide a reason for rejection')
                             }
                         }}
                         onCancel={(_, reason) => cancelChangeRequest(reason)}
@@ -144,7 +144,7 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
                     </div>
                 </section>
 
-                <LemonDivider />
+                <Divider />
 
                 <section>
                     <h3 className="font-semibold mb-2">Proposed changes</h3>
@@ -157,7 +157,7 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
                     />
                 </section>
 
-                <LemonDivider />
+                <Divider />
 
                 <section>
                     <h3 className="font-semibold mb-2">Decision Analysis</h3>
@@ -169,14 +169,14 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
 
                 {changeRequest.approvals && changeRequest.approvals.length > 0 && (
                     <>
-                        <LemonDivider />
+                        <Divider />
                         <section>
                             <h3 className="font-semibold mb-2">Approval Timeline</h3>
                             <div className="space-y-3">
                                 {changeRequest.approvals.map((approval) => (
                                     <div key={approval.id} className="flex items-start gap-3">
                                         <div className="flex-shrink-0 mt-1">
-                                            <LemonTag
+                                            <Tag
                                                 type={
                                                     approval.decision === ApprovalDecision.Approved
                                                         ? 'success'
@@ -184,7 +184,7 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
                                                 }
                                             >
                                                 {approval.decision}
-                                            </LemonTag>
+                                            </Tag>
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
@@ -209,7 +209,7 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
 
                 {changeRequest.state === ChangeRequestState.Applied && changeRequest.result_data && (
                     <>
-                        <LemonDivider />
+                        <Divider />
                         <section>
                             <h3 className="font-semibold mb-2">Application Result</h3>
                             <div className="bg-bg-light p-4 rounded border">
@@ -223,7 +223,7 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
 
                 {changeRequest.state === ChangeRequestState.Failed && changeRequest.apply_error && (
                     <>
-                        <LemonDivider />
+                        <Divider />
                         <section>
                             <h3 className="font-semibold mb-2">Error</h3>
                             <div className="bg-bg-light p-4 rounded border">
@@ -235,7 +235,7 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
 
                 {changeRequest.validation_errors && (
                     <>
-                        <LemonDivider />
+                        <Divider />
                         <section>
                             <h3 className="font-semibold mb-2">Validation Errors</h3>
                             <div className="bg-warning-light p-4 rounded border border-warning">
@@ -247,7 +247,7 @@ function ApprovalDetail({ id }: ApprovalLogicProps): JSX.Element {
                     </>
                 )}
 
-                <LemonDivider />
+                <Divider />
 
                 <section>
                     <h3 className="font-semibold mb-2">Policy Configuration</h3>
@@ -275,7 +275,7 @@ function ProposedChangesTabs({
     const fullRequestData = changeRequest.intent?.full_request_data
 
     return (
-        <LemonTabs
+        <Tabs
             activeKey={activeTab}
             onChange={(key) => setActiveTab(key as ProposedChangesTab)}
             tabs={[
@@ -340,9 +340,9 @@ function StatusTag({ state }: { state: ChangeRequestState }): JSX.Element {
     } as const
 
     return (
-        <LemonTag type={tagTypes[state]} className="uppercase">
+        <Tag type={tagTypes[state]} className="uppercase">
             {state}
-        </LemonTag>
+        </Tag>
     )
 }
 
@@ -376,7 +376,7 @@ function PolicyConfigurationDisplay({ policySnapshot }: { policySnapshot?: Polic
     if (membersLoading || rolesLoading) {
         return (
             <div className="bg-bg-light p-4 rounded border">
-                <LemonSkeleton className="h-32" />
+                <Skeleton className="h-32" />
             </div>
         )
     }
@@ -425,13 +425,13 @@ function PolicyConfigurationDisplay({ policySnapshot }: { policySnapshot?: Polic
                         {roleIds.map((id) => {
                             const role = rolesById.get(id)
                             return role ? (
-                                <LemonTag key={id} type="highlight">
+                                <Tag key={id} type="highlight">
                                     {role.name}
-                                </LemonTag>
+                                </Tag>
                             ) : (
-                                <LemonTag key={id} type="muted">
+                                <Tag key={id} type="muted">
                                     Deleted role ID {id}
-                                </LemonTag>
+                                </Tag>
                             )
                         })}
                     </div>

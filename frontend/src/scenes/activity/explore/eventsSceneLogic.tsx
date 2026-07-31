@@ -2,7 +2,7 @@ import equal from 'fast-deep-equal'
 import { actions, connect, kea, path, reducers, selectors } from 'kea'
 import { UrlToActionPayload } from 'kea-router/lib/types'
 
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareScene } from 'lib/logic/scenes/tabAwareScene'
@@ -70,7 +70,7 @@ export const eventsSceneLogic = kea<eventsSceneLogicType>([
                     if (typeof queryParam === 'object') {
                         actions.setQuery(queryParam)
                     } else {
-                        lemonToast.error('Invalid query in URL')
+                        toast.error('Invalid query in URL')
                         console.error({ queryParam })
                     }
                 }

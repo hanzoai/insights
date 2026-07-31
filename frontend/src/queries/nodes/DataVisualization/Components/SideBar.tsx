@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonTab, LemonTabs } from '@hanzo/lemon-ui'
+import { Tab, Tabs } from '@hanzo/elements'
 
 import { ChartDisplayType } from '~/types'
 
@@ -41,7 +41,7 @@ export const SideBar = (): JSX.Element => {
     const { activeSideBarTab, visualizationType } = useValues(dataVisualizationLogic)
     const { setSideBarTab } = useActions(dataVisualizationLogic)
 
-    const tabs: LemonTab<string>[] = useMemo(
+    const tabs: Tab<string>[] = useMemo(
         () =>
             Object.entries(TABS_TO_CONTENT)
                 .filter(([_, tab]) => tab.shouldShow(visualizationType))
@@ -54,7 +54,7 @@ export const SideBar = (): JSX.Element => {
 
     return (
         <div className="bg-surface-primary w-[18rem] flex flex-col">
-            <LemonTabs
+            <Tabs
                 size="small"
                 activeKey={activeSideBarTab}
                 onChange={(tab) => setSideBarTab(tab as SideBarTab)}

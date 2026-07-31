@@ -1,4 +1,4 @@
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
+import { Skeleton } from 'lib/elements/Skeleton'
 
 import { ProductTourStats } from '../productTourLogic'
 
@@ -15,7 +15,7 @@ function StatCard({ title, value, subValue, description, loading }: StatCardProp
         <div className="flex flex-col p-4 border rounded bg-surface-primary">
             <div className="text-secondary text-sm font-medium">{title}</div>
             {loading ? (
-                <LemonSkeleton className="h-8 w-20 my-1" />
+                <Skeleton className="h-8 w-20 my-1" />
             ) : (
                 <div className="flex items-baseline gap-2">
                     <div className="text-2xl font-bold">{value}</div>

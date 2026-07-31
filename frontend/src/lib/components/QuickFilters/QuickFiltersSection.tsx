@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import {
     QuickFilterSelector,
@@ -46,9 +46,9 @@ export function QuickFiltersSection({ context }: QuickFiltersSectionProps): JSX.
                     />
                 )
             })}
-            <LemonButton size="small" icon={<IconGear />} onClick={openModal}>
+            <Button size="small" icon={<IconGear />} onClick={openModal}>
                 Configure quick filters
-            </LemonButton>
+            </Button>
             <QuickFiltersModal context={context} />
         </>
     )

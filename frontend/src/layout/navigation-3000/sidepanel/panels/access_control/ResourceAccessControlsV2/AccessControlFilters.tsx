@@ -1,5 +1,5 @@
 import { IconChevronDown } from '@hanzo/icons'
-import { LemonButton, LemonDropdown, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Dropdown, Input } from '@hanzo/elements'
 
 import { fullName } from 'lib/utils'
 
@@ -25,7 +25,7 @@ export function AccessControlFilters(props: AccessControlFiltersProps): JSX.Elem
     return (
         <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
-                <LemonInput
+                <Input
                     type="search"
                     className="w-64"
                     value={props.searchText}
@@ -74,7 +74,7 @@ function RolesFilter(props: {
     canUseRoles: boolean
 }): JSX.Element {
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             placement="bottom-start"
             overlay={
@@ -90,15 +90,15 @@ function RolesFilter(props: {
                 />
             }
         >
-            <LemonButton
+            <Button
                 type="secondary"
                 size="small"
                 sideIcon={<IconChevronDown />}
                 disabledReason={!props.canUseRoles ? 'You must upgrade your plan to use roles' : undefined}
             >
                 Role{props.selectedRoleIds.length ? ` (${props.selectedRoleIds.length})` : ''}
-            </LemonButton>
-        </LemonDropdown>
+            </Button>
+        </Dropdown>
     )
 }
 
@@ -108,7 +108,7 @@ function MembersFilter(props: {
     members: OrganizationMemberType[]
 }): JSX.Element {
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             placement="bottom-start"
             overlay={
@@ -124,10 +124,10 @@ function MembersFilter(props: {
                 />
             }
         >
-            <LemonButton type="secondary" size="small" sideIcon={<IconChevronDown />}>
+            <Button type="secondary" size="small" sideIcon={<IconChevronDown />}>
                 Member{props.selectedMemberIds.length ? ` (${props.selectedMemberIds.length})` : ''}
-            </LemonButton>
-        </LemonDropdown>
+            </Button>
+        </Dropdown>
     )
 }
 
@@ -137,7 +137,7 @@ function FeaturesFilter(props: {
     resources: { key: APIScopeObject; label: string }[]
 }): JSX.Element {
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             placement="bottom-start"
             overlay={
@@ -150,10 +150,10 @@ function FeaturesFilter(props: {
                 />
             }
         >
-            <LemonButton type="secondary" size="small" sideIcon={<IconChevronDown />}>
+            <Button type="secondary" size="small" sideIcon={<IconChevronDown />}>
                 Feature{props.selectedResourceKeys.length ? ` (${props.selectedResourceKeys.length})` : ''}
-            </LemonButton>
-        </LemonDropdown>
+            </Button>
+        </Dropdown>
     )
 }
 
@@ -163,7 +163,7 @@ function AccessLevelFilter(props: {
     ruleOptions: { key: string; label: string }[]
 }): JSX.Element {
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             placement="bottom-start"
             overlay={
@@ -176,9 +176,9 @@ function AccessLevelFilter(props: {
                 />
             }
         >
-            <LemonButton type="secondary" size="small" sideIcon={<IconChevronDown />}>
+            <Button type="secondary" size="small" sideIcon={<IconChevronDown />}>
                 Access{props.selectedRuleLevels.length ? ` (${props.selectedRuleLevels.length})` : ''}
-            </LemonButton>
-        </LemonDropdown>
+            </Button>
+        </Dropdown>
     )
 }

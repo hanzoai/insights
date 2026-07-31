@@ -1,4 +1,4 @@
-import { LemonButtonProps, LemonSelect } from '@hanzo/lemon-ui'
+import { ButtonProps, Select } from '@hanzo/elements'
 
 import { FilterLogicalOperator } from '~/types'
 
@@ -8,8 +8,8 @@ interface AndOrFilterSelectProps {
     topLevelFilter?: boolean
     prefix?: React.ReactNode
     suffix?: [singular: string, plural: string]
-    disabledReason?: LemonButtonProps['disabledReason']
-    size?: LemonButtonProps['size']
+    disabledReason?: ButtonProps['disabledReason']
+    size?: ButtonProps['size']
 }
 
 export function AndOrFilterSelect({
@@ -24,7 +24,7 @@ export function AndOrFilterSelect({
     return (
         <div className="flex items-center font-medium">
             <span className="ml-2">{prefix}</span>
-            <LemonSelect
+            <Select
                 className="mx-2"
                 size={size}
                 value={value}

@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonDivider, LemonModal, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Divider, Modal, Link, Tooltip } from '@hanzo/elements'
 
-import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
-import { LoadingBar } from 'lib/lemon-ui/LoadingBar'
+import { Progress } from 'lib/elements/Progress'
+import { LoadingBar } from 'lib/elements/LoadingBar'
 import { humanFriendlyNumber } from 'lib/utils'
 
 import { Experiment, InsightType } from '~/types'
@@ -87,7 +87,7 @@ export function DataCollection(): JSX.Element {
                     <div className="mt-2 mb-1 font-semibold">{`${
                         experimentProgressPercent > 100 ? 100 : experimentProgressPercent.toFixed(2)
                     }% complete`}</div>
-                    <LemonProgress
+                    <Progress
                         className="w-full border"
                         bgColor="var(--color-bg-table)"
                         size="medium"
@@ -129,7 +129,7 @@ export function DataCollection(): JSX.Element {
                         </div>
                     )}
                 </div>
-                <LemonDivider className="my-0" vertical />
+                <Divider className="my-0" vertical />
                 <div className="w-2/5 pl-4">
                     <div className={`text-lg font-semibold ${experiment.end_date ? 'mt-4' : ''}`}>
                         {minimumDetectableEffect}%
@@ -162,14 +162,14 @@ export function DataCollection(): JSX.Element {
                     </div>
                     {!experiment.end_date && (
                         <div className="w-24">
-                            <LemonButton
+                            <Button
                                 className="mt-2"
                                 size="xsmall"
                                 type="secondary"
                                 onClick={openExperimentCollectionGoalModal}
                             >
                                 <span className="px-0">Edit</span>
-                            </LemonButton>
+                            </Button>
                         </div>
                     )}
                     <DataCollectionGoalModal experimentId={experimentId} />
@@ -195,14 +195,14 @@ export function DataCollectionGoalModal({ experimentId }: { experimentId: Experi
             : funnelMetricInsightLoading
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isExperimentCollectionGoalModalOpen}
             onClose={closeExperimentCollectionGoalModal}
             width={550}
             title="Recalculate estimated sample size"
             footer={
                 <div className="flex items-center gap-2">
-                    <LemonButton
+                    <Button
                         form="edit-experiment-exposure-form"
                         type="secondary"
                         onClick={() => {
@@ -211,8 +211,8 @@ export function DataCollectionGoalModal({ experimentId }: { experimentId: Experi
                         }}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         form="edit-experiment-exposure-form"
                         onClick={() => {
                             updateExperimentCollectionGoal()
@@ -222,7 +222,7 @@ export function DataCollectionGoalModal({ experimentId }: { experimentId: Experi
                         data-attr="create-annotation-submit"
                     >
                         Save
-                    </LemonButton>
+                    </Button>
                 </div>
             }
         >
@@ -237,6 +237,6 @@ export function DataCollectionGoalModal({ experimentId }: { experimentId: Experi
             ) : (
                 <DataCollectionCalculator experimentId={experimentId} />
             )}
-        </LemonModal>
+        </Modal>
     )
 }

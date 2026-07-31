@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo, IconNotification } from '@hanzo/icons'
-import { LemonTabs, Link, Tooltip } from '@hanzo/lemon-ui'
+import { Tabs, Link, Tooltip } from '@hanzo/elements'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
@@ -68,7 +68,7 @@ export function AdvancedActivityLogsScene(): JSX.Element | null {
                 }}
             />
             <PayGateMini feature={AvailableFeature.AUDIT_LOGS}>
-                <LemonTabs
+                <Tabs
                     activeKey={activeTab}
                     onChange={(key) => setActiveTab(key as 'logs' | 'exports')}
                     tabs={tabs}

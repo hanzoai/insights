@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 import { useEffect, useState } from 'react'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonButton, LemonDropdown } from '@hanzo/lemon-ui'
+import { Button, Dropdown } from '@hanzo/elements'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
@@ -111,7 +111,7 @@ export function AddIntegrationButton({ onIntegrationSelect }: AddIntegrationButt
             <div key={type}>
                 <div className="px-2 py-1 text-xs font-medium text-muted-foreground">{title}</div>
                 {integrations.map((integrationId) => (
-                    <LemonButton
+                    <Button
                         key={integrationId}
                         fullWidth
                         size="small"
@@ -126,14 +126,14 @@ export function AddIntegrationButton({ onIntegrationSelect }: AddIntegrationButt
                                 <span className="font-medium">{integrationId}</span>
                             </span>
                         </span>
-                    </LemonButton>
+                    </Button>
                 ))}
             </div>
         )
     }
 
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             visible={showPopover}
             matchWidth={false}
@@ -152,9 +152,9 @@ export function AddIntegrationButton({ onIntegrationSelect }: AddIntegrationButt
                 </div>
             }
         >
-            <LemonButton type="primary" size="small" icon={<IconPlusSmall />} data-attr="add-integration">
+            <Button type="primary" size="small" icon={<IconPlusSmall />} data-attr="add-integration">
                 Add source
-            </LemonButton>
-        </LemonDropdown>
+            </Button>
+        </Dropdown>
     )
 }

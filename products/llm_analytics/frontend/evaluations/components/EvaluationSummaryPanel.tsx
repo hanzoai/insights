@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheck, IconChevronDown, IconMinus, IconX } from '@hanzo/icons'
-import { LemonButton, LemonSegmentedButton, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Button, SegmentedButton, Spinner, Tooltip } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -78,7 +78,7 @@ export function EvaluationSummaryControls(): JSX.Element | null {
                     resourceType={AccessControlResourceType.LlmAnalytics}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={() => {
                             if (evaluationSummary) {
@@ -94,10 +94,10 @@ export function EvaluationSummaryControls(): JSX.Element | null {
                         data-attr="llma-evaluation-summarize"
                     >
                         {evaluationSummary ? 'Regenerate' : 'Summarize'}
-                    </LemonButton>
+                    </Button>
                 </AccessControlAction>
             </Tooltip>
-            <LemonSegmentedButton
+            <SegmentedButton
                 value={evaluationSummaryFilter}
                 onChange={(value) => {
                     setEvaluationSummaryFilter(value as EvaluationSummaryFilter, evaluationSummaryFilter)
@@ -153,7 +153,7 @@ export function EvaluationSummaryPanel({ runsLookup }: EvaluationSummaryPanelPro
 
     return (
         <div className="border rounded-lg bg-bg-light">
-            <LemonButton
+            <Button
                 fullWidth
                 onClick={toggleSummaryExpanded}
                 data-attr="llma-evaluation-summary-toggle"
@@ -169,7 +169,7 @@ export function EvaluationSummaryPanel({ runsLookup }: EvaluationSummaryPanelPro
                         {evaluationSummary.statistics.total_analyzed} runs analyzed
                     </span>
                 </div>
-            </LemonButton>
+            </Button>
 
             {summaryExpanded && (
                 <div className="p-4 pt-0 space-y-4">

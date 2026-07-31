@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonInput } from 'lib/lemon-ui/LemonInput/LemonInput'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'
+import { Banner } from 'lib/elements/Banner'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input/Input'
+import { Modal } from 'lib/elements/Modal'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { verifiedDomainsLogic } from './verifiedDomainsLogic'
@@ -28,52 +28,52 @@ export function ConfigureSAMLModal(): JSX.Element {
     }
 
     return (
-        <LemonModal onClose={handleClose} isOpen={!!configureSAMLModalId} title="" simple>
-            <Form logic={verifiedDomainsLogic} formKey="samlConfig" enableFormOnSubmit className="LemonModal__layout ">
-                <LemonModal.Header>
+        <Modal onClose={handleClose} isOpen={!!configureSAMLModalId} title="" simple>
+            <Form logic={verifiedDomainsLogic} formKey="samlConfig" enableFormOnSubmit className="Modal__layout ">
+                <Modal.Header>
                     <h3>Configure SAML authentication and provisioning</h3>
-                </LemonModal.Header>
-                <LemonModal.Content className="deprecated-space-y-2">
+                </Modal.Header>
+                <Modal.Content className="deprecated-space-y-2">
                     <p>
                         <Link to="https://hanzo.ai/docs/data/sso#setting-up-saml" target="_blank" targetBlankIcon>
                             Read the docs
                         </Link>
                     </p>
-                    <LemonField label="ACS Consumer URL" name="_ACSConsumerUrl">
+                    <Field label="ACS Consumer URL" name="_ACSConsumerUrl">
                         <CopyToClipboardInline>{`${siteUrl}/complete/saml/`}</CopyToClipboardInline>
-                    </LemonField>
-                    <LemonField label="RelayState" name="_RelayState">
+                    </Field>
+                    <Field label="RelayState" name="_RelayState">
                         <CopyToClipboardInline>{configureSAMLModalId || 'unknown'}</CopyToClipboardInline>
-                    </LemonField>
-                    <LemonField label="Audience / Entity ID" name="_Audience">
+                    </Field>
+                    <Field label="Audience / Entity ID" name="_Audience">
                         <CopyToClipboardInline>{siteUrl}</CopyToClipboardInline>
-                    </LemonField>
-                    <LemonField name="saml_acs_url" label="SAML ACS URL">
-                        <LemonInput className="ph-ignore-input" placeholder="Your IdP's ACS or single sign-on URL." />
-                    </LemonField>
-                    <LemonField name="saml_entity_id" label="SAML Entity ID">
-                        <LemonInput className="ph-ignore-input" placeholder="Entity ID provided by your IdP." />
-                    </LemonField>
-                    <LemonField name="saml_x509_cert" label="SAML X.509 Certificate">
-                        <LemonTextArea
+                    </Field>
+                    <Field name="saml_acs_url" label="SAML ACS URL">
+                        <Input className="ph-ignore-input" placeholder="Your IdP's ACS or single sign-on URL." />
+                    </Field>
+                    <Field name="saml_entity_id" label="SAML Entity ID">
+                        <Input className="ph-ignore-input" placeholder="Entity ID provided by your IdP." />
+                    </Field>
+                    <Field name="saml_x509_cert" label="SAML X.509 Certificate">
+                        <TextArea
                             className="ph-ignore-input"
                             minRows={10}
                             placeholder={`Enter the public certificate of your IdP. Keep all line breaks.\n-----BEGIN CERTIFICATE-----\nMIICVjCCAb+gAwIBAgIBADANBgkqhkiG9w0BAQ0FADBIMQswCQYDVQQGEwJ1czEL\n-----END CERTIFICATE-----`}
                         />
-                    </LemonField>
+                    </Field>
                     {!samlReady && (
-                        <LemonBanner type="info">
+                        <Banner type="info">
                             SAML will not be enabled unless you enter all attributes above. However you can still
                             settings as draft.
-                        </LemonBanner>
+                        </Banner>
                     )}
-                </LemonModal.Content>
-                <LemonModal.Footer>
-                    <LemonButton loading={isSamlConfigSubmitting} type="primary" htmlType="submit">
+                </Modal.Content>
+                <Modal.Footer>
+                    <Button loading={isSamlConfigSubmitting} type="primary" htmlType="submit">
                         Save settings
-                    </LemonButton>
-                </LemonModal.Footer>
+                    </Button>
+                </Modal.Footer>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

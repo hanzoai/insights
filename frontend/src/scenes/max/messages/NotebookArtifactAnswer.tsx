@@ -3,7 +3,7 @@ import { useActions } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { IconCollapse, IconExpand, IconNotebook } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Skeleton } from '@hanzo/elements'
 
 import {
     InsightBreakdownSummary,
@@ -12,7 +12,7 @@ import {
 } from 'lib/components/Cards/InsightCard/InsightDetails'
 import { TopHeading } from 'lib/components/Cards/InsightCard/TopHeading'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { NotebookNodeType, NotebookTarget } from 'scenes/notebooks/types'
 import {
     SessionRecordingPlayer,
@@ -70,9 +70,9 @@ export function NotebookArtifactAnswer({ content, status }: NotebookArtifactAnsw
                 <div className="p-2">
                     <div className="flex items-center gap-2 mb-3">
                         <IconNotebook className="size-5 text-secondary" />
-                        <LemonSkeleton className="h-5 w-32" />
+                        <Skeleton className="h-5 w-32" />
                     </div>
-                    <LemonSkeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
                 </div>
             </MessageTemplate>
         )
@@ -118,7 +118,7 @@ export function NotebookArtifactAnswer({ content, status }: NotebookArtifactAnsw
                 </div>
 
                 <div className="mt-4 flex justify-end">
-                    <LemonButton
+                    <Button
                         onClick={handleCreateNotebook}
                         type="primary"
                         size="small"
@@ -126,7 +126,7 @@ export function NotebookArtifactAnswer({ content, status }: NotebookArtifactAnsw
                         disabledReason={isStreaming ? 'Wait for notebook to finish generating' : null}
                     >
                         Create notebook
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </MessageTemplate>
@@ -180,7 +180,7 @@ function VisualizationBlockPreview({ block }: { block: VisualizationBlock }): JS
                 <Query query={query} readOnly embedded />
             </div>
             <div className="flex items-center justify-between px-2 py-1 bg-surface-secondary border-t">
-                <LemonButton
+                <Button
                     sideIcon={isSummaryShown ? <IconCollapse /> : <IconExpand />}
                     onClick={() => setIsSummaryShown(!isSummaryShown)}
                     size="xsmall"
@@ -190,8 +190,8 @@ function VisualizationBlockPreview({ block }: { block: VisualizationBlock }): JS
                     <span className="text-xs font-medium">
                         <TopHeading query={query} />
                     </span>
-                </LemonButton>
-                <LemonButton
+                </Button>
+                <Button
                     to={urls.insightNew({ query: query as InsightVizNode | DataVisualizationNode })}
                     icon={<IconOpenInNew />}
                     size="xsmall"
@@ -230,7 +230,7 @@ function SessionReplayBlockPreview({ block }: { block: SessionReplayBlock }): JS
             </div>
             <div className="flex items-center justify-between px-2 py-1 bg-surface-secondary border-t">
                 <span className="text-xs font-medium">{block.title || 'Session Replay'}</span>
-                <LemonButton
+                <Button
                     to={urls.replaySingle(block.session_id)}
                     icon={<IconOpenInNew />}
                     size="xsmall"
@@ -245,10 +245,10 @@ function LoadingBlockPreview({ block }: { block: LoadingBlock }): JSX.Element {
     void block // Block contains artifact_id for future use
     return (
         <div className="border border-dashed rounded p-4 flex items-center gap-3">
-            <LemonSkeleton className="size-8 rounded" />
+            <Skeleton className="size-8 rounded" />
             <div className="flex-1">
-                <LemonSkeleton className="h-4 w-32 mb-2" />
-                <LemonSkeleton className="h-3 w-48" />
+                <Skeleton className="h-4 w-32 mb-2" />
+                <Skeleton className="h-3 w-48" />
             </div>
         </div>
     )

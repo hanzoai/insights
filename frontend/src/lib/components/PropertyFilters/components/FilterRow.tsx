@@ -6,8 +6,8 @@ import React, { useState } from 'react'
 import { IconPlusSmall, IconTrash, IconX } from '@hanzo/icons'
 
 import { isValidPropertyFilter } from 'lib/components/PropertyFilters/utils'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Button } from 'lib/elements/Button'
+import { Popover } from 'lib/elements/Popover/Popover'
 
 import { AnyPropertyFilter, PathCleaningFilter } from '~/types'
 
@@ -80,7 +80,7 @@ export const FilterRow = React.memo(function FilterRow({
                     <>
                         {filterComponent(() => setOpen(false))}
                         {Object.keys(filters[index]).length > 0 && editable ? (
-                            <LemonButton
+                            <Button
                                 icon={orFiltering ? <IconTrash /> : <IconX />}
                                 onClick={() => onRemove(index)}
                                 size={size}
@@ -104,7 +104,7 @@ export const FilterRow = React.memo(function FilterRow({
                                 disabledReason={disabledReason}
                             />
                         ) : !disabledReason ? (
-                            <LemonButton
+                            <Button
                                 onClick={() => setOpen(!open)}
                                 className="new-prop-filter grow"
                                 data-attr={'new-prop-filter-' + pageKey}
@@ -114,7 +114,7 @@ export const FilterRow = React.memo(function FilterRow({
                                 sideIcon={null}
                             >
                                 {label}
-                            </LemonButton>
+                            </Button>
                         ) : undefined}
                     </Popover>
                 )}

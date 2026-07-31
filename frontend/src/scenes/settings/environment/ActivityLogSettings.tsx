@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo } from '@hanzo/icons'
-import { LemonButton, LemonSwitch, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Switch, Tooltip } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -18,9 +18,9 @@ export function ActivityLogSettings(): JSX.Element {
         <PayGateMini feature={AvailableFeature.AUDIT_LOGS}>
             <div className="flex">
                 <p>
-                    <LemonButton to={urls.advancedActivityLogs()} type="primary">
+                    <Button to={urls.advancedActivityLogs()} type="primary">
                         Browse all activity logs
-                    </LemonButton>
+                    </Button>
                 </p>
             </div>
         </PayGateMini>
@@ -57,7 +57,7 @@ export function ActivityLogOrgLevelSettings(): JSX.Element {
                     </Tooltip>
                 </p>
 
-                <LemonSwitch
+                <Switch
                     id="insights-activity-log-org-level-switch"
                     onChange={handleToggle}
                     checked={!!currentTeam?.receive_org_level_activity_logs}

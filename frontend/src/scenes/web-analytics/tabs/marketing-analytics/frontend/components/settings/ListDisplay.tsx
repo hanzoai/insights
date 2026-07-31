@@ -1,6 +1,6 @@
 import './ListDisplay.scss'
 
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 interface ListDisplayProps {
     list: string[]

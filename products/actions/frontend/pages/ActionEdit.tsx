@@ -12,11 +12,11 @@ import { SceneTags } from 'lib/components/Scenes/SceneTags'
 import { SceneActivityIndicator } from 'lib/components/Scenes/SceneUpdateActivityInfo'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { getAccessControlDisabledReason, userHasAccess } from 'lib/utils/accessControlUtils'
 import { teamLogic } from 'scenes/teamLogic'
@@ -91,7 +91,7 @@ export function ActionEdit({ action: loadedAction, id, actionLoading }: ActionEd
     }
 
     const cancelButton = (): JSX.Element => (
-        <LemonButton
+        <Button
             data-attr="cancel-action-bottom"
             type="tertiary"
             status="danger"
@@ -102,7 +102,7 @@ export function ActionEdit({ action: loadedAction, id, actionLoading }: ActionEd
             size="small"
         >
             Cancel
-        </LemonButton>
+        </Button>
     )
 
     return (
@@ -209,7 +209,7 @@ export function ActionEdit({ action: loadedAction, id, actionLoading }: ActionEd
                     actions={
                         <>
                             {!id && cancelButton()}
-                            <LemonButton
+                            <Button
                                 data-attr="save-action-button"
                                 type="primary"
                                 htmlType="submit"
@@ -227,7 +227,7 @@ export function ActionEdit({ action: loadedAction, id, actionLoading }: ActionEd
                                 disabledReason={!actionChanged ? 'No changes to save' : undefined}
                             >
                                 {actionChanged ? 'Save' : 'No changes'}
-                            </LemonButton>
+                            </Button>
                         </>
                     }
                 />
@@ -246,11 +246,11 @@ export function ActionEdit({ action: loadedAction, id, actionLoading }: ActionEd
                 >
                     {actionLoading ? (
                         <div className="flex gap-2">
-                            <LemonSkeleton className="w-1/2 h-[261px]" />
-                            <LemonSkeleton className="w-1/2 h-[261px]" />
+                            <Skeleton className="w-1/2 h-[261px]" />
+                            <Skeleton className="w-1/2 h-[261px]" />
                         </div>
                     ) : (
-                        <LemonField name="steps">
+                        <Field name="steps">
                             {({ value: stepsValue, onChange }) => (
                                 <div className="grid @4xl:grid-cols-2 gap-3">
                                     {stepsValue.map((step: ActionStepType, index: number) => {
@@ -279,7 +279,7 @@ export function ActionEdit({ action: loadedAction, id, actionLoading }: ActionEd
                                     })}
 
                                     <div>
-                                        <LemonButton
+                                        <Button
                                             icon={<IconPlus />}
                                             type="secondary"
                                             onClick={() => {
@@ -290,11 +290,11 @@ export function ActionEdit({ action: loadedAction, id, actionLoading }: ActionEd
                                             disabledReason={cannotEditReason ?? undefined}
                                         >
                                             Add match group
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 </div>
                             )}
-                        </LemonField>
+                        </Field>
                     )}
                 </SceneSection>
             </Form>

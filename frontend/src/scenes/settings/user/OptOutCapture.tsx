@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch } from '@hanzo/lemon-ui'
+import { Switch } from '@hanzo/elements'
 
 import { userLogic } from 'scenes/userLogic'
 
@@ -10,7 +10,7 @@ export function OptOutCapture(): JSX.Element {
 
     return (
         <div>
-            <LemonSwitch
+            <Switch
                 label="Anonymize my data"
                 data-attr="anonymize-data-collection"
                 onChange={(checked) => updateUser({ anonymize_data: checked })}

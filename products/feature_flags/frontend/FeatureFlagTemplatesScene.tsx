@@ -3,7 +3,7 @@ import { combineUrl, router } from 'kea-router'
 import insights from '@hanzo/insights'
 
 import { IconArrowLeft, IconFlask, IconPeople, IconPlus, IconTestTube, IconToggle } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -102,14 +102,14 @@ export function FeatureFlagTemplatesScene(): JSX.Element {
         <div className="flex flex-col items-center justify-center py-8" style={{ minHeight: '80vh' }}>
             <div className="w-full max-w-5xl px-4">
                 <div className="mb-6">
-                    <LemonButton
+                    <Button
                         type="secondary"
                         icon={<IconArrowLeft />}
                         onClick={() => router.actions.push(combineUrl(urls.featureFlags(), searchParams).url)}
                         size="small"
                     >
                         Back to feature flags
-                    </LemonButton>
+                    </Button>
                 </div>
                 <div className="space-y-8">
                     <div className="text-center space-y-3">

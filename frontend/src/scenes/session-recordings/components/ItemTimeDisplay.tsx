@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
 import { Dayjs } from 'lib/dayjs'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { colonDelimitedDuration } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
 import { formatLocalizedDate } from 'lib/utils/dateTimeUtils'

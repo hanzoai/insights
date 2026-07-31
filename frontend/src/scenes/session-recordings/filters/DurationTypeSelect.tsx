@@ -1,6 +1,6 @@
 import insights from '@hanzo/insights'
 
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { DurationType } from '~/types'
 
@@ -17,7 +17,7 @@ export function DurationTypeSelect({
     onChangeEventDescription,
 }: DurationTypeFilterProps): JSX.Element {
     return (
-        <LemonSelect
+        <Select
             data-attr="duration-type-selector"
             onChange={(v) => {
                 insights.capture(onChangeEventDescription || 'session recording duration type filter changed', {

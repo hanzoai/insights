@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -265,7 +265,7 @@ export const surveyWizardLogic = kea<surveyWizardLogicType>([
             const template = values.selectedTemplate
             if (template) {
                 actions.setSurveyValue('questions', template.questions)
-                lemonToast.success('Questions restored to defaults')
+                toast.success('Questions restored to defaults')
             }
         },
         launchSurvey: async () => {
@@ -278,11 +278,11 @@ export const surveyWizardLogic = kea<surveyWizardLogicType>([
                 actions.launchSurveySuccess(createdSurvey)
             } catch (e) {
                 actions.launchSurveyFailure(String(e))
-                lemonToast.error('Failed to create survey')
+                toast.error('Failed to create survey')
             }
         },
         launchSurveySuccess: ({ survey }) => {
-            lemonToast.success(`Survey ${survey.name} created`)
+            toast.success(`Survey ${survey.name} created`)
             actions.loadSurveys()
             actions.reportSurveyCreated(survey, false, 'wizard')
             actions.addProductIntent({
@@ -309,11 +309,11 @@ export const surveyWizardLogic = kea<surveyWizardLogicType>([
                 actions.saveDraftSuccess(createdSurvey)
             } catch (e) {
                 actions.saveDraftFailure(String(e))
-                lemonToast.error('Failed to save draft')
+                toast.error('Failed to save draft')
             }
         },
         saveDraftSuccess: ({ survey }) => {
-            lemonToast.success(`Survey "${survey.name}" saved as draft`)
+            toast.success(`Survey "${survey.name}" saved as draft`)
             actions.loadSurveys()
             actions.reportSurveyCreated(survey, false, 'wizard')
             actions.addProductIntent({
@@ -332,11 +332,11 @@ export const surveyWizardLogic = kea<surveyWizardLogicType>([
                 actions.updateSurveySuccess(updatedSurvey)
             } catch (e) {
                 actions.updateSurveyFailure(String(e))
-                lemonToast.error('Failed to update survey')
+                toast.error('Failed to update survey')
             }
         },
         updateSurveySuccess: ({ survey }) => {
-            lemonToast.success(`Survey "${survey.name}" updated`)
+            toast.success(`Survey "${survey.name}" updated`)
             actions.loadSurveys()
             actions.reportSurveyEdited(survey)
             router.actions.push(urls.survey(survey.id))

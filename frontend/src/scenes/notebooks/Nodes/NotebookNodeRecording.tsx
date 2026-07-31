@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconPerson } from '@hanzo/icons'
-import { LemonInput, LemonSwitch } from '@hanzo/lemon-ui'
+import { Input, Switch } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -124,7 +124,7 @@ export const Settings = ({
 }: NotebookNodeAttributeProperties<NotebookNodeRecordingAttributes>): JSX.Element => {
     return (
         <div className="p-3">
-            <LemonSwitch
+            <Switch
                 onChange={() => updateAttributes({ noInspector: !attributes.noInspector })}
                 label="Hide Inspector"
                 checked={attributes.noInspector}
@@ -132,7 +132,7 @@ export const Settings = ({
             />
             <div className="mt-3">
                 <label className="block text-muted mb-1">Start at timestamp</label>
-                <LemonInput
+                <Input
                     type="text"
                     fullWidth
                     value={attributes.timestampMs ? colonDelimitedDuration(attributes.timestampMs / 1000) : ''}

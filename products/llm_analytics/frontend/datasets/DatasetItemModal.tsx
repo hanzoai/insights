@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import React from 'react'
 
-import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
+import { Button, Modal } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonModalContent, LemonModalFooter, LemonModalHeader } from 'lib/lemon-ui/LemonModal/LemonModal'
+import { Field } from 'lib/elements/Field'
+import { ModalContent, ModalFooter, ModalHeader } from 'lib/elements/Modal/Modal'
 
 import { DatasetItem } from '~/types'
 
@@ -42,7 +42,7 @@ export const DatasetItemModal = React.memo(function DatasetItemModal({
     const { submitDatasetItemForm, setShouldCloseModal } = useActions(datasetItemModalLogic(logicProps))
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isOpen}
             onClose={() => onClose(refetchDatasetItems)}
             maxWidth="40rem"
@@ -56,25 +56,25 @@ export const DatasetItemModal = React.memo(function DatasetItemModal({
                 enableFormOnSubmit
                 className="flex flex-col overflow-y-hidden"
             >
-                <LemonModalHeader>
+                <ModalHeader>
                     <h3>{title ?? (partialDatasetItem?.id ? 'Edit dataset item' : 'New dataset item')}</h3>
-                </LemonModalHeader>
+                </ModalHeader>
 
-                <LemonModalContent className="flex flex-col gap-4">
-                    <LemonField name="input" label="Input">
+                <ModalContent className="flex flex-col gap-4">
+                    <Field name="input" label="Input">
                         <JSONEditor />
-                    </LemonField>
-                    <LemonField name="output" label="Output">
+                    </Field>
+                    <Field name="output" label="Output">
                         <JSONEditor />
-                    </LemonField>
-                    <LemonField name="metadata" label="Metadata">
+                    </Field>
+                    <Field name="metadata" label="Metadata">
                         <JSONEditor />
-                    </LemonField>
-                </LemonModalContent>
+                    </Field>
+                </ModalContent>
 
-                <LemonModalFooter>
+                <ModalFooter>
                     {displayBulkCreationButton && !partialDatasetItem?.id && (
-                        <LemonButton
+                        <Button
                             type="secondary"
                             loading={isDatasetItemFormSubmitting}
                             htmlType="submit"
@@ -85,13 +85,13 @@ export const DatasetItemModal = React.memo(function DatasetItemModal({
                             }}
                         >
                             Save and add another
-                        </LemonButton>
+                        </Button>
                     )}
-                    <LemonButton type="primary" htmlType="submit" loading={isDatasetItemFormSubmitting}>
+                    <Button type="primary" htmlType="submit" loading={isDatasetItemFormSubmitting}>
                         Save
-                    </LemonButton>
-                </LemonModalFooter>
+                    </Button>
+                </ModalFooter>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 })

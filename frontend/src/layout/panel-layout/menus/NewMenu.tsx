@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 
 import { IconChevronRight, IconFolder } from '@hanzo/icons'
 
-import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { TreeDataItem } from 'lib/elements/Tree/Tree'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     ContextMenuGroup,

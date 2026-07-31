@@ -6,10 +6,10 @@ import { IconCheck, IconPlus, IconX } from '@hanzo/icons'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTable, LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Divider } from 'lib/elements/Divider'
+import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
+import { createdByColumn } from 'lib/elements/Table/columnUtils'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { SavedInsightsEmptyState } from 'scenes/insights/EmptyStates'
 import { useSummarizeInsight } from 'scenes/insights/summarizeInsight'
 import { SavedInsightsFilters } from 'scenes/saved-insights/SavedInsightsFilters'
@@ -40,7 +40,7 @@ export function SavedInsightsTable({ isSelected, onToggle, isToggling }: SavedIn
     const { setModalPage, setModalFilters } = useActions(addSavedInsightsModalLogic)
     const summarizeInsight = useSummarizeInsight()
 
-    const columns: LemonTableColumns<QueryBasedInsightModel> = [
+    const columns: TableColumns<QueryBasedInsightModel> = [
         {
             key: 'id',
             width: 32,
@@ -80,7 +80,7 @@ export function SavedInsightsTable({ isSelected, onToggle, isToggling }: SavedIn
                 return <ObjectTags tags={tags} staticOnly />
             },
         },
-        createdByColumn() as LemonTableColumn<QueryBasedInsightModel, keyof QueryBasedInsightModel | undefined>,
+        createdByColumn() as TableColumn<QueryBasedInsightModel, keyof QueryBasedInsightModel | undefined>,
         {
             title: 'Last modified',
             sorter: true,
@@ -130,7 +130,7 @@ export function SavedInsightsTable({ isSelected, onToggle, isToggling }: SavedIn
             </div>
             {hasLoadedInsights && !insightsLoading && insights.count < 1 ? (
                 <>
-                    {hasFilteredUI && <LemonDivider className="my-0" />}
+                    {hasFilteredUI && <Divider className="my-0" />}
                     <SavedInsightsEmptyState
                         filters={filters}
                         usingFilters={hasFilters}
@@ -144,7 +144,7 @@ export function SavedInsightsTable({ isSelected, onToggle, isToggling }: SavedIn
                 </>
             ) : (
                 <div className="overflow-x-hidden">
-                    <LemonTable
+                    <Table
                         dataSource={insights.results}
                         columns={columns}
                         loading={insightsLoading}

@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
+import { Dialog, toast } from '@hanzo/elements'
 
 import api, { getCookie } from 'lib/api'
 import { globalSetupLogic } from 'lib/components/ProductSetup'
@@ -102,15 +102,15 @@ export const integrationsLogic = kea<integrationsLogicType>([
                                 (x) => x.kind === kind && x.display_name === response.display_name
                             )
                         ) {
-                            lemonToast.success('Google Cloud key updated.')
+                            toast.success('Google Cloud key updated.')
                             return values.integrations.map((x) =>
                                 x.kind === kind && x.display_name === response.display_name ? responseWithIcon : x
                             )
                         }
-                        lemonToast.success('Google Cloud key created.')
+                        toast.success('Google Cloud key created.')
                         return [...(values.integrations ?? []), responseWithIcon]
                     } catch (e) {
-                        lemonToast.error('Failed to upload Google Cloud key.')
+                        toast.error('Failed to upload Google Cloud key.')
                         throw e
                     }
                 },
@@ -145,16 +145,16 @@ export const integrationsLogic = kea<integrationsLogicType>([
                     })
 
                     actions.loadIntegrations()
-                    lemonToast.success(`Integration successful.`)
+                    toast.success(`Integration successful.`)
                 } else {
                     // If the requesting user does not have permissions an installation_id will not be returned
                     // we assume in this situation that a request has been made to the GitHub organization owners
-                    lemonToast.info(
+                    toast.info(
                         'Your request to connect to GitHub has been sent to the organization owners. They will need to complete the installation.'
                     )
                 }
             } catch {
-                lemonToast.error(`Something went wrong. Please try again.`)
+                toast.error(`Something went wrong. Please try again.`)
             } finally {
                 router.actions.replace(urls.settings('project-integrations'))
             }
@@ -165,7 +165,7 @@ export const integrationsLogic = kea<integrationsLogicType>([
             let replaceUrl: string = next || urls.settings('project-integrations')
 
             if (error) {
-                lemonToast.error(`Failed due to "${error}"`)
+                toast.error(`Failed due to "${error}"`)
                 router.actions.replace(replaceUrl)
                 return
             }
@@ -186,9 +186,9 @@ export const integrationsLogic = kea<integrationsLogicType>([
                 replaceUrl = url.pathname + url.search + url.hash
 
                 actions.loadIntegrations()
-                lemonToast.success(`Integration successful.`)
+                toast.success(`Integration successful.`)
             } catch {
-                lemonToast.error(`Something went wrong. Please try again.`)
+                toast.error(`Something went wrong. Please try again.`)
             } finally {
                 router.actions.replace(replaceUrl)
             }
@@ -200,7 +200,7 @@ export const integrationsLogic = kea<integrationsLogicType>([
                 return
             }
 
-            LemonDialog.open({
+            Dialog.open({
                 title: `Do you want to disconnect from this ${integration.kind} integration?`,
                 description:
                     'This cannot be undone. Insights resources configured to use this integration will remain but will stop working.',

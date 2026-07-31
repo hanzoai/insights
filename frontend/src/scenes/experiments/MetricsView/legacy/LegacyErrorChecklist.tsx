@@ -2,9 +2,9 @@ import { useValues } from 'kea'
 import { combineUrl } from 'kea-router/lib/utils'
 
 import { IconCheck, IconX } from '@hanzo/icons'
-import { Link, Tooltip } from '@hanzo/lemon-ui'
+import { Link, Tooltip } from '@hanzo/elements'
 
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { NodeKind } from '~/queries/schema/schema-general'

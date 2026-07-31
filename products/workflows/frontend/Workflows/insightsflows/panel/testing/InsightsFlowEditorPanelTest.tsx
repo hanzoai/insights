@@ -4,23 +4,23 @@ import { useEffect } from 'react'
 
 import { IconInfo, IconPlayFilled, IconRedo, IconTestTube } from '@hanzo/icons'
 import {
-    LemonBanner,
-    LemonButton,
-    LemonCollapse,
-    LemonDivider,
-    LemonLabel,
-    LemonSwitch,
+    Banner,
+    Button,
+    Collapse,
+    Divider,
+    Label,
+    Switch,
     Link,
     ProfilePicture,
     Spinner,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Field } from 'lib/elements/Field'
+import { Popover } from 'lib/elements/Popover/Popover'
 import { InsightsFunctionTestEditor } from 'scenes/insights-functions/configuration/InsightsFunctionTest'
 import { LogsViewerTable } from 'scenes/insights-functions/logs/LogsViewer'
 import { asDisplay } from 'scenes/persons/person-utils'
@@ -87,9 +87,9 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
 
                 <p>Step through each action in your workflow and see how it behaves.</p>
 
-                <LemonButton type="primary" onClick={() => setSelectedNodeId(TRIGGER_NODE_ID)}>
+                <Button type="primary" onClick={() => setSelectedNodeId(TRIGGER_NODE_ID)}>
                     Start testing
-                </LemonButton>
+                </Button>
             </div>
         )
     }
@@ -103,9 +103,9 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
             className="flex overflow-hidden flex-col flex-1"
         >
             <div className="flex gap-2 items-center p-2">
-                <LemonField name="mock_async_functions" className="flex-1">
+                <Field name="mock_async_functions" className="flex-1">
                     {({ value, onChange }) => (
-                        <LemonSwitch
+                        <Switch
                             onChange={(v) => onChange(!v)}
                             checked={!value}
                             data-attr="toggle-workflow-test-panel-new-mocking"
@@ -129,11 +129,11 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                             }
                         />
                     )}
-                </LemonField>
+                </Field>
                 {testResult ? (
                     <>
                         <div className="flex-1" />
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={() => setTestResult(null)}
                             loading={isTestInvocationSubmitting}
@@ -141,10 +141,10 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                             data-attr="clear-workflow-test-panel-new-result"
                         >
                             Clear test result
-                        </LemonButton>
+                        </Button>
 
                         {nextActionId && (
-                            <LemonButton
+                            <Button
                                 type="primary"
                                 onClick={() => setSelectedNodeId(nextActionId)}
                                 icon={<IconPlayFilled />}
@@ -153,14 +153,14 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                                 data-attr="continue-workflow-test-panel-new"
                             >
                                 Go to next step
-                            </LemonButton>
+                            </Button>
                         )}
                     </>
                 ) : (
                     <>
                         <div className="flex-1" />
 
-                        <LemonButton
+                        <Button
                             type="primary"
                             data-attr="test-workflow-panel-new"
                             onClick={() => submitTestInvocation()}
@@ -169,15 +169,15 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                             size="small"
                         >
                             Run test
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
             </div>
-            <LemonDivider className="my-0" />
+            <Divider className="my-0" />
             <div className="flex flex-col flex-1 overflow-y-auto">
                 {/* Event Information */}
                 <div className="flex-0">
-                    <LemonCollapse
+                    <Collapse
                         embedded
                         multiple
                         activeKeys={eventPanelOpen}
@@ -198,12 +198,12 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                                         <div className="bg-surface-secondary">
                                             {sampleGlobalsError && (
                                                 <div>
-                                                    <LemonBanner type="info" className="mb-2">
+                                                    <Banner type="info" className="mb-2">
                                                         {sampleGlobalsError}
-                                                    </LemonBanner>
+                                                    </Banner>
                                                     {canTryExtendedSearch && (
                                                         <div className="mb-2 text-center">
-                                                            <LemonButton
+                                                            <Button
                                                                 type="primary"
                                                                 onClick={() => {
                                                                     if (shouldLoadSampleGlobals) {
@@ -220,7 +220,7 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                                                                 loading={sampleGlobalsLoading}
                                                             >
                                                                 Try searching last 30 days (slower)
-                                                            </LemonButton>
+                                                            </Button>
                                                         </div>
                                                     )}
                                                 </div>
@@ -244,7 +244,7 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                                                     )}
                                                 </div>
                                                 {shouldLoadSampleGlobals ? (
-                                                    <LemonButton
+                                                    <Button
                                                         type="secondary"
                                                         onClick={() => loadSampleGlobals()}
                                                         tooltip={
@@ -261,7 +261,7 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                                                         size="small"
                                                     >
                                                         Load new event
-                                                    </LemonButton>
+                                                    </Button>
                                                 ) : (
                                                     <Popover
                                                         overlay={
@@ -284,14 +284,14 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                                                         onClickOutside={() => setEventSelectorOpen(false)}
                                                         placement="bottom-end"
                                                     >
-                                                        <LemonButton
+                                                        <Button
                                                             type="secondary"
                                                             onClick={() => setEventSelectorOpen(!eventSelectorOpen)}
                                                             tooltip="Select an event type to load test data"
                                                             size="small"
                                                         >
                                                             {sampleGlobals?.event?.event || 'Select event'}
-                                                        </LemonButton>
+                                                        </Button>
                                                     </Popover>
                                                 )}
                                             </div>
@@ -317,14 +317,14 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                         ]}
                     />
                 </div>
-                <LemonDivider className="my-0" />
+                <Divider className="my-0" />
                 <div className="flex flex-col flex-1 gap-2 p-2">
                     <h3 className="mb-0">Test results</h3>
                     {!testResult ? (
                         <div className="text-muted text-sm">No tests run yet</div>
                     ) : (
                         <>
-                            <LemonBanner
+                            <Banner
                                 type={
                                     testResult.status === 'success'
                                         ? 'success'
@@ -338,10 +338,10 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
                                     : testResult.status === 'skipped'
                                       ? 'Workflow was skipped because the event did not match the filter criteria'
                                       : 'Error: ' + testResult.errors?.join(', ')}
-                            </LemonBanner>
+                            </Banner>
 
                             <div className="flex flex-col gap-2">
-                                <LemonLabel>Logs</LemonLabel>
+                                <Label>Logs</Label>
 
                                 <LogsViewerTable
                                     instanceLabel="workflow run"

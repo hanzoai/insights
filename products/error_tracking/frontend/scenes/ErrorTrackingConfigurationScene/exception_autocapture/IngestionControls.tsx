@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonButton, LemonLabel } from '@hanzo/lemon-ui'
+import { Banner, Button, Label } from '@hanzo/elements'
 
 import IngestionControls from 'lib/components/IngestionControls'
 import { IngestionControlsSummary } from 'lib/components/IngestionControls/Summary'
@@ -47,9 +47,9 @@ export function ErrorTrackingIngestionControls({ disabled }: { disabled: boolean
 
     if (!hasControls) {
         return (
-            <LemonButton type="primary" onClick={() => createControls()}>
+            <Button type="primary" onClick={() => createControls()}>
                 Enable autocapture controls
-            </LemonButton>
+            </Button>
         )
     }
 
@@ -62,10 +62,10 @@ export function ErrorTrackingIngestionControls({ disabled }: { disabled: boolean
         >
             <div className="space-y-2">
                 {disabled && (
-                    <LemonBanner type="warning">
+                    <Banner type="warning">
                         <strong>Exception autocapture is disabled.</strong> Ingestion controls will only apply when it
                         is enabled.
-                    </LemonBanner>
+                    </Banner>
                 )}
                 <div className="flex flex-col gap-y-2">
                     <IngestionControlsSummary triggers={triggers} controlDescription="exceptions captured" />
@@ -98,7 +98,7 @@ const Sampling = ({
 }): JSX.Element => {
     return (
         <div className="space-y-2">
-            <LemonLabel className="text-base">Sampling</LemonLabel>
+            <Label className="text-base">Sampling</Label>
             <IngestionControls.SamplingTrigger initialSampleRate={initialValue * 100} onChange={onChange} />
             <p>Choose how many exceptions to capture. 100% = capture every exception, 50% = capture roughly half.</p>
         </div>
@@ -167,7 +167,7 @@ function EventTriggers({
     return (
         <div className="flex flex-col space-y-2 mt-2">
             <div className="flex items-center gap-2 justify-between">
-                <LemonLabel className="text-base">Event emitted</LemonLabel>
+                <Label className="text-base">Event emitted</Label>
                 <IngestionControls.EventTriggerSelect events={value} onChange={onChange} />
             </div>
             <p>Start capturing exceptions when a certain event is queued.</p>
@@ -195,7 +195,7 @@ function LinkedFlagSelector({
     return (
         <IngestionControls.FlagTrigger logicKey="error-tracking-linked-flag" flag={value} onChange={onChange}>
             <div className="flex flex-col space-y-2 mt-2">
-                <LemonLabel className="text-base">Feature flag</LemonLabel>
+                <Label className="text-base">Feature flag</Label>
                 <IngestionControls.FlagSelector />
 
                 <p>Only capture exceptions when this flag is enabled.</p>

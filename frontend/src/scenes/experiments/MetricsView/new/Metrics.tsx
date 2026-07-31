@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconInfo, IconList } from '@hanzo/icons'
-import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Tooltip } from '@hanzo/elements'
 
-import { IconAreaChart } from 'lib/lemon-ui/icons'
+import { IconAreaChart } from 'lib/elements/icons'
 import { AddMetricButton } from 'scenes/experiments/Metrics/AddMetricButton'
 import { METRIC_CONTEXTS } from 'scenes/experiments/Metrics/experimentMetricModalLogic'
 
@@ -82,7 +82,7 @@ export function Metrics({ isSecondary }: { isSecondary?: boolean }): JSX.Element
                                     metricContext={isSecondary ? METRIC_CONTEXTS.secondary : METRIC_CONTEXTS.primary}
                                 />
                                 {metrics.length > 1 && (
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="xsmall"
                                         onClick={() =>

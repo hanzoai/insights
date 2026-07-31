@@ -1,9 +1,9 @@
 import { useActions } from 'kea'
 
 import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
-import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
+import { Button, Skeleton } from '@hanzo/elements'
 
-import { Link } from 'lib/lemon-ui/Link'
+import { Link } from 'lib/elements/Link'
 
 import { HealthCheck, HealthCheckStatus } from '../healthCheckTypes'
 import { webAnalyticsHealthLogic } from '../webAnalyticsHealthLogic'
@@ -37,19 +37,19 @@ export function HealthCheckItem({ check }: HealthCheckItemProps): JSX.Element {
                     )}
                 </div>
                 <div className="text-sm text-secondary mt-0.5">
-                    {check.status === 'loading' ? <LemonSkeleton className="w-32 h-4" /> : check.description}
+                    {check.status === 'loading' ? <Skeleton className="w-32 h-4" /> : check.description}
                 </div>
             </div>
             {check.action && (
                 <div className="flex-shrink-0">
                     {check.action.to ? (
-                        <LemonButton type="secondary" size="small" to={check.action.to} onClick={handleActionClick}>
+                        <Button type="secondary" size="small" to={check.action.to} onClick={handleActionClick}>
                             {check.action.label}
-                        </LemonButton>
+                        </Button>
                     ) : check.action.onClick ? (
-                        <LemonButton type="secondary" size="small" onClick={handleActionClick}>
+                        <Button type="secondary" size="small" onClick={handleActionClick}>
                             {check.action.label}
-                        </LemonButton>
+                        </Button>
                     ) : null}
                 </div>
             )}
@@ -90,7 +90,7 @@ function StatusIcon({ status, urgent }: { status: HealthCheckStatus; urgent?: bo
         case 'loading':
             return (
                 <div className="w-6 h-6 rounded-full bg-muted-alt flex items-center justify-center flex-shrink-0">
-                    <LemonSkeleton className="w-4 h-4 rounded-full" />
+                    <Skeleton className="w-4 h-4 rounded-full" />
                 </div>
             )
     }

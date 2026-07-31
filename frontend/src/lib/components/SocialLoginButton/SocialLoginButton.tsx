@@ -3,9 +3,9 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
 import { SSO_PROVIDER_NAMES } from 'lib/constants'
-import { LemonButton, LemonButtonWithoutSideActionProps } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
+import { Button, ButtonWithoutSideActionProps } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
+import { Tag } from 'lib/elements/Tag'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { BeginPasskeyLoginParams, passkeyLogic } from 'scenes/authentication/passkeyLogic'
 
@@ -62,20 +62,20 @@ export function SocialLoginButton({
     return (
         <SocialLoginLink provider={provider} extraQueryParams={extraQueryParams}>
             <div className="relative">
-                <LemonButton
+                <Button
                     size="large"
                     icon={<SocialLoginIcon provider={provider} />}
                     active={isLastUsed}
                     tooltip={SSO_PROVIDER_NAMES[provider]}
                 />
                 {isLastUsed && (
-                    <LemonTag
+                    <Tag
                         type="muted"
                         size="small"
                         className="absolute -top-3 left-1/2 -translate-x-1/2 pointer-events-none"
                     >
                         Last used
-                    </LemonTag>
+                    </Tag>
                 )}
             </div>
         </SocialLoginLink>
@@ -93,7 +93,7 @@ export function PasskeyLoginButton({ isLastUsed, extraQueryParams }: PasskeyLogi
 
     return (
         <div className="relative">
-            <LemonButton
+            <Button
                 size="large"
                 icon={<img src={passkeyLogo} alt="Passkey" className="object-contain w-7 h-7" />}
                 active={isLastUsed}
@@ -106,13 +106,13 @@ export function PasskeyLoginButton({ isLastUsed, extraQueryParams }: PasskeyLogi
                 data-attr="passkey-login"
             />
             {isLastUsed && (
-                <LemonTag
+                <Tag
                     type="muted"
                     size="small"
                     className="absolute -top-3 left-1/2 -translate-x-1/2 pointer-events-none"
                 >
                     Last used
-                </LemonTag>
+                </Tag>
             )}
         </div>
     )
@@ -154,7 +154,7 @@ export function SocialLoginButtons({
 
     return (
         <>
-            {topDivider ? <LemonDivider dashed className="my-4" /> : null}
+            {topDivider ? <Divider dashed className="my-4" /> : null}
 
             <div className={clsx(className, 'text-center deprecated-space-y-4')}>
                 {title && <h3>{title}</h3>}
@@ -172,13 +172,13 @@ export function SocialLoginButtons({
                 </div>
                 {caption && captionLocation === 'bottom' && <p className="text-secondary">{caption}</p>}
             </div>
-            {bottomDivider ? <LemonDivider dashed className="my-6" /> : null}
+            {bottomDivider ? <Divider dashed className="my-6" /> : null}
         </>
     )
 }
 
 type SSOEnforcedLoginButtonProps = SocialLoginButtonProps &
-    Partial<LemonButtonWithoutSideActionProps> & {
+    Partial<ButtonWithoutSideActionProps> & {
         email: string
     } & {
         actionText?: string
@@ -194,7 +194,7 @@ export function SSOEnforcedLoginButton({
 }: SSOEnforcedLoginButtonProps): JSX.Element {
     return (
         <SocialLoginLink provider={provider} extraQueryParams={{ ...extraQueryParams, email }}>
-            <LemonButton
+            <Button
                 className="btn-bridge relative"
                 data-attr="sso-login"
                 htmlType="button"
@@ -207,11 +207,11 @@ export function SSOEnforcedLoginButton({
             >
                 {actionText} with {SSO_PROVIDER_NAMES[provider]}
                 {isLastUsed && (
-                    <LemonTag type="muted" size="medium" className="absolute -top-3 -right-2 pointer-events-none">
+                    <Tag type="muted" size="medium" className="absolute -top-3 -right-2 pointer-events-none">
                         Last used
-                    </LemonTag>
+                    </Tag>
                 )}
-            </LemonButton>
+            </Button>
         </SocialLoginLink>
     )
 }

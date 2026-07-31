@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconBug, IconQuestion } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { SupportTicketKind, SupportTicketTargetArea, supportLogic } from 'lib/components/Support/supportLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -27,7 +27,7 @@ export function SupportModalButton({
     return preflight?.cloud ? ( // We don't provide support for self-hosted instances
         <>
             <div className="text-center">
-                <LemonButton
+                <Button
                     onClick={() => {
                         openSupportForm({
                             name,
@@ -40,7 +40,7 @@ export function SupportModalButton({
                     size="small"
                 >
                     <span className="text-secondary">{label}</span>
-                </LemonButton>
+                </Button>
             </div>
         </>
     ) : null

@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
 import { IconWarning } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { Table, TableColumns } from 'lib/elements/Table'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { pluralize } from 'lib/utils'
 import { EnvironmentConfigOption, preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
@@ -54,7 +54,7 @@ export function InstanceConfigTab(): JSX.Element {
         clearInstanceConfigEditing()
     }
 
-    const columns: LemonTableColumns<InstanceSetting> = [
+    const columns: TableColumns<InstanceSetting> = [
         {
             title: 'Key',
             dataIndex: 'key',
@@ -87,7 +87,7 @@ export function InstanceConfigTab(): JSX.Element {
         },
     ]
 
-    const envColumns: LemonTableColumns<EnvironmentConfigOption> = [
+    const envColumns: TableColumns<EnvironmentConfigOption> = [
         {
             key: 'metric',
             title: 'Metric',
@@ -118,14 +118,14 @@ export function InstanceConfigTab(): JSX.Element {
                 </div>
                 {instanceConfigMode === ConfigMode.View ? (
                     <>
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={() => setInstanceConfigMode(ConfigMode.Edit)}
                             data-attr="instance-config-edit-button"
                             disabled={instanceSettingsLoading}
                         >
                             Edit
-                        </LemonButton>
+                        </Button>
                     </>
                 ) : (
                     <>
@@ -143,17 +143,17 @@ export function InstanceConfigTab(): JSX.Element {
                                 </span>
                             </span>
                         )}
-                        <LemonButton type="secondary" disabled={instanceSettingsLoading} onClick={discard}>
+                        <Button type="secondary" disabled={instanceSettingsLoading} onClick={discard}>
                             Discard changes
-                        </LemonButton>
-                        <LemonButton type="primary" disabled={instanceSettingsLoading} onClick={save}>
+                        </Button>
+                        <Button type="primary" disabled={instanceSettingsLoading} onClick={save}>
                             Save
-                        </LemonButton>
+                        </Button>
                     </>
                 )}
             </div>
 
-            <LemonTable
+            <Table
                 dataSource={editableInstanceSettings}
                 columns={columns}
                 loading={instanceSettingsLoading}
@@ -170,7 +170,7 @@ export function InstanceConfigTab(): JSX.Element {
                     .
                 </div>
             </div>
-            <LemonTable dataSource={configOptions} columns={envColumns} loading={preflightLoading} rowKey="key" />
+            <Table dataSource={configOptions} columns={envColumns} loading={preflightLoading} rowKey="key" />
             <InstanceConfigSaveModal
                 isOpen={instanceConfigMode === ConfigMode.Saving}
                 onClose={() => setInstanceConfigMode(ConfigMode.Edit)}

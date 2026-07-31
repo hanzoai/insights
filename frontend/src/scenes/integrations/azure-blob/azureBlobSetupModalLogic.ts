@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 
 import { IntegrationType } from '~/types'
 
@@ -42,10 +42,10 @@ export const azureBlobSetupModalLogic = kea<azureBlobSetupModalLogicType>([
                         },
                     })
                     actions.loadIntegrations()
-                    lemonToast.success('Azure Blob Storage connection created successfully!')
+                    toast.success('Azure Blob Storage connection created successfully!')
                     props.onComplete(integration.id)
                 } catch (error: any) {
-                    lemonToast.error(error.detail || 'Failed to create Azure Blob Storage connection')
+                    toast.error(error.detail || 'Failed to create Azure Blob Storage connection')
                     throw error
                 }
             },

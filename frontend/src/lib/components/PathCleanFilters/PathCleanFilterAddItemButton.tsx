@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { IconPlus } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import { PathCleaningFilter } from '~/types'
 
@@ -25,7 +25,7 @@ export function PathCleanFilterAddItemButton({ onAdd }: PathCleanFilterAddItemBu
                 }}
             />
 
-            <LemonButton
+            <Button
                 onClick={() => setVisible(true)}
                 type="secondary"
                 size="small"
@@ -33,7 +33,7 @@ export function PathCleanFilterAddItemButton({ onAdd }: PathCleanFilterAddItemBu
                 sideIcon={null}
             >
                 Add rule
-            </LemonButton>
+            </Button>
         </>
     )
 }

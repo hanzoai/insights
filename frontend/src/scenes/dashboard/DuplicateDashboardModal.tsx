@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonField } from 'lib/lemon-ui/LemonField'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
+import { Button } from 'lib/elements/Button'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Field } from 'lib/elements/Field'
+import { Modal } from 'lib/elements/Modal'
 import { duplicateDashboardLogic } from 'scenes/dashboard/duplicateDashboardLogic'
 
 export function DuplicateDashboardModal(): JSX.Element {
@@ -12,13 +12,13 @@ export function DuplicateDashboardModal(): JSX.Element {
     const { isDuplicateDashboardSubmitting, duplicateDashboardModalVisible } = useValues(duplicateDashboardLogic)
 
     return (
-        <LemonModal
+        <Modal
             title="Duplicate dashboard"
             onClose={hideDuplicateDashboardModal}
             isOpen={duplicateDashboardModalVisible}
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         form="new-dashboard-form"
                         type="secondary"
                         data-attr="dashboard-cancel"
@@ -26,8 +26,8 @@ export function DuplicateDashboardModal(): JSX.Element {
                         onClick={hideDuplicateDashboardModal}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         form="new-dashboard-form"
                         type="secondary"
                         data-attr="dashboard-submit-and-go"
@@ -35,8 +35,8 @@ export function DuplicateDashboardModal(): JSX.Element {
                         onClick={duplicateAndGoToDashboard}
                     >
                         Duplicate and go to dashboard
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         form="duplicate-dashboard-form"
                         htmlType="submit"
                         type="primary"
@@ -45,7 +45,7 @@ export function DuplicateDashboardModal(): JSX.Element {
                         disabled={isDuplicateDashboardSubmitting}
                     >
                         Duplicate
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
@@ -56,15 +56,15 @@ export function DuplicateDashboardModal(): JSX.Element {
                 enableFormOnSubmit
                 className="deprecated-space-y-2"
             >
-                <LemonField
+                <Field
                     name="duplicateTiles"
                     help="Choose whether to duplicate this dashboard's insights and text or attach them to the new dashboard."
                 >
                     {({ value, onChange }) => (
-                        <LemonCheckbox checked={value} label="Duplicate this dashboard's tiles" onChange={onChange} />
+                        <Checkbox checked={value} label="Duplicate this dashboard's tiles" onChange={onChange} />
                     )}
-                </LemonField>
+                </Field>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }

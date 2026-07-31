@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconChevronDown, IconPlay } from '@hanzo/icons'
-import { LemonButton, LemonMenuItems, LemonMenuOverlay } from '@hanzo/lemon-ui'
+import { Button, MenuItems, MenuOverlay } from '@hanzo/elements'
 
 import { notebookSettingsLogic } from '../../Notebook/notebookSettingsLogic'
 import { NotebookRunMode, buildRunMenuItems } from './runMenuItems'
@@ -30,7 +30,7 @@ export const PythonRunMenu = ({
     const pythonRunIconClass = isFresh ? 'text-success' : isStale ? 'text-danger' : undefined
     const pythonRunTooltip = `Run Python cell.${queued ? ' Queued.' : isStale ? ' Stale.' : ''}`
 
-    const pythonRunMenuItems: LemonMenuItems = [
+    const pythonRunMenuItems: MenuItems = [
         ...buildRunMenuItems(onRun),
         {
             label: 'Toggle kernel info',
@@ -39,7 +39,7 @@ export const PythonRunMenu = ({
     ]
 
     return (
-        <LemonButton
+        <Button
             onClick={() => onRun('auto')}
             size="small"
             icon={<IconPlay className={pythonRunIconClass} />}
@@ -50,7 +50,7 @@ export const PythonRunMenu = ({
                 icon: <IconChevronDown />,
                 dropdown: {
                     placement: 'bottom-end',
-                    overlay: <LemonMenuOverlay items={pythonRunMenuItems} />,
+                    overlay: <MenuOverlay items={pythonRunMenuItems} />,
                 },
                 divider: false,
                 'aria-label': 'Open run options',

@@ -15,8 +15,8 @@ jest.mock('./NodeWrapper', () => ({
 }))
 
 // Mocking because it is annoying to mock the hover to assert the tooltip text
-jest.mock('@hanzo/lemon-ui', () => ({
-    ...jest.requireActual('@hanzo/lemon-ui'),
+jest.mock('@hanzo/elements', () => ({
+    ...jest.requireActual('@hanzo/elements'),
     Tooltip: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-attr={title}>{children}</div>
     ),
@@ -88,7 +88,7 @@ describe('MRR Component', () => {
             <MRR groupData={mockGroupData} mrr={mrrData} baseCurrency={baseCurrency} isLoading={true} />
         )
 
-        const skeleton = container.querySelector('.LemonSkeleton')
+        const skeleton = container.querySelector('.Skeleton')
         expect(skeleton).toBeInTheDocument()
         expect(skeleton).toHaveClass('h-4', 'w-32')
         expect(screen.queryByText('MRR:')).not.toBeInTheDocument()
@@ -151,7 +151,7 @@ describe('LifetimeValue Component', () => {
             <LifetimeValue lifetimeValue={lifetimeValueData} baseCurrency={baseCurrency} isLoading={true} />
         )
 
-        const skeleton = container.querySelector('.LemonSkeleton')
+        const skeleton = container.querySelector('.Skeleton')
         expect(skeleton).toBeInTheDocument()
         expect(skeleton).toHaveClass('h-4', 'w-40')
         expect(screen.queryByText('Lifetime value:')).not.toBeInTheDocument()
@@ -269,7 +269,7 @@ describe('GroupInfo Component', () => {
             </Provider>
         )
 
-        const skeletons = container.querySelectorAll('.LemonSkeleton')
+        const skeletons = container.querySelectorAll('.Skeleton')
         expect(skeletons).toHaveLength(1) // Only MRR skeleton
         expect(screen.getByText('Lifetime value:')).toBeInTheDocument() // LTV should render
     })
@@ -354,7 +354,7 @@ describe('GroupInfo Component', () => {
             </Provider>
         )
 
-        const skeletons = container.querySelectorAll('.LemonSkeleton')
+        const skeletons = container.querySelectorAll('.Skeleton')
         expect(skeletons).toHaveLength(2) // Both MRR and LTV skeletons
     })
 })
@@ -477,7 +477,7 @@ describe('Integration scenarios', () => {
         )
 
         expect(screen.getByText('Paid products:')).toBeInTheDocument()
-        const tags = container.querySelectorAll('.LemonTag')
+        const tags = container.querySelectorAll('.Tag')
         expect(tags).toHaveLength(2)
         expect(screen.getByText('Product A')).toBeInTheDocument()
         expect(screen.getByText('Product B')).toBeInTheDocument()

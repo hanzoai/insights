@@ -2,14 +2,14 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconFilter } from '@hanzo/icons'
-import { Popover } from '@hanzo/lemon-ui'
+import { Popover } from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isWebAnalyticsPropertyFilter } from 'lib/components/PropertyFilters/utils'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { IconWithCount } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { IconWithCount } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { AnyPropertyFilter } from '~/types'
@@ -96,7 +96,7 @@ export const WebPropertyFilters = ({
             }
         >
             <div className="relative">
-                <LemonButton
+                <Button
                     icon={
                         <IconWithCount count={webAnalyticsFilters.length} showZero={false}>
                             <IconFilter />
@@ -108,7 +108,7 @@ export const WebPropertyFilters = ({
                     size="small"
                 >
                     Filters
-                </LemonButton>
+                </Button>
                 {hasIncompatibleFilters && (
                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-warning rounded-full animate-pulse" />
                 )}

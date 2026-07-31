@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { IconCheck, IconPencil, IconPlusSmall, IconTrash, IconWarning, IconX } from '@hanzo/icons'
-import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
+import { Button, Input } from '@hanzo/elements'
 
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
+import { Table } from 'lib/elements/Table'
 import { uuid } from 'lib/utils'
 import { QUERY_TYPES_METADATA } from 'scenes/saved-insights/SavedInsights'
 
@@ -103,7 +103,7 @@ export function ConversionGoalsConfiguration({
 
                 <div className="space-y-3">
                     <div>
-                        <LemonInput
+                        <Input
                             value={formState.name}
                             onChange={(value) => setFormState((prev) => ({ ...prev, name: value }))}
                             placeholder={conversionGoalNamePlaceholder}
@@ -127,7 +127,7 @@ export function ConversionGoalsConfiguration({
                     </div>
 
                     <div className="flex gap-2">
-                        <LemonButton
+                        <Button
                             type="primary"
                             onClick={handleAddConversionGoal}
                             disabled={!isFormValid}
@@ -135,9 +135,9 @@ export function ConversionGoalsConfiguration({
                             icon={<IconPlusSmall />}
                         >
                             Add conversion goal
-                        </LemonButton>
+                        </Button>
 
-                        <LemonButton onClick={() => setFormState(createEmptyFormState())}>Clear</LemonButton>
+                        <Button onClick={() => setFormState(createEmptyFormState())}>Clear</Button>
                     </div>
                 </div>
             </div>
@@ -146,7 +146,7 @@ export function ConversionGoalsConfiguration({
             <div>
                 <h3 className="font-bold mb-4">{getConfiguredConversionGoalsLabel(conversion_goals.length)}</h3>
 
-                <LemonTable
+                <Table
                     rowKey={(item) => item.conversion_goal_id}
                     dataSource={conversion_goals}
                     columns={[
@@ -163,7 +163,7 @@ export function ConversionGoalsConfiguration({
 
                                 if (editingGoalId === goal.conversion_goal_id && editingGoal) {
                                     return (
-                                        <LemonInput
+                                        <Input
                                             value={editingGoal.conversion_goal_name}
                                             onChange={(value) =>
                                                 setEditingGoal((prev) =>
@@ -232,14 +232,14 @@ export function ConversionGoalsConfiguration({
                                 if (editingGoalId === goal.conversion_goal_id) {
                                     return (
                                         <div className="flex gap-1">
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconCheck />}
                                                 size="small"
                                                 type="primary"
                                                 onClick={handleSaveEdit}
                                                 tooltip="Save changes"
                                             />
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconX />}
                                                 size="small"
                                                 onClick={handleCancelEdit}
@@ -251,13 +251,13 @@ export function ConversionGoalsConfiguration({
 
                                 return (
                                     <div className="flex gap-1">
-                                        <LemonButton
+                                        <Button
                                             icon={<IconPencil />}
                                             size="small"
                                             onClick={() => handleStartEdit(goal)}
                                             tooltip="Edit conversion goal"
                                         />
-                                        <LemonButton
+                                        <Button
                                             icon={<IconTrash />}
                                             size="small"
                                             status="danger"

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { Spinner } from 'lib/elements/Spinner'
 
 import { ToolbarMenu } from '~/toolbar/bar/ToolbarMenu'
 
@@ -19,9 +19,9 @@ export function ProductToursToolbarMenu(): JSX.Element {
             </ToolbarMenu.Header>
             <ToolbarMenu.Body>
                 <div className="p-2 space-y-3">
-                    <LemonButton type="primary" fullWidth onClick={() => newTour()}>
+                    <Button type="primary" fullWidth onClick={() => newTour()}>
                         Create new tour
-                    </LemonButton>
+                    </Button>
 
                     {toursLoading ? (
                         <div className="flex justify-center py-4">
@@ -33,7 +33,7 @@ export function ProductToursToolbarMenu(): JSX.Element {
                             {tours
                                 .filter((tour) => !tour.archived && tour.content?.type !== 'announcement')
                                 .map((tour) => (
-                                    <LemonButton
+                                    <Button
                                         key={tour.id}
                                         fullWidth
                                         type="secondary"
@@ -44,7 +44,7 @@ export function ProductToursToolbarMenu(): JSX.Element {
                                         <span className="text-muted text-xs ml-auto">
                                             {tour.content?.steps?.length ?? 0} steps
                                         </span>
-                                    </LemonButton>
+                                    </Button>
                                 ))}
                         </div>
                     ) : (

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonModal, LemonTable, Link } from '@hanzo/lemon-ui'
+import { Button, Modal, Table, Link } from '@hanzo/elements'
 
-import { IconOpenInNew } from 'lib/lemon-ui/icons'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { FeatureFlagFiltersSection } from 'scenes/feature-flags/FeatureFlagFilters'
 import { urls } from 'scenes/urls'
 
@@ -39,14 +39,14 @@ export const SelectExistingFeatureFlagModal = ({
     )
 
     return (
-        <LemonModal isOpen={isModalOpen} onClose={handleClose} title="Choose an existing feature flag" width="50%">
+        <Modal isOpen={isModalOpen} onClose={handleClose} title="Choose an existing feature flag" width="50%">
             <div className="deprecated-space-y-2">
                 <div className="text-muted mb-2 max-w-xl">
                     Select an existing multivariate feature flag to use with this experiment. The feature flag must use
                     multiple variants with <code>'control'</code> as the first.
                 </div>
                 {filtersSection}
-                <LemonTable
+                <Table
                     id="ff"
                     dataSource={featureFlags.results}
                     loading={featureFlagsLoading}
@@ -79,7 +79,7 @@ export const SelectExistingFeatureFlagModal = ({
                             render: function RenderActions(_, flag) {
                                 return (
                                     <div className="flex items-center justify-end">
-                                        <LemonButton
+                                        <Button
                                             size="xsmall"
                                             type="primary"
                                             onClick={() => {
@@ -88,7 +88,7 @@ export const SelectExistingFeatureFlagModal = ({
                                             }}
                                         >
                                             Select
-                                        </LemonButton>
+                                        </Button>
                                     </div>
                                 )
                             },
@@ -106,6 +106,6 @@ export const SelectExistingFeatureFlagModal = ({
                     }
                 />
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

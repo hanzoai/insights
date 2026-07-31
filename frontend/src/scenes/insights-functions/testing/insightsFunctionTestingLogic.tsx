@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import { beforeUnload } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 
@@ -195,9 +195,9 @@ export const insightsFunctionTestingLogic = kea<insightsFunctionTestingLogicType
                         return [...values.retries, retry]
                     } catch (e: any) {
                         if (e?.data?.configuration?.filters?.non_field_errors) {
-                            lemonToast.error(`Testing failed: ${e.data.configuration.filters.non_field_errors}`)
+                            toast.error(`Testing failed: ${e.data.configuration.filters.non_field_errors}`)
                         } else {
-                            lemonToast.error(`An unexpected server error occurred while testing the function: ${e}`)
+                            toast.error(`An unexpected server error occurred while testing the function: ${e}`)
                         }
                     }
                     actions.removeLoadingRetry(eventId)

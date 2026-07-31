@@ -1,0 +1,99 @@
+.Calendar {
+    --calendar-month-height: 305px;
+    --calendar-row-gap: 2px;
+    --calendar-day-width: 40px;
+    --calendar-today-radius: 2px;
+    --calendar-time-column-width: 50px;
+
+    // Tricky: needs to match the equivalent height button from Button.scss
+    --calendar-time-button-height: 2.3125rem;
+
+    // Force height for month so when swtiching to longer months, the height doesn't change
+    height: var(--calendar-month-height);
+
+    .Calendar__month {
+        width: 100%;
+    }
+
+    .Calendar__month > thead > tr:first-child > th,
+    .Calendar__month > tbody > tr > td {
+        padding: calc(var(--calendar-row-gap) / 2) 0;
+    }
+
+    .Calendar__month > thead > tr:first-child > th:first-child,
+    .Calendar__month > thead > tr:first-child > th:last-child,
+    .Calendar__month > tbody > tr > td {
+        width: var(--calendar-day-width);
+    }
+
+    .Calendar__month tr {
+        &.Calendar__month-header {
+            height: var(--calendar-time-button-height);
+        }
+
+        .Button {
+            &.rounded-none {
+                border-radius: 0;
+            }
+
+            &.rounded-r-none {
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+
+            &.rounded-l-none {
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+            }
+        }
+
+        .Calendar__today {
+            position: relative;
+
+            &::after {
+                position: absolute;
+                bottom: 5px;
+                left: calc(50% - var(--calendar-today-radius));
+                width: calc(var(--calendar-today-radius) * 2);
+                height: calc(var(--calendar-today-radius) * 2);
+                content: '';
+                background: currentColor;
+                border-radius: 100%;
+            }
+        }
+    }
+
+    .Calendar__range--boundary {
+        background-color: var(--color-border-primary);
+    }
+
+    &--hour {
+        --calendar-time-columns: 2;
+    }
+
+    &--minute {
+        --calendar-time-columns: 3;
+    }
+
+    &--hour,
+    &--minute {
+        padding-right: calc((var(--calendar-time-columns) * var(--calendar-time-column-width)) + 2px);
+
+        .Calendar__time {
+            & > div {
+                width: var(--calendar-time-column-width);
+
+                &.ScrollableShadows {
+                    & .ScrollableShadows__inner {
+                        scrollbar-width: none;
+                        scroll-behavior: smooth;
+                    }
+                }
+            }
+
+            &--scroll-spacer {
+                height: calc(100% - var(--calendar-time-button-height));
+            }
+        }
+    }
+}

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { toast } from 'react-toastify'
 
-import { LemonInput, Tooltip } from '@hanzo/lemon-ui'
+import { Input, Tooltip } from '@hanzo/elements'
 
 import { retentionLogic } from 'scenes/retention/retentionLogic'
 
@@ -23,7 +23,7 @@ export function MinimumOccurrencesInput(): JSX.Element | null {
                 </>
             }
         >
-            <LemonInput
+            <Input
                 type="number"
                 className="ml-2 w-20"
                 defaultValue={minimumOccurrences}

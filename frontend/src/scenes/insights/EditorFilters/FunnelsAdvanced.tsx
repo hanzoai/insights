@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Button } from 'lib/elements/Button'
+import { Field } from 'lib/elements/Field'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 
 import { Noun } from '~/models/groupsModel'
@@ -17,14 +17,14 @@ export function FunnelsAdvanced({ insightProps }: EditorFilterProps): JSX.Elemen
 
     return (
         <div className="deprecated-space-y-4">
-            <LemonField.Pure label="Step order" info={<StepOrderInfo />}>
+            <Field.Pure label="Step order" info={<StepOrderInfo />}>
                 <FunnelStepOrderPicker />
-            </LemonField.Pure>
-            <LemonField.Pure label="Conversion rate calculation">
+            </Field.Pure>
+            <Field.Pure label="Conversion rate calculation">
                 <FunnelStepReferencePicker />
-            </LemonField.Pure>
+            </Field.Pure>
 
-            <LemonField.Pure
+            <Field.Pure
                 label="Exclusion steps"
                 info={
                     <ExclusionStepsInfo
@@ -34,11 +34,11 @@ export function FunnelsAdvanced({ insightProps }: EditorFilterProps): JSX.Elemen
                 }
             >
                 <FunnelExclusionsFilter />
-            </LemonField.Pure>
+            </Field.Pure>
 
             {!!advancedOptionsUsedCount && (
                 <div className="mt-4">
-                    <LemonButton
+                    <Button
                         status="danger"
                         onClick={() => {
                             updateInsightFilter({
@@ -49,7 +49,7 @@ export function FunnelsAdvanced({ insightProps }: EditorFilterProps): JSX.Elemen
                         }}
                     >
                         Reset advanced options
-                    </LemonButton>
+                    </Button>
                 </div>
             )}
         </div>

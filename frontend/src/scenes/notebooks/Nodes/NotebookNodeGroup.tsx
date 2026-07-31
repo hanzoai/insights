@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconTrending } from '@hanzo/icons'
-import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Tag, Tooltip } from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { formatCurrency } from 'lib/utils/geography/currency'
 import stringWithWBR from 'lib/utils/stringWithWBR'
@@ -94,10 +94,10 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeGroupAttributes
             <div className={`p-4 flex-0 flex gap-2 justify-between ${inGroupFeed ? 'flex-col' : 'flex-wrap'}`}>
                 {groupDataLoading ? (
                     <div className={`flex flex-1 gap-2 ${inGroupFeed ? 'flex-col' : 'flex-wrap'}`}>
-                        <LemonSkeleton className="h-4 w-20 mb-2" />
-                        <LemonSkeleton className="h-3 w-32" />
-                        <LemonSkeleton className="h-3 w-40" />
-                        <LemonSkeleton className="h-3 w-44" />
+                        <Skeleton className="h-4 w-20 mb-2" />
+                        <Skeleton className="h-3 w-32" />
+                        <Skeleton className="h-3 w-40" />
+                        <Skeleton className="h-3 w-44" />
                     </div>
                 ) : groupData ? (
                     <>
@@ -175,7 +175,7 @@ export function MRR({
     if (isLoading) {
         return (
             <div className="flex gap-1 items-center">
-                <LemonSkeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-32" />
             </div>
         )
     }
@@ -235,7 +235,7 @@ export function LifetimeValue({
     if (isLoading) {
         return (
             <div className="flex items-center gap-1">
-                <LemonSkeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-40" />
             </div>
         )
     }
@@ -263,7 +263,7 @@ export function PaidProducts({ groupData }: { groupData: Group }): JSX.Element |
     }
 
     const paidProductTags = paidProducts.map((product) => (
-        <LemonTag className="mr-1 mb-1" key={product} children={product} />
+        <Tag className="mr-1 mb-1" key={product} children={product} />
     ))
 
     return <div>Paid products: {paidProductTags}</div>

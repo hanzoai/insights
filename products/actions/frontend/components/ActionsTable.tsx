@@ -1,21 +1,21 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCheckCircle, IconPin, IconPinFilled } from '@hanzo/icons'
-import { LemonInput, LemonSegmentedButton } from '@hanzo/lemon-ui'
+import { Input, SegmentedButton } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import { LemonTableColumn, LemonTableColumns } from 'lib/lemon-ui/LemonTable/types'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { Button } from 'lib/elements/Button'
+import { More } from 'lib/elements/Button/More'
+import { Divider } from 'lib/elements/Divider'
+import { Table } from 'lib/elements/Table'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { TableColumn, TableColumns } from 'lib/elements/Table/types'
+import { toast } from 'lib/elements/Toast/Toast'
 import { stripHTTP } from 'lib/utils'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { teamLogic } from 'scenes/teamLogic'
@@ -64,7 +64,7 @@ export function ActionsTable(): JSX.Element {
         return urls.insightNew({ query })
     }
 
-    const columns: LemonTableColumns<ActionType> = [
+    const columns: TableColumns<ActionType> = [
         {
             width: 0,
             title: 'Pinned',
@@ -74,7 +74,7 @@ export function ActionsTable(): JSX.Element {
                 (a.pinned_at ? new Date(a.pinned_at).getTime() : 0),
             render: function Render(pinned, action) {
                 return (
-                    <LemonButton
+                    <Button
                         size="small"
                         onClick={pinned ? () => unpinAction(action) : () => pinAction(action)}
                         tooltip={pinned ? 'Unpin action' : 'Pin action'}
@@ -90,7 +90,7 @@ export function ActionsTable(): JSX.Element {
             sorter: (a: ActionType, b: ActionType) => (a.name || '').localeCompare(b.name || ''),
             render: function RenderName(_, action: ActionType, index: number): JSX.Element {
                 return (
-                    <LemonTableLink
+                    <TableLink
                         data-attr={'action-link-' + index}
                         to={urls.action(action.id)}
                         title={action.name || <i>Unnamed</i>}
@@ -180,9 +180,9 @@ export function ActionsTable(): JSX.Element {
             render: function renderTags(tags: string[]) {
                 return <ObjectTags tags={tags} staticOnly />
             },
-        } as LemonTableColumn<ActionType, keyof ActionType | undefined>,
-        createdByColumn() as LemonTableColumn<ActionType, keyof ActionType | undefined>,
-        createdAtColumn() as LemonTableColumn<ActionType, keyof ActionType | undefined>,
+        } as TableColumn<ActionType, keyof ActionType | undefined>,
+        createdByColumn() as TableColumn<ActionType, keyof ActionType | undefined>,
+        createdAtColumn() as TableColumn<ActionType, keyof ActionType | undefined>,
         ...(currentTeam?.slack_incoming_webhook
             ? [
                   {
@@ -192,7 +192,7 @@ export function ActionsTable(): JSX.Element {
                       render: function RenderActions(post_to_slack): JSX.Element | null {
                           return post_to_slack ? <IconCheckCircle /> : null
                       },
-                  } as LemonTableColumn<ActionType, keyof ActionType | undefined>,
+                  } as TableColumn<ActionType, keyof ActionType | undefined>,
               ]
             : []),
         {
@@ -207,13 +207,13 @@ export function ActionsTable(): JSX.Element {
                                     minAccessLevel={AccessControlLevel.Editor}
                                     userAccessLevel={action.user_access_level}
                                 >
-                                    <LemonButton to={urls.action(action.id)} fullWidth>
+                                    <Button to={urls.action(action.id)} fullWidth>
                                         Edit
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
-                                <LemonButton to={urls.duplicateAction(action)} fullWidth>
+                                <Button to={urls.duplicateAction(action)} fullWidth>
                                     Duplicate
-                                </LemonButton>
+                                </Button>
                                 <ViewRecordingsPlaylistButton
                                     filters={{
                                         filter_group: {
@@ -243,16 +243,16 @@ export function ActionsTable(): JSX.Element {
                                     fullWidth
                                     data-attr="action-table-view-recordings"
                                 />
-                                <LemonButton to={tryInInsightsUrl(action)} fullWidth targetBlank>
+                                <Button to={tryInInsightsUrl(action)} fullWidth targetBlank>
                                     Try out in Insights
-                                </LemonButton>
-                                <LemonDivider />
+                                </Button>
+                                <Divider />
                                 <AccessControlAction
                                     resourceType={AccessControlResourceType.Action}
                                     minAccessLevel={AccessControlLevel.Editor}
                                     userAccessLevel={action.user_access_level}
                                 >
-                                    <LemonButton
+                                    <Button
                                         status="danger"
                                         onClick={() => {
                                             deleteWithUndo({
@@ -260,13 +260,13 @@ export function ActionsTable(): JSX.Element {
                                                 object: action,
                                                 callback: loadActions,
                                             }).catch((e: any) => {
-                                                lemonToast.error(`Error deleting action: ${e.detail}`)
+                                                toast.error(`Error deleting action: ${e.detail}`)
                                             })
                                         }}
                                         fullWidth
                                     >
                                         Delete action
-                                    </LemonButton>
+                                    </Button>
                                 </AccessControlAction>
                             </>
                         }
@@ -291,13 +291,13 @@ export function ActionsTable(): JSX.Element {
             />
             {(shouldShowEmptyState && filterType === 'me') || !shouldShowEmptyState ? (
                 <div className="flex items-center justify-between gap-2 mb-4">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search for actions"
                         onChange={setSearchTerm}
                         value={searchTerm}
                     />
-                    <LemonSegmentedButton
+                    <SegmentedButton
                         value={filterType}
                         onChange={setFilterType}
                         options={[
@@ -309,7 +309,7 @@ export function ActionsTable(): JSX.Element {
             ) : null}
             {(!shouldShowEmptyState || filterType === 'me') && (
                 <>
-                    <LemonTable
+                    <Table
                         columns={columns}
                         loading={actionsLoading}
                         rowKey="id"

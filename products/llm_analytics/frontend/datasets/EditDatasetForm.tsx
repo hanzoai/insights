@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput, LemonTextArea } from '@hanzo/lemon-ui'
+import { Input, TextArea } from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { JSONEditor } from '../components/JSONEditor'
 import { llmAnalyticsDatasetLogic } from './llmAnalyticsDatasetLogic'
@@ -14,27 +14,27 @@ export function EditDatasetForm(): JSX.Element {
     return (
         <div className="max-w-160">
             <div className="flex flex-col gap-4 flex-2">
-                <LemonField name="name" label="Name" htmlFor="dataset-name">
-                    <LemonInput
+                <Field name="name" label="Name" htmlFor="dataset-name">
+                    <Input
                         data-attr="dataset-name"
                         value={datasetForm.name}
                         onChange={(value) => setDatasetFormValue('name', value)}
                         placeholder="Enter dataset name"
                         data-testid="edit-dataset-name-input"
                     />
-                </LemonField>
+                </Field>
 
-                <LemonField name="description" label="Description" showOptional>
-                    <LemonTextArea
+                <Field name="description" label="Description" showOptional>
+                    <TextArea
                         className="ph-ignore-input"
                         placeholder="Describe what this dataset contains"
                         value={datasetForm.description}
                         onChange={(value) => setDatasetFormValue('description', value)}
                         data-testid="edit-dataset-description-input"
                     />
-                </LemonField>
+                </Field>
 
-                <LemonField
+                <Field
                     name="metadata"
                     label="Metadata"
                     htmlFor="dataset-metadata"
@@ -47,7 +47,7 @@ export function EditDatasetForm(): JSX.Element {
                             setDatasetFormValue('metadata', code)
                         }}
                     />
-                </LemonField>
+                </Field>
             </div>
         </div>
     )

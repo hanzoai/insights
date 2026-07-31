@@ -1,7 +1,7 @@
 import { actions, connect, kea, path, reducers, selectors } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonSelectOption, LemonSelectOptions } from '@hanzo/lemon-ui'
+import { SelectOption, SelectOptions } from '@hanzo/elements'
 
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -16,8 +16,8 @@ const isValidAnnotationScope = (scope: string): scope is AnnotationScope => {
     return Object.values(AnnotationScope).includes(scope as AnnotationScope)
 }
 
-export const annotationScopesMenuOptions = (): LemonSelectOptions<AnnotationType['scope'] | null> => {
-    const scopeOptions: LemonSelectOption<AnnotationType['scope'] | null>[] = Object.values(AnnotationScope).map(
+export const annotationScopesMenuOptions = (): SelectOptions<AnnotationType['scope'] | null> => {
+    const scopeOptions: SelectOption<AnnotationType['scope'] | null>[] = Object.values(AnnotationScope).map(
         (scope) => ({
             value: scope,
             label: annotationScopeToName[scope],

@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { IconTableChart } from 'lib/lemon-ui/icons'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { IconTableChart } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { DataTableNode } from '~/queries/schema/schema-general'
@@ -19,7 +19,7 @@ export function DataTableOpenEditor({ query }: DataTableOpenEditorProps): JSX.El
     const { response } = useValues(dataTableLogic)
 
     return (
-        <LemonButton
+        <Button
             type="secondary"
             icon={<IconTableChart />}
             to={urls.insightNew({ query })}
@@ -28,7 +28,7 @@ export function DataTableOpenEditor({ query }: DataTableOpenEditorProps): JSX.El
                     ? {
                           dropdown: {
                               overlay: (
-                                  <LemonMenuOverlay
+                                  <MenuOverlay
                                       items={[
                                           {
                                               label: 'Open in SQL editor',
@@ -46,6 +46,6 @@ export function DataTableOpenEditor({ query }: DataTableOpenEditorProps): JSX.El
             size="small"
         >
             Open as new insight
-        </LemonButton>
+        </Button>
     )
 }

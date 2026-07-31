@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { teamLogic } from 'scenes/teamLogic'
@@ -129,10 +129,10 @@ export const approvalsLogic = kea<approvalsLogicType>([
                 await api.create(`api/environments/${values.currentTeamId}/change_requests/${id}/approve/`, {
                     reason: reason || '',
                 })
-                lemonToast.success('Change request approved')
+                toast.success('Change request approved')
                 actions.loadChangeRequests()
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to approve change request')
+                toast.error(error.detail || 'Failed to approve change request')
             }
         },
         rejectChangeRequest: async ({ id, reason }) => {
@@ -140,10 +140,10 @@ export const approvalsLogic = kea<approvalsLogicType>([
                 await api.create(`api/environments/${values.currentTeamId}/change_requests/${id}/reject/`, {
                     reason,
                 })
-                lemonToast.success('Change request rejected')
+                toast.success('Change request rejected')
                 actions.loadChangeRequests()
             } catch (error: any) {
-                lemonToast.error(error.detail || 'Failed to reject change request')
+                toast.error(error.detail || 'Failed to reject change request')
             }
         },
     })),

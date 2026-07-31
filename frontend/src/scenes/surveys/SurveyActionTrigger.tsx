@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlus } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { ActionType } from '~/types'
 
@@ -16,7 +16,7 @@ export function SurveyActionTrigger(): JSX.Element {
     const { setSurveyValue } = useActions(surveyLogic)
 
     return (
-        <LemonField.Pure
+        <Field.Pure
             label="User performs actions"
             info="These actions are only observed in the current user session. Requires at least insights-js v1.301.0, and is supported only for web surveys."
         >
@@ -39,11 +39,11 @@ export function SurveyActionTrigger(): JSX.Element {
                 }
                 selectedEvents={survey.conditions?.actions?.values?.map((v) => v.name) ?? []}
                 addElement={
-                    <LemonButton size="small" type="secondary" icon={<IconPlus />} sideIcon={null}>
+                    <Button size="small" type="secondary" icon={<IconPlus />} sideIcon={null}>
                         Add action
-                    </LemonButton>
+                    </Button>
                 }
             />
-        </LemonField.Pure>
+        </Field.Pure>
     )
 }

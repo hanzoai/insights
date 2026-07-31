@@ -1,4 +1,4 @@
-import { LemonInput, LemonSelect } from '@hanzo/lemon-ui'
+import { Input, Select } from '@hanzo/elements'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { TagSelect } from 'lib/components/TagSelect'
@@ -45,7 +45,7 @@ export function FeatureFlagFiltersSection({
     return (
         <div className="flex justify-between gap-2 flex-wrap">
             {config.search && (
-                <LemonInput
+                <Input
                     className="w-[335px] !max-w-[335px]"
                     type="search"
                     placeholder={searchPlaceholder}
@@ -61,7 +61,7 @@ export function FeatureFlagFiltersSection({
                             <span>
                                 <b>Type</b>
                             </span>
-                            <LemonSelect
+                            <Select
                                 dropdownMatchSelectWidth={false}
                                 size="small"
                                 onChange={(type) => {
@@ -97,7 +97,7 @@ export function FeatureFlagFiltersSection({
                             <span>
                                 <b>Status</b>
                             </span>
-                            <LemonSelect
+                            <Select
                                 dropdownMatchSelectWidth={false}
                                 size="small"
                                 onChange={(status) => {
@@ -170,7 +170,7 @@ export function FeatureFlagFiltersSection({
                                 <span className="ml-1">
                                     <b>Runtime</b>
                                 </span>
-                                <LemonSelect
+                                <Select
                                     dropdownMatchSelectWidth={false}
                                     size="small"
                                     onChange={(runtime) => {

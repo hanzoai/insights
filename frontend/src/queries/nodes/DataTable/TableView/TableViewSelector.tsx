@@ -3,17 +3,17 @@ import { Form } from 'kea-forms'
 
 import { IconChevronDown, IconDownload, IconGear, IconPerson, IconPlus } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInput,
-    LemonMenu,
-    LemonMenuItem,
-    LemonMenuItems,
-    LemonModal,
-    LemonSegmentedButton,
+    Button,
+    Input,
+    Menu,
+    MenuItem,
+    MenuItems,
+    Modal,
+    SegmentedButton,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
-import { LemonField } from 'lib/lemon-ui/LemonField'
+import { Field } from 'lib/elements/Field'
 
 import { TableViewSupportedQueryType, tableViewLogic } from './tableViewLogic'
 
@@ -29,7 +29,7 @@ export function TableViewSelector({ contextKey, query, setQuery }: TableViewSele
     const { views, currentView, hasUnsavedChanges, viewsLoading, canEditCurrentView, user } = useValues(logic)
     const { applyView, updateView, setShowDeleteConfirm, setIsCreating } = useActions(logic)
 
-    const menuItems: LemonMenuItems = [
+    const menuItems: MenuItems = [
         {
             items: views.map((view) => {
                 const canEditView = view.created_by === user?.id
@@ -50,7 +50,7 @@ export function TableViewSelector({ contextKey, query, setQuery }: TableViewSele
                             dropdown: {
                                 overlay: (
                                     <>
-                                        <LemonButton
+                                        <Button
                                             size="small"
                                             fullWidth
                                             onClick={() => {
@@ -61,8 +61,8 @@ export function TableViewSelector({ contextKey, query, setQuery }: TableViewSele
                                             }}
                                         >
                                             Rename
-                                        </LemonButton>
-                                        <LemonButton
+                                        </Button>
+                                        <Button
                                             size="small"
                                             fullWidth
                                             status="danger"
@@ -71,13 +71,13 @@ export function TableViewSelector({ contextKey, query, setQuery }: TableViewSele
                                             }}
                                         >
                                             Delete
-                                        </LemonButton>
+                                        </Button>
                                     </>
                                 ),
                             },
                         },
                     }),
-                } as LemonMenuItem
+                } as MenuItem
             }),
         },
         {
@@ -95,24 +95,24 @@ export function TableViewSelector({ contextKey, query, setQuery }: TableViewSele
         <BindLogic logic={tableViewLogic} props={tableViewLogicProps}>
             <div className="flex items-center gap-2">
                 {currentView ? (
-                    <LemonMenu items={menuItems} closeOnClickInside={true}>
-                        <LemonButton type="secondary" size="small" sideIcon={<IconChevronDown />}>
+                    <Menu items={menuItems} closeOnClickInside={true}>
+                        <Button type="secondary" size="small" sideIcon={<IconChevronDown />}>
                             {currentView?.name || 'Select view'}
-                        </LemonButton>
-                    </LemonMenu>
+                        </Button>
+                    </Menu>
                 ) : (
-                    <LemonButton
+                    <Button
                         icon={<IconDownload />}
                         size="small"
                         type="secondary"
                         onClick={() => setIsCreating(true)}
                     >
                         Save current view
-                    </LemonButton>
+                    </Button>
                 )}
 
                 {currentView && hasUnsavedChanges && (
-                    <LemonButton
+                    <Button
                         icon={<IconDownload />}
                         size="small"
                         type="secondary"
@@ -125,7 +125,7 @@ export function TableViewSelector({ contextKey, query, setQuery }: TableViewSele
                         }}
                     >
                         Update "{currentView.name}"
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
 
@@ -140,7 +140,7 @@ function CreateViewModal(): JSX.Element {
     const { submitNewViewForm, resetNewViewForm, setIsCreating } = useActions(tableViewLogic)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={isCreating}
             onClose={() => {
                 setIsCreating(false)
@@ -150,7 +150,7 @@ function CreateViewModal(): JSX.Element {
             description="Save the current table configuration as a reusable view"
             footer={
                 <>
-                    <LemonButton
+                    <Button
                         type="secondary"
                         onClick={() => {
                             setIsCreating(false)
@@ -158,35 +158,35 @@ function CreateViewModal(): JSX.Element {
                         }}
                     >
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         onClick={submitNewViewForm}
                         loading={isNewViewFormSubmitting}
                         disabledReason={isNewViewFormSubmitting ? 'Creating view...' : undefined}
                     >
                         Create view
-                    </LemonButton>
+                    </Button>
                 </>
             }
         >
             <Form logic={tableViewLogic} formKey="newViewForm">
                 <div className="space-y-4">
-                    <LemonField name="name" label="View name">
-                        <LemonInput placeholder="View name" autoFocus onPressEnter={submitNewViewForm} />
-                    </LemonField>
-                    <LemonField name="visibility" label="Visibility">
-                        <LemonSegmentedButton
+                    <Field name="name" label="View name">
+                        <Input placeholder="View name" autoFocus onPressEnter={submitNewViewForm} />
+                    </Field>
+                    <Field name="visibility" label="Visibility">
+                        <SegmentedButton
                             options={[
                                 { value: 'private', label: 'Private (only visible to me)' },
                                 { value: 'shared', label: 'Shared with team' },
                             ]}
                             fullWidth
                         />
-                    </LemonField>
+                    </Field>
                 </div>
             </Form>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -195,17 +195,17 @@ function DeleteConfirmationModal(): JSX.Element {
     const { deleteView, setShowDeleteConfirm } = useActions(tableViewLogic)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={!!showDeleteConfirm}
             onClose={() => setShowDeleteConfirm(null)}
             title="Delete view"
             description={`Are you sure you want to delete the view "${views.find((v) => v.id === showDeleteConfirm)?.name}"?`}
             footer={
                 <>
-                    <LemonButton type="secondary" onClick={() => setShowDeleteConfirm(null)}>
+                    <Button type="secondary" onClick={() => setShowDeleteConfirm(null)}>
                         Cancel
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         type="primary"
                         status="danger"
                         onClick={() => {
@@ -216,7 +216,7 @@ function DeleteConfirmationModal(): JSX.Element {
                         }}
                     >
                         Delete
-                    </LemonButton>
+                    </Button>
                 </>
             }
         />

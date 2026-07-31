@@ -1,6 +1,6 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { twoFactorLogic } from 'scenes/authentication/twoFactorLogic'
@@ -73,7 +73,7 @@ export const apiStatusLogic = kea<apiStatusLogicType>([
                         !values.twoFactorVerificationExpiredToastShown
                     ) {
                         actions.setTwoFactorVerificationExpiredToastShown(true)
-                        lemonToast.error(
+                        toast.error(
                             'Your session requires re-authentication. You will be logged out to verify your identity again.',
                             {
                                 button: {

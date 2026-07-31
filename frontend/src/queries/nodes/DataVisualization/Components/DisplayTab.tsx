@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPlusSmall } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonCollapse, LemonSelect, LemonSwitch } from '@hanzo/lemon-ui'
+import { Badge, Button, Collapse, Select, Switch } from '@hanzo/elements'
 
 import { GoalLinesList } from 'lib/components/GoalLinesList'
 
@@ -22,7 +22,7 @@ export const DisplayTab = (): JSX.Element => {
             <>
                 <div className="flex gap-2 items-center justify-between">
                     <span className="font-medium">Scale</span>
-                    <LemonSelect
+                    <Select
                         size="xsmall"
                         value={chartSettings[name]?.scale ?? 'linear'}
                         options={[
@@ -34,7 +34,7 @@ export const DisplayTab = (): JSX.Element => {
                         }}
                     />
                 </div>
-                <LemonSwitch
+                <Switch
                     className="flex-1 w-full"
                     label="Show labels"
                     checked={chartSettings[name]?.showTicks ?? true}
@@ -43,7 +43,7 @@ export const DisplayTab = (): JSX.Element => {
                     }}
                 />
 
-                <LemonSwitch
+                <Switch
                     className="flex-1 w-full"
                     label="Begin at zero"
                     checked={chartSettings[name]?.startAtZero ?? chartSettings.yAxisAtZero ?? true}
@@ -51,7 +51,7 @@ export const DisplayTab = (): JSX.Element => {
                         updateChartSettings({ [name]: { startAtZero: value } })
                     }}
                 />
-                <LemonSwitch
+                <Switch
                     className="flex-1 w-full"
                     label="Show grid lines"
                     checked={chartSettings[name]?.showGridLines ?? true}
@@ -65,7 +65,7 @@ export const DisplayTab = (): JSX.Element => {
 
     return (
         <div className="flex flex-col w-full">
-            <LemonCollapse
+            <Collapse
                 embedded
                 defaultActiveKeys={['general']}
                 multiple
@@ -76,7 +76,7 @@ export const DisplayTab = (): JSX.Element => {
                         className: 'p-2 flex flex-col gap-2',
                         content: (
                             <>
-                                <LemonSwitch
+                                <Switch
                                     className="flex-1 w-full"
                                     label="Show legend"
                                     checked={chartSettings.showLegend ?? false}
@@ -84,7 +84,7 @@ export const DisplayTab = (): JSX.Element => {
                                         updateChartSettings({ showLegend: value })
                                     }}
                                 />
-                                <LemonSwitch
+                                <Switch
                                     className="flex-1 w-full"
                                     label="Show total row"
                                     checked={chartSettings.showTotalRow ?? true}
@@ -92,7 +92,7 @@ export const DisplayTab = (): JSX.Element => {
                                         updateChartSettings({ showTotalRow: value })
                                     }}
                                 />
-                                <LemonSwitch
+                                <Switch
                                     className="flex-1 w-full"
                                     label="Show X-axis labels"
                                     checked={chartSettings.showXAxisTicks ?? true}
@@ -100,7 +100,7 @@ export const DisplayTab = (): JSX.Element => {
                                         updateChartSettings({ showXAxisTicks: value })
                                     }}
                                 />
-                                <LemonSwitch
+                                <Switch
                                     className="flex-1 w-full"
                                     label="Show X-axis border"
                                     checked={chartSettings.showXAxisBorder ?? true}
@@ -108,7 +108,7 @@ export const DisplayTab = (): JSX.Element => {
                                         updateChartSettings({ showXAxisBorder: value })
                                     }}
                                 />
-                                <LemonSwitch
+                                <Switch
                                     className="flex-1 w-full"
                                     label="Show Y-axis border"
                                     checked={chartSettings.showYAxisBorder ?? true}
@@ -137,7 +137,7 @@ export const DisplayTab = (): JSX.Element => {
                               header: 'Stack bars',
                               className: 'p-2 flex flex-col gap-2',
                               content: (
-                                  <LemonSwitch
+                                  <Switch
                                       className="flex-1"
                                       label="Stack bars 100%"
                                       checked={chartSettings.stackBars100 ?? false}
@@ -154,7 +154,7 @@ export const DisplayTab = (): JSX.Element => {
                             <div className="flex items-center gap-1 flex-1">
                                 <span className="flex-1">Goals</span>
                                 {goalLines.length > 0 && (
-                                    <LemonBadge.Number status="muted" size="small" count={goalLines.length} />
+                                    <Badge.Number status="muted" size="small" count={goalLines.length} />
                                 )}
                             </div>
                         ),
@@ -166,9 +166,9 @@ export const DisplayTab = (): JSX.Element => {
                                     removeGoalLine={removeGoalLine}
                                     updateGoalLine={updateGoalLine}
                                 />
-                                <LemonButton className="mt-1" onClick={addGoalLine} icon={<IconPlusSmall />} fullWidth>
+                                <Button className="mt-1" onClick={addGoalLine} icon={<IconPlusSmall />} fullWidth>
                                     Add goal line
-                                </LemonButton>
+                                </Button>
                             </>
                         ),
                     },

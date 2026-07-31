@@ -1,9 +1,9 @@
 import { useActions } from 'kea'
 
 import { IconRewindPlay } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
+import { Button } from 'lib/elements/Button'
 
 import type { Experiment } from '~/types'
 
@@ -28,7 +28,7 @@ export const SummarizeSessionReplaysButton = ({
     }
 
     return (
-        <LemonButton
+        <Button
             size="small"
             onClick={() => {
                 reportExperimentSessionReplaySummaryRequested(experiment)
@@ -39,9 +39,9 @@ export const SummarizeSessionReplaysButton = ({
             tooltip="Use AI to analyze session replays and identify patterns in user behavior across experiment variants. Discover insights about how users interact with your variants."
         >
             Summarize session replays
-            <LemonTag type="highlight" size="small" className="ml-1">
+            <Tag type="highlight" size="small" className="ml-1">
                 Beta
-            </LemonTag>
-        </LemonButton>
+            </Tag>
+        </Button>
     )
 }

@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 
 import { IconEllipsis } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { ProfileBubbles } from 'lib/lemon-ui/ProfilePicture'
-import { IconSlack } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Modal } from 'lib/elements/Modal'
+import { Skeleton } from 'lib/elements/Skeleton'
+import { ProfileBubbles } from 'lib/elements/ProfilePicture'
+import { IconSlack } from 'lib/elements/icons'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils'
 
 import { SubscriptionType } from '~/types'
@@ -22,7 +22,7 @@ interface SubscriptionListItemProps {
 
 export function SubscriptionListItem({ subscription, onClick, onDelete }: SubscriptionListItemProps): JSX.Element {
     return (
-        <LemonButton
+        <Button
             type="secondary"
             onClick={onClick}
             data-attr="subscription-list-item"
@@ -34,14 +34,14 @@ export function SubscriptionListItem({ subscription, onClick, onDelete }: Subscr
                     overlay: (
                         <>
                             {onDelete && (
-                                <LemonButton
+                                <Button
                                     onClick={onDelete}
                                     data-attr="subscription-list-item-delete"
                                     status="danger"
                                     fullWidth
                                 >
                                     Delete Subscription
-                                </LemonButton>
+                                </Button>
                             )}
                         </>
                     ),
@@ -61,7 +61,7 @@ export function SubscriptionListItem({ subscription, onClick, onDelete }: Subscr
                 ) : null}
                 {subscription.target_type === 'slack' ? <IconSlack /> : null}
             </div>
-        </LemonButton>
+        </Button>
     )
 }
 
@@ -86,14 +86,14 @@ export function ManageSubscriptions({
 
     return (
         <>
-            <LemonModal.Header>
+            <Modal.Header>
                 <h3> Manage Subscriptions</h3>
-            </LemonModal.Header>
-            <LemonModal.Content>
+            </Modal.Header>
+            <Modal.Content>
                 {subscriptionsLoading && !subscriptions.length ? (
                     <div className="deprecated-space-y-2">
-                        <LemonSkeleton className="w-1/2 h-4" />
-                        <LemonSkeleton.Row repeat={2} />
+                        <Skeleton className="w-1/2 h-4" />
+                        <Skeleton.Row repeat={2} />
                     </div>
                 ) : subscriptions.length ? (
                     <div className="deprecated-space-y-2">
@@ -120,25 +120,25 @@ export function ManageSubscriptions({
 
                         <p>Once subscriptions are created they will display here. </p>
 
-                        <LemonButton type="primary" onClick={() => onSelect('new')}>
+                        <Button type="primary" onClick={() => onSelect('new')}>
                             Add subscription
-                        </LemonButton>
+                        </Button>
                     </div>
                 )}
-            </LemonModal.Content>
+            </Modal.Content>
 
-            <LemonModal.Footer>
+            <Modal.Footer>
                 <div className="flex-1">
                     {subscriptions.length ? (
-                        <LemonButton type="secondary" onClick={() => onSelect('new')}>
+                        <Button type="secondary" onClick={() => onSelect('new')}>
                             Add subscription
-                        </LemonButton>
+                        </Button>
                     ) : null}
                 </div>
-                <LemonButton type="secondary" onClick={onCancel}>
+                <Button type="secondary" onClick={onCancel}>
                     Close
-                </LemonButton>
-            </LemonModal.Footer>
+                </Button>
+            </Modal.Footer>
         </>
     )
 }

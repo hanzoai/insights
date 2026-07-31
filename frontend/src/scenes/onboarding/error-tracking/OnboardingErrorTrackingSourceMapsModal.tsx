@@ -1,4 +1,4 @@
-import { LemonModal } from '@hanzo/lemon-ui'
+import { Modal } from '@hanzo/elements'
 
 import { SDK } from '~/types'
 
@@ -20,7 +20,7 @@ export function SourceMapsInstructionsModal({
     const InstructionComponent = sdkInstructions as (() => JSX.Element) | undefined
 
     return (
-        <LemonModal isOpen={isOpen} onClose={onClose} simple title="" zIndex="1161">
+        <Modal isOpen={isOpen} onClose={onClose} simple title="" zIndex="1161">
             <div className="overflow-y-auto p-6">
                 {InstructionComponent && (
                     <div className="space-y-4">
@@ -29,6 +29,6 @@ export function SourceMapsInstructionsModal({
                     </div>
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }

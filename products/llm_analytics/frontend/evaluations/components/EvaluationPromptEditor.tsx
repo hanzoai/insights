@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Field } from 'kea-forms'
 
-import { LemonTag, LemonTextArea } from '@hanzo/lemon-ui'
+import { Tag, TextArea } from '@hanzo/elements'
 
 import { llmEvaluationLogic } from '../llmEvaluationLogic'
 
@@ -20,7 +20,7 @@ export function EvaluationPromptEditor(): JSX.Element {
         <div className="space-y-4">
             <Field name="prompt" label="Evaluation prompt">
                 <div className="space-y-2">
-                    <LemonTextArea
+                    <TextArea
                         value={prompt}
                         onChange={setEvaluationPrompt}
                         placeholder={
@@ -40,9 +40,9 @@ Example: Is this response helpful and accurate? Return true if yes, false if no.
                         <div>{prompt.length}/2000 characters</div>
                         <div className="flex items-center gap-2">
                             <span>Expected output:</span>
-                            <LemonTag type="completion">
+                            <Tag type="completion">
                                 {allowsNA ? 'Boolean (true/false/NA)' : 'Boolean (true/false)'}
-                            </LemonTag>
+                            </Tag>
                         </div>
                     </div>
                 </div>

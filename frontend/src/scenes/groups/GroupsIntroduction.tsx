@@ -1,5 +1,5 @@
 import { IconOpenSidebar } from '@hanzo/icons'
-import { LemonButton, Link } from '@hanzo/lemon-ui'
+import { Button, Link } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 
@@ -19,7 +19,7 @@ export function GroupsIntroduction(): JSX.Element {
                     then include the group identifier in the event&nbsp;properties.
                 </div>
                 <div className="w-80 max-w-[90%] mt-4">
-                    <LemonButton
+                    <Button
                         type="primary"
                         to={`https://hanzo.ai/docs/user-guides/group-analytics?utm_medium=in-product&utm_campaign=${AvailableFeature.GROUP_ANALYTICS}-upgrade-learn-more`}
                         targetBlank
@@ -27,7 +27,7 @@ export function GroupsIntroduction(): JSX.Element {
                         data-attr={`${AvailableFeature.GROUP_ANALYTICS}-learn-more`}
                     >
                         Learn more <IconOpenSidebar className="ml-4" />
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </PayGateMini>

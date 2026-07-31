@@ -1,7 +1,7 @@
 import insights from '@hanzo/insights'
 import { DashboardFilter, InsightsQLVariable } from 'src/queries/schema/schema-general'
 
-import { Link } from '@hanzo/lemon-ui'
+import { Link } from '@hanzo/elements'
 
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {

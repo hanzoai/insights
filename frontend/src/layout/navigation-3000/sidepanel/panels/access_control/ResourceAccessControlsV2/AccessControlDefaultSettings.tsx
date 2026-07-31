@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconHome, IconInfo, IconPlus } from '@hanzo/icons'
-import { LemonButton, LemonDropdown, LemonSelect, LemonTable, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Dropdown, Select, Table, Tooltip } from '@hanzo/elements'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'
@@ -45,7 +45,7 @@ export function AccessControlDefaultSettings({ projectId }: { projectId: string 
                     </p>
                 </div>
                 <div className="max-w-sm">
-                    <LemonSelect
+                    <Select
                         dropdownPlacement="bottom-start"
                         value={mappedLevels['project'] ?? null}
                         disabled={loading || !canEditAccessControls}
@@ -60,7 +60,7 @@ export function AccessControlDefaultSettings({ projectId }: { projectId: string 
             </div>
 
             <PayGateMini feature={AvailableFeature.ADVANCED_PERMISSIONS}>
-                <LemonTable
+                <Table
                     dataSource={resourcesWithProject.filter((r) => r.key !== 'project')}
                     loading={loading}
                     columns={[
@@ -94,12 +94,12 @@ export function AccessControlDefaultSettings({ projectId }: { projectId: string 
 
                                 if (value === null) {
                                     return (
-                                        <LemonDropdown
+                                        <Dropdown
                                             placement="bottom-end"
                                             overlay={
                                                 <div className="flex flex-col">
                                                     {getLevelOptionsForResource(resource.key).map((option) => (
-                                                        <LemonButton
+                                                        <Button
                                                             key={option.value}
                                                             size="small"
                                                             className="w-36"
@@ -121,12 +121,12 @@ export function AccessControlDefaultSettings({ projectId }: { projectId: string 
                                                             }}
                                                         >
                                                             {option.label}
-                                                        </LemonButton>
+                                                        </Button>
                                                     ))}
                                                 </div>
                                             }
                                         >
-                                            <LemonButton
+                                            <Button
                                                 size="small"
                                                 type="tertiary"
                                                 icon={<IconPlus />}
@@ -135,13 +135,13 @@ export function AccessControlDefaultSettings({ projectId }: { projectId: string 
                                                 className="ml-auto my-0.5 w-36"
                                             >
                                                 Add default
-                                            </LemonButton>
-                                        </LemonDropdown>
+                                            </Button>
+                                        </Dropdown>
                                     )
                                 }
 
                                 return (
-                                    <LemonSelect
+                                    <Select
                                         dropdownPlacement="bottom-end"
                                         placeholder="No override"
                                         value={value}

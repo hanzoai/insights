@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import {
     DEFAULT_OAUTH_SCOPES,
     MCP_SERVER_OAUTH_SCOPES,
@@ -64,7 +64,7 @@ const oauthAuthorize = async (
             }
         }
     } catch (error: any) {
-        lemonToast.error('Something went wrong while authorizing the application')
+        toast.error('Something went wrong while authorizing the application')
         throw error
     }
 

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
+import { Select } from 'lib/elements/Select'
 import { RETENTION_TIME_WINDOW_MODE_OPTIONS } from 'scenes/retention/constants'
 
 import { RetentionFilter } from '~/queries/schema/schema-general'
@@ -17,7 +17,7 @@ export function RetentionTimeWindowModePicker(): JSX.Element {
     }
 
     return (
-        <LemonSelect
+        <Select
             value={retentionFilter?.timeWindowMode ?? 'strict_calendar_dates'}
             onChange={handleChange}
             options={RETENTION_TIME_WINDOW_MODE_OPTIONS}

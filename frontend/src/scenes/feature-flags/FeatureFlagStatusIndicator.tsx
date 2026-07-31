@@ -1,5 +1,5 @@
-import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tag } from 'lib/elements/Tag'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { FeatureFlagStatus, FeatureFlagStatusResponse } from '~/types'
 
@@ -25,9 +25,9 @@ export function FeatureFlagStatusIndicator({
             placement="right"
         >
             <span>
-                <LemonTag type="warning" className="uppercase cursor-default">
+                <Tag type="warning" className="uppercase cursor-default">
                     {flagStatus.status}
-                </LemonTag>
+                </Tag>
             </span>
         </Tooltip>
     )

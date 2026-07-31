@@ -1,7 +1,7 @@
 import { combineUrl } from 'kea-router'
 
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { getDefaultEventsSceneQuery } from 'scenes/activity/explore/defaults'
 import { Params, Scene, SceneConfig, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -713,7 +713,7 @@ export const redirects: Record<
             const before = dayjs(timestamp).add(15, 'second').startOf('second').toISOString()
             Object.assign(query.source as EventsQuery, { before, after })
         } catch {
-            lemonToast.error('Invalid event timestamp')
+            toast.error('Invalid event timestamp')
         }
         return combineUrl(urls.activity(ActivityTab.ExploreEvents), {}, { q: query }).url
     },

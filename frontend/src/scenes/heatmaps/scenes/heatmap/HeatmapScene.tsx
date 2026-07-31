@@ -2,14 +2,14 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
 import { IconBrowser, IconDownload } from '@hanzo/icons'
-import { LemonTag, Spinner } from '@hanzo/lemon-ui'
+import { Tag, Spinner } from '@hanzo/elements'
 
 import { appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { HeatmapCanvas } from 'lib/components/heatmaps/HeatmapCanvas'
 import { FilmCameraMascot } from 'lib/components/mascots'
-import { LemonBanner } from 'lib/lemon-ui/LemonBanner/LemonBanner'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LoadingBar } from 'lib/lemon-ui/LoadingBar'
+import { Banner } from 'lib/elements/Banner/Banner'
+import { Button } from 'lib/elements/Button'
+import { LoadingBar } from 'lib/elements/LoadingBar'
 import { FilterPanel } from 'scenes/heatmaps/components/FilterPanel'
 import { HeatmapHeader } from 'scenes/heatmaps/components/HeatmapHeader'
 import { urls } from 'scenes/urls'
@@ -86,10 +86,10 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                     }}
                     actions={
                         <>
-                            <LemonButton type="primary" onClick={updateHeatmap} size="small">
+                            <Button type="primary" onClick={updateHeatmap} size="small">
                                 Save
-                            </LemonButton>
-                            <LemonButton
+                            </Button>
+                            <Button
                                 onClick={exportHeatmap}
                                 data-attr="export-heatmap"
                                 type="secondary"
@@ -102,14 +102,14 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                                 }
                             >
                                 Export{' '}
-                                <LemonTag type="warning" className="ml-2">
+                                <Tag type="warning" className="ml-2">
                                     BETA
-                                </LemonTag>
-                            </LemonButton>
+                                </Tag>
+                            </Button>
                         </>
                     }
                 />
-                <LemonBanner
+                <Banner
                     type="info"
                     dismissKey={`heatmap-type-info:${id}:${type ?? 'unknown'}`}
                     className="mb-2"
@@ -128,10 +128,10 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                     }}
                 >
                     You're viewing {type === 'screenshot' ? 'a' : 'an'}{' '}
-                    <LemonTag type="highlight">{type === 'screenshot' ? 'Screenshot' : 'Iframe'}</LemonTag> heatmap. We
+                    <Tag type="highlight">{type === 'screenshot' ? 'Screenshot' : 'Iframe'}</Tag> heatmap. We
                     recommend trying both methods to see which works best for your site. You can also open your website
                     using the toolbar and verify results there (useful for auth-protected pages).
-                </LemonBanner>
+                </Banner>
                 <HeatmapHeader />
                 <FilterPanel />
                 <SceneDivider />
@@ -143,10 +143,10 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                         <div className="p-2 border-b text-muted-foreground gap-x-2 flex items-center">
                             <IconBrowser /> {displayUrl}
                             {typeof widthOverride === 'number' && containerWidth && widthOverride > containerWidth ? (
-                                <LemonTag className="ml-auto" type="highlight">
+                                <Tag className="ml-auto" type="highlight">
                                     Scaled to {scalePercent}% ({widthOverride}px →{' '}
                                     {Math.round(effectiveWidth as number)} px)
-                                </LemonTag>
+                                </Tag>
                             ) : null}
                         </div>
                         {type === 'screenshot' ? (

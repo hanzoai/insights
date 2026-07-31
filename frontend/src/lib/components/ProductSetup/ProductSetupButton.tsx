@@ -2,11 +2,11 @@ import { useActions, useValues } from 'kea'
 import { forwardRef } from 'react'
 
 import { IconTarget } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
-import { LemonBadge } from 'lib/lemon-ui/LemonBadge'
+import { Badge } from 'lib/elements/Badge'
 import { organizationLogic } from 'scenes/organizationLogic'
 
 import { ProductSetupPopover } from './ProductSetupPopover'
@@ -88,13 +88,13 @@ const MinimizedButton = forwardRef<HTMLButtonElement, MinimizedButtonProps>(func
     ref
 ) {
     return (
-        <LemonButton
+        <Button
             ref={ref}
             icon={
                 <span className="relative">
                     <IconTarget />
                     {remainingCount > 0 && (
-                        <LemonBadge.Number count={remainingCount} status="muted" size="medium" position="top-right" />
+                        <Badge.Number count={remainingCount} status="muted" size="medium" position="top-right" />
                     )}
                 </span>
             }
@@ -120,7 +120,7 @@ const ExpandedButton = forwardRef<HTMLButtonElement, ExpandedButtonProps>(functi
     ref
 ) {
     return (
-        <LemonButton
+        <Button
             ref={ref}
             icon={<IconTarget />}
             size="small"
@@ -130,11 +130,11 @@ const ExpandedButton = forwardRef<HTMLButtonElement, ExpandedButtonProps>(functi
             data-attr="global-product-setup-button"
             sideIcon={
                 showBadge && remainingCount > 0 ? (
-                    <LemonBadge.Number count={remainingCount} status="muted" size="medium" />
+                    <Badge.Number count={remainingCount} status="muted" size="medium" />
                 ) : undefined
             }
         >
             Quick start
-        </LemonButton>
+        </Button>
     )
 })

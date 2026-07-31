@@ -1,4 +1,4 @@
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { humanizeBytes } from 'lib/utils'

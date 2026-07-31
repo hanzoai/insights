@@ -2,13 +2,13 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
 import {
-    LemonButton,
-    LemonButtonProps,
-    LemonDropdown,
-    LemonDropdownProps,
-    LemonInput,
+    Button,
+    ButtonProps,
+    Dropdown,
+    DropdownProps,
+    Input,
     ProfilePicture,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { fullName } from 'lib/utils'
 import { membersLogic } from 'scenes/organization/membersLogic'
@@ -21,7 +21,7 @@ export type MemberMultiSelectProps = {
     value: number[]
     excludedMembers?: number[]
     onChange: (value: number[]) => void
-    children?: (selectedUsers: UserBasicType[]) => LemonDropdownProps['children']
+    children?: (selectedUsers: UserBasicType[]) => DropdownProps['children']
 }
 
 export function MemberMultiSelect({
@@ -31,7 +31,7 @@ export function MemberMultiSelect({
     onChange,
     children,
     ...buttonProps
-}: MemberMultiSelectProps & Pick<LemonButtonProps, 'type' | 'size'>): JSX.Element {
+}: MemberMultiSelectProps & Pick<ButtonProps, 'type' | 'size'>): JSX.Element {
     const { meFirstMembers, filteredMembers, search, membersLoading } = useValues(membersLogic)
     const { ensureAllMembersLoaded, setSearch } = useActions(membersLogic)
     const [showPopover, setShowPopover] = useState(false)
@@ -74,7 +74,7 @@ export function MemberMultiSelect({
     const buttonClass = selectedCount > 0 ? 'min-w-26' : 'w-26'
 
     return (
-        <LemonDropdown
+        <Dropdown
             closeOnClickInside={false}
             visible={showPopover}
             matchWidth={false}
@@ -83,7 +83,7 @@ export function MemberMultiSelect({
             onVisibilityChange={(visible) => setShowPopover(visible)}
             overlay={
                 <div className="max-w-100 deprecated-space-y-2">
-                    <LemonInput
+                    <Input
                         type="search"
                         placeholder="Search"
                         autoFocus
@@ -94,7 +94,7 @@ export function MemberMultiSelect({
                     <ul className="deprecated-space-y-px">
                         {selectableMembers.map((member) => (
                             <li key={member.user.uuid}>
-                                <LemonButton
+                                <Button
                                     fullWidth
                                     role="menuitem"
                                     size="small"
@@ -115,7 +115,7 @@ export function MemberMultiSelect({
                                             {meFirstMembers[0] === member && `(you)`}
                                         </span>
                                     </span>
-                                </LemonButton>
+                                </Button>
                             </li>
                         ))}
 
@@ -131,7 +131,7 @@ export function MemberMultiSelect({
                             <>
                                 <div className="my-1 border-t" />
                                 <li>
-                                    <LemonButton
+                                    <Button
                                         fullWidth
                                         role="menuitem"
                                         size="small"
@@ -139,7 +139,7 @@ export function MemberMultiSelect({
                                         type="secondary"
                                     >
                                         Clear selection
-                                    </LemonButton>
+                                    </Button>
                                 </li>
                             </>
                         )}
@@ -150,10 +150,10 @@ export function MemberMultiSelect({
             {children ? (
                 children(selectedMembersAsUsers)
             ) : (
-                <LemonButton size="small" type="secondary" className={buttonClass} {...buttonProps}>
+                <Button size="small" type="secondary" className={buttonClass} {...buttonProps}>
                     {selectedCount > 0 ? `${selectedCount} selected` : defaultLabel}
-                </LemonButton>
+                </Button>
             )}
-        </LemonDropdown>
+        </Dropdown>
     )
 }

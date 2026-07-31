@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import insights from '@hanzo/insights'
 import { KeyboardEvent, useEffect, useState } from 'react'
 
-import { LemonInput, LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Input, Tag, Tooltip } from '@hanzo/elements'
 
 import { notebookLogic } from 'scenes/notebooks/Notebook/notebookLogic'
 
@@ -121,9 +121,9 @@ export function NotebookNodeTitle(): JSX.Element {
 
     const suggestedTaskTitle = (
         <span className="NotebookNodeTitle flex items-center gap-2" title={title}>
-            <LemonTag type="warning" size="small">
+            <Tag type="warning" size="small">
                 Suggested task
-            </LemonTag>
+            </Tag>
             <span className="truncate">{title}</span>
         </span>
     )
@@ -179,7 +179,7 @@ export function NotebookNodeTitle(): JSX.Element {
             )}
         </Tooltip>
     ) : (
-        <LemonInput
+        <Input
             autoFocus
             placeholder={titlePlaceholder}
             size="small"

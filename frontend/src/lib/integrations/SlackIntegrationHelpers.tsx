@@ -2,17 +2,17 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
 import {
-    LemonBanner,
-    LemonButton,
-    LemonInputSelect,
-    LemonInputSelectOption,
+    Banner,
+    Button,
+    InputSelect,
+    InputSelectOption,
     Link,
     ProfilePicture,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import api from 'lib/api'
 import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
-import { IconSlackExternal } from 'lib/lemon-ui/icons'
+import { IconSlackExternal } from 'lib/elements/icons'
 
 import { IntegrationType, SlackChannelType } from '~/types'
 
@@ -20,7 +20,7 @@ import { slackIntegrationLogic } from './slackIntegrationLogic'
 
 export function SlackNotConfiguredBanner(): JSX.Element {
     return (
-        <LemonBanner type="info">
+        <Banner type="info">
             <div className="flex justify-between gap-2 items-center">
                 <span>
                     Slack is not yet configured for this project. Add Insights to your Slack workspace to continue.
@@ -41,11 +41,11 @@ export function SlackNotConfiguredBanner(): JSX.Element {
                     />
                 </Link>
             </div>
-        </LemonBanner>
+        </Banner>
     )
 }
 
-const getSlackChannelOptions = (slackChannels?: SlackChannelType[] | null): LemonInputSelectOption[] | null => {
+const getSlackChannelOptions = (slackChannels?: SlackChannelType[] | null): InputSelectOption[] | null => {
     return slackChannels
         ? slackChannels.map((x) => {
               const name = x.is_private_without_access ? 'Private Channel' : x.name
@@ -88,7 +88,7 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
     // If slackChannels aren't loaded, make sure we display only the channel name and not the actual underlying value
     const rawSlackChannelOptions = useMemo(() => getSlackChannelOptions(slackChannels), [slackChannels])
 
-    const slackChannelOptions = (): LemonInputSelectOption[] | null => {
+    const slackChannelOptions = (): InputSelectOption[] | null => {
         return rawSlackChannelOptions
             ? rawSlackChannelOptions.filter((x) => {
                   const [id] = x.key.split('|#')
@@ -120,7 +120,7 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
 
     return (
         <>
-            <LemonInputSelect
+            <InputSelect
                 onChange={(val) => onChange?.(val[0] ?? null)}
                 onInputChange={(val) => {
                     if (val) {
@@ -162,7 +162,7 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
             />
 
             {showSlackMembershipWarning ? (
-                <LemonBanner type="info">
+                <Banner type="info">
                     <div className="flex gap-2 items-center">
                         <span>
                             The Insights Slack App is not in this channel. Please add it to the channel otherwise
@@ -171,22 +171,22 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
                                 See the Docs for more information
                             </Link>
                         </span>
-                        <LemonButton
+                        <Button
                             type="secondary"
                             disabledReason={getChannelRefreshButtonDisabledReason()}
                             onClick={() => loadAllSlackChannels(true)}
                             loading={allSlackChannelsLoading}
                         >
                             Check again
-                        </LemonButton>
+                        </Button>
                     </div>
-                </LemonBanner>
+                </Banner>
             ) : isPrivateChannelWithoutAccess(value ?? '') ? (
-                <LemonBanner type="info">
+                <Banner type="info">
                     This is a private Slack channel. Ask{' '}
                     <ProfilePicture user={integration.created_by} showName size="sm" /> or connect your own Slack
                     account to configure private channels.
-                </LemonBanner>
+                </Banner>
             ) : null}
         </>
     )

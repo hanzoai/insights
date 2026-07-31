@@ -2,12 +2,12 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
 import { IconChevronDown, IconChevronRight, IconInfo } from '@hanzo/icons'
-import { LemonTag } from '@hanzo/lemon-ui'
+import { Tag } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { Link } from 'lib/lemon-ui/Link'
-import { Spinner } from 'lib/lemon-ui/Spinner'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Link } from 'lib/elements/Link'
+import { Spinner } from 'lib/elements/Spinner'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { urls } from 'scenes/urls'
 
 import { DataTable } from '~/queries/nodes/DataTable/DataTable'
@@ -221,21 +221,21 @@ export function LLMAnalyticsSessionsScene(): JSX.Element {
                                                                 <span className="text-sm">{trace.traceName}</span>
                                                             )}
                                                             {(trace.errorCount ?? 0) > 0 && (
-                                                                <LemonTag type="danger" size="small">
+                                                                <Tag type="danger" size="small">
                                                                     {trace.errorCount === 1
                                                                         ? '1 error'
                                                                         : `${trace.errorCount} errors`}
-                                                                </LemonTag>
+                                                                </Tag>
                                                             )}
                                                             {typeof trace.totalLatency === 'number' && (
-                                                                <LemonTag type="muted">
+                                                                <Tag type="muted">
                                                                     {trace.totalLatency.toFixed(2)}s
-                                                                </LemonTag>
+                                                                </Tag>
                                                             )}
                                                             {typeof trace.totalCost === 'number' && (
-                                                                <LemonTag type="muted">
+                                                                <Tag type="muted">
                                                                     {formatLLMCost(trace.totalCost)}
-                                                                </LemonTag>
+                                                                </Tag>
                                                             )}
                                                             <Link
                                                                 to={

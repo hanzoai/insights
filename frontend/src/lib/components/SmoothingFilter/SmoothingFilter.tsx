@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
 import { IconPulse } from '@hanzo/icons'
-import { LemonSelect } from '@hanzo/lemon-ui'
+import { Select } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -36,7 +36,7 @@ export function SmoothingFilter(): JSX.Element | null {
     }))
 
     return options.length ? (
-        <LemonSelect
+        <Select
             key={interval}
             value={smoothingIntervals || 1}
             dropdownMatchSelectWidth={false}

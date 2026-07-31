@@ -2,7 +2,7 @@ import { actions, kea, key, path, props, reducers, selectors, useActions, useVal
 import { actionToUrl, urlToAction } from 'kea-router'
 
 import { NotFound } from 'lib/components/NotFound'
-import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
+import { Tab, Tabs } from 'lib/elements/Tabs'
 import { DataPipelinesSelfManagedSource } from 'scenes/data-pipelines/DataPipelinesSelfManagedSource'
 import { cleanSourceId, isManagedSourceId, isSelfManagedSourceId } from 'scenes/data-warehouse/utils'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
@@ -132,7 +132,7 @@ export function DataWarehouseSourceScene(): JSX.Element {
 
     const sourceId = cleanSourceId(id)
 
-    const tabs: LemonTab<DataWarehouseSourceSceneTab>[] = isManagedSourceId(id)
+    const tabs: Tab<DataWarehouseSourceSceneTab>[] = isManagedSourceId(id)
         ? [
               {
                   label: 'Schemas',
@@ -165,7 +165,7 @@ export function DataWarehouseSourceScene(): JSX.Element {
                 resourceType={{ type: 'data_pipeline' }}
                 isLoading={breadcrumbName === 'Source'}
             />
-            <LemonTabs activeKey={currentTab} tabs={tabs} onChange={setCurrentTab} sceneInset />
+            <Tabs activeKey={currentTab} tabs={tabs} onChange={setCurrentTab} sceneInset />
         </SceneContent>
     )
 }

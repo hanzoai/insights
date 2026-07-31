@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 
-import { LemonBanner } from '@hanzo/lemon-ui'
+import { Banner } from '@hanzo/elements'
 
-import { Link } from 'lib/lemon-ui/Link/Link'
+import { Link } from 'lib/elements/Link/Link'
 import { urls } from 'scenes/urls'
 
 import { ExternalDataSchemaStatus } from '~/types'
@@ -72,7 +72,7 @@ export const MarketingAnalyticsSourceStatusBanner = (): JSX.Element | null => {
     const statusCounts = getStatusCounts(syncingOrFailedSources)
 
     return (
-        <LemonBanner type={statusCounts[ExternalDataSchemaStatus.Failed] > 0 ? 'error' : 'info'} className="mb-2 mt-4">
+        <Banner type={statusCounts[ExternalDataSchemaStatus.Failed] > 0 ? 'error' : 'info'} className="mb-2 mt-4">
             {syncingOrFailedSources.length === 1 ? (
                 <>
                     <strong>{syncingOrFailedSources[0].name}</strong> is currently{' '}
@@ -110,6 +110,6 @@ export const MarketingAnalyticsSourceStatusBanner = (): JSX.Element | null => {
                 marketing analytics settings
             </Link>{' '}
             for more details.
-        </LemonBanner>
+        </Banner>
     )
 }

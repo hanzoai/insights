@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { actionToUrl, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { isUserLoggedIn } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -187,7 +187,7 @@ export const systemStatusLogic = kea<systemStatusLogicType>([
                 actions.loadInstanceSettings()
                 actions.clearInstanceConfigEditing()
                 actions.setInstanceConfigMode(ConfigMode.View)
-                lemonToast.success('Instance settings updated')
+                toast.success('Instance settings updated')
             }
         },
     })),

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonInput, Link } from '@hanzo/lemon-ui'
+import { Button, Input, Link } from '@hanzo/elements'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -54,7 +54,7 @@ export function WebhookIntegration(): JSX.Element {
     return (
         <div>
             <div className="deprecated-space-y-4 max-w-160">
-                <LemonInput
+                <Input
                     value={webhook}
                     onChange={setWebhook}
                     type="url"
@@ -65,7 +65,7 @@ export function WebhookIntegration(): JSX.Element {
                     onPressEnter={() => testWebhook(webhook)}
                 />
                 <div className="flex items-center gap-2">
-                    <LemonButton
+                    <Button
                         type="primary"
                         disabled={!webhook}
                         onClick={(e) => {
@@ -75,8 +75,8 @@ export function WebhookIntegration(): JSX.Element {
                         loading={loading}
                     >
                         Test & Save
-                    </LemonButton>
-                    <LemonButton
+                    </Button>
+                    <Button
                         status="danger"
                         type="secondary"
                         onClick={(e) => {
@@ -87,7 +87,7 @@ export function WebhookIntegration(): JSX.Element {
                         disabled={!currentTeam?.slack_incoming_webhook}
                     >
                         Clear & Disable
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
         </div>

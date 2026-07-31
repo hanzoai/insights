@@ -16,11 +16,11 @@ import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedAr
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TeamMembershipLevel } from 'lib/constants'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonCheckbox } from 'lib/lemon-ui/LemonCheckbox'
-import { LemonModal } from 'lib/lemon-ui/LemonModal'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
-import { IconTuning, SortableDragIcon } from 'lib/lemon-ui/icons'
+import { Button } from 'lib/elements/Button'
+import { Checkbox } from 'lib/elements/Checkbox'
+import { Modal } from 'lib/elements/Modal'
+import { Tooltip } from 'lib/elements/Tooltip'
+import { IconTuning, SortableDragIcon } from 'lib/elements/icons'
 
 import { dataTableLogic } from '~/queries/nodes/DataTable/dataTableLogic'
 import { DataTableNode } from '~/queries/schema/schema-general'
@@ -98,7 +98,7 @@ export function ColumnConfigurator({ query, setQuery }: ColumnConfiguratorProps)
 
     return (
         <BindLogic logic={columnConfiguratorLogic} props={columnConfiguratorLogicProps}>
-            <LemonButton
+            <Button
                 type="secondary"
                 data-attr="events-table-column-selector"
                 icon={<IconTuning />}
@@ -106,7 +106,7 @@ export function ColumnConfigurator({ query, setQuery }: ColumnConfiguratorProps)
                 size="small"
             >
                 Configure columns
-            </LemonButton>
+            </Button>
             <ColumnConfiguratorModal query={query} setQuery={setQuery} />
         </BindLogic>
     )
@@ -157,28 +157,28 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
         isActorsQuery(query.source)
 
     return (
-        <LemonModal
+        <Modal
             isOpen={modalVisible}
             title="Configure columns"
             onClose={hideModal}
             footer={
                 <>
                     <div className="flex-1">
-                        <LemonButton
+                        <Button
                             type="secondary"
                             onClick={() =>
                                 setColumns(query.defaultColumns || defaultDataTableColumns(query.source.kind))
                             }
                         >
                             Reset to defaults
-                        </LemonButton>
+                        </Button>
                     </div>
-                    <LemonButton type="secondary" onClick={hideModal}>
+                    <Button type="secondary" onClick={hideModal}>
                         Close
-                    </LemonButton>
-                    <LemonButton type="primary" onClick={save} data-attr="items-selector-confirm">
+                    </Button>
+                    <Button type="primary" onClick={save} data-attr="items-selector-confirm">
                         Save
-                    </LemonButton>
+                    </Button>
                 </>
             }
             className="w-full max-w-248"
@@ -244,7 +244,7 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
                     </div>
                 </div>
                 {showPersistedColumnReorder && query.showPersistentColumnConfigurator && (
-                    <LemonCheckbox
+                    <Checkbox
                         label={
                             context?.type === 'groups'
                                 ? 'Save as default columns for this group type'
@@ -261,7 +261,7 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
                     />
                 )}
             </div>
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -320,14 +320,14 @@ const SelectedColumn = ({
                 />
                 <div className="flex-1" />
                 <Tooltip title="Edit">
-                    <LemonButton onClick={() => onEdit(column, dataIndex)} size="small">
+                    <Button onClick={() => onEdit(column, dataIndex)} size="small">
                         <IconPencil data-attr="column-display-item-edit-icon" />
-                    </LemonButton>
+                    </Button>
                 </Tooltip>
                 <Tooltip title="Remove">
-                    <LemonButton onClick={() => onRemove(column)} status="danger" size="small">
+                    <Button onClick={() => onRemove(column)} status="danger" size="small">
                         <IconX data-attr="column-display-item-remove-icon" />
-                    </LemonButton>
+                    </Button>
                 </Tooltip>
             </div>
         </div>

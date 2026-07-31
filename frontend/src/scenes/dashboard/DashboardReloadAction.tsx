@@ -3,15 +3,15 @@ import { useEffect, useState } from 'react'
 
 import { IconCheck, IconX } from '@hanzo/icons'
 import { IconRefresh } from '@hanzo/icons'
-import { LemonBadge, LemonButton, LemonSwitch, Spinner } from '@hanzo/lemon-ui'
+import { Badge, Button, Switch, Spinner } from '@hanzo/elements'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
 import { usePageVisibilityCb } from 'lib/hooks/usePageVisibility'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { Radio } from 'lib/elements/Radio'
 import { humanFriendlyDuration } from 'lib/utils'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 import { Scene } from 'scenes/sceneTypes'
@@ -105,7 +105,7 @@ export function DashboardReloadAction(): JSX.Element {
                 interaction="click"
                 scope={Scene.Dashboard}
             >
-                <LemonButton
+                <Button
                     onClick={() => (itemsLoading ? cancelDashboardRefresh() : triggerDashboardRefresh())}
                     type="secondary"
                     icon={
@@ -129,11 +129,11 @@ export function DashboardReloadAction(): JSX.Element {
                             closeOnClickInside: false,
                             placement: 'bottom-end',
                             overlay: (
-                                <LemonMenuOverlay
+                                <MenuOverlay
                                     items={[
                                         {
                                             label: () => (
-                                                <LemonSwitch
+                                                <Switch
                                                     onChange={(checked) =>
                                                         setAutoRefresh(checked, autoRefresh.interval)
                                                     }
@@ -149,7 +149,7 @@ export function DashboardReloadAction(): JSX.Element {
                                             items: [
                                                 {
                                                     label: () => (
-                                                        <LemonRadio
+                                                        <Radio
                                                             value={autoRefresh.interval}
                                                             options={options}
                                                             onChange={(value: number) => {
@@ -168,10 +168,10 @@ export function DashboardReloadAction(): JSX.Element {
                     }}
                 >
                     {itemsLoading ? 'Cancel' : 'Refresh'}
-                </LemonButton>
+                </Button>
             </AppShortcut>
 
-            <LemonBadge
+            <Badge
                 size="small"
                 content={
                     <>

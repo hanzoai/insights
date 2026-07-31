@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { IconPlusSmall, IconX } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { EventsQuery } from '~/queries/schema/schema-general'
 
@@ -49,7 +49,7 @@ export function EventsFilter({ query, setQuery }: EventsFilterProps): JSX.Elemen
                         allEventsOption="clear"
                         placeholder="Select event"
                     />
-                    <LemonButton
+                    <Button
                         icon={<IconX />}
                         size="small"
                         type="tertiary"
@@ -67,7 +67,7 @@ export function EventsFilter({ query, setQuery }: EventsFilterProps): JSX.Elemen
                         allEventsOption="clear"
                         placeholder="Select event"
                     />
-                    <LemonButton
+                    <Button
                         icon={<IconX />}
                         size="small"
                         type="tertiary"
@@ -76,7 +76,7 @@ export function EventsFilter({ query, setQuery }: EventsFilterProps): JSX.Elemen
                     />
                 </div>
             ) : (
-                <LemonButton
+                <Button
                     icon={<IconPlusSmall />}
                     size="small"
                     type="secondary"

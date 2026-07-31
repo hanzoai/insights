@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 import { useEffect } from 'react'
 
 import { IconInfo, IconOpenSidebar } from '@hanzo/icons'
-import { LemonButton, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Tag } from '@hanzo/elements'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { NotFound } from 'lib/components/NotFound'
@@ -104,9 +104,9 @@ export function NotebookScene(): JSX.Element {
                     and it will be full screen here instead.
                 </p>
 
-                <LemonButton type="secondary" onClick={() => closeSidePanel()}>
+                <Button type="secondary" onClick={() => closeSidePanel()}>
                     Open it here instead
-                </LemonButton>
+                </Button>
             </div>
         )
     }
@@ -122,7 +122,7 @@ export function NotebookScene(): JSX.Element {
             <div className="flex items-center justify-between">
                 <div className="flex gap-2 items-center">
                     <SceneBreadcrumbBackButton />
-                    {isTemplate && <LemonTag type="highlight">TEMPLATE</LemonTag>}
+                    {isTemplate && <Tag type="highlight">TEMPLATE</Tag>}
                     <UserActivityIndicator at={notebook?.last_modified_at} by={notebook?.last_modified_by} />
                 </div>
 
@@ -131,7 +131,7 @@ export function NotebookScene(): JSX.Element {
 
                     <NotebookMenu shortId={notebookId} />
 
-                    <LemonButton
+                    <Button
                         type="secondary"
                         icon={<IconInfo />}
                         size="small"
@@ -147,11 +147,11 @@ export function NotebookScene(): JSX.Element {
                             ? 'Close '
                             : ''}
                         Guide
-                    </LemonButton>
+                    </Button>
                     <NotebookTableOfContentsButton type="secondary" size="small" />
                     <NotebookKernelInfoButton type="secondary" size="small" />
                     <NotebookExpandButton type="secondary" size="small" inPanel={false} />
-                    <LemonButton
+                    <Button
                         type="secondary"
                         size="small"
                         onClick={() => {
@@ -168,7 +168,7 @@ export function NotebookScene(): JSX.Element {
                         sideIcon={<IconOpenSidebar />}
                     >
                         {isRemovingSidePanelFlag ? 'Open in context panel' : 'Open in side panel'}
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
 

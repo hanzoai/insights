@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { ReactNode } from 'react'
 
-import { LemonButton, LemonDialog } from '@hanzo/lemon-ui'
+import { Button, Dialog } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SdkVersionWarnings } from 'scenes/surveys/components/SdkVersionWarnings'
@@ -27,12 +27,12 @@ export function LaunchSurveyButton({ children = 'Launch' }: { children?: ReactNo
             minAccessLevel={AccessControlLevel.Editor}
             userAccessLevel={survey.user_access_level}
         >
-            <LemonButton
+            <Button
                 type="primary"
                 data-attr="launch-survey"
                 size="small"
                 onClick={() => {
-                    LemonDialog.open({
+                    Dialog.open({
                         title: 'Launch this survey?',
                         content: (
                             <div className="flex flex-col gap-3">
@@ -74,7 +74,7 @@ export function LaunchSurveyButton({ children = 'Launch' }: { children?: ReactNo
                 }}
             >
                 {children}
-            </LemonButton>
+            </Button>
         </AccessControlAction>
     )
 }

@@ -1,6 +1,6 @@
-import { LemonCheckbox, Tooltip } from '@hanzo/lemon-ui'
+import { Checkbox, Tooltip } from '@hanzo/elements'
 
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
+import { Input } from 'lib/elements/Input'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { ExperimentMeanMetric, ExperimentMetric } from '~/queries/schema/schema-general'
@@ -22,14 +22,14 @@ export function ExperimentMetricOutlierHandling({
         >
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                    <LemonCheckbox
+                    <Checkbox
                         label="Lower bound percentile"
                         checked={metric.lower_bound_percentile !== undefined}
                         onChange={(checked) =>
                             handleSetMetric({ ...metric, lower_bound_percentile: checked ? 0.05 : undefined })
                         }
                     />
-                    <LemonInput
+                    <Input
                         value={metric.lower_bound_percentile !== undefined ? metric.lower_bound_percentile * 100 : 0}
                         onChange={(value) =>
                             metric.lower_bound_percentile !== undefined &&
@@ -45,14 +45,14 @@ export function ExperimentMetricOutlierHandling({
                     />
                 </div>
                 <div className="flex items-center gap-2">
-                    <LemonCheckbox
+                    <Checkbox
                         label="Upper bound percentile"
                         checked={metric.upper_bound_percentile !== undefined}
                         onChange={(checked) =>
                             handleSetMetric({ ...metric, upper_bound_percentile: checked ? 0.95 : undefined })
                         }
                     />
-                    <LemonInput
+                    <Input
                         value={metric.upper_bound_percentile !== undefined ? metric.upper_bound_percentile * 100 : 0}
                         onChange={(value) =>
                             metric.upper_bound_percentile !== undefined &&
@@ -76,7 +76,7 @@ export function ExperimentMetricOutlierHandling({
                             docLink="https://hanzo.ai/docs/experiments/metrics#outlier-handling"
                         >
                             <span>
-                                <LemonCheckbox
+                                <Checkbox
                                     label="Ignore zeros when calculating upper bound"
                                     checked={metric.ignore_zeros ?? false}
                                     onChange={(checked) => handleSetMetric({ ...metric, ignore_zeros: checked })}

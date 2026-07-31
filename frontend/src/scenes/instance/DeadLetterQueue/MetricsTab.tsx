@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
 import { IconCalendar, IconRefresh } from '@hanzo/icons'
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonTable } from 'lib/lemon-ui/LemonTable'
-import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
+import { Button } from 'lib/elements/Button'
+import { Table } from 'lib/elements/Table'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { userLogic } from 'scenes/userLogic'
 
@@ -41,14 +41,14 @@ export function MetricsTab(): JSX.Element {
             />
 
             <div className="mb-4 float-right">
-                <LemonButton
+                <Button
                     icon={deadLetterQueueMetricsLoading ? <Spinner /> : <IconRefresh />}
                     onClick={loadDeadLetterQueueMetrics}
                     type="secondary"
                     size="small"
                 >
                     Refresh
-                </LemonButton>
+                </Button>
             </div>
 
             <div className="flex deprecated-space-x-8 mb-4">
@@ -63,7 +63,7 @@ export function MetricsTab(): JSX.Element {
             {tableMetrics.map((row) => (
                 <div key={row.key}>
                     <h2>{row.metric}</h2>
-                    <LemonTable
+                    <Table
                         columns={
                             row.subrows?.columns?.map((columnTitle, index) => ({
                                 title: columnTitle,
@@ -97,14 +97,14 @@ export function MetricsTab(): JSX.Element {
                         embedded
                     />
                     <div className="flex justify-center m-4 text-center">
-                        <LemonButton
+                        <Button
                             disabledReason={rowsPerMetric[row.key].length % ROWS_LIMIT !== 0 && 'No more values'}
                             onClick={() => loadMoreRows(row.key)}
                         >
                             Load more values
-                        </LemonButton>
+                        </Button>
                     </div>
-                    <LemonDivider />
+                    <Divider />
                 </div>
             ))}
         </div>

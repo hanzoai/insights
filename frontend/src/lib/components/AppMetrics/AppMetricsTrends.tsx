@@ -1,4 +1,4 @@
-import { SpinnerOverlay } from '@hanzo/lemon-ui'
+import { SpinnerOverlay } from '@hanzo/elements'
 
 import { LineGraph } from '~/queries/nodes/DataVisualization/Components/Charts/LineGraph'
 import { ChartDisplayType } from '~/types'

@@ -1,0 +1,10 @@
+.Card {
+    transition: 200ms ease;
+
+    &.Card--hoverEffect {
+        &:hover {
+            box-shadow: var(--shadow-elevation-3000);
+            transform: scale(1.01);
+        }
+    }
+}

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonInputSelect, LemonInputSelectOption } from '@hanzo/lemon-ui'
+import { InputSelect, InputSelectOption } from '@hanzo/elements'
 
 import { GoogleAdsConversionActionType, IntegrationType } from '~/types'
 
@@ -9,7 +9,7 @@ import { googleAdsIntegrationLogic } from './googleAdsIntegrationLogic'
 
 const getGoogleAdsAccountOptions = (
     googleAdsAccounts?: { id: string; name: string; parent_id: string; level: string }[] | null
-): LemonInputSelectOption[] | null => {
+): InputSelectOption[] | null => {
     return googleAdsAccounts
         ? googleAdsAccounts.map((customer) => ({
               key: `${customer.id}/${customer.parent_id}`,
@@ -25,7 +25,7 @@ const getGoogleAdsAccountOptions = (
 
 const getGoogleAdsConversionActionOptions = (
     googleAdsConversionActions?: GoogleAdsConversionActionType[] | null
-): LemonInputSelectOption[] | null => {
+): InputSelectOption[] | null => {
     return googleAdsConversionActions
         ? googleAdsConversionActions.map(({ id, name }) => ({
               key: id,
@@ -72,7 +72,7 @@ export function GoogleAdsConversionActionPicker({
 
     return (
         <>
-            <LemonInputSelect
+            <InputSelect
                 onChange={(val) => onChange?.(val[0] ?? null)}
                 value={value ? [value] : []}
                 onFocus={() =>
@@ -126,7 +126,7 @@ export function GoogleAdsCustomerIdPicker({
 
     return (
         <>
-            <LemonInputSelect
+            <InputSelect
                 onChange={(val) => onChange?.(val[0] ?? null)}
                 value={value ? [value] : []}
                 onFocus={() =>

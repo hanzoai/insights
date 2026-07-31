@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 
 import { IconX } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
-import { IconFeedback } from 'lib/lemon-ui/icons'
+import { IconFeedback } from 'lib/elements/icons'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
 
@@ -23,7 +23,7 @@ export const FunnelCorrelationSkewWarning = (): JSX.Element | null => {
                     <IconFeedback style={{ fontSize: 24, marginRight: 4, color: 'var(--warning)' }} />
                     <span>Adjust your funnel definition to improve correlation analysis</span>
                 </div>
-                <LemonButton icon={<IconX />} onClick={hideSkewWarning} />
+                <Button icon={<IconX />} onClick={hideSkewWarning} />
             </h4>
             <div className="px-2">
                 <b className="font-medium">Tips for adjusting your funnel:</b>

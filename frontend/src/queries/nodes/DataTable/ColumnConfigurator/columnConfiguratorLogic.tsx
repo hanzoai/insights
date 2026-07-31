@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, key, listeners, path, props, propsCh
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -140,10 +140,10 @@ export const columnConfiguratorLogic = kea<columnConfiguratorLogicType>([
                         })
                     }
 
-                    lemonToast.success('Default columns saved')
+                    toast.success('Default columns saved')
                 } catch (error: any) {
                     console.error('Error saving column configuration:', error)
-                    lemonToast.error(error.detail || 'Failed to save column configuration')
+                    toast.error(error.detail || 'Failed to save column configuration')
                 }
                 props.setColumns(values.columns)
                 return
@@ -155,10 +155,10 @@ export const columnConfiguratorLogic = kea<columnConfiguratorLogicType>([
                         groupTypeIndex: props.context.groupTypeIndex,
                         defaultColumns: values.columns,
                     })
-                    lemonToast.success('Default columns saved for this group type')
+                    toast.success('Default columns saved for this group type')
                 } catch (error) {
                     console.error('Error saving default columns to group type:', error)
-                    lemonToast.error('Failed to save columns to group type')
+                    toast.error('Failed to save columns to group type')
                 }
             } else if (props.context?.type === 'event_definition' && props.context.eventDefinitionId) {
                 try {
@@ -168,10 +168,10 @@ export const columnConfiguratorLogic = kea<columnConfiguratorLogicType>([
                             default_columns: values.columns,
                         },
                     })
-                    lemonToast.success('Default columns saved for this event')
+                    toast.success('Default columns saved for this event')
                 } catch (error: any) {
                     console.error('Error saving default columns to event definition:', error)
-                    lemonToast.error(error.detail || 'Failed to save columns to event definition')
+                    toast.error(error.detail || 'Failed to save columns to event definition')
                 }
             } else {
                 // Team-wide default columns

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch, Link } from '@hanzo/lemon-ui'
+import { Switch, Link } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { urls } from 'scenes/urls'
@@ -28,7 +28,7 @@ export function FilterTestAccountsConfiguration(): JSX.Element {
                 resourceType={AccessControlResourceType.RevenueAnalytics}
                 minAccessLevel={AccessControlLevel.Editor}
             >
-                <LemonSwitch
+                <Switch
                     onChange={updateFilterTestAccounts}
                     checked={filterTestAccounts}
                     label="Filter out internal and test users"

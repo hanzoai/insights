@@ -20,10 +20,10 @@ import { useActions, useValues } from 'kea'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { IconArchive, IconPencil, IconTarget } from '@hanzo/icons'
-import { LemonButton, LemonTag, LemonTagType, lemonToast } from '@hanzo/lemon-ui'
+import { Button, Tag, TagType, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { Tooltip } from 'lib/lemon-ui/Tooltip'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
@@ -65,7 +65,7 @@ function LineageNode({ data, edges, tabId }: LineageNodeProps): JSX.Element {
         return 'Table'
     }
 
-    const getTagType = (type: string): LemonTagType => {
+    const getTagType = (type: string): TagType => {
         return type === 'view' ? 'primary' : 'highlight'
     }
 
@@ -83,7 +83,7 @@ function LineageNode({ data, edges, tabId }: LineageNodeProps): JSX.Element {
                     try {
                         view = await api.dataWarehouseSavedQueries.get(view.id)
                     } catch {
-                        lemonToast.error('Failed to load view details')
+                        toast.error('Failed to load view details')
                         return
                     }
                 }
@@ -111,7 +111,7 @@ function LineageNode({ data, edges, tabId }: LineageNodeProps): JSX.Element {
                     <div className="flex items-center w-full justify-between">
                         <div className="font-medium text-sm truncate max-w-[240px] block">{data.name}</div>
                         {data.type === 'view' && !data.isCurrentView && (
-                            <LemonButton
+                            <Button
                                 size="xxsmall"
                                 type="secondary"
                                 icon={<IconPencil />}
@@ -123,16 +123,16 @@ function LineageNode({ data, edges, tabId }: LineageNodeProps): JSX.Element {
             </div>
 
             <div className="flex items-center gap-2">
-                <LemonTag type={getTagType(data.type)} size="small">
+                <Tag type={getTagType(data.type)} size="small">
                     {getNodeType(data.type, data.last_run_at)}
-                </LemonTag>
+                </Tag>
                 {data.status && (
-                    <LemonTag
+                    <Tag
                         type={data.status === 'Failed' ? 'danger' : data.status === 'Running' ? 'warning' : 'success'}
                         size="small"
                     >
                         {data.status}
-                    </LemonTag>
+                    </Tag>
                 )}
             </div>
 

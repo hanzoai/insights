@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonDivider } from '@hanzo/lemon-ui'
+import { Divider } from '@hanzo/elements'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 
@@ -43,7 +43,7 @@ export function RetentionContainer({
                     <RetentionGraph inSharedMode={inSharedMode} />
                 </div>
             )}
-            {showLineGraph && showTable ? <LemonDivider /> : null}
+            {showLineGraph && showTable ? <Divider /> : null}
             {showTable && (
                 <div className="RetentionContainer__table overflow-x-auto">
                     <RetentionTable inSharedMode={inSharedMode} embedded={embedded} />

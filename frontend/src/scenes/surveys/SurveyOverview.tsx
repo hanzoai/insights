@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconComment, IconGitBranch } from '@hanzo/icons'
-import { LemonButton, LemonDivider, Link } from '@hanzo/lemon-ui'
+import { Button, Divider, Link } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { IconAreaChart, IconGridView, IconLink, IconListView } from 'lib/lemon-ui/icons'
+import { IconAreaChart, IconGridView, IconLink, IconListView } from 'lib/elements/icons'
 import { pluralize } from 'lib/utils'
 import { CopySurveyLink } from 'scenes/surveys/CopySurveyLink'
 import { SurveyDisplaySummary } from 'scenes/surveys/Survey'
@@ -123,14 +123,14 @@ export function SurveyOverview({ onTabChange }: { onTabChange?: (tab: string) =>
                             })}
                             {hasBranchingLogic && (
                                 <div>
-                                    <LemonButton
+                                    <Button
                                         type="secondary"
                                         size="small"
                                         icon={<IconGitBranch />}
                                         onClick={() => setShowFlowModal(true)}
                                     >
                                         View branching flow
-                                    </LemonButton>
+                                    </Button>
                                 </div>
                             )}
                         </div>
@@ -170,7 +170,7 @@ export function SurveyOverview({ onTabChange }: { onTabChange?: (tab: string) =>
                     <SurveyOption label="Partial responses">
                         {survey.enable_partial_responses ? 'Enabled' : 'Disabled'}
                     </SurveyOption>
-                    <LemonDivider />
+                    <Divider />
                     <SurveyDisplaySummary id={survey.id} survey={survey} targetingFlagFilters={targetingFlagFilters} />
                 </dl>
                 {survey.type !== SurveyType.API ? (

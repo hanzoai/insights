@@ -1,9 +1,9 @@
 import { actions, connect, kea, path, reducers } from 'kea'
 import { forms } from 'kea-forms'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
-import { TreeDataItem } from 'lib/lemon-ui/LemonTree/LemonTree'
+import { TreeDataItem } from 'lib/elements/Tree/Tree'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { projectTreeDataLogic } from '~/layout/panel-layout/ProjectTree/projectTreeDataLogic'
@@ -42,7 +42,7 @@ export const itemSelectModalLogic = kea<itemSelectModalLogicType>([
                     const shortcutPath = joinPath([splitPath(item.path).pop() ?? 'Unnamed'])
 
                     if (values.shortcutData.some((s) => s.path === shortcutPath)) {
-                        lemonToast.info('Shortcut already exists')
+                        toast.info('Shortcut already exists')
                         return
                     }
 

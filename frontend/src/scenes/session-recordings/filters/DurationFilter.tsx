@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 
-import { LemonButton, LemonButtonProps } from '@hanzo/lemon-ui'
+import { Button, ButtonProps } from '@hanzo/elements'
 
 import { DurationPicker, convertSecondsToDuration } from 'lib/components/DurationPicker/DurationPicker'
 import { OperatorSelect } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
-import { Popover } from 'lib/lemon-ui/Popover/Popover'
+import { Popover } from 'lib/elements/Popover/Popover'
 import { DurationTypeSelect } from 'scenes/session-recordings/filters/DurationTypeSelect'
 
 import { DurationType, PropertyOperator, RecordingDurationFilter } from '~/types'
@@ -14,8 +14,8 @@ interface DurationFilterProps {
     durationTypeFilter: DurationType
     onChange: (recordingDurationFilter: RecordingDurationFilter, durationType: DurationType) => void
     pageKey: string
-    size?: LemonButtonProps['size']
-    type?: LemonButtonProps['type']
+    size?: ButtonProps['size']
+    type?: ButtonProps['type']
 }
 
 const durationTypeMapping: Record<DurationType, string> = {
@@ -78,7 +78,7 @@ export function DurationFilter({
                 </div>
             }
         >
-            <LemonButton
+            <Button
                 type={type ?? 'secondary'}
                 size={size ?? 'small'}
                 onClick={() => {
@@ -86,7 +86,7 @@ export function DurationFilter({
                 }}
             >
                 {durationString}
-            </LemonButton>
+            </Button>
         </Popover>
     )
 }

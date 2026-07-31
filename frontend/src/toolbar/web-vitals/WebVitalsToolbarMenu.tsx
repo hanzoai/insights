@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner, Link, Spinner, Tooltip } from '@hanzo/lemon-ui'
+import { Banner, Link, Spinner, Tooltip } from '@hanzo/elements'
 
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
 import { urls } from 'scenes/urls'
@@ -30,13 +30,13 @@ export const WebVitalsToolbarMenu = (): JSX.Element => {
             <ToolbarMenu.Body>
                 <div className="flex flex-col gap-2">
                     {!insights?.webVitalsAutocapture?.isEnabled && !inStorybookTestRunner() && !inStorybook() && (
-                        <LemonBanner type="warning">
+                        <Banner type="warning">
                             Web vitals are not enabled for this project so you won't see any data here. Enable it on the{' '}
                             <Link to={joinWithUiHost(uiHost, urls.settings())} target="_blank">
                                 settings page
                             </Link>{' '}
                             to start capturing web vitals.
-                        </LemonBanner>
+                        </Banner>
                     )}
 
                     <MetricCards

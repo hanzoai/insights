@@ -4,25 +4,25 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { IconInfo } from '@hanzo/icons'
 import {
-    LemonButton,
-    LemonInput,
-    LemonModal,
-    LemonSelect,
-    LemonSkeleton,
-    LemonSwitch,
-    LemonTable,
-    LemonTag,
-    LemonTagType,
+    Button,
+    Input,
+    Modal,
+    Select,
+    Skeleton,
+    Switch,
+    Table,
+    Tag,
+    TagType,
     Link,
     Spinner,
     Tooltip,
-} from '@hanzo/lemon-ui'
+} from '@hanzo/elements'
 
 import { AccessControlAction, AccessControlActionChildrenProps } from 'lib/components/AccessControlAction'
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { More } from 'lib/lemon-ui/LemonButton/More'
+import { More } from 'lib/elements/Button/More'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { SyncTypeLabelMap, defaultQuery, syncAnchorIntervalToHumanReadable } from 'scenes/data-warehouse/utils'
 import { teamLogic } from 'scenes/teamLogic'
@@ -83,7 +83,7 @@ export const Schemas = ({ id }: SchemasProps): JSX.Element => {
     return (
         <BindLogic logic={dataWarehouseSourceSettingsLogic} props={logicProps}>
             <div className="flex items-center gap-2 mb-2">
-                <LemonSwitch
+                <Switch
                     checked={showEnabledSchemasOnly}
                     onChange={setShowEnabledSchemasOnly}
                     label="Show enabled only"
@@ -94,7 +94,7 @@ export const Schemas = ({ id }: SchemasProps): JSX.Element => {
                 REVENUE_ENABLED_SOURCES.includes(source.source_type) &&
                 featureFlags[FEATURE_FLAGS.REVENUE_ANALYTICS] && (
                     <div className="flex justify-end">
-                        <LemonButton
+                        <Button
                             type="primary"
                             className="mt-2"
                             tooltip="This source is feeding data into our Revenue analytics product - currently in beta."
@@ -108,10 +108,10 @@ export const Schemas = ({ id }: SchemasProps): JSX.Element => {
                             }}
                         >
                             See data in Revenue analytics
-                            <LemonTag className="ml-2" type="warning" size="small">
+                            <Tag className="ml-2" type="warning" size="small">
                                 BETA
-                            </LemonTag>
-                        </LemonButton>
+                            </Tag>
+                        </Button>
                     </div>
                 )}
         </BindLogic>
@@ -123,7 +123,7 @@ interface SchemaTableProps {
     isLoading: boolean
 }
 
-const StatusTagSetting: Record<ExternalDataSchemaStatus | ExternalDataJobStatus, LemonTagType> = {
+const StatusTagSetting: Record<ExternalDataSchemaStatus | ExternalDataJobStatus, TagType> = {
     Running: 'primary',
     Completed: 'success',
     Failed: 'danger',
@@ -150,7 +150,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
 
     return (
         <>
-            <LemonTable
+            <Table
                 dataSource={schemas}
                 loading={initialLoad}
                 disableTableWhileLoading={false}
@@ -170,7 +170,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                     <span>UTC</span>
                                     {currentTeam?.timezone !== 'UTC' && currentTeam?.timezone !== 'GMT' && (
                                         <>
-                                            <LemonSwitch
+                                            <Switch
                                                 size="xsmall"
                                                 checked={isProjectTime}
                                                 onChange={setIsProjectTime}
@@ -200,7 +200,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                         render: function RenderFrequency(_, schema) {
                             return (
                                 <SourceEditorAction source={source}>
-                                    <LemonSelect
+                                    <Select
                                         className="my-1"
                                         size="xsmall"
                                         disabled={!schema.should_sync}
@@ -239,14 +239,14 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                 return (
                                     <>
                                         <SourceEditorAction source={source}>
-                                            <LemonButton
+                                            <Button
                                                 className="my-1"
                                                 type="primary"
                                                 size="xsmall"
                                                 onClick={() => openSyncMethodModal(schema)}
                                             >
                                                 Set up
-                                            </LemonButton>
+                                            </Button>
                                         </SourceEditorAction>
                                         <SyncMethodModal schema={schema} />
                                     </>
@@ -256,14 +256,14 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                             return (
                                 <>
                                     <SourceEditorAction source={source}>
-                                        <LemonButton
+                                        <Button
                                             className="my-1"
                                             size="xsmall"
                                             type="secondary"
                                             onClick={() => openSyncMethodModal(schema)}
                                         >
                                             {SyncTypeLabelMap[schema.sync_type]}
-                                        </LemonButton>
+                                        </Button>
                                     </SourceEditorAction>
                                     <SyncMethodModal schema={schema} />
                                 </>
@@ -277,7 +277,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                         render: function RenderShouldSync(_, schema) {
                             return (
                                 <SourceEditorAction source={source}>
-                                    <LemonSwitch
+                                    <Switch
                                         disabledReason={
                                             schema.sync_type === null
                                                 ? 'You must set up the sync method first'
@@ -356,14 +356,14 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                 return null
                             }
                             const tagContent = (
-                                <LemonTag type={StatusTagSetting[schema.status] || 'default'}>
+                                <Tag type={StatusTagSetting[schema.status] || 'default'}>
                                     {schema.status}
                                     {schema.latest_error && schema.status === 'Failed' && (
                                         <span className="ml-0.5 inline-flex items-center justify-center w-3 h-3 bg-danger/90 text-white rounded-full text-[10px] font-medium tracking-tight shadow-md backdrop-blur-sm border border-danger/20">
                                             ?
                                         </span>
                                     )}
-                                </LemonTag>
+                                </Tag>
                             )
                             return schema.latest_error && schema.status === 'Failed' ? (
                                 <Tooltip title={schema.latest_error}>{tagContent}</Tooltip>
@@ -399,7 +399,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                                                     : 'Sync all data.'
                                                             }
                                                         >
-                                                            <LemonButton
+                                                            <Button
                                                                 type="tertiary"
                                                                 size="xsmall"
                                                                 fullWidth
@@ -409,11 +409,11 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                                                 disabledReason={disabledReason}
                                                             >
                                                                 Sync now
-                                                            </LemonButton>
+                                                            </Button>
                                                         </Tooltip>
                                                         {schema.incremental && (
                                                             <Tooltip title="Completely resync incrementally loaded data. Only recommended if there is an issue with data quality in previously imported data.">
-                                                                <LemonButton
+                                                                <Button
                                                                     type="tertiary"
                                                                     size="xsmall"
                                                                     fullWidth
@@ -424,7 +424,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                                                     disabledReason={disabledReason}
                                                                 >
                                                                     Delete table and resync
-                                                                </LemonButton>
+                                                                </Button>
                                                             </Tooltip>
                                                         )}
                                                         {schema.table && (
@@ -435,7 +435,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                                                         : ''
                                                                 }`}
                                                             >
-                                                                <LemonButton
+                                                                <Button
                                                                     status="danger"
                                                                     id="data-warehouse-schema-delete"
                                                                     type="tertiary"
@@ -453,7 +453,7 @@ export const SchemaTable = ({ schemas, isLoading }: SchemaTableProps): JSX.Eleme
                                                                     disabledReason={disabledReason}
                                                                 >
                                                                     Delete table from Insights
-                                                                </LemonButton>
+                                                                </Button>
                                                             </Tooltip>
                                                         )}
                                                     </>
@@ -499,7 +499,7 @@ const SyncMethodModal = ({ schema }: { schema: ExternalDataSourceSchema }): JSX.
     }
 
     return (
-        <LemonModal
+        <Modal
             title={
                 <>
                     Sync method for <span className="font-mono">{currentSyncMethodModalSchema.name}</span>
@@ -510,16 +510,16 @@ const SyncMethodModal = ({ schema }: { schema: ExternalDataSourceSchema }): JSX.
             footer={
                 schemaLoading && (
                     <>
-                        <LemonSkeleton.Button />
-                        <LemonSkeleton.Button />
+                        <Skeleton.Button />
+                        <Skeleton.Button />
                     </>
                 )
             }
         >
             {schemaLoading && (
                 <div className="deprecated-space-y-2">
-                    <LemonSkeleton className="w-1/2 h-4" />
-                    <LemonSkeleton.Row repeat={3} />
+                    <Skeleton className="w-1/2 h-4" />
+                    <Skeleton.Row repeat={3} />
                 </div>
             )}
             {showForm && (
@@ -563,7 +563,7 @@ const SyncMethodModal = ({ schema }: { schema: ExternalDataSourceSchema }): JSX.
                     }}
                 />
             )}
-        </LemonModal>
+        </Modal>
     )
 }
 
@@ -618,7 +618,7 @@ const AnchorTime = ({
 
     return (
         <div className="flex">
-            <LemonInput
+            <Input
                 type="time"
                 size="xsmall"
                 disabledReason={disabledReasonForInput()}
@@ -641,7 +641,7 @@ const AnchorTime = ({
                     ) : undefined
                 }
             />
-            <LemonSwitch
+            <Switch
                 className="ml-2"
                 checked={isSyncTimeSet}
                 disabledReason={disabledReason || (!schema.should_sync && 'Enable syncing to set anchor time')}

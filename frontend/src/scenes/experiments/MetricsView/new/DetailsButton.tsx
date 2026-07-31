@@ -1,5 +1,5 @@
 import { IconGraph } from '@hanzo/icons'
-import { LemonButton } from '@hanzo/lemon-ui'
+import { Button } from '@hanzo/elements'
 
 import { ExperimentMetric } from '~/queries/schema/schema-general'
 
@@ -11,9 +11,9 @@ export function DetailsButton({
 }): JSX.Element {
     return (
         <>
-            <LemonButton type="secondary" size="xsmall" icon={<IconGraph />} onClick={() => setIsModalOpen(true)}>
+            <Button type="secondary" size="xsmall" icon={<IconGraph />} onClick={() => setIsModalOpen(true)}>
                 Details
-            </LemonButton>
+            </Button>
         </>
     )
 }

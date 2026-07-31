@@ -5,7 +5,7 @@ import insights from '@hanzo/insights'
 import api from 'lib/api'
 import { getSeriesColor } from 'lib/colors'
 import { dayjs } from 'lib/dayjs'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
 import { tabAwareUrlToAction } from 'lib/logic/scenes/tabAwareUrlToAction'
 import { urls } from 'scenes/urls'
@@ -467,7 +467,7 @@ export const clustersLogic = kea<clustersLogicType>([
         },
 
         loadClusteringRunFailure: () => {
-            lemonToast.error('Failed to load clustering run')
+            toast.error('Failed to load clustering run')
         },
 
         loadClusteringRunsSuccess: ({ clusteringRuns }) => {

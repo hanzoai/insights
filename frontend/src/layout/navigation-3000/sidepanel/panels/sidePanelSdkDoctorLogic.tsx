@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -275,7 +275,7 @@ export const sidePanelSdkDoctorLogic = kea<sidePanelSdkDoctorLogicType>([
 
     listeners({
         snoozeSdkDoctor: () => {
-            lemonToast.success('SDK Doctor snoozed for 30 days')
+            toast.success('SDK Doctor snoozed for 30 days')
         },
     }),
 

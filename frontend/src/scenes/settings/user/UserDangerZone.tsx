@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 import { useEffect } from 'react'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonModal, LemonTable, LemonTag, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Dialog, Input, Modal, Table, Tag, Tooltip } from '@hanzo/elements'
 
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { detailedTime, humanFriendlyDetailedTime, isNotNil } from 'lib/utils'
@@ -40,19 +40,19 @@ export function DeleteUserModal({
 
     return (
         <>
-            <LemonModal
+            <Modal
                 title="Delete your account"
                 onClose={!userLoading ? () => setIsOpen(false) : undefined}
                 footer={
                     <>
-                        <LemonButton
+                        <Button
                             disabledReason={userLoading && 'Loading...'}
                             type="secondary"
                             onClick={() => setIsOpen(false)}
                         >
                             Cancel
-                        </LemonButton>
-                        <LemonButton
+                        </Button>
+                        <Button
                             type="secondary"
                             disabled={!isUserDeletionConfirmed}
                             loading={userLoading}
@@ -61,7 +61,7 @@ export function DeleteUserModal({
                             onClick={() => deleteUser()}
                         >
                             Delete account
-                        </LemonButton>
+                        </Button>
                     </>
                 }
                 isOpen={isOpen}
@@ -71,7 +71,7 @@ export function DeleteUserModal({
                         <p className="text-danger font-semibold">
                             You must leave or delete all organizations before deleting your account.
                         </p>
-                        <LemonTable
+                        <Table
                             dataSource={organizations}
                             size="small"
                             columns={[
@@ -88,7 +88,7 @@ export function DeleteUserModal({
                                             <div className="flex justify-end items-center gap-2 py-1 text-danger font-semibold">
                                                 {organization.membership_level ===
                                                     OrganizationMembershipLevel.Owner && (
-                                                    <LemonButton
+                                                    <Button
                                                         type="secondary"
                                                         size="small"
                                                         status="default"
@@ -104,16 +104,16 @@ export function DeleteUserModal({
                                                         }}
                                                     >
                                                         Transfer ownership
-                                                    </LemonButton>
+                                                    </Button>
                                                 )}
                                                 {organization.membership_level !==
                                                     OrganizationMembershipLevel.Owner && (
-                                                    <LemonButton
+                                                    <Button
                                                         type="secondary"
                                                         size="small"
                                                         status="default"
                                                         onClick={() => {
-                                                            LemonDialog.open({
+                                                            Dialog.open({
                                                                 title: `Leave organization ${organization.name}?`,
                                                                 primaryButton: {
                                                                     children: 'Leave',
@@ -127,11 +127,11 @@ export function DeleteUserModal({
                                                         }}
                                                     >
                                                         Leave organization
-                                                    </LemonButton>
+                                                    </Button>
                                                 )}
                                                 {organization.membership_level ===
                                                     OrganizationMembershipLevel.Owner && (
-                                                    <LemonButton
+                                                    <Button
                                                         type="secondary"
                                                         size="small"
                                                         status="danger"
@@ -140,7 +140,7 @@ export function DeleteUserModal({
                                                         }}
                                                     >
                                                         Delete organization
-                                                    </LemonButton>
+                                                    </Button>
                                                 )}
                                             </div>
                                         )
@@ -161,7 +161,7 @@ export function DeleteUserModal({
                                 <p className="text-danger font-semibold mt-4">
                                     The following personal API keys will be deleted
                                 </p>
-                                <LemonTable
+                                <Table
                                     dataSource={keys}
                                     size="small"
                                     className="mt-2"
@@ -194,7 +194,7 @@ export function DeleteUserModal({
                                             dataIndex: 'scopes',
                                             render: (_, key) =>
                                                 key.scopes[0] === '*' ? (
-                                                    <LemonTag type="warning">All access</LemonTag>
+                                                    <Tag type="warning">All access</Tag>
                                                 ) : (
                                                     <TagList tags={key.scopes} onMoreClick={() => {}} />
                                                 ),
@@ -208,7 +208,7 @@ export function DeleteUserModal({
                             Please type <strong className="select-none">{DELETE_CONFIRMATION_TEXT}</strong> to confirm
                             account deletion.
                         </p>
-                        <LemonInput
+                        <Input
                             type="text"
                             onChange={(value) => {
                                 setIsUserDeletionConfirmed(
@@ -218,7 +218,7 @@ export function DeleteUserModal({
                         />
                     </>
                 )}
-            </LemonModal>
+            </Modal>
             <DeleteOrganizationModal
                 isOpen={organizationToDelete !== null}
                 setIsOpen={() => setOrganizationToDelete(null)}
@@ -239,7 +239,7 @@ export function UserDangerZone(): JSX.Element {
                     <p className="text-danger">
                         This is <b>irreversible</b>. Please be certain.
                     </p>
-                    <LemonButton
+                    <Button
                         status="danger"
                         type="secondary"
                         onClick={() => setDeleteUserModalOpen(true)}
@@ -247,7 +247,7 @@ export function UserDangerZone(): JSX.Element {
                         icon={<IconTrash />}
                     >
                         Delete your account
-                    </LemonButton>
+                    </Button>
                 </div>
             </div>
             <DeleteUserModal isOpen={deleteUserModalOpen} setIsOpen={setDeleteUserModalOpen} />

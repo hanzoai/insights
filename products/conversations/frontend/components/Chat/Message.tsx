@@ -1,7 +1,7 @@
 import { JSONContent } from '@tiptap/core'
 
 import { IconLock } from '@hanzo/icons'
-import { ProfilePicture, Tooltip } from '@hanzo/lemon-ui'
+import { ProfilePicture, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 

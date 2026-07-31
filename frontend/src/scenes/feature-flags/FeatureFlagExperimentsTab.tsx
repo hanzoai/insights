@@ -1,11 +1,11 @@
 import { useValues } from 'kea'
 
 import { IconArrowRight } from '@hanzo/icons'
-import { LemonBanner, LemonButton, LemonTable, Link } from '@hanzo/lemon-ui'
+import { Banner, Button, Table, Link } from '@hanzo/elements'
 
-import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
-import { createdAtColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
-import type { LemonTableColumn } from 'lib/lemon-ui/LemonTable/types'
+import { TableLink } from 'lib/elements/Table/TableLink'
+import { createdAtColumn } from 'lib/elements/Table/columnUtils'
+import type { TableColumn } from 'lib/elements/Table/types'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { StatusTag } from 'scenes/experiments/ExperimentView/components'
 import { experimentsLogic, getExperimentStatus } from 'scenes/experiments/experimentsLogic'
@@ -23,16 +23,16 @@ export function ExperimentsTab({ featureFlag }: { featureFlag: FeatureFlagType }
         return (
             <div className="flex flex-col items-center pt-5">
                 <div className="w-full max-w-5xl">
-                    <LemonBanner type="info" className="mb-6">
+                    <Banner type="info" className="mb-6">
                         Create an experiment using this feature flag to test different variants and measure their impact
-                    </LemonBanner>
+                    </Banner>
                     <div className="border rounded p-6 bg-bg-light flex flex-col items-center gap-4">
                         <div className="text-muted text-center">
                             No experiments are using this feature flag yet. Create one to start testing variants.
                         </div>
-                        <LemonButton type="primary" to={urls.experiment('new')}>
+                        <Button type="primary" to={urls.experiment('new')}>
                             Create experiment
-                        </LemonButton>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -41,14 +41,14 @@ export function ExperimentsTab({ featureFlag }: { featureFlag: FeatureFlagType }
 
     return (
         <div className="space-y-6">
-            <LemonBanner type="info">
+            <Banner type="info">
                 Showing experiments associated with this feature flag.{' '}
                 <Link to={urls.experiments()}>
                     See all experiments <IconArrowRight />
                 </Link>
-            </LemonBanner>
+            </Banner>
 
-            <LemonTable
+            <Table
                 dataSource={relatedExperiments}
                 defaultSorting={{
                     columnKey: 'created_at',
@@ -63,7 +63,7 @@ export function ExperimentsTab({ featureFlag }: { featureFlag: FeatureFlagType }
                         title: 'Name',
                         render: function RenderName(_, experiment: Experiment) {
                             return (
-                                <LemonTableLink
+                                <TableLink
                                     to={urls.experiment(experiment.id)}
                                     title={stringWithWBR(experiment.name, 17)}
                                 />
@@ -78,7 +78,7 @@ export function ExperimentsTab({ featureFlag }: { featureFlag: FeatureFlagType }
                             return <StatusTag status={status} />
                         },
                     },
-                    createdAtColumn<Experiment>() as LemonTableColumn<Experiment, keyof Experiment | undefined>,
+                    createdAtColumn<Experiment>() as TableColumn<Experiment, keyof Experiment | undefined>,
                 ]}
             />
         </div>

@@ -2,7 +2,7 @@ import { JSONContent } from '@tiptap/core'
 import { useRef, useState } from 'react'
 
 import { IconLock } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, Tooltip } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Tooltip } from '@hanzo/elements'
 
 import { RichContentEditorType } from 'lib/components/RichContentEditor/types'
 
@@ -60,7 +60,7 @@ export function MessageInput({
                 {showPrivateOption ? (
                     <Tooltip title="Private notes are only visible to your team, not to the customer.">
                         <span>
-                            <LemonCheckbox
+                            <Checkbox
                                 checked={isPrivate}
                                 onChange={setIsPrivate}
                                 label={
@@ -75,14 +75,14 @@ export function MessageInput({
                 ) : (
                     <div />
                 )}
-                <LemonButton
+                <Button
                     type="primary"
                     onClick={handleSubmit}
                     loading={messageSending}
                     disabledReason={isEmpty ? 'No message' : isUploading ? 'Uploading image...' : undefined}
                 >
                     {isPrivate ? 'Attach' : buttonText}
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

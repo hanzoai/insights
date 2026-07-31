@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { IconExternal, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonInput, LemonSelect, LemonSkeleton, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Input, Select, Skeleton, Tag } from '@hanzo/elements'
 
 import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { slackIntegrationLogic } from 'lib/integrations/slackIntegrationLogic'
@@ -113,7 +113,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
             {alertId && (
                 <div>
                     {existingInsightsFunctionsLoading ? (
-                        <LemonSkeleton className="h-8" repeat={2} />
+                        <Skeleton className="h-8" repeat={2} />
                     ) : existingInsightsFunctions.length > 0 ? (
                         <div className="space-y-2">
                             {existingInsightsFunctions.map((hf) => {
@@ -126,16 +126,16 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-sm font-medium">{destType}</span>
-                                                <LemonTag type={hf.enabled ? 'success' : 'default'} size="small">
+                                                <Tag type={hf.enabled ? 'success' : 'default'} size="small">
                                                     {hf.enabled ? 'Active' : 'Paused'}
-                                                </LemonTag>
+                                                </Tag>
                                             </div>
                                             {detail && (
                                                 <span className="text-xs text-muted-alt truncate block">{detail}</span>
                                             )}
                                         </div>
                                         <div className="flex items-center gap-1 shrink-0">
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconExternal />}
                                                 size="xsmall"
                                                 to={urls.insightsFunction(hf.id)}
@@ -143,7 +143,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
                                                 hideExternalLinkIcon
                                                 tooltip="Open destination"
                                             />
-                                            <LemonButton
+                                            <Button
                                                 icon={<IconTrash />}
                                                 size="xsmall"
                                                 status="danger"
@@ -167,7 +167,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
                                 {getNotificationLabel(notification)}{' '}
                                 <span className="text-muted-alt">(pending - click Save to apply)</span>
                             </span>
-                            <LemonButton
+                            <Button
                                 icon={<IconTrash />}
                                 size="xsmall"
                                 status="danger"
@@ -182,7 +182,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
             <div className="space-y-3 border rounded p-3">
                 <div className="flex gap-2 items-end">
                     <div className="flex-1">
-                        <LemonSelect
+                        <Select
                             fullWidth
                             options={ALERT_NOTIFICATION_TYPE_OPTIONS}
                             value={selectedType}
@@ -206,7 +206,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
                 )}
 
                 {selectedType === ALERT_NOTIFICATION_TYPE_WEBHOOK && (
-                    <LemonInput
+                    <Input
                         placeholder="https://example.com/webhook"
                         value={webhookUrl}
                         onChange={setWebhookUrl}
@@ -214,7 +214,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
                     />
                 )}
 
-                <LemonButton
+                <Button
                     type="secondary"
                     size="small"
                     onClick={handleAdd}
@@ -231,7 +231,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
                     }
                 >
                     Add notification
-                </LemonButton>
+                </Button>
             </div>
         </div>
     )

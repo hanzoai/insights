@@ -2,7 +2,7 @@ import { actions, connect, kea, key, listeners, path, props, reducers, selectors
 import { forms } from 'kea-forms'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast'
+import { toast } from 'lib/elements/Toast'
 import { userLogic } from 'scenes/userLogic'
 
 import type { InsightsFlowTemplate } from '../insightsflows/types'
@@ -72,7 +72,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                         actions.hideSaveAsTemplateModal()
                     } catch (e: any) {
                         const errorMessage = e?.detail || e?.message || 'Failed to update template'
-                        lemonToast.error(errorMessage)
+                        toast.error(errorMessage)
                         throw e
                     }
                     return
@@ -93,11 +93,11 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                         tags: formValues.tags,
                         scope,
                     })
-                    lemonToast.success('Workflow template created')
+                    toast.success('Workflow template created')
                     actions.hideSaveAsTemplateModal()
                 } catch (e: any) {
                     const errorMessage = e?.detail || e?.message || 'Failed to create workflow template'
-                    lemonToast.error(errorMessage)
+                    toast.error(errorMessage)
                     throw e
                 }
             },
@@ -168,7 +168,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                         })
                     } catch (e: any) {
                         const errorMessage = e?.detail || e?.message || 'Failed to load template'
-                        lemonToast.error(errorMessage)
+                        toast.error(errorMessage)
                         actions.hideSaveAsTemplateModal()
                         return
                     }
@@ -192,7 +192,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
             })
 
             await api.insightsFlowTemplates.updateInsightsFlowTemplate(workflowTemplate.id, workflowTemplate)
-            lemonToast.success('Template updated')
+            toast.success('Template updated')
 
             // Update the template list in workflowTemplatesLogic
             const templatesLogic = workflowTemplatesLogic.findMounted()

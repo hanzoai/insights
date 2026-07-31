@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
-import { LemonButton, LemonButtonWithDropdown } from 'lib/lemon-ui/LemonButton'
-import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
+import { Button, ButtonWithDropdown } from 'lib/elements/Button'
+import { Divider } from 'lib/elements/Divider'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { AggregationAxisFormat, INSIGHT_UNIT_OPTIONS } from 'scenes/insights/aggregationAxisFormat'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -100,7 +100,7 @@ export function UnitPicker(): JSX.Element {
 
     return (
         <div className="flex-1 mb-2.5 mx-2">
-            <LemonButtonWithDropdown
+            <ButtonWithDropdown
                 onClick={() => setIsVisible(!isVisible)}
                 size="small"
                 type="secondary"
@@ -112,19 +112,19 @@ export function UnitPicker(): JSX.Element {
                     overlay: (
                         <>
                             {INSIGHT_UNIT_OPTIONS.map(({ value, label }, index) => (
-                                <LemonButton
+                                <Button
                                     key={index}
                                     onClick={() => handleChange({ format: value })}
                                     active={value === localAxisFormat}
                                     fullWidth
                                 >
                                     {label}
-                                </LemonButton>
+                                </Button>
                             ))}
 
                             <>
-                                <LemonDivider />
-                                <LemonButton
+                                <Divider />
+                                <Button
                                     onClick={handleCustomPrefix}
                                     active={!!trendsFilter?.aggregationAxisPrefix}
                                     fullWidth
@@ -133,8 +133,8 @@ export function UnitPicker(): JSX.Element {
                                     {trendsFilter?.aggregationAxisPrefix
                                         ? `: ${trendsFilter?.aggregationAxisPrefix}...`
                                         : '...'}
-                                </LemonButton>
-                                <LemonButton
+                                </Button>
+                                <Button
                                     onClick={handleCustomPostfix}
                                     active={!!trendsFilter?.aggregationAxisPostfix}
                                     fullWidth
@@ -143,7 +143,7 @@ export function UnitPicker(): JSX.Element {
                                     {trendsFilter?.aggregationAxisPostfix
                                         ? `: ${trendsFilter?.aggregationAxisPostfix}...`
                                         : '...'}
-                                </LemonButton>
+                                </Button>
                             </>
                         </>
                     ),
@@ -153,7 +153,7 @@ export function UnitPicker(): JSX.Element {
                 }}
             >
                 {displayValue}
-            </LemonButtonWithDropdown>
+            </ButtonWithDropdown>
         </div>
     )
 }

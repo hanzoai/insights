@@ -1,5 +1,5 @@
 import { IconWarning } from '@hanzo/icons'
-import { LemonDialog, Link } from '@hanzo/lemon-ui'
+import { Dialog, Link } from '@hanzo/elements'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 import { urls } from 'scenes/urls'
@@ -137,7 +137,7 @@ export function openConfirmationModal({
     // Determine if the primary button should be disabled
     const hasBlockingDependentFlags = isBeingDisabled && dependentFlags && dependentFlags.length > 0
 
-    LemonDialog.open({
+    Dialog.open({
         title,
         description,
         primaryButton: {

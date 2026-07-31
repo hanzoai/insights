@@ -8,10 +8,10 @@ import { IconTrash } from '@hanzo/icons'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { ReadingMascot } from 'lib/components/mascots'
-import { More } from 'lib/lemon-ui/LemonButton/More'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
-import { Spinner } from 'lib/lemon-ui/Spinner'
+import { More } from 'lib/elements/Button/More'
+import { Input } from 'lib/elements/Input'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { Spinner } from 'lib/elements/Spinner'
 import MaxTool from 'scenes/max/MaxTool'
 import { urls } from 'scenes/urls'
 
@@ -51,7 +51,7 @@ export function MessageTemplatesTable(): JSX.Element {
                 <div className="relative" />
             </MaxTool>
             <div className="flex items-center gap-2 mb-4">
-                <LemonInput type="search" placeholder="Search templates" value={search} onChange={setSearch} />
+                <Input type="search" placeholder="Search templates" value={search} onChange={setSearch} />
                 <div className="flex items-center gap-2">
                     <span className="text-secondary whitespace-nowrap">Created by:</span>
                     <MemberSelect value={createdByFilter} onChange={(user) => setCreatedByFilter(user?.id ?? null)} />
@@ -71,7 +71,7 @@ export function MessageTemplatesTable(): JSX.Element {
                                 <More
                                     size="small"
                                     overlay={
-                                        <LemonMenuOverlay
+                                        <MenuOverlay
                                             items={[
                                                 {
                                                     label: 'Duplicate',

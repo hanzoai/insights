@@ -4,9 +4,9 @@ import { useMemo } from 'react'
 
 import { IconBalance, IconPlus, IconX } from '@hanzo/icons'
 
-import { LemonButton } from 'lib/lemon-ui/LemonButton'
-import { LemonInput } from 'lib/lemon-ui/LemonInput'
-import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
+import { Button } from 'lib/elements/Button'
+import { Input } from 'lib/elements/Input'
+import { Label } from 'lib/elements/Label'
 
 import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
 import { InsightsFlow, InsightsFlowAction } from '../types'
@@ -104,11 +104,11 @@ export function StepRandomCohortBranchConfiguration({
             {cohorts.map((cohort, index) => (
                 <div key={index} className="flex flex-col gap-2 p-2 rounded border">
                     <div className="flex justify-between items-center">
-                        <LemonLabel>Cohort {index + 1}</LemonLabel>
-                        <LemonButton size="xsmall" icon={<IconX />} onClick={() => removeCohort(index)} />
+                        <Label>Cohort {index + 1}</Label>
+                        <Button size="xsmall" icon={<IconX />} onClick={() => removeCohort(index)} />
                     </div>
 
-                    <LemonInput
+                    <Input
                         value={localCohortNames[index] || ''}
                         onChange={(value) => handleNameChange(index, value)}
                         placeholder={`Cohort #${index + 1}`}
@@ -134,12 +134,12 @@ export function StepRandomCohortBranchConfiguration({
             )}
 
             <div className="flex gap-2">
-                <LemonButton type="secondary" icon={<IconPlus />} onClick={() => addCohort()} className="flex-1">
+                <Button type="secondary" icon={<IconPlus />} onClick={() => addCohort()} className="flex-1">
                     Add cohort
-                </LemonButton>
-                <LemonButton type="secondary" onClick={normalizePercentages} tooltip="Normalize cohort percentages">
+                </Button>
+                <Button type="secondary" onClick={normalizePercentages} tooltip="Normalize cohort percentages">
                     <IconBalance />
-                </LemonButton>
+                </Button>
             </div>
         </>
     )

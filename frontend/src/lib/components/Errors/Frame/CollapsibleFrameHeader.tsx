@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react'
 import { P, match } from 'ts-pattern'
 
 import { IconBox, IconEllipsis, IconSpinner, IconWarning } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/lemon-ui'
+import { Tooltip } from '@hanzo/elements'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { CollapsiblePrimitiveTrigger } from 'lib/ui/CollapsiblePrimitive/CollapsiblePrimitive'

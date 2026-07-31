@@ -4,7 +4,7 @@ import { router, urlToAction } from 'kea-router'
 import { editor } from 'monaco-editor'
 import insights from '@hanzo/insights'
 
-import { lemonToast } from '@hanzo/lemon-ui'
+import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
@@ -207,13 +207,13 @@ export const dataWarehouseSettingsSceneLogic = kea<dataWarehouseSettingsSceneLog
             await api.dataWarehouseSavedQueries.delete(tableId)
             actions.selectRow(null)
             actions.loadDatabase()
-            lemonToast.success('View successfully deleted')
+            toast.success('View successfully deleted')
         },
         selectRow: () => {
             actions.setIsEditingSavedQuery(false)
         },
         updateDataWarehouseSavedQuerySuccess: async ({ payload }) => {
-            lemonToast.success(`${payload?.name ?? 'View'} successfully updated`)
+            toast.success(`${payload?.name ?? 'View'} successfully updated`)
             if (payload) {
                 router.actions.push(urls.sqlEditor({ view_id: payload.id }))
             }
@@ -244,7 +244,7 @@ export const dataWarehouseSettingsSceneLogic = kea<dataWarehouseSettingsSceneLog
                     })
                 }
             } catch (e: any) {
-                lemonToast.error(e.message)
+                toast.error(e.message)
                 actions.setEditSchemaIsLoading(false)
             }
         },
@@ -264,7 +264,7 @@ export const dataWarehouseSettingsSceneLogic = kea<dataWarehouseSettingsSceneLog
         deleteDataWarehouseTable: async ({ tableId }) => {
             await api.dataWarehouseTables.delete(tableId)
             actions.selectRow(null)
-            lemonToast.success('Table successfully deleted')
+            toast.success('Table successfully deleted')
         },
         toggleSchemaModal: () => {
             if (values.schemaModalIsOpen && values.selectedRow) {

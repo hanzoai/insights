@@ -7,10 +7,10 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { IconEmoji, IconPlusSmall, IconRevert, IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSwitch, LemonTag } from '@hanzo/lemon-ui'
+import { Button, Checkbox, Input, Switch, Tag } from '@hanzo/elements'
 
 import { EditableField } from 'lib/components/EditableField/EditableField'
-import { SortableDragIcon } from 'lib/lemon-ui/icons'
+import { SortableDragIcon } from 'lib/elements/icons'
 
 import {
     LinkSurveyQuestion,
@@ -121,7 +121,7 @@ function QuestionOptions({ question, onUpdate }: QuestionOptionsProps): JSX.Elem
                 <div className="flex items-center gap-3">
                     <div className="flex-1">
                         <span className="text-xs text-secondary block mb-1">Lower label</span>
-                        <LemonInput
+                        <Input
                             size="xsmall"
                             value={ratingQuestion.lowerBoundLabel || ''}
                             placeholder="e.g. Unlikely"
@@ -131,7 +131,7 @@ function QuestionOptions({ question, onUpdate }: QuestionOptionsProps): JSX.Elem
                     </div>
                     <div className="flex-1">
                         <span className="text-xs text-secondary block mb-1">Upper label</span>
-                        <LemonInput
+                        <Input
                             size="xsmall"
                             value={ratingQuestion.upperBoundLabel || ''}
                             placeholder="e.g. Very likely"
@@ -190,7 +190,7 @@ function QuestionOptions({ question, onUpdate }: QuestionOptionsProps): JSX.Elem
                         const isOpenChoice = hasOpenChoice && choiceIndex === choices.length - 1
                         return (
                             <div key={choiceIndex} className="flex items-center gap-1.5">
-                                <LemonInput
+                                <Input
                                     size="xsmall"
                                     value={choice}
                                     placeholder={isOpenChoice ? 'Other (open-ended)' : `Choice ${choiceIndex + 1}`}
@@ -198,13 +198,13 @@ function QuestionOptions({ question, onUpdate }: QuestionOptionsProps): JSX.Elem
                                     className="flex-1"
                                     suffix={
                                         isOpenChoice ? (
-                                            <LemonTag type="highlight" size="small">
+                                            <Tag type="highlight" size="small">
                                                 open
-                                            </LemonTag>
+                                            </Tag>
                                         ) : null
                                     }
                                 />
-                                <LemonButton
+                                <Button
                                     icon={<IconTrash />}
                                     size="xsmall"
                                     type="tertiary"
@@ -217,21 +217,21 @@ function QuestionOptions({ question, onUpdate }: QuestionOptionsProps): JSX.Elem
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                     {choices.length < MAX_CHOICES && (
-                        <LemonButton icon={<IconPlusSmall />} size="xsmall" type="secondary" onClick={addChoice}>
+                        <Button icon={<IconPlusSmall />} size="xsmall" type="secondary" onClick={addChoice}>
                             Add choice
-                        </LemonButton>
+                        </Button>
                     )}
                     {!hasOpenChoice && choices.length < MAX_CHOICES && (
-                        <LemonButton
+                        <Button
                             icon={<IconPlusSmall />}
                             size="xsmall"
                             type="secondary"
                             onClick={addOpenEndedChoice}
                         >
                             Add "Other"
-                        </LemonButton>
+                        </Button>
                     )}
-                    <LemonCheckbox
+                    <Checkbox
                         label="Shuffle"
                         checked={!!choiceQuestion.shuffleOptions}
                         onChange={(checked) => onUpdate({ shuffleOptions: checked } as Partial<MultipleSurveyQuestion>)}
@@ -253,7 +253,7 @@ function QuestionOptions({ question, onUpdate }: QuestionOptionsProps): JSX.Elem
                 <div className="flex items-center gap-3">
                     <div className="flex-1">
                         <span className="text-xs text-secondary block mb-1">Button text</span>
-                        <LemonInput
+                        <Input
                             size="xsmall"
                             value={linkQuestion.buttonText || ''}
                             placeholder="Learn more"
@@ -263,7 +263,7 @@ function QuestionOptions({ question, onUpdate }: QuestionOptionsProps): JSX.Elem
                     </div>
                     <div className="flex-1">
                         <span className="text-xs text-secondary block mb-1">Link URL</span>
-                        <LemonInput
+                        <Input
                             size="xsmall"
                             value={linkValue}
                             placeholder="https://example.com"
@@ -301,7 +301,7 @@ function ConfirmationScreenEditor({ appearance, onUpdate }: ConfirmationScreenEd
             {/* Always visible header with toggle */}
             <div className="flex items-center justify-between gap-2 px-3 py-2.5">
                 <span className="text-sm font-medium">Confirmation screen</span>
-                <LemonSwitch
+                <Switch
                     checked={isEnabled}
                     onChange={(checked) => onUpdate({ displayThankYouMessage: checked })}
                 />
@@ -448,16 +448,16 @@ function SortableQuestionCard({
                     <div className="flex items-center gap-2">
                         <QuestionTypeChip type={question.type} onChange={(newType) => onChangeType(index, newType)} />
                         {question.optional && (
-                            <LemonTag type="highlight" size="small">
+                            <Tag type="highlight" size="small">
                                 Optional
-                            </LemonTag>
+                            </Tag>
                         )}
                     </div>
 
                     <QuestionOptions question={question} onUpdate={(updates) => onUpdate(index, updates)} />
                 </div>
                 {canDelete && (
-                    <LemonButton
+                    <Button
                         icon={<IconTrash />}
                         size="small"
                         type="tertiary"
@@ -550,9 +550,9 @@ export function QuestionsStep(): JSX.Element {
                     <p className="text-secondary text-sm">Click any question to edit it</p>
                 </div>
                 {hasChanges && (
-                    <LemonButton type="tertiary" size="small" icon={<IconRevert />} onClick={restoreDefaultQuestions}>
+                    <Button type="tertiary" size="small" icon={<IconRevert />} onClick={restoreDefaultQuestions}>
                         Restore defaults
-                    </LemonButton>
+                    </Button>
                 )}
             </div>
 

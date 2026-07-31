@@ -1,6 +1,6 @@
 import { useMountedLogic, useValues } from 'kea'
 
-import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
+import { Select } from 'lib/elements/Select'
 import { cleanedInsightActorsQueryOptions } from 'scenes/trends/persons-modal/persons-modal-utils'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
@@ -24,7 +24,7 @@ export function InsightActorsQueryOptions({ setQuery, query }: InsightActorsQuer
         <>
             {cleanedInsightActorsQueryOptions(insightActorsQueryOptions, query).map(([key, options]) => (
                 <div key={key}>
-                    <LemonSelect
+                    <Select
                         fullWidth
                         className="min-w-32"
                         placeholder={key}

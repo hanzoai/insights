@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect, LemonSelectSection } from '@hanzo/lemon-ui'
+import { Select, SelectSection } from '@hanzo/elements'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
@@ -71,7 +71,7 @@ export function AggregationSelect({
     }
 
     const baseValues = [UNIQUE_USERS]
-    const optionSections: LemonSelectSection<string>[] = [
+    const optionSections: SelectSection<string>[] = [
         {
             title: 'Event Aggregation',
             options: [
@@ -129,7 +129,7 @@ export function AggregationSelect({
     }
 
     return (
-        <LemonSelect
+        <Select
             className={className || 'flex-1'}
             value={value}
             onChange={(newValue) => {

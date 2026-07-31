@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, reducers, selectors
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
+import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'
 
 import type { defaultEvaluationContextsLogicType } from './defaultEvaluationContextsLogicType'
@@ -94,7 +94,7 @@ export const defaultEvaluationContextsLogic = kea<defaultEvaluationContextsLogic
 
                         return currentData
                     } catch (error: any) {
-                        lemonToast.error(error.error || error.detail || 'Failed to add tag')
+                        toast.error(error.error || error.detail || 'Failed to add tag')
                         throw error
                     }
                 },
@@ -122,7 +122,7 @@ export const defaultEvaluationContextsLogic = kea<defaultEvaluationContextsLogic
                             ),
                         }
                     } catch (error: any) {
-                        lemonToast.error(error.error || error.detail || 'Failed to remove tag')
+                        toast.error(error.error || error.detail || 'Failed to remove tag')
                         throw error
                     }
                 },
@@ -138,11 +138,11 @@ export const defaultEvaluationContextsLogic = kea<defaultEvaluationContextsLogic
         },
 
         addTagSuccess: () => {
-            lemonToast.success('Tag added to default evaluation contexts')
+            toast.success('Tag added to default evaluation contexts')
         },
 
         removeTagSuccess: () => {
-            lemonToast.success('Tag removed from default evaluation contexts')
+            toast.success('Tag removed from default evaluation contexts')
         },
     })),
 

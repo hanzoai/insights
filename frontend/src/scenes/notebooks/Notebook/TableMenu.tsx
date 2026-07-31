@@ -2,7 +2,7 @@ import { BubbleMenu } from '@tiptap/react/menus'
 import { useValues } from 'kea'
 
 import { IconTrash } from '@hanzo/icons'
-import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
+import { Button, Divider } from '@hanzo/elements'
 
 import { richContentEditorLogic } from 'lib/components/RichContentEditor/richContentEditorLogic'
 
@@ -22,28 +22,28 @@ export function TableMenu(): JSX.Element | null {
             options={{ placement: 'top-start' }}
         >
             <div className="NotebookTableMenu flex bg-surface-primary rounded border items-center text-secondary p-1 gap-x-0.5 text-xs">
-                <LemonButton onClick={() => ttEditor.chain().focus().addRowBefore().run()} size="small">
+                <Button onClick={() => ttEditor.chain().focus().addRowBefore().run()} size="small">
                     Add row above
-                </LemonButton>
-                <LemonButton onClick={() => ttEditor.chain().focus().addRowAfter().run()} size="small">
+                </Button>
+                <Button onClick={() => ttEditor.chain().focus().addRowAfter().run()} size="small">
                     Add row below
-                </LemonButton>
-                <LemonDivider vertical />
-                <LemonButton onClick={() => ttEditor.chain().focus().addColumnBefore().run()} size="small">
+                </Button>
+                <Divider vertical />
+                <Button onClick={() => ttEditor.chain().focus().addColumnBefore().run()} size="small">
                     Add column left
-                </LemonButton>
-                <LemonButton onClick={() => ttEditor.chain().focus().addColumnAfter().run()} size="small">
+                </Button>
+                <Button onClick={() => ttEditor.chain().focus().addColumnAfter().run()} size="small">
                     Add column right
-                </LemonButton>
-                <LemonDivider vertical />
-                <LemonButton onClick={() => ttEditor.chain().focus().deleteRow().run()} size="small" status="danger">
+                </Button>
+                <Divider vertical />
+                <Button onClick={() => ttEditor.chain().focus().deleteRow().run()} size="small" status="danger">
                     Delete row
-                </LemonButton>
-                <LemonButton onClick={() => ttEditor.chain().focus().deleteColumn().run()} size="small" status="danger">
+                </Button>
+                <Button onClick={() => ttEditor.chain().focus().deleteColumn().run()} size="small" status="danger">
                     Delete column
-                </LemonButton>
-                <LemonDivider vertical />
-                <LemonButton
+                </Button>
+                <Divider vertical />
+                <Button
                     onClick={() => ttEditor.chain().focus().deleteTable().run()}
                     icon={<IconTrash />}
                     status="danger"
