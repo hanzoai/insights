@@ -1058,6 +1058,17 @@
     --color-text-secondary-inverse: var(--color-neutral-650);
     --color-text-secondary: var(--color-neutral-350);
     --color-text-tertiary: var(--color-neutral-400);
+    // Dimming is not symmetric between themes. On white, 0.65 opacity moves text
+    // TOWARD the background and still reads. On black it moves toward the
+    // background too — but the text started closer to it, so a disabled control
+    // stops being readable rather than looking unavailable. The onboarding
+    // "Next" button was the visible case: legible enough to click for, not
+    // legible enough to read.
+    //
+    // 0.8 still reads as unavailable next to a full-strength control while
+    // leaving the label legible. Disabled means "you cannot use this", never
+    // "you cannot see this".
+    --opacity-disabled: 0.8;
     --color-text-success: var(--color-green-400);
     --color-text-warning: var(--color-yellow-400);
     --color-text-error: var(--color-red-400);
