@@ -10,6 +10,13 @@ packages:
     - common/siphash
     - common/insights-node
     - frontend
+    # The design system lives under frontend/ but is its own package, and three
+    # products depend on it by name ("@hanzo/elements": "*"). Without this entry
+    # pnpm does not know it is local, resolves that "*" against the npm registry,
+    # and every install fails — which is why `pnpm install` could not run in this
+    # repo at all. The Docker build survives only because it filters to one
+    # package with --no-frozen-lockfile.
+    - frontend/@hanzo/*
     - playwright
     - nodejs
     - nodejs/src/scripts

@@ -313,40 +313,40 @@
     --color-insights-brand-yellow-lightness: 80%;
 
     // Product specific colors
-    --color-product-data-pipeline-light: rgb(46 162 211);
-    --color-product-product-analytics-light: rgb(47 128 250);
-    --color-product-workflows-light: rgb(47 128 250);
-    --color-product-web-analytics-light: rgb(52 175 102);
-    --color-product-web-analytics-dark: rgb(54 196 111); // original color
-    --color-product-embedded-analytics-light: rgb(243 153 109);
-    --color-product-embedded-analytics-dark: rgb(250 158 120);
-    --color-product-session-replay-light: rgb(235 162 18);
-    --color-product-session-replay-dark: rgb(247 165 1);
-    --color-product-heatmaps-light: rgb(220 152 16);
-    --color-product-heatmaps-dark: rgb(247 165 1);
-    --color-product-logs-light: rgb(214 37 123);
-    --color-product-marketing-analytics-light: rgb(214 37 123);
-    --color-product-live-debugger-light: rgb(76 14 200);
-    --color-product-feature-flags-light: rgb(48 171 198);
-    --color-product-experiments-light: rgb(182 42 217);
-    --color-product-error-tracking-light: rgb(211 148 24);
-    --color-product-error-tracking-dark: rgb(247 165 1);
-    --color-product-surveys-light: rgb(243 84 84);
-    --color-product-data-warehouse-light: rgb(133 103 255);
-    --color-product-llm-analytics-light: rgb(182 42 217);
-    --color-product-llm-clusters-light: rgb(147 51 234);
-    --color-product-llm-datasets-light: rgb(124 58 237);
-    --color-product-llm-evaluations-light: rgb(167 139 250);
-    --color-product-llm-prompts-light: rgb(196 181 253);
-    --color-product-links-light: rgb(143 7 255);
-    --color-product-revenue-analytics-light: rgb(52 175 102);
-    --color-product-revenue-analytics-dark: rgb(54 196 111);
-    --color-product-user-interviews-light: rgb(0 140 255);
-    --color-product-dashboards-light: rgb(255 139 7);
-    --color-product-early-access-features-light: rgb(39 171 151);
-    --color-product-early-access-features-dark: rgb(53 213 189);
-    --color-product-support-light: rgb(243 84 84);
-    --color-product-support-dark: rgb(247 165 1);
+    --color-product-data-pipeline-light: var(--color-text-secondary);
+    --color-product-product-analytics-light: var(--color-text-secondary);
+    --color-product-workflows-light: var(--color-text-secondary);
+    --color-product-web-analytics-light: var(--color-text-secondary);
+    --color-product-web-analytics-dark: var(--color-text-secondary); // original color
+    --color-product-embedded-analytics-light: var(--color-text-secondary);
+    --color-product-embedded-analytics-dark: var(--color-text-secondary);
+    --color-product-session-replay-light: var(--color-text-secondary);
+    --color-product-session-replay-dark: var(--color-text-secondary);
+    --color-product-heatmaps-light: var(--color-text-secondary);
+    --color-product-heatmaps-dark: var(--color-text-secondary);
+    --color-product-logs-light: var(--color-text-secondary);
+    --color-product-marketing-analytics-light: var(--color-text-secondary);
+    --color-product-live-debugger-light: var(--color-text-secondary);
+    --color-product-feature-flags-light: var(--color-text-secondary);
+    --color-product-experiments-light: var(--color-text-secondary);
+    --color-product-error-tracking-light: var(--color-text-secondary);
+    --color-product-error-tracking-dark: var(--color-text-secondary);
+    --color-product-surveys-light: var(--color-text-secondary);
+    --color-product-data-warehouse-light: var(--color-text-secondary);
+    --color-product-llm-analytics-light: var(--color-text-secondary);
+    --color-product-llm-clusters-light: var(--color-text-secondary);
+    --color-product-llm-datasets-light: var(--color-text-secondary);
+    --color-product-llm-evaluations-light: var(--color-text-secondary);
+    --color-product-llm-prompts-light: var(--color-text-secondary);
+    --color-product-links-light: var(--color-text-secondary);
+    --color-product-revenue-analytics-light: var(--color-text-secondary);
+    --color-product-revenue-analytics-dark: var(--color-text-secondary);
+    --color-product-user-interviews-light: var(--color-text-secondary);
+    --color-product-dashboards-light: var(--color-text-secondary);
+    --color-product-early-access-features-light: var(--color-text-secondary);
+    --color-product-early-access-features-dark: var(--color-text-secondary);
+    --color-product-support-light: var(--color-text-secondary);
+    --color-product-support-dark: var(--color-text-secondary);
 
     // Insight colors
     --color-insight-funnel-light: rgb(47 128 250);
