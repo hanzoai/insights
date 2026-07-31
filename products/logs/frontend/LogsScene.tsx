@@ -1,4 +1,4 @@
-import { useValues } from 'kea'
+import { useActions, useValues } from 'kea'
 
 import { IconGear } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
@@ -34,6 +34,7 @@ export function LogsScene(): JSX.Element {
 const LogsSceneContent = (): JSX.Element => {
     const { tabId } = useValues(logsSceneLogic)
     const { hasLogs, teamHasLogsCheckFailed } = useValues(logsIngestionLogic)
+    const { loadTeamHasLogs } = useActions(logsIngestionLogic)
     const openLogsSettings = useOpenLogsSettingsPanel()
 
     return (
@@ -57,17 +58,23 @@ const LogsSceneContent = (): JSX.Element => {
                     </>
                 }
             />
+            {/*
+             * A failed check is a server fault, not a verdict about the user's setup, so it must not
+             * be dressed up as onboarding advice. The "you may not have configured logging" reading
+             * belongs exclusively to the case where the check SUCCEEDS and reports no logs — which
+             * LogsSetupPrompt already renders. Error and unconfigured are different facts.
+             * Not dismissible: a dismissed error banner would hide a live outage forever.
+             */}
             {teamHasLogsCheckFailed && (
                 <Banner
-                    type="info"
-                    dismissKey="logs-setup-hint-banner"
+                    type="error"
                     action={{
-                        to: 'https://hanzo.ai/docs/logs/',
-                        targetBlank: true,
-                        children: 'Setup guide',
+                        children: 'Retry',
+                        onClick: () => loadTeamHasLogs(),
                     }}
                 >
-                    Unable to verify logs setup. If you haven't configured logging yet, check out our setup guide.
+                    Couldn't load logs — the logs query failed on the server. This says nothing about whether logging is
+                    configured for this project; we couldn't reach the logs backend to find out.
                 </Banner>
             )}
             <LogsSetupPrompt>
