@@ -1,7 +1,7 @@
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
 from insights.kafka_client.topics import KAFKA_EVENTS_PLUGIN_INGESTION
 from insights.models.kafka_partition_stats.sql import PartitionStatsKafkaTable
-from insights.settings.data_stores import KAFKA_HOSTS
+from insights.settings.kafka import KAFKA_HOSTS
 
 operations = [
     run_sql_with_exceptions(

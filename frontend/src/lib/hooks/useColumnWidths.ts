@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { DEFAULT_COLUMN_WIDTH } from '../elements/Table/columnUtils'
-import { determineColumnKey } from '../elements/Table/columnUtils'
+import { DEFAULT_COLUMN_WIDTH } from '../elements/Table/columnLayoutUtils'
+import { determineColumnKey } from '../elements/Table/columnLayoutUtils'
 import { TableColumn } from '../elements/Table/types'
 
 interface UseColumnWidthsProps {

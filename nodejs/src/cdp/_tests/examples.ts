@@ -1,10 +1,10 @@
-import { ACCESS_TOKEN_PLACEHOLDER } from '~/config/constants'
+import { ACCESS_TOKEN_PLACEHOLDER } from '~/common/config/constants'
 
 import { PropertyOperator } from '../../types'
 import { InsightsFunctionType } from '../types'
 
 /**
- * Custom functions are largely generated and built in the django service, making it tricky to test on this side.
+ * Script functions are largely generated and built in the django service, making it tricky to test on this side.
  * As such we have a bunch of prebuilt examples here for usage in tests.
  */
 
@@ -839,7 +839,7 @@ export const FN_FILTERS_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'fil
     no_filters_data_warehouse_table: { filters: { source: 'data-warehouse-table', bytecode: ['_h', 29] } },
 }
 
-export const CUSTOM_MASK_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'masking'>> = {
+export const FN_MASK_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'masking'>> = {
     all: {
         masking: {
             ttl: 30,
@@ -864,9 +864,83 @@ export const CUSTOM_MASK_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'ma
             threshold: null,
         },
     },
+    personPerDay: {
+        masking: {
+            ttl: 86400,
+            hash: "{concat(toString(person.id), '-', formatDateTime(now(), '%Y-%m-%d'))}",
+            bytecode: [
+                '_H',
+                1,
+                32,
+                'id',
+                32,
+                'person',
+                1,
+                2,
+                2,
+                'toString',
+                1,
+                32,
+                '-',
+                2,
+                'now',
+                0,
+                32,
+                '%Y-%m-%d',
+                2,
+                'formatDateTime',
+                2,
+                2,
+                'concat',
+                3,
+            ],
+            threshold: null,
+        },
+    },
+    personPerEventPerDay: {
+        masking: {
+            ttl: 86400,
+            hash: "{concat(toString(person.id), '-', event.event, '-', formatDateTime(now(), '%Y-%m-%d'))}",
+            bytecode: [
+                '_H',
+                1,
+                32,
+                'id',
+                32,
+                'person',
+                1,
+                2,
+                2,
+                'toString',
+                1,
+                32,
+                '-',
+                32,
+                'event',
+                32,
+                'event',
+                1,
+                2,
+                32,
+                '-',
+                2,
+                'now',
+                0,
+                32,
+                '%Y-%m-%d',
+                2,
+                'formatDateTime',
+                2,
+                2,
+                'concat',
+                5,
+            ],
+            threshold: null,
+        },
+    },
 }
 
-export const INSIGHTS_FLOW_MASK_EXAMPLES: Record<string, Pick<any, 'trigger_masking'>> = {
+export const FN_FLOW_MASK_EXAMPLES: Record<string, Pick<any, 'trigger_masking'>> = {
     everyTime: {
         trigger_masking: {
             ttl: 30,
@@ -888,6 +962,39 @@ export const INSIGHTS_FLOW_MASK_EXAMPLES: Record<string, Pick<any, 'trigger_mask
             ttl: null,
             hash: '{person.id}',
             bytecode: ['_h', 32, 'id', 32, 'person', 1, 2],
+            threshold: null,
+        },
+    },
+    oncePerCalendarDay: {
+        trigger_masking: {
+            ttl: 86400,
+            hash: "{concat(toString(person.id), '-', formatDateTime(now(), '%Y-%m-%d'))}",
+            bytecode: [
+                '_H',
+                1,
+                32,
+                'id',
+                32,
+                'person',
+                1,
+                2,
+                2,
+                'toString',
+                1,
+                32,
+                '-',
+                2,
+                'now',
+                0,
+                32,
+                '%Y-%m-%d',
+                2,
+                'formatDateTime',
+                2,
+                2,
+                'concat',
+                3,
+            ],
             threshold: null,
         },
     },

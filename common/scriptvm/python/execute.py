@@ -1,5 +1,5 @@
-import re
 import time
+import operator
 from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
@@ -10,10 +10,10 @@ from common.scriptvm.python.debugger import color_bytecode, debugger
 from common.scriptvm.python.objects import (
     CallFrame,
     ThrowFrame,
-    is_iql_error,
-    is_iql_upvalue,
-    new_iql_callable,
-    new_iql_closure,
+    is_hog_error,
+    is_hog_upvalue,
+    new_hog_callable,
+    new_hog_closure,
 )
 from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_IDENTIFIER, INSIGHTSQL_BYTECODE_IDENTIFIER_V0, Operation
 from common.scriptvm.python.stl import STL
@@ -26,6 +26,7 @@ from common.scriptvm.python.utils import (
     calculate_cost,
     get_nested_value,
     like,
+    regex_match,
     set_nested_value,
     unify_comparison_types,
 )
@@ -41,8 +42,15 @@ CALLSTACK_LENGTH = 1000
 @dataclass
 class BytecodeResult:
     result: Any
-    bytecodes: dict[str, list[Any]]
+    bytecodes: dict[str, Any]
     stdout: list[str]
+
+
+def _compare_values(left: Any, right: Any, comparison: Callable[[Any, Any], bool]) -> bool:
+    try:
+        return comparison(left, right)
+    except TypeError as e:
+        raise ScriptVMException(str(e)) from e
 
 
 def execute_bytecode(
@@ -52,8 +60,9 @@ def execute_bytecode(
     timeout=timedelta(seconds=5),
     team: Optional["Team"] = None,
     debug=False,
+    disallowed_functions: Optional[frozenset[str]] = None,
 ) -> BytecodeResult:
-    bytecodes = input if isinstance(input, dict) else {"root": {"bytecode": input}}
+    bytecodes: dict[str, Any] = input if isinstance(input, dict) else {"root": {"bytecode": input}}
     root_bytecode = bytecodes.get("root", {}).get("bytecode", []) or []
 
     if (
@@ -79,6 +88,7 @@ def execute_bytecode(
     debug_bytecode = []
     if isinstance(timeout, int):
         timeout = timedelta(seconds=timeout)
+    disallowed_functions = disallowed_functions or frozenset()
 
     if len(call_stack) == 0:
         call_stack.append(
@@ -87,8 +97,8 @@ def execute_bytecode(
                 chunk="root",
                 stack_start=0,
                 arg_len=0,
-                closure=new_iql_closure(
-                    new_iql_callable(
+                closure=new_hog_closure(
+                    new_hog_callable(
                         type="local",
                         arg_count=0,
                         upvalue_count=0,
@@ -170,6 +180,16 @@ def execute_bytecode(
         if time.time() - start_time > timeout.total_seconds() and not debug:
             raise ScriptVMRuntimeExceededException(timeout_seconds=timeout.total_seconds(), ops_performed=ops)
 
+    def remaining_timeout() -> float:
+        # Budget left for this run, so blocking STL functions (e.g. sleep) can bound themselves to it.
+        return max(0.0, timeout.total_seconds() - (time.time() - start_time))
+
+    def check_allowed(name: str):
+        # Enforced at dispatch so it catches every path to an STL call (direct, expression call,
+        # a closure bound to a local), not just the syntactic `name(...)` a static check would see.
+        if name in disallowed_functions:
+            raise ScriptVMException(f"Function {name} is not allowed here")
+
     def capture_upvalue(index) -> dict:
         nonlocal upvalues
         for upvalue in reversed(upvalues):
@@ -178,7 +198,7 @@ def execute_bytecode(
             if upvalue["location"] == index:
                 return upvalue
         created_upvalue = {
-            "__iqlUpValue__": True,
+            "__hogUpValue__": True,
             "location": index,
             "closed": False,
             "value": None,
@@ -251,58 +271,48 @@ def execute_bytecode(
                 push_stack(var1 != var2)
             case Operation.GT:
                 var1, var2 = unify_comparison_types(pop_stack(), pop_stack())
-                push_stack(var1 > var2)
+                push_stack(_compare_values(var1, var2, operator.gt))
             case Operation.GT_EQ:
                 var1, var2 = unify_comparison_types(pop_stack(), pop_stack())
-                push_stack(var1 >= var2)
+                push_stack(_compare_values(var1, var2, operator.ge))
             case Operation.LT:
                 var1, var2 = unify_comparison_types(pop_stack(), pop_stack())
-                push_stack(var1 < var2)
+                push_stack(_compare_values(var1, var2, operator.lt))
             case Operation.LT_EQ:
                 var1, var2 = unify_comparison_types(pop_stack(), pop_stack())
-                push_stack(var1 <= var2)
+                push_stack(_compare_values(var1, var2, operator.le))
             case Operation.LIKE:
                 push_stack(like(pop_stack(), pop_stack()))
             case Operation.ILIKE:
-                push_stack(like(pop_stack(), pop_stack(), re.IGNORECASE))
+                push_stack(like(pop_stack(), pop_stack(), case_insensitive=True))
             case Operation.NOT_LIKE:
                 push_stack(not like(pop_stack(), pop_stack()))
             case Operation.NOT_ILIKE:
-                push_stack(not like(pop_stack(), pop_stack(), re.IGNORECASE))
+                push_stack(not like(pop_stack(), pop_stack(), case_insensitive=True))
             case Operation.IN:
                 push_stack(pop_stack() in pop_stack())
             case Operation.NOT_IN:
                 push_stack(pop_stack() not in pop_stack())
             case Operation.REGEX:
                 args = [pop_stack(), pop_stack()]
-                # TODO: swap this for re2, as used in InsightsQL/Datastore and in the NodeJS VM
-                push_stack(bool(re.search(re.compile(args[1]), args[0])) if args[0] and args[1] else False)
+                push_stack(regex_match(args[0], args[1]))
             case Operation.NOT_REGEX:
                 args = [pop_stack(), pop_stack()]
-                # TODO: swap this for re2, as used in InsightsQL/Datastore and in the NodeJS VM
-                push_stack(not bool(re.search(re.compile(args[1]), args[0])) if args[0] and args[1] else False)
+                push_stack(not regex_match(args[0], args[1]) if args[0] and args[1] else False)
             case Operation.IREGEX:
                 args = [pop_stack(), pop_stack()]
-                push_stack(
-                    bool(re.search(re.compile(args[1], re.RegexFlag.IGNORECASE), args[0]))
-                    if args[0] and args[1]
-                    else False
-                )
+                push_stack(regex_match(args[0], args[1], case_insensitive=True))
             case Operation.NOT_IREGEX:
                 args = [pop_stack(), pop_stack()]
-                push_stack(
-                    not bool(re.search(re.compile(args[1], re.RegexFlag.IGNORECASE), args[0]))
-                    if args[0] and args[1]
-                    else False
-                )
+                push_stack(not regex_match(args[0], args[1], case_insensitive=True) if args[0] and args[1] else False)
             case Operation.GET_GLOBAL:
                 chain = [pop_stack() for _ in range(next_token())]
                 if chunk_globals and chain[0] in chunk_globals:
                     push_stack(deepcopy(get_nested_value(chunk_globals, chain, True)))
                 elif functions and chain[0] in functions:
                     push_stack(
-                        new_iql_closure(
-                            new_iql_callable(
+                        new_hog_closure(
+                            new_hog_callable(
                                 type="stl",
                                 name=chain[0],
                                 arg_count=0,
@@ -314,8 +324,8 @@ def execute_bytecode(
                     )
                 elif chain[0] in STL and len(chain) == 1:
                     push_stack(
-                        new_iql_closure(
-                            new_iql_callable(
+                        new_hog_closure(
+                            new_hog_callable(
                                 type="stl",
                                 name=chain[0],
                                 arg_count=STL[chain[0]].maxArgs or 0,
@@ -327,8 +337,8 @@ def execute_bytecode(
                     )
                 elif chain[0] in BYTECODE_STL and len(chain) == 1:
                     push_stack(
-                        new_iql_closure(
-                            new_iql_callable(
+                        new_hog_closure(
+                            new_hog_callable(
                                 type="stl",
                                 name=chain[0],
                                 arg_count=len(BYTECODE_STL[chain[0]][0]),
@@ -432,7 +442,7 @@ def execute_bytecode(
                 upvalue_count = next_token()
                 body_length = next_token()
                 push_stack(
-                    new_iql_callable(
+                    new_hog_callable(
                         type="local",
                         name=name,
                         chunk=frame.chunk,
@@ -444,7 +454,7 @@ def execute_bytecode(
                 frame.ip += body_length
             case Operation.CLOSURE:
                 closure_callable = pop_stack()
-                closure = new_iql_closure(closure_callable)
+                closure = new_hog_closure(closure_callable)
                 stack_start = frame.stack_start
                 upvalue_count = next_token()
                 if upvalue_count != closure_callable["upvalueCount"]:
@@ -464,7 +474,7 @@ def execute_bytecode(
                 if index >= len(closure["upvalues"]):
                     raise ScriptVMException(f"Invalid upvalue index: {index}")
                 upvalue = upvalues_by_id[closure["upvalues"][index]]
-                if not is_iql_upvalue(upvalue):
+                if not is_hog_upvalue(upvalue):
                     raise ScriptVMException(f"Invalid upvalue: {upvalue}")
                 if upvalue["closed"]:
                     push_stack(upvalue["value"])
@@ -476,7 +486,7 @@ def execute_bytecode(
                 if index >= len(closure["upvalues"]):
                     raise ScriptVMException(f"Invalid upvalue index: {index}")
                 upvalue = upvalues_by_id[closure["upvalues"][index]]
-                if not is_iql_upvalue(upvalue):
+                if not is_hog_upvalue(upvalue):
                     raise ScriptVMException(f"Invalid upvalue: {upvalue}")
                 if upvalue["closed"]:
                     upvalue["value"] = pop_stack()
@@ -498,8 +508,8 @@ def execute_bytecode(
                         chunk=frame.chunk,
                         stack_start=len(stack) - arg_len,
                         arg_len=arg_len,
-                        closure=new_iql_closure(
-                            new_iql_callable(
+                        closure=new_hog_closure(
+                            new_hog_callable(
                                 type="local",
                                 name=name,
                                 arg_count=arg_len,
@@ -523,8 +533,8 @@ def execute_bytecode(
                             chunk=module_name,
                             stack_start=len(stack),
                             arg_len=0,
-                            closure=new_iql_closure(
-                                new_iql_callable(
+                            closure=new_hog_closure(
+                                new_hog_callable(
                                     type="local",
                                     name=module_name,
                                     arg_count=0,
@@ -544,11 +554,12 @@ def execute_bytecode(
                             args = stack_keep_first_elements(len(stack) - arg_count)
                         push_stack(functions[name](*args))
                     elif name in STL:
+                        check_allowed(name)
                         if version == 0:
                             args = [pop_stack() for _ in range(arg_count)]
                         else:
                             args = stack_keep_first_elements(len(stack) - arg_count)
-                        push_stack(STL[name].fn(args, team, stdout, timeout.total_seconds()))
+                        push_stack(STL[name].fn(args, team, stdout, remaining_timeout()))
                     elif name in BYTECODE_STL:
                         arg_names = BYTECODE_STL[name][0]
                         if len(arg_names) != arg_count:
@@ -559,8 +570,8 @@ def execute_bytecode(
                             chunk=f"stl/{name}",
                             stack_start=len(stack) - arg_count,
                             arg_len=arg_count,
-                            closure=new_iql_closure(
-                                new_iql_callable(
+                            closure=new_hog_closure(
+                                new_hog_callable(
                                     type="stl",
                                     name=name,
                                     arg_count=arg_count,
@@ -578,16 +589,16 @@ def execute_bytecode(
             case Operation.CALL_LOCAL:
                 check_timeout()
                 closure = pop_stack()
-                if not isinstance(closure, dict) or closure.get("__iqlClosure__") is None:
+                if not isinstance(closure, dict) or closure.get("__hogClosure__") is None:
                     raise ScriptVMException(f"Invalid closure: {closure}")
                 callable = closure.get("callable")
-                if not isinstance(callable, dict) or callable.get("__iqlCallable__") is None:
+                if not isinstance(callable, dict) or callable.get("__hogCallable__") is None:
                     raise ScriptVMException(f"Invalid callable: {callable}")
                 args_length = next_token()
                 if args_length > MAX_FUNCTION_ARGS_LENGTH:
                     raise ScriptVMException("Too many arguments")
 
-                if callable.get("__iqlCallable__") == "local":
+                if callable.get("__hogCallable__") == "local":
                     if callable["argCount"] > args_length:
                         # TODO: specify minimum required arguments somehow
                         for _ in range(callable["argCount"] - args_length):
@@ -608,9 +619,10 @@ def execute_bytecode(
                     call_stack.append(frame)
                     continue  # resume the loop without incrementing frame.ip
 
-                elif callable.get("__iqlCallable__") == "stl":
+                elif callable.get("__hogCallable__") == "stl":
                     if callable["name"] not in STL:
                         raise ScriptVMException(f"Unsupported function call: {callable['name']}")
+                    check_allowed(callable["name"])
                     stl_fn = STL[callable["name"]]
                     if stl_fn.minArgs is not None and args_length < stl_fn.minArgs:
                         raise ScriptVMException(
@@ -624,9 +636,9 @@ def execute_bytecode(
                         args = list(reversed([pop_stack() for _ in range(args_length)]))
                         if stl_fn.maxArgs is not None and len(args) < stl_fn.maxArgs:
                             args = [*args, *([None] * (stl_fn.maxArgs - len(args)))]
-                    push_stack(stl_fn.fn(args, team, stdout, timeout.total_seconds()))
+                    push_stack(stl_fn.fn(args, team, stdout, remaining_timeout()))
 
-                elif callable.get("__iqlCallable__") == "async":
+                elif callable.get("__hogCallable__") == "async":
                     raise ScriptVMException("Async functions are not supported")
 
                 else:
@@ -645,7 +657,7 @@ def execute_bytecode(
                     raise ScriptVMException("Invalid operation POP_TRY: no try block to pop")
             case Operation.THROW:
                 exception = pop_stack()
-                if not is_iql_error(exception):
+                if not is_hog_error(exception):
                     raise ScriptVMException("Can not throw: value is not of type Error")
                 if throw_stack:
                     last_throw = throw_stack.pop()

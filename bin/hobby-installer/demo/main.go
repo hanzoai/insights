@@ -7,9 +7,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/hanzoai/insights/bin/hobby-installer/core"
-	"github.com/hanzoai/insights/bin/hobby-installer/tui/steps"
-	"github.com/hanzoai/insights/bin/hobby-installer/ui"
+	"github.com/insights/insights/bin/hobby-installer/core"
+	"github.com/insights/insights/bin/hobby-installer/tui/steps"
+	"github.com/insights/insights/bin/hobby-installer/ui"
 )
 
 func main() {

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from functools import wraps
 from html import escape
-from typing import Union
+from typing import Any, Union
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from django.apps import apps
@@ -23,23 +23,27 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_http_methods
 
 import structlog
+from opentelemetry import trace
 
+from insights.api.capture import capture_internal
 from insights.auth import AUTH_BRAND_COOKIE, apply_auth_brand_cookie, normalize_auth_brand
 from insights.cloud_utils import is_cloud
 from insights.email import is_email_available
 from insights.exceptions_capture import capture_exception
 from insights.health import is_datastore_connected, is_kafka_connected
-from insights.models import Organization, User
+from insights.helpers.dev_login import is_dev_login_allowed
+from insights.models import Organization, Team, User
 from insights.models.activity_logging.activity_log import Detail, log_activity
 from insights.models.integration import SlackIntegration
-from insights.models.message_category import MessageCategory
-from insights.models.message_preferences import (
-    ALL_MESSAGE_PREFERENCE_CATEGORY_ID,
-    MessageRecipientPreference,
-    PreferenceStatus,
-)
 from insights.models.oauth import find_oauth_access_token, find_oauth_refresh_token
 from insights.models.personal_api_key import find_personal_api_key
+from insights.models.project_secret_api_key import find_project_secret_api_key
+from insights.models.utils import (
+    OAUTH_ACCESS_TOKEN_PREFIX,
+    OAUTH_REFRESH_TOKEN_PREFIX,
+    PROJECT_API_TOKEN_PREFIX,
+    SECRET_API_TOKEN_PREFIX,
+)
 from insights.plugins.plugin_server_api import validate_messaging_preferences_token
 from insights.redis import get_client
 from insights.utils import (
@@ -57,11 +61,33 @@ from insights.utils import (
     render_template,
 )
 
+from products.messaging.backend.models.message_category import MessageCategory
+from products.messaging.backend.models.message_preferences import (
+    ALL_MESSAGE_PREFERENCE_CATEGORY_ID,
+    EMAIL_TRACKING_PREFERENCE_ID,
+    MessageRecipientPreference,
+    PreferenceStatus,
+)
+from products.messaging.backend.services.customerio_sync_service import sync_preferences_to_customerio
+from products.workflows.backend.models.team_workflows_config import EmailTrackingConsentMode
+
 logger = structlog.get_logger(__name__)
+tracer = trace.get_tracer(__name__)
+
+
+def _traced(name: str, fn, *args, **kwargs):
+    with tracer.start_as_current_span(name):
+        return fn(*args, **kwargs)
 
 
 def noop(*args, **kwargs) -> None:
     return None
+
+
+try:
+    from ee.models.license import get_licensed_users_available
+except ImportError:
+    get_licensed_users_available = noop  # ty: ignore[invalid-assignment]
 
 
 def login_required(view):
@@ -69,6 +95,10 @@ def login_required(view):
 
     @wraps(view)
     def handler(request, *args, **kwargs):
+        # Dev-only: in cloud-OAuth mode the session is client-side, so serve without a local login
+        # (the SPA uses its bearer token). DEBUG-gated, so prod gating is unchanged.
+        if settings.DEBUG and request.COOKIES.get("ph_oauth_mode"):
+            return view(request, *args, **kwargs)
         if not User.objects.exists():
             return redirect("/preflight")
         elif not request.user.is_authenticated and settings.AUTO_LOGIN:
@@ -130,6 +160,7 @@ Disallow: /*@*
 # Block authentication paths
 Disallow: /verify_email/
 Disallow: /authorize_and_redirect
+Disallow: /toolbar_oauth/
 
 # Block ingestion paths
 Disallow: /e/
@@ -161,26 +192,34 @@ def render_query(request: HttpRequest) -> HttpResponse:
 
 @never_cache
 def preflight_check(request: HttpRequest) -> JsonResponse:
-    slack_client_id = SlackIntegration.slack_config().get("SLACK_APP_CLIENT_ID")
+    with tracer.start_as_current_span("preflight.slack_config_main"):
+        slack_client_id = SlackIntegration.slack_config().get("SLACK_APP_CLIENT_ID")
     hubspot_client_id = settings.HUBSPOT_APP_CLIENT_ID
     salesforce_client_id = settings.SALESFORCE_CONSUMER_KEY
 
+    in_cloud = is_cloud()
+
     response = {
         "django": True,
-        "redis": is_cloud() or is_redis_alive() or settings.TEST,
-        "plugins": is_cloud() or is_plugin_server_alive() or settings.TEST,
-        "celery": is_cloud() or is_celery_alive() or settings.TEST,
-        "datastore": is_cloud() or is_datastore_connected() or settings.TEST,
-        "kafka": is_cloud() or is_kafka_connected() or settings.TEST,
-        "db": is_cloud() or is_postgres_alive(),
-        "initiated": is_cloud() or Organization.objects.exists(),
-        "cloud": is_cloud(),
+        "redis": in_cloud or _traced("preflight.is_redis_alive", is_redis_alive) or settings.TEST,
+        "plugins": in_cloud or _traced("preflight.is_plugin_server_alive", is_plugin_server_alive) or settings.TEST,
+        "celery": in_cloud or _traced("preflight.is_celery_alive", is_celery_alive) or settings.TEST,
+        "datastore": in_cloud
+        or _traced("preflight.is_datastore_connected", is_datastore_connected)
+        or settings.TEST,
+        "kafka": in_cloud or _traced("preflight.is_kafka_connected", is_kafka_connected),
+        "db": in_cloud or _traced("preflight.is_postgres_alive", is_postgres_alive),
+        "initiated": in_cloud or _traced("preflight.organization_exists", Organization.objects.exists),
+        "cloud": in_cloud,
         "demo": settings.DEMO,
         "realm": get_instance_realm(),
         "region": get_instance_region(),
-        "available_social_auth_providers": get_instance_available_sso_providers(),
-        "can_create_org": get_can_create_org(request.user),
-        "email_service_available": is_cloud() or is_email_available(with_absolute_urls=True),
+        "available_social_auth_providers": _traced(
+            "preflight.available_social_auth_providers", get_instance_available_sso_providers
+        ),
+        "can_create_org": _traced("preflight.can_create_org", get_can_create_org, request.user),
+        "email_service_available": in_cloud
+        or _traced("preflight.is_email_available", is_email_available, with_absolute_urls=True),
         "slack_service": {
             "available": bool(slack_client_id),
             "client_id": slack_client_id or None,
@@ -189,8 +228,9 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
             "hubspot": {"client_id": hubspot_client_id},
             "salesforce": {"client_id": salesforce_client_id},
         },
-        "object_storage": is_cloud() or is_object_storage_available(),
+        "object_storage": in_cloud or _traced("preflight.is_object_storage_available", is_object_storage_available),
         "public_egress_ip_addresses": settings.PUBLIC_EGRESS_IP_ADDRESSES,
+        "wizard_cloud_run_available": bool(settings.WIZARD_CLOUD_RUN_OAUTH_CLIENT_ID),
     }
     auth_brand = normalize_auth_brand(request.COOKIES.get(AUTH_BRAND_COOKIE))
     if auth_brand:
@@ -198,6 +238,9 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
 
     if settings.DEBUG or settings.E2E_TESTING:
         response["is_debug"] = True
+
+    if is_dev_login_allowed():
+        response["allow_dev_login"] = True
 
     if settings.TEST:
         response["is_test"] = True
@@ -208,13 +251,19 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
     if request.user.is_authenticated:
         response = {
             **response,
-            "available_timezones": get_available_timezones_with_offsets(),
+            "available_timezones": _traced("preflight.available_timezones", get_available_timezones_with_offsets),
             "opt_out_capture": os.environ.get("OPT_OUT_CAPTURE", False),
-            "licensed_users_available": None,
+            "licensed_users_available": _traced("preflight.licensed_users_available", get_licensed_users_available)
+            if not in_cloud
+            else None,
             "openai_available": bool(os.environ.get("OPENAI_API_KEY")),
+            # Max runs on Anthropic, so it needs its own signal — otherwise self-hosted instances
+            # render the assistant but fail at call time with no key configured.
+            "anthropic_available": bool(os.environ.get("ANTHROPIC_API_KEY")),
             "site_url": settings.SITE_URL,
             "instance_preferences": settings.INSTANCE_PREFERENCES,
             "buffer_conversion_seconds": settings.BUFFER_CONVERSION_SECONDS,
+            "ai_gateway_url": settings.AI_GATEWAY_PUBLIC_URL or None,
         }
 
     return JsonResponse(response)
@@ -412,17 +461,29 @@ def api_key_search_view(request: HttpRequest):
     else:
         if request.method != "POST":
             return HttpResponseNotAllowed(permitted_methods=["POST"])
+        query = query.strip()
 
     personal_api_key_object = None
     personal_api_key_hash_mode = None
-    if query is not None and query.startswith("hix_"):
+    # Legacy personal API keys predate the phx_ prefix, so any query without another known
+    # prefix is also treated as a personal key candidate (matching authentication behavior).
+    non_personal_api_key_prefixes = (
+        SECRET_API_TOKEN_PREFIX,
+        OAUTH_ACCESS_TOKEN_PREFIX,
+        OAUTH_REFRESH_TOKEN_PREFIX,
+        PROJECT_API_TOKEN_PREFIX,
+    )
+    if query and not query.startswith(non_personal_api_key_prefixes):
         result = find_personal_api_key(query)
         if result is not None:
             personal_api_key_object, personal_api_key_hash_mode = result
 
+    project_secret_api_key_object = None
     team_object = None
     team_object_key_type = None
-    if query is not None and query.startswith("his_"):
+    if query is not None and query.startswith(SECRET_API_TOKEN_PREFIX):
+        project_secret_api_key_object = find_project_secret_api_key(query)
+
         Team = apps.get_model(app_label="insights", model_name="Team")
 
         try:
@@ -434,11 +495,11 @@ def api_key_search_view(request: HttpRequest):
             pass
 
     oauth_access_token_object = None
-    if query is not None and query.startswith("hia_"):
+    if query is not None and query.startswith(OAUTH_ACCESS_TOKEN_PREFIX):
         oauth_access_token_object = find_oauth_access_token(query)
 
     oauth_refresh_token_object = None
-    if query is not None and query.startswith("hir_"):
+    if query is not None and query.startswith(OAUTH_REFRESH_TOKEN_PREFIX):
         oauth_refresh_token_object = find_oauth_refresh_token(query)
 
     context = {
@@ -448,6 +509,7 @@ def api_key_search_view(request: HttpRequest):
             "title": "Specify key to search",
             "personal_api_key_object": personal_api_key_object,
             "personal_api_key_hash_mode": personal_api_key_hash_mode,
+            "project_secret_api_key_object": project_secret_api_key_object,
             "team_object": team_object,
             "team_object_key_type": team_object_key_type,
             "oauth_access_token_object": oauth_access_token_object,
@@ -456,6 +518,90 @@ def api_key_search_view(request: HttpRequest):
     }
 
     return render(request, template_name="api_key_search/values.html", context=context, status=200)
+
+
+def report_workflows_email_unsubscribed(team_id: int, identifier: str, category_ids: list[str], source: str) -> None:
+    """
+    Emit $workflows_email_unsubscribed engagement events into the customer's project.
+
+    Mirrors the plugin-server's $workflows_email_* engagement events (email-tracking.service.ts),
+    gated on the same capture_workflows_engagement_events team flag. The unsubscribe token only
+    carries team_id + identifier, so this event is email-level: distinct_id is the recipient's
+    email, and no workflow/action id is available. Best-effort — never fails the unsubscribe flow.
+    """
+    try:
+        team = Team.objects.get(id=team_id)
+        if not team.workflows_config.capture_workflows_engagement_events:
+            return
+
+        # The form POST accepts arbitrary category id strings; only emit for the team's real
+        # categories (or "$all") so a token bearer can't inject junk property values
+        known_category_ids: set[str] = set()
+        if any(category_id != ALL_MESSAGE_PREFERENCE_CATEGORY_ID for category_id in category_ids):
+            known_category_ids = {
+                str(category_id)
+                for category_id in MessageCategory.objects.filter(team_id=team_id, deleted=False).values_list(
+                    "id", flat=True
+                )
+            }
+    except Exception as e:
+        capture_exception(e)
+        return
+
+    # Each category is independently best-effort: one failed capture must not skip the rest
+    for category_id in category_ids:
+        if category_id != ALL_MESSAGE_PREFERENCE_CATEGORY_ID and category_id not in known_category_ids:
+            continue
+        properties: dict[str, Any] = {
+            "$email": identifier,
+            "category": category_id,
+            "source": source,
+        }
+        try:
+            result = capture_internal(
+                token=team.api_token,
+                event_name="$workflows_email_unsubscribed",
+                event_source="workflows_unsubscribe",
+                distinct_id=identifier,
+                properties=properties,
+            )
+            if not result.succeeded():
+                logger.error(
+                    "workflows_email_unsubscribed_capture_failed",
+                    team_id=team_id,
+                    category=category_id,
+                    error=result.error,
+                )
+        except Exception as e:
+            capture_exception(e)
+
+
+def report_workflows_email_tracking_consent_updated(team_id: int, identifier: str, status: str) -> None:
+    """
+    Emit a $workflows_email_tracking_consent_updated engagement event when a recipient
+    changes their open/click tracking consent on the preferences page. Gated on the same
+    capture_workflows_engagement_events flag as the other $workflows_email_* events.
+    Best-effort — never fails the preferences flow.
+    """
+    try:
+        team = Team.objects.get(id=team_id)
+        if not team.workflows_config.capture_workflows_engagement_events:
+            return
+        result = capture_internal(
+            token=team.api_token,
+            event_name="$workflows_email_tracking_consent_updated",
+            event_source="workflows_preferences",
+            distinct_id=identifier,
+            properties={"$email": identifier, "status": status, "source": "preferences_page"},
+        )
+        if not result.succeeded():
+            logger.error(
+                "workflows_email_tracking_consent_capture_failed",
+                team_id=team_id,
+                error=result.error,
+            )
+    except Exception as e:
+        capture_exception(e)
 
 
 @csrf_exempt
@@ -483,14 +629,28 @@ def preferences_page(request: HttpRequest, token: str) -> HttpResponse:
         request.GET.get("one_click_unsubscribe") == "1" or request.POST.get("one_click_unsubscribe") == "1"
     )
     if is_one_click_unsubscribe:
+        was_fully_opted_out = recipient.get_preference(ALL_MESSAGE_PREFERENCE_CATEGORY_ID) == PreferenceStatus.OPTED_OUT
+
         # If one-click unsubscribe, set all preferences to opted out
         preferences_dict = {str(cat.id): PreferenceStatus.OPTED_OUT.value for cat in categories}
 
         # Also set the "$all" preference
         preferences_dict[ALL_MESSAGE_PREFERENCE_CATEGORY_ID] = PreferenceStatus.OPTED_OUT.value
 
+        # Unsubscribing is about which emails arrive, not how they're measured — a stored
+        # tracking-consent answer must survive the wholesale rebuild
+        tracking_pref = (recipient.preferences or {}).get(EMAIL_TRACKING_PREFERENCE_ID)
+        if tracking_pref is not None:
+            preferences_dict[EMAIL_TRACKING_PREFERENCE_ID] = tracking_pref
+
         recipient.preferences = preferences_dict
         recipient.save(update_fields=["preferences"])
+
+        sync_preferences_to_customerio(team_id, identifier, preferences_dict)
+
+        # Only a genuine transition emits, so token replays and scanner prefetches don't inflate events
+        if not was_fully_opted_out:
+            report_workflows_email_unsubscribed(team_id, identifier, [ALL_MESSAGE_PREFERENCE_CATEGORY_ID], "one_click")
 
         if request.method == "POST":
             return HttpResponse(status=200)
@@ -508,6 +668,11 @@ def preferences_page(request: HttpRequest, token: str) -> HttpResponse:
         for cat in categories
     ]
 
+    # Only surface the tracking-consent toggle when the team actually enforces consent —
+    # in "off" mode a stored preference would have no effect on sends
+    tracking_consent_mode = Team.objects.get(id=team_id).workflows_config.email_tracking_consent_mode
+    tracking_status = preferences.get(EMAIL_TRACKING_PREFERENCE_ID, PreferenceStatus.NO_PREFERENCE)
+
     context = {
         "recipient": recipient,
         "categories": [
@@ -520,6 +685,13 @@ def preferences_page(request: HttpRequest, token: str) -> HttpResponse:
             },
         ],
         "token": token,
+        "email_tracking_consent_enabled": tracking_consent_mode != EmailTrackingConsentMode.OFF,
+        # No stored answer falls back to the mode's default: tracked under opt-out, untracked under opt-in
+        "email_tracking_allowed": (
+            tracking_status == PreferenceStatus.OPTED_IN
+            if tracking_consent_mode == EmailTrackingConsentMode.OPT_IN
+            else tracking_status != PreferenceStatus.OPTED_OUT
+        ),
     }
 
     return render(
@@ -560,10 +732,10 @@ def update_preferences(request: HttpRequest) -> JsonResponse:
         recipient = MessageRecipientPreference(team_id=team_id, identifier=identifier)
 
     try:
+        prior_preferences = dict(recipient.preferences or {})
         preferences = request.POST.getlist("preferences[]")
         # Convert to dict of category_id: status
         preferences_dict = {}
-        all_opted_out = True
 
         for pref in preferences:
             category_id, opted_in = pref.split(":")
@@ -574,16 +746,46 @@ def update_preferences(request: HttpRequest) -> JsonResponse:
             status = PreferenceStatus.OPTED_IN if opted_in == "true" else PreferenceStatus.OPTED_OUT
             preferences_dict[category_id] = status.value
 
-            if status == PreferenceStatus.OPTED_IN:
-                all_opted_out = False
+        # $email_tracking is a measurement consent, not a subscription — it must neither
+        # block nor trigger the "unsubscribed from everything" $all computation
+        subscription_prefs = {k: v for k, v in preferences_dict.items() if k != EMAIL_TRACKING_PREFERENCE_ID}
 
         # If all preferences are opted out, add the "$all" preference
-        if all_opted_out and preferences_dict:
+        if subscription_prefs and all(v == PreferenceStatus.OPTED_OUT.value for v in subscription_prefs.values()):
             preferences_dict[ALL_MESSAGE_PREFERENCE_CATEGORY_ID] = PreferenceStatus.OPTED_OUT.value
+
+        # A save that doesn't include the tracking toggle (e.g. consent mode is off) must
+        # not erase a stored consent answer in the wholesale rebuild
+        if EMAIL_TRACKING_PREFERENCE_ID not in preferences_dict and EMAIL_TRACKING_PREFERENCE_ID in prior_preferences:
+            preferences_dict[EMAIL_TRACKING_PREFERENCE_ID] = prior_preferences[EMAIL_TRACKING_PREFERENCE_ID]
+
+        # A tracking-only save (no category toggles rendered, e.g. a team without marketing
+        # categories) must not rebuild subscription state - it would drop a stored $all opt-out
+        if not subscription_prefs:
+            preferences_dict = {**prior_preferences, **preferences_dict}
 
         # Update all preferences with a single DB write
         recipient.preferences = preferences_dict
         recipient.save()
+
+        sync_preferences_to_customerio(team_id, identifier, preferences_dict)
+
+        # Only genuine opt-out transitions count, so repeated saves don't double-emit
+        newly_opted_out = [
+            category_id
+            for category_id, status in preferences_dict.items()
+            if category_id != EMAIL_TRACKING_PREFERENCE_ID
+            and status == PreferenceStatus.OPTED_OUT.value
+            and prior_preferences.get(category_id) != PreferenceStatus.OPTED_OUT.value
+        ]
+        if newly_opted_out:
+            report_workflows_email_unsubscribed(team_id, identifier, newly_opted_out, "preferences_page")
+
+        new_tracking_consent = preferences_dict.get(EMAIL_TRACKING_PREFERENCE_ID)
+        if new_tracking_consent is not None and new_tracking_consent != prior_preferences.get(
+            EMAIL_TRACKING_PREFERENCE_ID
+        ):
+            report_workflows_email_tracking_consent_updated(team_id, identifier, new_tracking_consent)
 
         return JsonResponse({"success": True})
 

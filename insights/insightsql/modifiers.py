@@ -1,13 +1,12 @@
 from typing import TYPE_CHECKING, Optional
 
 import hanzo_insights
-from pydantic import ValidationError
 
-from insights.schema import (
+from insights.cloud_utils import is_cloud
+from insights.schema_enums import (
     BounceRatePageViewMode,
-    CustomChannelRule,
-    InsightsQLQueryModifiers,
     InCohortVia,
+    InlineCohortCalculation,
     MaterializationMode,
     PersonsArgMaxVersion,
     PropertyGroupsMode,
@@ -15,15 +14,19 @@ from insights.schema import (
     SessionTableVersion,
 )
 
-from insights.cloud_utils import is_cloud
-
+# This module loads at django.setup() via Team; insights.schema (the pydantic models) is
+# runtime-imported in the functions that build modifier objects to keep it off that path.
 if TYPE_CHECKING:
+    from insights.schema import InsightsQLQueryModifiers
+
     from insights.models import Team, User
 
 
 def create_default_modifiers_for_user(
-    user: "User", team: "Team", modifiers: Optional[InsightsQLQueryModifiers] = None
-) -> InsightsQLQueryModifiers:
+    user: "User", team: "Team", modifiers: Optional["InsightsQLQueryModifiers"] = None
+) -> "InsightsQLQueryModifiers":
+    from insights.schema import InsightsQLQueryModifiers  # noqa: PLC0415
+
     if modifiers is None:
         modifiers = InsightsQLQueryModifiers()
     else:
@@ -43,8 +46,12 @@ def create_default_modifiers_for_user(
 
 
 def create_default_modifiers_for_team(
-    team: "Team", modifiers: Optional[InsightsQLQueryModifiers] = None
-) -> InsightsQLQueryModifiers:
+    team: "Team", modifiers: Optional["InsightsQLQueryModifiers"] = None
+) -> "InsightsQLQueryModifiers":
+    from pydantic import ValidationError  # noqa: PLC0415
+
+    from insights.schema import CustomChannelRule, InsightsQLQueryModifiers  # noqa: PLC0415
+
     if modifiers is None:
         modifiers = InsightsQLQueryModifiers()
     else:
@@ -68,31 +75,14 @@ def create_default_modifiers_for_team(
                     setattr(modifiers, key, value)
 
     if modifiers.optimizeProjections is None:
-        modifiers.optimizeProjections = hanzo_insights.feature_enabled(
-            "projection-pushdown",
-            str(team.uuid),
-            groups={
-                "organization": str(team.organization_id),
-                "project": str(team.id),
-            },
-            group_properties={
-                "organization": {
-                    "id": str(team.organization_id),
-                },
-                "project": {
-                    "id": str(team.id),
-                },
-            },
-            only_evaluate_locally=True,
-            send_feature_flag_events=False,
-        )
+        modifiers.optimizeProjections = True
 
     set_default_modifier_values(modifiers, team)
 
     return modifiers
 
 
-def set_default_modifier_values(modifiers: InsightsQLQueryModifiers, team: "Team"):
+def set_default_modifier_values(modifiers: "InsightsQLQueryModifiers", team: "Team"):
     if modifiers.personsOnEventsMode is None:
         modifiers.personsOnEventsMode = team.person_on_events_mode_flag_based_default
 
@@ -107,6 +97,12 @@ def set_default_modifier_values(modifiers: InsightsQLQueryModifiers, team: "Team
 
     if modifiers.optimizeJoinedFilters is None:
         modifiers.optimizeJoinedFilters = False
+
+    # typeAwareCastSimplification deliberately gets no explicit default: None is falsy at the
+    # printer gate, stays out of the serialized cache payload (an explicit False would change every
+    # query's cache key on deploy for zero behavior change), and remains overridable per team via
+    # team.modifiers. Flipping the default on is a deliberate follow-up that carries the emitted-SQL
+    # snapshot churn for review.
 
     if modifiers.bounceRatePageViewMode is None:
         modifiers.bounceRatePageViewMode = BounceRatePageViewMode.COUNT_PAGEVIEWS
@@ -126,11 +122,17 @@ def set_default_modifier_values(modifiers: InsightsQLQueryModifiers, team: "Team
     if modifiers.convertToProjectTimezone is None:
         modifiers.convertToProjectTimezone = True
 
-    if modifiers.optimizeProjections is None:
-        modifiers.optimizeProjections = False
+    if modifiers.inlineCohortCalculation is None:
+        modifiers.inlineCohortCalculation = InlineCohortCalculation.AUTO
+
+    if modifiers.sessionIdPushdown is None:
+        modifiers.sessionIdPushdown = False
+
+    if modifiers.sessionPropertyPreAggregation is None:
+        modifiers.sessionPropertyPreAggregation = False
 
 
-def set_default_in_cohort_via(modifiers: InsightsQLQueryModifiers) -> InsightsQLQueryModifiers:
+def set_default_in_cohort_via(modifiers: "InsightsQLQueryModifiers") -> "InsightsQLQueryModifiers":
     if modifiers.inCohortVia is None or modifiers.inCohortVia == InCohortVia.AUTO:
         modifiers.inCohortVia = InCohortVia.SUBQUERY
 

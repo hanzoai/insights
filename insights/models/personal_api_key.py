@@ -1,48 +1,41 @@
-import hashlib
-from typing import Literal, Optional
+from typing import TYPE_CHECKING, Optional
 
 from django.contrib.auth.hashers import PBKDF2PasswordHasher
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import Q, QuerySet
 from django.utils import timezone
 
 from django_deprecate_fields import deprecate_field
+from prometheus_client import Counter
 
 from insights.models.activity_logging.model_activity import ModelActivityMixin
+from insights.models.utils import EncryptionModeType, generate_random_token, hash_key_value
 
-from .utils import generate_random_token
+if TYPE_CHECKING:
+    from insights.models.organization import Organization
 
-ModeType = Literal["sha256", "pbkdf2"]
-PERSONAL_API_KEY_MODES_TO_TRY: tuple[tuple[ModeType, Optional[int]], ...] = (
+PERSONAL_API_KEY_MODES_TO_TRY: tuple[tuple[EncryptionModeType, Optional[int]], ...] = (
     ("sha256", None),  # Moved to simple hashing in 2024-02
     ("pbkdf2", 260000),  # This is the iteration count used by Insights since the beginning of time.
     ("pbkdf2", 390000),  # This is the iteration count used briefly on some API keys.
 )
 
 LEGACY_PERSONAL_API_KEY_SALT = "insights_personal_api_key"
+LEGACY_HASH_PREFIX = f"{PBKDF2PasswordHasher.algorithm}$"
 
-
-def hash_key_value(value: str, mode: ModeType = "sha256", iterations: Optional[int] = None) -> str:
-    if mode == "pbkdf2":
-        if not iterations:
-            raise ValueError("Iterations must be provided when using legacy PBKDF2 mode")
-
-        hasher = PBKDF2PasswordHasher()
-        return hasher.encode(value, LEGACY_PERSONAL_API_KEY_SALT, iterations=iterations)
-
-    if iterations:
-        raise ValueError("Iterations must not be provided when using simple hashing mode")
-
-    # Inspiration on why no salt:
-    # https://github.com/jazzband/django-rest-knox/issues/188
-    value = hashlib.sha256(value.encode()).hexdigest()
-    return f"sha256${value}"  # Following format from Django's PBKDF2PasswordHasher
+PERSONAL_API_KEY_AUTH_COUNTER = Counter(
+    "personal_api_key_hash_mode_total",
+    "Successful personal API key authentications by hash mode",
+    labelnames=["hash_mode"],
+)
 
 
 class PersonalAPIKey(ModelActivityMixin, models.Model):
     id = models.CharField(primary_key=True, max_length=50, default=generate_random_token)
     user = models.ForeignKey("insights.User", on_delete=models.CASCADE, related_name="personal_api_keys")
     label = models.CharField(max_length=40)
+    description = models.TextField(null=True, blank=True, max_length=1000)
     mask_value = models.CharField(max_length=11, editable=False, null=True)
     secure_value = models.CharField(
         unique=True,
@@ -53,9 +46,9 @@ class PersonalAPIKey(ModelActivityMixin, models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     last_used_at = models.DateTimeField(null=True, blank=True)
     last_rolled_at = models.DateTimeField(null=True, blank=True)
-    scopes: ArrayField = ArrayField(models.CharField(max_length=100), null=True)
-    scoped_teams: ArrayField = ArrayField(models.IntegerField(), null=True)
-    scoped_organizations: ArrayField = ArrayField(models.CharField(max_length=100), null=True)
+    scopes: ArrayField = ArrayField(models.CharField(max_length=100), default=list)
+    scoped_teams: ArrayField = ArrayField(models.IntegerField(), null=True, blank=True)
+    scoped_organizations: ArrayField = ArrayField(models.CharField(max_length=100), null=True, blank=True)
 
     # DEPRECATED: value is no longer persisted; use secure_value for hash of value
     value = deprecate_field(models.CharField(unique=True, max_length=50, editable=False, null=True, blank=True))
@@ -71,7 +64,7 @@ class PersonalAPIKey(ModelActivityMixin, models.Model):
 
 def find_personal_api_key(token: str) -> tuple[PersonalAPIKey, str] | None:
     for mode, iterations in PERSONAL_API_KEY_MODES_TO_TRY:
-        secure_value = hash_key_value(token, mode=mode, iterations=iterations)
+        secure_value = hash_key_value(token, mode=mode, legacy_salt=LEGACY_PERSONAL_API_KEY_SALT, iterations=iterations)
         try:
             obj = (
                 PersonalAPIKey.objects.select_related("user")
@@ -84,3 +77,25 @@ def find_personal_api_key(token: str) -> tuple[PersonalAPIKey, str] | None:
             pass
 
     return None
+
+
+def get_organization_personal_api_keys(organization: "Organization") -> QuerySet[PersonalAPIKey]:
+    """Personal API keys of org members that can access this organization or any of its projects.
+
+    Includes fully unscoped keys (which can reach everything the owner can), keys explicitly scoped
+    to this organization, and keys scoped to any of the organization's teams.
+    """
+    team_ids = list(organization.teams.values_list("id", flat=True))
+    return (
+        PersonalAPIKey.objects.filter(user__organization_membership__organization_id=organization.id)
+        .filter(
+            Q(scoped_organizations__contains=[str(organization.id)])
+            | Q(scoped_teams__overlap=team_ids)
+            | (
+                (Q(scoped_organizations__isnull=True) | Q(scoped_organizations=[]))
+                & (Q(scoped_teams__isnull=True) | Q(scoped_teams=[]))
+            )
+        )
+        .select_related("user")
+        .distinct()
+    )

@@ -2,29 +2,22 @@
 
 set -e
 
-# This script copies built dist files from @hanzo/insights so they can be served on the CDN.
-PKG_DIR=$(node -e "console.log(require('path').dirname(require.resolve('@hanzo/insights/package.json')))")
+# This script copies the following built files from insights-js so that they can served on Insights's CDN
 
-if [ ! -d "$PKG_DIR/dist" ]; then
-    echo "ERROR: Cannot find @hanzo/insights dist at $PKG_DIR/dist" >&2
-    exit 1
-fi
-
-DIST="$PKG_DIR/dist"
-
-cp "$DIST"/array.js* dist/
-cp "$DIST"/array.full.js* dist/
-cp "$DIST"/array.full.es5.js* dist/
-cp "$DIST"/surveys.js* dist/
-cp "$DIST"/logs.js* dist/
-cp "$DIST"/exception-autocapture.js* dist/
-cp "$DIST"/web-vitals.js* dist/
-cp "$DIST"/tracing-headers.js* dist/
-cp "$DIST"/dead-clicks-autocapture.js* dist/
-cp "$DIST"/customizations.full.js* dist/
-# Copy all external integration bundles
-cp "$DIST"/*integration.js* dist/ 2>/dev/null || true
-# Copy all recorder bundles
-cp "$DIST"/*recorder*.js* dist/ 2>/dev/null || true
-cp "$DIST"/product-tours.js* dist/
-cp "$DIST"/conversations.js* dist/
+cp node_modules/insights-js/dist/array.js* dist/
+cp node_modules/insights-js/dist/array.full.js* dist/
+cp node_modules/insights-js/dist/array.full.es5.js* dist/
+cp node_modules/insights-js/dist/surveys.js* dist/
+cp node_modules/insights-js/dist/logs.js* dist/
+cp node_modules/insights-js/dist/exception-autocapture.js* dist/
+cp node_modules/insights-js/dist/web-vitals.js* dist/
+cp node_modules/insights-js/dist/web-vitals-with-attribution.js* dist/
+cp node_modules/insights-js/dist/tracing-headers.js* dist/
+cp node_modules/insights-js/dist/dead-clicks-autocapture.js* dist/
+cp node_modules/insights-js/dist/customizations.full.js* dist/
+# there are multiple external integrations that we use, so we need to copy them all
+cp node_modules/insights-js/dist/*integration.js* dist/ 2>/dev/null || true
+# there are multiple recorder files that we use, so we need to copy them all
+cp node_modules/insights-js/dist/*recorder*.js* dist/ 2>/dev/null || true
+cp node_modules/insights-js/dist/product-tours.js* dist/
+cp node_modules/insights-js/dist/conversations.js* dist/

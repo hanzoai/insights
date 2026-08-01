@@ -2,11 +2,11 @@ import { Collapse } from '@hanzo/elements'
 
 import { Markdown } from 'lib/elements/Markdown'
 
+import { SEVERITY_CONFIG } from './constants'
 import { ImmediateActionsSection } from './ImmediateActionsSection'
 import { KeyFieldsSection } from './KeyFieldsSection'
 import { ProbableCausesSection } from './ProbableCausesSection'
 import { SeverityBanner } from './SeverityBanner'
-import { SEVERITY_CONFIG } from './constants'
 import { LogExplanation } from './types'
 
 export interface ExplanationContentProps {

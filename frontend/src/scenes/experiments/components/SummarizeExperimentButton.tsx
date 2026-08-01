@@ -1,5 +1,5 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useMemo } from 'react'
 
 import { IconAI } from '@hanzo/icons'
@@ -11,7 +11,10 @@ import { useMaxTool } from 'scenes/max/useMaxTool'
 import { iconForType } from '~/layout/panel-layout/ProjectTree/defaultTree'
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 
+import { useAttachedContext } from 'products/insights_ai/frontend/api/logics'
+
 import { experimentLogic } from '../experimentLogic'
+import { isLaunched } from '../experimentsLogic'
 
 /**
  * Minimal context sent to the backend for experiment summarization.
@@ -52,9 +55,9 @@ function useExperimentSummaryMaxTool(): ReturnType<typeof useMaxTool> {
 
     const shouldShowMaxSummaryTool = useMemo(() => {
         const hasResults = orderedPrimaryMetricsWithResults.length > 0
-        const hasStarted = !!experiment.start_date
+        const hasStarted = isLaunched(experiment)
         return hasResults && hasStarted
-    }, [orderedPrimaryMetricsWithResults, experiment.start_date])
+    }, [orderedPrimaryMetricsWithResults, experiment.status, experiment.start_date, experiment.end_date, experiment])
 
     const maxToolResult = useMaxTool({
         identifier: 'experiment_results_summary',
@@ -84,6 +87,12 @@ function useExperimentSummaryMaxTool(): ReturnType<typeof useMaxTool> {
         },
     })
 
+    useAttachedContext(
+        shouldShowMaxSummaryTool
+            ? [{ type: 'experiment', key: experiment.id, label: experiment.name || 'Unnamed experiment' }]
+            : null
+    )
+
     return maxToolResult
 }
 
@@ -106,7 +115,7 @@ export function SummarizeExperimentButton({ disabledReason }: { disabledReason?:
             icon={<IconAI />}
             disabledReason={disabledReason}
         >
-            Summarize
+            Summarize results
         </Button>
     )
 }

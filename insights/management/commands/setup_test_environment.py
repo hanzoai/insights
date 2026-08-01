@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.test.runner import DiscoverRunner as TestRunner
 
-from datastore_orm import Database
+from infi.datastore_orm import Database
 
 from insights.datastore.schema import (
     CREATE_DATA_QUERIES,
@@ -61,6 +61,8 @@ class Command(BaseCommand):
             verify_ssl_cert=DATASTORE_VERIFY,
             autocreate=False,
             randomize_replica_paths=True,
+            # don't use the egress proxy, datastore is internal
+            trust_env=False,
         )
         if database.db_exists:
             print(  # noqa: T201
@@ -92,7 +94,9 @@ def disable_migrations() -> None:
     Speeds up setup significantly.
     """
     from django.conf import settings
-    from django.core.management.commands import migrate
+    from django.core.management.commands import migrate as django_migrate
+
+    from insights.management.commands import migrate as insights_migrate
 
     class DisableMigrations:
         def __contains__(self, item: str) -> bool:
@@ -101,7 +105,7 @@ def disable_migrations() -> None:
         def __getitem__(self, item: str) -> None:
             return None
 
-    class MigrateSilentCommand(migrate.Command):
+    class MigrateSilentCommand(insights_migrate.Command):
         def handle(self, *args, **kwargs):
             from django.db import connection
 
@@ -113,4 +117,5 @@ def disable_migrations() -> None:
             return super().handle(*args, **kwargs)
 
     settings.MIGRATION_MODULES = DisableMigrations()
-    migrate.Command = MigrateSilentCommand  # type: ignore
+    django_migrate.Command = MigrateSilentCommand  # type: ignore
+    insights_migrate.Command = MigrateSilentCommand  # type: ignore

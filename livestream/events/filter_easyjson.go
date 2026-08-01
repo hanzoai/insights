@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents(in *jlexer.Lexer, out *ResponseInsightsEvent) {
+func easyjson4d398eaaDecodeGithubComInsightsInsightsLivestreamEvents(in *jlexer.Lexer, out *ResponseInsightsEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -84,7 +84,7 @@ func easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents(in *jlexer.L
 		in.Consumed()
 	}
 }
-func easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents(out *jwriter.Writer, in ResponseInsightsEvent) {
+func easyjson4d398eaaEncodeGithubComInsightsInsightsLivestreamEvents(out *jwriter.Writer, in ResponseInsightsEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -152,27 +152,27 @@ func easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents(out *jwriter
 // MarshalJSON supports json.Marshaler interface
 func (v ResponseInsightsEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents(&w, v)
+	easyjson4d398eaaEncodeGithubComInsightsInsightsLivestreamEvents(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ResponseInsightsEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents(w, v)
+	easyjson4d398eaaEncodeGithubComInsightsInsightsLivestreamEvents(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ResponseInsightsEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents(&r, v)
+	easyjson4d398eaaDecodeGithubComInsightsInsightsLivestreamEvents(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ResponseInsightsEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents(l, v)
+	easyjson4d398eaaDecodeGithubComInsightsInsightsLivestreamEvents(l, v)
 }
-func easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents1(in *jlexer.Lexer, out *ResponseGeoEvent) {
+func easyjson4d398eaaDecodeGithubComInsightsInsightsLivestreamEvents1(in *jlexer.Lexer, out *ResponseGeoEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -211,7 +211,7 @@ func easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents1(in *jlexer.
 		in.Consumed()
 	}
 }
-func easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents1(out *jwriter.Writer, in ResponseGeoEvent) {
+func easyjson4d398eaaEncodeGithubComInsightsInsightsLivestreamEvents1(out *jwriter.Writer, in ResponseGeoEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -246,23 +246,23 @@ func easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents1(out *jwrite
 // MarshalJSON supports json.Marshaler interface
 func (v ResponseGeoEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents1(&w, v)
+	easyjson4d398eaaEncodeGithubComInsightsInsightsLivestreamEvents1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ResponseGeoEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents1(w, v)
+	easyjson4d398eaaEncodeGithubComInsightsInsightsLivestreamEvents1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ResponseGeoEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents1(&r, v)
+	easyjson4d398eaaDecodeGithubComInsightsInsightsLivestreamEvents1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ResponseGeoEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents1(l, v)
+	easyjson4d398eaaDecodeGithubComInsightsInsightsLivestreamEvents1(l, v)
 }

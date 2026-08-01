@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use scriptvm::{native_func, sync_execute, ExecutionContext, IQLLiteral, NativeFunction, Program};
+use scriptvm::{native_func, sync_execute, ExecutionContext, HogLiteral, NativeFunction, Program};
 use serde_json::{json, Value};
 
 fn stl_test_extensions() -> HashMap<String, NativeFunction> {
@@ -9,7 +9,7 @@ fn stl_test_extensions() -> HashMap<String, NativeFunction> {
             "print",
             native_func(|_, args| {
                 println!("{args:?}");
-                Ok(IQLLiteral::Null.into())
+                Ok(HogLiteral::Null.into())
             }),
         ),
         (
@@ -24,7 +24,7 @@ fn stl_test_extensions() -> HashMap<String, NativeFunction> {
                     .try_into()
                     .expect("Could convert")
                 {
-                    Ok(IQLLiteral::Null.into())
+                    Ok(HogLiteral::Null.into())
                 } else {
                     panic!("{lhs:?} did not equal {rhs:?}")
                 }
@@ -36,7 +36,7 @@ fn stl_test_extensions() -> HashMap<String, NativeFunction> {
                 // Used in test programs
                 let condition = args.first().unwrap().deref(&vm.heap).unwrap();
                 if *condition.try_as().expect("Could convert") {
-                    Ok(IQLLiteral::Null.into())
+                    Ok(HogLiteral::Null.into())
                 } else {
                     panic!("Assertion failed")
                 }
@@ -59,7 +59,7 @@ fn load_test_programs() -> Vec<(String, String)> {
         .expect("Could read test programs")
     {
         let file = file.unwrap();
-        if !file.file_name().to_str().unwrap().ends_with(".iqle") {
+        if !file.file_name().to_str().unwrap().ends_with(".hoge") {
             continue;
         }
         let name = file.file_name().to_str().unwrap().to_string();

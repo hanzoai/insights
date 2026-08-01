@@ -37,25 +37,72 @@ TYPE_CONVERSION_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "reinterpretAsFloat32": InsightsQLFunctionMeta("reinterpretAsFloat32", 1, 1),
     "reinterpretAsFloat64": InsightsQLFunctionMeta("reinterpretAsFloat64", 1, 1),
     "reinterpretAsUUID": InsightsQLFunctionMeta("reinterpretAsUUID", 1, 1),
+    "accurateCast": InsightsQLFunctionMeta("accurateCast", 2, 2),
+    "accurateCastOrNull": InsightsQLFunctionMeta("accurateCastOrNull", 2, 2),
     "toInt": InsightsQLFunctionMeta("accurateCastOrNull", 1, 1, suffix_args=[ast.Constant(value="Int64")]),
     "toIntOrZero": InsightsQLFunctionMeta("toInt64OrZero", 1, 1, signatures=[((StringType(),), IntegerType())]),
+    "toIntOrDefault": InsightsQLFunctionMeta(
+        # Mirror of toFloatOrDefault: Datastore's toInt64OrDefault requires the default value to
+        # already be Int64, so cast it (any numeric/string literal then works). The 1-arg form is
+        # degenerate (equivalent to toIntOrZero) and is rewritten in the printer before the
+        # placeholder template renders.
+        # Defaults are Integer only: accurateCast of a fractional float (e.g. 0.5) to Int64 throws
+        # at runtime, so unlike toFloatOrDefault we don't accept Float-typed defaults.
+        "toInt64OrDefault({0}, accurateCast({1}, 'Int64'))",
+        1,
+        2,
+        using_placeholder_arguments=True,
+        using_positional_arguments=True,
+        signatures=[
+            ((DecimalType(),), IntegerType()),
+            ((IntegerType(),), IntegerType()),
+            ((FloatType(),), IntegerType()),
+            ((StringType(),), IntegerType()),
+            ((DecimalType(), IntegerType()), IntegerType()),
+            ((IntegerType(), IntegerType()), IntegerType()),
+            ((FloatType(), IntegerType()), IntegerType()),
+            ((StringType(), IntegerType()), IntegerType()),
+        ],
+    ),
     "_toInt8": InsightsQLFunctionMeta("toInt8", 1, 1),
     "_toInt16": InsightsQLFunctionMeta("toInt16", 1, 1),
     "_toInt32": InsightsQLFunctionMeta("toInt32", 1, 1),
     "_toInt64": InsightsQLFunctionMeta("toInt64", 1, 1),
+    "_toUInt8": InsightsQLFunctionMeta("toUInt8", 1, 1, signatures=[((UnknownType(),), IntegerType())]),
     "_toUInt64": InsightsQLFunctionMeta("toUInt64", 1, 1, signatures=[((UnknownType(),), IntegerType())]),
     "_toUInt128": InsightsQLFunctionMeta("toUInt128", 1, 1),
     "toFloat": InsightsQLFunctionMeta("accurateCastOrNull", 1, 1, suffix_args=[ast.Constant(value="Float64")]),
+    # Aliases for the Datastore names — these map to the same nullable cast as toFloat
+    # (accurateCastOrNull returns NULL on unparseable input, matching toFloat64OrNull semantics).
+    "toFloatOrNull": InsightsQLFunctionMeta("accurateCastOrNull", 1, 1, suffix_args=[ast.Constant(value="Float64")]),
+    "toFloat64OrNull": InsightsQLFunctionMeta("accurateCastOrNull", 1, 1, suffix_args=[ast.Constant(value="Float64")]),
     "toFloatOrZero": InsightsQLFunctionMeta("toFloat64OrZero", 1, 1, signatures=[((StringType(),), FloatType())]),
     "toFloatOrDefault": InsightsQLFunctionMeta(
-        "toFloat64OrDefault",
+        # Datastore's toFloat64OrDefault requires the default value to already be
+        # Float64 — passing e.g. an integer 0 raises "Default value type should be
+        # same as cast type". Cast the default so any numeric/string literal works.
+        # The 1-arg form is degenerate (equivalent to toFloatOrZero) and is
+        # rewritten in the printer before the placeholder template renders.
+        "toFloat64OrDefault({0}, accurateCast({1}, 'Float64'))",
         1,
         2,
+        using_placeholder_arguments=True,
+        using_positional_arguments=True,
+        # The default arg (second) may be an integer or float literal — the
+        # template casts it to Float64 either way, so both must resolve.
         signatures=[
+            ((DecimalType(),), FloatType()),
+            ((IntegerType(),), FloatType()),
+            ((FloatType(),), FloatType()),
+            ((StringType(),), FloatType()),
             ((DecimalType(), FloatType()), FloatType()),
+            ((DecimalType(), IntegerType()), FloatType()),
             ((IntegerType(), FloatType()), FloatType()),
+            ((IntegerType(), IntegerType()), FloatType()),
             ((FloatType(), FloatType()), FloatType()),
+            ((FloatType(), IntegerType()), FloatType()),
             ((StringType(), FloatType()), FloatType()),
+            ((StringType(), IntegerType()), FloatType()),
         ],
     ),
     "toDecimal": InsightsQLFunctionMeta(
@@ -85,11 +132,13 @@ TYPE_CONVERSION_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "toNullableString": InsightsQLFunctionMeta(
         "accurateCastOrNull", 1, 1, suffix_args=[ast.Constant(value="Nullable(String)")]
     ),
-    "toBool": InsightsQLFunctionMeta("toBool", 1, 1),
+    "toBool": InsightsQLFunctionMeta("accurateCastOrNull", 1, 1, suffix_args=[ast.Constant(value="Bool")]),
     "toJSONString": InsightsQLFunctionMeta("toJSONString", 1, 1),
     "parseDateTime": InsightsQLFunctionMeta("parseDateTimeOrNull", 2, 3, tz_aware=True),
     "parseDateTimeBestEffort": InsightsQLFunctionMeta("parseDateTime64BestEffortOrNull", 1, 2, tz_aware=True),
+    "dynamicType": InsightsQLFunctionMeta("dynamicType", 1, 1),
     "toTypeName": InsightsQLFunctionMeta("toTypeName", 1, 1),
+    "defaultValueOfTypeName": InsightsQLFunctionMeta("defaultValueOfTypeName", 1, 1),
     "cityHash64": InsightsQLFunctionMeta("cityHash64", 1, 1),
     "UUIDv7ToDateTime": InsightsQLFunctionMeta("UUIDv7ToDateTime", 1, 1, tz_aware=True),
 }

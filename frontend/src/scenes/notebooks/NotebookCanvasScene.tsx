@@ -4,8 +4,8 @@ import { useMemo } from 'react'
 import { IconEllipsis } from '@hanzo/icons'
 import { Button, Menu, toast } from '@hanzo/elements'
 
-import { uuid } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
+import { uuid } from 'lib/utils/dom'
 import { getTextFromFile, selectFiles } from 'lib/utils/file-utils'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -48,7 +48,7 @@ export function NotebookCanvas(): JSX.Element {
                             items={[
                                 {
                                     label: 'Clear canvas',
-                                    onClick: () => setLocalContent({ type: 'doc', content: [] }, true),
+                                    onClick: () => setLocalContent({ type: 'doc', content: [] }),
                                 },
                                 {
                                     label: 'Export as JSON',
@@ -61,14 +61,17 @@ export function NotebookCanvas(): JSX.Element {
                                             contentType: 'application/json',
                                             multiple: false,
                                         })
-                                            .then((files) => getTextFromFile(files[0]))
-                                            .then((text) => {
+                                            .then(async (files) => {
+                                                if (!files.length) {
+                                                    return
+                                                }
+                                                const text = await getTextFromFile(files[0])
                                                 const data = JSON.parse(text)
                                                 if (data.type !== 'doc') {
                                                     throw new Error('Not a notebook')
                                                 }
                                                 // Looks like a notebook
-                                                setLocalContent(data, true)
+                                                setLocalContent(data)
                                             })
                                             .catch((e) => {
                                                 toast.error(e.message)

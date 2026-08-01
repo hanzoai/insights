@@ -1,6 +1,8 @@
+import { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
-import { useEffect, useRef } from 'react'
+import insights from 'insights-js'
+import { useEffect, useMemo, useRef } from 'react'
 
 import {
     IconBrackets,
@@ -8,50 +10,120 @@ import {
     IconCalendar,
     IconCheck,
     IconClock,
+    IconChevronRight,
     IconCode,
     IconCode2,
     IconDatabase,
+    IconExternal,
     IconPlusSmall,
 } from '@hanzo/icons'
-import { Link } from '@hanzo/elements'
+import { Dialog } from '@hanzo/elements'
 
+import { FEATURE_FLAGS } from 'lib/constants'
+import { IconTextSize } from 'lib/elements/icons'
+import { Field } from 'lib/elements/Field'
+import { Input } from 'lib/elements/Input'
 import { Tree, TreeRef, TreeDataItem } from 'lib/elements/Tree/Tree'
 import { TreeNodeDisplayIcon } from 'lib/elements/Tree/TreeUtils'
-import { IconTextSize } from 'lib/elements/icons'
+import { Link } from 'lib/elements/Link'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
-import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator } from 'lib/ui/DropdownMenu/DropdownMenu'
+import {
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+} from 'lib/ui/DropdownMenu/DropdownMenu'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
-import { buildQueryForColumnClick } from 'scenes/data-warehouse/editor/sql-utils'
+import { newInternalTab } from 'lib/utils/newInternalTab'
+import { POSTFN_WAREHOUSE } from 'scenes/data-warehouse/editor/connectionSelectorLogic'
+import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
 import { sqlEditorLogic } from 'scenes/data-warehouse/editor/sqlEditorLogic'
-import { dataWarehouseSettingsLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsLogic'
-import { sceneLogic } from 'scenes/sceneLogic'
 import { urls } from 'scenes/urls'
 
 import { SearchHighlightMultiple } from '~/layout/navigation-3000/components/SearchHighlight'
-import { DatabaseSerializedFieldType } from '~/queries/schema/schema-general'
+import { DatabaseSerializedFieldType, externalDataSources } from '~/queries/schema/schema-general'
+import { escapeDottedInsightsQLIdentifier, escapePropertyAsInsightsQLIdentifier } from '~/queries/utils'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
+
+import { sourceManagementLogic } from 'products/data_warehouse/frontend/shared/logics/sourceManagementLogic'
+import { buildSelectAllQuery } from 'products/data_warehouse/frontend/utils'
 
 import { dataWarehouseViewsLogic } from '../../saved_queries/dataWarehouseViewsLogic'
+import { TableCertificationIcon } from '../../TableCertificationBadge'
 import { draftsLogic } from '../draftsLogic'
 import { renderTableCount } from '../editorSceneLogic'
-import { OutputTab } from '../outputPaneLogic'
 import { isJoined, queryDatabaseLogic } from './queryDatabaseLogic'
 
-export const QueryDatabase = (): JSX.Element => {
+export function getSidebarAddJoinSourceTableName(
+    recordType: string | undefined,
+    itemName: string,
+    tableName?: string
+): string | null {
+    switch (recordType) {
+        case 'view':
+        case 'managed-view':
+            return itemName
+        case 'endpoint':
+            return tableName ?? null
+        default:
+            return null
+    }
+}
+
+/**
+ * Keep a section whose folder, or any of its children, matches the search term — the same
+ * name-and-field matching the database tree does for its own tables.
+ */
+const filterTreeSections = (sections: TreeDataItem[], searchTerm: string): TreeDataItem[] => {
+    const needle = searchTerm.trim().toLowerCase()
+    if (!needle) {
+        return sections
+    }
+    const matches = (item: TreeDataItem): boolean =>
+        item.name.toLowerCase().includes(needle) || (item.children ?? []).some(matches)
+    return sections.flatMap((section) => {
+        const children = (section.children ?? []).filter(matches)
+        return children.length ? [{ ...section, children }] : []
+    })
+}
+
+export const QueryDatabase = ({
+    virtualizationScrollContainerRef,
+    extraTreeSections,
+}: {
+    virtualizationScrollContainerRef?: React.RefObject<HTMLDivElement | null>
+    /**
+     * Extra top-level sections to render above the database tree, owned by the embedding surface
+     * (notebooks lists the dataframes its kernel holds). Rendered as-is: whatever builds them owns
+     * their icons, children, and search filtering. Default empty, so surfaces that pass nothing are
+     * unaffected.
+     */
+    extraTreeSections?: TreeDataItem[]
+}): JSX.Element => {
     const {
-        treeData,
-        searchTreeData,
-        expandedFolders,
-        expandedSearchFolders,
         searchTerm,
         joinsByFieldName,
         editingDraftId,
+        displayedTreeData,
+        expandedItemIds,
+        connectionId,
+        activeDraggedViewId,
+        highlightedDropFolderId,
+        highlightViewsSectionDrop,
+        featureFlags,
     } = useValues(queryDatabaseLogic)
     const {
         setExpandedFolders,
         toggleFolderOpen,
         setTreeRef,
         setExpandedSearchFolders,
+        startDraggingView,
+        updateDraggedViewDropTarget,
+        clearDraggedViewState,
+        moveDraggedViewToDropTarget,
         selectSourceTable,
         toggleEditJoinModal,
         setEditingDraft,
@@ -59,11 +131,35 @@ export const QueryDatabase = (): JSX.Element => {
         openUnsavedQuery,
         deleteUnsavedQuery,
     } = useActions(queryDatabaseLogic)
-    const { deleteDataWarehouseSavedQuery, runDataWarehouseSavedQuery } = useActions(dataWarehouseViewsLogic)
-    const { deleteJoin } = useActions(dataWarehouseSettingsLogic)
+    const {
+        createDataWarehouseSavedQueryFolder,
+        deleteDataWarehouseSavedQueryFolder,
+        updateDataWarehouseSavedQueryFolder,
+        deleteDataWarehouseSavedQuery,
+    } = useActions(dataWarehouseViewsLogic)
+    const { deleteJoin } = useActions(sourceManagementLogic)
     const { deleteDraft } = useActions(draftsLogic)
-    const { setQueryInput } = useActions(sqlEditorLogic)
-    const builtTabLogic = useMountedLogic(sqlEditorLogic)
+    const {
+        openMaterializationModal,
+        openAccessControlModal,
+        runQuery,
+        setActiveTab,
+        setQueryInput,
+        setSourceQuery,
+        insertTextAtCursor,
+    } = useActions(sqlEditorLogic)
+    const { isEmbeddedMode, sourceQuery } = useValues(sqlEditorLogic)
+    useMountedLogic(sqlEditorLogic)
+    // Project-wide warehouse write actions (Add join, Materialization) — gated at the
+    // resource level regardless of per-object creator bypass. Per-object actions like
+    // Edit view use the view's own user_access_level inline below.
+    const resourceLevelEditorDisabledReason = getAccessControlDisabledReason(
+        AccessControlResourceType.WarehouseObjects,
+        AccessControlLevel.Editor
+    )
+    const addJoinAccessDisabledReason = resourceLevelEditorDisabledReason
+    const materializationAccessDisabledReason = resourceLevelEditorDisabledReason
+    const warehouseAccessControlEnabled = !!featureFlags[FEATURE_FLAGS.INSIGHTSQL_WAREHOUSE_ACCESS_CONTROL]
     const formatTraversalChain = (chain?: (string | number)[]): string | null => {
         if (!chain || chain.length === 0) {
             return null
@@ -151,7 +247,7 @@ export const QueryDatabase = (): JSX.Element => {
             case 'managed-view':
                 return 'managed view'
             case 'endpoint':
-                return 'endpoint'
+                return 'materialized endpoint'
             case 'view':
             case 'view-table':
                 return item.record.view?.is_materialized ? 'materialized view' : 'view'
@@ -163,7 +259,6 @@ export const QueryDatabase = (): JSX.Element => {
                     case 'batch_export':
                         return 'batch export'
                     case 'data_warehouse':
-                        // Return "" to not clutter the interface
                         return ''
                     case 'insights':
                         // Return "" to not clutter the interface
@@ -180,18 +275,110 @@ export const QueryDatabase = (): JSX.Element => {
         }
     }
 
+    const isPreviewableViewItem = (item: TreeDataItem): boolean => {
+        return ['view', 'managed-view', 'endpoint'].includes(item.record?.type)
+    }
+
+    const previewItem = (item: TreeDataItem): void => {
+        if (!isPreviewableViewItem(item)) {
+            return
+        }
+
+        const table = item.record?.tableName || item.name
+        const previewQuery = `SELECT * FROM ${escapePropertyAsInsightsQLIdentifier(table)} LIMIT 100`
+        const nextConnectionId = connectionId && connectionId !== POSTFN_WAREHOUSE ? connectionId : undefined
+
+        if (isEmbeddedMode) {
+            setActiveTab(OutputTab.Results)
+            setSourceQuery({
+                ...sourceQuery,
+                source: {
+                    ...sourceQuery.source,
+                    connectionId: nextConnectionId,
+                    query: previewQuery,
+                },
+            })
+            setQueryInput(previewQuery)
+            runQuery(previewQuery, true)
+            return
+        }
+
+        router.actions.push(
+            urls.sqlEditor({
+                query: previewQuery,
+                outputTab: OutputTab.Results,
+                connectionId: nextConnectionId,
+            })
+        )
+    }
+
+    const openItemEditor = (item: TreeDataItem, newTab = false): void => {
+        const url =
+            item.record?.type === 'endpoint' ? getEndpointUrl(item) : urls.sqlEditor({ view_id: item.record?.view.id })
+
+        if (newTab) {
+            newInternalTab(url)
+            return
+        }
+
+        router.actions.push(url)
+    }
+
+    const getEndpointUrl = (item: TreeDataItem): string => {
+        const endpointName = item.record?.table?.name ?? item.name
+        const versionMatch = endpointName.match(/^(.+)_v(\d+)$/)
+
+        if (versionMatch) {
+            return urls.endpoint(versionMatch[1], parseInt(versionMatch[2], 10))
+        }
+
+        return urls.endpoint(item.name)
+    }
+
     const treeRef = useRef<TreeRef>(null)
     useEffect(() => {
         setTreeRef(treeRef)
     }, [treeRef, setTreeRef])
 
+    const treeData = useMemo(() => {
+        if (!extraTreeSections?.length) {
+            return displayedTreeData
+        }
+        // Filtered here rather than by the caller: the tree swaps in its own filtered data while
+        // searching, so an unfiltered section would sit above the results still listing
+        // everything — and keeping the search term on this side means an embedder doesn't have to
+        // mount this logic just to read it.
+        return [...filterTreeSections(extraTreeSections, searchTerm), ...displayedTreeData]
+    }, [extraTreeSections, displayedTreeData, searchTerm])
+
     return (
         <Tree
             ref={treeRef}
-            // TODO: Can move this to treedata selector but selectors are maxed out on dependencies
-            data={searchTerm ? searchTreeData : treeData}
-            expandedItemIds={searchTerm ? expandedSearchFolders : expandedFolders}
-            onSetExpandedItemIds={searchTerm ? setExpandedSearchFolders : setExpandedFolders}
+            data={treeData}
+            enableDragAndDrop={!searchTerm}
+            isItemDraggable={(item) => !searchTerm && item.record?.type === 'view' && item.record?.isSavedQuery}
+            isItemDroppable={(item) =>
+                !searchTerm &&
+                ((item.record?.type === 'folder' && item.record?.folderType === 'view-folder') ||
+                    item.record?.type === 'views')
+            }
+            onDragStart={(dragEvent: DragStartEvent) => {
+                startDraggingView(String(dragEvent.active.id))
+            }}
+            onDragOver={(dragEvent: DragOverEvent) => {
+                updateDraggedViewDropTarget(dragEvent.over?.id ? String(dragEvent.over.id) : null)
+            }}
+            onDragCancel={clearDraggedViewState}
+            onDragEnd={(dragEvent: DragEndEvent) => {
+                moveDraggedViewToDropTarget(
+                    String(dragEvent.active.id),
+                    dragEvent.over?.id ? String(dragEvent.over.id) : null
+                )
+            }}
+            expandedItemIds={expandedItemIds}
+            onSetExpandedItemIds={
+                searchTerm ? setExpandedSearchFolders : (folderIds) => setExpandedFolders(folderIds, connectionId)
+            }
             onFolderClick={(folder, isExpanded) => {
                 if (folder) {
                     toggleFolderOpen(folder.id, isExpanded)
@@ -212,12 +399,9 @@ export const QueryDatabase = (): JSX.Element => {
                     router.actions.push(urls.sqlEditor({ draftId: item.record.draft.id }))
                 }
 
-                // Copy column name when clicking on a column
+                // Insert the column at the cursor, preserving the rest of the query the user has typed
                 if (item && item.record?.type === 'column') {
-                    const currentQueryInput = builtTabLogic.values.queryInput
-                    setQueryInput(
-                        buildQueryForColumnClick(currentQueryInput, item.record.table, item.record.columnName)
-                    )
+                    insertTextAtCursor(escapeDottedInsightsQLIdentifier(item.record.columnName))
                 }
 
                 if (item && item.record?.type === 'unsaved-query') {
@@ -231,35 +415,59 @@ export const QueryDatabase = (): JSX.Element => {
                 const isColumn = item.record?.type === 'column'
                 const columnType = isColumn ? item.record?.field?.type : null
                 const tableKindLabel = !isColumn && item.children?.length ? getTableKindLabel(item) : null
+                const certification =
+                    item.record?.type === 'table'
+                        ? item.record?.table?.certification
+                        : item.record?.type === 'view'
+                          ? item.record?.certification
+                          : undefined
+                const itemLabel = typeof item.displayName === 'string' ? item.displayName : item.name
+                const isHighlightedFolderDropTarget =
+                    item.record?.type === 'folder' &&
+                    item.record?.folderType === 'view-folder' &&
+                    item.record.folder.id === highlightedDropFolderId
+                const isHighlightedViewsDropTarget = item.record?.type === 'views' && highlightViewsSectionDrop
+                const showDropTargetBadge =
+                    activeDraggedViewId &&
+                    (isHighlightedFolderDropTarget || isHighlightedViewsDropTarget) &&
+                    activeDraggedViewId !== item.id
 
                 return (
-                    <span className="truncate">
+                    <span
+                        className="truncate"
+                        onDoubleClick={(e) => {
+                            if (!isPreviewableViewItem(item)) {
+                                return
+                            }
+                            e.stopPropagation()
+                            previewItem(item)
+                        }}
+                    >
                         <div className="flex flex-row gap-1 justify-between">
                             <div className="shrink-0 flex min-w-0 items-center gap-2">
                                 {hasMatches && searchTerm ? (
                                     <SearchHighlightMultiple
-                                        string={item.name}
+                                        string={itemLabel}
                                         substring={searchTerm}
                                         className={cn(isColumn && 'font-mono text-xs')}
                                     />
                                 ) : (
                                     <span
                                         className={cn(
-                                            [
-                                                'managed-views',
-                                                'views',
-                                                'sources',
-                                                'drafts',
-                                                'unsaved-folder',
-                                                'endpoints',
-                                            ].includes(item.record?.type) && 'font-semibold',
+                                            ['managed-views', 'views', 'sources', 'drafts', 'unsaved-folder'].includes(
+                                                item.record?.type
+                                            ) && 'font-semibold',
+                                            item.record?.type === 'folder' &&
+                                                item.record?.folderType === 'view-folder' &&
+                                                'font-semibold',
                                             isColumn && 'font-mono text-xs',
                                             'truncate shrink-0'
                                         )}
                                     >
-                                        {item.name}
+                                        {item.displayName ?? item.name}
                                     </span>
                                 )}
+                                <TableCertificationIcon certification={certification} />
                                 {isColumn && columnType ? (
                                     <span className="shrink rounded px-1.5 py-0.5 text-xs text-muted-alt">
                                         {columnType === 'field_traverser' && item?.record?.field.chain
@@ -269,6 +477,10 @@ export const QueryDatabase = (): JSX.Element => {
                                 ) : tableKindLabel ? (
                                     <span className="shrink rounded px-1.5 py-0.5 text-xs text-muted-alt">
                                         {tableKindLabel}
+                                    </span>
+                                ) : showDropTargetBadge ? (
+                                    <span className="shrink rounded px-1.5 py-0.5 text-xs bg-accent-highlight-secondary text-accent">
+                                        Drop here
                                     </span>
                                 ) : null}
                             </div>
@@ -352,13 +564,26 @@ export const QueryDatabase = (): JSX.Element => {
 
                 // Show menu for tables
                 if (item.record?.type === 'table') {
+                    // Per-object access control only exists for actual warehouse tables, not insights/system tables
+                    const warehouseTableId =
+                        warehouseAccessControlEnabled && item.record.table?.type === 'data_warehouse'
+                            ? item.record.table?.id
+                            : null
+
                     return (
                         <DropdownMenuGroup>
                             <DropdownMenuItem
                                 asChild
                                 onClick={(e) => {
                                     e.stopPropagation()
-                                    sceneLogic.actions.newTab(urls.sqlEditor({ query: `SELECT * FROM ${item.name}` }))
+                                    const nextConnectionId =
+                                        connectionId && connectionId !== POSTFN_WAREHOUSE ? connectionId : undefined
+                                    router.actions.push(
+                                        urls.sqlEditor({
+                                            query: buildSelectAllQuery(item.name, null),
+                                            connectionId: nextConnectionId,
+                                        })
+                                    )
                                 }}
                             >
                                 <ButtonPrimitive menuItem>Query</ButtonPrimitive>
@@ -367,10 +592,20 @@ export const QueryDatabase = (): JSX.Element => {
                                 asChild
                                 onClick={(e) => {
                                     e.stopPropagation()
+                                    if (addJoinAccessDisabledReason) {
+                                        return
+                                    }
                                     selectSourceTable(item.name)
                                 }}
                             >
-                                <ButtonPrimitive menuItem>Add join</ButtonPrimitive>
+                                <ButtonPrimitive
+                                    menuItem
+                                    disabledReasons={
+                                        addJoinAccessDisabledReason ? { [addJoinAccessDisabledReason]: true } : {}
+                                    }
+                                >
+                                    Add join
+                                </ButtonPrimitive>
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 asChild
@@ -381,121 +616,322 @@ export const QueryDatabase = (): JSX.Element => {
                             >
                                 <ButtonPrimitive menuItem>Copy table name</ButtonPrimitive>
                             </DropdownMenuItem>
+                            {warehouseTableId ? (
+                                <DropdownMenuItem
+                                    asChild
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        openAccessControlModal({
+                                            resource: AccessControlResourceType.WarehouseTable,
+                                            resourceId: warehouseTableId,
+                                            name: item.name,
+                                        })
+                                    }}
+                                >
+                                    <ButtonPrimitive menuItem>Access control</ButtonPrimitive>
+                                </DropdownMenuItem>
+                            ) : null}
                         </DropdownMenuGroup>
                     )
                 }
 
-                // Show menu for views
-                if (item.record?.type === 'view' || item.record?.type === 'managed-view') {
-                    // Extract view ID from item.id (format: 'view-{id}' or 'search-view-{id}')
-                    const viewId = item.id.startsWith('search-view-')
-                        ? item.id.replace('search-view-', '')
-                        : item.id.replace('view-', '')
-
-                    // Check if this is a saved query (has last_run_at) vs managed view
-                    const isSavedQuery = item.record?.isSavedQuery || false
-                    const isManagedViewsetQuery = item.record?.view.managed_viewset_kind !== null
-
+                if (item.record?.type === 'views') {
                     return (
                         <DropdownMenuGroup>
-                            {isSavedQuery && (
-                                <>
-                                    <DropdownMenuItem
-                                        asChild
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            sceneLogic.actions.newTab(urls.sqlEditor({ view_id: item.record?.view.id }))
-                                        }}
-                                    >
-                                        <ButtonPrimitive
-                                            menuItem
-                                            tooltipInteractive
-                                            tooltipPlacement="right"
-                                            disabled={isManagedViewsetQuery}
-                                            tooltip={
-                                                isManagedViewsetQuery ? (
-                                                    <>
-                                                        Managed viewset views cannot be edited directly. You can
-                                                        enable/disable these views in the{' '}
-                                                        <Link to={urls.dataWarehouseManagedViewsets()}>
-                                                            Managed Viewsets
-                                                        </Link>{' '}
-                                                        section.
-                                                    </>
-                                                ) : undefined
-                                            }
-                                        >
-                                            Edit view definition
-                                        </ButtonPrimitive>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        asChild
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            selectSourceTable(item.name)
-                                        }}
-                                    >
-                                        <ButtonPrimitive menuItem>Add join</ButtonPrimitive>
-                                    </DropdownMenuItem>
-                                    {item.record?.view?.is_materialized && (
-                                        <DropdownMenuItem
-                                            asChild
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                runDataWarehouseSavedQuery(viewId)
-                                            }}
-                                        >
-                                            <ButtonPrimitive
-                                                menuItem
-                                                disabledReasons={{
-                                                    'Materialization is already running':
-                                                        item.record?.view?.status === 'Running',
-                                                }}
-                                            >
-                                                Sync now
-                                            </ButtonPrimitive>
-                                        </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        asChild
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            deleteDataWarehouseSavedQuery(viewId)
-                                        }}
-                                    >
-                                        <ButtonPrimitive
-                                            menuItem
-                                            tooltipInteractive
-                                            tooltipPlacement="right"
-                                            disabled={isManagedViewsetQuery}
-                                            tooltip={
-                                                isManagedViewsetQuery ? (
-                                                    <>
-                                                        Managed viewset views cannot be individually deleted. You can
-                                                        choose to delete all views in the managed viewset from the{' '}
-                                                        <Link to={urls.dataWarehouseManagedViewsets()}>
-                                                            Managed Viewsets
-                                                        </Link>{' '}
-                                                        page.
-                                                    </>
-                                                ) : undefined
-                                            }
-                                        >
-                                            Delete
-                                        </ButtonPrimitive>
-                                    </DropdownMenuItem>
-                                </>
-                            )}
                             <DropdownMenuItem
                                 asChild
                                 onClick={(e) => {
                                     e.stopPropagation()
-                                    void copyToClipboard(item.name)
+                                    Dialog.openForm({
+                                        title: 'New folder',
+                                        initialValues: { folderName: '' },
+                                        content: (
+                                            <Field name="folderName">
+                                                <Input placeholder="Enter a folder name" autoFocus />
+                                            </Field>
+                                        ),
+                                        errors: {
+                                            folderName: (name) =>
+                                                !name?.trim() ? 'You must enter a folder name' : undefined,
+                                        },
+                                        onSubmit: ({ folderName }) =>
+                                            createDataWarehouseSavedQueryFolder(folderName.trim()),
+                                    })
                                 }}
                             >
-                                <ButtonPrimitive menuItem>Copy view name</ButtonPrimitive>
+                                <ButtonPrimitive menuItem>+ New folder</ButtonPrimitive>
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                                asChild
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    newInternalTab(urls.models())
+                                }}
+                            >
+                                <ButtonPrimitive menuItem>Manage views</ButtonPrimitive>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                asChild
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    newInternalTab(urls.endpoints())
+                                }}
+                            >
+                                <ButtonPrimitive menuItem>Manage endpoints</ButtonPrimitive>
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                    )
+                }
+
+                if (item.record?.type === 'folder' && item.record?.folderType === 'view-folder') {
+                    const folder = item.record.folder
+
+                    return (
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem
+                                asChild
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    Dialog.openForm({
+                                        title: 'Rename folder',
+                                        initialValues: { folderName: item.name },
+                                        content: (
+                                            <Field name="folderName">
+                                                <Input placeholder="Enter a folder name" autoFocus />
+                                            </Field>
+                                        ),
+                                        errors: {
+                                            folderName: (name) =>
+                                                !name?.trim() ? 'You must enter a folder name' : undefined,
+                                        },
+                                        onSubmit: ({ folderName }) =>
+                                            updateDataWarehouseSavedQueryFolder({
+                                                id: folder.id,
+                                                name: folderName.trim(),
+                                            }),
+                                    })
+                                }}
+                            >
+                                <ButtonPrimitive menuItem>Rename folder</ButtonPrimitive>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                asChild
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    Dialog.open({
+                                        title: `Delete folder "${item.name}"?`,
+                                        description:
+                                            'Deleting a folder also deletes every view inside it. This cannot be undone.',
+                                        primaryButton: {
+                                            status: 'danger',
+                                            children: 'Delete folder',
+                                            onClick: () => deleteDataWarehouseSavedQueryFolder(folder.id),
+                                        },
+                                        secondaryButton: {
+                                            children: 'Cancel',
+                                        },
+                                    })
+                                }}
+                            >
+                                <ButtonPrimitive menuItem className="text-danger">
+                                    Delete folder
+                                </ButtonPrimitive>
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                    )
+                }
+
+                if (
+                    item.record?.type === 'endpoint' ||
+                    item.record?.type === 'view' ||
+                    item.record?.type === 'managed-view'
+                ) {
+                    const editLabel = item.record.type === 'endpoint' ? 'Edit endpoint' : 'Edit view'
+                    const addJoinSourceTableName = getSidebarAddJoinSourceTableName(
+                        item.record.type,
+                        item.name,
+                        item.record.type === 'endpoint' ? item.record.tableName : undefined
+                    )
+                    // Edit view is per-object — creators can edit their own views.
+                    const editViewAccessDisabledReason =
+                        item.record.type !== 'endpoint'
+                            ? getAccessControlDisabledReason(
+                                  AccessControlResourceType.WarehouseObjects,
+                                  AccessControlLevel.Editor,
+                                  item.record.view?.user_access_level
+                              )
+                            : null
+                    // Only saved views map to the WarehouseView resource; endpoints use the Endpoint resource, managed views have none.
+                    const warehouseViewId =
+                        warehouseAccessControlEnabled && item.record.type === 'view' && item.record.isSavedQuery
+                            ? item.record.view?.id
+                            : null
+
+                    return (
+                        <DropdownMenuGroup>
+                            <div className="flex gap-px">
+                                {!isEmbeddedMode && item.record.type !== 'endpoint' ? (
+                                    <>
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                to={urls.sqlEditor({ view_id: item.record.view?.id })}
+                                                onClick={(e) => e.stopPropagation()}
+                                                disabledReason={editViewAccessDisabledReason}
+                                                buttonProps={{
+                                                    menuItem: true,
+                                                    className: 'flex-1 rounded-r-none',
+                                                }}
+                                            >
+                                                {editLabel}
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                to={urls.sqlEditor({ view_id: item.record.view?.id })}
+                                                target="_blank"
+                                                targetBlankIcon={false}
+                                                onClick={(e) => e.stopPropagation()}
+                                                disabledReason={editViewAccessDisabledReason}
+                                                tooltip={editLabel}
+                                                buttonProps={{
+                                                    menuItem: true,
+                                                    iconOnly: true,
+                                                    className: 'px-2 rounded-l-none',
+                                                }}
+                                            >
+                                                <IconExternal />
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </>
+                                ) : (
+                                    <DropdownMenuItem
+                                        asChild
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            openItemEditor(item, true)
+                                        }}
+                                    >
+                                        <ButtonPrimitive menuItem>{editLabel}</ButtonPrimitive>
+                                    </DropdownMenuItem>
+                                )}
+                            </div>
+                            <DropdownMenuItem
+                                asChild
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    previewItem(item)
+                                }}
+                            >
+                                <ButtonPrimitive menuItem>Query</ButtonPrimitive>
+                            </DropdownMenuItem>
+                            {addJoinSourceTableName ? (
+                                <DropdownMenuItem
+                                    asChild
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        if (addJoinAccessDisabledReason) {
+                                            return
+                                        }
+                                        selectSourceTable(addJoinSourceTableName)
+                                    }}
+                                >
+                                    <ButtonPrimitive
+                                        menuItem
+                                        disabledReasons={
+                                            addJoinAccessDisabledReason ? { [addJoinAccessDisabledReason]: true } : {}
+                                        }
+                                    >
+                                        Add join
+                                    </ButtonPrimitive>
+                                </DropdownMenuItem>
+                            ) : null}
+                            {item.record.type === 'view' ? (
+                                <DropdownMenuItem
+                                    asChild
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        if (materializationAccessDisabledReason) {
+                                            return
+                                        }
+                                        openMaterializationModal(item.record?.view)
+                                    }}
+                                >
+                                    <ButtonPrimitive
+                                        menuItem
+                                        disabledReasons={
+                                            materializationAccessDisabledReason
+                                                ? { [materializationAccessDisabledReason]: true }
+                                                : {}
+                                        }
+                                    >
+                                        Materialization
+                                    </ButtonPrimitive>
+                                </DropdownMenuItem>
+                            ) : null}
+                            {item.record.type !== 'endpoint' ? (
+                                <DropdownMenuItem
+                                    asChild
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        void copyToClipboard(item.name)
+                                    }}
+                                >
+                                    <ButtonPrimitive menuItem>Copy view name</ButtonPrimitive>
+                                </DropdownMenuItem>
+                            ) : null}
+                            {warehouseViewId ? (
+                                <DropdownMenuItem
+                                    asChild
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        openAccessControlModal({
+                                            resource: AccessControlResourceType.WarehouseView,
+                                            resourceId: warehouseViewId,
+                                            name: item.name,
+                                        })
+                                    }}
+                                >
+                                    <ButtonPrimitive menuItem>Access control</ButtonPrimitive>
+                                </DropdownMenuItem>
+                            ) : null}
+                            {item.record.type === 'view' && item.record.isSavedQuery ? (
+                                <DropdownMenuItem
+                                    asChild
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        if (editViewAccessDisabledReason) {
+                                            return
+                                        }
+                                        Dialog.open({
+                                            title: `Delete view "${item.name}"?`,
+                                            description:
+                                                'Are you sure you want to delete this view? This action cannot be undone.',
+                                            primaryButton: {
+                                                status: 'danger',
+                                                children: 'Delete view',
+                                                onClick: () => {
+                                                    if (item.record?.view?.id) {
+                                                        deleteDataWarehouseSavedQuery(item.record.view.id)
+                                                    }
+                                                },
+                                            },
+                                            secondaryButton: {
+                                                children: 'Cancel',
+                                            },
+                                        })
+                                    }}
+                                >
+                                    <ButtonPrimitive
+                                        menuItem
+                                        className="text-danger"
+                                        disabledReasons={
+                                            editViewAccessDisabledReason ? { [editViewAccessDisabledReason]: true } : {}
+                                        }
+                                    >
+                                        Delete view
+                                    </ButtonPrimitive>
+                                </DropdownMenuItem>
+                            ) : null}
                         </DropdownMenuGroup>
                     )
                 }
@@ -529,41 +965,76 @@ export const QueryDatabase = (): JSX.Element => {
                     )
                 }
 
-                // Show menu for endpoints
-                if (item.record?.type === 'endpoint') {
+                if (item.record?.type === 'sources') {
+                    // used to override default icon behavior
+                    return null
+                }
+
+                // External source folders get an actions menu: edit the source and add a new one of this type
+                if (
+                    item.record?.type === 'source-folder' &&
+                    externalDataSources.includes(item.record?.sourceType as (typeof externalDataSources)[number])
+                ) {
+                    const sourceType = item.record?.sourceType
+                    const sources: { id: string; label: string }[] = item.record?.sources ?? []
                     return (
                         <DropdownMenuGroup>
-                            <DropdownMenuItem
-                                asChild
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    sceneLogic.actions.newTab(urls.endpoint(item.name))
-                                }}
-                            >
-                                <ButtonPrimitive menuItem>View endpoint</ButtonPrimitive>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                asChild
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    sceneLogic.actions.newTab(
-                                        urls.sqlEditor({
-                                            query: item.record?.endpoint?.query.query,
-                                            outputTab: OutputTab.Endpoint,
-                                            endpointName: item.record?.endpoint?.name,
+                            {sources.length === 1 ? (
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        to={urls.dataWarehouseSource(`managed-${sources[0].id}`, 'configuration')}
+                                        target="_blank"
+                                        buttonProps={{ menuItem: true }}
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        Edit source
+                                    </Link>
+                                </DropdownMenuItem>
+                            ) : sources.length > 1 ? (
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger asChild>
+                                        <ButtonPrimitive menuItem>
+                                            Edit source
+                                            <IconChevronRight className="ml-auto size-3" />
+                                        </ButtonPrimitive>
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent>
+                                        {sources.map((source) => (
+                                            <DropdownMenuItem key={source.id} asChild>
+                                                <Link
+                                                    to={urls.dataWarehouseSource(
+                                                        `managed-${source.id}`,
+                                                        'configuration'
+                                                    )}
+                                                    target="_blank"
+                                                    buttonProps={{ menuItem: true }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {source.label}
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                            ) : null}
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    to={urls.dataWarehouseSourceNew(sourceType)}
+                                    target="_blank"
+                                    buttonProps={{ menuItem: true }}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        insights.capture('sql-editor-add-source-clicked', {
+                                            source_type: sourceType,
+                                            location: 'source_type_row',
                                         })
-                                    )
-                                }}
-                            >
-                                <ButtonPrimitive menuItem>Edit endpoint query</ButtonPrimitive>
+                                    }}
+                                >
+                                    Add new source of this type
+                                </Link>
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                     )
-                }
-
-                if (['sources', 'endpoints'].includes(item.record?.type)) {
-                    // used to override default icon behavior
-                    return null
                 }
 
                 return undefined
@@ -577,7 +1048,11 @@ export const QueryDatabase = (): JSX.Element => {
                             className="z-2"
                             onClick={(e) => {
                                 e.stopPropagation()
-                                sceneLogic.actions.newTab(urls.dataWarehouseSourceNew())
+                                insights.capture('sql-editor-add-source-clicked', {
+                                    source_type: null,
+                                    location: 'sources_header',
+                                })
+                                newInternalTab(urls.dataWarehouseSourceNew())
                             }}
                             data-attr="sql-editor-add-source"
                         >
@@ -586,26 +1061,21 @@ export const QueryDatabase = (): JSX.Element => {
                     )
                 }
 
-                if (item.record?.type === 'endpoints') {
-                    return (
-                        <ButtonPrimitive
-                            iconOnly
-                            isSideActionRight
-                            className="z-2"
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                sceneLogic.actions.newTab(urls.sqlEditor({ outputTab: OutputTab.Endpoint }))
-                            }}
-                            data-attr="sql-editor-add-endpoint"
-                        >
-                            <IconPlusSmall className="text-tertiary" />
-                        </ButtonPrimitive>
-                    )
-                }
+                // External source folders fall through to the default ellipsis trigger, which opens
+                // the actions menu (edit source / add new source of this type) defined in itemSideAction
             }}
             renderItemTooltip={(item) => {
                 // Show tooltip with full name for items that could be truncated
-                const tooltipTypes = ['table', 'view', 'managed-view', 'endpoint', 'draft', 'column', 'unsaved-query']
+                const tooltipTypes = [
+                    'table',
+                    'view',
+                    'managed-view',
+                    'endpoint',
+                    'draft',
+                    'column',
+                    'unsaved-query',
+                    'folder',
+                ]
                 if (tooltipTypes.includes(item.record?.type)) {
                     if (item.record?.type === 'column' && item.record?.field?.type === 'field_traverser') {
                         const traversalChain = formatTraversalChain(item.record.field.chain)
@@ -628,13 +1098,10 @@ export const QueryDatabase = (): JSX.Element => {
                 if (item.record?.type === 'column') {
                     return getFieldTypeIcon(item.record.field?.type)
                 }
-                return (
-                    <TreeNodeDisplayIcon
-                        item={item}
-                        expandedItemIds={searchTerm ? expandedSearchFolders : expandedFolders}
-                    />
-                )
+                return <TreeNodeDisplayIcon item={item} expandedItemIds={expandedItemIds} />
             }}
+            virtualized
+            virtualizationScrollContainerRef={virtualizationScrollContainerRef}
         />
     )
 }

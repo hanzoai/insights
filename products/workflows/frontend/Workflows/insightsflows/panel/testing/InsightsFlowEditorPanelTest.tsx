@@ -16,9 +16,9 @@ import {
     Tooltip,
 } from '@hanzo/elements'
 
-import { TZLabel } from 'lib/components/TZLabel'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
+import { TZLabel } from 'lib/components/TZLabel'
 import { Field } from 'lib/elements/Field'
 import { Popover } from 'lib/elements/Popover/Popover'
 import { InsightsFunctionTestEditor } from 'scenes/insights-functions/configuration/InsightsFunctionTest'
@@ -28,8 +28,8 @@ import { urls } from 'scenes/urls'
 
 import { renderWorkflowLogMessage } from '../../../logs/log-utils'
 import { TRIGGER_NODE_ID, workflowLogic } from '../../../workflowLogic'
-import { insightsFlowEditorLogic } from '../../insightsFlowEditorLogic'
-import { insightsFlowEditorTestLogic } from './insightsFlowEditorTestLogic'
+import { hogFlowEditorLogic } from '../../hogFlowEditorLogic'
+import { hogFlowEditorTestLogic } from './hogFlowEditorTestLogic'
 
 export function InsightsFlowTestPanelNonSelected(): JSX.Element {
     return (
@@ -42,8 +42,8 @@ export function InsightsFlowTestPanelNonSelected(): JSX.Element {
 }
 
 export function InsightsFlowEditorPanelTest(): JSX.Element | null {
-    const { workflow, selectedNode } = useValues(insightsFlowEditorLogic)
-    const { setSelectedNodeId } = useActions(insightsFlowEditorLogic)
+    const { workflow, selectedNode } = useValues(hogFlowEditorLogic)
+    const { setSelectedNodeId } = useActions(hogFlowEditorLogic)
     const { logicProps } = useValues(workflowLogic)
 
     const {
@@ -59,7 +59,7 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
         eventPanelOpen,
         eventSelectorOpen,
         lastSearchedEventName,
-    } = useValues(insightsFlowEditorTestLogic(logicProps))
+    } = useValues(hogFlowEditorTestLogic(logicProps))
     const {
         submitTestInvocation,
         setTestResult,
@@ -68,7 +68,7 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
         setSampleGlobals,
         setEventPanelOpen,
         setEventSelectorOpen,
-    } = useActions(insightsFlowEditorTestLogic(logicProps))
+    } = useActions(hogFlowEditorTestLogic(logicProps))
 
     const display = asDisplay(sampleGlobals?.person)
     const url = urls.personByDistinctId(sampleGlobals?.event?.distinct_id || '')
@@ -96,7 +96,7 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
 
     return (
         <Form
-            logic={insightsFlowEditorTestLogic}
+            logic={hogFlowEditorTestLogic}
             props={logicProps}
             formKey="testInvocation"
             enableFormOnSubmit

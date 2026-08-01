@@ -1,0 +1,70 @@
+import { useState } from 'react'
+
+import { IconPencil, IconPlus } from '@hanzo/icons'
+import { Dropdown, InputSelect, Tag } from '@hanzo/elements'
+
+import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
+import { Spinner } from 'lib/elements/Spinner'
+
+import type { SharedMetric } from './sharedMetricLogic'
+
+export function InlineTagEditor({
+    metric,
+    allTags,
+    onSave,
+    saving,
+}: {
+    metric: SharedMetric
+    allTags: string[]
+    onSave: (tags: string[]) => void
+    saving: boolean
+}): JSX.Element {
+    const [isEditing, setIsEditing] = useState(false)
+    const tags = metric.tags || []
+    const hasTags = tags.length > 0
+
+    return (
+        <div className="inline-flex flex-wrap gap-0.5 items-center">
+            {saving ? (
+                <Spinner className="text-sm" />
+            ) : (
+                <>
+                    {hasTags && <ObjectTags tags={tags} staticOnly />}
+                    <Dropdown
+                        visible={isEditing}
+                        onClickOutside={() => setIsEditing(false)}
+                        overlay={
+                            <div className="p-2 w-[200px]">
+                                <InputSelect
+                                    mode="multiple"
+                                    allowCustomValues
+                                    value={tags}
+                                    options={allTags
+                                        .filter((t) => !tags.includes(t))
+                                        .map((t) => ({ key: t, label: t }))}
+                                    onChange={(newTags) => {
+                                        onSave(newTags)
+                                        setIsEditing(false)
+                                    }}
+                                    placeholder='try "official"'
+                                    autoFocus
+                                    size="small"
+                                />
+                            </div>
+                        }
+                    >
+                        <Tag
+                            type="none"
+                            onClick={() => setIsEditing(!isEditing)}
+                            icon={hasTags ? <IconPencil /> : <IconPlus />}
+                            className="border border-dashed cursor-pointer"
+                            size="small"
+                        >
+                            {hasTags ? undefined : 'Add tag'}
+                        </Tag>
+                    </Dropdown>
+                </>
+            )}
+        </div>
+    )
+}

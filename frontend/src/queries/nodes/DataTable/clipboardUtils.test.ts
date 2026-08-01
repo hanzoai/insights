@@ -10,6 +10,7 @@ import {
     copyTableToCsv,
     copyTableToExcel,
     copyTableToJson,
+    copyTableToMarkdown,
     flattenObject,
     getCsvTableData,
     getJsonTableData,
@@ -30,7 +31,7 @@ jest.mock('papaparse', () => ({
 }))
 
 const mockCopyToClipboard = copyToClipboard as jest.MockedFunction<typeof copyToClipboard>
-const mockToastError = toast.error as jest.MockedFunction<typeof toast.error>
+const mockLemonToastError = toast.error as jest.MockedFunction<typeof toast.error>
 const mockPapaUnparse = Papa.unparse as jest.MockedFunction<typeof Papa.unparse>
 
 type DataTableSourceKind = DataTableNode['source']['kind']
@@ -278,7 +279,7 @@ describe('clipboardUtils', () => {
 
             copyTableToCsv([{ result: ['pageview'] }], ['event'], query)
 
-            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
         })
     })
 
@@ -302,7 +303,7 @@ describe('clipboardUtils', () => {
 
             copyTableToJson([{ result: ['pageview'] }], ['event'], query)
 
-            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
         })
     })
 
@@ -337,7 +338,7 @@ describe('clipboardUtils', () => {
 
             copyTableToExcel([{ result: ['pageview'] }], ['event'], query)
 
-            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
         })
 
         it('handles Papa.unparse failure', () => {
@@ -348,7 +349,81 @@ describe('clipboardUtils', () => {
 
             copyTableToExcel([{ result: ['pageview'] }], ['event'], query)
 
-            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
+        })
+    })
+
+    describe('copyTableToMarkdown', () => {
+        it('copies a padded markdown table to clipboard', () => {
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
+            // getCsvTableData sorts columns alphabetically: age, city, name
+            const columns = ['name', 'age', 'city']
+            const rows: DataTableRow[] = [
+                { result: ['Alice', 30, 'New York'] },
+                { result: ['Bob', 25, 'San Francisco'] },
+            ]
+
+            copyTableToMarkdown(rows, columns, query)
+
+            const expected = [
+                '| age | city          | name  |',
+                '| --- | ------------- | ----- |',
+                '| 30  | New York      | Alice |',
+                '| 25  | San Francisco | Bob   |',
+            ].join('\n')
+            expect(mockCopyToClipboard).toHaveBeenCalledWith(expected, 'table')
+        })
+
+        it.each([
+            {
+                name: 'pads short header names to match data width',
+                columns: ['n', 'v'],
+                rows: [{ result: ['very_long_value', 'x'] }],
+                // 'n' column: max(3, 1, 15) = 15; 'v' column: max(3, 1, 1) = 3
+                expected: ['| n               | v   |', '| --------------- | --- |', '| very_long_value | x   |'].join(
+                    '\n'
+                ),
+            },
+            {
+                name: 'escapes pipe characters in header and cell values',
+                columns: ['\\nexpr|rpxe\n\r\n\r'],
+                rows: [{ result: ['a|b|'] }],
+                expected: [
+                    String.raw`| \nexpr\|rpxe\n\r\n\r |`,
+                    String.raw`| -------------------- |`,
+                    String.raw`| a\|b\|               |`,
+                ].join('\n'),
+            },
+            {
+                name: 'handles null and undefined cell values',
+                columns: ['col'],
+                rows: [{ result: [null] }, { result: [undefined] }],
+                expected: ['| col |', '| --- |', '|     |', '|     |'].join('\n'),
+            },
+        ])('$name', ({ columns, rows, expected }) => {
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
+            copyTableToMarkdown(rows as DataTableRow[], columns, query)
+            expect(mockCopyToClipboard).toHaveBeenCalledWith(expected, 'table')
+        })
+
+        it('shows error toast when no data is returned', () => {
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
+
+            copyTableToMarkdown([], ['event'], query)
+
+            expect(mockLemonToastError).toHaveBeenCalledWith('No data to copy!')
+            expect(mockCopyToClipboard).not.toHaveBeenCalled()
+        })
+
+        it('shows error on copy failure', () => {
+            mockCopyToClipboard.mockImplementation(() => {
+                throw new Error('Copy failed')
+            })
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
+
+            copyTableToMarkdown([{ result: ['pageview'] }], ['event'], query)
+
+            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
         })
     })
 
@@ -369,7 +444,7 @@ describe('clipboardUtils', () => {
 
             copyTableToJson(rows, ['name'], query)
 
-            expect(mockToastError).toHaveBeenCalledWith('Copy failed!')
+            expect(mockLemonToastError).toHaveBeenCalledWith('Copy failed!')
 
             // Restore original
             JSON.stringify = originalStringify

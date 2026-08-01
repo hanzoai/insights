@@ -6,11 +6,15 @@ import pytest
 from insights.test.base import APIBaseTest, QueryMatchingTest, snapshot_postgres_queries
 from unittest.mock import patch
 
+from django.conf import settings
+from django.test import override_settings
 from django.utils import timezone
 
+from parameterized import parameterized
 from rest_framework import status
 
 from insights.cloud_utils import TEST_clear_instance_license_cache
+from insights.helpers.dev_login import is_dev_login_allowed
 from insights.models.instance_setting import set_instance_setting
 from insights.models.organization import Organization
 from insights.models.organization_invite import OrganizationInvite
@@ -50,6 +54,7 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
             "slack_service": {"available": False, "client_id": None},
             "object_storage": False,
             "public_egress_ip_addresses": [],
+            "wizard_cloud_run_available": False,
             **options,
         }
 
@@ -64,9 +69,11 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
             "instance_preferences": {"debug_queries": True, "disable_paid_fs": False},
             "object_storage": False,
             "buffer_conversion_seconds": 60,
+            "ai_gateway_url": settings.AI_GATEWAY_PUBLIC_URL or None,
             # we calculate this here because otherwise it is non-deterministic when running locally
             # it can be overridden in tests by passing in options
             "openai_available": bool(os.environ.get("OPENAI_API_KEY")),
+            "anthropic_available": bool(os.environ.get("ANTHROPIC_API_KEY")),
             "is_test": True,
             **options,
         }
@@ -79,7 +86,9 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
         """
         self.client.logout()
         with self.is_cloud(False):
-            with self.settings(OBJECT_STORAGE_ENABLED=False):
+            with self.settings(
+                OBJECT_STORAGE_ENABLED=False,
+            ):
                 response = self.client.get("/_preflight/")
 
         assert response.status_code == status.HTTP_200_OK
@@ -116,6 +125,18 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
                 assert response == self.preflight_authenticated_dict({"object_storage": True})
                 assert {"Europe/Moscow": 3, "UTC": 0}.items() <= available_timezones.items()
 
+    def test_preflight_request_with_wizard_cloud_run_available(self):
+        self.client.logout()
+        with self.is_cloud(False):
+            with self.settings(
+                OBJECT_STORAGE_ENABLED=False,
+                WIZARD_CLOUD_RUN_OAUTH_CLIENT_ID="wizard-client-id",
+            ):
+                response = self.client.get("/_preflight/")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == self.preflight_dict({"wizard_cloud_run_available": True})
+
     @pytest.mark.ee
     def test_cloud_preflight_request_unauthenticated(self):
         set_instance_setting("EMAIL_HOST", "localhost")
@@ -124,7 +145,9 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
         self.client.logout()  # make sure it works anonymously
 
         with self.is_cloud(True):
-            with self.settings(OBJECT_STORAGE_ENABLED=False):
+            with self.settings(
+                OBJECT_STORAGE_ENABLED=False,
+            ):
                 response = self.client.get("/_preflight/")
                 assert response.status_code == status.HTTP_200_OK
 
@@ -146,7 +169,10 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
     @pytest.mark.ee
     def test_cloud_preflight_request(self):
         with self.is_cloud(True):
-            with self.settings(SITE_URL="https://insights.hanzo.ai", OBJECT_STORAGE_ENABLED=False):
+            with self.settings(
+                SITE_URL="https://app.hanzo.ai",
+                OBJECT_STORAGE_ENABLED=False,
+            ):
                 response = self.client.get("/_preflight/")
                 assert response.status_code == status.HTTP_200_OK
                 response = response.json()
@@ -163,7 +189,7 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
                             "disable_paid_fs": False,
                             "cloudflare_proxy_enabled": False,
                         },
-                        "site_url": "https://insights.hanzo.ai",
+                        "site_url": "https://app.hanzo.ai",
                         "email_service_available": True,
                         "object_storage": True,
                     }
@@ -175,7 +201,7 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
     def test_cloud_preflight_limited_db_queries(self):
         with self.is_cloud(True):
             # :IMPORTANT: This code is hit _every_ web request on cloud so avoid ever increasing db load.
-            with self.assertNumQueries(6):  # session (2x), user, team, organization and slack instance setting.
+            with self.assertNumQueries(5):  # session, user, team, organization and slack instance setting.
                 response = self.client.get("/_preflight/")
                 assert response.status_code == status.HTTP_200_OK
 
@@ -221,7 +247,10 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
     def test_demo(self):
         self.client.logout()  # make sure it works anonymously
 
-        with self.settings(DEMO=True, OBJECT_STORAGE_ENABLED=False):
+        with self.settings(
+            DEMO=True,
+            OBJECT_STORAGE_ENABLED=False,
+        ):
             response = self.client.get("/_preflight/")
 
         assert response.status_code == status.HTTP_200_OK
@@ -230,7 +259,25 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
     @pytest.mark.ee
     @pytest.mark.skip_on_multitenancy
     def test_ee_preflight_with_users_limit(self):
-        pass
+        try:
+            from ee.models.license import License, LicenseManager
+        except ImportError:
+            pass
+        else:
+            with self.is_cloud(False):
+                super(LicenseManager, cast(LicenseManager, License.objects)).create(
+                    key="key_123",
+                    plan="free_datastore",
+                    valid_until=timezone.make_aware(datetime(2038, 1, 19, 3, 14, 7)),
+                    max_users=3,
+                )
+
+                OrganizationInvite.objects.create(organization=self.organization, target_email="invite@hanzo.ai")
+
+                response = self.client.get("/_preflight/")
+                assert response.status_code == status.HTTP_200_OK
+                assert response.json()["licensed_users_available"] == 1
+                assert response.json()["can_create_org"] is False
 
     def test_can_create_org_in_fresh_instance(self):
         Organization.objects.all().delete()
@@ -249,6 +296,22 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["can_create_org"] is False
 
+        try:
+            from ee.models.license import License, LicenseManager
+        except ImportError:
+            pass
+        else:
+            super(LicenseManager, cast(LicenseManager, License.objects)).create(
+                key="key_123",
+                plan="enterprise",
+                valid_until=timezone.make_aware(datetime(2038, 1, 19, 3, 14, 7)),
+            )
+            TEST_clear_instance_license_cache()
+            with self.settings(MULTI_ORG_ENABLED=True):
+                response = self.client.get("/_preflight/")
+            assert response.status_code == status.HTTP_200_OK
+            assert response.json()["can_create_org"] is True
+
     @pytest.mark.ee
     def test_cloud_preflight_based_on_region(self):
         with self.settings(CLOUD_DEPLOYMENT="US"):
@@ -261,3 +324,35 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
             assert response.status_code == status.HTTP_200_OK
             assert response.json()["realm"] == "hosted-datastore"
             assert response.json()["cloud"] is False
+
+    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=True)
+    def test_preflight_includes_allow_dev_login_when_enabled(self):
+        with self.is_cloud(False):
+            response = self.client.get("/_preflight/")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["allow_dev_login"] is True
+        assert is_dev_login_allowed()
+
+    @parameterized.expand([(False,), (True,)])
+    def test_preflight_kafka_reflects_probe_on_self_hosted(self, probe_result):
+        # Regression for #54702: the kafka probe was removed, hardcoding the
+        # response to False off-cloud and blocking self-hosted Live-mode setup.
+        # Patch is_kafka_connected at the view's import site so the preflight
+        # wiring is exercised directly; TEST=False also defeats the helper's own
+        # DEBUG/TEST short-circuit as belt-and-braces.
+        self.client.logout()
+        with (
+            self.is_cloud(False),
+            self.settings(TEST=False, OBJECT_STORAGE_ENABLED=False),
+            patch("insights.views.is_kafka_connected", return_value=probe_result),
+        ):
+            response = self.client.get("/_preflight/")
+            assert response.status_code == status.HTTP_200_OK
+            assert response.json()["kafka"] is probe_result
+
+    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=False)
+    def test_preflight_omits_allow_dev_login_when_disabled(self):
+        with self.is_cloud(False):
+            response = self.client.get("/_preflight/")
+        assert response.status_code == status.HTTP_200_OK
+        assert "allow_dev_login" not in response.json()

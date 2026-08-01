@@ -11,7 +11,7 @@ import { initKeaTests } from '~/test/init'
 import { timeSensitiveAuthenticationLogic } from './timeSensitiveAuthenticationLogic'
 
 jest.mock('lib/api')
-jest.mock('@hanzo/insights')
+jest.mock('insights-js')
 
 describe('timeSensitiveAuthenticationLogic', () => {
     let logic: ReturnType<typeof timeSensitiveAuthenticationLogic.build>
@@ -133,6 +133,23 @@ describe('timeSensitiveAuthenticationLogic', () => {
             }).toMatchValues({
                 showAuthenticationModal: true,
             })
+        })
+
+        it('should settle a pending checkReauthentication when the modal is dismissed', async () => {
+            userLogic.actions.loadUserSuccess({
+                ...MOCK_DEFAULT_USER,
+                sensitive_session_expires_at: dayjs().add(4, 'minutes').toISOString(),
+            })
+
+            const pending = logic.asyncActions.checkReauthentication()
+            expect(logic.values.showAuthenticationModal).toBe(true) // guard: the check is actually pending on the modal
+            logic.actions.setDismissedReauthentication(true)
+
+            // Rejects (TypeError on undefined.message in kea's listener wrapper) if dismissal
+            // rejects the stored callback pair instead of resolving it
+            await pending
+
+            await expectLogic(logic).toMatchValues({ showAuthenticationModal: false })
         })
     })
 })

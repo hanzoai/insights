@@ -1,10 +1,14 @@
+import { createMockJobQueue } from '../../../tests/helpers/mocks/job-queue.mock'
 import '../../../tests/helpers/mocks/producer.mock'
 
-import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
+import { closeHub, createHub } from '~/common/utils/db/hub'
+
+import { createCdpConsumerDeps } from '../../../tests/helpers/cdp'
+import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
-import { closeHub, createHub } from '../../utils/db/hub'
 import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import { insertInsightsFunction as _insertInsightsFunction, createInternalEvent, createKafkaMessage } from '../_tests/fixtures'
+import { HogWatcherState } from '../services/monitoring/script-watcher.service'
 import { InsightsFunctionType } from '../types'
 import { CdpInternalEventsConsumer } from './cdp-internal-event.consumer'
 
@@ -12,11 +16,17 @@ describe('CDP Internal Events Consumer', () => {
     let processor: CdpInternalEventsConsumer
     let hub: Hub
     let team: Team
+    let team2: Team
+    let mockQueueInvocations: jest.MockedFunction<any>
 
     const insertInsightsFunction = async (insightsFunction: Partial<InsightsFunctionType>) => {
-        const item = await _insertInsightsFunction(hub.postgres, team.id, insightsFunction)
+        const teamId = insightsFunction.team_id ?? team.id
+        const item = await _insertInsightsFunction(hub.postgres, teamId, {
+            ...insightsFunction,
+            type: 'internal_destination',
+        })
         // Trigger the reload that django would do
-        processor['insightsFunctionManager']['onInsightsFunctionsReloaded'](team.id, [item.id])
+        processor['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [item.id])
         return item
     }
 
@@ -25,9 +35,26 @@ describe('CDP Internal Events Consumer', () => {
         hub = await createHub({
             SITE_URL: 'http://localhost:8000',
         })
-        team = await getFirstTeam(hub)
+        team = await getFirstTeam(hub.postgres)
 
-        processor = new CdpInternalEventsConsumer(hub)
+        const otherOrganizationId = await createOrganization(hub.postgres)
+        const team2Id = await createTeam(hub.postgres, otherOrganizationId)
+        team2 = (await getTeam(hub.postgres, team2Id))!
+
+        jest.spyOn(hub.quotaLimiting, 'isTeamQuotaLimited').mockResolvedValue(false)
+
+        const mockJobQueue = createMockJobQueue()
+        processor = new CdpInternalEventsConsumer(hub, createCdpConsumerDeps(hub), mockJobQueue)
+
+        // Don't actually connect Kafka — test the core logic only
+        processor['kafkaConsumer'] = {
+            connect: jest.fn(),
+            disconnect: jest.fn(),
+            isHealthy: jest.fn(),
+        } as any
+
+        mockQueueInvocations = mockJobQueue.queueInvocations
+
         await processor.start()
     })
 
@@ -40,7 +67,7 @@ describe('CDP Internal Events Consumer', () => {
         jest.useRealTimers()
     })
 
-    describe('_handleKafkaBatch', () => {
+    describe('_parseKafkaBatch', () => {
         it('should ignore invalid message', async () => {
             const events = await processor._parseKafkaBatch([createKafkaMessage({})])
             expect(events).toHaveLength(0)
@@ -51,13 +78,12 @@ describe('CDP Internal Events Consumer', () => {
             expect(events).toHaveLength(0)
         })
 
-        describe('with an existing team and custom function', () => {
+        describe('with an existing team and script function', () => {
             beforeEach(async () => {
                 await insertInsightsFunction({
                     ...FN_EXAMPLES.simple_fetch,
                     ...FN_INPUTS_EXAMPLES.simple_fetch,
                     ...FN_FILTERS_EXAMPLES.no_filters,
-                    type: 'internal_destination',
                 })
             })
 
@@ -72,7 +98,7 @@ describe('CDP Internal Events Consumer', () => {
                 expect(events).toHaveLength(0)
             })
 
-            it('should parse a valid message with an existing team and custom function ', async () => {
+            it('should parse a valid message with an existing team and script function ', async () => {
                 const event = createInternalEvent(team.id, {})
                 event.event.timestamp = '2024-12-18T15:06:23.545Z'
                 event.event.uuid = 'b6da2f33-ba54-4550-9773-50d3278ad61f'
@@ -98,6 +124,102 @@ describe('CDP Internal Events Consumer', () => {
                     },
                 })
             })
+        })
+    })
+
+    describe('team filtering', () => {
+        it('should not parse events for teams without script functions', async () => {
+            await insertInsightsFunction({
+                team_id: team.id,
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
+            })
+
+            const events = [
+                createKafkaMessage(createInternalEvent(team.id, {})),
+                createKafkaMessage(createInternalEvent(team2.id, {})),
+            ]
+
+            const invocations = await processor._parseKafkaBatch(events)
+            expect(invocations).toHaveLength(1)
+            expect(invocations[0].project.id).toBe(team.id)
+
+            await insertInsightsFunction({
+                team_id: team2.id,
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
+            })
+
+            const invocations2 = await processor._parseKafkaBatch(events)
+            expect(invocations2).toHaveLength(2)
+        })
+    })
+
+    describe('processBatch', () => {
+        it('should build invocations from internal events and queue them', async () => {
+            const fn = await insertInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
+            })
+
+            const messages = [createKafkaMessage(createInternalEvent(team.id, {}))]
+            const globals = await processor._parseKafkaBatch(messages)
+            const { invocations, backgroundTask } = await processor.processBatch(globals)
+            await backgroundTask
+
+            expect(invocations).toHaveLength(1)
+            expect(invocations[0].functionId).toBe(fn.id)
+            expect(mockQueueInvocations).toHaveBeenCalledWith(invocations)
+        })
+
+        it('should return empty when given no events', async () => {
+            const { invocations, backgroundTask } = await processor.processBatch([])
+            await backgroundTask
+
+            expect(invocations).toHaveLength(0)
+            expect(mockQueueInvocations).not.toHaveBeenCalled()
+        })
+
+        it('should filter out functions that are disabled', async () => {
+            const fn = await insertInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
+            })
+            await processor.hogWatcher.forceStateChange(fn, HogWatcherState.disabled)
+
+            const messages = [createKafkaMessage(createInternalEvent(team.id, {}))]
+            const globals = await processor._parseKafkaBatch(messages)
+            const { invocations } = await processor.processBatch(globals)
+
+            expect(invocations).toHaveLength(0)
+        })
+
+        it('should only load internal_destination script functions (filters out destination type)', async () => {
+            // Insert a `destination` type function for the same team
+            await _insertInsightsFunction(hub.postgres, team.id, {
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
+                type: 'destination',
+            })
+
+            // Insert an internal_destination function — should be the only one picked up
+            const internalFn = await insertInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
+            })
+
+            const messages = [createKafkaMessage(createInternalEvent(team.id, {}))]
+            const globals = await processor._parseKafkaBatch(messages)
+            const { invocations } = await processor.processBatch(globals)
+
+            expect(invocations).toHaveLength(1)
+            expect(invocations[0].functionId).toBe(internalFn.id)
         })
     })
 })

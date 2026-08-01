@@ -1,19 +1,19 @@
 import { Message } from 'node-rdkafka'
 import { z } from 'zod'
 
+import { KAFKA_COHORT_MEMBERSHIP_CHANGED } from '~/common/config/kafka-topics'
+import { KafkaConsumerInterface, createKafkaConsumer } from '~/common/kafka/consumer'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
+import { PostgresUse } from '~/common/utils/db/postgres'
+import { parseJSON } from '~/common/utils/json-parse'
+import { logger } from '~/common/utils/logger'
 
-import { STREAM_COHORT_MEMBERSHIP_CHANGED, STREAM_COHORT_MEMBERSHIP_CHANGED_TRIGGER } from '../../config/stream-topics'
-import { StreamConsumer } from '../../stream/consumer'
-import { HealthCheckResult, Hub } from '../../types'
-import { PostgresUse } from '../../utils/db/postgres'
-import { parseJSON } from '../../utils/json-parse'
-import { logger } from '../../utils/logger'
-import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
+import { HealthCheckResult } from '../../types'
+import { CdpConsumerBase, CdpConsumerBaseConfig, CdpConsumerBaseDeps } from './cdp-base.consumer'
 
 // Zod schema for validation
 const CohortMembershipChangeSchema = z.object({
-    person_id: z.string().uuid(),
+    person_id: z.guid(),
     cohort_id: z.number(),
     team_id: z.number(),
     status: z.enum(['entered', 'left']),
@@ -22,37 +22,15 @@ const CohortMembershipChangeSchema = z.object({
 
 export type CohortMembershipChange = z.infer<typeof CohortMembershipChangeSchema>
 
-/**
- * Hub type for CdpCohortMembershipConsumer.
- * Extends CdpConsumerBaseHub with postgres for cohort membership persistence.
- */
-export type CdpCohortMembershipConsumerHub = CdpConsumerBaseHub & Pick<Hub, 'postgres'>
-
-export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMembershipConsumerHub> {
+export class CdpCohortMembershipConsumer extends CdpConsumerBase {
     protected name = 'CdpCohortMembershipConsumer'
-    private streamConsumer: StreamConsumer
+    private kafkaConsumer: KafkaConsumerInterface
 
-    constructor(hub: CdpCohortMembershipConsumerHub) {
-        super(hub)
-        this.streamConsumer = new StreamConsumer({
+    constructor(config: CdpConsumerBaseConfig, deps: CdpConsumerBaseDeps) {
+        super(config, deps)
+        this.kafkaConsumer = createKafkaConsumer({
             groupId: 'cdp-cohort-membership-consumer',
-            topic: STREAM_COHORT_MEMBERSHIP_CHANGED,
-        })
-    }
-
-    private async publishCohortMembershipTriggers(changes: CohortMembershipChange[]): Promise<void> {
-        if (!this.streamProducer || changes.length === 0) {
-            return
-        }
-
-        const messages = changes.map((change) => ({
-            value: JSON.stringify(change),
-            key: change.person_id,
-        }))
-
-        await this.streamProducer.queueMessages({
-            topic: STREAM_COHORT_MEMBERSHIP_CHANGED_TRIGGER,
-            messages,
+            topic: KAFKA_COHORT_MEMBERSHIP_CHANGED,
         })
     }
 
@@ -62,12 +40,18 @@ export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMember
         }
 
         try {
+            // Deduplicate by (team_id, cohort_id, person_id), keeping last in Kafka order
+            const deduped = new Map<string, CohortMembershipChange>()
+            for (const change of changes) {
+                deduped.set(`${change.team_id}:${change.cohort_id}:${change.person_id}`, change)
+            }
+
             // Build the VALUES clause for batch upsert
             const values: any[] = []
             const placeholders: string[] = []
             let paramIndex = 1
 
-            for (const change of changes) {
+            for (const change of deduped.values()) {
                 const inCohort = change.status === 'entered'
                 placeholders.push(
                     `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, CURRENT_TIMESTAMP)`
@@ -86,7 +70,7 @@ export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMember
                     last_updated = CURRENT_TIMESTAMP
             `
 
-            await this.hub.postgres.query(
+            await this.deps.postgres.query(
                 PostgresUse.BEHAVIORAL_COHORTS_RW,
                 query,
                 values,
@@ -119,7 +103,7 @@ export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMember
 
                 if (!validationResult.success) {
                     logger.error('Invalid cohort membership change message', {
-                        errors: validationResult.error.errors,
+                        errors: validationResult.error.issues,
                         message: messageValue,
                     })
                     throw new Error(`Invalid cohort membership change message: ${validationResult.error.message}`)
@@ -139,35 +123,26 @@ export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMember
         return cohortMembershipChanges
     }
 
-    public async start(): Promise<void> {
+    public override async start(): Promise<void> {
         await super.start()
 
         logger.info('🚀', `${this.name} starting...`)
 
-        await this.streamConsumer.connect(async (messages) => {
+        await this.kafkaConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, {
                 size: messages.length,
             })
 
             return instrumentFn('cdpCohortMembershipConsumer.handleEachBatch', async () => {
                 const cohortMembershipChanges = this._parseAndValidateBatch(messages)
-
-                // First persist changes to the database
                 await this.persistCohortMembershipChanges(cohortMembershipChanges)
-
-                // Then publish trigger events as a background task
-                const backgroundTask = this.publishCohortMembershipTriggers(cohortMembershipChanges).catch((error) => {
-                    logger.error('Failed to publish cohort membership triggers', { error })
-                })
-
-                return { backgroundTask }
             })
         })
     }
 
-    public async stop(): Promise<void> {
+    public override async stop(): Promise<void> {
         logger.info('💤', `Stopping ${this.name}...`)
-        await this.streamConsumer.disconnect()
+        await this.kafkaConsumer.disconnect()
 
         // IMPORTANT: super always comes last
         await super.stop()
@@ -175,6 +150,6 @@ export class CdpCohortMembershipConsumer extends CdpConsumerBase<CdpCohortMember
     }
 
     public isHealthy(): HealthCheckResult {
-        return this.streamConsumer.isHealthy()
+        return this.kafkaConsumer.isHealthy()
     }
 }

@@ -3,7 +3,6 @@ from freezegun import freeze_time
 from insights.test.base import _create_event, _create_person
 
 from insights.datastore.client.execute import sync_execute
-from insights.insightsql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
 from insights.models.utils import uuid7
 from insights.models.web_preaggregated.sql import (
     DROP_PARTITION_SQL,
@@ -18,6 +17,10 @@ from insights.models.web_preaggregated.sql import (
     get_team_filters,
     get_web_bounces_insert_columns,
     get_web_stats_insert_columns,
+)
+
+from products.web_analytics.backend.insightsql_queries.test.web_preaggregated_test_base import (
+    WebAnalyticsPreAggregatedTestBase,
 )
 
 

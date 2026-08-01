@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Fetch current ticket data into a workflow variable',
     icon_url: '/static/insights-icon.svg',
     category: ['Custom'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 if (empty(inputs.ticket_id)) {
   throw Error('Ticket ID is required')

@@ -12,7 +12,7 @@ body:
       id: debug-info
       attributes:
           label: Debug info
-          value: "- [ ] Insights Cloud, Debug information: [please copy/paste from https://insights.hanzo.ai/settings/project-details#variables or https://insights.hanzo.ai/settings/project-details#variables]\n- [ ] Insights Hobby self-hosted with `docker compose`, version/commit: [please provide]\n- [ ] Insights self-hosted with Kubernetes (deprecated, see [`Sunsetting Kubernetes support`](https://hanzo.ai/blog/sunsetting-helm-support-insights)), version/commit: [please provide]\n"
+          value: "- [ ] Insights Cloud, Debug information: [please copy/paste from https://us.hanzo.ai/settings/project-details#variables or https://eu.hanzo.ai/settings/project-details#variables]\n- [ ] Insights Hobby self-hosted with `docker compose`, version/commit: [please provide]\n- [ ] Insights self-hosted with Kubernetes (deprecated, see [`Sunsetting Kubernetes support`](https://hanzo.ai/blog/sunsetting-helm-support-insights)), version/commit: [please provide]\n"
           render: shell
 
     - type: markdown

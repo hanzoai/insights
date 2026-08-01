@@ -65,6 +65,7 @@ export enum BehavioralFilterKey {
     Behavioral = 'behavioral',
     Cohort = 'cohort',
     Person = 'person',
+    PersonMetadata = 'person_metadata',
 }
 
 export interface Field {
@@ -143,8 +144,8 @@ export enum CohortClientErrors {
     SequentialTimeMismatch = 'The lower bound period sequential time value must not be greater than the upper bound time value.',
     EmptyEventsAndActions = 'Event or action cannot be empty.',
     EmptyEventFilters = 'Event filters cannot be empty.',
-    EmptyPersonProperties = 'User property name cannot be empty.',
-    EmptyPersonPropertyValues = 'User property value cannot be empty',
+    EmptyPersonProperties = 'Person property name cannot be empty.',
+    EmptyPersonPropertyValues = 'Person property value cannot be empty',
     EmptyEventType = 'Event type cannot be empty.',
     EmptyNumber = 'Period values must be at least 1 day and cannot be empty.',
     EmptyNumberTicker = 'Number cannot be empty.',
@@ -160,4 +161,5 @@ export enum CohortClientErrors {
     EmptyBehavioral = 'Behavioral selector cannot be empty.',
     BetweenMinGreaterThanMax = 'Minimum value must be less than maximum value',
     EmptyBetweenValues = 'Both minimum and maximum values are required',
+    InvalidNumericPersonPropertyValue = 'Please enter valid numeric values only',
 }

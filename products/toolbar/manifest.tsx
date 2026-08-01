@@ -1,16 +1,16 @@
 import { urls } from 'scenes/urls'
 
-import { ProductKey } from '~/queries/schema/schema-general'
+import { ProductItemCategory, ProductKey } from '~/queries/schema/schema-general'
 
 import { ProductManifest } from '../../frontend/src/types'
 
 export const manifest: ProductManifest = {
-    name: 'Site Inspector',
+    name: 'Toolbar',
     scenes: {
         Toolbar: {
-            name: 'Site Inspector',
+            name: 'Toolbar',
             projectBased: true,
-            description: 'Site Inspector launches Insights right in your app or website.',
+            description: 'Insights toolbar launches Insights right in your app or website.',
             iconType: 'toolbar',
         },
     },
@@ -19,11 +19,11 @@ export const manifest: ProductManifest = {
     },
     treeItemsProducts: [
         {
-            path: 'Site Inspector',
+            path: 'Toolbar',
             intents: [ProductKey.TOOLBAR],
             href: urls.toolbarLaunch(),
             type: 'toolbar',
-            category: 'Tools',
+            category: ProductItemCategory.TOOLS,
             iconType: 'toolbar',
             sceneKey: 'Toolbar',
         },

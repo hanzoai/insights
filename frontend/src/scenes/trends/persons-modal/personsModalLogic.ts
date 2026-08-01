@@ -1,13 +1,27 @@
-import { actions, afterMount, connect, kea, listeners, path, props, propsChanged, reducers, selectors } from 'kea'
+import {
+    MakeLogicType,
+    actions,
+    afterMount,
+    connect,
+    kea,
+    listeners,
+    path,
+    props,
+    propsChanged,
+    reducers,
+    selectors,
+} from 'kea'
 import { loaders } from 'kea-loaders'
-import { router, urlToAction } from 'kea-router'
+import { combineUrl, router, urlToAction } from 'kea-router'
 
 import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { isGroupType } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
+import { assignField, isGroupType, isSessionType } from 'lib/utils/guards'
 import { cleanFilters } from 'scenes/insights/utils/cleanFilters'
+import { sceneLogic } from 'scenes/sceneLogic'
+import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { cohortsModel } from '~/models/cohortsModel'
@@ -17,6 +31,7 @@ import { performQuery } from '~/queries/query'
 import {
     ActorsQuery,
     DataTableNode,
+    ExperimentActorsQuery,
     FunnelCorrelationActorsQuery,
     FunnelsActorsQuery,
     InsightActorsQuery,
@@ -28,6 +43,7 @@ import {
 } from '~/queries/schema/schema-general'
 import { setLatestVersionsOnQuery } from '~/queries/utils'
 import {
+    ActivityTab,
     ActorType,
     BreakdownType,
     ChartDisplayType,
@@ -37,18 +53,95 @@ import {
     IntervalType,
     PersonActorType,
     PropertiesTimelineFilterType,
+    SessionActorType,
     PropertyFilterType,
     PropertyOperator,
     RecordingUniversalFilters,
     UniversalFilterValue,
 } from '~/types'
 
-import type { personsModalLogicType } from './personsModalLogicType'
+import type { Noun } from '../../../models/groupsModel'
+import type { InsightQueryNode } from '../../../queries/schema/schema-general'
+import type { GroupType, GroupTypeIndex } from '../../../types'
 
 const RESULTS_PER_PAGE = 100
 
+// Scope session recordings to the funnel's selected breakdown value. Load-bearing:
+// matched_recordings from the backend contains ALL of each actor's session IDs, so we
+// need this filter to actually narrow the list. Returns null for breakdown types that
+// can't be a single property filter (insightsql / data_warehouse / multi-key / multi-value).
+function buildFunnelBreakdownFilter(source: ActorsQuery['source'] | null): UniversalFilterValue | null {
+    if (!source || source.kind !== NodeKind.FunnelsActorsQuery || source.funnelStepBreakdown == null) {
+        return null
+    }
+    const breakdownFilter = source.source.breakdownFilter
+    const breakdown = breakdownFilter?.breakdown
+    const breakdownType = breakdownFilter?.breakdown_type ?? 'event'
+
+    // Backend sends single values as one-element arrays (e.g. ["NL"]). Unwrap them; bail
+    // for genuine multi-value arrays — a click represents one selected value.
+    const rawBreakdownValue = source.funnelStepBreakdown
+    let breakdownValue: string | number
+    if (Array.isArray(rawBreakdownValue)) {
+        if (rawBreakdownValue.length !== 1) {
+            return null
+        }
+        breakdownValue = rawBreakdownValue[0]
+    } else {
+        breakdownValue = rawBreakdownValue
+    }
+
+    // Cohort → cohort membership filter. Skip the "All users" pseudo-cohort (0 / 'all').
+    if (breakdownType === 'cohort') {
+        if (breakdownValue === 0 || breakdownValue === 'all') {
+            return null
+        }
+        const cohortId = typeof breakdownValue === 'number' ? breakdownValue : Number(breakdownValue)
+        if (!Number.isFinite(cohortId)) {
+            return null
+        }
+        return {
+            type: PropertyFilterType.Cohort,
+            key: 'id',
+            value: cohortId,
+            operator: PropertyOperator.In,
+        }
+    }
+
+    // Non-cohort types need a single property key.
+    if (!breakdown || Array.isArray(breakdown)) {
+        return null
+    }
+
+    const key = String(breakdown)
+    const base = { key, value: breakdownValue, operator: PropertyOperator.Exact }
+
+    switch (breakdownType) {
+        case 'event':
+            return { ...base, type: PropertyFilterType.Event }
+        case 'event_metadata':
+            return { ...base, type: PropertyFilterType.EventMetadata }
+        case 'person':
+            return { ...base, type: PropertyFilterType.Person }
+        case 'session':
+            return { ...base, type: PropertyFilterType.Session }
+        case 'group':
+            if (breakdownFilter?.breakdown_group_type_index == null) {
+                return null
+            }
+            return {
+                ...base,
+                type: PropertyFilterType.Group,
+                group_type_index: breakdownFilter.breakdown_group_type_index,
+            }
+        // insightsql / data_warehouse / revenue_analytics don't map to a single property filter.
+        default:
+            return null
+    }
+}
+
 export interface PersonModalLogicProps {
-    query?: InsightActorsQuery | FunnelsActorsQuery | FunnelCorrelationActorsQuery | null
+    query?: InsightActorsQuery | FunnelsActorsQuery | FunnelCorrelationActorsQuery | ExperimentActorsQuery | null
     url?: string | null
     additionalSelect?: Partial<Record<keyof CommonActorType, string>>
     orderBy?: string[]
@@ -63,6 +156,158 @@ export interface ListActorsResponse {
     next?: string
     offset?: number // Offset for InsightsQL queries
 }
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface personsModalLogicValues {
+    aggregationLabel: (groupTypeIndex: number | null | undefined, deferToUserWording?: boolean) => Noun // groupsModel
+    groupTypes: Map<GroupTypeIndex, GroupType> // groupsModel
+    currentTeamId: number | null // teamLogic
+    actorLabel: Noun
+    actors: ActorType[]
+    actorsQuery: ActorsQuery | null
+    actorsResponse: ListActorsResponse | null
+    actorsResponseLoading: boolean
+    errorObject: Record<string, any> | null
+    exploreUrl: string | null
+    insightActorsQueryOptions: InsightActorsQueryOptionsResponse | null
+    insightActorsQueryOptionsLoading: boolean
+    insightEventsQueryUrl: string | null
+    isCohortModalOpen: boolean
+    isModalOpen: boolean
+    missingActorsCount: number
+    propertiesTimelineFilterFromUrl: PropertiesTimelineFilterType
+    query: FunnelsActorsQuery | InsightActorsQuery | null
+    recordingFilters: Partial<RecordingUniversalFilters>
+    searchTerm: string
+    selectFields: string[]
+    sessionIdsFromLoadedActors: string[]
+    validationError: string | null
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface personsModalLogicActions {
+    reportPersonsModalSearched: (params: { actorType?: string; teamId?: number | null }) => {
+        params: {
+            actorType?: string | undefined
+            teamId?: number | null | undefined
+        }
+    } // eventUsageLogic
+    reportPersonsModalViewed: (params: any) => {
+        params: any
+    } // eventUsageLogic
+    closeModal: () => boolean
+    loadActors: ({ url, clear, offset }: { clear?: boolean; offset?: number; url?: string | null }) => {
+        clear: boolean | undefined
+        offset: number | undefined
+        url: string | null | undefined
+    }
+    loadActorsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadActorsQueryOptions: (query: FunnelsActorsQuery | InsightActorsQuery) => {
+        query: FunnelsActorsQuery | InsightActorsQuery<InsightQueryNode>
+    }
+    loadActorsQueryOptionsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadActorsQueryOptionsSuccess: (
+        insightActorsQueryOptions:
+            | InsightActorsQueryOptionsResponse
+            | {
+                  [k: string]: any
+              }
+            | null,
+        payload?: {
+            query: FunnelsActorsQuery | InsightActorsQuery<InsightQueryNode>
+        }
+    ) => {
+        insightActorsQueryOptions:
+            | InsightActorsQueryOptionsResponse
+            | {
+                  [k: string]: any
+              }
+            | null
+        payload?: {
+            query: FunnelsActorsQuery | InsightActorsQuery<InsightQueryNode>
+        }
+    }
+    loadActorsSuccess: (
+        actorsResponse: ListActorsResponse | null,
+        payload?: {
+            clear: boolean | undefined
+            offset: number | undefined
+            url: string | null | undefined
+        }
+    ) => {
+        actorsResponse: ListActorsResponse | null
+        payload?: {
+            clear: boolean | undefined
+            offset: number | undefined
+            url: string | null | undefined
+        }
+    }
+    loadNextActors: () => {
+        value: true
+    }
+    resetActors: () => boolean
+    saveAsCohort: (cohortName: string) => {
+        cohortName: string
+    }
+    setIsCohortModalOpen: (isOpen: boolean) => {
+        isOpen: boolean
+    }
+    setSearchTerm: (search: string) => {
+        search: string
+    }
+    updateActorsQuery: (query: Partial<InsightActorsQuery> | Partial<FunnelsActorsQuery>) => {
+        query: Partial<InsightActorsQuery<InsightQueryNode>> | Partial<FunnelsActorsQuery>
+    }
+    updateQuery: (query: FunnelsActorsQuery | InsightActorsQuery) => {
+        query: FunnelsActorsQuery | InsightActorsQuery<InsightQueryNode>
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface personsModalLogicMeta {
+    __keaTypeGenInternalSelectorTypes: {
+        actorLabel: (
+            actors: ActorType[],
+            aggregationLabel: (groupTypeIndex: number | null | undefined, deferToUserWording?: boolean) => Noun
+        ) => Noun
+        validationError: (errorObject: Record<string, any> | null) => string | null
+        propertiesTimelineFilterFromUrl: (arg: any) => PropertiesTimelineFilterType
+        selectFields: (arg: any) => string[]
+        actorsQuery: (
+            arg: any,
+            query: FunnelsActorsQuery | InsightActorsQuery<InsightQueryNode> | null,
+            searchTerm: string,
+            selectFields: string[]
+        ) => ActorsQuery | null
+        exploreUrl: (actorsQuery: ActorsQuery | null) => string | null
+        insightEventsQueryUrl: (actorsQuery: ActorsQuery | null) => string | null
+        sessionIdsFromLoadedActors: (actors: ActorType[]) => string[]
+        recordingFilters: (
+            actorsQuery: ActorsQuery | null,
+            propertiesTimelineFilterFromUrl: PropertiesTimelineFilterType,
+            sessionIdsFromLoadedActors: string[]
+        ) => Partial<RecordingUniversalFilters>
+    }
+}
+
+export type personsModalLogicType = MakeLogicType<
+    personsModalLogicValues,
+    personsModalLogicActions,
+    PersonModalLogicProps,
+    personsModalLogicMeta
+>
 
 export const personsModalLogic = kea<personsModalLogicType>([
     path(['scenes', 'trends', 'personsModalLogic']),
@@ -79,13 +324,13 @@ export const personsModalLogic = kea<personsModalLogicType>([
             offset,
         }),
         loadNextActors: true,
-        updateQuery: (query: InsightActorsQuery) => ({ query }),
-        updateActorsQuery: (query: Partial<InsightActorsQuery>) => ({ query }),
-        loadActorsQueryOptions: (query: InsightActorsQuery) => ({ query }),
+        updateQuery: (query: InsightActorsQuery | FunnelsActorsQuery) => ({ query }),
+        updateActorsQuery: (query: Partial<InsightActorsQuery> | Partial<FunnelsActorsQuery>) => ({ query }),
+        loadActorsQueryOptions: (query: InsightActorsQuery | FunnelsActorsQuery) => ({ query }),
     }),
     connect(() => ({
-        values: [groupsModel, ['groupTypes', 'aggregationLabel']],
-        actions: [eventUsageLogic, ['reportPersonsModalViewed']],
+        values: [groupsModel, ['groupTypes', 'aggregationLabel'], teamLogic, ['currentTeamId']],
+        actions: [eventUsageLogic, ['reportPersonsModalViewed', 'reportPersonsModalSearched']],
     })),
 
     loaders(({ values, actions, props }) => ({
@@ -123,9 +368,10 @@ export const personsModalLogic = kea<personsModalLogicType>([
                         breakpoint()
 
                         const assembledSelectFields = values.selectFields
-                        const additionalFieldIndices = Object.values(props.additionalSelect || {}).map((field) =>
-                            assembledSelectFields.indexOf(field)
-                        )
+                        const fieldKeys = Object.keys(props.additionalSelect || {}) as Array<keyof CommonActorType>
+                        const fieldValues = Object.values(props.additionalSelect || {}) as Array<keyof CommonActorType>
+                        const additionalFieldIndices = fieldValues.map((field) => assembledSelectFields.indexOf(field))
+                        const personColumnIndex = (response.columns || []).indexOf('person')
                         const newResponse: ListActorsResponse = {
                             results: [
                                 {
@@ -142,10 +388,26 @@ export const personsModalLogic = kea<personsModalLogicType>([
                                                 matched_recordings: [],
                                                 value_at_data_point: null,
                                             }
-                                            Object.keys(props.additionalSelect || {}).forEach((field, index) => {
-                                                group[field] = result[additionalFieldIndices[index]]
+                                            fieldKeys.forEach((field, index) => {
+                                                assignField(group, field, result[additionalFieldIndices[index]])
                                             })
                                             return group
+                                        }
+
+                                        if (result[0].session_id !== undefined) {
+                                            const session: SessionActorType = {
+                                                type: 'session',
+                                                id: result[0].session_id,
+                                                properties: result[0],
+                                                created_at: result[0].$start_timestamp,
+                                                matched_recordings: [],
+                                                value_at_data_point: null,
+                                                person: personColumnIndex >= 0 ? result[personColumnIndex] : undefined,
+                                            }
+                                            fieldKeys.forEach((field, index) => {
+                                                assignField(session, field, result[additionalFieldIndices[index]])
+                                            })
+                                            return session
                                         }
                                         const person: PersonActorType = {
                                             type: 'person',
@@ -157,11 +419,9 @@ export const personsModalLogic = kea<personsModalLogicType>([
                                             matched_recordings: [],
                                             value_at_data_point: null,
                                         }
-
-                                        Object.keys(props.additionalSelect || {}).forEach((field, index) => {
-                                            person[field] = result[additionalFieldIndices[index]]
+                                        fieldKeys.forEach((field, index) => {
+                                            assignField(person, field, result[additionalFieldIndices[index]])
                                         })
-
                                         return person
                                     }),
                                 },
@@ -206,7 +466,7 @@ export const personsModalLogic = kea<personsModalLogicType>([
 
     reducers(({ props }) => ({
         query: [
-            props.query as InsightActorsQuery | null,
+            props.query as InsightActorsQuery | FunnelsActorsQuery | null,
             {
                 updateQuery: (_, { query }) => query,
             },
@@ -258,9 +518,16 @@ export const personsModalLogic = kea<personsModalLogicType>([
     })),
 
     listeners(({ actions, values, props }) => ({
-        setSearchTerm: async (_, breakpoint) => {
+        setSearchTerm: async ({ search }, breakpoint) => {
             await breakpoint(500)
             actions.loadActors({ url: props.url, clear: true })
+
+            if (search) {
+                actions.reportPersonsModalSearched({
+                    teamId: values.currentTeamId,
+                    actorType: values.actorLabel.singular,
+                })
+            }
         },
         saveAsCohort: async ({ cohortName }) => {
             const cohortParams = {
@@ -293,7 +560,8 @@ export const personsModalLogic = kea<personsModalLogicType>([
         },
         updateActorsQuery: ({ query: q }) => {
             if (q && values.query) {
-                actions.updateQuery({ ...values.query, ...q })
+                // The partial always targets the current query's kind; the spread can't express that.
+                actions.updateQuery({ ...values.query, ...q } as InsightActorsQuery | FunnelsActorsQuery)
                 actions.loadActors({ offset: 0, clear: true })
             }
         },
@@ -302,18 +570,27 @@ export const personsModalLogic = kea<personsModalLogicType>([
     selectors({
         actorLabel: [
             (s) => [s.actors, s.aggregationLabel],
-            (actors, aggregationLabel) => {
+            (
+                actors: ActorType[],
+                aggregationLabel: (
+                    groupTypeIndex: number | null | undefined,
+                    deferToUserWording?: boolean
+                ) => import('~/models/groupsModel').Noun
+            ) => {
                 const firstResult = actors[0]
 
                 if (!firstResult) {
                     return { singular: 'result', plural: 'results' }
+                }
+                if (isSessionType(firstResult)) {
+                    return { singular: 'session', plural: 'sessions' }
                 }
                 return aggregationLabel(isGroupType(firstResult) ? firstResult.group_type_index : undefined)
             },
         ],
         validationError: [
             (s) => [s.errorObject],
-            (errorObject): string | null => {
+            (errorObject: Record<string, any> | null): string | null => {
                 return extractValidationError(errorObject)
             },
         ],
@@ -352,9 +629,20 @@ export const personsModalLogic = kea<personsModalLogicType>([
         ],
         actorsQuery: [
             (s) => [(_, p) => p.orderBy, s.query, s.searchTerm, s.selectFields],
-            (orderBy, query, searchTerm, selectFields): ActorsQuery | null => {
+            (
+                orderBy,
+                query: FunnelsActorsQuery | InsightActorsQuery | null,
+                searchTerm: string,
+                selectFields: string[]
+            ): ActorsQuery | null => {
                 if (!query) {
                     return null
+                }
+                const sourceTags = { ...query.source?.tags, ...query.tags }
+                const activeScene = sceneLogic.findMounted()?.values.activeSceneId
+                const tags = {
+                    ...sourceTags,
+                    ...(activeScene && !sourceTags.scene ? { scene: activeScene } : {}),
                 }
                 return setLatestVersionsOnQuery(
                     {
@@ -363,6 +651,7 @@ export const personsModalLogic = kea<personsModalLogicType>([
                         select: selectFields,
                         orderBy: orderBy || [],
                         search: searchTerm,
+                        ...(Object.keys(tags).length > 0 ? { tags } : {}),
                     },
                     { recursion: false }
                 )
@@ -370,7 +659,7 @@ export const personsModalLogic = kea<personsModalLogicType>([
         ],
         exploreUrl: [
             (s) => [s.actorsQuery],
-            (actorsQuery): string | null => {
+            (actorsQuery: ActorsQuery | null): string | null => {
                 if (!actorsQuery) {
                     return null
                 }
@@ -419,7 +708,11 @@ export const personsModalLogic = kea<personsModalLogicType>([
                     full: true,
                 }
 
-                return urls.insightNew({ query })
+                // Route to the dedicated events explorer rather than /insights/new. The explorer reads the
+                // query synchronously from the `#q=` hash and renders the events table directly, whereas the
+                // insight scene round-trips this drill-down through an async query upgrade that can drop it and
+                // fall back to a default Trends insight.
+                return combineUrl(urls.activity(ActivityTab.ExploreEvents), {}, { q: query }).url
             },
         ],
         sessionIdsFromLoadedActors: [
@@ -452,30 +745,86 @@ export const personsModalLogic = kea<personsModalLogicType>([
 
                 const source = actorsQuery.source
 
-                // For FunnelsActorsQuery with session IDs, use ONLY session IDs for efficient lookup
-                // No need for additional event/property filters since we already have the exact list of sessions
-                if (source.kind === 'FunnelsActorsQuery' && sessionIds.length > 0) {
+                // Scope recordings to the selected funnel breakdown value (e.g. country = "NL").
+                const funnelBreakdownFilter = buildFunnelBreakdownFilter(source)
+
+                // The actual insight query (with series, properties, etc.) is nested at source.source
+                let insightQuery = source
+                if ('source' in source && source.source) {
+                    insightQuery = source.source as any
+                }
+
+                let date_from = propertiesTimelineFilter?.date_from
+                let date_to = propertiesTimelineFilter?.date_to
+
+                if ('dateRange' in insightQuery && insightQuery.dateRange) {
+                    const dateRange = insightQuery.dateRange as any
+                    date_from = dateRange.date_from || date_from
+                    date_to = dateRange.date_to || date_to
+                }
+
+                // If we have session IDs from matched_recordings, use them directly for efficient lookup
+                if (sessionIds.length > 0) {
                     return {
                         session_ids: sessionIds,
-                        // Use minimal valid structure required by conversion functions
                         filter_group: {
                             type: FilterLogicalOperator.And,
-                            values: [{ type: FilterLogicalOperator.And, values: [] }],
+                            values: [
+                                {
+                                    type: FilterLogicalOperator.And,
+                                    values: funnelBreakdownFilter ? [funnelBreakdownFilter] : [],
+                                },
+                            ],
                         },
-                        duration: [], // Empty duration means no duration filtering (we have explicit session IDs)
+                        duration: [],
+                        date_from,
+                        date_to,
                     }
                 }
 
                 // For non-funnel queries or funnels without session IDs, use filter-based approach
                 const filters: UniversalFilterValue[] = []
 
-                // For FunnelsActorsQuery, the actual query is nested at source.source
-                let insightQuery = source
-                if (source.kind === 'FunnelsActorsQuery' && 'source' in source && source.source) {
-                    insightQuery = source.source as any
+                // Extract events from the insight query series
+                if ('series' in insightQuery && Array.isArray(insightQuery.series)) {
+                    // drop-off actors (negative funnelStep) only completed the steps before the
+                    // drop-off, so only those can be required as event filters
+                    let seriesToFilterOn: any[] = insightQuery.series
+                    if (source.kind === NodeKind.FunnelsActorsQuery && typeof source.funnelStep === 'number') {
+                        const completedStepCount =
+                            source.funnelStep > 0 ? source.funnelStep : Math.abs(source.funnelStep) - 1
+                        seriesToFilterOn = insightQuery.series.slice(0, completedStepCount)
+                    }
+                    seriesToFilterOn.forEach((series) => {
+                        let entityFilter: any = null
+                        if ('event' in series && series.event) {
+                            entityFilter = {
+                                id: series.event,
+                                name: series.event,
+                                type: 'events',
+                            }
+                        } else if (series.kind === NodeKind.ActionsNode && series.id != null) {
+                            // action steps have an action id, not an event name
+                            entityFilter = {
+                                id: series.id,
+                                name: series.name,
+                                type: 'actions',
+                            }
+                        }
+                        if (entityFilter) {
+                            if (
+                                'properties' in series &&
+                                Array.isArray(series.properties) &&
+                                series.properties.length > 0
+                            ) {
+                                entityFilter.properties = series.properties
+                            }
+                            filters.push(entityFilter)
+                        }
+                    })
                 }
 
-                // Add breakdown filters if present
+                // Add breakdown filters if present (trends path)
                 if ('breakdown' in source && source.breakdown && propertiesTimelineFilter?.breakdown) {
                     const breakdownFilter = {
                         key: propertiesTimelineFilter.breakdown,
@@ -486,6 +835,11 @@ export const personsModalLogic = kea<personsModalLogicType>([
                     filters.push(breakdownFilter as UniversalFilterValue)
                 }
 
+                // Add breakdown filter for funnels
+                if (funnelBreakdownFilter) {
+                    filters.push(funnelBreakdownFilter)
+                }
+
                 // Add global properties from the insight query
                 if (
                     'properties' in insightQuery &&
@@ -493,16 +847,6 @@ export const personsModalLogic = kea<personsModalLogicType>([
                     insightQuery.properties.length > 0
                 ) {
                     filters.push(...insightQuery.properties)
-                }
-
-                // Extract date range from insight query
-                let date_from = propertiesTimelineFilter?.date_from
-                let date_to = propertiesTimelineFilter?.date_to
-
-                if ('dateRange' in insightQuery && insightQuery.dateRange) {
-                    const dateRange = insightQuery.dateRange as any
-                    date_from = dateRange.date_from || date_from
-                    date_to = dateRange.date_to || date_to
                 }
 
                 // Build the result for non-funnel or fallback cases

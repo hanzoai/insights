@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Create and update contacts in Attio",
     icon_url="/static/services/attio.png",
     category=["Advertisement"],
-    code_language="fn",
+    code_language="script",
     code="""
 let body := {
     'data': {

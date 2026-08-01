@@ -16,6 +16,7 @@ INSIGHTSQL_PERMITTED_PARAMETRIC_FUNCTIONS: set[str] = {
     "avgState",
     "avgMap",
     "avgMapState",
+    "median",
     "uniq",
     "uniqState",
     "uniqMap",

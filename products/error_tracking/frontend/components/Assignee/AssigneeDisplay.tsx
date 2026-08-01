@@ -5,8 +5,9 @@ import { match } from 'ts-pattern'
 import { IconPerson } from '@hanzo/icons'
 import { ProfilePicture } from '@hanzo/elements'
 
-import { UnexpectedNeverError, fullName } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
+import { UnexpectedNeverError } from 'lib/utils/guards'
+import { fullName } from 'lib/utils/strings'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 
@@ -100,9 +101,7 @@ export const AssigneeLabelDisplay = ({
 }
 
 interface AssigneeDisplayProps
-    extends AssigneeBaseDisplayProps,
-        Omit<AssigneeLabelDisplayProps, 'className'>,
-        AssigneeIconDisplayProps {
+    extends AssigneeBaseDisplayProps, Omit<AssigneeLabelDisplayProps, 'className'>, AssigneeIconDisplayProps {
     className?: string
     labelClassname?: string
 }

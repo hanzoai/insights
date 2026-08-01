@@ -1,6 +1,7 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
+import { SDK_DEFAULTS_DATE } from './_snippets/sdkDefaults'
 
 export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
     const { CodeBlock, Markdown, dedent, snippets, Tab } = ctx
@@ -48,7 +49,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        In your `src/main.ts`, initialize Insights using your project API key and instance address:
+                        In your `src/main.ts`, initialize Insights using your project token and instance address:
                     </Markdown>
                     <Tab.Group tabs={['Angular 17+', 'Angular 16 and below']}>
                         <Tab.List>
@@ -90,7 +91,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                                   this.ngZone.runOutsideAngular(() => {
                                                     insights.init(environment.insightsKey, {
                                                       api_host: environment.insightsHost,
-                                                      defaults: '2026-01-30',
+                                                      defaults: '${SDK_DEFAULTS_DATE}',
                                                     });
                                                   });
                                                 }
@@ -139,7 +140,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     {dedent`
                                         In your \`src/main.ts\`, initialize Insights using your project API 
                                         key and instance address. You can find both in your 
-                                        [project settings](https://insights.hanzo.ai/project/settings).
+                                        [project settings](https://us.hanzo.ai/project/settings).
                                     `}
                                 </Markdown>
                                 <CodeBlock
@@ -153,17 +154,17 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                               import { appConfig } from './app/app.config';
                                               import { AppComponent } from './app/app.component';
                                               import { environment } from "./environments/environment";
-                                              import insights from '@hanzo/insights'
+                                              import insights from 'insights-js'
                                               insights.init(environment.insightsKey, {
                                                 api_host: environment.insightsHost,
-                                                defaults: '2025-11-30'
+                                                defaults: '${SDK_DEFAULTS_DATE}'
                                               })
                                               bootstrapApplication(AppComponent, appConfig)
                                                 .catch((err) => console.error(err));
                                             `,
-                                            },
-                                        ]}
-                                    />
+                                        },
+                                    ]}
+                                />
                             </Tab.Panel>
                         </Tab.Panels>
                     </Tab.Group>

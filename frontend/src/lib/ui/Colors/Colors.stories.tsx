@@ -3,8 +3,7 @@ import { useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
 import { Slider } from 'lib/elements/Slider'
-
-import { themeLogic } from '~/layout/navigation-3000/themeLogic'
+import { themeLogic } from 'lib/logic/themeLogic'
 
 const meta: Meta = {
     title: 'UI/Colors',

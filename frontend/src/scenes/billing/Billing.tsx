@@ -6,20 +6,24 @@ import { Field, Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
+import * as judge from '@hanzo/brand/hoggies/png/judge'
+import { IconDocument } from '@hanzo/icons'
 import { Button, Divider, Input, Link } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
+import { StarHog } from 'lib/components/mascots'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { JudgeMascot, StarMascot } from 'lib/components/mascots'
-import { OrganizationMembershipLevel } from 'lib/constants'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { Banner } from 'lib/elements/Banner'
 import { SpinnerOverlay } from 'lib/elements/Spinner/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { toSentenceCase } from 'lib/utils'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
+import { toSentenceCase } from 'lib/utils/strings'
 import { couponLogic } from 'scenes/coupons/couponLogic'
+import { getProductIcon } from 'scenes/onboarding/shared/utils'
+import { membersLogic } from 'scenes/organization/membersLogic'
+import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -27,13 +31,16 @@ import { ProductKey } from '~/queries/schema/schema-general'
 import { BillingProductV2Type } from '~/types'
 
 import { BillingHero } from './BillingHero'
+import { billingLogic } from './billingLogic'
 import { BillingNoAccess } from './BillingNoAccess'
-import { BillingPortalButton } from './BillingPortalButton'
 import { BillingProduct } from './BillingProduct'
 import { BillingSummary } from './BillingSummary'
+import { CodeSeatsSection } from './CodeSeatsSection'
 import { CreditCTAHero } from './CreditCTAHero'
+import { StripePortalButton } from './StripePortalButton'
 import { UnsubscribeCard } from './UnsubscribeCard'
-import { billingLogic } from './billingLogic'
+
+const MascotJudge = pngHoggie(judge)
 
 export const scene: SceneExport = {
     component: Billing,
@@ -50,6 +57,8 @@ export function Billing(): JSX.Element {
         showBillingSummary,
         showCreditCTAHero,
         showBillingHero,
+        minimumBillingAccessLevel,
+        hasSupportAddonPlan,
     } = useValues(billingLogic)
     const { reportBillingShown } = useActions(billingLogic)
     const { preflight, isCloudOrDev } = useValues(preflightLogic)
@@ -57,9 +66,10 @@ export function Billing(): JSX.Element {
     const { featureFlags } = useValues(featureFlagLogic)
     const { location, searchParams } = useValues(router)
     const { activeCoupons, couponsOverviewLoading } = useValues(couponLogic({}))
+    const { memberCount } = useValues(membersLogic)
 
     const restrictionReason = useRestrictedArea({
-        minimumAccessLevel: OrganizationMembershipLevel.Admin,
+        minimumAccessLevel: minimumBillingAccessLevel,
         scope: RestrictionScope.Organization,
     })
 
@@ -151,7 +161,7 @@ export function Billing(): JSX.Element {
             {billing?.trial ? (
                 <Banner type="info" hideIcon className="max-w-300 mb-2">
                     <div className="flex items-center gap-4">
-                        <JudgeMascot className="w-20 h-20 flex-shrink-0" />
+                        <MascotJudge className="w-20 h-20 flex-shrink-0" />
                         <div>
                             <p className="text-lg">You're on (a) trial</p>
                             <p>
@@ -189,13 +199,13 @@ export function Billing(): JSX.Element {
                 </div>
             )}
 
-            {!showBillingSummary && <BillingPortalButton />}
+            {!showBillingSummary && <StripePortalButton />}
 
             {!couponsOverviewLoading && activeCoupons.length > 0 && (
                 <div className="mt-6 max-w-300">
                     <Banner type="info" hideIcon>
                         <div className="flex items-center gap-4">
-                            <StarMascot className="w-16 h-16 flex-shrink-0" />
+                            <StarHog className="w-16 h-16 flex-shrink-0" />
                             <div>
                                 <p className="font-semibold mb-2">You have active coupons!</p>
                                 <ul className="list-disc list-inside space-y-1">
@@ -231,7 +241,7 @@ export function Billing(): JSX.Element {
                 <h2>Products</h2>
             </div>
 
-            {(featureFlags[FEATURE_FLAGS.REORDER_PLATFORM_ADDON_BILLING_SECTION] === 'test-top-of-page'
+            {(memberCount >= 5 && !hasSupportAddonPlan
                 ? [
                       platformAndSupportProduct,
                       ...(products?.filter((product) => product.type !== ProductKey.PLATFORM_AND_SUPPORT) ?? []),
@@ -247,6 +257,33 @@ export function Billing(): JSX.Element {
                         <BillingProduct product={x} />
                     </div>
                 ))}
+
+            {featureFlags[FEATURE_FLAGS.POSTFN_CODE_BILLING] && (
+                <div className="flex flex-wrap max-w-300 pb-8">
+                    <div className="border border-primary rounded w-full bg-surface-primary">
+                        <div className="border-b border-primary rounded-t p-4">
+                            <div className="flex gap-4 items-center justify-between">
+                                <div className="flex gap-x-2">
+                                    <div>{getProductIcon('IconTerminal', { className: 'text-2xl shrink-0' })}</div>
+                                    <div>
+                                        <h3 className="font-bold mb-0">Insights Desktop</h3>
+                                        <div>Manage existing Insights Desktop seats.</div>
+                                    </div>
+                                </div>
+                                <Button
+                                    icon={<IconDocument />}
+                                    size="small"
+                                    to="https://hanzo.ai/docs/insights-code"
+                                    tooltip="Read the docs"
+                                />
+                            </div>
+                        </div>
+                        <div className="p-8">
+                            <CodeSeatsSection />
+                        </div>
+                    </div>
+                </div>
+            )}
             <div>
                 {billing?.subscription_level == 'paid' && !!platformAndSupportProduct ? (
                     <>

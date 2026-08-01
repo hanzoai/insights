@@ -1,7 +1,9 @@
 from insights.test.base import BaseTest
 
-from insights.models import Action, Element, Organization
+from insights.models import Element, Organization
 from insights.models.event import Selector
+
+from products.actions.backend.models.action import Action
 
 
 def _create_action(team, steps):

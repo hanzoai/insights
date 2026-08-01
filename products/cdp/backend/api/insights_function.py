@@ -1,0 +1,955 @@
+import json
+from typing import Any, Optional, cast
+
+from django.db import transaction
+from django.db.models import Q, QuerySet
+
+import structlog
+import hanzo_insights
+from django_filters import BaseInFilter, CharFilter, FilterSet
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
+from opentelemetry import trace
+from rest_framework import exceptions, serializers, viewsets
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
+
+from insights.api.app_metrics2 import AppMetricsMixin
+from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.hog_invocation_rerun import HogInvocationRerunRequestSerializer, HogInvocationRerunResponseSerializer
+from insights.api.log_entries import LogEntryMixin
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import SearchMatchTypeSerializerMixin, UserBasicSerializer
+from insights.api.utils import action, log_activity_from_viewset
+from insights.cdp.services.icons import CDPIconsService
+from insights.cdp.site_functions import get_transpiled_function
+from insights.cdp.validation import (
+    InsightsFunctionFiltersSerializer,
+    InputsSchemaItemSerializer,
+    InputsSerializer,
+    MappingsSerializer,
+    compile_hog,
+    generate_template_bytecode,
+)
+from insights.exceptions_capture import capture_exception
+from insights.helpers.impersonation import is_impersonated
+from insights.helpers.trigram_search import (
+    DESCRIPTION_FIELD,
+    MAX_SEARCH_LENGTH,
+    NAME_FIELD,
+    apply_trigram_search,
+    drop_similar_when_exact_exists,
+)
+from insights.models import Team
+from insights.models.activity_logging.activity_log import Change, Detail, log_activity
+from insights.plugins.plugin_server_api import create_hog_invocation_test, rerun_hog_invocations
+
+from products.cdp.backend.api.insights_function_template import InsightsFunctionTemplateSerializer
+from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
+from products.cdp.backend.models.insights_functions.insights_function import (
+    TYPES_THAT_CAN_RERUN,
+    TYPES_WITH_EXECUTION_ORDER,
+    TYPES_WITH_JAVASCRIPT_SOURCE,
+    InsightsFunction,
+    InsightsFunctionState,
+    InsightsFunctionType,
+)
+from products.cdp.backend.models.insights_functions.utils import humanize_insights_function_type
+from products.cdp.backend.models.plugin import TranspilerError
+
+# Maximum size of HOG code as a string in bytes (100KB)
+MAX_FN_CODE_SIZE_BYTES = 100 * 1024
+# Maximum number of transformation functions per team
+MAX_TRANSFORMATIONS_PER_TEAM = 20
+# Log transformations execute per log record; volume is orders of magnitude higher than
+# events, so the enabled cap starts much lower.
+MAX_LOG_TRANSFORMATIONS_PER_TEAM = 5
+
+# Per-type caps on *enabled* functions of types that run in the ingestion hot path
+MAX_ENABLED_FUNCTIONS_PER_TEAM_BY_TYPE = {
+    InsightsFunctionType.TRANSFORMATION: MAX_TRANSFORMATIONS_PER_TEAM,
+    InsightsFunctionType.TRANSFORMATION_LOG: MAX_LOG_TRANSFORMATIONS_PER_TEAM,
+}
+
+# Gates creation of log transformations while the feature rolls out; sync with
+# FEATURE_FLAGS.LOGS_TRANSFORMATIONS on the frontend
+LOGS_TRANSFORMATIONS_FEATURE_FLAG = "logs-transformations"
+
+logger = structlog.get_logger(__name__)
+tracer = trace.get_tracer(__name__)
+
+
+class InsightsFunctionStatusSerializer(serializers.Serializer):
+    state = serializers.ChoiceField(choices=[state.value for state in InsightsFunctionState])
+    tokens: serializers.IntegerField = serializers.IntegerField()
+
+
+class InsightsFunctionMinimalSerializer(SearchMatchTypeSerializerMixin, serializers.ModelSerializer):
+    created_by = UserBasicSerializer(read_only=True)
+    status = InsightsFunctionStatusSerializer(read_only=True, required=False, allow_null=True)
+    template = InsightsFunctionTemplateSerializer(read_only=True)
+
+    class Meta:
+        model = InsightsFunction
+        fields = [
+            "id",
+            "type",
+            "name",
+            "description",
+            "created_at",
+            "created_by",
+            "updated_at",
+            "enabled",
+            "script",
+            "filters",
+            "icon_url",
+            "template",
+            "status",
+            "execution_order",
+            "search_match_type",
+        ]
+        read_only_fields = fields
+
+
+class InsightsFunctionMaskingSerializer(serializers.Serializer):
+    ttl = serializers.IntegerField(
+        required=True,
+        min_value=60,
+        max_value=60 * 60 * 24,
+        help_text="Time-to-live in seconds for the masking cache (60–86400).",
+    )
+    threshold = serializers.IntegerField(
+        required=False, allow_null=True, help_text="Optional threshold count before masking applies."
+    )
+    hash = serializers.CharField(required=True, help_text="Script expression used to compute the masking hash.")
+    bytecode = serializers.JSONField(
+        required=False, allow_null=True, help_text="Compiled bytecode for the hash expression. Auto-generated."
+    )
+
+    def validate(self, attrs):
+        attrs["bytecode"] = generate_template_bytecode(attrs["hash"], input_collector=set())
+
+        return super().validate(attrs)
+
+
+class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
+    template = InsightsFunctionTemplateSerializer(read_only=True)
+    masking = InsightsFunctionMaskingSerializer(
+        required=False,
+        allow_null=True,
+        help_text="PII masking configuration with TTL, threshold, and hash expression.",
+    )
+    type = serializers.ChoiceField(
+        choices=InsightsFunctionType.choices,
+        required=False,
+        allow_null=True,
+        help_text="Function type: destination, site_destination, internal_destination, source_webhook, warehouse_source_webhook, site_app, transformation, or transformation_log.",
+    )
+    inputs_schema = serializers.ListField(
+        child=InputsSchemaItemSerializer(required=True),
+        required=False,
+        help_text="Schema defining the configurable input parameters for this function.",
+    )
+    inputs = InputsSerializer(required=False, help_text="Values for each input defined in inputs_schema.")
+    mappings = serializers.ListField(
+        child=MappingsSerializer(),
+        required=False,
+        allow_null=True,
+        help_text="Event-to-destination field mappings. Only for destination and site_destination types.",
+    )
+    filters = InsightsFunctionFiltersSerializer(
+        required=False, help_text="Event filters that control which events trigger this function."
+    )
+    _create_in_folder = serializers.CharField(required=False, allow_blank=True, write_only=True)
+
+    class Meta:
+        model = InsightsFunction
+        fields = [
+            "id",
+            "type",
+            "name",
+            "description",
+            "created_at",
+            "created_by",
+            "updated_at",
+            "enabled",
+            "deleted",
+            "script",
+            "bytecode",
+            "transpiled",
+            "inputs_schema",
+            "inputs",
+            "filters",
+            "masking",
+            "mappings",
+            "icon_url",
+            "template",
+            "template_id",
+            "status",
+            "execution_order",
+            "_create_in_folder",
+            "batch_export_id",
+            "search_match_type",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "created_by",
+            "updated_at",
+            "bytecode",
+            "transpiled",
+            "template",
+            "status",
+        ]
+        extra_kwargs = {
+            "script": {
+                "required": False,
+                "help_text": "Source code. Script language for most types; TypeScript for site_destination and site_app.",
+            },
+            "inputs_schema": {"required": False},
+            "template_id": {
+                "write_only": True,
+                "help_text": "ID of the template to create this function from.",
+            },
+            "deleted": {
+                "write_only": True,
+                "help_text": "Soft-delete flag. Set to true to archive the function.",
+            },
+            "type": {"required": True},
+            "name": {"help_text": "Display name for the function."},
+            "description": {"help_text": "Human-readable description of what this function does."},
+            "enabled": {"help_text": "Whether the function is active and processing events."},
+            "icon_url": {"help_text": "URL for the function's icon displayed in the UI."},
+            "execution_order": {"help_text": "Execution priority for transformations. Lower values run first."},
+        }
+
+    def _validate_template_is_creatable(self, template: InsightsFunctionTemplate) -> None:
+        # Hidden templates are internal building blocks (e.g. the native email destination) that the
+        # workflow editor renders but that are never offered as standalone destinations. Block creating a
+        # function from one via this API/MCP entirely — they are not a supported destination type.
+        if template.status == "hidden":
+            raise serializers.ValidationError(
+                {
+                    "template_id": f"Template '{template.template_id}' is internal and cannot be used to create a function."
+                }
+            )
+
+    def _validate_hidden_template_not_enabled(self, attrs: dict, is_create: bool) -> None:
+        # Creating from a hidden template is already blocked outright. For an existing function built from
+        # one (the unsupported standalone destinations this PR is about), allow disabling and deleting so it
+        # can be cleaned up, but never let it stay enabled — block any update that would leave it enabled,
+        # including content edits (script/inputs/filters) that omit `enabled` while it is currently on.
+        if is_create or not isinstance(self.instance, InsightsFunction) or attrs.get("deleted") is True:
+            return
+        if attrs.get("enabled", self.instance.enabled) is not True:
+            return
+        template = InsightsFunctionTemplate.get_template(self.instance.template_id) if self.instance.template_id else None
+        if template is not None and template.status == "hidden":
+            raise serializers.ValidationError(
+                {
+                    "enabled": "This function was created from an internal template and can only be disabled or deleted, not kept enabled."
+                }
+            )
+
+    # NOTE: All pre-validation should be done here such as loading the template info etc.
+    def to_internal_value(self, data):
+        self.initial_data = data
+        team = self.context["get_team"]()
+        is_create = self.context.get("is_create") or (
+            self.context.get("view") and self.context["view"].action == "create"
+        )
+        instance = cast(Optional[InsightsFunction], self.context.get("instance", self.instance))
+
+        # Override some default values from the instance that should always be set
+        data["type"] = data.get("type", instance.type if instance else "destination")
+        data["template_id"] = instance.template_id if instance else data.get("template_id")
+        data["inputs_schema"] = data.get("inputs_schema", instance.inputs_schema if instance else [])
+        data["inputs"] = data.get("inputs", instance.inputs if instance else {})
+
+        # Always ensure filters is initialized as an empty object if it's null
+        data["filters"] = data.get("filters", instance.filters if instance else {}) or {}
+
+        # Set some context variables that are used in the sub validators
+        self.context["function_type"] = data["type"]
+        # Uncompilable filters only block saves that leave the function enabled - disabling or
+        # deleting must stay possible even when e.g. the team's test account filters have since
+        # gained a cohort that real-time filters can't evaluate. Coerce via BooleanField so
+        # form-encoded string values ("true"/"false") are read correctly, not by Python truthiness.
+        to_bool = serializers.BooleanField().to_internal_value
+        deleted = to_bool(data["deleted"]) if data.get("deleted") is not None else False
+        enabled = (
+            to_bool(data["enabled"]) if data.get("enabled") is not None else (instance.enabled if instance else False)
+        )
+        self.context["function_will_be_enabled"] = False if deleted else enabled
+        # Warehouse-table sources deliver the synced row under event.properties, so input templates
+        # may use the `{record.x}` alias — flag it so the inputs serializer rewrites it on compile.
+        self.context["is_dwh_source"] = data["filters"].get("source") == "data-warehouse-table"
+        self.context["encrypted_inputs"] = instance.encrypted_inputs if instance else {}
+
+        template = None
+        if data["template_id"]:
+            template = InsightsFunctionTemplate.get_template(data["template_id"])
+            if not template:
+                properties = {"team_id": team.id, "template_id": data.get("template_id")}
+                if instance and instance.id:
+                    properties["insights_function_id"] = instance.id
+                capture_exception(
+                    Exception(f"No template found for id '{data['template_id']}'"), additional_properties=properties
+                )
+
+                raise serializers.ValidationError({"template_id": f"No template found for id '{data['template_id']}'"})
+
+        if is_create:
+            # Set defaults for new functions
+            data["inputs_schema"] = data.get("inputs_schema") or []
+            data["inputs"] = data.get("inputs") or {}
+            data["mappings"] = data.get("mappings") or None
+
+            # Handle template values
+            template_id = data.get("template_id")
+            if template_id:
+                template = InsightsFunctionTemplate.objects.get(template_id=data["template_id"])
+                if template:
+                    self._validate_template_is_creatable(template)
+                    data["script"] = data.get("script") or template.code
+                    data["inputs_schema"] = data.get("inputs_schema") or template.inputs_schema
+                    data["inputs"] = data.get("inputs") or {}
+                    data["icon_url"] = data.get("icon_url") or template.icon_url
+                    data["description"] = data.get("description") or template.description
+                    data["name"] = data.get("name") or template.name
+
+        return super().to_internal_value(data)
+
+    def validate_type(self, value):
+        if value == InsightsFunctionType.WAREHOUSE_SOURCE_WEBHOOK.value:
+            raise serializers.ValidationError(
+                "Cannot create or modify warehouse source webhook functions via this API."
+            )
+
+        # Ensure it is only set when creating a new function
+        if self.context.get("view") and self.context["view"].action == "create":
+            return value
+
+        instance = cast(Optional[InsightsFunction], self.context.get("instance", self.instance))
+        if instance and instance.type != value:
+            raise serializers.ValidationError("Cannot modify the type of an existing function")
+        return value
+
+    def validate(self, attrs):
+        team = self.context["get_team"]()
+        attrs["team"] = team  # NOTE: This has to be done at this level
+        hog_type = self.context["function_type"]
+        is_create = self.context.get("is_create") or (
+            self.context.get("view") and self.context["view"].action == "create"
+        )
+
+        self._validate_hidden_template_not_enabled(attrs, bool(is_create))
+
+        # Existing functions keep working (and can be updated/disabled) if the flag is
+        # later turned off; only creation is gated.
+        if is_create and hog_type == InsightsFunctionType.TRANSFORMATION_LOG:
+            if not hanzo_insights.feature_enabled(
+                LOGS_TRANSFORMATIONS_FEATURE_FLAG,
+                str(team.uuid),
+                groups={"organization": str(team.organization.id)},
+                group_properties={
+                    "organization": {
+                        "id": str(team.organization.id),
+                        "created_at": team.organization.created_at,
+                    }
+                },
+                send_feature_flag_events=False,
+            ):
+                raise serializers.ValidationError({"type": "Log transformations are not enabled for this team."})
+
+        # Check for transformation limit per team when the function will be enabled
+        # We allow unlimited creation of disabled transformations as they don't run during ingestion
+        enabled_cap = MAX_ENABLED_FUNCTIONS_PER_TEAM_BY_TYPE.get(hog_type)
+        if enabled_cap is not None:
+            # The cap covers the effective post-update state: restoring a soft-deleted
+            # enabled function ({"deleted": false} with no "enabled" key) re-enters the
+            # running set just like flipping enabled on, and must not bypass the limit.
+            instance = self.instance if isinstance(self.instance, InsightsFunction) else None
+            will_be_enabled = attrs.get("enabled", instance.enabled if instance else False)
+            will_be_deleted = attrs.get("deleted", instance.deleted if instance else False)
+            was_active = instance is not None and instance.enabled and not instance.deleted
+            apply_limit = will_be_enabled and not will_be_deleted and not was_active
+
+            if apply_limit:
+                # Count enabled and non-deleted functions of the same type
+                transformation_count = InsightsFunction.objects.filter(
+                    team=team, type=hog_type, deleted=False, enabled=True
+                ).count()
+
+                if transformation_count >= enabled_cap:
+                    raise serializers.ValidationError(
+                        {
+                            "type": f"Maximum of {enabled_cap} enabled {humanize_insights_function_type(hog_type)} functions allowed per team. Please contact support if you need this limit increased, or disable some existing ones."
+                        }
+                    )
+
+        if attrs.get("mappings", None) is not None:
+            # special case for items that migrate to mappings - we want to make sure event filters are not set
+            if attrs.get("filters", None) is not None:
+                attrs["filters"].pop("events", None)
+                attrs["filters"].pop("actions", None)
+
+            if hog_type not in ["site_destination", "destination"]:
+                raise serializers.ValidationError({"mappings": "Mappings are only allowed for destinations."})
+
+        if "script" in attrs:
+            # First check the raw code size before trying to compile/transpile it
+            hog_code_size = len(attrs["script"].encode("utf-8"))
+            if hog_code_size > MAX_FN_CODE_SIZE_BYTES:
+                raise serializers.ValidationError(
+                    {
+                        "script": f"HOG code exceeds maximum size of {MAX_FN_CODE_SIZE_BYTES // 1024}KB. Please simplify your code or contact support if you need this limit increased."
+                    }
+                )
+
+            if hog_type in TYPES_WITH_JAVASCRIPT_SOURCE:
+                try:
+                    # Validate transpilation using the model instance
+                    attrs["transpiled"] = get_transpiled_function(
+                        InsightsFunction(
+                            team=team,
+                            script=attrs["script"],
+                            filters=attrs["filters"],
+                            inputs=attrs["inputs"],
+                        )
+                    )
+                except TranspilerError:
+                    raise serializers.ValidationError({"script": "Error in TypeScript code"})
+                attrs["bytecode"] = None
+            else:
+                attrs["bytecode"] = compile_hog(attrs["script"], hog_type)
+                attrs["transpiled"] = None
+
+        if is_create:
+            if not attrs.get("script"):
+                raise serializers.ValidationError({"script": "Required."})
+
+        return attrs
+
+    def to_representation(self, data):
+        encrypted_inputs = data.encrypted_inputs or {} if isinstance(data, InsightsFunction) else {}
+        data = super().to_representation(data)
+
+        inputs_schema = data.get("inputs_schema", []) or []
+        inputs = data.get("inputs") or {}
+
+        for schema in inputs_schema:
+            if schema.get("secret"):
+                # TRICKY: We used to store these inputs so we check both the encrypted and non-encrypted inputs
+                has_value = encrypted_inputs.get(schema["key"]) or inputs.get(schema["key"])
+                if has_value:
+                    # Marker to indicate to the user that a secret is set
+                    inputs[schema["key"]] = {"secret": True}
+
+        data["inputs"] = inputs
+
+        return data
+
+    def create(self, validated_data: dict, *args, **kwargs) -> InsightsFunction:
+        request = self.context["request"]
+        validated_data["created_by"] = request.user
+
+        template_id = validated_data.get("template_id")
+        if template_id:
+            db_template = InsightsFunctionTemplate.objects.get(template_id=template_id)
+            if not db_template:
+                raise serializers.ValidationError({"template_id": f"No template found for id '{template_id}'"})
+            validated_data["insights_function_template"] = db_template
+
+        # Handle execution_order for types that run sequentially during ingestion
+        if validated_data.get("type") in TYPES_WITH_EXECUTION_ORDER:
+            requested_order = validated_data.get("execution_order")
+
+            # For transformations, we need to determine the execution_order
+            if requested_order is None:
+                # If no order specified, add at the end
+                highest_order = self._get_highest_execution_order(validated_data["team"].id, validated_data["type"])
+                validated_data["execution_order"] = highest_order + 1
+
+            # Create the function with the execution_order
+            return super().create(validated_data=validated_data)
+        else:
+            # For non-transformation types, just create normally
+            return super().create(validated_data=validated_data)
+
+    def _get_highest_execution_order(self, team_id: int, hog_type: str) -> int:
+        """Get the highest execution_order among functions of the same type in a team."""
+        highest_order = (
+            InsightsFunction.objects.filter(team_id=team_id, type=hog_type, deleted=False)
+            .order_by("-execution_order")
+            .values_list("execution_order", flat=True)
+            .first()
+        )
+        return highest_order or 0
+
+    def update(self, instance: InsightsFunction, validated_data: dict, *args, **kwargs) -> InsightsFunction:
+        # Handle undeletion or re-enabling by placing at the end when needed
+        if instance.type in TYPES_WITH_EXECUTION_ORDER and (
+            (instance.deleted and validated_data.get("deleted") is False)
+            or (
+                not instance.enabled
+                and validated_data.get("enabled") is True
+                and "execution_order" not in validated_data
+            )
+        ):
+            highest_order = self._get_highest_execution_order(instance.team_id, instance.type)
+            validated_data["execution_order"] = highest_order + 1
+
+        # Standard update
+        res: InsightsFunction = super().update(instance, validated_data)
+
+        if res.enabled and res.status.get("state", 0) == InsightsFunctionState.DISABLED.value:
+            res.set_function_status(InsightsFunctionState.DEGRADED.value)
+
+        return res
+
+
+class InsightsFunctionInvocationSerializer(serializers.Serializer):
+    configuration = InsightsFunctionSerializer(write_only=True, help_text="Full function configuration to test.")
+    globals = serializers.DictField(
+        write_only=True, required=False, help_text="Mock global variables available during test invocation."
+    )
+    datastore_event = serializers.DictField(
+        write_only=True, required=False, help_text="Mock Datastore event data to test the function with."
+    )
+    mock_async_functions = serializers.BooleanField(
+        default=True,
+        write_only=True,
+        help_text="When true (default), async functions like fetch() are simulated.",
+    )
+    status = serializers.CharField(read_only=True, help_text="Invocation result status.")
+    logs = serializers.ListField(read_only=True, help_text="Execution logs from the test invocation.")
+    invocation_id = serializers.CharField(
+        required=False, allow_null=True, help_text="Optional invocation ID for correlation."
+    )
+
+
+class InsightsFunctionRearrangeSerializer(serializers.Serializer):
+    orders = serializers.DictField(
+        child=serializers.IntegerField(),
+        help_text="Map of script function UUIDs to their new execution_order values.",
+    )
+
+
+class CommaSeparatedListFilter(BaseInFilter, CharFilter):
+    pass
+
+
+class InsightsFunctionFilterSet(FilterSet):
+    type = CommaSeparatedListFilter(field_name="type", lookup_expr="in")
+
+    class Meta:
+        model = InsightsFunction
+        fields = ["type", "enabled", "id", "created_by", "created_at", "updated_at"]
+
+
+@extend_schema(tags=["insights_functions"], extensions={"x-product": "cdp"})
+class InsightsFunctionViewSet(
+    TeamAndOrgViewSetMixin,
+    LogEntryMixin,
+    AppMetricsMixin,
+    ForbidDestroyModel,
+    viewsets.ModelViewSet,
+):
+    scope_object = "insights_function"
+    scope_object_read_actions = ["list", "retrieve", "logs", "metrics", "metrics_totals"]
+    scope_object_write_actions = ["create", "update", "partial_update", "invocations", "rearrange", "rerun"]
+    queryset = InsightsFunction.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = InsightsFunctionFilterSet
+    log_source = "insights_function"
+    app_source = "insights_function"
+
+    def dangerously_get_required_scopes(self, request, view) -> Optional[list[str]]:
+        # Rerun re-executes stored invocations — it replays up to 30 days of
+        # persisted event/person/group data through the current (possibly
+        # reconfigured) function. A `insights_function:write`-only token could use
+        # that to route historical data it can't otherwise read to a destination
+        # it controls, so gate rerun on person:read + group:read on top of write
+        # — the same data-read scopes the invocation-inspection paths require.
+        # (`insights_function:read` would be a no-op since :write already satisfies it.)
+        if self.action == "rerun":
+            return ["insights_function:write", "person:read", "group:read"]
+        return None
+
+    def get_serializer_class(self) -> type[BaseSerializer]:
+        if self.action == "list":
+            # Use full serializer (including inputs, mappings, etc.) when ?full=true
+            if self.request.GET.get("full") == "true":
+                return InsightsFunctionSerializer
+            return InsightsFunctionMinimalSerializer
+        return InsightsFunctionSerializer
+
+    @tracer.start_as_current_span("InsightsFunctionViewSet.list")
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        response = super().list(request, *args, **kwargs)
+        if request.query_params.get("search"):
+            data = response.data if isinstance(response.data, dict) else {}
+            results_len = data.get("count", len(data.get("results", [])))
+            span = trace.get_current_span()
+            span.set_attribute("insights_function.search.result_count", results_len)
+            span.set_attribute("insights_function.search.empty", results_len == 0)
+        return response
+
+    @staticmethod
+    @tracer.start_as_current_span("InsightsFunctionViewSet._apply_search")
+    def _apply_search(queryset: QuerySet, search: str) -> QuerySet:
+        return apply_trigram_search(
+            queryset,
+            search,
+            span_prefix="insights_function.search",
+            fields=(NAME_FIELD, DESCRIPTION_FIELD),
+            tiebreakers=("name",),
+        )
+
+    def safely_get_queryset(self, queryset: QuerySet) -> QuerySet:
+        queryset = queryset.exclude(type=InsightsFunctionType.WAREHOUSE_SOURCE_WEBHOOK.value)
+
+        if not (self.action == "partial_update" and self.request.data.get("deleted") is False):
+            # We only want to include deleted functions if we are un-deleting them
+            queryset = queryset.filter(deleted=False)
+
+        if self.action == "list":
+            search = self.request.GET.get("search")
+            if search:
+                if len(search) > MAX_SEARCH_LENGTH:
+                    raise serializers.ValidationError(
+                        {"search": f"Search query must be {MAX_SEARCH_LENGTH} characters or fewer."}
+                    )
+                queryset = self._apply_search(queryset, search)
+            else:
+                queryset = queryset.order_by("execution_order", "-updated_at")
+
+        final_filter_groups = []
+
+        if self.request.GET.get("filter_groups"):
+            try:
+                filter_groups = json.loads(self.request.GET["filter_groups"])
+                if not isinstance(filter_groups, list):
+                    raise ValueError("filter_groups must be a list")
+
+                for filter_group in filter_groups:
+                    final_filter_groups.append(filter_group)
+
+            except (ValueError, KeyError, TypeError):
+                raise exceptions.ValidationError({"filter_groups": "Invalid filter_groups"})
+
+        if self.request.GET.get("filters"):
+            try:
+                filters = json.loads(self.request.GET["filters"])
+                final_filter_groups.append(filters)
+            except (ValueError, KeyError, TypeError):
+                raise exceptions.ValidationError({"filters": "Invalid filters"})
+
+        if final_filter_groups:
+            combined_q = Q()
+
+            for filter_group in final_filter_groups:
+                if filter_group:
+                    combined_q |= Q(filters__contains=filter_group)
+
+            queryset = queryset.filter(combined_q)
+
+        return queryset
+
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
+        return drop_similar_when_exact_exists(super().filter_queryset(queryset))
+
+    @action(detail=False, methods=["GET"])
+    def icons(self, request: Request, *args, **kwargs):
+        query = request.GET.get("query")
+        if not query:
+            return Response([])
+
+        icons = CDPIconsService().list_icons(
+            query, icon_url_base="/api/projects/@current/insights_functions/icon/?id=", team_id=self.team_id
+        )
+
+        return Response(icons)
+
+    @action(detail=False, methods=["GET"])
+    def icon(self, request: Request, *args, **kwargs):
+        id = request.GET.get("id")
+        if not id:
+            raise serializers.ValidationError("id is required")
+
+        icon_service = CDPIconsService()
+
+        return icon_service.get_icon_http_response(id, team_id=self.team_id)
+
+    @extend_schema(
+        request=InsightsFunctionInvocationSerializer,
+        responses={200: InsightsFunctionInvocationSerializer},
+    )
+    @action(detail=True, methods=["POST"])
+    def invocations(self, request: Request, *args, **kwargs):
+        try:
+            insights_function = self.get_object()
+        except Exception:
+            insights_function = None
+
+        serializer = InsightsFunctionInvocationSerializer(
+            data=request.data, context={**self.get_serializer_context(), "instance": insights_function}
+        )
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        configuration = serializer.validated_data["configuration"]
+        # Remove the team from the config
+        configuration.pop("team")
+
+        res = create_hog_invocation_test(
+            team_id=self.team_id,
+            insights_function_id=str(insights_function.id) if insights_function else "new",
+            payload=serializer.validated_data,
+        )
+
+        if res.status_code != 200:
+            return Response({"status": "error"}, status=res.status_code)
+
+        return Response(res.json())
+
+    @extend_schema(
+        request=HogInvocationRerunRequestSerializer,
+        responses={200: HogInvocationRerunResponseSerializer, 400: HogInvocationRerunResponseSerializer},
+    )
+    @action(detail=True, methods=["POST"])
+    def rerun(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        Rerun past invocations of this script function from their stored payloads.
+
+        The CDP worker reads matching rows from the `hog_invocation_results`
+        Datastore table, rehydrates the invocation from the stored
+        `invocation_globals`, and re-enqueues onto cyclotron. Each rerun
+        run reuses the original `invocation_id` with `is_retry=1` set on the
+        new lifecycle row so the UI can surface that it was a rerun.
+
+        Only types a cyclotron worker executes (`TYPES_THAT_CAN_RERUN`) can be
+        rerun: rerun re-enqueues onto the cyclotron script queue, and other types
+        run elsewhere (source webhooks inline in the cdp-api HTTP handler,
+        transformations during ingestion, `site_*` transpiled to client-side
+        JS). A re-enqueued invocation of one of those would never drain and
+        wedges the partition, so a rerun of a non-rerunnable type is rejected
+        with a 400 here.
+
+        Because rerun replays historical event/person/group data, it requires
+        `person:read` and `group:read` on top of `insights_function:write`.
+        """
+        insights_function = self.get_object()
+
+        if insights_function.type not in TYPES_THAT_CAN_RERUN:
+            return Response(
+                {
+                    "queued_count": 0,
+                    "skipped_count": 0,
+                    "detail": f"Re-runs aren't supported for '{insights_function.type}' functions.",
+                },
+                status=400,
+            )
+
+        serializer = HogInvocationRerunRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # `serializer.data` runs `to_representation`, which converts the
+        # `DateTimeField`s on `filter.window_start` / `filter.window_end` to
+        # ISO-8601 strings — `requests.post(json=...)` can't serialize raw
+        # `datetime` objects, so passing `validated_data` would 500 every
+        # filter-mode rerun before the request even left Django.
+        res = rerun_hog_invocations(
+            team_id=self.team_id,
+            function_kind="insights_function",
+            function_id=str(insights_function.id),
+            payload=serializer.data,
+        )
+
+        if res.status_code != 200:
+            return Response(
+                {"queued_count": 0, "skipped_count": 0, "detail": res.text},
+                status=res.status_code,
+            )
+
+        return Response(res.json())
+
+    def perform_create(self, serializer):
+        serializer.save()
+        log_activity_from_viewset(
+            self,
+            serializer.instance,
+            name=serializer.instance.name,
+            detail_type=humanize_insights_function_type(serializer.instance.type),
+        )
+
+    def perform_update(self, serializer):
+        instance_id = serializer.instance.id
+
+        try:
+            # nosemgrep: idor-lookup-without-team (ID from already team-scoped instance)
+            before_update = InsightsFunction.objects.get(pk=instance_id)
+        except InsightsFunction.DoesNotExist:
+            before_update = None
+
+        serializer.save()
+
+        log_activity_from_viewset(
+            self,
+            serializer.instance,
+            name=serializer.instance.name,
+            previous=before_update,
+            detail_type=humanize_insights_function_type(serializer.instance.type),
+        )
+
+    @extend_schema(
+        request=InsightsFunctionRearrangeSerializer,
+        responses={200: InsightsFunctionSerializer(many=True)},
+        filters=False,
+    )
+    @action(methods=["PATCH"], detail=False, pagination_class=None)
+    def rearrange(self, request: Request, *args, **kwargs) -> Response:
+        """Update the execution order of multiple InsightsFunctions."""
+        team = self.team
+        orders: dict[str, int] = request.data.get("orders", {})
+
+        if not orders:
+            raise exceptions.ValidationError("No orders provided")
+
+        with transaction.atomic():
+            # Get all functions in a single query and validate them
+            function_ids = list(orders.keys())
+            functions = {
+                str(f.id): f
+                for f in InsightsFunction.objects.filter(
+                    id__in=function_ids, team=team, type__in=TYPES_WITH_EXECUTION_ORDER, deleted=False
+                )
+            }
+
+            # Validate all functions exist
+            missing_ids = set(function_ids) - set(functions.keys())
+            if missing_ids:
+                raise exceptions.ValidationError(f"InsightsFunction with id {missing_ids.pop()} does not exist")
+
+            # execution_order is scoped per type, so one rearrange request must stay within one type
+            types = {f.type for f in functions.values()}
+            if len(types) > 1:
+                raise exceptions.ValidationError("Cannot rearrange functions of different types in one request")
+            hog_type = types.pop()
+
+            # Update orders and create activity logs
+            from django.contrib.auth.models import AnonymousUser
+            from django.utils import timezone
+
+            current_time = timezone.now()
+            user = None if isinstance(request.user, AnonymousUser) else request.user
+
+            for function_id, function in functions.items():
+                new_order = orders[function_id]
+                old_order = function.execution_order
+
+                if old_order != new_order:
+                    function.execution_order = new_order
+                    function.updated_at = current_time
+
+                    log_activity(
+                        organization_id=self.organization.id,
+                        team_id=self.team_id,
+                        user=user,
+                        item_id=str(function.id),
+                        was_impersonated=is_impersonated(request),
+                        scope="InsightsFunction",
+                        activity="updated",
+                        detail=Detail(
+                            name=function.name,
+                            type=humanize_insights_function_type(function.type),
+                            changes=[
+                                Change(
+                                    type="InsightsFunction",
+                                    action="changed",
+                                    field="priority",
+                                    before=str(old_order),
+                                    after=str(new_order),
+                                )
+                            ],
+                        ),
+                    )
+
+                    function.save(update_fields=["execution_order", "updated_at"])
+
+        # Get final ordered list in a single query
+        transformations = InsightsFunction.objects.filter(team=team, type=hog_type, deleted=False).order_by(
+            "execution_order"
+        )
+
+        serializer = self.get_serializer(transformations, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["POST"])
+    def enable_backfills(self, request: Request, *args, **kwargs):
+        from products.batch_exports.backend.api.batch_export import BatchExportSerializer
+
+        insights_function = self.get_object()
+
+        # Check if backfill is already enabled
+        if insights_function.batch_export_id:
+            return Response({"error": "Backfills already enabled for this function"}, status=400)
+
+        # Only event-sourced destinations support backfills
+        if insights_function.type != InsightsFunctionType.DESTINATION:
+            return Response(
+                {"error": "Backfills are only supported for destination functions."},
+                status=400,
+            )
+        source = (insights_function.filters or {}).get("source", "events")
+        if source != "events":
+            return Response(
+                {"error": "Backfills are only supported for event-sourced destinations."},
+                status=400,
+            )
+
+        # Check feature flag for backfill-workflows-destination
+        team = Team.objects.get(id=self.team_id)
+        if not hanzo_insights.feature_enabled(
+            "backfill-workflows-destination",
+            str(team.uuid),
+            groups={"organization": str(team.organization.id)},
+            group_properties={
+                "organization": {
+                    "id": str(team.organization.id),
+                    "created_at": team.organization.created_at,
+                }
+            },
+            send_feature_flag_events=False,
+        ):
+            raise PermissionDenied("Backfilling Workflows is not enabled for this team.")
+
+        # Prepare batch export data matching the frontend's structure
+        batch_export_data = {
+            "name": insights_function.name,
+            "paused": True,
+            "interval": "hour",
+            "model": "events",
+            "filters": insights_function.filters.get("events", []) if insights_function.filters else [],
+            "destination": {
+                "type": "Workflows",
+                "config": {"insights_function_id": str(insights_function.id)},
+            },
+        }
+
+        batch_export_serializer = BatchExportSerializer(
+            data=batch_export_data, context={"team_id": self.team_id, "request": request}
+        )
+
+        if not batch_export_serializer.is_valid():
+            return Response(batch_export_serializer.errors, status=400)
+
+        batch_export = batch_export_serializer.save()
+
+        insights_function.batch_export_id = batch_export.id
+        insights_function.save(update_fields=["batch_export_id"])
+
+        return Response({"batch_export_id": str(batch_export.id)})

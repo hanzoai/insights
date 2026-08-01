@@ -5,9 +5,15 @@ from insights.test.base import BaseTest
 from django.utils import timezone
 
 from insights.datastore.client import sync_execute
-from insights.models import Plugin, PluginConfig
-from insights.models.plugin import PluginLogEntrySource, PluginLogEntryType, fetch_plugin_log_entries
 from insights.models.utils import UUIDT
+
+from products.cdp.backend.models.plugin import (
+    Plugin,
+    PluginConfig,
+    PluginLogEntrySource,
+    PluginLogEntryType,
+    fetch_plugin_log_entries,
+)
 
 
 def create_plugin_log_entry(

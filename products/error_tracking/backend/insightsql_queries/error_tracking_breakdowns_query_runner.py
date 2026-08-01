@@ -13,9 +13,11 @@ from insights.insightsql import ast
 from insights.insightsql.property import property_to_expr
 from insights.insightsql.query import execute_insightsql_query
 
+from insights.insightsql_queries.insights.utils.breakdowns import BREAKDOWN_NULL_STRING_LABEL
 from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
-from insights.queries.trends.breakdown import BREAKDOWN_NULL_STRING_LABEL
 from insights.utils import relative_date_parse
+
+from products.error_tracking.backend.insightsql_queries.error_tracking_query_runner_utils import validate_uuid_param
 
 logger = structlog.get_logger(__name__)
 
@@ -26,6 +28,7 @@ class ErrorTrackingBreakdownsQueryRunner(AnalyticsQueryRunner[ErrorTrackingBreak
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.query.issueId = validate_uuid_param(self.query.issueId, "issueId")
         self.date_from = self.parse_relative_date_from(self.query.dateRange.date_from if self.query.dateRange else None)
         self.date_to = self.parse_relative_date_to(self.query.dateRange.date_to if self.query.dateRange else None)
 
@@ -195,6 +198,7 @@ class ErrorTrackingBreakdownsQueryRunner(AnalyticsQueryRunner[ErrorTrackingBreak
             query_result = execute_insightsql_query(
                 query=self.to_query(),
                 team=self.team,
+                user=self.user,
                 query_type="ErrorTrackingBreakdownsQuery",
                 timings=self.timings,
                 modifiers=self.modifiers,

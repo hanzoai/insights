@@ -5,19 +5,16 @@ import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { Button, ButtonWithDropdown } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
-import { AggregationAxisFormat, INSIGHT_UNIT_OPTIONS } from 'scenes/insights/aggregationAxisFormat'
+import {
+    AggregationAxisFormat,
+    defaultAggregationAxisFormatForDisplay,
+    INSIGHT_UNIT_OPTIONS,
+    INSIGHT_UNIT_OPTIONS_SHORT,
+} from 'scenes/insights/aggregationAxisFormat'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
 import { unitPickerModalLogic } from './unitPickerModalLogic'
-
-const aggregationDisplayMap = INSIGHT_UNIT_OPTIONS.reduce<Record<AggregationAxisFormat, React.ReactNode>>(
-    (acc, option) => {
-        acc[option.value] = option.label
-        return acc
-    },
-    {} as Record<AggregationAxisFormat, React.ReactNode>
-)
 
 export interface HandleUnitChange {
     format?: AggregationAxisFormat
@@ -36,6 +33,8 @@ export function UnitPicker(): JSX.Element {
 
     const [isVisible, setIsVisible] = useState(false)
     const [localAxisFormat, setLocalAxisFormat] = useState(trendsFilter?.aggregationAxisFormat || undefined)
+    // Some display types (e.g. Metric) render a default unit when none is explicitly set — reflect it here.
+    const effectiveAxisFormat = localAxisFormat ?? defaultAggregationAxisFormatForDisplay(display)
 
     useKeyboardHotkeys(
         {
@@ -70,8 +69,9 @@ export function UnitPicker(): JSX.Element {
 
     const displayValue = useMemo(() => {
         let displayValue: React.ReactNode = 'None'
-        if (localAxisFormat) {
-            displayValue = aggregationDisplayMap[localAxisFormat]
+        // 'numeric' is the explicit "None" option, so keep the "None" label rather than its empty short symbol.
+        if (effectiveAxisFormat && effectiveAxisFormat !== 'numeric') {
+            displayValue = INSIGHT_UNIT_OPTIONS_SHORT[effectiveAxisFormat]
         }
         if (trendsFilter?.aggregationAxisPrefix?.length) {
             displayValue = `Prefix: ${trendsFilter?.aggregationAxisPrefix}`
@@ -80,7 +80,7 @@ export function UnitPicker(): JSX.Element {
             displayValue = `Postfix: ${trendsFilter?.aggregationAxisPostfix}`
         }
         return displayValue
-    }, [localAxisFormat, trendsFilter])
+    }, [effectiveAxisFormat, trendsFilter])
 
     const handleCustomPrefix = (): void => {
         showCustomUnitModal({
@@ -106,6 +106,7 @@ export function UnitPicker(): JSX.Element {
                 type="secondary"
                 data-attr="chart-aggregation-axis-format"
                 fullWidth
+                truncate
                 dropdown={{
                     onClickOutside: () => setIsVisible(false),
                     visible: isVisible,
@@ -115,7 +116,7 @@ export function UnitPicker(): JSX.Element {
                                 <Button
                                     key={index}
                                     onClick={() => handleChange({ format: value })}
-                                    active={value === localAxisFormat}
+                                    active={value === effectiveAxisFormat}
                                     fullWidth
                                 >
                                     {label}
@@ -152,7 +153,7 @@ export function UnitPicker(): JSX.Element {
                     closeOnClickInside: false,
                 }}
             >
-                {displayValue}
+                <span className="min-w-0 truncate">{displayValue}</span>
             </ButtonWithDropdown>
         </div>
     )

@@ -20,6 +20,13 @@ export enum RichContentNodeType {
     Mention = 'ph-mention',
 }
 
+declare module '@tiptap/core' {
+    interface NodeConfig {
+        /** Plain-text serialization of a custom node, used when extracting text content. */
+        serializedText: (attrs: Record<string, any>) => string
+    }
+}
+
 export interface RichContentEditorType {
     isEmpty: () => boolean
     getJSON: () => JSONContent
@@ -35,9 +42,11 @@ export interface RichContentEditorType {
     chain: () => EditorCommands
     destroy: () => void
     getMarks: (type: string) => { id: string; pos: number }[]
+    getAttributes: (typeOrName: string) => Record<string, any>
     setMark: (id: string) => void
     getMentions: () => number[]
     isActive: (name: string, attributes?: {}) => boolean
+    isSelectionFullyWithinSingleMark: (markName: string) => boolean
     deleteRange: (range: EditorRange) => EditorCommands
     insertContent: (content: JSONContent) => void
     insertContentAt: (position: number, content: JSONContent) => void

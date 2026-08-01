@@ -15,7 +15,7 @@ pub struct Config {
 
     pub insights_api_key: Option<String>,
 
-    #[envconfig(default = "https://us.i.insights.hanzo.ai/capture")]
+    #[envconfig(default = "https://us.i.hanzo.ai/capture")]
     pub insights_endpoint: String,
 
     #[envconfig(nested = true)]
@@ -46,6 +46,12 @@ pub struct Config {
 
     #[envconfig(default = "10")]
     pub max_event_batch_wait_seconds: u64,
+
+    // Per-request timeout for calls to the embedding provider, covering the whole
+    // request (connect through response body). Bounds a slow/hung request so it
+    // can't stall batch processing indefinitely.
+    #[envconfig(default = "10")]
+    pub embedding_request_timeout_seconds: u64,
 }
 
 impl Config {

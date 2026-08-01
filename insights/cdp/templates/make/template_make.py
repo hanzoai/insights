@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Triggers a webhook based scenario",
     icon_url="/static/services/make.png",
     category=["Custom"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (not match(inputs.webhookUrl, '^https://hook.[^/]+.make.com/?.*')) {
     throw Error('Invalid URL. The URL should match the format: https://hook.<region>.make.com/<hookUrl>')

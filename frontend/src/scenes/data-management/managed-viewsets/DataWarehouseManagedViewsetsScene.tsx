@@ -27,7 +27,7 @@ const RESOURCE_TYPES_MAP: Record<DataWarehouseManagedViewsetKind, AccessControlR
     revenue_analytics: AccessControlResourceType.RevenueAnalytics,
 }
 
-export function DataWarehouseManagedViewsetsScene(): JSX.Element {
+export function DataWarehouseManagedViewsetsScene(): JSX.Element | null {
     const { currentTeam } = useValues(teamLogic)
     const { featureFlags } = useValues(featureFlagLogic)
     const { kind, views } = useValues(
@@ -36,7 +36,7 @@ export function DataWarehouseManagedViewsetsScene(): JSX.Element {
 
     const { loadCurrentTeam } = useActions(teamLogic)
 
-    if (!featureFlags[FEATURE_FLAGS.REVENUE_ANALYTICS]) {
+    if (!featureFlags[FEATURE_FLAGS.MANAGED_VIEWSETS]) {
         return (
             <SceneContent>
                 <SceneTitleSection
@@ -51,7 +51,11 @@ export function DataWarehouseManagedViewsetsScene(): JSX.Element {
         )
     }
 
-    const managedViewsets = currentTeam!.managed_viewsets!
+    if (!currentTeam) {
+        return null
+    }
+
+    const managedViewsets = currentTeam.managed_viewsets ?? {}
 
     const onConfirmDisable = async (): Promise<boolean> => {
         if (!kind) {
@@ -60,6 +64,9 @@ export function DataWarehouseManagedViewsetsScene(): JSX.Element {
 
         try {
             await api.dataWarehouseManagedViewsets.toggle(kind, false)
+            if (kind === 'revenue_analytics') {
+                await api.revenueAnalyticsJoins.sync(false)
+            }
             toast.success(`${VIEWSET_TITLES[kind]} viewset disabled and views deleted successfully`)
             loadCurrentTeam()
             return true
@@ -78,14 +85,16 @@ export function DataWarehouseManagedViewsetsScene(): JSX.Element {
             />
 
             <div className="space-y-4">
-                {(Object.keys(managedViewsets) as DataWarehouseManagedViewsetKind[]).map((kind) => (
-                    <DataWarehouseManagedViewsetCard
-                        key={kind}
-                        resourceType={RESOURCE_TYPES_MAP[kind]}
-                        type="DataWarehouseManagedViewsetsScene"
-                        kind={kind}
-                    />
-                ))}
+                {(Object.keys(managedViewsets) as DataWarehouseManagedViewsetKind[])
+                    .filter((kind) => kind in RESOURCE_TYPES_MAP)
+                    .map((kind) => (
+                        <DataWarehouseManagedViewsetCard
+                            key={kind}
+                            resourceType={RESOURCE_TYPES_MAP[kind]}
+                            type="DataWarehouseManagedViewsetsScene"
+                            kind={kind}
+                        />
+                    ))}
             </div>
 
             <DataWarehouseManagedViewsetImpactModal

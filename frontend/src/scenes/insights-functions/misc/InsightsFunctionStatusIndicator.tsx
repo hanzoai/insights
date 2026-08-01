@@ -1,15 +1,15 @@
 import { Dropdown, Tag, TagProps } from '@hanzo/elements'
 
-import { InsightsFunctionType, InsightsWatcherState } from '~/types'
+import { InsightsFunctionType, HogWatcherState } from '~/types'
 
 type DisplayOptions = { tagType: TagProps['type']; display: string; description: JSX.Element }
-const displayMap: Record<InsightsWatcherState, DisplayOptions> = {
-    [InsightsWatcherState.healthy]: {
+const displayMap: Record<HogWatcherState, DisplayOptions> = {
+    [HogWatcherState.healthy]: {
         tagType: 'success',
         display: 'Active',
         description: <>The function is running as expected.</>,
     },
-    [InsightsWatcherState.overflowed]: {
+    [HogWatcherState.overflowed]: {
         tagType: 'caution',
         display: 'Degraded',
         description: (
@@ -19,7 +19,7 @@ const displayMap: Record<InsightsWatcherState, DisplayOptions> = {
             </>
         ),
     },
-    [InsightsWatcherState.disabled]: {
+    [HogWatcherState.disabled]: {
         tagType: 'danger',
         display: 'Disabled',
         description: (
@@ -29,20 +29,20 @@ const displayMap: Record<InsightsWatcherState, DisplayOptions> = {
             </>
         ),
     },
-    [InsightsWatcherState.forcefully_degraded]: {
+    [HogWatcherState.forcefully_degraded]: {
         tagType: 'caution',
         display: 'Degraded',
         description: (
             <>
-                The function has been forcefully marked as degraded by an Insights admin. This means it is moved to a
+                The function has been forcefully marked as degraded by a Insights admin. This means it is moved to a
                 separate processing queue and may experience delays or increased failures.
             </>
         ),
     },
-    [InsightsWatcherState.forcefully_disabled]: {
+    [HogWatcherState.forcefully_disabled]: {
         tagType: 'danger',
         display: 'Disabled',
-        description: <>The function has been forcefully disabled by an Insights admin. Please contact support.</>,
+        description: <>The function has been forcefully disabled by a Insights admin. Please contact support.</>,
     },
 }
 
@@ -69,9 +69,7 @@ export type InsightsFunctionStatusIndicatorProps = {
 
 const HIDE_STATUS_FOR_TYPES: InsightsFunctionType['type'][] = ['site_destination', 'site_app']
 
-export function InsightsFunctionStatusIndicator({
-    insightsFunction,
-}: InsightsFunctionStatusIndicatorProps): JSX.Element | null {
+export function InsightsFunctionStatusIndicator({ insightsFunction }: InsightsFunctionStatusIndicatorProps): JSX.Element | null {
     if (!insightsFunction || HIDE_STATUS_FOR_TYPES.includes(insightsFunction.type)) {
         return null
     }

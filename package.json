@@ -1,21 +1,20 @@
 {
     "name": "@hanzo/root",
-    "description": "",
     "version": "0.0.0",
+    "description": "",
+    "homepage": "https://github.com/insights/insights#readme",
+    "bugs": {
+        "url": "https://github.com/insights/insights/issues"
+    },
+    "license": "MIT",
+    "author": "Insights Inc.",
     "repository": {
         "type": "git",
-        "url": "https://github.com/hanzoai/insights.git"
+        "url": "https://github.com/insights/insights.git"
     },
-    "author": "Hanzo Insights Inc.",
-    "bugs": {
-        "url": "https://github.com/hanzoai/insights/issues"
+    "browser": {
+        "path": "path-browserify"
     },
-    "homepage": "https://github.com/hanzoai/insights#readme",
-    "license": "MIT",
-    "engines": {
-        "node": ">=24 <25"
-    },
-    "packageManager": "pnpm@10.29.3",
     "scripts": {
         "prepare": "husky install",
         "schema:build": "bin/insightscli build:schema",
@@ -23,87 +22,186 @@
         "schema:build:python": "bash bin/build-schema-python.sh",
         "taxonomy:build": "pnpm run taxonomy:build:json",
         "taxonomy:build:json": "python bin/build-taxonomy-json.py",
-        "grammar:build": "pnpm grammar:build:python && pnpm grammar:build:cpp",
-        "grammar:build:python": "cd insights/insightsql/grammar && cat InsightsQLLexer.python.g4 > InsightsQLLexer.g4 && tail -n +2 InsightsQLLexer.common.g4 |sed s/isOpeningTag/self.isOpeningTag/ >> InsightsQLLexer.g4 && antlr -Dlanguage=Python3 InsightsQLLexer.g4 && rm InsightsQLLexer.g4 && antlr -visitor -no-listener -Dlanguage=Python3 InsightsQLParser.g4",
+        "grammar:build": "pnpm grammar:build:cpp",
         "grammar:build:cpp": "cd insights/insightsql/grammar && cat InsightsQLLexer.cpp.g4 > InsightsQLLexer.g4 && tail -n +2 InsightsQLLexer.common.g4 >> InsightsQLLexer.g4 && antlr -o ../../../common/insightsql_parser -Dlanguage=Cpp InsightsQLLexer.g4 && rm InsightsQLLexer.g4 && antlr -o ../../../common/insightsql_parser -visitor -no-listener -Dlanguage=Cpp InsightsQLParser.g4",
         "build:products": "pnpm --filter=@hanzo/frontend run build:products",
         "generate:source-configs": "DEBUG=1 python manage.py generate_source_configs",
         "// DEPRECATED - use insightscli migrations:run instead": "",
         "dev:migrate:postgres": "export DEBUG=1 && source env/bin/activate && python manage.py migrate",
         "// DEPRECATED - use insightscli migrations:run instead ": "",
-        "dev:migrate:clickhouse": "export DEBUG=1 && source env/bin/activate && python manage.py migrate_clickhouse",
-        "mypy-baseline-sync": "TEST=1 mypy . | mypy-baseline sync",
-        "mypy-check": "TEST=1 mypy . | mypy-baseline filter",
+        "dev:migrate:datastore": "export DEBUG=1 && source env/bin/activate && python manage.py migrate_datastore",
         "// DEPRECATED - use insightscli format:python instead": "",
         "format:backend": "./bin/ruff.sh format .",
         "// DEPRECATED - use insightscli format:js instead": "",
-        "format:frontend": "pnpm --filter=@hanzo/frontend run format",
+        "format:frontend": "oxfmt \"{products,frontend/src,docs}/**/*.{js,mjs,ts,tsx,json,yaml,yml,css,scss}\"",
+        "format:frontend:check": "oxfmt --check \"{products,frontend/src,docs}/**/*.{js,mjs,ts,tsx,json,yaml,yml,css,scss}\"",
         "// DEPRECATED - use insightscli format instead": "",
         "format": "pnpm format:backend && pnpm format:frontend",
         "cleandep": "rm -rf node_modules && pnpm -r exec rm -rf node_modules",
         "storybook": "pnpm turbo --filter=@hanzo/storybook start",
+        "quill:dev": "pnpm --filter=@hanzo/quill-workspace dev",
+        "quill:build": "pnpm --filter='@hanzo/quill...' --filter='@hanzo/quill-charts...' build",
+        "quill:storybook": "pnpm --filter=@hanzo/quill-workspace storybook",
+        "quill:publish": "pnpm quill:build && pnpm --filter @hanzo/quill-tokens publish --tag alpha --no-git-checks && pnpm --filter @hanzo/quill publish --tag alpha --no-git-checks && pnpm --filter @hanzo/quill-charts publish --tag alpha --no-git-checks",
         "// DEPRECATED - use insightscli start instead": "",
         "start": "./bin/start",
-        "postinstall": "git config --get blame.ignoreRevsFile > /dev/null 2>&1 || git config blame.ignoreRevsFile .git-blame-ignore-revs > /dev/null 2>&1 || true",
+        "postinstall": "git config --get blame.ignoreRevsFile > /dev/null 2>&1 || git config blame.ignoreRevsFile .git-blame-ignore-revs > /dev/null 2>&1 || true; [ ! -f bin/fix-rdkafka-paths ] || bin/fix-rdkafka-paths",
         "lint": "pnpm lint:js && pnpm lint:css",
         "lint:js": "oxlint --quiet",
-        "lint:css": "stylelint \"(frontend|products)/**/*.{css,scss}\""
+        "lint:css": "stylelint \"(frontend|products)/**/*.{css,scss}\" --ignore-pattern \"products/desktop/**\"",
+        "test:unit": "pnpm --filter=@hanzo/frontend test"
     },
     "dependencies": {
         "concurrently": "catalog:",
         "fuse.js": "catalog:",
         "husky": "catalog:",
         "lint-staged": "catalog:",
-        "uuid": "^13.0.0"
+        "uuid": "^11.1.1",
+        "zod": "^4.3.6"
     },
     "devDependencies": {
         "@parcel/packager-ts": "catalog:",
         "@parcel/transformer-typescript-types": "catalog:",
-        "@trivago/prettier-plugin-sort-imports": "^6.0.2",
-        "@types/uuid": "^11.0.0",
-        "markdownlint-cli2": "^0.21.0",
-        "orval": "8.5.3",
-        "oxlint": "^1.56.0",
-        "playwright": "1.58.2",
-        "prettier": "catalog:",
-        "stylelint": "^17.4.0",
-        "stylelint-config-recess-order": "^7.7.0",
-        "stylelint-config-standard-scss": "^17.0.0",
-        "stylelint-order": "^8.1.1",
-        "syncpack": "^14.2.0",
-        "turbo": "^2.8.18"
+        "@playwright/test": "catalog:",
+        "@tailwindcss/postcss": "4.3.0",
+        "@typescript/native-preview": "7.0.0-dev.20260707.2",
+        "autoprefixer": "^10.4.13",
+        "cssnano": "^7.0.6",
+        "markdownlint-cli2": "^0.18.1",
+        "oxfmt": "catalog:",
+        "oxlint": "^1.72.0",
+        "playwright": "1.60.0",
+        "postcss": "^8.5.15",
+        "postcss-preset-env": "^10.1.4",
+        "stylelint": "^15.11.0",
+        "stylelint-config-recess-order": "^4.6.0",
+        "stylelint-config-standard-scss": "^11.1.0",
+        "stylelint-order": "^6.0.4",
+        "syncpack": "^15.3.1",
+        "turbo": "^2.9.14"
     },
     "optionalDependencies": {
         "fsevents": "^2.3.3"
     },
+    "lint-staged": {
+        ".claude/settings.json": "sh -c 'printf \"\\n\\033[31mDo not commit .claude/settings.json — personal permissions belong in .claude/settings.local.json (gitignored).\\nUnstage with: git restore --staged .claude/settings.json\\033[0m\\n\\n\" >&2 && exit 1'",
+        ".claude/hooks/**": "sh -c 'printf \"\\n\\033[33mWarning: hooks in .claude/ are reserved for env bootstrapping (SessionStart only).\\nPrefer skills, AGENTS.md instructions, or lint-staged rules. See Agent automation in AGENTS.md.\\033[0m\\n\\n\"'",
+        "**/{AGENTS,CLAUDE}.md": "sh -c '.github/scripts/check-agents-md-symlinks.sh'",
+        "packages/quill/packages/*/src/**/*.{ts,tsx,css}": "sh -c 'git diff --cached --name-only | grep -q \"^packages/quill/.*AGENTS\\\\.md$\" || printf \"\\n\\033[33mWarning: quill component sources changed without an AGENTS.md update.\\nIf variants, composition, or spacing changed, update the consumer guide (packages/quill/packages/<pkg>/AGENTS.md) in the same PR.\\033[0m\\n\\n\"'",
+        "frontend/public/services/*.{png,jpg,jpeg,gif}": "node frontend/bin/check-service-icon-size.mjs",
+        "products/**/manifest.tsx": [
+            "bin/insightscli format:js",
+            "sh -c 'pnpm build:products && git add frontend/src/products.tsx frontend/src/productScenes.tsx frontend/src/products.json'"
+        ],
+        "!(**/.sqlx/**|products/review_hog/backend/reviewer/prompts/*/schema.json|**/chart/*/templates/**|products/metrics/agent/tests/**/golden/**)*.{json,yaml,yml}": "bin/insightscli format:yaml",
+        "*.{css,scss}": "bin/insightscli format:css",
+        "frontend/src/lib/constants.tsx": [
+            "bin/insightscli lint:feature-flags:fix",
+            "bin/insightscli format:js"
+        ],
+        "{playwright,frontend,products,common,ee,services,docs}/**/*.{js,jsx,mjs,mts,ts,tsx}": "bin/insightscli format:js",
+        "nodejs/**/*.{js,jsx,mjs,mts,ts,tsx}": "bin/insightscli format:nodejs",
+        "funnel-udf/**/*.rs": "bin/insightscli format:rust",
+        "!(insights/insightsql/grammar/*|insights/personinsights_client/proto/generated/*|products/*/skills/*/scripts/*)*.{py,pyi}": [
+            "bin/insightscli lint:python:fix",
+            "bin/insightscli format:python",
+            "uv run --no-sync ty check"
+        ],
+        "*.{md,mdx}": "bin/insightscli format:markdown"
+    },
+    "browserslist": {
+        "development": [
+            "last 2 chrome versions",
+            "last 2 firefox versions",
+            "last 2 edge versions"
+        ],
+        "production": [
+            "defaults and not op_mini all"
+        ]
+    },
+    "engines": {
+        "node": ">=24 <25"
+    },
+    "packageManager": "pnpm@10.29.3",
     "pnpm": {
-        "// Fix Typescript and React version to a fixed known good version across the monorepo": "",
+        "// Fix React version to a fixed known good version across the monorepo": "",
         "overrides": {
-            "@modelcontextprotocol/sdk": "^1.26.0",
+            "axios": "^1.15.0",
+            "@modelcontextprotocol/sdk": "^1.29.0",
             "@types/react": "18.3.27",
             "@types/react-dom": "18.3.7",
             "cipher-base": ">=1.0.5",
+            "d3-geo": ">=3.1.0",
+            "d3-selection": ">=3.0.0",
+            "d3-zoom": ">=3.0.0",
             "form-data": ">=4.0.4",
-            "node-forge": "1.3.2",
+            "node-forge": ">=1.4.0",
             "pbkdf2": ">=3.1.3",
             "react": "18.3.1",
             "react-dom": "18.3.1",
             "sha.js": ">=2.4.12",
-            "typescript": "5.4.5",
-            "@hanzo/icons": "npm:@hanzo/insights-icons@0.36.7",
-            "@hanzo/mascot-mode": "npm:@hanzo/insights-mascot-mode@0.0.48",
-            "@hanzo/rrweb": "npm:@hanzo/insights-rrweb@0.0.26",
-            "@hanzo/rrweb-types": "npm:@hanzo/insights-rrweb-types@0.0.26",
-            "@hanzo/rrweb-plugin-console-record": "npm:@hanzo/insights-rrweb-plugin-console-record@0.0.26"
+            "typescript": "6.0.3",
+            "ultimate-express>uWebSockets.js": "-",
+            "fast-xml-parser@^4": ">=4.5.4",
+            "fast-xml-parser@^5": ">=5.3.5",
+            "jest-playwright-preset>playwright-core": "1.60.0",
+            "@smithy/node-http-handler": "4.4.9",
+            "@smithy/core": "3.24.6",
+            "rolldown": "1.1.4",
+            "@tiptap/core": "3.20.6",
+            "@tiptap/extensions": "3.20.6",
+            "@tiptap/html": "3.20.6",
+            "@tiptap/markdown": "3.20.6",
+            "@tiptap/pm": "3.20.6",
+            "@tiptap/react": "3.20.6",
+            "@tiptap/starter-kit": "3.20.6",
+            "@tiptap/suggestion": "3.20.6",
+            "@tiptap/extension-blockquote": "3.20.6",
+            "@tiptap/extension-bold": "3.20.6",
+            "@tiptap/extension-bubble-menu": "3.20.6",
+            "@tiptap/extension-bullet-list": "3.20.6",
+            "@tiptap/extension-code": "3.20.6",
+            "@tiptap/extension-code-block": "3.20.6",
+            "@tiptap/extension-code-block-lowlight": "3.20.6",
+            "@tiptap/extension-collaboration": "3.20.6",
+            "@tiptap/extension-color": "3.20.6",
+            "@tiptap/extension-document": "3.20.6",
+            "@tiptap/extension-drag-handle": "3.20.6",
+            "@tiptap/extension-drag-handle-react": "3.20.6",
+            "@tiptap/extension-dropcursor": "3.20.6",
+            "@tiptap/extension-floating-menu": "3.20.6",
+            "@tiptap/extension-gapcursor": "3.20.6",
+            "@tiptap/extension-hard-break": "3.20.6",
+            "@tiptap/extension-heading": "3.20.6",
+            "@tiptap/extension-horizontal-rule": "3.20.6",
+            "@tiptap/extension-image": "3.20.6",
+            "@tiptap/extension-italic": "3.20.6",
+            "@tiptap/extension-link": "3.20.6",
+            "@tiptap/extension-list": "3.20.6",
+            "@tiptap/extension-list-item": "3.20.6",
+            "@tiptap/extension-list-keymap": "3.20.6",
+            "@tiptap/extension-node-range": "3.20.6",
+            "@tiptap/extension-ordered-list": "3.20.6",
+            "@tiptap/extension-paragraph": "3.20.6",
+            "@tiptap/extension-placeholder": "3.20.6",
+            "@tiptap/extension-strike": "3.20.6",
+            "@tiptap/extension-table": "3.20.6",
+            "@tiptap/extension-table-of-contents": "3.20.6",
+            "@tiptap/extension-text": "3.20.6",
+            "@tiptap/extension-text-align": "3.20.6",
+            "@tiptap/extension-text-style": "3.20.6",
+            "@tiptap/extension-underline": "3.20.6"
         },
         "patchedDependencies": {
             "heatmap.js@2.0.5": "patches/heatmap.js@2.0.5.patch",
             "dayjs@1.11.11": "patches/dayjs@1.11.11.patch",
-            "chartjs-plugin-crosshair@2.0.0": "patches/chartjs-plugin-crosshair@2.0.0.patch"
+            "chartjs-plugin-crosshair@2.0.0": "patches/chartjs-plugin-crosshair@2.0.0.patch",
+            "kea@4.0.0-pre.6": "patches/kea@4.0.0-pre.6.patch"
         },
         "// Known dependencies that we need preinstall scripts for, add new ones with caution": "",
         "onlyBuiltDependencies": [
             "@modelcontextprotocol/ext-apps",
+            "@mongodb-js/zstd",
             "@parcel/watcher",
             "chartjs-plugin-stacked100",
             "@swc/core",
@@ -124,34 +222,5 @@
             "unrs-resolver",
             "workerd"
         ]
-    },
-    "lint-staged": {
-        "products/**/manifest.tsx": [
-            "bin/insightscli format:js",
-            "sh -c 'pnpm build:products && git add frontend/src/products.tsx frontend/src/products.json'"
-        ],
-        "*.{json,yaml,yml}": "bin/insightscli format:yaml",
-        "*.{css,scss}": "bin/insightscli format:css",
-        "{playwright,frontend,products,common,ee,services}/**/*.{js,jsx,mjs,ts,tsx}": "bin/insightscli format:js",
-        "nodejs/**/*.{js,jsx,mjs,ts,tsx}": "bin/insightscli format:nodejs",
-        "funnel-udf/**/*.rs": "bin/insightscli format:rust",
-        "!(insights/insightsql/grammar/*)*.{py,pyi}": [
-            "bin/insightscli lint:python:fix",
-            "bin/insightscli format:python"
-        ],
-        "*.{md,mdx}": "bin/insightscli format:markdown"
-    },
-    "browserslist": {
-        "development": [
-            "last 2 chrome versions",
-            "last 2 firefox versions",
-            "last 2 edge versions"
-        ],
-        "production": [
-            "defaults and not op_mini all"
-        ]
-    },
-    "browser": {
-        "path": "path-browserify"
     }
 }

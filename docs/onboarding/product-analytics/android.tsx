@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -43,17 +43,17 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     class SampleApp : Application() {
 
                                         companion object {
-                                            const val INSIGHTS_API_KEY = "<ph_project_api_key>"
-                                            const val INSIGHTS_HOST = "<ph_client_api_host>"
+                                            const val POSTFN_PROJECT_TOKEN = "<ph_project_token>"
+                                            const val POSTFN_HOST = "<ph_client_api_host>"
                                         }
 
                                         override fun onCreate() {
                                             super.onCreate()
 
-                                            // Create a Insights Config with the given API key and host
+                                            // Create a Insights Config with the given project token and host
                                             val config = InsightsAndroidConfig(
-                                                apiKey = INSIGHTS_API_KEY,
-                                                host = INSIGHTS_HOST
+                                                apiKey = POSTFN_PROJECT_TOKEN,
+                                                host = POSTFN_HOST
                                             )
 
                                             // Setup Insights with the given Context and Config

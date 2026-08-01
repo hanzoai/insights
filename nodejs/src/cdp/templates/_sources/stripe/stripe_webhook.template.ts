@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Capture an event via a Stripe webhook',
     icon_url: '/static/services/stripe.png',
     category: ['Revenue', 'Payment'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 if(request.method != 'POST') {
   return {
@@ -21,7 +21,16 @@ if(request.method != 'POST') {
 }
 
 if (not inputs.bypass_signature_check) {
-  let body := request.stringBody  
+  if (empty(inputs.signing_secret)) {
+    return {
+      'httpResponse': {
+        'status': 400,
+        'body': 'Signing secret not configured',
+      }
+    }
+  }
+
+  let body := request.stringBody
   let signatureHeader := request.headers['stripe-signature']
 
   if (empty(signatureHeader)) {

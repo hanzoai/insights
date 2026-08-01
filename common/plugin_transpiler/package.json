@@ -2,20 +2,20 @@
     "name": "@hanzo/plugin-transpiler",
     "version": "1.0.0",
     "description": "Transpiles site apps TSX to browser JS via stdin/stdout",
+    "license": "MIT",
+    "author": "Insights Inc.",
     "main": "transpile.mjs",
     "scripts": {
         "build": "tsc -b && node build.mjs",
         "start:dist": "node dist/index.js",
         "start": "npm run build && npm run start:dist"
     },
-    "author": "Hanzo Insights Inc.",
-    "license": "MIT",
     "dependencies": {
         "@babel/standalone": "^7.23.2",
         "@hanzo/esbuilder": "workspace:*",
         "@types/babel__standalone": "^7.1.6",
         "@types/node": "^22.13.14",
-        "typescript": "5.4.5"
+        "typescript": "catalog:"
     },
     "devDependencies": {}
 }

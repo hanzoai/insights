@@ -1,6 +1,7 @@
 import { useValues } from 'kea'
 
-import { Banner } from 'lib/elements/Banner'
+import { IconInfo } from '@hanzo/icons'
+
 import { Link } from 'lib/elements/Link'
 
 import { AnyPropertyFilter, FeatureFlagEvaluationRuntime } from '~/types'
@@ -25,12 +26,16 @@ export function FeatureFlagConditionWarning({
     }
 
     return (
-        <Banner type="warning" className={className}>
-            This flag cannot be locally evaluated by server-side SDKs due to unsupported features: {warning}. The flag
-            will still evaluate correctly when not using local evaluation.{' '}
-            <Link to="https://hanzo.ai/docs/feature-flags/local-evaluation#restriction-on-local-evaluation">
-                Learn more
-            </Link>
-        </Banner>
+        <div
+            className={`flex items-center gap-2 text-xs p-2 rounded border border-warning-dark bg-warning-highlight${className ? ` ${className}` : ''}`}
+        >
+            <IconInfo className="text-base shrink-0 text-warning-dark" />
+            <span>
+                Local evaluation unavailable ({warning}).{' '}
+                <Link to="https://hanzo.ai/docs/feature-flags/local-evaluation#restriction-on-local-evaluation">
+                    Learn more
+                </Link>
+            </span>
+        </div>
     )
 }

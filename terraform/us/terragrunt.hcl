@@ -17,5 +17,5 @@ generate "providers_region.tf" {
 }
 
 inputs = {
-  insights_api_key = get_env("INSIGHTS_PROVIDER_API_KEY")
+  insights_api_key = get_env("POSTFN_PROVIDER_POSTFN_API_KEY")
 }

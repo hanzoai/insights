@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { IconDownload } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
 
-import { humanFriendlyNumber } from 'lib/utils'
+import { humanFriendlyNumber } from 'lib/utils/numbers'
 
 import { logsExportLogic } from './logsExportLogic'
 import { logsViewerLogic } from './logsViewerLogic'

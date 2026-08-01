@@ -1,8 +1,9 @@
 import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 
-import { DataWarehouseManagedSourcesTable } from '../settings/DataWarehouseManagedSourcesTable'
-import { DataWarehouseSelfManagedSourcesTable } from '../settings/DataWarehouseSelfManagedSourcesTable'
+import { DirectConnectSourcesTable } from 'products/data_warehouse/frontend/shared/components/DirectConnectSourcesTable'
+import { ManagedSourcesTable } from 'products/data_warehouse/frontend/shared/components/ManagedSourcesTable'
+import { SelfManagedSourcesTable } from 'products/data_warehouse/frontend/shared/components/SelfManagedSourcesTable'
 
 export function SourcesTab(): JSX.Element {
     return (
@@ -11,14 +12,21 @@ export function SourcesTab(): JSX.Element {
                 title="Managed data warehouse sources"
                 description="Insights can connect to external sources and automatically import data from them into the Insights data warehouse"
             >
-                <DataWarehouseManagedSourcesTable />
+                <ManagedSourcesTable />
+            </SceneSection>
+            <SceneDivider />
+            <SceneSection
+                title="Direct connect sources"
+                description="Query these sources live from Insights. Your data stays where it is, nothing gets imported"
+            >
+                <DirectConnectSourcesTable />
             </SceneSection>
             <SceneDivider />
             <SceneSection
                 title="Self-managed data warehouse sources"
                 description="Connect to your own data sources, making them queryable in Insights"
             >
-                <DataWarehouseSelfManagedSourcesTable />
+                <SelfManagedSourcesTable />
             </SceneSection>
         </div>
     )

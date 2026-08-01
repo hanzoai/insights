@@ -2,11 +2,11 @@ import { useMountedLogic } from 'kea'
 import { forwardRef } from 'react'
 
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
-import { now } from 'lib/dayjs'
 import { Button, ButtonProps, ButtonWithDropdown } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 
-import { ExportContext, ExporterFormat, OnlineExportContext } from '~/types'
+import { AccessControlLevel, AccessControlResourceType, ExporterFormat, OnlineExportContext } from '~/types'
 
 import { TriggerExportProps } from './exporter'
 
@@ -18,10 +18,13 @@ export interface ExportButtonItem {
     insight?: number
 }
 
-export interface ExportButtonProps
-    extends Pick<ButtonProps, 'disabledReason' | 'icon' | 'sideIcon' | 'id' | 'type' | 'fullWidth'> {
+export interface ExportButtonProps extends Pick<
+    ButtonProps,
+    'disabledReason' | 'icon' | 'sideIcon' | 'id' | 'type' | 'fullWidth'
+> {
     items: ExportButtonItem[]
     buttonCopy?: string
+    size?: ButtonProps['size']
 }
 
 export const ExportButton: React.FunctionComponent<ExportButtonProps & React.RefAttributes<HTMLButtonElement>> =
@@ -30,27 +33,21 @@ export const ExportButton: React.FunctionComponent<ExportButtonProps & React.Ref
 
         const { actions } = exportsLogic
         const onExportClick = async (triggerExportProps: TriggerExportProps): Promise<void> => {
-            const timestamp = now().format('YYYY-MM-DD-hhmmss')
-            let modifiedContext: ExportContext | undefined = undefined
-
-            if (triggerExportProps.export_context && triggerExportProps.export_context.filename?.startsWith('export')) {
-                modifiedContext = {
-                    ...triggerExportProps.export_context,
-                    filename: `${triggerExportProps.export_context.filename}-${timestamp}`,
-                }
-            }
-            const modifiedProps = {
-                ...triggerExportProps,
-                export_context: modifiedContext ?? triggerExportProps.export_context,
-            }
-            actions.startExport(modifiedProps)
+            actions.startExport(triggerExportProps)
         }
+
+        // Creating an export requires editor access to the export resource.
+        const accessControlDisabledReason = getAccessControlDisabledReason(
+            AccessControlResourceType.Export,
+            AccessControlLevel.Editor
+        )
 
         return (
             <ButtonWithDropdown
                 ref={ref}
                 data-attr="export-button"
                 {...buttonProps}
+                disabledReason={buttonProps.disabledReason ?? accessControlDisabledReason ?? undefined}
                 dropdown={{
                     actionable: true,
                     placement: 'right-start',
@@ -60,9 +57,13 @@ export const ExportButton: React.FunctionComponent<ExportButtonProps & React.Ref
                             <h5>File type</h5>
                             <Divider />
                             {items.map(({ title, ...triggerExportProps }, i) => {
-                                const exportFormatExtension = Object.keys(ExporterFormat)
-                                    .find((key) => ExporterFormat[key as any] === triggerExportProps.export_format)
-                                    ?.toLowerCase()
+                                const exportFormatExtension = (
+                                    Object.keys(ExporterFormat).find(
+                                        (key) =>
+                                            ExporterFormat[key as keyof typeof ExporterFormat] ===
+                                            triggerExportProps.export_format
+                                    ) ?? triggerExportProps.export_format
+                                ).toLowerCase()
 
                                 let target: string
                                 let exportBody: string = ''

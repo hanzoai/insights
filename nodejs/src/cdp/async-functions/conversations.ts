@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
 
-import { CyclotronInvocationQueueParametersFetchSchema } from '~/schema/cyclotron'
+import { CyclotronInvocationQueueParametersFetchSchema } from '~/cdp/schema/cyclotron'
+import { InsightsFlow } from '~/cdp/schema/hogflow'
 
 import { registerAsyncFunction } from '../async-function-registry'
 
@@ -13,16 +14,19 @@ registerAsyncFunction('insightsGetTicket', {
             throw new Error("[InsightsFunction] - insightsGetTicket call missing 'ticket_id' property")
         }
 
-        const team = await context.hub.teamManager.getTeam(context.invocation.teamId)
+        const team = await context.teamManager.getTeam(context.invocation.teamId)
         if (!team) {
             throw new Error(`Team ${context.invocation.teamId} not found`)
+        }
+        if (!team.secret_api_token) {
+            throw new Error(`Team ${context.invocation.teamId} has no secret API token configured`)
         }
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.hub.SITE_URL}/api/conversations/external/ticket/${ticketId}`,
+            url: `${context.siteUrl}/api/conversations/external/ticket/${ticketId}`,
             method: 'GET',
-            headers: { Authorization: `Bearer ${team.api_token}` },
+            headers: { Authorization: `Bearer ${team.secret_api_token}` },
         })
     },
 
@@ -42,15 +46,29 @@ registerAsyncFunction('insightsGetTicket', {
             status: 200,
             body: {
                 id: args[0]?.ticket_id ?? 'mock-ticket-id',
+                number: 1,
                 status: 'new',
                 priority: null,
-                ticket_number: 1,
                 channel_source: 'widget',
+                distinct_id: 'mock-distinct-id',
+                created_at: DateTime.now().toISO(),
+                updated_at: DateTime.now().toISO(),
                 message_count: 0,
                 last_message_at: null,
                 last_message_text: null,
                 unread_team_count: 0,
                 unread_customer_count: 0,
+                sla: null,
+                assignee: null,
+                url: null,
+                slack_channel_id: null,
+                slack_thread_ts: null,
+                slack_team_id: null,
+                email_subject: null,
+                email_from: null,
+                email_to: null,
+                cc_participants: [],
+                tags: [],
             },
         }
     },
@@ -66,20 +84,35 @@ registerAsyncFunction('insightsUpdateTicket', {
             throw new Error("[InsightsFunction] - insightsUpdateTicket call missing 'ticket_id' property")
         }
 
-        const updateTeam = await context.hub.teamManager.getTeam(context.invocation.teamId)
+        const updateTeam = await context.teamManager.getTeam(context.invocation.teamId)
         if (!updateTeam) {
             throw new Error(`Team ${context.invocation.teamId} not found`)
+        }
+        if (!updateTeam.secret_api_token) {
+            throw new Error(`Team ${context.invocation.teamId} has no secret API token configured`)
+        }
+
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${updateTeam.secret_api_token}`,
+        }
+
+        // Present only when running inside a InsightsFlow (spread onto the synthesized invocation);
+        // forward the workflow id so the ticket activity log can attribute and link to it. Only
+        // the id is sent — the display name is resolved from the workflow on the frontend so it
+        // can't be spoofed through this header. Typed as an optional InsightsFlow so a rename of its
+        // id shape breaks compilation here.
+        const hogFlow = (context.invocation as { hogFlow?: InsightsFlow }).hogFlow
+        if (hogFlow?.id) {
+            headers['X-Insights-Script-Flow-Id'] = hogFlow.id
         }
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.hub.SITE_URL}/api/conversations/external/ticket/${ticketId}`,
+            url: `${context.siteUrl}/api/conversations/external/ticket/${ticketId}`,
             method: 'PATCH',
             body: JSON.stringify(updates),
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${updateTeam.api_token}`,
-            },
+            headers,
         })
     },
 

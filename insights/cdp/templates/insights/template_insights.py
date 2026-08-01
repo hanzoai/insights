@@ -14,7 +14,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send a copy of the incoming data in realtime to another Insights instance",
     icon_url="/static/insights-icon.svg",
     category=["Custom", "Analytics"],
-    code_language="fn",
+    code_language="script",
     code="""
 let host := inputs.host
 let token := inputs.token
@@ -81,12 +81,12 @@ fetch(f'{host}/e', {
 
 
 class TemplateInsightsMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-plugin-replicator"
+    plugin_url = "https://github.com/Insights/insights-plugin-replicator"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         host = obj.config.get("host", "")

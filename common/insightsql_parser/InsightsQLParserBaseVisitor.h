@@ -115,6 +115,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitLimitAndOffsetClauseOptional(InsightsQLParser::LimitAndOffsetClauseOptionalContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitSelectStmt(InsightsQLParser::SelectStmtContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -151,11 +155,27 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitGroupingSetList(InsightsQLParser::GroupingSetListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitGroupingSet(InsightsQLParser::GroupingSetContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitHavingClause(InsightsQLParser::HavingClauseContext *ctx) override {
     return visitChildren(ctx);
   }
 
+  virtual std::any visitQualifyClause(InsightsQLParser::QualifyClauseContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitOrderByClause(InsightsQLParser::OrderByClauseContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterpolateClause(InsightsQLParser::InterpolateClauseContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -179,6 +199,18 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitValuesClause(InsightsQLParser::ValuesClauseContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitValuesRow(InsightsQLParser::ValuesRowContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitJoinExprPositional(InsightsQLParser::JoinExprPositionalContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitJoinExprOp(InsightsQLParser::JoinExprOpContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -187,11 +219,19 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitJoinExprUnpivot(InsightsQLParser::JoinExprUnpivotContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitJoinExprParens(InsightsQLParser::JoinExprParensContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual std::any visitJoinExprCrossOp(InsightsQLParser::JoinExprCrossOpContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitJoinExprPivot(InsightsQLParser::JoinExprPivotContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -231,6 +271,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitWithFillClause(InsightsQLParser::WithFillClauseContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterpolateExpr(InsightsQLParser::InterpolateExprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitRatioExpr(InsightsQLParser::RatioExprContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -255,6 +303,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitWithinGroupClause(InsightsQLParser::WithinGroupClauseContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitWinFrameClause(InsightsQLParser::WinFrameClauseContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -275,19 +327,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnTypeExprSimple(InsightsQLParser::ColumnTypeExprSimpleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitColumnTypeExprNested(InsightsQLParser::ColumnTypeExprNestedContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnTypeExprEnum(InsightsQLParser::ColumnTypeExprEnumContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnTypeExprComplex(InsightsQLParser::ColumnTypeExprComplexContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -295,7 +335,71 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitColumnTypeExprArray(InsightsQLParser::ColumnTypeExprArrayContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnTypeExprComplex(InsightsQLParser::ColumnTypeExprComplexContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnTypeExprSimple(InsightsQLParser::ColumnTypeExprSimpleContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnTypeExprEnum(InsightsQLParser::ColumnTypeExprEnumContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnTypeExprCompound(InsightsQLParser::ColumnTypeExprCompoundContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnTypeCastExprWithTimeZone(InsightsQLParser::ColumnTypeCastExprWithTimeZoneContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnTypeCastExprSimple(InsightsQLParser::ColumnTypeCastExprSimpleContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnTypeCastIdentifier(InsightsQLParser::ColumnTypeCastIdentifierContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitKeywordForTypeCast(InsightsQLParser::KeywordForTypeCastContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitColumnExprList(InsightsQLParser::ColumnExprListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitSelectColumnExprListBeforeFromTrailingComma(InsightsQLParser::SelectColumnExprListBeforeFromTrailingCommaContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitSelectColumnExprListBeforeFromPlain(InsightsQLParser::SelectColumnExprListBeforeFromPlainContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitSelectColumnExprList(InsightsQLParser::SelectColumnExprListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprAliasBefore(InsightsQLParser::ColumnExprAliasBeforeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprInvalidFromImplicitAlias(InsightsQLParser::ColumnExprInvalidFromImplicitAliasContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprSelectValue(InsightsQLParser::ColumnExprSelectValueContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprAliasImplicit(InsightsQLParser::ColumnExprAliasImplicitContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -307,15 +411,23 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitColumnExprAnd(InsightsQLParser::ColumnExprAndContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprValuePassthrough(InsightsQLParser::ColumnExprValuePassthroughContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprOr(InsightsQLParser::ColumnExprOrContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColumnsAll(InsightsQLParser::ColumnExprColumnsAllContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitColumnExprNegate(InsightsQLParser::ColumnExprNegateContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnExprDict(InsightsQLParser::ColumnExprDictContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnExprSubquery(InsightsQLParser::ColumnExprSubqueryContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -327,31 +439,15 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnExprSubstring(InsightsQLParser::ColumnExprSubstringContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnExprCast(InsightsQLParser::ColumnExprCastContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnExprOr(InsightsQLParser::ColumnExprOrContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnExprNullTupleAccess(InsightsQLParser::ColumnExprNullTupleAccessContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnExprTypeCast(InsightsQLParser::ColumnExprTypeCastContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitColumnExprPrecedence1(InsightsQLParser::ColumnExprPrecedence1Context *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual std::any visitColumnExprPrecedence2(InsightsQLParser::ColumnExprPrecedence2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprNullSafeEq(InsightsQLParser::ColumnExprNullSafeEqContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -363,15 +459,15 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnExprCallSelect(InsightsQLParser::ColumnExprCallSelectContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitColumnExprIsNull(InsightsQLParser::ColumnExprIsNullContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual std::any visitColumnExprWinFunctionTarget(InsightsQLParser::ColumnExprWinFunctionTargetContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprNamedArg(InsightsQLParser::ColumnExprNamedArgContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -383,19 +479,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnExprTrim(InsightsQLParser::ColumnExprTrimContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitColumnExprTagElement(InsightsQLParser::ColumnExprTagElementContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnExprTemplateString(InsightsQLParser::ColumnExprTemplateStringContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnExprTuple(InsightsQLParser::ColumnExprTupleContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -411,15 +495,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnExprPropertyAccess(InsightsQLParser::ColumnExprPropertyAccessContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitColumnExprParens(InsightsQLParser::ColumnExprParensContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitColumnExprNullArrayAccess(InsightsQLParser::ColumnExprNullArrayAccessContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -427,11 +503,135 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnExprNullish(InsightsQLParser::ColumnExprNullishContext *ctx) override {
+  virtual std::any visitColumnExprColumnsQualifiedExclude(InsightsQLParser::ColumnExprColumnsQualifiedExcludeContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnExprAnd(InsightsQLParser::ColumnExprAndContext *ctx) override {
+  virtual std::any visitColumnExprNot(InsightsQLParser::ColumnExprNotContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprFunction(InsightsQLParser::ColumnExprFunctionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprDict(InsightsQLParser::ColumnExprDictContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprSubquery(InsightsQLParser::ColumnExprSubqueryContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprSubstring(InsightsQLParser::ColumnExprSubstringContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprCast(InsightsQLParser::ColumnExprCastContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprArraySlice(InsightsQLParser::ColumnExprArraySliceContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColumnsQualifiedReplace(InsightsQLParser::ColumnExprColumnsQualifiedReplaceContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprNullTupleAccess(InsightsQLParser::ColumnExprNullTupleAccessContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprFunctionWithinGroup(InsightsQLParser::ColumnExprFunctionWithinGroupContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprPositional(InsightsQLParser::ColumnExprPositionalContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColumnsRegex(InsightsQLParser::ColumnExprColumnsRegexContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprTypeCast(InsightsQLParser::ColumnExprTypeCastContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprIsDistinctFrom(InsightsQLParser::ColumnExprIsDistinctFromContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprSpreadColumnsList(InsightsQLParser::ColumnExprSpreadColumnsListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColumnsExcludeReplace(InsightsQLParser::ColumnExprColumnsExcludeReplaceContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColumnsQualifiedExcludeReplace(InsightsQLParser::ColumnExprColumnsQualifiedExcludeReplaceContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColumnsExclude(InsightsQLParser::ColumnExprColumnsExcludeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColonLambda(InsightsQLParser::ColumnExprColonLambdaContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprCallSelect(InsightsQLParser::ColumnExprCallSelectContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColumnsQualifiedAll(InsightsQLParser::ColumnExprColumnsQualifiedAllContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprTrim(InsightsQLParser::ColumnExprTrimContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprTemplateString(InsightsQLParser::ColumnExprTemplateStringContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprTuple(InsightsQLParser::ColumnExprTupleContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprTryCast(InsightsQLParser::ColumnExprTryCastContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColumnsList(InsightsQLParser::ColumnExprColumnsListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprColumnsReplace(InsightsQLParser::ColumnExprColumnsReplaceContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprSpreadColumnsRegex(InsightsQLParser::ColumnExprSpreadColumnsRegexContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprPropertyAccess(InsightsQLParser::ColumnExprPropertyAccessContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprNullArrayAccess(InsightsQLParser::ColumnExprNullArrayAccessContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprIgnoreNulls(InsightsQLParser::ColumnExprIgnoreNullsContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprNullish(InsightsQLParser::ColumnExprNullishContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -447,10 +647,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnExprNot(InsightsQLParser::ColumnExprNotContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitColumnExprWinFunction(InsightsQLParser::ColumnExprWinFunctionContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -463,15 +659,23 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnExprFunction(InsightsQLParser::ColumnExprFunctionContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitColumnExprAsterisk(InsightsQLParser::ColumnExprAsteriskContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitColumnLambdaExpr(InsightsQLParser::ColumnLambdaExprContext *ctx) override {
+  virtual std::any visitArrowLambda(InsightsQLParser::ArrowLambdaContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColonLambda(InsightsQLParser::ColonLambdaContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnsReplaceList(InsightsQLParser::ColumnsReplaceListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnsReplaceItem(InsightsQLParser::ColumnsReplaceItemContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -507,6 +711,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitWithExprColumnNameList(InsightsQLParser::WithExprColumnNameListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitColumnIdentifier(InsightsQLParser::ColumnIdentifierContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -531,11 +739,47 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitTableExprPivot(InsightsQLParser::TableExprPivotContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitTableExprValues(InsightsQLParser::TableExprValuesContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitTableExprAlias(InsightsQLParser::TableExprAliasContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual std::any visitTableExprFunction(InsightsQLParser::TableExprFunctionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitTableExprUnpivot(InsightsQLParser::TableExprUnpivotContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitPivotColumnList(InsightsQLParser::PivotColumnListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitPivotColumn(InsightsQLParser::PivotColumnContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitUnpivotColumnList(InsightsQLParser::UnpivotColumnListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitUnpivotColumn(InsightsQLParser::UnpivotColumnContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnExprTupleOrSingle(InsightsQLParser::ColumnExprTupleOrSingleContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitColumnAliases(InsightsQLParser::ColumnAliasesContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -579,7 +823,15 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitKeywordForImplicitAlias(InsightsQLParser::KeywordForImplicitAliasContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitAlias(InsightsQLParser::AliasContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitImplicitAlias(InsightsQLParser::ImplicitAliasContext *ctx) override {
     return visitChildren(ctx);
   }
 

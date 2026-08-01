@@ -8,11 +8,11 @@ import { Link, Spinner } from '@hanzo/elements'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
 import { Row } from 'lib/elements/Row'
-import { IconErrorOutline } from 'lib/elements/icons'
-import { capitalizeFirstLetter } from 'lib/utils'
+import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { PreflightCheckStatus, PreflightItem, preflightLogic } from './preflightLogic'

@@ -11,13 +11,30 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 
-from insights.api.feature_flag import FeatureFlagSerializer
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import get_token
-from insights.auth import TemporaryTokenAuthentication
+from insights.event_usage import report_user_action
 from insights.exceptions import generate_exception_response
-from insights.models import Team, WebExperiment
+from insights.models import Team
 from insights.utils_cors import cors_response
+
+from products.experiments.backend.models.experiment import Experiment
+from products.experiments.backend.models.web_experiment import WebExperiment
+from products.feature_flags.backend.facade.api import create_flag, update_flag
+from products.feature_flags.backend.facade.filters import replace_variant_distribution
+
+# XSS vector patterns, paired with the error message shown when one matches:
+# script tags (opening and closing), event handlers (onclick, onerror, etc.),
+# javascript: protocol, data:text/html, iframe/object/embed tags
+_XSS_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"<script[^>]*>", re.IGNORECASE), "contains disallowed <script> tags"),
+    (re.compile(r"</script>", re.IGNORECASE), "contains disallowed </script> tags"),
+    (re.compile(r"\son\w+\s*=", re.IGNORECASE), "contains disallowed event handlers (onclick, onerror, etc.)"),
+    (re.compile(r"javascript\s*:", re.IGNORECASE), "contains disallowed javascript: protocol"),
+    (re.compile(r"data\s*:\s*text/html", re.IGNORECASE), "contains disallowed data:text/html"),
+    (re.compile(r"<iframe[^>]*>", re.IGNORECASE), "contains disallowed <iframe> tags"),
+    (re.compile(r"<(object|embed)[^>]*>", re.IGNORECASE), "contains disallowed <object> or <embed> tags"),
+]
 
 
 def validate_no_xss(content: str, field_name: str) -> None:
@@ -27,32 +44,9 @@ def validate_no_xss(content: str, field_name: str) -> None:
 
     This validation-only approach preserves the original formatting while preventing XSS attacks.
     """
-    # Check for script tags (opening and closing)
-    if re.search(r"<script[^>]*>", content, re.IGNORECASE):
-        raise ValidationError(f"{field_name} contains disallowed <script> tags")
-
-    if re.search(r"</script>", content, re.IGNORECASE):
-        raise ValidationError(f"{field_name} contains disallowed </script> tags")
-
-    # Check for event handlers (onclick, onerror, onload, onmouseover, etc.)
-    if re.search(r"\son\w+\s*=", content, re.IGNORECASE):
-        raise ValidationError(f"{field_name} contains disallowed event handlers (onclick, onerror, etc.)")
-
-    # Check for javascript: protocol in attributes
-    if re.search(r"javascript\s*:", content, re.IGNORECASE):
-        raise ValidationError(f"{field_name} contains disallowed javascript: protocol")
-
-    # Check for data: protocol with HTML/script content
-    if re.search(r"data\s*:\s*text/html", content, re.IGNORECASE):
-        raise ValidationError(f"{field_name} contains disallowed data:text/html")
-
-    # Check for iframe tags (commonly used for XSS)
-    if re.search(r"<iframe[^>]*>", content, re.IGNORECASE):
-        raise ValidationError(f"{field_name} contains disallowed <iframe> tags")
-
-    # Check for object and embed tags
-    if re.search(r"<(object|embed)[^>]*>", content, re.IGNORECASE):
-        raise ValidationError(f"{field_name} contains disallowed <object> or <embed> tags")
+    for pattern, message in _XSS_PATTERNS:
+        if pattern.search(content):
+            raise ValidationError(f"{field_name} {message}")
 
 
 class WebExperimentsAPISerializer(serializers.ModelSerializer):
@@ -103,8 +97,7 @@ class WebExperimentsAPISerializer(serializers.ModelSerializer):
         if not obj.feature_flag:
             return obj.variants or {}
 
-        multivariate = obj.feature_flag.filters.get("multivariate", {})
-        variants_list = multivariate.get("variants", [])
+        variants_list = obj.feature_flag.variants
 
         # If no feature flag variants, fall back to experiment variants
         if not variants_list:
@@ -189,26 +182,27 @@ class WebExperimentsAPISerializer(serializers.ModelSerializer):
             "multivariate": self.get_variants_for_feature_flag(validated_data),
         }
 
-        # Ensure the request method is set correctly for validation
-        self.context["request"].method = "POST"
-
-        feature_flag_serializer = FeatureFlagSerializer(
-            data={
+        team = self.context["get_team"]()
+        feature_flag = create_flag(
+            {
                 "key": self.get_feature_flag_name(validated_data.get("name", "")),
                 "name": f"Feature Flag for Experiment {validated_data['name']}",
                 "filters": filters,
                 "active": False,
                 "creation_context": "web_experiments",
             },
-            context=self.context,
+            team=team,
+            user=self.context["request"].user,
+            request=self.context["request"],
         )
 
-        feature_flag_serializer.is_valid(raise_exception=True)
-        feature_flag = feature_flag_serializer.save()
-
         # Get team's default stats method setting
-        team = Team.objects.get(id=self.context["team_id"])
-        default_method = team.default_experiment_stats_method or "bayesian"
+        from insights.models.team.extensions import get_or_create_team_extension
+
+        from products.experiments.backend.models.team_experiments_config import TeamExperimentsConfig
+
+        config = get_or_create_team_extension(team, TeamExperimentsConfig)
+        default_method = config.default_experiment_stats_method or "bayesian"
         stats_config = {
             "method": default_method,
         }
@@ -216,27 +210,32 @@ class WebExperimentsAPISerializer(serializers.ModelSerializer):
         experiment = WebExperiment.objects.create(
             team_id=self.context["team_id"], feature_flag=feature_flag, **create_params, stats_config=stats_config
         )
+
+        report_user_action(
+            self.context["request"].user,
+            "experiment created",
+            {**experiment.get_analytics_metadata(), "creation_mode": "new"},
+            team=team,
+            request=self.context["request"],
+        )
+
         return experiment
 
     def update(self, instance: WebExperiment, validated_data: dict[str, Any]) -> WebExperiment:
         variants = validated_data.get("variants", None)
         if variants is not None and isinstance(variants, dict):
             feature_flag = instance.feature_flag
-            filters = {
-                "groups": feature_flag.filters.get("groups", None),
-                "multivariate": self.get_variants_for_feature_flag(validated_data),
-            }
-
-            # Ensure the request method is set correctly for validation
-            self.context["request"].method = "PATCH"
-            existing_flag_serializer = FeatureFlagSerializer(
-                feature_flag,
-                data={"filters": filters},
-                partial=True,
-                context=self.context,
+            filters = replace_variant_distribution(
+                feature_flag.get_filters(),
+                self.get_variants_for_feature_flag(validated_data)["variants"],
             )
-            existing_flag_serializer.is_valid(raise_exception=True)
-            existing_flag_serializer.save()
+            update_flag(
+                feature_flag,
+                {"filters": filters},
+                team=self.context["get_team"](),
+                user=self.context["request"].user,
+                request=self.context["request"],
+            )
 
         instance = super().update(instance, validated_data)
         return instance
@@ -259,7 +258,6 @@ class WebExperimentsAPISerializer(serializers.ModelSerializer):
 class WebExperimentViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     scope_object = "experiment"
     serializer_class = WebExperimentsAPISerializer
-    authentication_classes = [TemporaryTokenAuthentication]
     queryset = WebExperiment.objects.select_related("feature_flag", "created_by").order_by("-created_at").all()
 
     def safely_get_queryset(self, queryset):
@@ -279,7 +277,7 @@ def web_experiments(request: Request):
             request,
             generate_exception_response(
                 "experiments",
-                "API key not provided. You can find your project API key in your Insights project settings.",
+                "Project token not provided. You can find your project token in your Insights project settings.",
                 type="authentication_error",
                 code="missing_api_key",
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -293,7 +291,7 @@ def web_experiments(request: Request):
                 request,
                 generate_exception_response(
                     "experiments",
-                    "Project API key invalid. You can find your project API key in your Insights project settings.",
+                    "Project token invalid. You can find your project token in your Insights project settings.",
                     type="authentication_error",
                     code="invalid_api_key",
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -304,7 +302,7 @@ def web_experiments(request: Request):
             WebExperiment.objects.filter(team_id=team.id)
             .exclude(archived=True)
             .exclude(deleted=True)
-            .exclude(end_date__isnull=False)
+            .filter(status__in=[Experiment.Status.DRAFT, Experiment.Status.RUNNING])
             .select_related("feature_flag", "created_by")
             .order_by("-created_at"),
             many=True,

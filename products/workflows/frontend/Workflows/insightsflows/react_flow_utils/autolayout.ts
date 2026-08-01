@@ -1,5 +1,7 @@
 import { Edge, Position } from '@xyflow/react'
-import ELK, { ElkExtendedEdge, ElkNode } from 'elkjs/lib/elk.bundled.js'
+import type { ElkExtendedEdge, ElkNode } from 'elkjs/lib/elk.bundled.js'
+
+import { getElk } from 'lib/elk'
 
 import { TRIGGER_NODE_ID } from '../../workflowLogic'
 import type { InsightsFlowActionNode } from '../types'
@@ -24,8 +26,6 @@ const getElkPortSide = (position: Position): string => {
             return 'EAST'
     }
 }
-
-const elk = new ELK()
 
 export const getFormattedNodes = async (nodes: InsightsFlowActionNode[], edges: Edge[]): Promise<InsightsFlowActionNode[]> => {
     const elkOptions = {
@@ -75,6 +75,7 @@ export const getFormattedNodes = async (nodes: InsightsFlowActionNode[], edges: 
         })) as ElkExtendedEdge[],
     }
 
+    const elk = await getElk()
     const layoutedGraph = await elk.layout(graph)
 
     /**
@@ -95,8 +96,22 @@ export const getFormattedNodes = async (nodes: InsightsFlowActionNode[], edges: 
         node.y = (node.y || 0) - offsetY
     })
 
-    return layoutedGraph.children?.map((node) => ({
-        ...node,
-        position: { x: node.x, y: node.y },
-    })) as InsightsFlowActionNode[]
+    // Rebuild from the input nodes rather than spreading elk's children: elk annotates every
+    // graph element it lays out with internal bookkeeping (e.g. a `$H` hash that differs per
+    // run), which would leak into ReactFlow and make deep-equal layouts look changed. Handle
+    // positions come from each node's `handles`, not node-level source/targetPosition, so
+    // dropping elk's copies of those fields is safe.
+    const layoutedById = new Map(layoutedGraph.children?.map((child) => [child.id, child]))
+    return nodes.map((node) => {
+        const layouted = layoutedById.get(node.id)
+        if (!layouted) {
+            console.warn(`[autolayout] elk did not return a position for node "${node.id}"; defaulting to (0, 0)`)
+        }
+        return {
+            ...node,
+            width: NODE_WIDTH,
+            height: NODE_HEIGHT,
+            position: { x: layouted?.x ?? 0, y: layouted?.y ?? 0 },
+        }
+    })
 }

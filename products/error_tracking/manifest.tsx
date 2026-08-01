@@ -2,51 +2,60 @@ import { combineUrl } from 'kea-router'
 
 import { urls } from 'scenes/urls'
 
-import { DateRange, FileSystemIconType, ProductKey } from '~/queries/schema/schema-general'
+import { DateRange, FileSystemIconType, ProductItemCategory, ProductKey } from '~/queries/schema/schema-general'
 
 import { FileSystemIconColor, ProductManifest, UniversalFiltersGroup } from '../../frontend/src/types'
 
 export const manifest: ProductManifest = {
-    name: 'Error Tracking',
+    name: 'Error tracking',
     scenes: {
         ErrorTracking: {
             import: () => import('./frontend/scenes/ErrorTrackingScene/ErrorTrackingScene'),
             projectBased: true,
-            name: 'Error Tracking',
-            defaultDocsPath: '/docs/error-tracking',
+            name: 'Error tracking',
             iconType: 'error_tracking',
             description: 'Track and analyze your error tracking data to understand and fix issues.',
         },
         ErrorTrackingIssue: {
             import: () => import('./frontend/scenes/ErrorTrackingIssueScene/ErrorTrackingIssueScene'),
             projectBased: true,
-            name: 'Error Tracking issue',
+            name: 'Error tracking issue',
             layout: 'app-raw',
         },
         ErrorTrackingIssueFingerprints: {
             import: () =>
                 import('./frontend/scenes/ErrorTrackingFingerprintsScene/ErrorTrackingIssueFingerprintsScene'),
             projectBased: true,
-            name: 'Error Tracking issue fingerprints',
+            name: 'Error tracking issue fingerprints',
         },
-        ErrorTrackingConfiguration: {
-            import: () => import('./frontend/scenes/ErrorTrackingConfigurationScene/ErrorTrackingConfigurationScene'),
+        ErrorTrackingFingerprint: {
+            import: () => import('./frontend/scenes/ErrorTrackingFingerprintScene/ErrorTrackingFingerprintScene'),
             projectBased: true,
-            name: 'Error Tracking configuration',
+            name: 'Error tracking fingerprint',
         },
     },
     routes: {
         '/error_tracking': ['ErrorTracking', 'errorTracking'],
-        '/error_tracking/configuration': ['ErrorTrackingConfiguration', 'errorTrackingConfiguration'],
+        '/error_tracking/fingerprint/*': ['ErrorTrackingFingerprint', 'errorTrackingFingerprint'],
         '/error_tracking/:id': ['ErrorTrackingIssue', 'errorTrackingIssue'],
         '/error_tracking/:id/fingerprints': ['ErrorTrackingIssueFingerprints', 'errorTrackingIssueFingerprints'],
         '/error_tracking/alerts/:id': ['InsightsFunction', 'errorTrackingAlert'],
         '/error_tracking/alerts/new/:templateId': ['InsightsFunction', 'errorTrackingAlertNew'],
     },
-    redirects: {},
+    redirects: {
+        '/error_tracking/configuration': (_params, searchParams, hashParams) => {
+            const { tab, ...restSearchParams } = searchParams
+            return combineUrl(
+                '/error_tracking',
+                { ...restSearchParams, activeTab: 'configuration' },
+                { ...hashParams, ...(tab ? { selectedSetting: tab } : {}) }
+            ).url
+        },
+    },
     urls: {
         errorTracking: (params = {}): string => combineUrl('/error_tracking', params).url,
-        errorTrackingConfiguration: (params = {}): string => combineUrl('/error_tracking/configuration', params).url,
+        errorTrackingConfiguration: (params = {}): string =>
+            combineUrl('/error_tracking', { ...params, activeTab: 'configuration' }).url,
         errorTrackingIssue: (
             id: string,
             params: {
@@ -55,9 +64,18 @@ export const manifest: ProductManifest = {
                 searchQuery?: string
                 dateRange?: DateRange
                 filterGroup?: UniversalFiltersGroup
+                utm_source?: string
+                utm_campaign?: string
+                utm_medium?: string
             } = {}
         ): string => combineUrl(`/error_tracking/${id}`, params).url,
         errorTrackingIssueFingerprints: (id: string): string => `/error_tracking/${id}/fingerprints`,
+        errorTrackingFingerprint: (
+            fingerprint: string,
+            params: {
+                timestamp?: string
+            } = {}
+        ): string => combineUrl(`/error_tracking/fingerprint/${encodeURIComponent(fingerprint)}`, params).url,
         errorTrackingAlert: (id: string): string => `/error_tracking/alerts/${id}`,
         errorTrackingAlertNew: (templateId: string): string => `/error_tracking/alerts/new/${templateId}`,
     },
@@ -65,9 +83,9 @@ export const manifest: ProductManifest = {
     treeItemsNew: [],
     treeItemsProducts: [
         {
-            path: 'Error Tracking',
+            path: 'Error tracking',
             intents: [ProductKey.ERROR_TRACKING],
-            category: 'Behavior',
+            category: ProductItemCategory.APP_MONITORING,
             type: 'error_tracking',
             iconType: 'error_tracking' as FileSystemIconType,
             iconColor: [

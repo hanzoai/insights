@@ -5,7 +5,8 @@ import { IconCollapse, IconExpand, IconRewindPlay } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { humanFriendlyDetailedTime, humanFriendlyDuration } from 'lib/utils'
+import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
+import { humanFriendlyDuration } from 'lib/utils/durations'
 import { NotebookNodeType } from 'scenes/notebooks/types'
 
 import { notebookNodeLogic } from '../notebookNodeLogic'

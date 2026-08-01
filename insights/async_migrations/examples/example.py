@@ -38,25 +38,27 @@ class Migration(AsyncMigrationDefinition):
         ServiceVersionRequirement(service="datastore", supported_version=">=21.6.0,<21.7.0")
     ]
 
-    operations = [
-        AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.DATASTORE,
-            sql=PERSONS_DISTINCT_ID_TABLE_SQL().replace(PERSONS_DISTINCT_ID_TABLE, TEMPORARY_TABLE_NAME, 1),
-            rollback=f"DROP TABLE IF EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
-        ),
-        AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.DATASTORE,
-            sql=f"DROP TABLE person_distinct_id_mv ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
-            rollback=PERSONS_DISTINCT_ID_TABLE_MV_SQL(),
-        ),
-        AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.DATASTORE,
-            sql=f"DROP TABLE kafka_person_distinct_id ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
-            rollback=KAFKA_PERSONS_DISTINCT_ID_TABLE_SQL(),
-        ),
-        AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.DATASTORE,
-            sql=f"""
+    @property
+    def operations(self) -> list[AsyncMigrationOperation]:
+        return [
+            AsyncMigrationOperationSQL(
+                database=AnalyticsDBMS.DATASTORE,
+                sql=PERSONS_DISTINCT_ID_TABLE_SQL().replace(PERSONS_DISTINCT_ID_TABLE, TEMPORARY_TABLE_NAME, 1),
+                rollback=f"DROP TABLE IF EXISTS {TEMPORARY_TABLE_NAME} ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
+            ),
+            AsyncMigrationOperationSQL(
+                database=AnalyticsDBMS.DATASTORE,
+                sql=f"DROP TABLE person_distinct_id_mv ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
+                rollback=PERSONS_DISTINCT_ID_TABLE_MV_SQL(),
+            ),
+            AsyncMigrationOperationSQL(
+                database=AnalyticsDBMS.DATASTORE,
+                sql=f"DROP TABLE kafka_person_distinct_id ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
+                rollback=KAFKA_PERSONS_DISTINCT_ID_TABLE_SQL(),
+            ),
+            AsyncMigrationOperationSQL(
+                database=AnalyticsDBMS.DATASTORE,
+                sql=f"""
                 INSERT INTO {TEMPORARY_TABLE_NAME} (distinct_id, person_id, team_id, _sign, _timestamp, _offset)
                 SELECT
                     distinct_id,
@@ -67,35 +69,35 @@ class Migration(AsyncMigrationDefinition):
                     _offset
                 FROM {PERSONS_DISTINCT_ID_TABLE}
             """,
-            rollback=f"DROP TABLE IF EXISTS {TEMPORARY_TABLE_NAME}",
-        ),
-        AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.DATASTORE,
-            sql=f"""
+                rollback=f"DROP TABLE IF EXISTS {TEMPORARY_TABLE_NAME}",
+            ),
+            AsyncMigrationOperationSQL(
+                database=AnalyticsDBMS.DATASTORE,
+                sql=f"""
                 RENAME TABLE
                     {settings.DATASTORE_DATABASE}.{PERSONS_DISTINCT_ID_TABLE} to {settings.DATASTORE_DATABASE}.person_distinct_id_async_migration_backup,
                     {settings.DATASTORE_DATABASE}.{TEMPORARY_TABLE_NAME} to {settings.DATASTORE_DATABASE}.{PERSONS_DISTINCT_ID_TABLE}
                 ON CLUSTER '{settings.DATASTORE_CLUSTER}'
             """,
-            rollback=f"""
+                rollback=f"""
                 RENAME TABLE
                     {settings.DATASTORE_DATABASE}.{PERSONS_DISTINCT_ID_TABLE} to {settings.DATASTORE_DATABASE}.{TEMPORARY_TABLE_NAME},
                     {settings.DATASTORE_DATABASE}.person_distinct_id_async_migration_backup to {settings.DATASTORE_DATABASE}.person_distinct_id,
                 ON CLUSTER '{settings.DATASTORE_CLUSTER}'
             """,
-        ),
-        AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.DATASTORE,
-            sql=KAFKA_PERSONS_DISTINCT_ID_TABLE_SQL(),
-            rollback=f"DROP TABLE IF EXISTS kafka_person_distinct_id ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
-        ),
-        AsyncMigrationOperationSQL(
-            database=AnalyticsDBMS.DATASTORE,
-            sql=PERSONS_DISTINCT_ID_TABLE_MV_SQL(),
-            rollback=f"DROP TABLE IF EXISTS person_distinct_id_mv ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
-        ),
-        AsyncMigrationOperation(fn=example_fn, rollback_fn=example_rollback_fn),
-    ]
+            ),
+            AsyncMigrationOperationSQL(
+                database=AnalyticsDBMS.DATASTORE,
+                sql=KAFKA_PERSONS_DISTINCT_ID_TABLE_SQL(),
+                rollback=f"DROP TABLE IF EXISTS kafka_person_distinct_id ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
+            ),
+            AsyncMigrationOperationSQL(
+                database=AnalyticsDBMS.DATASTORE,
+                sql=PERSONS_DISTINCT_ID_TABLE_MV_SQL(),
+                rollback=f"DROP TABLE IF EXISTS person_distinct_id_mv ON CLUSTER '{settings.DATASTORE_CLUSTER}'",
+            ),
+            AsyncMigrationOperation(fn=example_fn, rollback_fn=example_rollback_fn),
+        ]
 
     def healthcheck(self):
         result = sync_execute("SELECT total_space, free_space FROM system.disks")

@@ -15,6 +15,10 @@ from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_logger
 
+from ee.billing.salesforce_enrichment.constants import DEFAULT_CHUNK_SIZE, SALESFORCE_ACCOUNTS_QUERY
+from ee.billing.salesforce_enrichment.enrichment import enrich_accounts_async
+from ee.billing.salesforce_enrichment.redis_cache import get_cached_accounts_count, store_accounts_in_redis
+from ee.billing.salesforce_enrichment.salesforce_client import get_salesforce_client
 
 LOGGER = get_logger(__name__)
 

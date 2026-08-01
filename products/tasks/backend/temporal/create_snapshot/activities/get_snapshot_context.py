@@ -5,7 +5,7 @@ from temporalio import activity
 from insights.models.integration import Integration
 from insights.temporal.common.utils import asyncify
 
-from products.tasks.backend.temporal.exceptions import TaskInvalidStateError
+from products.tasks.backend.exceptions import TaskInvalidStateError
 from products.tasks.backend.temporal.observability import log_with_activity_context
 
 

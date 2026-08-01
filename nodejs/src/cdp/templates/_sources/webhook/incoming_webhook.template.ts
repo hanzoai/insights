@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Capture an event via a custom incoming webhook',
     icon_url: '/static/services/webhook.svg',
     category: ['Custom'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 if(inputs.debug) {
   print('Incoming request:', request.body)

@@ -6,8 +6,9 @@ import {
     sanitizeResourceName,
 } from 'lib/components/TerraformExporter/hclExporterFormattingUtils'
 
-import { AlertType } from '~/lib/components/Alerts/types'
 import { InsightsFunctionType, InsightModel } from '~/types'
+
+import { AlertType } from 'products/alerts/frontend/types'
 
 import { generateAlertHCL } from './alertHclExporter'
 import { FieldMapping, HclExportOptions, HclExportResult, ResourceExporter, generateHCL } from './hclExporter'
@@ -17,7 +18,7 @@ export interface InsightHclExportOptions extends HclExportOptions {
     dashboardIdReplacements?: Map<number, string>
     /** Child alerts to include in export */
     alerts?: AlertType[]
-    /** Custom functions grouped by alert ID */
+    /** Script functions grouped by alert ID */
     insightsFunctionsByAlertId?: Map<string, InsightsFunctionType[]>
 }
 
@@ -99,7 +100,7 @@ function validateInsight(insight: Partial<InsightModel>, options?: InsightHclExp
     return warnings
 }
 
-const INSIGHT_EXPORTER: ResourceExporter<Partial<InsightModel>, InsightHclExportOptions> = {
+export const INSIGHT_EXPORTER: ResourceExporter<Partial<InsightModel>, InsightHclExportOptions> = {
     resourceType: 'insights_insight',
     resourceLabel: 'insight',
     fieldMappings: INSIGHT_FIELD_MAPPINGS,

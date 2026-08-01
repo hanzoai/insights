@@ -6,8 +6,8 @@ from django.test import RequestFactory
 
 import structlog
 
-from insights.api.insights_flow import InsightsFlowSerializer
-from insights.models.insights_flow.insights_flow import InsightsFlow
+from products.workflows.backend.api.hog_flow import InsightsFlowSerializer
+from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
 
 logger = structlog.get_logger(__name__)
 
@@ -35,7 +35,7 @@ class Command(BaseCommand):
             "--team-id", type=int, help="Team ID to refresh InsightsFlows for (if not provided, processes all teams)"
         )
         parser.add_argument(
-            "--fn-flow-id",
+            "--script-flow-id",
             type=str,
             help="Specific InsightsFlow ID to refresh (if provided, only this flow is processed)",
         )
@@ -53,16 +53,16 @@ class Command(BaseCommand):
         error_count = 0
 
         team_id = options.get("team_id")
-        insights_flow_id = options.get("insights_flow_id")
+        hog_flow_id = options.get("hog_flow_id")
         page_size = options.get("page_size", 1000)
 
         self.stdout.write("Starting InsightsFlow refresh...")
 
         queryset = InsightsFlow.objects.select_related("team")
 
-        if insights_flow_id:
-            queryset = queryset.filter(id=insights_flow_id)
-            self.stdout.write(f"Processing single InsightsFlow: {insights_flow_id}")
+        if hog_flow_id:
+            queryset = queryset.filter(id=hog_flow_id)
+            self.stdout.write(f"Processing single InsightsFlow: {hog_flow_id}")
         elif team_id:
             queryset = queryset.filter(team_id=team_id)
             self.stdout.write(f"Processing InsightsFlows for team: {team_id}")
@@ -83,43 +83,43 @@ class Command(BaseCommand):
 
             self.stdout.write(f"Processing page {page_num}/{paginator.num_pages} ({len(page.object_list)} flows)...")
 
-            for insights_flow in page.object_list:
+            for hog_flow in page.object_list:
                 try:
                     total_processed += 1
 
                     # Create a mock request context for the serializer
                     request = RequestFactory().post("/")
-                    if insights_flow.created_by:
-                        request.user = insights_flow.created_by
+                    if hog_flow.created_by:
+                        request.user = hog_flow.created_by
 
-                    def get_team_func(flow=insights_flow):
+                    def get_team_func(flow=hog_flow):
                         return flow.team
 
                     serializer_context = {
                         "request": request,
-                        "team_id": insights_flow.team_id,
+                        "team_id": hog_flow.team_id,
                         "get_team": get_team_func,
                     }
 
                     # Get the current data from the InsightsFlow
                     data = {
-                        "name": insights_flow.name,
-                        "description": insights_flow.description,
-                        "status": insights_flow.status,
-                        "trigger": insights_flow.trigger,
-                        "trigger_masking": insights_flow.trigger_masking,
-                        "conversion": insights_flow.conversion,
-                        "exit_condition": insights_flow.exit_condition,
-                        "edges": insights_flow.edges,
-                        "actions": insights_flow.actions,
-                        "variables": insights_flow.variables,
+                        "name": hog_flow.name,
+                        "description": hog_flow.description,
+                        "status": hog_flow.status,
+                        "trigger": hog_flow.trigger,
+                        "trigger_masking": hog_flow.trigger_masking,
+                        "conversion": hog_flow.conversion,
+                        "exit_condition": hog_flow.exit_condition,
+                        "edges": hog_flow.edges,
+                        "actions": hog_flow.actions,
+                        "variables": hog_flow.variables,
                     }
 
-                    data["actions"] = remove_event_filters_from_conditionals(insights_flow.actions)
+                    data["actions"] = remove_event_filters_from_conditionals(hog_flow.actions)
 
                     # Process through serializer to regenerate bytecode
                     serializer = InsightsFlowSerializer(
-                        instance=insights_flow, data=data, context=serializer_context, partial=True
+                        instance=hog_flow, data=data, context=serializer_context, partial=True
                     )
 
                     if serializer.is_valid():
@@ -127,11 +127,11 @@ class Command(BaseCommand):
                         total_updated += 1
                         logger.info(
                             "Successfully refreshed InsightsFlow",
-                            insights_flow_id=str(insights_flow.id),
-                            team_id=insights_flow.team_id,
-                            status=insights_flow.status,
-                            name=insights_flow.name,
-                            version=insights_flow.version,
+                            hog_flow_id=str(hog_flow.id),
+                            team_id=hog_flow.team_id,
+                            status=hog_flow.status,
+                            name=hog_flow.name,
+                            version=hog_flow.version,
                         )
                     else:
                         raise Exception(f"Serializer validation failed: {serializer.errors}")
@@ -140,14 +140,14 @@ class Command(BaseCommand):
                     error_count += 1
                     logger.error(
                         "Error refreshing InsightsFlow",
-                        insights_flow_id=str(insights_flow.id),
-                        team_id=insights_flow.team_id,
-                        status=insights_flow.status,
-                        name=insights_flow.name,
+                        hog_flow_id=str(hog_flow.id),
+                        team_id=hog_flow.team_id,
+                        status=hog_flow.status,
+                        name=hog_flow.name,
                         error=str(e),
                         exc_info=True,
                     )
-                    self.stdout.write(self.style.ERROR(f"Error processing flow {insights_flow.id}: {str(e)}"))
+                    self.stdout.write(self.style.ERROR(f"Error processing flow {hog_flow.id}: {str(e)}"))
 
         # Output summary
         duration = time.time() - start_time

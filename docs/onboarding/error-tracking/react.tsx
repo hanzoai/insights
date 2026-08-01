@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getReactSteps as getReactStepsPA } from '../product-analytics/react'
 import { StepDefinition } from '../steps'
@@ -15,7 +15,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             <>
                 <Markdown>
                     {dedent`
-                        You can enable exception autocapture for the JavaScript Web SDK in the **Error tracking** section of [your project settings](https://insights.hanzo.ai/settings/project-error-tracking#exception-autocapture).
+                        You can enable exception autocapture for the JavaScript Web SDK in the **Error tracking** section of [your project settings](https://app.hanzo.ai/settings/project-error-tracking#exception-autocapture).
 
                         When enabled, this automatically captures \`$exception\` events when errors are thrown by wrapping the \`window.onerror\` and \`window.onunhandledrejection\` listeners.
                     `}
@@ -43,7 +43,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 import { InsightsProvider, InsightsErrorBoundary } from '@hanzo/react'
                                 const Layout = () => {
                                   return (
-                                    <InsightsProvider apiKey="<ph_project_api_key>">
+                                    <InsightsProvider apiKey="<ph_project_token>">
                                       <InsightsErrorBoundary
                                         fallback={<YourFallbackComponent />} // (Optional) Add a fallback component that's shown when an error happens.
                                       >
@@ -97,19 +97,13 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
+                    [Check for exceptions in Insights](https://app.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),
     }
 
-    return [
-        ...installSteps,
-        exceptionAutocaptureStep,
-        errorBoundaryStep,
-        manualCaptureStep,
-        verifyStep,
-    ]
+    return [...installSteps, exceptionAutocaptureStep, errorBoundaryStep, manualCaptureStep, verifyStep]
 }
 
 export const ReactInstallation = createInstallation(getReactSteps)

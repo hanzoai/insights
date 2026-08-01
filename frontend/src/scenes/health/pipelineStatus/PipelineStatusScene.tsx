@@ -1,21 +1,23 @@
 import { useActions, useValues } from 'kea'
+import insights from 'insights-js'
 
-import { IconRefresh } from '@hanzo/icons'
+import { IconBell, IconRefresh } from '@hanzo/icons'
 
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { SceneExport } from 'scenes/sceneTypes'
+import { urls } from 'scenes/urls'
 
-import { HealthIssueCard } from '~/layout/navigation-3000/sidepanel/panels/SidePanelHealth'
-import { sidePanelHealthLogic } from '~/layout/navigation-3000/sidepanel/panels/sidePanelHealthLogic'
-import type { DataHealthIssue } from '~/layout/navigation-3000/sidepanel/panels/sidePanelHealthLogic'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 
+import { pipelineHealthLogic } from './pipelineHealthLogic'
+import type { DataHealthIssue } from './pipelineHealthLogic'
+import { PipelineStatusIssueCard } from './PipelineStatusIssueCard'
+import { pipelineStatusSceneLogic } from './pipelineStatusSceneLogic'
 import { PipelineStatusSummary } from './PipelineStatusSummary'
 import { PipelineStatusToolbar } from './PipelineStatusToolbar'
-import { pipelineStatusSceneLogic } from './pipelineStatusSceneLogic'
 
 export const scene: SceneExport = {
     component: PipelineStatusScene,
@@ -23,30 +25,46 @@ export const scene: SceneExport = {
 }
 
 export function PipelineStatusScene(): JSX.Element {
-    const { issues, healthIssuesLoading, hasErrors, issueCount } = useValues(sidePanelHealthLogic)
-    const { loadHealthIssues } = useActions(sidePanelHealthLogic)
+    const { issues, healthIssuesLoading, hasErrors, issueCount } = useValues(pipelineHealthLogic)
+    const { loadHealthIssues } = useActions(pipelineHealthLogic)
     const { filteredIssues, filteredIssueCount, isIssueDismissed } = useValues(pipelineStatusSceneLogic)
     const { dismissIssue, undismissIssue } = useActions(pipelineStatusSceneLogic)
 
     return (
         <SceneContent>
             <SceneTitleSection
-                name="Data Pipeline status"
+                name="Pipeline status"
                 description="Monitor the status of your data pipelines."
                 resourceType={{
                     to: undefined,
                     type: 'pipeline_status',
                 }}
                 actions={
-                    <Button
-                        type="primary"
-                        size="small"
-                        icon={<IconRefresh className="size-4" />}
-                        disabledReason={healthIssuesLoading ? 'Refreshing...' : undefined}
-                        onClick={() => loadHealthIssues()}
-                    >
-                        {healthIssuesLoading ? 'Refreshing...' : 'Refresh'}
-                    </Button>
+                    <>
+                        <Button
+                            type="secondary"
+                            size="small"
+                            icon={<IconBell className="size-4" />}
+                            to={urls.healthAlerts(['external_data_failure', 'materialized_view_failure'])}
+                            onClick={() => {
+                                insights.capture('health_alerts_entry_point_clicked', {
+                                    source: 'pipeline_status',
+                                })
+                            }}
+                            tooltip="Subscribe to alerts when a pipeline fails"
+                        >
+                            Alerts
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            icon={<IconRefresh className="size-4" />}
+                            disabledReason={healthIssuesLoading ? 'Refreshing...' : undefined}
+                            onClick={() => loadHealthIssues()}
+                        >
+                            {healthIssuesLoading ? 'Refreshing...' : 'Refresh'}
+                        </Button>
+                    </>
                 }
             />
 
@@ -78,7 +96,7 @@ export function PipelineStatusScene(): JSX.Element {
                         ) : (
                             <div className="space-y-3">
                                 {filteredIssues.map((issue: DataHealthIssue) => (
-                                    <HealthIssueCard
+                                    <PipelineStatusIssueCard
                                         key={issue.id}
                                         issue={issue}
                                         isDismissed={isIssueDismissed(issue.id)}

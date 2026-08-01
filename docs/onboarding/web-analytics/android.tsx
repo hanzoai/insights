@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getAndroidSteps as getAndroidStepsPA } from '../product-analytics/android'
 import { StepDefinition } from '../steps'
@@ -29,8 +29,8 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     file: 'SampleApp.kt',
                                     code: dedent`
                                         val config = InsightsAndroidConfig(
-                                            apiKey = INSIGHTS_API_KEY,
-                                            host = INSIGHTS_HOST
+                                            apiKey = POSTFN_PROJECT_TOKEN,
+                                            host = POSTFN_HOST
                                         ).apply {
                                             captureScreenViews = true
                                         }

@@ -1,9 +1,12 @@
-import equal from 'fast-deep-equal'
+import { deepEqual as equal } from 'fast-equals'
 import { DeepPartialMap, ValidationErrorType } from 'kea-forms'
 
-import { isEmptyProperty } from 'lib/components/PropertyFilters/utils'
+import { isEmptyProperty, propertyFilterTypeToPropertyDefinitionType } from 'lib/components/PropertyFilters/utils'
+import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { ENTITY_MATCH_TYPE, PROPERTY_MATCH_TYPE } from 'lib/constants'
-import { areObjectValuesEmpty, calculateDays, isNumeric } from 'lib/utils'
+import { calculateDays } from 'lib/utils/durations'
+import { isNumeric } from 'lib/utils/guards'
+import { areObjectValuesEmpty } from 'lib/utils/objects'
 import { BEHAVIORAL_TYPE_TO_LABEL, CRITERIA_VALIDATIONS, ROWS } from 'scenes/cohorts/CohortFilters/constants'
 import {
     BehavioralFilterKey,
@@ -13,6 +16,8 @@ import {
     FilterType,
 } from 'scenes/cohorts/CohortFilters/types'
 
+import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
+import { getCoreFilterDefinition } from '~/taxonomy/helpers'
 import {
     ActionType,
     AnyCohortCriteriaType,
@@ -26,9 +31,38 @@ import {
     CohortType,
     FilterLogicalOperator,
     PropertyFilterType,
+    PropertyFilterValue,
     PropertyOperator,
+    PropertyType,
     TimeUnitType,
 } from '~/types'
+
+/**
+ * Single source of truth for whether a HaveProperty/NotHaveProperty criterion targets a
+ * top-level persons-table column (PersonMetadata) or the JSON properties blob (Person).
+ *
+ * `event_type` is the transient taxonomic-group hint set when the user picks a property: it
+ * wins when present, so a freshly-picked property derives the right key immediately. Once
+ * that hint has been dropped (e.g. a cohort loaded from the API), the durable `type` carries
+ * the answer. We only fall back to a PersonMetadata `type` when `event_type` is absent — so
+ * switching away from a PersonMetadata property to a plain person property (which arrives
+ * with `event_type === PersonProperties`) correctly downgrades to Person rather than
+ * persisting a `person_metadata` criterion the server would reject.
+ */
+export function behavioralKeyForPersonProperty(criteria: {
+    type?: BehavioralFilterKey | null
+    event_type?: TaxonomicFilterGroupType | null
+}): BehavioralFilterKey.Person | BehavioralFilterKey.PersonMetadata {
+    return criteria.event_type === TaxonomicFilterGroupType.PersonMetadata ||
+        (criteria.type === BehavioralFilterKey.PersonMetadata && !criteria.event_type)
+        ? BehavioralFilterKey.PersonMetadata
+        : BehavioralFilterKey.Person
+}
+
+/** True for either flavor of person-property criterion (JSON-blob lookup or persons-table column). */
+export function isPersonPropertyFilterKey(type: BehavioralFilterKey | undefined): boolean {
+    return type === BehavioralFilterKey.Person || type === BehavioralFilterKey.PersonMetadata
+}
 
 export function cleanBehavioralTypeCriteria(criteria: AnyCohortCriteriaType): AnyCohortCriteriaType {
     let type = undefined
@@ -58,7 +92,7 @@ export function cleanBehavioralTypeCriteria(criteria: AnyCohortCriteriaType): An
             criteria.value as BehavioralEventType
         )
     ) {
-        type = BehavioralFilterKey.Person
+        type = behavioralKeyForPersonProperty(criteria)
     }
     return {
         ...criteria,
@@ -91,7 +125,10 @@ export function isValidCohortGroup(criteria: AnyCohortGroupType): boolean {
     )
 }
 
-export function createCohortFormData(cohort: CohortType): FormData {
+export function createCohortFormData(
+    cohort: CohortType,
+    { preserveStaticFilters = false }: { preserveStaticFilters?: boolean } = {}
+): FormData {
     const rawCohort = {
         ...(cohort.name ? { name: cohort.name } : {}),
         description: cohort.description ?? '',
@@ -99,7 +136,7 @@ export function createCohortFormData(cohort: CohortType): FormData {
         ...(cohort.is_static ? { is_static: cohort.is_static } : {}),
         ...(typeof cohort._create_in_folder === 'string' ? { _create_in_folder: cohort._create_in_folder } : {}),
         filters: JSON.stringify(
-            cohort.is_static
+            cohort.is_static && !preserveStaticFilters
                 ? {
                       properties: {},
                   }
@@ -145,8 +182,22 @@ export function createCohortFormData(cohort: CohortType): FormData {
     return cohortFormData
 }
 
+/** Whether a group (or bare criterion) contributes at least one positive (non-negated) matching criterion. */
+function hasPositiveCriterion(group: CohortCriteriaGroupFilter | AnyCohortCriteriaType): boolean {
+    if (!isCohortCriteriaGroup(group)) {
+        return !group.negation
+    }
+    return (group.values as AnyCohortCriteriaType[]).filter((g) => !isCohortCriteriaGroup(g)).some((c) => !c.negation)
+}
+
 export function validateGroup(
-    group: CohortCriteriaGroupFilter | AnyCohortCriteriaType
+    group: CohortCriteriaGroupFilter | AnyCohortCriteriaType,
+    // The outer ("Match all/any criteria") operator and the other groups in the cohort. When the
+    // outer operator is AND, every group is intersected, so a negation in one group is bounded by a
+    // positive matching criterion in any sibling group — the whole cohort has to be considered, not
+    // just this group in isolation.
+    outerOperator?: FilterLogicalOperator,
+    siblingGroups: (CohortCriteriaGroupFilter | AnyCohortCriteriaType)[] = []
 ): DeepPartialMap<CohortCriteriaGroupFilter, ValidationErrorType> {
     if (!isCohortCriteriaGroup(group)) {
         return {}
@@ -159,14 +210,23 @@ export function validateGroup(
     const negatedCriteria = criteria.filter((c) => !!c.negation)
     const negatedCriteriaIndices = new Set(negatedCriteria.map((c) => c.index))
 
-    if (
-        // Negation criteria can only be used when matching ALL criteria
-        (group.type !== FilterLogicalOperator.And && negatedCriteria.length > 0) ||
-        // Negation criteria has at least one positive matching criteria
-        (group.type === FilterLogicalOperator.And && negatedCriteria.length === criteria.length)
-    ) {
+    // A negation is bounded by a positive matching criterion either within this AND group, or — when
+    // the cohort matches ALL criteria (outer AND) — within any sibling group.
+    const boundedWithinGroup = group.type === FilterLogicalOperator.And && negatedCriteria.length < criteria.length
+    const boundedBySibling =
+        group.type === FilterLogicalOperator.And &&
+        outerOperator === FilterLogicalOperator.And &&
+        siblingGroups.some((sibling) => hasPositiveCriterion(sibling))
+
+    if (negatedCriteria.length > 0 && !boundedWithinGroup && !boundedBySibling) {
         const errorMsg = `${negatedCriteria
-            .map((c) => `'${BEHAVIORAL_TYPE_TO_LABEL[criteriaToBehavioralFilterType(c)]!.label}'`)
+            .map((c) => {
+                const behavioralFilterType = criteriaToBehavioralFilterType(c)
+                // Fall back to the raw filter type when the label map has no entry: this surfaces which
+                // BehavioralFilterType is missing from BEHAVIORAL_TYPE_TO_LABEL (e.g. a new enum value that
+                // landed before the map was updated) rather than crashing on an undefined `.label`.
+                return `'${BEHAVIORAL_TYPE_TO_LABEL[behavioralFilterType]?.label ?? behavioralFilterType}'`
+            })
             .join(', ')} ${negatedCriteria.length > 1 ? 'are' : 'is a'} negative cohort criteria. ${
             CohortClientErrors.NegationCriteriaMissingOther
         }`
@@ -331,6 +391,9 @@ export function validateGroup(
 
             // Handle EventFilters separately, since these are optional
             requiredFields = requiredFields.filter((f) => f.fieldKey !== 'event_filters')
+
+            // explicit_datetime_to is the optional upper bound of a date range
+            requiredFields = requiredFields.filter((f) => f.fieldKey !== 'explicit_datetime_to')
             const eventFilterError =
                 c?.event_filters &&
                 c.event_filters.length > 0 &&
@@ -338,17 +401,61 @@ export function validateGroup(
                     ? CohortClientErrors.EmptyEventFilters
                     : undefined
 
+            const cRecord = c as Record<string, unknown>
             const criteriaErrors = Object.fromEntries(
-                requiredFields.map(({ fieldKey, type }) => [
-                    fieldKey,
-                    (
-                        Array.isArray(c[fieldKey])
-                            ? c[fieldKey].length > 0
-                            : c[fieldKey] !== undefined && c[fieldKey] !== null && c[fieldKey] !== ''
-                    )
-                        ? undefined
-                        : CRITERIA_VALIDATIONS?.[type](c[fieldKey]),
-                ])
+                requiredFields.map(({ fieldKey, type }) => {
+                    const fieldValue = cRecord[fieldKey]
+                    const hasValue = Array.isArray(fieldValue)
+                        ? fieldValue.length > 0
+                        : fieldValue !== undefined && fieldValue !== null && fieldValue !== ''
+
+                    if (!hasValue) {
+                        return [
+                            fieldKey,
+                            CRITERIA_VALIDATIONS?.[type](fieldValue as string | number | null | undefined),
+                        ]
+                    }
+
+                    // Add numeric validation for person property values
+                    if (
+                        fieldKey === 'value_property' &&
+                        'key' in c &&
+                        'type' in c &&
+                        isPersonPropertyFilterKey(c.type)
+                    ) {
+                        const propertyKey = c.key as string
+                        const propertyDefinitionType = propertyFilterTypeToPropertyDefinitionType(
+                            c.type === BehavioralFilterKey.PersonMetadata
+                                ? PropertyFilterType.PersonMetadata
+                                : PropertyFilterType.Person
+                        )
+
+                        const mountedModel = propertyDefinitionsModel.findMounted()
+                        if (
+                            mountedModel &&
+                            mountedModel.values.describeProperty &&
+                            mountedModel.values.describeProperty(propertyKey, propertyDefinitionType) ===
+                                PropertyType.Numeric
+                        ) {
+                            const values = Array.isArray(fieldValue) ? fieldValue : [fieldValue]
+                            const invalidValues = values.filter((val) => {
+                                const strVal = String(val).trim()
+                                // Empty values are considered valid (handled by required field validation)
+                                if (strVal === '') {
+                                    return false
+                                }
+                                // Strict numeric validation: allow optional sign, digits with optional single decimal point
+                                return !/^[+-]?(\d+\.?|\d*\.\d+)$/.test(strVal)
+                            })
+
+                            if (invalidValues.length > 0) {
+                                return [fieldKey, CohortClientErrors.InvalidNumericPersonPropertyValue]
+                            }
+                        }
+                    }
+
+                    return [fieldKey, undefined]
+                })
             )
 
             const allErrors = { ...criteriaErrors, event_filters: eventFilterError }
@@ -372,7 +479,7 @@ export function criteriaToBehavioralFilterType(criteria: AnyCohortCriteriaType):
         if (criteria.value === BehavioralEventType.PerformEvent) {
             return BehavioralEventType.NotPerformedEvent
         }
-        if (criteria.type === BehavioralFilterKey.Person) {
+        if (isPersonPropertyFilterKey(criteria.type)) {
             return BehavioralEventType.NotHaveProperty
         }
         if (criteria.type === BehavioralFilterKey.Cohort) {
@@ -413,7 +520,11 @@ export function determineFilterType(
     }
     if (value === BehavioralEventType.NotHaveProperty || (value === BehavioralEventType.HaveProperty && negation)) {
         return {
-            type: BehavioralFilterKey.Person,
+            // Preserve PersonMetadata vs Person — the original type drives whether the
+            // filter targets the persons-table column or the JSON properties blob.
+            // Without this, a negated PersonMetadata criterion silently degrades to
+            // a JSON-blob lookup on every cleanCriteria pass.
+            type: behavioralKeyForPersonProperty({ type }),
             value: BehavioralEventType.HaveProperty,
             negation: true,
         }
@@ -429,12 +540,19 @@ export function determineFilterType(
 export function resolveCohortFieldValue(
     criteria: AnyCohortCriteriaType,
     fieldKey: string
-): string | number | boolean | null | undefined | AnyPropertyFilter[] {
+): string | number | boolean | null | undefined | AnyPropertyFilter[] | PropertyFilterValue {
     // Resolve correct behavioral filter type
     if (fieldKey === 'value') {
         return criteriaToBehavioralFilterType(criteria)
     }
-    return criteria?.[fieldKey] ?? null
+    return (
+        (
+            criteria as Record<
+                string,
+                string | number | boolean | null | undefined | AnyPropertyFilter[] | PropertyFilterValue
+            >
+        )[fieldKey] ?? null
+    )
 }
 
 export function applyAllCriteriaGroup(
@@ -485,7 +603,7 @@ function getCriteriaValue(criteria: AnyCohortCriteriaType, key: string): any {
 // Populate empty values with default values on changing type, pruning any extra variables
 export function cleanCriteria(criteria: AnyCohortCriteriaType, shouldPurge: boolean = false): AnyCohortCriteriaType {
     const populatedCriteria: Record<string, any> = {}
-    const { fields, ...apiProps } = ROWS[criteriaToBehavioralFilterType(criteria)]
+    const { fields, ...apiProps } = ROWS[criteriaToBehavioralFilterType(criteria)] ?? { fields: [] }
     Object.entries(apiProps).forEach(([key, defaultValue]) => {
         const nextValue = getCriteriaValue(criteria, key) ?? defaultValue
         if (shouldPurge) {
@@ -540,6 +658,17 @@ export function criteriaToHumanSentence(
                     words.push(<pre>{actionsById?.[value]?.name ?? `Action ${value}`}</pre>)
                 } else if (type === FilterType.EventFilters && (criteria.event_filters?.length || 0) > 0) {
                     words.push(<pre>with filters</pre>)
+                } else if (
+                    fieldKey === 'key' &&
+                    (criteria as AnyCohortCriteriaType).type === BehavioralFilterKey.PersonMetadata
+                ) {
+                    // PersonMetadata keys (e.g. created_at) are stored raw; resolve the taxonomy
+                    // label ("First seen") so the human sentence doesn't surface the column name.
+                    const label = getCoreFilterDefinition(
+                        value as string,
+                        TaxonomicFilterGroupType.PersonMetadata
+                    )?.label
+                    words.push(<pre>{label ?? value}</pre>)
                 } else {
                     words.push(<pre>{value}</pre>)
                 }

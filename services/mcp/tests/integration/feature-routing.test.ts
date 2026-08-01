@@ -8,15 +8,21 @@ const createMockContext = (): Context => ({
     api: {} as any,
     cache: {} as any,
     env: {
-        INKEEP_API_KEY: undefined,
-        INSIGHTS_API_BASE_URL: undefined,
-        INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: undefined,
-        INSIGHTS_UI_APPS_TOKEN: undefined,
+        MCP_APPS_BASE_URL: undefined,
+        POSTFN_ANALYTICS_API_KEY: undefined,
+        POSTFN_ANALYTICS_HOST: undefined,
+        POSTFN_API_BASE_URL: undefined,
+        POSTFN_PUBLIC_URL: undefined,
+        POSTFN_MCP_APPS_ANALYTICS_BASE_URL: undefined,
+        POSTFN_UI_APPS_TOKEN: undefined,
     },
     stateManager: {
         getApiKey: async () => ({ scopes: ['*'] }),
+        getAiConsentGiven: async () => undefined,
     } as any,
     sessionManager: new SessionManager({} as any),
+    getDistinctId: async () => 'test-distinct-id',
+    trackEvent: async () => {},
 })
 
 describe('Feature Routing Integration', () => {
@@ -27,9 +33,9 @@ describe('Feature Routing Integration', () => {
             expectedTools: [
                 'feature-flag-get-definition',
                 'dashboard-create',
-                'insights-get-all',
-                'organizations-get',
-                'list-errors',
+                'insights-list',
+                'organizations-list',
+                'query-error-tracking-issues-list',
             ],
         },
         {
@@ -42,7 +48,6 @@ describe('Feature Routing Integration', () => {
                 'dashboard-update',
                 'dashboard-delete',
                 'dashboard-reorder-tiles',
-                'add-insight-to-dashboard',
             ],
         },
         {
@@ -52,10 +57,17 @@ describe('Feature Routing Integration', () => {
                 'feature-flag-get-definition',
                 'create-feature-flag',
                 'feature-flag-get-all',
-                'organizations-get',
                 'switch-organization',
                 'projects-get',
             ],
+        },
+        {
+            // Organization discovery must ship with the workspace navigation tools —
+            // otherwise an agent can switch orgs but has no way to enumerate them,
+            // stranding any project that lives in a different organization.
+            features: ['workspace'],
+            description: 'workspace feature includes organization discovery',
+            expectedTools: ['organizations-get', 'switch-organization', 'projects-get', 'switch-project'],
         },
         {
             features: ['invalid', 'flags', 'unknown'],

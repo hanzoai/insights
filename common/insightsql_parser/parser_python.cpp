@@ -40,6 +40,7 @@
     Py_XDECREF(py_end);                                                                                 \
     Py_XDECREF(py_start);                                                                               \
     Py_XDECREF(py_err);                                                                                 \
+    Py_XDECREF(py_err_args);                                                                            \
     Py_XDECREF(error_type);                                                                             \
     OTHER_CLEANUP                                                                                       \
     return NULL;                                                                                        \
@@ -113,6 +114,22 @@ class InsightsQLErrorListener : public antlr4::BaseErrorListener {
     if (start == string::npos) {
       start = 0;
     }
+    // A character outside the InsightsQL token set lexes as UNEXPECTED_CHARACTER
+    // and dooms the parse. The default message quotes the raw character,
+    // which is unactionable when it is invisible — report the code point
+    // instead and point at the character itself.
+    if (auto* parser = dynamic_cast<antlr4::Parser*>(recognizer)) {
+      if (auto* tokens = dynamic_cast<antlr4::BufferedTokenStream*>(parser->getTokenStream())) {
+        tokens->fill();
+        for (antlr4::Token* token : tokens->getTokens()) {
+          if (token->getType() == InsightsQLLexer::UNEXPECTED_CHARACTER) {
+            throw SyntaxError(
+                describe_unexpected_character(token->getText()), token->getStartIndex(), input.size()
+            );
+          }
+        }
+      }
+    }
     throw SyntaxError(msg, start, input.size());
   }
 
@@ -179,11 +196,11 @@ static PyMethodDef parser_methods[] = {
     {.ml_name = "parse_full_template_string_json",
      .ml_meth = (PyCFunction)method_parse_full_template_string_json,
      .ml_flags = METH_VARARGS | METH_KEYWORDS,
-     .ml_doc = "Parse a Hog template string into a JSON AST"},
+     .ml_doc = "Parse a Script template string into a JSON AST"},
     {.ml_name = "parse_program_json",
      .ml_meth = (PyCFunction)method_parse_program_json,
      .ml_flags = METH_VARARGS | METH_KEYWORDS,
-     .ml_doc = "Parse a Hog program into a JSON AST"},
+     .ml_doc = "Parse a Script program into a JSON AST"},
 
     {NULL, NULL, 0, NULL}
 };

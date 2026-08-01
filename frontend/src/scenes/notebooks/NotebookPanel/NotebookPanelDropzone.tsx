@@ -4,7 +4,7 @@ import { DragEventHandler, useState } from 'react'
 
 import { Button } from '@hanzo/elements'
 
-import { notebookLogicType } from '../Notebook/notebookLogicType'
+import type { notebookLogicType } from '../Notebook/notebookLogic'
 import { NotebookSelectList } from '../NotebookSelectButton/NotebookSelectButton'
 import { NotebookNodeType } from '../types'
 import { notebookPanelLogic } from './notebookPanelLogic'

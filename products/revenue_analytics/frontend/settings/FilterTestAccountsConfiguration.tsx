@@ -2,17 +2,22 @@ import { useActions, useValues } from 'kea'
 
 import { Switch, Link } from '@hanzo/elements'
 
-import { AccessControlAction } from 'lib/components/AccessControlAction'
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { urls } from 'scenes/urls'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
-import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 import { revenueAnalyticsSettingsLogic } from './revenueAnalyticsSettingsLogic'
 
 export function FilterTestAccountsConfiguration(): JSX.Element {
     const { filterTestAccounts } = useValues(revenueAnalyticsSettingsLogic)
     const { updateFilterTestAccounts } = useActions(revenueAnalyticsSettingsLogic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
+
     return (
         <SceneSection
             title="Filter out internal and test users from revenue analytics"
@@ -20,21 +25,17 @@ export function FilterTestAccountsConfiguration(): JSX.Element {
                 <>
                     When enabled, events from test accounts will be excluded from Revenue analytics. You can configure
                     these test accounts{' '}
-                    <Link to={urls.settings('project-product-analytics', 'internal-user-filtering')}>here</Link>.
+                    <Link to={urls.settings('environment-customization', 'internal-user-filtering')}>here</Link>.
                 </>
             }
         >
-            <AccessControlAction
-                resourceType={AccessControlResourceType.RevenueAnalytics}
-                minAccessLevel={AccessControlLevel.Editor}
-            >
-                <Switch
-                    onChange={updateFilterTestAccounts}
-                    checked={filterTestAccounts}
-                    label="Filter out internal and test users"
-                    bordered
-                />
-            </AccessControlAction>
+            <Switch
+                onChange={updateFilterTestAccounts}
+                checked={filterTestAccounts}
+                label="Filter out internal and test users"
+                bordered
+                disabledReason={restrictedReason}
+            />
         </SceneSection>
     )
 }

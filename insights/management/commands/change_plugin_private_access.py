@@ -7,7 +7,8 @@ from django.core.management.base import BaseCommand
 import structlog
 
 from insights.models import Organization
-from insights.models.plugin import Plugin
+
+from products.cdp.backend.models.plugin import Plugin
 
 logger = structlog.get_logger(__name__)
 logger.setLevel(logging.INFO)

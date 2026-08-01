@@ -14,7 +14,7 @@ from llm_gateway.auth.service import AuthService, extract_token
 
 
 @pytest.fixture(autouse=True)
-def reset_cache() -> Generator[None, None, None]:
+def reset_cache() -> Generator[None]:
     reset_auth_cache()
     yield
     reset_auth_cache()
@@ -61,8 +61,8 @@ class TestExtractToken:
     @pytest.mark.parametrize(
         "api_key,expected",
         [
-            pytest.param("hix_test_key", "hix_test_key", id="personal_api_key"),
-            pytest.param("hia_oauth_token", "hia_oauth_token", id="oauth_token"),
+            pytest.param("phx_test_key", "phx_test_key", id="personal_api_key"),
+            pytest.param("pha_oauth_token", "pha_oauth_token", id="oauth_token"),
             pytest.param("  spaced_key  ", "spaced_key", id="whitespace_trimmed"),
         ],
     )
@@ -94,7 +94,7 @@ class TestAuthService:
     @pytest.mark.asyncio
     async def test_routes_oauth_token_to_oauth_validator(self, auth_service: AuthService, mock_pool: MagicMock) -> None:
         request = MagicMock(spec=Request)
-        request.headers = {"authorization": "Bearer hia_valid_token"}
+        request.headers = {"authorization": "Bearer pha_valid_token"}
 
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(
@@ -106,6 +106,7 @@ class TestAuthService:
                 "current_team_id": 456,
                 "application_id": 789,
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
@@ -121,7 +122,7 @@ class TestAuthService:
         self, auth_service: AuthService, mock_pool: MagicMock
     ) -> None:
         request = MagicMock(spec=Request)
-        request.headers = {"x-api-key": "hix_valid_key"}
+        request.headers = {"x-api-key": "phx_valid_key"}
 
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(
@@ -131,6 +132,7 @@ class TestAuthService:
                 "scopes": ["llm_gateway:read"],
                 "current_team_id": 101,
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
@@ -144,7 +146,7 @@ class TestAuthService:
     @pytest.mark.asyncio
     async def test_invalid_token_returns_none(self, auth_service: AuthService, mock_pool: MagicMock) -> None:
         request = MagicMock(spec=Request)
-        request.headers = {"authorization": "Bearer hix_unknown_key"}
+        request.headers = {"authorization": "Bearer phx_unknown_key"}
 
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(return_value=None)
@@ -189,9 +191,9 @@ class TestPersonalApiKeyAuthenticator:
     ) -> None:
         assert authenticator.hash_token(key1) != authenticator.hash_token(key2)
 
-    def test_matches_hix_prefix(self, authenticator: PersonalApiKeyAuthenticator) -> None:
-        assert authenticator.matches("hix_test_key") is True
-        assert authenticator.matches("hia_oauth_token") is False
+    def test_matches_phx_prefix(self, authenticator: PersonalApiKeyAuthenticator) -> None:
+        assert authenticator.matches("phx_test_key") is True
+        assert authenticator.matches("pha_oauth_token") is False
         assert authenticator.matches("random_token") is False
 
     @pytest.mark.asyncio
@@ -206,16 +208,18 @@ class TestPersonalApiKeyAuthenticator:
                 "scopes": ["llm_gateway:read"],
                 "current_team_id": 456,
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
-        token_hash = authenticator.hash_token("hix_test_key")
+        token_hash = authenticator.hash_token("phx_test_key")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None
         assert result.user_id == 123
         assert result.team_id == 456
         assert result.auth_method == "personal_api_key"
+        assert result.is_staff is False
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -234,6 +238,10 @@ class TestPersonalApiKeyAuthenticator:
                 {"id": "k3", "user_id": 100, "scopes": [], "current_team_id": 200},
                 id="empty_scopes",
             ),
+            pytest.param(
+                {"id": "k4", "user_id": 101, "scopes": ["*"], "current_team_id": 201},
+                id="wildcard_scope_rejected",
+            ),
         ],
     )
     async def test_invalid_keys_return_none(
@@ -242,7 +250,7 @@ class TestPersonalApiKeyAuthenticator:
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(return_value=db_result)
 
-        token_hash = authenticator.hash_token("hix_invalid_key")
+        token_hash = authenticator.hash_token("phx_invalid_key")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -252,9 +260,9 @@ class TestOAuthAccessTokenAuthenticator:
     def authenticator(self) -> OAuthAccessTokenAuthenticator:
         return OAuthAccessTokenAuthenticator()
 
-    def test_matches_hia_prefix(self, authenticator: OAuthAccessTokenAuthenticator) -> None:
-        assert authenticator.matches("hia_oauth_token") is True
-        assert authenticator.matches("hix_personal_key") is False
+    def test_matches_pha_prefix(self, authenticator: OAuthAccessTokenAuthenticator) -> None:
+        assert authenticator.matches("pha_oauth_token") is True
+        assert authenticator.matches("phx_personal_key") is False
         assert authenticator.matches("random_token") is False
 
     @pytest.mark.asyncio
@@ -264,7 +272,7 @@ class TestOAuthAccessTokenAuthenticator:
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(return_value=None)
 
-        token_hash = authenticator.hash_token("hia_unknown_token")
+        token_hash = authenticator.hash_token("pha_unknown_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -285,7 +293,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("hia_expired_token")
+        token_hash = authenticator.hash_token("pha_expired_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -303,10 +311,11 @@ class TestOAuthAccessTokenAuthenticator:
                 "current_team_id": 456,
                 "application_id": 789,
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
-        token_hash = authenticator.hash_token("hia_no_expiry")
+        token_hash = authenticator.hash_token("pha_no_expiry")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None
@@ -329,7 +338,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("hia_no_app_id")
+        token_hash = authenticator.hash_token("pha_no_app_id")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -359,7 +368,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("hia_wrong_scope")
+        token_hash = authenticator.hash_token("pha_wrong_scope")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -372,6 +381,7 @@ class TestOAuthAccessTokenAuthenticator:
             pytest.param(
                 "read:all llm_gateway:read admin", ["read:all", "llm_gateway:read", "admin"], id="three_scopes"
             ),
+            pytest.param("*", ["*"], id="wildcard_scope_accepted_for_oauth"),
         ],
     )
     async def test_scope_parsing(
@@ -387,10 +397,11 @@ class TestOAuthAccessTokenAuthenticator:
                 "current_team_id": 456,
                 "application_id": 789,
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
-        token_hash = authenticator.hash_token("hia_valid_token")
+        token_hash = authenticator.hash_token("pha_valid_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None
@@ -410,10 +421,11 @@ class TestOAuthAccessTokenAuthenticator:
                 "current_team_id": 456,
                 "application_id": 789,
                 "distinct_id": "test-distinct-id",
+                "is_staff": True,
             }
         )
 
-        token_hash = authenticator.hash_token("hia_valid_token")
+        token_hash = authenticator.hash_token("pha_valid_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None
@@ -421,6 +433,7 @@ class TestOAuthAccessTokenAuthenticator:
         assert result.team_id == 456
         assert result.auth_method == "oauth_access_token"
         assert result.scopes == ["llm_gateway:read"]
+        assert result.is_staff is True
 
     @pytest.mark.asyncio
     async def test_valid_token_with_null_team_id(
@@ -436,10 +449,11 @@ class TestOAuthAccessTokenAuthenticator:
                 "current_team_id": None,
                 "application_id": 789,
                 "distinct_id": "test-distinct-id",
+                "is_staff": False,
             }
         )
 
-        token_hash = authenticator.hash_token("hia_valid_token")
+        token_hash = authenticator.hash_token("pha_valid_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None

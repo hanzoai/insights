@@ -6,7 +6,7 @@ from django.utils.timezone import now
 MIGRATION_PATH = "ee/datastore/migrations"
 
 FILE_DEFAULT = """
-from datastore_orm import migrations # type: ignore
+from infi.datastore_orm import migrations # type: ignore
 operations = []
 """
 

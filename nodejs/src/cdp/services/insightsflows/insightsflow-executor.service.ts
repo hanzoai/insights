@@ -1,10 +1,11 @@
-// @ts-nocheck
 import { get } from 'lodash'
 import { DateTime } from 'luxon'
+import { Counter } from 'prom-client'
 
-import { InsightsFlow, InsightsFlowAction } from '../../../schema/insightsflow'
-import { logger } from '../../../utils/logger'
-import { UUIDT } from '../../../utils/utils'
+import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { logger } from '~/common/utils/logger'
+import { UUIDT } from '~/common/utils/utils'
+
 import {
     CyclotronJobInvocationInsightsFlow,
     CyclotronJobInvocationResult,
@@ -13,12 +14,15 @@ import {
     InsightsFunctionInvocationGlobals,
     LogEntry,
     LogEntryLevel,
+    MessageAssetRow,
     MinimalAppMetric,
     MinimalLogEntry,
+    WarehouseWebhookPayload,
 } from '../../types'
-import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../../utils/insights-function-filtering'
+import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../../utils/script-function-filtering'
 import { createInvocationResult } from '../../utils/invocation-utils'
-import { ScriptExecutorExecuteAsyncOptions } from '../script-executor.service'
+import { HogExecutorExecuteAsyncOptions } from '../script-executor.service'
+import { EmailValidationService } from '../messaging/email-validation.service'
 import { RecipientPreferencesService } from '../messaging/recipient-preferences.service'
 import { ActionHandler } from './actions/action.interface'
 import { ConditionalBranchHandler } from './actions/conditional_branch'
@@ -28,25 +32,40 @@ import { InsightsFunctionHandler } from './actions/insights_function'
 import { RandomCohortBranchHandler } from './actions/random_cohort_branch'
 import { TriggerHandler } from './actions/trigger.handler'
 import { WaitUntilTimeWindowHandler } from './actions/wait_until_time_window'
-import { InsightsFlowFunctionsService } from './insightsflow-functions.service'
+import { InsightsFlowDuplicateObserverService } from './hogflow-duplicate-observer.service'
+import { InsightsFlowFunctionsService } from './hogflow-functions.service'
 import {
+    WorkflowChangedError,
     actionIdForLogging,
     ensureCurrentAction,
     findContinueAction,
     shouldSkipAction,
     trackE2eLag,
-} from './insightsflow-utils'
+} from './hogflow-utils'
 
 export const MAX_ACTION_STEPS_HARD_LIMIT = 1000
 
+// Deliberately unlabelled: fleet-wide volume is the signal; which flow/step redirected where is in
+// the run's log line, where unbounded cardinality belongs.
+const counterRedirectApplied = new Counter({
+    name: 'cdp_hogflow_redirect_applied',
+    help: 'A run parked on a deleted step was redirected to its surviving successor',
+})
+// The API guarantees redirect targets exist in the same flow row; nonzero means that invariant broke
+// (the affected runs still exit gracefully rather than follow the bad entry).
+const counterRedirectTargetMissing = new Counter({
+    name: 'cdp_hogflow_redirect_target_missing',
+    help: 'A redirect map entry pointed at an action missing from the live graph',
+})
+
 export function createInsightsFlowInvocation(
     globals: InsightsFunctionInvocationGlobals,
-    insightsFlow: InsightsFlow,
+    hogFlow: InsightsFlow,
     filterGlobals: InsightsFunctionFilterGlobals
 ): CyclotronJobInvocationInsightsFlow {
-    // Build default variables from insightsFlow, then merge in any provided in globals.variables
+    // Build default variables from hogFlow, then merge in any provided in globals.variables
     const defaultVariables =
-        insightsFlow.variables?.reduce(
+        hogFlow.variables?.reduce(
             (acc, variable) => {
                 acc[variable.key] = variable.default || null
                 return acc
@@ -66,28 +85,47 @@ export function createInsightsFlowInvocation(
             actionStepCount: 0,
             variables: mergedVariables,
         },
-        teamId: insightsFlow.team_id,
-        functionId: insightsFlow.id, // TODO: Include version?
-        insightsFlow,
+        teamId: hogFlow.team_id,
+        functionId: hogFlow.id, // TODO: Include version?
+        hogFlow,
         person: globals.person, // This is outside of state as we don't persist it
+        groups: globals.groups, // Same as person: in-memory only (test path); real execution re-resolves on dequeue
         filterGlobals,
-        queue: 'customflow',
+        queue: 'hogflow',
         queuePriority: 1,
     }
 }
 
 export class InsightsFlowExecutorService {
     private readonly actionHandlers: Record<InsightsFlowAction['type'], ActionHandler>
+    private readonly duplicateObserver: InsightsFlowDuplicateObserverService | null
+    private readonly hogFlowFunctionsService: InsightsFlowFunctionsService
 
     constructor(
-        insightsFlowFunctionsService: InsightsFlowFunctionsService,
-        recipientPreferencesService: RecipientPreferencesService
+        hogFlowFunctionsService: InsightsFlowFunctionsService,
+        recipientPreferencesService: RecipientPreferencesService,
+        emailValidationService: EmailValidationService,
+        duplicateObserver?: InsightsFlowDuplicateObserverService
     ) {
-        const insightsFunctionHandler = new InsightsFunctionHandler(insightsFlowFunctionsService, recipientPreferencesService, 'fetch')
-        const insightsFunctionEmailHandler = new InsightsFunctionHandler(
-            insightsFlowFunctionsService,
+        this.hogFlowFunctionsService = hogFlowFunctionsService
+        this.duplicateObserver = duplicateObserver ?? null
+        const insightsFunctionHandler = new InsightsFunctionHandler(
+            hogFlowFunctionsService,
             recipientPreferencesService,
+            emailValidationService,
+            'fetch'
+        )
+        const insightsFunctionEmailHandler = new InsightsFunctionHandler(
+            hogFlowFunctionsService,
+            recipientPreferencesService,
+            emailValidationService,
             'email'
+        )
+        const insightsFunctionPushHandler = new InsightsFunctionHandler(
+            hogFlowFunctionsService,
+            recipientPreferencesService,
+            emailValidationService,
+            'push'
         )
 
         this.actionHandlers = {
@@ -99,13 +137,19 @@ export class InsightsFlowExecutorService {
             random_cohort_branch: new RandomCohortBranchHandler(),
             function: insightsFunctionHandler,
             function_sms: insightsFunctionHandler,
+            function_push: insightsFunctionPushHandler,
             function_email: insightsFunctionEmailHandler,
             exit: new ExitHandler(),
         }
     }
 
+    // Decrypted secret input values across the flow's function actions, for redacting test-run logs.
+    async getSensitiveValues(hogFlow: InsightsFlow): Promise<string[]> {
+        return this.hogFlowFunctionsService.getSensitiveValues(hogFlow)
+    }
+
     async buildInsightsFlowInvocations(
-        insightsFlows: InsightsFlow[],
+        hogFlows: InsightsFlow[],
         triggerGlobals: InsightsFunctionInvocationGlobals
     ): Promise<{
         invocations: CyclotronJobInvocationInsightsFlow[]
@@ -116,16 +160,23 @@ export class InsightsFlowExecutorService {
         const logs: LogEntry[] = []
         const invocations: CyclotronJobInvocationInsightsFlow[] = []
 
-        // TRICKY: The frontend generates filters matching the datastore event type so we are converting back
+        // TRICKY: The frontend generates filters matching the Datastore event type so we are converting back
         const filterGlobals = convertToInsightsFunctionFilterGlobal(triggerGlobals)
 
-        for (const insightsFlow of insightsFlows) {
-            if (insightsFlow.trigger.type !== 'event') {
+        // Trigger-source compatibility is decided by the pipeline's eligibilityFn (see
+        // InsightsFlowInvocationPipeline). Flows that reach this loop are assumed to be source-compatible
+        // with the given globals — the executor's job is just to evaluate filter bytecode.
+        for (const hogFlow of hogFlows) {
+            const trigger = hogFlow.trigger
+
+            // Defensive: only the trigger types that carry `filters` make it through eligibility.
+            if (trigger.type !== 'event' && trigger.type !== 'data-warehouse-table') {
                 continue
             }
+
             const filterResults = await filterFunctionInstrumented({
-                fn: insightsFlow,
-                filters: insightsFlow.trigger.filters,
+                fn: hogFlow,
+                filters: trigger.filters,
                 filterGlobals,
             })
 
@@ -137,7 +188,7 @@ export class InsightsFlowExecutorService {
                 continue
             }
 
-            const invocation = createInsightsFlowInvocation(triggerGlobals, insightsFlow, filterGlobals)
+            const invocation = createInsightsFlowInvocation(triggerGlobals, hogFlow, filterGlobals)
             invocations.push(invocation)
         }
 
@@ -148,6 +199,13 @@ export class InsightsFlowExecutorService {
         }
     }
 
+    private async observeDuplicateInvocation(
+        invocation: CyclotronJobInvocationInsightsFlow,
+        currentAction: InsightsFlowAction
+    ): Promise<void> {
+        await this.duplicateObserver?.observe(invocation, currentAction)
+    }
+
     async execute(
         invocation: CyclotronJobInvocationInsightsFlow
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow>> {
@@ -155,23 +213,34 @@ export class InsightsFlowExecutorService {
         const metrics: MinimalAppMetric[] = []
         const logs: MinimalLogEntry[] = []
         const capturedInsightsEvents: InsightsFunctionCapturedEvent[] = []
+        const warehouseWebhookPayloads: WarehouseWebhookPayload[] = []
+        const emailAssets: MessageAssetRow[] = []
 
-        const earlyExitResult = await this.shouldExitEarly(invocation)
+        const earlyExitResult = await this.shouldExitEarly(invocation, metrics, capturedInsightsEvents)
         if (earlyExitResult) {
             return earlyExitResult
         }
 
-        logs.push(this.logExecutionTriggerInfo(invocation))
+        // Routing-only reschedule: the previous dequeue moved this job onto a dedicated queue
+        // (e.g. 'email' for SES rate-limit gating) and is continuing the same action. Suppress
+        // the redundant trigger log — the customer-visible story should be one Resuming line
+        // per real wake (delay, wait_until_condition, throttle retry), not a second one for
+        // an internal queue transition. The flag stays set so executeCurrentAction can also
+        // suppress its "Executing action..." debug log on this same continuation; it clears
+        // the flag itself after reading so subsequent actions on this dequeue log normally.
+        if (!invocation.state.currentAction?.routingOnlyReschedule) {
+            logs.push(this.logExecutionTriggerInfo(invocation))
+        }
 
         while (!result || !result.finished) {
             const nextInvocation: CyclotronJobInvocationInsightsFlow = result?.invocation ?? invocation
 
-            // Here we could be continuing the custom function side of things?
+            // Here we could be continuing the script function side of things?
             result = await this.executeCurrentAction(nextInvocation)
 
             if (result.finished) {
                 if (result.error) {
-                    this.log(result, 'error', `Workflow encountered an error: ${result.error}`)
+                    this.log(result, 'error', this.logExecutionErrorInfo(result, result.error))
                 } else {
                     this.log(result, 'info', `Workflow completed`)
                 }
@@ -182,6 +251,8 @@ export class InsightsFlowExecutorService {
             logs.push(...result.logs)
             metrics.push(...result.metrics)
             capturedInsightsEvents.push(...result.capturedInsightsEvents)
+            warehouseWebhookPayloads.push(...result.warehouseWebhookPayloads)
+            emailAssets.push(...result.emailAssets)
 
             if (this.shouldEndInsightsFlowExecution(result, logs)) {
                 break
@@ -191,6 +262,8 @@ export class InsightsFlowExecutorService {
         result.logs = logs
         result.metrics = metrics
         result.capturedInsightsEvents = capturedInsightsEvents
+        result.warehouseWebhookPayloads = warehouseWebhookPayloads
+        result.emailAssets = emailAssets
 
         return result
     }
@@ -205,7 +278,7 @@ export class InsightsFlowExecutorService {
         let shouldAbortAfterError = false
         if (result.error) {
             const lastExecutedActionId = result.invocation.state.currentAction?.id
-            const lastExecutedAction = result.invocation.insightsFlow.actions.find((a) => a.id === lastExecutedActionId)
+            const lastExecutedAction = result.invocation.hogFlow.actions.find((a) => a.id === lastExecutedActionId)
 
             if (lastExecutedAction?.on_error === 'abort') {
                 shouldAbortAfterError = true
@@ -230,48 +303,104 @@ export class InsightsFlowExecutorService {
     }
 
     /**
-     * Determines if the invocation should exit early based on the customflow's exit condition
+     * Determines if the invocation should exit early based on the hogflow's exit condition
      */
     private async shouldExitEarly(
-        invocation: CyclotronJobInvocationInsightsFlow
+        invocation: CyclotronJobInvocationInsightsFlow,
+        metrics: MinimalAppMetric[],
+        capturedInsightsEvents: InsightsFunctionCapturedEvent[]
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow> | null> {
         let earlyExitResult: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow> | null = null
 
-        const { insightsFlow, person } = invocation
+        const { hogFlow, person } = invocation
         let shouldExit = false
         let exitReason = ''
 
         let triggerMatch: boolean | undefined = undefined
         let conversionMatch: boolean | undefined = undefined
 
-        if (insightsFlow.trigger.type === 'event' && insightsFlow.trigger.filters && person) {
+        if (hogFlow.trigger.type === 'event' && hogFlow.trigger.filters && person) {
             const filterResult = await filterFunctionInstrumented({
-                fn: insightsFlow,
-                filters: insightsFlow.trigger.filters,
+                fn: hogFlow,
+                filters: hogFlow.trigger.filters,
                 filterGlobals: invocation.filterGlobals,
             })
             triggerMatch = filterResult.match
         }
-        if (insightsFlow.conversion?.filters && person) {
-            const filterResult = await filterFunctionInstrumented({
-                fn: insightsFlow,
-                filters: insightsFlow.conversion.filters,
-                filterGlobals: invocation.filterGlobals,
-            })
-            conversionMatch = filterResult.match
+        if (hogFlow.conversion?.filters?.length && person) {
+            if (hogFlow.conversion.bytecode?.length) {
+                const filterResult = await filterFunctionInstrumented({
+                    fn: hogFlow,
+                    filters: {
+                        bytecode: hogFlow.conversion.bytecode || [],
+                        properties: hogFlow.conversion.filters || [],
+                    },
+                    filterGlobals: invocation.filterGlobals,
+                })
+                conversionMatch = filterResult.match
+            } else {
+                logger.error(
+                    'InsightsFlowExecutorService: Conversion filters are set but no bytecode is provided. This means we cannot evaluate the conversion filters to determine if we should exit the flow.',
+                    { hogFlowId: hogFlow.id }
+                )
+            }
+        }
+        // Count property-based conversions here, regardless of exit condition, so the metric is
+        // meaningful even for flows that don't exit on conversion. Captured before the event-flag
+        // override below: event-based conversions are counted by the subscription matcher, so the
+        // executor must only emit for the property path or exit-on-conversion event flows double-count.
+        // Guarded once-per-run by `conversionCounted` since shouldExitEarly runs on every resume.
+        const propertyConversionMatched = conversionMatch === true
+        let conversionMetric: MinimalAppMetric | null = null
+        let conversionEvent: InsightsFunctionCapturedEvent | null = null
+        if (propertyConversionMatched && !invocation.state.conversionCounted) {
+            invocation.state.conversionCounted = true
+            conversionMetric = {
+                team_id: hogFlow.team_id,
+                app_source_id: invocation.parentRunId ?? hogFlow.id,
+                instance_id: hogFlow.id,
+                metric_kind: 'other',
+                metric_name: 'conversion',
+                count: 1,
+            }
+            // Also surface the conversion as a billable Insights event so it can power insights and
+            // cohorts (mirrors the $workflows_email_* engagement events). Event-based conversions are
+            // emitted by the subscription matcher, so this only fires for the property path.
+            const distinctId = invocation.state.event?.distinct_id
+            if (distinctId) {
+                conversionEvent = {
+                    team_id: hogFlow.team_id,
+                    event: '$workflows_conversion',
+                    distinct_id: distinctId,
+                    timestamp: new Date().toISOString(),
+                    properties: {
+                        $workflow_id: hogFlow.id,
+                        $workflow_conversion_type: 'property',
+                    },
+                }
+            }
+        }
+        // Event-based conversion goals are evaluated by the subscription matcher (against the live
+        // event stream), which flags the job when the conversion event fires. The property-based
+        // check above can't see those, so honor the flag here. It is a one-shot signal ("the
+        // conversion event just fired"), so consume it: clear it after reading so a later, unrelated
+        // resume (e.g. after a subsequent delay) can't re-trigger an exit from a stale flag.
+        if (invocation.state.conversionMatched) {
+            conversionMatch = true
+            invocation.state.conversionMatched = false
         }
 
-        switch (insightsFlow.exit_condition) {
+        switch (hogFlow.exit_condition) {
             case 'exit_on_trigger_not_matched':
                 if (triggerMatch === false) {
                     shouldExit = true
-                    exitReason = 'Person no longer matches trigger filters'
+                    exitReason = `[Person:${invocation.person?.id ?? 'unknown'}|${invocation.person?.name ?? 'unknown'}] no longer matches trigger filters`
                 }
                 break
             case 'exit_on_conversion':
                 if (conversionMatch === true) {
                     shouldExit = true
-                    exitReason = 'Person matches conversion filters'
+                    exitReason = `[Person:${invocation.person?.id ?? 'unknown'}|${invocation.person?.name ?? 'unknown'}] matches conversion filters`
                 }
                 break
             case 'exit_on_trigger_not_matched_or_conversion':
@@ -279,8 +408,8 @@ export class InsightsFlowExecutorService {
                     shouldExit = true
                     exitReason =
                         triggerMatch === false
-                            ? 'Person no longer matches trigger filters'
-                            : 'Person matches conversion filters'
+                            ? `[Person:${invocation.person?.id ?? 'unknown'}|${invocation.person?.name ?? 'unknown'}] no longer matches trigger filters`
+                            : `[Person:${invocation.person?.id ?? 'unknown'}|${invocation.person?.name ?? 'unknown'}] matches conversion filters`
                 }
                 break
         }
@@ -291,16 +420,26 @@ export class InsightsFlowExecutorService {
             earlyExitResult.logs.push({
                 level: 'info',
                 timestamp: DateTime.now(),
-                message: `Workflow exited early due to exit condition: ${insightsFlow.exit_condition} (${exitReason})`,
+                message: `Workflow exited early due to exit condition: ${hogFlow.exit_condition} (${exitReason})`,
             })
             earlyExitResult.metrics.push({
-                team_id: insightsFlow.team_id,
-                app_source_id: insightsFlow.id,
+                team_id: hogFlow.team_id,
+                app_source_id: invocation.parentRunId ?? hogFlow.id,
                 instance_id: invocation.state?.currentAction?.id || 'exit_condition',
                 metric_kind: 'other',
                 metric_name: 'early_exit',
                 count: 1,
             })
+        }
+
+        // Route the conversion metric/event onto whichever result is actually flushed: the early-exit
+        // result when we exit, otherwise the caller's arrays (which become result.metrics /
+        // result.capturedInsightsEvents once the run continues and finishes).
+        if (conversionMetric) {
+            ;(earlyExitResult?.metrics ?? metrics).push(conversionMetric)
+        }
+        if (conversionEvent) {
+            ;(earlyExitResult?.capturedInsightsEvents ?? capturedInsightsEvents).push(conversionEvent)
         }
 
         return earlyExitResult
@@ -309,7 +448,7 @@ export class InsightsFlowExecutorService {
     public async executeCurrentAction(
         invocation: CyclotronJobInvocationInsightsFlow,
         options?: {
-            scriptExecutorOptions?: ScriptExecutorExecuteAsyncOptions
+            hogExecutorOptions?: HogExecutorExecuteAsyncOptions
         }
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow>> {
         const result = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation)
@@ -325,14 +464,30 @@ export class InsightsFlowExecutorService {
                 return result
             }
 
-            result.logs.push({
-                level: 'debug',
-                message: `Executing action ${actionIdForLogging(currentAction)}`,
-                timestamp: DateTime.now(),
-            })
+            await this.observeDuplicateInvocation(invocation, currentAction)
+
+            // Routing-only reschedule continuation (see insights_function.ts): the previous dequeue
+            // set this flag so the executor knows the current call is just resuming an action
+            // that was momentarily parked to switch queues — not the start of a fresh action
+            // step. Suppress the redundant "Executing action..." log and consume the flag so
+            // subsequent actions (next handler returns nextAction → loop continues) log normally.
+            if (invocation.state.currentAction?.routingOnlyReschedule) {
+                invocation.state.currentAction.routingOnlyReschedule = false
+            } else {
+                result.logs.push({
+                    level: 'debug',
+                    message: `Executing action ${actionIdForLogging(currentAction)}`,
+                    timestamp: DateTime.now(),
+                })
+            }
+            // Deliberately an allowlisted context, not the full action/invocation: an action's
+            // config.inputs can hold decrypted secrets (API keys, auth headers) that the encrypted_inputs
+            // split keeps out of storage, and dumping them here would put them straight into worker logs.
             logger.debug('🦔', `[InsightsFlowActionRunner] Running action ${currentAction.type}`, {
-                action: currentAction,
-                invocation,
+                hogFlowId: invocation.hogFlow.id,
+                invocationId: invocation.id,
+                actionId: currentAction.id,
+                actionType: currentAction.type,
             })
 
             const handler = this.actionHandlers[currentAction.type]
@@ -345,7 +500,7 @@ export class InsightsFlowExecutorService {
                     invocation,
                     action: currentAction,
                     result,
-                    scriptExecutorOptions: options?.scriptExecutorOptions,
+                    hogExecutorOptions: options?.hogExecutorOptions,
                 })
 
                 if (handlerResult.error) {
@@ -371,27 +526,129 @@ export class InsightsFlowExecutorService {
                     this.goToNextAction(result, currentAction, handlerResult.nextAction, 'succeeded')
                 }
             } catch (err) {
-                // Add logs and metric specifically for this action
-                this.logAction(result, currentAction, 'error', `Errored: ${String(err)}`) // TODO: Is this enough detail?
-                this.trackActionMetric(result, currentAction, 'failed')
+                // A live-edit WorkflowChangedError is not this action failing - the graph moved
+                // underneath the run - so it skips the failure log/metric and is classified by the
+                // outer catch. The same error from an untouched flow is a malformed definition and
+                // keeps the failure treatment.
+                if (!this.isLiveEditWorkflowChange(err, invocation)) {
+                    // Add logs and metric specifically for this action
+                    this.logAction(result, currentAction, 'error', `Errored: ${String(err)}`) // TODO: Is this enough detail?
+                    this.trackActionMetric(result, currentAction, 'failed')
+                }
 
                 throw err
             }
         } catch (err) {
+            // The workflow was edited underneath this run and its current step (or that step's next
+            // edge) no longer exists. That's a user action, not a defect: skip the run forward to the
+            // deleted step's surviving successor when the edit recorded one, otherwise finish the run
+            // as a deliberate exit - no result.error, so it doesn't count towards the workflow's
+            // failure rate - with its own metric so exits are attributable per workflow.
+            if (this.isLiveEditWorkflowChange(err, invocation)) {
+                if (this.maybeRedirectDeletedAction(result, invocation)) {
+                    return result
+                }
+                result.finished = true
+                this.log(
+                    result,
+                    'info',
+                    `Workflow exited: the workflow was edited and this run's current step no longer exists (${err.message})`
+                )
+                result.metrics.push({
+                    team_id: invocation.hogFlow.team_id,
+                    app_source_id: invocation.parentRunId ?? invocation.hogFlow.id,
+                    instance_id: invocation.state.currentAction?.id,
+                    metric_kind: 'other',
+                    metric_name: 'exited_workflow_changed',
+                    count: 1,
+                })
+
+                return result
+            }
+
             // The final catch - in this case we are always just logging the final outcome
             result.error = err.message
             result.finished = true // Explicitly set to true to prevent infinite loops
+            // (a WorkflowChangedError from an untouched flow lands here too: the graph was malformed
+            // all along, so it stays a failure the author can see rather than a quiet exit)
 
             this.maybeContinueToNextActionOnError(result)
 
             logger.error(
                 '🦔',
-                `[InsightsFlowExecutor] Error executing custom flow ${invocation.insightsFlow.id} - ${invocation.insightsFlow.name}. Event: '${invocation.state.event?.url}'`,
+                `[InsightsFlowExecutor] Error executing script flow ${invocation.hogFlow.id} - ${invocation.hogFlow.name}. Event: '${invocation.state.event?.url}'`,
                 err
             )
         }
 
         return result
+    }
+
+    // Skip-forward for deleted steps: when a live edit deleted the run's current action, the API
+    // recorded its next surviving successor in the flow's action_redirects map. Move the run there
+    // with a fresh step entry (so a delay/wait at the target parks from redirect time) and let the
+    // execute() loop enter it; the caller falls back to the graceful exit when there's no entry (a
+    // true dead end). Only ever reached behind isLiveEditWorkflowChange: the run's position is dead,
+    // so entries keyed by a *surviving* action id can't match, and after the redirect the fresh
+    // startedAtTimestamp means a second structural miss classifies as a plain failure, not a loop.
+    private maybeRedirectDeletedAction(
+        result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow>,
+        invocation: CyclotronJobInvocationInsightsFlow
+    ): boolean {
+        const deletedActionId = invocation.state.currentAction?.id
+        const redirectId = deletedActionId ? invocation.hogFlow.action_redirects?.[deletedActionId] : undefined
+        if (!deletedActionId || !redirectId) {
+            return false
+        }
+
+        // The API keeps every map value present in the same row's actions, so a miss here means a
+        // compute bug or torn data - don't trust the map, let the run exit gracefully instead.
+        const target = invocation.hogFlow.actions.find((action) => action.id === redirectId)
+        if (!target) {
+            counterRedirectTargetMissing.inc()
+            logger.warn('[InsightsFlowExecutor] Redirect target missing from live graph', {
+                hogFlowId: invocation.hogFlow.id,
+                deletedActionId,
+                redirectId,
+            })
+            return false
+        }
+
+        result.finished = false
+        result.invocation.state.actionStepCount++
+        result.invocation.state.currentAction = {
+            id: target.id,
+            startedAtTimestamp: DateTime.now().toMillis(),
+        }
+        this.log(
+            result,
+            'info',
+            `Workflow was edited and this run's current step was removed - continuing at ${actionIdForLogging(target)}`
+        )
+        result.metrics.push({
+            team_id: invocation.hogFlow.team_id,
+            app_source_id: invocation.parentRunId ?? invocation.hogFlow.id,
+            instance_id: deletedActionId,
+            metric_kind: 'other',
+            metric_name: 'redirected_workflow_changed',
+            count: 1,
+        })
+        counterRedirectApplied.inc()
+
+        return true
+    }
+
+    // A structural lookup miss only counts as a live edit when the flow was actually updated after
+    // the run arrived at its current step. Otherwise the graph was malformed from the start (a bad
+    // save, a lenient draft in a test run) and hiding it as a deliberate exit would bury the defect.
+    private isLiveEditWorkflowChange(err: unknown, invocation: CyclotronJobInvocationInsightsFlow): boolean {
+        if (!(err instanceof WorkflowChangedError)) {
+            return false
+        }
+        const stepStartedAt = invocation.state.currentAction?.startedAtTimestamp
+        // updated_at is a Date from pg in production and epoch millis in fixtures - normalize
+        const updatedAt = invocation.hogFlow.updated_at ? new Date(invocation.hogFlow.updated_at).getTime() : null
+        return Boolean(stepStartedAt && updatedAt && updatedAt > stepStartedAt)
     }
 
     private goToNextAction(
@@ -462,11 +719,18 @@ export class InsightsFlowExecutorService {
         // If the result has scheduled for the future then we return that triggering a push back to the queue
         result.invocation.queueScheduledAt = scheduledAt
         result.finished = false
-        result.logs.push({
-            level: 'info',
-            timestamp: DateTime.now(),
-            message: `Workflow will pause until ${scheduledAt.toUTC().toISO()}`,
-        })
+        // Routing-only reschedules (script function moving the job onto a dedicated queue) don't
+        // represent a workflow-author-visible pause — the next dequeue fires almost
+        // immediately and continues the same action. Skip the "Workflow will pause until..."
+        // log in that case so it doesn't surface as a pause the workflow never actually took.
+        // Real pauses (delays, wait_until_condition, throttle retries) still log normally.
+        if (!result.invocation.state.currentAction?.routingOnlyReschedule) {
+            result.logs.push({
+                level: 'info',
+                timestamp: DateTime.now(),
+                message: `Workflow will pause until ${scheduledAt.toUTC().toISO()}`,
+            })
+        }
 
         return result
     }
@@ -498,8 +762,8 @@ export class InsightsFlowExecutorService {
         metricName: 'failed' | 'succeeded' | 'filtered'
     ): void {
         result.metrics.push({
-            team_id: result.invocation.insightsFlow.team_id,
-            app_source_id: result.invocation.insightsFlow.id,
+            team_id: result.invocation.hogFlow.team_id,
+            app_source_id: result.invocation.parentRunId ?? result.invocation.hogFlow.id,
             instance_id: action.id,
             metric_kind: metricName === 'failed' ? 'failure' : metricName === 'succeeded' ? 'success' : 'other',
             metric_name: metricName,
@@ -594,27 +858,55 @@ export class InsightsFlowExecutorService {
 
         const hasAssociatedPerson = Boolean(invocation.person)
         const hasAssociatedEvent = Boolean(invocation.state.event)
-        const isWebhookTriggered = ['webhook', 'manual', 'schedule'].includes(invocation.insightsFlow.trigger.type)
-        const isBatchWorkflow = invocation.insightsFlow.trigger.type === 'batch'
+        const isWebhookTriggered = ['webhook', 'manual', 'schedule'].includes(invocation.hogFlow.trigger.type)
+        const isBatchWorkflow = invocation.hogFlow.trigger.type === 'batch'
 
         let triggeredForActor = ''
         if (!hasCurrentAction) {
             triggeredForActor = isWebhookTriggered
-                ? ` at request of [Actor:${invocation.state.event?.distinct_id || 'unknown'}]`
+                ? ` at request of [Actor:${invocation.state.event?.distinct_id ?? 'unknown'}]`
                 : ''
             triggeredForActor += hasAssociatedPerson
-                ? ` for [Person:${invocation.person?.id}|${invocation.person?.name}]`
+                ? ` for [Person:${invocation.person?.id}|${invocation.person?.name ?? 'unknown'}]`
                 : ''
         }
 
-        const triggeredByEvent = hasAssociatedEvent
+        let triggeredByEvent = hasAssociatedEvent
             ? ` on [Event:${invocation.state.event?.uuid}|${invocation.state.event?.event?.replaceAll('|', '')}|${invocation.state.event?.timestamp}]`
             : ''
 
+        // Surface the event that woke the job (not the trigger). The logs view builds the link
+        // from uuid + timestamp, so emit the linkable token only when both are present.
+        const wakeEvent = invocation.state.currentAction?.eventMatchedEvent
+        const wakeEventUuid = invocation.state.currentAction?.eventMatchedEventUuid
+        const wakeEventTimestamp = invocation.state.currentAction?.eventMatchedEventTimestamp
+        if (hasCurrentAction && invocation.state.currentAction?.eventMatched && wakeEvent) {
+            triggeredByEvent +=
+                wakeEventUuid && wakeEventTimestamp
+                    ? ` (woken by [Event:${wakeEventUuid}|${wakeEvent.replaceAll('|', '')}|${wakeEventTimestamp}])`
+                    : ` (woken by event: ${wakeEvent.replaceAll('|', '')})`
+        }
+
         return {
-            level: 'debug',
+            level: 'info',
             message: `${hasCurrentAction ? 'Resuming' : 'Starting'} ${isBatchWorkflow ? 'batch ' : ''}workflow execution at ${currentAction}${triggeredForActor}${triggeredByEvent}`,
             timestamp: DateTime.now(),
         }
+    }
+
+    private logExecutionErrorInfo(
+        result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow>,
+        error: Error
+    ): string {
+        const invocation = result.invocation
+        const currentActionId = invocation.state.currentAction?.id
+        const currentAction = currentActionId ? invocation.hogFlow.actions.find((a) => a.id === currentActionId) : null
+
+        const hasAssociatedEvent = Boolean(invocation.state.event)
+        const triggeredByEvent = hasAssociatedEvent
+            ? `. This workflow was triggered by [Event:${invocation.state.event?.uuid}|${invocation.state.event?.event?.replaceAll('|', '')}|${invocation.state.event?.timestamp}]`
+            : ''
+
+        return `Workflow encountered an error: ${error.message} at ${currentAction ? actionIdForLogging(currentAction) : 'unknown action'}${triggeredByEvent}`
     }
 }

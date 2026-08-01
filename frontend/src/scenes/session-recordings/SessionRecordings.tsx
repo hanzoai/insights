@@ -1,38 +1,38 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
+import { useState } from 'react'
 
-import { IconDocument, IconEllipsis, IconGear, IconHeadset, IconOpenSidebar } from '@hanzo/icons'
-import { Badge, Button, Menu, Link } from '@hanzo/elements'
+import { IconDocument, IconGear, IconHeadset, IconOpenSidebar } from '@hanzo/icons'
+import { Badge, Button, Link } from '@hanzo/elements'
+import { InsightsCaptureOnViewed } from '@hanzo/react'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
-import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
+import { WarningHog } from 'lib/components/mascots'
 import { LiveRecordingsCount } from 'lib/components/LiveUserCount'
-import { WarningMascot } from 'lib/components/mascots'
-import { FEATURE_FLAGS } from 'lib/constants'
-import { useAsyncHandler } from 'lib/hooks/useAsyncHandler'
+import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
+import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Banner } from 'lib/elements/Banner'
+import { lemonBannerLogic } from 'lib/elements/Banner/lemonBannerLogic'
 import { Tab, Tabs } from 'lib/elements/Tabs'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { cn } from 'lib/utils/css-classes'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
-import { ScenePanel, ScenePanelActionsSection } from '~/layout/scenes/SceneLayout'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
+import { ScenePanel, ScenePanelActionsSection } from '~/layout/scenes/SceneLayout'
 import { ProductKey } from '~/queries/schema/schema-general'
 import { AccessControlLevel, AccessControlResourceType, ReplayTab, ReplayTabs } from '~/types'
 
 import { SessionRecordingCollections } from './collections/SessionRecordingCollections'
 import { SessionRecordingsPlaylistRedesign } from './playlist-redesign/SessionRecordingsPlaylistRedesign'
-import { SessionRecordingsPlaylist } from './playlist/SessionRecordingsPlaylist'
 import { createPlaylist } from './playlist/playlistUtils'
+import { SessionRecordingsPlaylist } from './playlist/SessionRecordingsPlaylist'
 import {
     SessionRecordingPlaylistLogicProps,
     sessionRecordingsPlaylistLogic,
@@ -46,38 +46,26 @@ function Header(): JSX.Element {
     const { currentTeam } = useValues(teamLogic)
     const recordingsDisabled = currentTeam && !currentTeam?.session_recording_opt_in
     const { reportRecordingPlaylistCreated } = useActions(sessionRecordingEventUsageLogic)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
-    const newPlaylistHandler = useAsyncHandler(async () => {
-        await createPlaylist({ _create_in_folder: 'Unfiled/Replay playlists', type: 'collection' }, true)
-        reportRecordingPlaylistCreated('new')
-    })
+    const [loading, setLoading] = useState(false)
+    const handleNewPlaylist = async (): Promise<void> => {
+        setLoading(true)
+        try {
+            await createPlaylist({ _create_in_folder: 'Unfiled/Replay playlists', type: 'collection' }, true)
+            reportRecordingPlaylistCreated('new')
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <div className="flex items-center gap-2">
             {tab === ReplayTabs.Home && !recordingsDisabled && (
                 <>
                     <LiveRecordingsCount />
-                    {!isRemovingSidePanelFlag && (
-                        <Menu
-                            items={[
-                                {
-                                    label: 'Playback from Insights JSON file',
-                                    to: urls.replayFilePlayback(),
-                                },
-                                {
-                                    label: 'Kiosk mode',
-                                    to: urls.replayKiosk(),
-                                },
-                            ]}
-                            placement="bottom-end"
-                        >
-                            <Button icon={<IconEllipsis />} size="small" />
-                        </Menu>
-                    )}
                     <ScenePanel>
                         <ScenePanelActionsSection>
                             <Link
-                                to={urls.replaySettings()}
+                                to={urls.replayFilePlayback()}
                                 buttonProps={{
                                     menuItem: true,
                                 }}
@@ -102,7 +90,7 @@ function Header(): JSX.Element {
                     resourceType={AccessControlResourceType.SessionRecording}
                     minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <AppShortcut
+                    <Shortcut
                         name="NewRecordingCollection"
                         keybind={[keyBinds.new]}
                         intent="New collection"
@@ -111,18 +99,68 @@ function Header(): JSX.Element {
                     >
                         <Button
                             type="primary"
-                            onClick={(e) => newPlaylistHandler.onEvent?.(e)}
+                            onClick={handleNewPlaylist}
                             data-attr="save-recordings-playlist-button"
-                            loading={newPlaylistHandler.loading}
+                            loading={loading}
                             size="small"
                             tooltip="New collection"
                         >
                             New collection
                         </Button>
-                    </AppShortcut>
+                    </Shortcut>
                 </AccessControlAction>
             )}
+
+            <Button
+                icon={<IconGear />}
+                type="secondary"
+                size="small"
+                to={urls.replaySettings()}
+                data-attr="session-recordings-settings-button"
+            >
+                Settings
+            </Button>
         </div>
+    )
+}
+
+const REPLAY_VISION_PROMO_DISMISS_KEY = 'replay-vision-waitlist-promo'
+
+function ReplayVisionPromoBanner(): JSX.Element | null {
+    // Teams with the flag already have access, so send them to the product instead of the waitlist
+    const hasReplayVision = useFeatureFlag('REPLAY_VISION')
+    const { isDismissed } = useValues(lemonBannerLogic({ dismissKey: REPLAY_VISION_PROMO_DISMISS_KEY }))
+
+    // A dismissed Banner renders null but the viewed tracker would still fire, skewing impressions
+    if (isDismissed) {
+        return null
+    }
+
+    return (
+        <InsightsCaptureOnViewed name="replay-vision-waitlist-banner-shown">
+            <Banner
+                type="ai"
+                dismissKey={REPLAY_VISION_PROMO_DISMISS_KEY}
+                action={
+                    hasReplayVision
+                        ? {
+                              children: 'Try Replay vision',
+                              to: urls.replayVision(),
+                              center: true,
+                              'data-attr': 'replay-vision-waitlist-banner-cta',
+                          }
+                        : {
+                              children: 'Join the waitlist',
+                              to: 'https://hanzo.ai/replay-vision?utm_medium=in-product&utm_campaign=replay-vision-waitlist-banner',
+                              targetBlank: true,
+                              center: true,
+                              'data-attr': 'replay-vision-waitlist-banner-cta',
+                          }
+                }
+            >
+                Tired of watching replays? Replay vision watches them for you and surfaces what matters.
+            </Banner>
+        </InsightsCaptureOnViewed>
     )
 }
 
@@ -136,7 +174,7 @@ function Warnings(): JSX.Element {
                 <Banner type="info" hideIcon={true}>
                     <div className="flex gap-8 p-8 md:flex-row justify-center flex-wrap">
                         <div className="flex justify-center items-center w-full md:w-50">
-                            <WarningMascot className="w-full h-auto md:h-[200px] md:w-[200px] max-w-50" />
+                            <WarningHog className="w-full h-auto md:h-[200px] md:w-[200px] max-w-50" />
                         </div>
                         <div className="flex flex-col gap-2 flex-shrink max-w-180">
                             <h2 className="text-lg font-semibold">
@@ -192,27 +230,37 @@ function Warnings(): JSX.Element {
     )
 }
 
-function MainPanel({ tabId }: { tabId: string }): JSX.Element {
-    const { tab } = useValues(sessionReplaySceneLogic)
-    const { featureFlags } = useValues(featureFlagLogic)
+// Keeps the recordings logic mounted for the scene's lifetime so its state survives tab
+// switches. Rendered only on the Home tab so landing on Collections/Templates does not mount
+// it — which would otherwise fire a wasted loadSessionRecordings Datastore query on load.
+function AttachScenePlaylistLogic({
+    playlistLogicProps,
+}: {
+    playlistLogicProps: SessionRecordingPlaylistLogicProps
+}): null {
+    useAttachedLogic(sessionRecordingsPlaylistLogic(playlistLogicProps), sessionReplaySceneLogic())
+    return null
+}
 
-    const isRedesignEnabled = featureFlags[FEATURE_FLAGS.REPLAY_UI_REDESIGN_2026] === 'test'
+function MainPanel(): JSX.Element {
+    const { tab } = useValues(sessionReplaySceneLogic)
+    const isRedesignEnabled = useFeatureFlag('REPLAY_UI_REDESIGN_2026', 'test')
 
     const playlistLogicProps: SessionRecordingPlaylistLogicProps = {
-        logicKey: `scene-${tabId}`,
+        logicKey: 'scene',
         updateSearchParams: true,
     }
 
-    useAttachedLogic(sessionRecordingsPlaylistLogic(playlistLogicProps), sessionReplaySceneLogic({ tabId }))
-
     return (
         <div className={cn('flex flex-col gap-y-4', ReplayTabs.Home === tab && 'grow')}>
+            <ReplayVisionPromoBanner />
             <Warnings />
 
             {!tab ? (
                 <Spinner />
             ) : tab === ReplayTabs.Home ? (
                 <div className="SessionRecordingPlaylistHeightWrapper grow">
+                    <AttachScenePlaylistLogic playlistLogicProps={playlistLogicProps} />
                     {isRedesignEnabled ? (
                         <SessionRecordingsPlaylistRedesign {...playlistLogicProps} />
                     ) : (
@@ -243,20 +291,14 @@ const ReplayPageTabs: ReplayTab[] = [
         'data-attr': 'session-recordings-collections-tab',
     },
     {
-        label: 'What to watch',
+        label: 'Filter templates',
         key: ReplayTabs.Templates,
         'data-attr': 'session-recordings-templates-tab',
-    },
-    {
-        label: 'Settings',
-        key: ReplayTabs.Settings,
-        'data-attr': 'session-recordings-settings-tab',
     },
 ]
 
 export function SessionRecordingsPageTabs(): JSX.Element {
     const { tab, shouldShowNewBadge } = useValues(sessionReplaySceneLogic)
-
     return (
         <Tabs
             activeKey={tab}
@@ -284,16 +326,9 @@ export function SessionRecordingsPageTabs(): JSX.Element {
     )
 }
 
-export interface SessionsRecordingsProps {
-    tabId?: string
-}
-
-export function SessionsRecordings({ tabId }: SessionsRecordingsProps = {}): JSX.Element {
-    if (!tabId) {
-        throw new Error('<SessionsRecordings /> must receive a tabId prop')
-    }
+export function SessionsRecordings(): JSX.Element {
     return (
-        <BindLogic logic={sessionReplaySceneLogic} props={{ tabId }}>
+        <BindLogic logic={sessionReplaySceneLogic} props={{}}>
             <SceneContent className="h-full">
                 <SceneTitleSection
                     name={sceneConfigurations[Scene.Replay].name}
@@ -303,7 +338,7 @@ export function SessionsRecordings({ tabId }: SessionsRecordingsProps = {}): JSX
                     actions={<Header />}
                 />
                 <SessionRecordingsPageTabs />
-                <MainPanel tabId={tabId} />
+                <MainPanel />
             </SceneContent>
         </BindLogic>
     )

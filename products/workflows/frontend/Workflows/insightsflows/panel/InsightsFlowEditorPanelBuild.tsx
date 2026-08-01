@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Fragment, useEffect, useState } from 'react'
 
 import { IconDrag } from '@hanzo/icons'
-import { Button, Divider, Dropdown, Input, SpinnerOverlay } from '@hanzo/elements'
+import { Button, Divider, Dropdown, Input, Tag, SpinnerOverlay } from '@hanzo/elements'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { insightsFunctionTemplateListLogic } from 'scenes/insights-functions/list/insightsFunctionTemplateListLogic'
@@ -10,9 +10,13 @@ import { InsightsFunctionStatusTag } from 'scenes/insights-functions/misc/Insigh
 
 import { InsightsFunctionTemplateType } from '~/types'
 
-import { CreateActionType, insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
+import { CreateActionType, hogFlowEditorLogic } from '../hogFlowEditorLogic'
 // Side-effect imports: register product-specific trigger and action nodes
 import '../registry'
+
+import { FEATURE_FLAGS } from 'lib/constants'
+
+import { PERSON_DEPENDENT_ACTION_TYPES, workflowLogic } from '../../workflowLogic'
 import { getRegisteredActionNodeCategories } from '../registry/actions/actionNodeRegistry'
 import { useInsightsFlowStep } from '../steps/InsightsFlowSteps'
 import { getDelayDescription } from '../steps/stepDelayLogic'
@@ -51,6 +55,13 @@ export const ACTION_NODES_TO_SHOW: CreateActionType[] = [
     },
 ]
 
+const PUSH_NOTIFICATION_ACTION_NODE: CreateActionType = {
+    type: 'function_push',
+    name: 'Push',
+    description: 'Send a push notification to the user.',
+    config: { template_id: 'template-native-push', inputs: {} },
+}
+
 const DEFAULT_DELAY = '10m'
 export const DELAY_NODES_TO_SHOW: CreateActionType[] = [
     {
@@ -61,8 +72,8 @@ export const DELAY_NODES_TO_SHOW: CreateActionType[] = [
     },
     {
         type: 'wait_until_time_window',
-        name: 'Wait until window',
-        description: 'Wait until a specified time window.',
+        name: 'Time window',
+        description: 'Wait for the next allowed time window before continuing.',
         config: {
             timezone: null,
             day: 'any',
@@ -71,8 +82,8 @@ export const DELAY_NODES_TO_SHOW: CreateActionType[] = [
     },
     {
         type: 'wait_until_condition',
-        name: 'Wait until condition',
-        description: 'Wait until a condition is met or a duration has passed.',
+        name: 'Wait until',
+        description: 'Wait until a matching event fires or a condition is met, up to a maximum duration.',
         branchEdges: 1,
         config: {
             condition: { filters: null },
@@ -110,7 +121,7 @@ export const LOGIC_NODES_TO_SHOW: CreateActionType[] = [
     },
 ]
 
-export const INSIGHTS_NODES_TO_SHOW: CreateActionType[] = [
+export const POSTFN_NODES_TO_SHOW: CreateActionType[] = [
     {
         type: 'function',
         name: 'Set variable',
@@ -141,7 +152,7 @@ const TEMPLATE_IDS_AT_TOP_LEVEL: string[] = [
     ...ACTION_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
     ...DELAY_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
     ...LOGIC_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
-    ...INSIGHTS_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
+    ...POSTFN_NODES_TO_SHOW.map((action) => (action.config as any).template_id),
     ...getRegisteredActionNodeCategories().flatMap((cat) =>
         cat.nodes.map((action) => (action.config as any).template_id)
     ),
@@ -156,7 +167,7 @@ function InsightsFlowEditorToolbarNode({
     onDragStart?: (event: React.DragEvent) => void
     children?: React.ReactNode
 }): JSX.Element | null {
-    const { setNodeToBeAdded } = useActions(insightsFlowEditorLogic)
+    const { setNodeToBeAdded } = useActions(hogFlowEditorLogic)
 
     const onDragStart = (event: React.DragEvent): void => {
         setNodeToBeAdded(action)
@@ -194,7 +205,7 @@ const customFilterFunction = (template: InsightsFunctionTemplateType): boolean =
         return false
     }
 
-    if (template.status === 'coming_soon') {
+    if (['hidden', 'coming_soon'].includes(template.status)) {
         return false
     }
 
@@ -274,10 +285,18 @@ function InsightsFunctionTemplatesChooser(): JSX.Element {
 
 export function InsightsFlowEditorPanelBuild(): JSX.Element {
     const { featureFlags } = useValues(featureFlagLogic)
+    const { isRowScopedTrigger } = useValues(workflowLogic)
 
     const registeredCategories = getRegisteredActionNodeCategories().filter(
         (cat) => !cat.featureFlag || featureFlags[cat.featureFlag]
     )
+
+    // Warehouse-triggered workflows have no person, so don't offer person-dependent steps at all.
+    const hideIfRowScoped = (nodes: CreateActionType[]): CreateActionType[] =>
+        isRowScopedTrigger ? nodes.filter((node) => !PERSON_DEPENDENT_ACTION_TYPES.has(node.type)) : nodes
+
+    const delayNodes = hideIfRowScoped(DELAY_NODES_TO_SHOW)
+    const logicNodes = hideIfRowScoped(LOGIC_NODES_TO_SHOW)
 
     return (
         <div className="flex overflow-y-auto flex-col gap-px p-2" data-attr="workflow-add-action">
@@ -287,26 +306,38 @@ export function InsightsFlowEditorPanelBuild(): JSX.Element {
             {ACTION_NODES_TO_SHOW.map((node, index) => (
                 <InsightsFlowEditorToolbarNode key={`${node.type}-${index}`} action={node} />
             ))}
+            {featureFlags[FEATURE_FLAGS.WORKFLOWS_PUSH_NOTIFICATIONS] && (
+                <InsightsFlowEditorToolbarNode key="push-notifications" action={PUSH_NOTIFICATION_ACTION_NODE}>
+                    <span className="inline-flex items-center gap-1.5">
+                        {PUSH_NOTIFICATION_ACTION_NODE.name}
+                        <Tag type="completion">Beta</Tag>
+                    </span>
+                </InsightsFlowEditorToolbarNode>
+            )}
             <InsightsFunctionTemplatesChooser />
 
             <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
                 Delays <Divider className="flex-1" />
             </span>
-            {DELAY_NODES_TO_SHOW.map((action, index) => (
+            {delayNodes.map((action, index) => (
                 <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />
             ))}
 
-            <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
-                Audience split <Divider className="flex-1" />
-            </span>
-            {LOGIC_NODES_TO_SHOW.map((action, index) => (
-                <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />
-            ))}
+            {logicNodes.length > 0 && (
+                <>
+                    <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
+                        Audience split <Divider className="flex-1" />
+                    </span>
+                    {logicNodes.map((action, index) => (
+                        <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />
+                    ))}
+                </>
+            )}
 
             <span className="flex gap-2 text-sm font-semibold mt-2 items-center">
                 Insights actions <Divider className="flex-1" />
             </span>
-            {INSIGHTS_NODES_TO_SHOW.map((action, index) => (
+            {POSTFN_NODES_TO_SHOW.map((action, index) => (
                 <InsightsFlowEditorToolbarNode key={`${action.type}-${index}`} action={action} />
             ))}
 

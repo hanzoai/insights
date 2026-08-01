@@ -24,13 +24,13 @@ django.setup()
 
 from django.db import transaction
 
-from insights.models import FeatureFlag, Integration, PersonalAPIKey, Team, User
-from insights.models.personal_api_key import hash_key_value
-from insights.models.utils import generate_random_token_personal
+from insights.models import Integration, PersonalAPIKey, Team, User
+from insights.models.utils import generate_random_token_personal, hash_key_value
 
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
+from products.tasks.backend.logic.services.docker_sandbox import DockerSandbox
+from products.tasks.backend.logic.services.sandbox import SandboxConfig, SandboxTemplate
 from products.tasks.backend.models import Task, TaskRun
-from products.tasks.backend.services.docker_sandbox import DockerSandbox
-from products.tasks.backend.services.sandbox import SandboxConfig, SandboxTemplate
 
 
 def create_test_task(repository=None):
@@ -134,9 +134,9 @@ def main():
             template=SandboxTemplate.DEFAULT_BASE,
             environment_variables={
                 "GITHUB_TOKEN": github_token or "",
-                "INSIGHTS_PERSONAL_API_KEY": api_key_value,
-                "INSIGHTS_API_URL": "http://localhost:8000",  # Use 8000 directly, not 8010 (Caddy returns empty from Docker)
-                "INSIGHTS_PROJECT_ID": "1",
+                "POSTFN_PERSONAL_API_KEY": api_key_value,
+                "POSTFN_API_URL": "http://localhost:8000",  # Use 8000 directly, not 8010 (Caddy returns empty from Docker)
+                "POSTFN_PROJECT_ID": "1",
             },
         )
 

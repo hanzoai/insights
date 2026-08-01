@@ -1,21 +1,62 @@
-from typing import Protocol
+from collections.abc import Mapping
 
-from insights.models.property import PropertyName, TableColumn, TableWithProperties
+from insights.datastore.materialized_column_types import (
+    DMAT_STRING_COLUMN_NAME_PREFIX,
+    MATERIALIZATION_VALID_TABLES,
+    MATERIALIZED_COLUMN_NAME_PREFIXES,
+    ColumnName,
+    MaterializedColumn,
+    TablesWithMaterializedColumns,
+)
+from insights.models.instance_setting import get_instance_setting
+from insights.models.property import PropertyName, TableColumn
+from insights.property_columns import TableWithProperties
+from insights.settings import EE_AVAILABLE
 
-ColumnName = str
-TablesWithMaterializedColumns = TableWithProperties
-MATERIALIZATION_VALID_TABLES = {"events", "person", "groups"}
+__all__ = [
+    "DMAT_STRING_COLUMN_NAME_PREFIX",
+    "MATERIALIZATION_VALID_TABLES",
+    "MATERIALIZED_COLUMN_NAME_PREFIXES",
+    "ColumnName",
+    "MaterializedColumn",
+    "TableWithProperties",
+    "TablesWithMaterializedColumns",
+    "get_enabled_materialized_columns_by_table",
+    "get_materialized_column_for_property",
+]
 
+if EE_AVAILABLE:
+    from ee.datastore.materialized_columns.columns import get_enabled_materialized_columns
 
-class MaterializedColumn(Protocol):
-    name: ColumnName
-    is_nullable: bool
-    has_minmax_index: bool
-    has_bloom_filter_index: bool
-    has_ngram_lower_index: bool
+    def get_materialized_column_for_property(
+        table: TablesWithMaterializedColumns, table_column: TableColumn, property_name: PropertyName
+    ) -> MaterializedColumn | None:
+        if not get_instance_setting("MATERIALIZED_COLUMNS_ENABLED"):
+            return None
 
+        return get_enabled_materialized_columns(table).get((property_name, table_column))
 
-def get_materialized_column_for_property(
-    table: TablesWithMaterializedColumns, table_column: TableColumn, property_name: PropertyName
-) -> MaterializedColumn | None:
-    return None
+    def get_enabled_materialized_columns_by_table() -> Mapping[
+        TablesWithMaterializedColumns, Mapping[tuple[PropertyName, TableColumn], MaterializedColumn]
+    ]:
+        """Enabled materialized columns for every materialization-valid table, or empty when disabled.
+
+        Registry fetch behind the InsightsQL property-metadata bundle: memoized per query and invoked
+        lazily on the first materialized-column lookup, so the engine's lookups are pure map reads
+        and property-free compiles issue no registry queries (see PropertyMetadata's docstring).
+        """
+        if not get_instance_setting("MATERIALIZED_COLUMNS_ENABLED"):
+            return {}
+
+        return {table: get_enabled_materialized_columns(table) for table in MATERIALIZATION_VALID_TABLES}
+else:
+
+    def get_materialized_column_for_property(
+        table: TablesWithMaterializedColumns, table_column: TableColumn, property_name: PropertyName
+    ) -> MaterializedColumn | None:
+        return None
+
+    def get_enabled_materialized_columns_by_table() -> Mapping[
+        TablesWithMaterializedColumns, Mapping[tuple[PropertyName, TableColumn], MaterializedColumn]
+    ]:
+        return {}

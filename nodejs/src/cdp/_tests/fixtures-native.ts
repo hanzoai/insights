@@ -1,4 +1,4 @@
-import { UUIDT } from '~/utils/utils'
+import { UUIDT } from '~/common/utils/utils'
 
 import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '../types'
 import { createInsightsFunction } from './fixtures'
@@ -23,7 +23,7 @@ export const createExampleNativeInvocation = (
         teamId: insightsFunction.team_id,
         functionId: insightsFunction.id,
         insightsFunction,
-        queue: 'fn',
+        queue: 'script',
         queuePriority: 0,
     }
 }

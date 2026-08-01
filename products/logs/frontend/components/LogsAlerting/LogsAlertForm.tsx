@@ -1,0 +1,384 @@
+import { BindLogic, useActions, useValues } from 'kea'
+import { memo, useCallback, useMemo, useRef, useState } from 'react'
+
+import { IconInfo } from '@hanzo/icons'
+import { Dropdown, Input, SegmentedButton, Select } from '@hanzo/elements'
+
+import { InfiniteSelectResults } from 'lib/components/TaxonomicFilter/InfiniteSelectResults'
+import { TaxonomicFilterSearchInput } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
+import { taxonomicFilterLogic } from 'lib/components/TaxonomicFilter/taxonomicFilterLogic'
+import { TaxonomicFilterGroupType, TaxonomicFilterLogicProps } from 'lib/components/TaxonomicFilter/types'
+import UniversalFilters from 'lib/components/UniversalFilters/UniversalFilters'
+import { universalFiltersLogic } from 'lib/components/UniversalFilters/universalFiltersLogic'
+import { isUniversalGroupFilterLike } from 'lib/components/UniversalFilters/utils'
+import { Field } from 'lib/elements/Field'
+import { Tooltip } from 'lib/elements/Tooltip'
+
+import { AnyPropertyFilter, PropertyFilterType, PropertyOperator, UniversalFiltersGroup } from '~/types'
+
+import { AlertAdvancedOptions } from 'products/alerts/frontend/components/AlertAdvancedOptions'
+import { AlertDefinitionRow } from 'products/alerts/frontend/components/AlertDefinition'
+import { AlertEditorSection } from 'products/alerts/frontend/components/AlertEditor'
+import { ServiceFilter } from 'products/logs/frontend/components/LogsViewer/Filters/ServiceFilter'
+import { SeverityLevelsFilter } from 'products/logs/frontend/components/LogsViewer/Filters/SeverityLevelsFilter'
+import { LogsAlertThresholdOperatorEnumApi } from 'products/logs/frontend/generated/api.schemas'
+
+import { logsAlertFormLogic } from './logsAlertFormLogic'
+
+const WINDOW_OPTIONS = [
+    { value: 5, label: '5 minutes' },
+    { value: 10, label: '10 minutes' },
+    { value: 15, label: '15 minutes' },
+    { value: 30, label: '30 minutes' },
+    { value: 60, label: '60 minutes' },
+]
+
+const taxonomicFilterLogicKey = 'logs-alert'
+const taxonomicGroupTypes = [
+    TaxonomicFilterGroupType.Logs,
+    TaxonomicFilterGroupType.LogResourceAttributes,
+    TaxonomicFilterGroupType.LogAttributes,
+]
+
+function buildCheckPattern(datapoints: number, periods: number): boolean[] {
+    // Last check is always matched — it's the one that tips the alert over.
+    // Distribute OK checks evenly across the remaining positions.
+    const result: boolean[] = Array(periods).fill(true)
+    const okCount = periods - datapoints
+    for (let i = 0; i < okCount; i++) {
+        const pos = Math.round((i * (periods - 2)) / Math.max(okCount - 1, 1))
+        result[pos] = false
+    }
+    return result
+}
+
+function CheckDots({ checks }: { checks: boolean[] }): JSX.Element {
+    return (
+        <>
+            {checks.map((matched, i) => (
+                <div
+                    key={i}
+                    className={`w-3 h-3 rounded-full border ${
+                        matched ? 'bg-danger-highlight border-danger' : 'bg-success-highlight border-success'
+                    }`}
+                    title={`Check ${i + 1}: ${matched ? 'matched' : 'ok'}`}
+                />
+            ))}
+        </>
+    )
+}
+
+function CheckDotsTooltip({ datapoints, periods }: { datapoints: number; periods: number }): JSX.Element {
+    const checks = useMemo(() => buildCheckPattern(datapoints, periods), [datapoints, periods])
+
+    return (
+        <Tooltip
+            title={
+                <div className="space-y-1 py-0.5">
+                    <div className="text-xs">
+                        {datapoints} of {periods} checks must match to fire
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <CheckDots checks={checks} />
+                        <span className="text-xs">→</span>
+                        <span className="text-xs font-semibold text-danger">fires</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-secondary">
+                        <span className="inline-flex items-center gap-1">
+                            <span className="inline-block w-2 h-2 rounded-full bg-danger-highlight border border-danger" />
+                            matched
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                            <span className="inline-block w-2 h-2 rounded-full bg-success-highlight border border-success" />
+                            OK
+                        </span>
+                    </div>
+                </div>
+            }
+        >
+            <IconInfo className="text-base text-secondary" />
+        </Tooltip>
+    )
+}
+
+export function LogsAlertForm(): JSX.Element {
+    const { alertForm } = useValues(logsAlertFormLogic)
+    const { setAlertFormValue } = useActions(logsAlertFormLogic)
+
+    const handleFilterGroupChange = useCallback(
+        (group: UniversalFiltersGroup) => setAlertFormValue('filterGroup', group),
+        [setAlertFormValue]
+    )
+    const enabledAdvancedOptionsCount =
+        Number(alertForm.evaluationPeriods > 1 || alertForm.datapointsToAlarm > 1) +
+        Number(alertForm.cooldownMinutes > 0)
+
+    return (
+        <div className="space-y-6 max-w-2xl">
+            <AlertEditorSection
+                title="Definition"
+                description="Checks run every 5 minutes. Each check queries logs matching these filters."
+            >
+                <div className="space-y-6">
+                    <div className="space-y-5">
+                        <h4 className="m-0">Filters</h4>
+                        <Field name="severityLevels" label="Severity">
+                            <SeverityLevelsFilter
+                                value={alertForm.severityLevels}
+                                onChange={(levels) => setAlertFormValue('severityLevels', levels)}
+                            />
+                        </Field>
+                        <Field.Pure label="Service">
+                            <ServiceFilter
+                                value={alertForm.serviceNames}
+                                onChange={(names) => setAlertFormValue('serviceNames', names)}
+                            />
+                        </Field.Pure>
+                        <Field name="filterGroup" label="Attributes">
+                            <AlertFilterGroup filterGroup={alertForm.filterGroup} onChange={handleFilterGroupChange} />
+                        </Field>
+                    </div>
+
+                    <div className="space-y-2">
+                        <h4 className="m-0">Trigger condition</h4>
+                        <AlertDefinitionRow label="Alert if count goes">
+                            <SegmentedButton
+                                value={alertForm.thresholdOperator}
+                                onChange={(value) => setAlertFormValue('thresholdOperator', value)}
+                                options={[
+                                    { value: LogsAlertThresholdOperatorEnumApi.Above, label: 'above' },
+                                    { value: LogsAlertThresholdOperatorEnumApi.Below, label: 'below' },
+                                ]}
+                                size="small"
+                            />
+                            <Input
+                                type="number"
+                                min={0}
+                                value={alertForm.thresholdCount}
+                                onChange={(value) => setAlertFormValue('thresholdCount', value ?? 0)}
+                                className="w-24"
+                                size="small"
+                                data-attr="logs-alert-threshold-count"
+                            />
+                            <span className="text-sm">in the last</span>
+                            <Select
+                                value={alertForm.windowMinutes}
+                                onChange={(value) => setAlertFormValue('windowMinutes', value ?? 10)}
+                                options={WINDOW_OPTIONS}
+                                size="small"
+                            />
+                        </AlertDefinitionRow>
+                    </div>
+                </div>
+            </AlertEditorSection>
+
+            <AlertAdvancedOptions enabledCount={enabledAdvancedOptionsCount}>
+                <Field.Pure
+                    label={
+                        <span className="inline-flex items-center gap-1">
+                            Reduce noise
+                            <Tooltip title="Require the condition to be met multiple times before the alert fires. This prevents notifications on brief, one-off spikes.">
+                                <IconInfo className="text-base text-secondary" />
+                            </Tooltip>
+                        </span>
+                    }
+                >
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <Input
+                                type="number"
+                                min={1}
+                                max={alertForm.evaluationPeriods}
+                                value={alertForm.datapointsToAlarm}
+                                onChange={(value) => setAlertFormValue('datapointsToAlarm', value ?? 1)}
+                                className="w-16"
+                                size="small"
+                            />
+                            <span className="text-sm">of</span>
+                            <Input
+                                type="number"
+                                min={alertForm.datapointsToAlarm}
+                                max={10}
+                                value={alertForm.evaluationPeriods}
+                                onChange={(value) => {
+                                    const newPeriods = value ?? alertForm.datapointsToAlarm
+                                    setAlertFormValue('evaluationPeriods', newPeriods)
+                                    if (alertForm.datapointsToAlarm > newPeriods) {
+                                        setAlertFormValue('datapointsToAlarm', newPeriods)
+                                    }
+                                }}
+                                className="w-16"
+                                size="small"
+                            />
+                            <span className="text-sm">checks must match to fire</span>
+                            <CheckDotsTooltip
+                                datapoints={alertForm.datapointsToAlarm}
+                                periods={alertForm.evaluationPeriods}
+                            />
+                        </div>
+                        <p className="text-xs text-secondary m-0">
+                            The alert auto-resolves once the condition is no longer met.
+                        </p>
+                    </div>
+                </Field.Pure>
+                <Field.Pure
+                    label="Notification cooldown"
+                    help="After firing, wait this long before sending another notification. Set to 0 to notify on every check."
+                >
+                    <div className="flex items-center gap-2">
+                        <Input
+                            type="number"
+                            min={0}
+                            value={alertForm.cooldownMinutes}
+                            onChange={(value) => setAlertFormValue('cooldownMinutes', value ?? 0)}
+                            className="w-24"
+                            size="small"
+                        />
+                        <span className="text-sm">minutes</span>
+                    </div>
+                </Field.Pure>
+            </AlertAdvancedOptions>
+        </div>
+    )
+}
+
+const AlertFilterGroup = memo(function AlertFilterGroup({
+    filterGroup,
+    onChange,
+}: {
+    filterGroup: UniversalFiltersGroup
+    onChange: (group: UniversalFiltersGroup) => void
+}): JSX.Element {
+    const newlyAddedFilterIndex = useRef<number | null>(null)
+    const markBlankFilterAsNew = useCallback((index: number): void => {
+        newlyAddedFilterIndex.current = index
+    }, [])
+
+    return (
+        <UniversalFilters
+            rootKey={taxonomicFilterLogicKey}
+            group={filterGroup}
+            taxonomicGroupTypes={taxonomicGroupTypes}
+            onChange={onChange}
+        >
+            <div className="space-y-2">
+                <AlertFilterSearch onAddBlankFilter={markBlankFilterAsNew} />
+                <AlertAppliedFilters initiallyOpenFilterIndex={newlyAddedFilterIndex.current} />
+            </div>
+        </UniversalFilters>
+    )
+})
+
+function AlertFilterSearch({ onAddBlankFilter }: { onAddBlankFilter: (index: number) => void }): JSX.Element {
+    const [visible, setVisible] = useState<boolean>(false)
+    const { addGroupFilter, setGroupValues } = useActions(universalFiltersLogic)
+    const { filterGroup } = useValues(universalFiltersLogic)
+
+    const searchInputRef = useRef<HTMLInputElement | null>(null)
+    const floatingRef = useRef<HTMLDivElement | null>(null)
+    const filterGroupRef = useRef(filterGroup)
+    filterGroupRef.current = filterGroup
+
+    const onClose = useCallback((): void => {
+        searchInputRef.current?.blur()
+        setVisible(false)
+    }, [])
+
+    const taxonomicFilterLogicProps: TaxonomicFilterLogicProps = useMemo(
+        () => ({
+            taxonomicFilterLogicKey,
+            taxonomicGroupTypes,
+            onChange: (taxonomicGroup, value, item) => {
+                if (item.value === undefined) {
+                    onAddBlankFilter(filterGroupRef.current.values.length)
+                    addGroupFilter(taxonomicGroup, value, item)
+                    setVisible(false)
+                    return
+                }
+
+                const newValues = [...filterGroupRef.current.values]
+                const newPropertyFilter = {
+                    key: item.key,
+                    value: item.value,
+                    operator: PropertyOperator.IContains,
+                    type: item.propertyFilterType,
+                } as AnyPropertyFilter
+                newValues.push(newPropertyFilter)
+                setGroupValues(newValues)
+                setVisible(false)
+            },
+            onEnter: () => {
+                searchInputRef.current?.blur()
+                setVisible(false)
+            },
+            autoSelectItem: true,
+        }),
+        [addGroupFilter, onAddBlankFilter, setGroupValues]
+    )
+
+    const showDropdown = useCallback(() => setVisible(true), [])
+
+    return (
+        <BindLogic logic={taxonomicFilterLogic} props={taxonomicFilterLogicProps}>
+            <Dropdown
+                overlay={
+                    <div className="w-[400px]">
+                        <InfiniteSelectResults
+                            focusInput={() => searchInputRef.current?.focus()}
+                            taxonomicFilterLogicProps={taxonomicFilterLogicProps}
+                            popupAnchorElement={floatingRef.current}
+                        />
+                    </div>
+                }
+                visible={visible}
+                closeOnClickInside={false}
+                floatingRef={floatingRef}
+                onClickOutside={onClose}
+            >
+                <TaxonomicFilterSearchInput
+                    onClick={showDropdown}
+                    searchInputRef={searchInputRef}
+                    onClose={onClose}
+                    onChange={showDropdown}
+                    autoFocus={false}
+                />
+            </Dropdown>
+        </BindLogic>
+    )
+}
+
+function AlertAppliedFilters({
+    initiallyOpenFilterIndex = null,
+}: {
+    initiallyOpenFilterIndex?: number | null
+}): JSX.Element | null {
+    const { filterGroup } = useValues(universalFiltersLogic)
+    const { replaceGroupValue, removeGroupValue } = useActions(universalFiltersLogic)
+
+    if (filterGroup.values.length === 0) {
+        return null
+    }
+
+    return (
+        <div className="flex gap-1 items-center flex-wrap">
+            {filterGroup.values.map((filterOrGroup, index) => {
+                return isUniversalGroupFilterLike(filterOrGroup) ? (
+                    <UniversalFilters.Group index={index} key={index} group={filterOrGroup}>
+                        <AlertAppliedFilters />
+                    </UniversalFilters.Group>
+                ) : (
+                    <UniversalFilters.Value
+                        key={index}
+                        index={index}
+                        filter={filterOrGroup}
+                        onRemove={() => removeGroupValue(index)}
+                        onChange={(value) => replaceGroupValue(index, value)}
+                        initiallyOpen={
+                            index === initiallyOpenFilterIndex && filterOrGroup.type !== PropertyFilterType.InsightsQL
+                        }
+                    />
+                )
+            })}
+        </div>
+    )
+}

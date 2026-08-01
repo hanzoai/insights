@@ -4,8 +4,9 @@ import structlog
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from insights.models.link import Link
 from insights.models.team.team import Team
+
+from products.links.backend.models import Link
 
 logger = structlog.get_logger(__name__)
 
@@ -14,7 +15,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_create_link_success(self):
         data = {
             "redirect_url": "https://example.com",
-            "short_link_domain": "insights.link",
+            "short_link_domain": "phog.gg",
             "short_code": "test123",
             "description": "Test link",
         }
@@ -41,14 +42,14 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         json_response = str(response.json())
         self.assertIn("short_link_domain", json_response)
-        self.assertIn("Only insights.link is allowed as a short link domain", json_response)
+        self.assertIn("Only phog.gg is allowed as a short link domain", json_response)
 
     def test_list_links(self):
         # Create a link first
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="insights.link",
+            short_link_domain="phog.gg",
             short_code="test123",
             description="Test link",
             created_by=self.user,
@@ -63,7 +64,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="insights.link",
+            short_link_domain="phog.gg",
             short_code="test123",
             description="Test link",
             created_by=self.user,
@@ -77,7 +78,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="insights.link",
+            short_link_domain="phog.gg",
             short_code="test123",
             description="Test link",
             created_by=self.user,
@@ -85,7 +86,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         data = {
             "redirect_url": "https://updated.com",
-            "short_link_domain": "insights.link",
+            "short_link_domain": "phog.gg",
             "short_code": link.short_code,
             "description": "Updated link",
         }
@@ -101,7 +102,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="insights.link",
+            short_link_domain="phog.gg",
             short_code="test123",
             description="Test link",
             created_by=self.user,
@@ -125,14 +126,14 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         link1 = Link.objects.create(
             team=self.team,
             redirect_url="https://example1.com",
-            short_link_domain="insights.link",
+            short_link_domain="phog.gg",
             short_code="test1",
             created_by=self.user,
         )
         _link2 = Link.objects.create(
             team=team2,
             redirect_url="https://example2.com",
-            short_link_domain="insights.link",
+            short_link_domain="phog.gg",
             short_code="test2",
             created_by=self.user,
         )
@@ -148,7 +149,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             f"/api/projects/{self.team.id}/links",
             data={
                 "redirect_url": "https://example.com",
-                "short_link_domain": "insights.link",
+                "short_link_domain": "phog.gg",
                 "short_code": "test123",
                 "description": "Test link",
                 "_create_in_folder": "Special Folder/Links",

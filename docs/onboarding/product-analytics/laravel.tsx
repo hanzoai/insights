@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -52,7 +52,7 @@ export const getLaravelSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     public function boot(): void
                                     {
                                         Insights::init(
-                                            '<ph_project_api_key>',
+                                            '<ph_project_token>',
                                             [
                                                 'host' => '<ph_client_api_host>'
                                             ]

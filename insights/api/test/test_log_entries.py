@@ -5,7 +5,8 @@ from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTes
 from rest_framework import status
 
 from insights.datastore.client.execute import sync_execute
-from insights.models.insights_functions.insights_function import InsightsFunction
+
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
 
 def create_log_entry(
@@ -38,12 +39,12 @@ class TestLogEntries(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def setUp(self):
         super().setUp()
-        # Create a base custom function to use as the reference for log entries
+        # Create a base script function to use as the reference for log entries
         self.insights_function = InsightsFunction.objects.create(
             team=self.team,
             name="Fetch URL",
             description="Test description",
-            iql="fetch(inputs.url);",
+            script="fetch(inputs.url);",
         )
 
     def get_log_entries(self, params=None):

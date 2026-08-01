@@ -198,7 +198,7 @@ class Command(BaseCommand):
                 [None, "https://youtube.com/watch?v=example", "https://github.com/example"]
             ),
             "$device": random.choice(["iPhone", "Android", "Desktop", "iPad"]),
-            "token": f"hi_{''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=40))}",
+            "token": f"phc_{''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=40))}",
         }
 
         # Add some geoip properties

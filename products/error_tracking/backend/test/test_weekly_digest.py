@@ -1,22 +1,46 @@
+import json
+import time
 from datetime import timedelta
 from uuid import uuid4
 
-from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
+import pytest
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, _create_person, flush_persons_and_events
+from unittest.mock import patch
 
+from django.test import SimpleTestCase, override_settings
 from django.utils import timezone
 
-from insights.models.utils import uuid7
+import requests
+from parameterized import parameterized
 
-from products.error_tracking.backend.models import ErrorTrackingIssue, ErrorTrackingIssueFingerprintV2
+from insights.models import Team, User
+from insights.models.messaging import MessagingRecord
+from insights.models.organization import Organization
+from insights.models.utils import uuid7
+from insights.tasks.email import send_error_tracking_weekly_digest_for_org
+from insights.tasks.email_utils import compute_week_over_week_change
+
+from products.error_tracking.backend.facade import api as error_tracking_facade
+from products.error_tracking.backend.models import (
+    ErrorTrackingIssue,
+    ErrorTrackingIssueFingerprintV2,
+    ErrorTrackingRecommendation,
+    sync_issues_to_datastore,
+)
 from products.error_tracking.backend.weekly_digest import (
-    compute_week_over_week_change,
+    auto_select_project_for_user,
     get_crash_free_sessions,
     get_daily_exception_counts,
     get_exception_counts,
+    get_exception_summary_for_team,
     get_new_issues_for_team,
+    get_org_ids_with_exceptions,
+    get_source_maps_recommendation_for_team,
     get_top_issues_for_team,
+    send_digest_to_workflow,
 )
 
+from ee.datastore.materialized_columns.columns import materialize
 
 
 def _days_ago(n: int) -> str:
@@ -42,6 +66,8 @@ class TestWeeklyDigest(DatastoreTestMixin, APIBaseTest):
             issue=issue,
             fingerprint=str(uuid4()),
         )
+        # issue_id_v2 resolves via the fingerprint issue state table in Datastore
+        sync_issues_to_datastore(issue_ids=[issue.id], team_id=self.team.pk)
         return issue
 
     def _create_exception_event(
@@ -54,6 +80,13 @@ class TestWeeklyDigest(DatastoreTestMixin, APIBaseTest):
         props: dict = {}
         if issue_id:
             props["$exception_issue_id"] = str(issue_id)
+            fingerprint = (
+                ErrorTrackingIssueFingerprintV2.objects.filter(issue_id=issue_id)
+                .values_list("fingerprint", flat=True)
+                .first()
+            )
+            if fingerprint:
+                props["$exception_fingerprint"] = fingerprint
         if session_id:
             props["$session_id"] = session_id
 
@@ -83,36 +116,24 @@ class TestWeeklyDigest(DatastoreTestMixin, APIBaseTest):
             timestamp=timestamp or _days_ago(1),
         )
 
-    def test_get_exception_counts_returns_counts_per_team(self):
+    def _create_person_with_email(self, distinct_id: str, email: str) -> None:
+        _create_person(distinct_ids=[distinct_id], properties={"email": email}, team=self.team)
+
+    def _set_internal_user_filter(self) -> None:
+        self.team.test_account_filters = [
+            {"key": "email", "type": "person", "operator": "not_icontains", "value": "@internal.com"}
+        ]
+        self.team.save()
+
+    def test_get_exception_counts_returns_teams_with_exceptions(self):
         issue = self._create_issue()
-        for _ in range(3):
-            self._create_exception_event(issue_id=issue.id)
-        self._create_exception_event(issue_id=None)
+        self._create_exception_event(issue_id=issue.id)
         flush_persons_and_events()
 
         results = get_exception_counts(team_ids=[self.team.pk])
 
         assert len(results) == 1
-        team_id, exception_count, ingestion_failure_count, prev_exception_count = results[0]
-        assert team_id == self.team.pk
-        assert exception_count == 4
-        assert ingestion_failure_count == 1
-        assert prev_exception_count == 0
-
-    def test_get_exception_counts_includes_previous_week(self):
-        issue = self._create_issue()
-        for _ in range(3):
-            self._create_exception_event(issue_id=issue.id, timestamp=_days_ago(1))
-        for _ in range(5):
-            self._create_exception_event(issue_id=issue.id, timestamp=_days_ago(10))
-        flush_persons_and_events()
-
-        results = get_exception_counts(team_ids=[self.team.pk])
-
-        assert len(results) == 1
-        _, exception_count, _, prev_exception_count = results[0]
-        assert exception_count == 3
-        assert prev_exception_count == 5
+        assert results[0][0] == self.team.pk
 
     def test_get_exception_counts_excludes_old_events(self):
         issue = self._create_issue()
@@ -162,7 +183,7 @@ class TestWeeklyDigest(DatastoreTestMixin, APIBaseTest):
         self._create_exception_event(issue_id=issue.id, timestamp=_days_ago(3))
         flush_persons_and_events()
 
-        result = get_daily_exception_counts(self.team.pk)
+        result = get_daily_exception_counts(self.team)
 
         assert len(result) == 7
 
@@ -179,7 +200,7 @@ class TestWeeklyDigest(DatastoreTestMixin, APIBaseTest):
         assert pcts[day_3_ago] == 50
 
     def test_get_daily_exception_counts_empty(self):
-        result = get_daily_exception_counts(self.team.pk)
+        result = get_daily_exception_counts(self.team)
 
         assert len(result) == 7
         assert all(d["count"] == 0 for d in result)
@@ -246,6 +267,11 @@ class TestWeeklyDigest(DatastoreTestMixin, APIBaseTest):
         )
         ErrorTrackingIssue.objects.filter(id=old_issue.id).update(created_at=timezone.now() - timedelta(days=14))
         ErrorTrackingIssueFingerprintV2.objects.create(team=self.team, issue=old_issue, fingerprint=str(uuid4()))
+        # first_seen is auto_now_add; backdate it so the issue counts as old (newness comes from state-table first_seen)
+        ErrorTrackingIssueFingerprintV2.objects.filter(issue=old_issue).update(
+            first_seen=timezone.now() - timedelta(days=14)
+        )
+        sync_issues_to_datastore(issue_ids=[old_issue.id], team_id=self.team.pk)
         for _ in range(10):
             self._create_exception_event(issue_id=old_issue.id)
         flush_persons_and_events()
@@ -259,6 +285,216 @@ class TestWeeklyDigest(DatastoreTestMixin, APIBaseTest):
     def test_get_new_issues_empty_when_none(self):
         result = get_new_issues_for_team(self.team)
         assert result == []
+
+    def test_summary_not_suppressed_by_high_issue_cardinality(self):
+        # 101+ prior-week issues used to fill InsightsQL's injected LIMIT 100 and truncate away the current week
+        for _ in range(101):
+            self._create_exception_event(issue_id=str(uuid7()), timestamp=_days_ago(10))
+        issue = self._create_issue()
+        self._create_exception_event(issue_id=issue.id)
+        flush_persons_and_events()
+
+        result = get_exception_summary_for_team(self.team)
+
+        assert result["exception_count"] == 1
+        assert result["prev_exception_count"] == 101
+
+    def test_top_issues_follow_issue_merges(self):
+        issue_a = self._create_issue(name="OriginalIssue")
+        self._create_exception_event(issue_id=issue_a.id)  # ingested while the fingerprint pointed at A
+        issue_b = ErrorTrackingIssue.objects.create(
+            id=uuid7(), team=self.team, status=ErrorTrackingIssue.Status.ACTIVE, name="MergedIntoIssue"
+        )
+        ErrorTrackingIssueFingerprintV2.objects.filter(issue=issue_a).update(issue=issue_b)
+        # force a later state version so the merge wins argMax
+        with patch("products.error_tracking.backend.models.time") as mock_time:
+            mock_time.time.return_value = time.time() + 10
+            sync_issues_to_datastore(issue_ids=[issue_b.id], team_id=self.team.pk)
+        flush_persons_and_events()
+
+        result = get_top_issues_for_team(self.team)
+
+        assert len(result) == 1
+        assert str(result[0]["id"]) == str(issue_b.id)
+        assert result[0]["name"] == "MergedIntoIssue"
+
+    def test_get_org_ids_with_exceptions(self):
+        issue = self._create_issue()
+        self._create_exception_event(issue_id=issue.id)
+        flush_persons_and_events()
+
+        org_ids = get_org_ids_with_exceptions()
+
+        assert self.team.organization_id in org_ids
+
+    def test_get_org_ids_with_exceptions_empty(self):
+        org_ids = get_org_ids_with_exceptions()
+        assert org_ids == []
+
+    def test_get_exception_summary_for_team(self):
+        issue = self._create_issue()
+        for _ in range(3):
+            self._create_exception_event(issue_id=issue.id)
+        self._create_exception_event(issue_id=None)  # ingestion failure
+        flush_persons_and_events()
+
+        result = get_exception_summary_for_team(self.team)
+
+        assert result["exception_count"] == 4
+        assert result["ingestion_failure_count"] == 1
+        assert result["prev_exception_count"] == 0
+
+    def test_get_exception_summary_for_team_includes_previous_week(self):
+        issue = self._create_issue()
+        for _ in range(3):
+            self._create_exception_event(issue_id=issue.id, timestamp=_days_ago(1))
+        for _ in range(5):
+            self._create_exception_event(issue_id=issue.id, timestamp=_days_ago(10))
+        flush_persons_and_events()
+
+        result = get_exception_summary_for_team(self.team)
+
+        assert result["exception_count"] == 3
+        assert result["prev_exception_count"] == 5
+
+    def test_get_exception_summary_for_team_excludes_other_teams(self):
+        other_org = Organization.objects.create(name="Other Org")
+        other_team = Team.objects.create(organization=other_org, name="Other Team")
+
+        issue = self._create_issue()
+        self._create_exception_event(issue_id=issue.id)
+        flush_persons_and_events()
+
+        result = get_exception_summary_for_team(other_team)
+
+        assert result == {} or result["exception_count"] == 0
+
+    @parameterized.expand(["engineering", "data", "founder", "Engineering", "DATA", "Founder"])
+    def test_auto_select_project_enrolls_eligible_roles(self, role):
+        self.user.role_at_organization = role
+        self.user.save()
+
+        team_exception_counts = {
+            self.team.pk: {"exception_count": 10, "ingestion_failure_count": 0, "prev_exception_count": 0},
+        }
+
+        auto_select_project_for_user(self.user, self.organization.id, team_exception_counts)
+        self.user.refresh_from_db()
+
+        settings = self.user.notification_settings or {}
+        project_enabled = settings.get("error_tracking_weekly_digest_project_enabled", {})
+        assert project_enabled[str(self.team.pk)] is True
+
+    @parameterized.expand(["marketing", "sales", "leadership", "product", "other", None])
+    def test_auto_select_project_sets_empty_for_ineligible_roles(self, role):
+        self.user.role_at_organization = role
+        self.user.save()
+
+        team_exception_counts = {
+            self.team.pk: {"exception_count": 10, "ingestion_failure_count": 0, "prev_exception_count": 0},
+        }
+
+        auto_select_project_for_user(self.user, self.organization.id, team_exception_counts)
+        self.user.refresh_from_db()
+
+        settings = self.user.notification_settings or {}
+        project_enabled = settings.get("error_tracking_weekly_digest_project_enabled", {})
+        assert project_enabled == {}
+
+    def test_auto_select_project_skips_if_already_configured(self):
+        self.user.role_at_organization = "engineering"
+        self.user.partial_notification_settings = {
+            "error_tracking_weekly_digest_project_enabled": {str(self.team.pk): True},
+        }
+        self.user.save()
+
+        team_exception_counts = {
+            self.team.pk: {"exception_count": 5, "ingestion_failure_count": 0, "prev_exception_count": 0},
+        }
+
+        auto_select_project_for_user(self.user, self.organization.id, team_exception_counts)
+        self.user.refresh_from_db()
+
+        settings = self.user.notification_settings or {}
+        assert settings["error_tracking_weekly_digest_project_enabled"] == {str(self.team.pk): True}
+
+    def test_auto_select_project_noop_when_no_exceptions(self):
+        auto_select_project_for_user(self.user, self.organization.id, {})
+        self.user.refresh_from_db()
+
+        assert "error_tracking_weekly_digest_project_enabled" not in (self.user.partial_notification_settings or {})
+
+    def test_get_exception_summary_filters_internal_users(self):
+        self._set_internal_user_filter()
+        issue = self._create_issue()
+        self._create_person_with_email("regular_user", "user@external.com")
+        self._create_person_with_email("internal_user", "bot@internal.com")
+        self._create_exception_event(issue_id=issue.id, distinct_id="regular_user")
+        self._create_exception_event(issue_id=issue.id, distinct_id="regular_user")
+        self._create_exception_event(issue_id=issue.id, distinct_id="internal_user")
+        flush_persons_and_events()
+
+        result = get_exception_summary_for_team(self.team)
+
+        assert result["exception_count"] == 2
+
+    def test_get_daily_exception_counts_filters_internal_users(self):
+        self._set_internal_user_filter()
+        issue = self._create_issue()
+        self._create_person_with_email("regular_user", "user@external.com")
+        self._create_person_with_email("internal_user", "bot@internal.com")
+        self._create_exception_event(issue_id=issue.id, distinct_id="regular_user")
+        self._create_exception_event(issue_id=issue.id, distinct_id="internal_user")
+        flush_persons_and_events()
+
+        result = get_daily_exception_counts(self.team)
+
+        assert sum(d["count"] for d in result) == 1
+
+    def test_get_top_issues_filters_internal_users(self):
+        self._set_internal_user_filter()
+        issue = self._create_issue()
+        self._create_person_with_email("regular_user", "user@external.com")
+        self._create_person_with_email("internal_user", "bot@internal.com")
+        self._create_exception_event(issue_id=issue.id, distinct_id="regular_user")
+        self._create_exception_event(issue_id=issue.id, distinct_id="internal_user")
+        self._create_exception_event(issue_id=issue.id, distinct_id="internal_user")
+        flush_persons_and_events()
+
+        result = get_top_issues_for_team(self.team)
+
+        assert len(result) == 1
+        assert result[0]["occurrence_count"] == 1
+
+    def test_get_new_issues_filters_internal_users(self):
+        self._set_internal_user_filter()
+        issue = self._create_issue()
+        self._create_person_with_email("regular_user", "user@external.com")
+        self._create_person_with_email("internal_user", "bot@internal.com")
+        self._create_exception_event(issue_id=issue.id, distinct_id="regular_user")
+        self._create_exception_event(issue_id=issue.id, distinct_id="internal_user")
+        self._create_exception_event(issue_id=issue.id, distinct_id="internal_user")
+        flush_persons_and_events()
+
+        result = get_new_issues_for_team(self.team)
+
+        assert len(result) == 1
+        assert result[0]["occurrence_count"] == 1
+
+    def test_get_crash_free_sessions_filters_internal_users(self):
+        self._set_internal_user_filter()
+        s1, s2 = str(uuid7()), str(uuid7())
+        self._create_person_with_email("regular_user", "user@external.com")
+        self._create_person_with_email("internal_user", "bot@internal.com")
+        self._create_pageview(distinct_id="regular_user", session_id=s1)
+        self._create_pageview(distinct_id="internal_user", session_id=s2)
+        self._create_exception_event(distinct_id="internal_user", session_id=s2)
+        flush_persons_and_events()
+
+        result = get_crash_free_sessions(self.team)
+
+        assert result["total_sessions"] == 1
+        assert result["crash_free_rate"] == 100.0
 
 
 class TestComputeWeekOverWeekChange:
@@ -303,3 +539,310 @@ class TestComputeWeekOverWeekChange:
 
     def test_returns_none_when_no_change(self):
         assert compute_week_over_week_change(100, 100, higher_is_better=True) is None
+
+
+# total_frames >= 20 and unresolved_pct > 0.30 => an active (not completed) recommendation
+_ACTIVE_META = {
+    "total_frames": 100,
+    "unresolved_frames": 72,
+    "unresolved_pct": 0.72,
+    "threshold_pct": 0.30,
+    "min_sample_frames": 20,
+    "lookback_hours": 24,
+}
+
+
+class TestSourceMapsRecommendationForDigest(APIBaseTest):
+    def _create_recommendation(
+        self, *, meta: dict, computed: bool = True, dismissed: bool = False
+    ) -> ErrorTrackingRecommendation:
+        now = timezone.now()
+        return ErrorTrackingRecommendation.objects.create(
+            team=self.team,
+            type="source_maps",
+            meta=meta,
+            computed_at=now if computed else None,
+            dismissed_at=now if dismissed else None,
+        )
+
+    def test_returns_none_when_no_recommendation(self):
+        assert get_source_maps_recommendation_for_team(self.team) is None
+
+    def test_returns_none_when_not_yet_computed(self):
+        self._create_recommendation(meta=_ACTIVE_META, computed=False)
+        assert get_source_maps_recommendation_for_team(self.team) is None
+
+    def test_returns_none_when_dismissed(self):
+        self._create_recommendation(meta=_ACTIVE_META, dismissed=True)
+        assert get_source_maps_recommendation_for_team(self.team) is None
+
+    def test_returns_none_when_completed_below_threshold(self):
+        self._create_recommendation(meta={**_ACTIVE_META, "unresolved_frames": 5, "unresolved_pct": 0.05})
+        assert get_source_maps_recommendation_for_team(self.team) is None
+
+    def test_returns_none_when_completed_too_few_frames(self):
+        self._create_recommendation(meta={**_ACTIVE_META, "total_frames": 5})
+        assert get_source_maps_recommendation_for_team(self.team) is None
+
+    def test_returns_data_when_active(self):
+        self._create_recommendation(meta=_ACTIVE_META)
+        result = get_source_maps_recommendation_for_team(self.team)
+        assert result is not None
+        assert result["unresolved_percent"] == 72
+        assert result["lookback_hours"] == 24
+        assert result["wizard_command"] == "npx -y @hanzo/wizard@latest upload-source-maps"
+        assert result["docs_url"].startswith("https://hanzo.ai/docs/error-tracking/upload-source-maps")
+
+    def test_only_returns_recommendation_for_the_given_team(self):
+        other_team = Team.objects.create(organization=self.organization, name="Other")
+        self._create_recommendation(meta=_ACTIVE_META)
+        assert get_source_maps_recommendation_for_team(other_team) is None
+
+
+@override_settings(CLOUD_DEPLOYMENT="US")
+class TestSendDigestToWorkflow(SimpleTestCase):
+    @override_settings(CLOUD_DEPLOYMENT=None)
+    def test_refuses_to_send_from_a_self_hosted_deployment(self):
+        with patch("products.error_tracking.backend.weekly_digest.requests.post") as mock_post:
+            with pytest.raises(RuntimeError, match="self-hosted"):
+                send_digest_to_workflow({"recipient_email": "a@b.com"}, "distinct-1")
+            assert mock_post.call_count == 0
+
+    def test_raises_on_non_2xx_so_failures_are_not_marked_sent(self):
+        with patch("products.error_tracking.backend.weekly_digest.requests.post") as mock_post:
+            mock_post.return_value.raise_for_status.side_effect = requests.HTTPError(
+                "500", response=mock_post.return_value
+            )
+            with pytest.raises(requests.HTTPError):
+                send_digest_to_workflow({"recipient_email": "a@b.com"}, "distinct-1")
+
+    @override_settings(WORKFLOWS_WEBHOOK_SECRET="Bearer test-token")
+    def test_sends_secret_as_authorization_header(self):
+        with patch("products.error_tracking.backend.weekly_digest.requests.post") as mock_post:
+            send_digest_to_workflow({"recipient_email": "a@b.com"}, "distinct-1")
+            assert mock_post.call_args.kwargs["headers"] == {"Authorization": "Bearer test-token"}
+
+
+@override_settings(CLOUD_DEPLOYMENT="US")
+class TestWeeklyDigestWorkflowDelivery(DatastoreTestMixin, APIBaseTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        materialize("events", "$exception_issue_id", is_nullable=True)
+
+    @override_settings(ERROR_TRACKING_WEEKLY_DIGEST_ALLOWED_EMAILS=["*"])
+    def test_task_posts_json_safe_digest_and_dedupes_on_retry(self):
+        issue = ErrorTrackingIssue.objects.create(
+            id=uuid7(), team=self.team, status=ErrorTrackingIssue.Status.ACTIVE, name="TestError"
+        )
+        fingerprint = str(uuid4())
+        ErrorTrackingIssueFingerprintV2.objects.create(team=self.team, issue=issue, fingerprint=fingerprint)
+        sync_issues_to_datastore(issue_ids=[issue.id], team_id=self.team.pk)
+        _create_event(
+            distinct_id="user_1",
+            event="$exception",
+            team=self.team,
+            properties={"$exception_issue_id": str(issue.id), "$exception_fingerprint": fingerprint},
+            timestamp=_days_ago(1),
+        )
+        flush_persons_and_events()
+
+        self.user.partial_notification_settings = {
+            "error_tracking_weekly_digest_project_enabled": {str(self.team.id): True}
+        }
+        self.user.save()
+
+        with patch("products.error_tracking.backend.weekly_digest.requests.post") as mock_post:
+            send_error_tracking_weekly_digest_for_org(str(self.organization.id))
+
+            assert mock_post.call_count == 1
+            url = mock_post.call_args.args[0] if mock_post.call_args.args else mock_post.call_args.kwargs["url"]
+            assert url == "https://webhooks.us.hanzo.ai/public/webhooks/019f2754-aeff-0000-6a0d-5d3933a94b08"
+
+            payload = mock_post.call_args.kwargs["json"]
+            json.dumps(payload)  # the workflow webhook only accepts JSON-serializable payloads
+            assert payload["event"] == "error_tracking_weekly_digest"
+            assert payload["distinct_id"] == self.user.distinct_id
+
+            digest = payload["digest"]
+            assert digest["recipient_email"] == self.user.email
+            assert digest["org_name"] == self.organization.name
+            section = digest["project_sections"][0]
+            assert section["team_name"] == self.team.name
+            assert section["exception_count"] == "1"
+            assert section["top_issues"][0]["id"] == str(issue.id)
+            assert section["top_issues"][0]["occurrence_count"] == "1"
+            # The email template branches on `ingestion_failure_count > 0`, so it
+            # must stay numeric; the formatted value ships as the display twin.
+            assert section["ingestion_failure_count"] == 0
+            assert section["ingestion_failure_count_display"] == "0"
+            assert "team" not in section
+
+            # Retry of the org task must not send the same campaign twice (MessagingRecord dedupe)
+            send_error_tracking_weekly_digest_for_org(str(self.organization.id))
+            assert mock_post.call_count == 1
+
+    def _create_second_team_with_exception(self, name: str = "Team B") -> Team:
+        team_b = Team.objects.create(organization=self.organization, name=name)
+        _create_event(
+            distinct_id="user_b",
+            event="$exception",
+            team=team_b,
+            properties={},
+            timestamp=_days_ago(1),
+        )
+        return team_b
+
+    @override_settings(ERROR_TRACKING_WEEKLY_DIGEST_ALLOWED_EMAILS=["*"])
+    def test_auto_select_uses_filtered_counts(self):
+        # Team A has more raw exceptions, but all from internal users; team B has one real exception.
+        # A first-time user must be enrolled onto B, not onto A whose digest builds empty.
+        self.team.test_account_filters = [
+            {"key": "email", "type": "person", "operator": "not_icontains", "value": "@internal.com"}
+        ]
+        self.team.save()
+        _create_person(distinct_ids=["internal_user"], properties={"email": "bot@internal.com"}, team=self.team)
+        for _ in range(5):
+            _create_event(
+                distinct_id="internal_user", event="$exception", team=self.team, properties={}, timestamp=_days_ago(1)
+            )
+        team_b = self._create_second_team_with_exception()
+        flush_persons_and_events()
+
+        self.user.role_at_organization = "engineering"
+        self.user.save()
+
+        with patch("products.error_tracking.backend.weekly_digest.requests.post"):
+            send_error_tracking_weekly_digest_for_org(str(self.organization.id))
+
+        self.user.refresh_from_db()
+        project_enabled = (self.user.partial_notification_settings or {}).get(
+            "error_tracking_weekly_digest_project_enabled", {}
+        )
+        assert project_enabled == {str(team_b.pk): True}
+
+    @override_settings(ERROR_TRACKING_WEEKLY_DIGEST_ALLOWED_EMAILS=["*"])
+    def test_recipient_missing_a_failed_team_is_deferred_while_others_send(self):
+        # self.team's build fails this run; team_b's succeeds.
+        _create_event(distinct_id="user_a", event="$exception", team=self.team, properties={}, timestamp=_days_ago(1))
+        team_b = self._create_second_team_with_exception()
+        flush_persons_and_events()
+
+        # Subscribed to both teams: their digest is incomplete this run, so it must be held for the retry
+        # rather than shipped as a partial that gets stamped and never completed.
+        self.user.partial_notification_settings = {
+            "error_tracking_weekly_digest_project_enabled": {str(self.team.pk): True, str(team_b.pk): True}
+        }
+        self.user.save()
+
+        # Subscribed to the healthy team only: unaffected by the unrelated failure, sends immediately.
+        other = User.objects.create_and_join(self.organization, "healthy-team-only@hanzo.ai", None)
+        other.partial_notification_settings = {"error_tracking_weekly_digest_project_enabled": {str(team_b.pk): True}}
+        other.save()
+
+        real_build = error_tracking_facade.build_team_digest_data
+
+        def build_or_fail(team):
+            if team.pk == self.team.pk:
+                raise Exception("Datastore query failed")
+            return real_build(team)
+
+        with (
+            patch("insights.tasks.email.error_tracking_api.build_team_digest_data", side_effect=build_or_fail),
+            patch("products.error_tracking.backend.weekly_digest.requests.post") as mock_post,
+        ):
+            with pytest.raises(Exception, match="team builds"):
+                send_error_tracking_weekly_digest_for_org(str(self.organization.id))
+
+        # Only the healthy-team-only recipient was sent; the incomplete recipient was deferred, not sent a partial.
+        recipients = [c.kwargs["json"]["digest"]["recipient_email"] for c in mock_post.call_args_list]
+        assert recipients == [other.email]
+        # The deferred recipient must not be stamped, so the retry can still deliver their complete digest.
+        assert not MessagingRecord.objects.filter(
+            campaign_key__contains=str(self.user.uuid), sent_at__isnull=False
+        ).exists()
+
+    @override_settings(ERROR_TRACKING_WEEKLY_DIGEST_ALLOWED_EMAILS=["*"])
+    def test_deferred_recipient_gets_full_digest_when_build_recovers_on_retry(self):
+        _create_event(distinct_id="user_a", event="$exception", team=self.team, properties={}, timestamp=_days_ago(1))
+        team_b = self._create_second_team_with_exception()
+        flush_persons_and_events()
+
+        self.user.partial_notification_settings = {
+            "error_tracking_weekly_digest_project_enabled": {str(self.team.pk): True, str(team_b.pk): True}
+        }
+        self.user.save()
+
+        real_build = error_tracking_facade.build_team_digest_data
+        fail_team_a = {"on": True}
+
+        def build_or_recover(team):
+            if team.pk == self.team.pk and fail_team_a["on"]:
+                raise Exception("Datastore query failed")
+            return real_build(team)
+
+        with (
+            patch("insights.tasks.email.error_tracking_api.build_team_digest_data", side_effect=build_or_recover),
+            patch("products.error_tracking.backend.weekly_digest.requests.post") as mock_post,
+        ):
+            # Attempt 1: team A build fails, so the recipient is deferred and the task raises to retry.
+            with pytest.raises(Exception, match="team builds"):
+                send_error_tracking_weekly_digest_for_org(str(self.organization.id))
+            assert mock_post.call_count == 0
+
+            # Attempt 2 (retry): team A now builds. Because attempt 1 never stamped the recipient, they
+            # are not deduped away and receive their complete digest — the whole point of the fix.
+            fail_team_a["on"] = False
+            send_error_tracking_weekly_digest_for_org(str(self.organization.id))
+
+        assert mock_post.call_count == 1
+        sections = mock_post.call_args.kwargs["json"]["digest"]["project_sections"]
+        assert {s["team_name"] for s in sections} == {self.team.name, team_b.name}
+
+    @override_settings(ERROR_TRACKING_WEEKLY_DIGEST_ALLOWED_EMAILS=["*"])
+    def test_final_attempt_sends_partial_to_recipient_with_permanently_failing_team(self):
+        _create_event(distinct_id="user_a", event="$exception", team=self.team, properties={}, timestamp=_days_ago(1))
+        team_b = self._create_second_team_with_exception()
+        flush_persons_and_events()
+
+        self.user.partial_notification_settings = {
+            "error_tracking_weekly_digest_project_enabled": {str(self.team.pk): True, str(team_b.pk): True}
+        }
+        self.user.save()
+
+        real_build = error_tracking_facade.build_team_digest_data
+
+        def build_or_fail(team):
+            if team.pk == self.team.pk:
+                raise Exception("Datastore query failed")
+            return real_build(team)
+
+        with (
+            patch("insights.tasks.email.error_tracking_api.build_team_digest_data", side_effect=build_or_fail),
+            patch("products.error_tracking.backend.weekly_digest.requests.post") as mock_post,
+        ):
+            # Retries exhausted (retries == max_retries): fall back to delivering the healthy teams rather
+            # than starving the recipient of a digest entirely. throw=False keeps the terminal raise eager.
+            send_error_tracking_weekly_digest_for_org.apply(args=[str(self.organization.id)], retries=5, throw=False)
+
+        assert mock_post.call_count == 1
+        sections = mock_post.call_args.kwargs["json"]["digest"]["project_sections"]
+        assert [s["team_name"] for s in sections] == [team_b.name]
+
+    @override_settings(ERROR_TRACKING_WEEKLY_DIGEST_ALLOWED_EMAILS=["*"])
+    def test_disabled_team_not_counted_as_excluded(self):
+        _create_event(distinct_id="user_a", event="$exception", team=self.team, properties={}, timestamp=_days_ago(1))
+        team_b = self._create_second_team_with_exception()
+        flush_persons_and_events()
+
+        self.user.partial_notification_settings = {
+            "error_tracking_weekly_digest_project_enabled": {str(self.team.pk): True, str(team_b.pk): False}
+        }
+        self.user.save()
+
+        with patch("products.error_tracking.backend.weekly_digest.requests.post") as mock_post:
+            send_error_tracking_weekly_digest_for_org(str(self.organization.id))
+
+        digest = mock_post.call_args.kwargs["json"]["digest"]
+        assert digest["disabled_project_names"] == [team_b.name]
+        assert digest["excluded_project_count"] == 0

@@ -26,9 +26,9 @@ export async function runAgent({
     createPR,
 }) {
     const envOverrides = {
-        INSIGHTS_API_KEY: insightsApiKey,
-        INSIGHTS_API_HOST: insightsApiUrl,
-        INSIGHTS_AUTH_HEADER: `Bearer ${insightsApiKey}`,
+        POSTFN_API_KEY: insightsApiKey,
+        POSTFN_API_HOST: insightsApiUrl,
+        POSTFN_AUTH_HEADER: `Bearer ${insightsApiKey}`,
         ANTHROPIC_API_KEY: insightsApiKey,
         ANTHROPIC_AUTH_TOKEN: insightsApiKey,
         ANTHROPIC_BASE_URL: `${insightsApiUrl}/api/projects/${parseInt(insightsProjectId, 10)}/llm_gateway`,
@@ -84,22 +84,22 @@ async function main() {
         process.exit(1)
     }
 
-    const insightsApiUrl = process.env.INSIGHTS_API_URL
-    const insightsApiKey = process.env.INSIGHTS_PERSONAL_API_KEY
-    const insightsProjectId = process.env.INSIGHTS_PROJECT_ID
+    const insightsApiUrl = process.env.POSTFN_API_URL
+    const insightsApiKey = process.env.POSTFN_PERSONAL_API_KEY
+    const insightsProjectId = process.env.POSTFN_PROJECT_ID
 
     if (!insightsApiUrl) {
-        console.error('Missing required environment variable: INSIGHTS_API_URL')
+        console.error('Missing required environment variable: POSTFN_API_URL')
         process.exit(1)
     }
 
     if (!insightsApiKey) {
-        console.error('Missing required environment variable: INSIGHTS_PERSONAL_API_KEY')
+        console.error('Missing required environment variable: POSTFN_PERSONAL_API_KEY')
         process.exit(1)
     }
 
     if (taskId && !insightsProjectId) {
-        console.error('Missing required environment variable: INSIGHTS_PROJECT_ID')
+        console.error('Missing required environment variable: POSTFN_PROJECT_ID')
         process.exit(1)
     }
 

@@ -12,6 +12,8 @@ from hanzo_insights.ai.gemini import genai
 from pydantic import BaseModel
 from rest_framework import exceptions
 
+from insights.event_usage import groups
+
 logger = structlog.get_logger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
@@ -23,13 +25,13 @@ def create_gemini_client():
         if not hanzo_insights.host:
             hanzo_insights.host = settings.SITE_URL
 
-    analytics_client = hanzo_insights.default_client
-    if not analytics_client:
-        logger.warning("Insights default_client not available, LLM analytics will not be tracked")
+    insights_client = hanzo_insights.default_client
+    if not insights_client:
+        logger.warning("Insights default_client not available, AI observability will not be tracked")
 
     return genai.Client(
         api_key=settings.GEMINI_API_KEY,
-        analytics_client=analytics_client,
+        insights_client=insights_client,
     )
 
 
@@ -42,6 +44,7 @@ def generate_structured_output(
     insights_properties: dict | None = None,
     team_id: int | None = None,
     distinct_id: str | None = None,
+    billable: bool = False,
 ) -> tuple[T, str]:
     client = create_gemini_client()
 
@@ -52,7 +55,12 @@ def generate_structured_output(
     )
 
     trace_id = str(uuid.uuid4())
-    properties = insights_properties or {}
+    properties = {**(insights_properties or {})}
+    insights_groups = {"project": str(team_id)} if team_id else {}
+    if billable and team_id is not None:
+        properties["team_id"] = team_id
+        properties["$ai_billable"] = True
+        insights_groups.update(groups())
 
     try:
         response = client.models.generate_content(
@@ -62,7 +70,7 @@ def generate_structured_output(
             insights_distinct_id=distinct_id or "",
             insights_trace_id=trace_id,
             insights_properties=properties,
-            insights_groups={"project": str(team_id)} if team_id else {},
+            insights_groups=insights_groups,
         )
 
         if not response.text:

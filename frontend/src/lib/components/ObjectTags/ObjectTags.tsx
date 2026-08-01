@@ -1,12 +1,12 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { CSSProperties, useMemo } from 'react'
+import { ComponentProps, CSSProperties, useId } from 'react'
 
 import { IconPencil, IconPlus } from '@hanzo/icons'
 import { InputSelect, Tag, TagType } from '@hanzo/elements'
 
 import { objectTagsLogic } from 'lib/components/ObjectTags/objectTagsLogic'
-import { colorForString } from 'lib/utils'
+import { colorForString } from 'lib/utils/colors'
 
 interface ObjectTagsPropsBase {
     tags: string[]
@@ -14,6 +14,7 @@ interface ObjectTagsPropsBase {
     style?: CSSProperties
     id?: string
     className?: string
+    actionButtonSize?: ComponentProps<typeof Tag>['size']
     'data-attr'?: string
 }
 
@@ -41,8 +42,6 @@ const COLOR_OVERRIDES: Record<string, TagType> = {
     deprecated: 'danger',
 }
 
-let uniqueMemoizedIndex = 1
-
 export function ObjectTags({
     tags,
     onChange, // Required unless `staticOnly`
@@ -52,9 +51,10 @@ export function ObjectTags({
     style = {},
     staticOnly = false,
     className,
+    actionButtonSize = 'small',
     'data-attr': dataAttr,
 }: ObjectTagsProps): JSX.Element {
-    const objectTagId = useMemo(() => uniqueMemoizedIndex++, [])
+    const objectTagId = useId()
     const logic = objectTagsLogic({ id: objectTagId, onChange })
     const { editingTags } = useValues(logic)
     const { setEditingTags, setTags } = useActions(logic)
@@ -112,7 +112,7 @@ export function ObjectTags({
                                 data-attr="button-add-tag"
                                 icon={hasTags ? <IconPencil /> : <IconPlus />}
                                 className="border border-dashed"
-                                size="small"
+                                size={actionButtonSize}
                             >
                                 {hasTags ? 'Edit tags' : 'Add tag'}
                             </Tag>

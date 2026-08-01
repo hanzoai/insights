@@ -1,10 +1,12 @@
+import { createMockJobQueue } from '../../../tests/helpers/mocks/job-queue.mock'
 import '../../../tests/helpers/mocks/producer.mock'
 
+import { closeHub, createHub } from '~/common/utils/db/hub'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 
+import { createCdpConsumerDeps } from '../../../tests/helpers/cdp'
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
-import { closeHub, createHub } from '../../utils/db/hub'
 import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
@@ -33,9 +35,10 @@ describe('CDP Person Updates Consumer', () => {
         hub = await createHub({
             SITE_URL: 'http://localhost:8000',
         })
-        team = await getFirstTeam(hub)
+        team = await getFirstTeam(hub.postgres)
 
-        processor = new CdpPersonUpdatesConsumer(hub)
+        const mockJobQueue = createMockJobQueue()
+        processor = new CdpPersonUpdatesConsumer(hub, createCdpConsumerDeps(hub), mockJobQueue)
         await processor.start()
 
         insightsFunction = createInsightsFunction({
@@ -68,7 +71,7 @@ describe('CDP Person Updates Consumer', () => {
             const events = await processor._parseKafkaBatch([createKafkaMessage(createDatastorePerson(999999, {}))])
             expect(events).toHaveLength(0)
         })
-        it('should parse a valid message with an existing team and custom function ', async () => {
+        it('should parse a valid message with an existing team and script function ', async () => {
             const event = createDatastorePerson(team.id, {
                 id: 'person-id-1',
             })
@@ -107,7 +110,7 @@ describe('CDP Person Updates Consumer', () => {
     })
 
     describe('processing', () => {
-        it('should only run custom functions that are filtering for person updates', async () => {
+        it('should only run script functions that are filtering for person updates', async () => {
             const insightsFunctionEvents = createInsightsFunction({
                 ...FN_EXAMPLES.simple_fetch,
                 ...FN_INPUTS_EXAMPLES.simple_fetch,

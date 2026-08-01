@@ -1,8 +1,12 @@
+use std::borrow::Cow;
 use std::collections::HashMap;
 
-use crate::properties::property_models::{OperatorType, PropertyFilter};
+use crate::properties::property_models::{
+    CompiledRegex, OperatorType, PropertyFilter, PropertyType,
+};
 use crate::properties::relative_date;
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
+use chrono_tz::Tz;
 use dateparser::parse as parse_date;
 use fancy_regex::RegexBuilder;
 use semver::{Version, VersionReq};
@@ -10,7 +14,34 @@ use serde_json::Value;
 
 /// Regex backtrack limit to prevent ReDoS attacks.
 /// 10k steps completes in ~1ms worst case, which is acceptable for a hot path.
-const REGEX_BACKTRACK_LIMIT: usize = 10_000;
+pub(crate) const REGEX_BACKTRACK_LIMIT: usize = 10_000;
+
+/// Prefix used when storing PersonMetadata field values (e.g. created_at) in the
+/// person properties map. Avoids collision with user-set properties of the same name.
+const PERSON_METADATA_KEY_PREFIX: &str = "__insights_person_metadata__";
+
+/// Top-level persons-table columns exposed as PersonMetadata filters. Must stay in sync
+/// with `PERSON_METADATA_FIELDS` in `insights/insightsql/property.py` (the source of truth) and
+/// with the injection match arm in `flag_matching_utils::apply_person_cohort_to_state`.
+pub const PERSON_METADATA_FIELDS: &[&str] = &["created_at"];
+
+/// Build the lookup key for a PersonMetadata field (e.g. created_at).
+pub fn person_metadata_key(field: &str) -> String {
+    format!("{}{}", PERSON_METADATA_KEY_PREFIX, field)
+}
+
+/// Resolve the lookup key for a property filter, applying the PersonMetadata prefix when
+/// the filter targets a top-level persons-table column rather than the properties JSON.
+///
+/// Returns `Cow::Borrowed` for the common case (Person/Group/Event/Cohort/Flag) so the hot
+/// `match_property` path doesn't allocate; only PersonMetadata filters allocate the prefixed key.
+pub fn lookup_key_for(filter: &PropertyFilter) -> Cow<'_, str> {
+    if filter.prop_type == PropertyType::PersonMetadata {
+        Cow::Owned(person_metadata_key(&filter.key))
+    } else {
+        Cow::Borrowed(&filter.key)
+    }
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum FlagMatchingError {
@@ -37,28 +68,108 @@ pub fn to_f64_representation(value: &Value) -> Option<f64> {
     to_string_representation(value).parse::<f64>().ok()
 }
 
+/// Parses the property value being matched as f64, for the numeric comparison operators
+/// (Gt/Gte/Lt/Lte, Between/NotBetween). A missing or non-numeric value is a validation
+/// error here, distinct from `match_value.is_none()` short-circuiting to `Ok(false)`
+/// earlier in each operator's match arm.
+fn parse_numeric_match_value(
+    match_value: Option<&Value>,
+    key: &str,
+    operator: OperatorType,
+) -> Result<f64, FlagMatchingError> {
+    let match_value = match_value.unwrap_or(&Value::Null);
+    to_f64_representation(match_value).ok_or_else(|| {
+        tracing::debug!(
+            "Failed to parse property value '{}' for key '{}' as number for operator {:?}",
+            match_value,
+            key,
+            operator
+        );
+        FlagMatchingError::ValidationError("value is not a number".to_string())
+    })
+}
+
 /// Strip 'v' prefix if present (e.g., "v1.2.3" -> "1.2.3")
 fn normalize_version_string(version: &str) -> &str {
     version.strip_prefix('v').unwrap_or(version).trim()
 }
 
+/// Strip leading zeros from an all-digit component ("08" -> "8", "000" -> "0").
+/// Non-numeric components are returned unchanged so invalid versions still fail to parse.
+fn strip_component_leading_zeros(part: &str) -> &str {
+    if part.is_empty() || !part.bytes().all(|b| b.is_ascii_digit()) {
+        return part;
+    }
+    let trimmed = part.trim_start_matches('0');
+    if trimmed.is_empty() {
+        "0"
+    } else {
+        trimmed
+    }
+}
+
+/// Canonicalize a version string into strict `MAJOR.MINOR.PATCH` semver so the `semver`
+/// crate can parse the shapes mobile SDKs actually emit. The crate rejects a missing patch
+/// component and any leading zeros, so real versions like "3.10", "3.08", and "2.48" would
+/// otherwise fail to parse and make version-gated flag conditions silently never match.
+///
+/// Two adjustments are made to the numeric core only, leaving any pre-release/build suffix
+/// (e.g. "-alpha.1", "+build.7") untouched:
+/// - pad a missing minor/patch component with 0 ("3" -> "3.0.0", "3.10" -> "3.10.0")
+/// - strip leading zeros from numeric identifiers ("3.08" -> "3.8.0", "0" -> "0.0.0")
+///
+/// Non-numeric components are left as-is so genuinely invalid versions still fail to parse.
+///
+/// Note: this is intentionally more permissive than two other surfaces that evaluate the
+/// same semver conditions: `STRICT_SEMVER_REGEX` in `insights/insightsql/property.py`, which
+/// gates the Datastore `sortableSemver` path used for insights/cohort analytics, and the
+/// insights-python SDK's local evaluator (`parse_semver`), which rejects leading zeros
+/// outright. `match_property` also backs local cohort evaluation, so a person on a version
+/// like "3.08" can now satisfy a cohort-gated flag locally while being excluded from the
+/// same cohort as computed by Datastore. Flag evaluation here cleanly returns `false` on a
+/// parse failure (no Datastore array-ordering pitfall), so accepting these formats only
+/// turns silent non-matches into correct matches for direct flag conditions; the
+/// cross-engine divergence above is the tradeoff.
+fn canonicalize_version_string(version: &str) -> String {
+    // Split off any pre-release ("-") or build ("+") suffix; the numeric core precedes it.
+    let (core, suffix) = match version.find(['-', '+']) {
+        Some(idx) => version.split_at(idx),
+        None => (version, ""),
+    };
+
+    let mut components: Vec<&str> = core.split('.').map(strip_component_leading_zeros).collect();
+
+    // Pad two-component versions ("3.10" -> "3.10.0") so strict semver parsing succeeds.
+    while components.len() < 3 {
+        components.push("0");
+    }
+
+    format!("{}{}", components.join("."), suffix)
+}
+
 pub fn to_semver_representation(value: &Value) -> Option<Version> {
     let version_string = to_string_representation(value);
     let normalized = normalize_version_string(&version_string);
-    // TODO: Build metadata (e.g., "1.0.0+build.1") is not currently supported because
-    // our `sortableSemver` method in Datastore/InsightsQL doesn't support it yet.
-    // For semver equality checks, use regular string equality operators instead.
-    Version::parse(normalized).ok()
+    let canonical = canonicalize_version_string(normalized);
+    // Build metadata (e.g., "1.0.0+build.1") parses fine here and canonicalization above
+    // preserves it, but our `sortableSemver` method in Datastore/InsightsQL ignores it, so
+    // equality-gated flags can diverge from insights/cohort analytics for build-tagged
+    // versions. Prefer regular string equality operators for exact build-tagged matches.
+    Version::parse(&canonical).ok()
 }
 
 pub fn match_property(
     property: &PropertyFilter,
     matching_property_values: &HashMap<String, Value>,
     partial_props: bool,
+    team_timezone: Tz,
 ) -> Result<bool, FlagMatchingError> {
+    let lookup_key = lookup_key_for(property);
+    let key: &str = lookup_key.as_ref();
+
     // only looks for matches where key exists in override_property_values
     // doesn't support operator is_not_set with partial_props
-    if partial_props && !matching_property_values.contains_key(&property.key) {
+    if partial_props && !matching_property_values.contains_key(key) {
         tracing::warn!("Missing property for matching: {}", property.key);
         return Err(FlagMatchingError::MissingProperty(format!(
             "can't match properties without a value. Missing property: {}",
@@ -66,7 +177,6 @@ pub fn match_property(
         )));
     }
 
-    let key = &property.key;
     let operator = property.operator.unwrap_or(OperatorType::Exact);
     let match_value = matching_property_values.get(key);
 
@@ -107,13 +217,12 @@ pub fn match_property(
                 }
 
                 if value.is_array() {
+                    let target = to_string_representation(override_value).to_lowercase();
                     return value
                         .as_array()
                         .expect("expected array value")
                         .iter()
-                        .map(|v| to_string_representation(v).to_lowercase())
-                        .collect::<Vec<String>>()
-                        .contains(&to_string_representation(override_value).to_lowercase());
+                        .any(|v| to_string_representation(v).to_lowercase() == target);
                 }
                 to_string_representation(value).to_lowercase()
                     == to_string_representation(override_value).to_lowercase()
@@ -156,6 +265,71 @@ pub fn match_property(
                 Ok(operator == OperatorType::NotIcontains)
             }
         }
+        OperatorType::StartsWith | OperatorType::NotStartsWith => {
+            if let Some(match_value) = match_value {
+                // Using to_ascii_lowercase() since we only care about ASCII case insensitivity
+                let is_prefix = to_string_representation(match_value)
+                    .to_ascii_lowercase()
+                    .starts_with(&to_string_representation(value).to_ascii_lowercase());
+
+                if operator == OperatorType::StartsWith {
+                    Ok(is_prefix)
+                } else {
+                    Ok(!is_prefix)
+                }
+            } else {
+                // When value doesn't exist:
+                // - for StartsWith: it's not a match (false)
+                // - for NotStartsWith: it is a match (true)
+                Ok(operator == OperatorType::NotStartsWith)
+            }
+        }
+        OperatorType::EndsWith | OperatorType::NotEndsWith => {
+            if let Some(match_value) = match_value {
+                // Using to_ascii_lowercase() since we only care about ASCII case insensitivity
+                let is_suffix = to_string_representation(match_value)
+                    .to_ascii_lowercase()
+                    .ends_with(&to_string_representation(value).to_ascii_lowercase());
+
+                if operator == OperatorType::EndsWith {
+                    Ok(is_suffix)
+                } else {
+                    Ok(!is_suffix)
+                }
+            } else {
+                // When value doesn't exist:
+                // - for EndsWith: it's not a match (false)
+                // - for NotEndsWith: it is a match (true)
+                Ok(operator == OperatorType::NotEndsWith)
+            }
+        }
+        OperatorType::IcontainsMulti | OperatorType::NotIcontainsMulti => {
+            if let Some(match_value) = match_value {
+                let match_string = to_string_representation(match_value).to_ascii_lowercase();
+
+                // Check if any of the search values is contained in the match value.
+                // Handle both single values and arrays without materializing an
+                // intermediate Vec — short-circuits the per-element lowercase work too.
+                let any_contained = match value {
+                    Value::Array(arr) => arr.iter().any(|v| {
+                        match_string.contains(&to_string_representation(v).to_ascii_lowercase())
+                    }),
+                    single_value => match_string
+                        .contains(&to_string_representation(single_value).to_ascii_lowercase()),
+                };
+
+                if operator == OperatorType::IcontainsMulti {
+                    Ok(any_contained)
+                } else {
+                    Ok(!any_contained)
+                }
+            } else {
+                // When value doesn't exist:
+                // - for IcontainsMulti: it's not a match (false)
+                // - for NotIcontainsMulti: it is a match (true)
+                Ok(operator == OperatorType::NotIcontainsMulti)
+            }
+        }
         OperatorType::Regex | OperatorType::NotRegex => {
             if match_value.is_none() {
                 // When value doesn't exist:
@@ -163,17 +337,30 @@ pub fn match_property(
                 // - for NotRegex: it is a match (true)
                 return Ok(operator == OperatorType::NotRegex);
             }
-            let pattern = match RegexBuilder::new(&to_string_representation(value))
-                .backtrack_limit(REGEX_BACKTRACK_LIMIT)
-                .build()
-            {
-                Ok(pattern) => pattern,
-                Err(_) => {
-                    return Ok(false);
-                }
+
+            // Three-state dispatch:
+            // - Some(Compiled): use the pre-compiled regex (fast path)
+            // - Some(InvalidPattern): pattern was already known-bad, short-circuit
+            // - None: prepare_regex() was not called, compile on-the-fly (fallback
+            //   for cohort property filters and test code)
+            let compiled;
+            let regex: &fancy_regex::Regex = match &property.compiled_regex {
+                Some(CompiledRegex::Compiled(regex)) => regex,
+                Some(CompiledRegex::InvalidPattern) => return Ok(false),
+                None => match RegexBuilder::new(&to_string_representation(value))
+                    .backtrack_limit(REGEX_BACKTRACK_LIMIT)
+                    .build()
+                {
+                    Ok(regex) => {
+                        compiled = regex;
+                        &compiled
+                    }
+                    Err(_) => return Ok(false),
+                },
             };
+
             let haystack = to_string_representation(match_value.unwrap_or(&Value::Null));
-            let match_ = pattern
+            let match_ = regex
                 .find(&haystack)
                 .map_err(|_| FlagMatchingError::InvalidRegexPattern)?;
 
@@ -201,22 +388,7 @@ pub fn match_property(
                 }
             };
 
-            let parsed_value = match to_f64_representation(
-                match_value.unwrap_or(&serde_json::Value::Null),
-            ) {
-                Some(parsed_value) => parsed_value,
-                None => {
-                    tracing::debug!(
-                        "Failed to parse property value '{}' for key '{}' as number for operator {:?}",
-                        match_value.unwrap_or(&serde_json::Value::Null),
-                        key,
-                        operator
-                    );
-                    return Err(FlagMatchingError::ValidationError(
-                        "value is not a number".to_string(),
-                    ));
-                }
-            };
+            let parsed_value = parse_numeric_match_value(match_value, key, operator)?;
 
             if let Some(filter_value) = to_f64_representation(value) {
                 Ok(compare(parsed_value, filter_value, operator))
@@ -230,6 +402,67 @@ pub fn match_property(
                 Err(FlagMatchingError::ValidationError(
                     "filter value is not a number".to_string(),
                 ))
+            }
+        }
+        OperatorType::Between | OperatorType::NotBetween => {
+            if match_value.is_none() {
+                // When value doesn't exist:
+                // - for Between/NotBetween: it's not a match (false)
+                return Ok(false);
+            }
+
+            // Mirrors InsightsQL semantics (insights/insightsql/property.py): between is inclusive
+            // on both ends, not_between is its complement, and the filter value must be
+            // a two-element numeric array with min <= max.
+            let bounds = match value.as_array() {
+                Some(bounds) if bounds.len() == 2 => bounds,
+                _ => {
+                    tracing::debug!(
+                        "Invalid filter value '{}' for key '{}' for operator {:?}",
+                        value,
+                        key,
+                        operator
+                    );
+                    return Err(FlagMatchingError::ValidationError(
+                        "between/not_between operator requires a two-element array [min, max]"
+                            .to_string(),
+                    ));
+                }
+            };
+
+            let (low, high) = match (
+                to_f64_representation(&bounds[0]),
+                to_f64_representation(&bounds[1]),
+            ) {
+                (Some(low), Some(high)) if !low.is_nan() && !high.is_nan() => (low, high),
+                _ => {
+                    return Err(FlagMatchingError::ValidationError(
+                        "between/not_between operator requires numeric values".to_string(),
+                    ));
+                }
+            };
+            if low > high {
+                return Err(FlagMatchingError::ValidationError(
+                    "between/not_between operator requires min value to be less than or equal to max value"
+                        .to_string(),
+                ));
+            }
+
+            let parsed_value = parse_numeric_match_value(match_value, key, operator)?;
+            if parsed_value.is_nan() {
+                // "NaN" parses successfully as f64::NAN rather than failing, but a NaN
+                // property value is malformed input, not a real number: it must be a
+                // non-match for both operators, not just the ones where NaN comparisons
+                // happen to fall out as false (Between would; NotBetween would flip it
+                // to true via `!in_range`).
+                return Ok(false);
+            }
+
+            let in_range = parsed_value >= low && parsed_value <= high;
+            if operator == OperatorType::Between {
+                Ok(in_range)
+            } else {
+                Ok(!in_range)
             }
         }
         OperatorType::SemverGt
@@ -310,8 +543,12 @@ pub fn match_property(
             let normalized_version = normalize_version_string(&version_string);
 
             let requirement_string = match operator {
-                OperatorType::SemverTilde => format!("~{normalized_version}"),
-                OperatorType::SemverCaret => format!("^{normalized_version}"),
+                OperatorType::SemverTilde => {
+                    format!("~{}", canonicalize_version_string(normalized_version))
+                }
+                OperatorType::SemverCaret => {
+                    format!("^{}", canonicalize_version_string(normalized_version))
+                }
                 OperatorType::SemverWildcard => {
                     // For wildcard, replace * with x for semver compatibility.
                     // Supported patterns: "1.*", "1.2.*", "1.*.*", "*"
@@ -326,7 +563,16 @@ pub fn match_property(
                     //
                     // Invalid patterns like "1.*.3" will fail VersionReq parsing and
                     // return a ValidationError, which is the expected behavior.
-                    normalized_version.replace('*', "x")
+                    //
+                    // Leading zeros are stripped from numeric components (not padded,
+                    // since "*" supplies the trailing components) so a mobile-shaped
+                    // wildcard filter like "3.08.*" parses the same way "~3.08" does.
+                    normalized_version
+                        .split('.')
+                        .map(strip_component_leading_zeros)
+                        .collect::<Vec<_>>()
+                        .join(".")
+                        .replace('*', "x")
                 }
                 _ => normalized_version.to_string(),
             };
@@ -351,7 +597,11 @@ pub fn match_property(
             Ok(requirement.matches(&parsed_value))
         }
         OperatorType::IsDateExact | OperatorType::IsDateAfter | OperatorType::IsDateBefore => {
-            let parsed_date = determine_parsed_date_for_property_matching(match_value);
+            // Both the person value and the filter value are interpreted in the
+            // team timezone (naive strings) or by their explicit offset, so the two
+            // sides agree with each other and with InsightsQL/Datastore cohort evaluation.
+            let parsed_date =
+                determine_parsed_date_for_property_matching(match_value, team_timezone);
 
             if parsed_date.is_none() {
                 // When value doesn't exist:
@@ -360,7 +610,7 @@ pub fn match_property(
             }
 
             if let Some(override_value) = value.as_str() {
-                let override_date = match parse_date_string(override_value) {
+                let override_date = match parse_date_string_in_tz(override_value, team_timezone) {
                     Some(date) => date,
                     None => {
                         return Ok(false);
@@ -438,36 +688,67 @@ fn is_truthy_property_value(value: &Value) -> bool {
     false
 }
 
-fn parse_date_string(date_str: &str) -> Option<DateTime<Utc>> {
-    // Try relative date parsing first
-    if let Some(date) = relative_date::parse_relative_date(date_str) {
+/// Naive wall-clock datetime formats (no embedded offset). A match here means the
+/// value is interpreted in the team timezone. `%.f` is optional in chrono, so these
+/// also cover the no-fractional-seconds case; both the space and `T` separators are
+/// listed because chrono does not treat them as interchangeable.
+const NAIVE_DATETIME_FORMATS: &[&str] = &[
+    "%Y-%m-%d %H:%M:%S%.f",
+    "%Y-%m-%dT%H:%M:%S%.f",
+    "%Y-%m-%d %H:%M",
+    "%Y-%m-%dT%H:%M",
+];
+
+/// Parses a datetime string, interpreting naive wall-clock values in
+/// `team_timezone` and honoring explicit offsets as written.
+///
+/// Both sides of an IS_DATE_* comparison flow through here so they agree with
+/// each other and with InsightsQL/Datastore cohort evaluation. InsightsQL wraps both the
+/// stored value and the filter constant in `…(value, <team_tz>)`, so a naive
+/// string like "2024-06-01" means midnight in the team timezone — not UTC.
+/// Values that carry an explicit offset (a trailing `Z` or `±HH:MM`) are honored
+/// as written, mirroring Datastore's `parseDateTime64BestEffort`, which respects
+/// the embedded offset regardless of the team timezone.
+fn parse_date_string_in_tz(date_str: &str, team_timezone: Tz) -> Option<DateTime<Utc>> {
+    // Relative dates ("-7d", "-30d", …) are anchored to "now" in the team timezone.
+    if let Some(date) = relative_date::parse_relative_date_in_tz(date_str, team_timezone) {
         return Some(date);
     }
 
-    // Try dateparser for other formats
-    if let Ok(date) = parse_date(date_str) {
-        return Some(date);
+    // Explicit-offset formats carry their own timezone; honor it as-is.
+    if let Ok(date) = DateTime::parse_from_rfc3339(date_str) {
+        return Some(date.with_timezone(&Utc));
     }
 
-    // Fallback: Try parsing ISO 8601 with milliseconds (without timezone)
-    // This handles formats like "2025-12-19T00:00:00.000" that dateparser can't handle
-    if let Ok(naive_date) = NaiveDateTime::parse_from_str(date_str, "%Y-%m-%dT%H:%M:%S%.f") {
-        return Some(naive_date.and_utc());
+    // Bare date ("2024-06-01") is the common filter form — check it first, then the
+    // forms that include a time component. All are interpreted in the team timezone.
+    if let Ok(date) = NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
+        return relative_date::naive_to_utc_in_tz(date.and_hms_opt(0, 0, 0)?, team_timezone);
+    }
+    for fmt in NAIVE_DATETIME_FORMATS {
+        if let Ok(naive) = NaiveDateTime::parse_from_str(date_str, fmt) {
+            return relative_date::naive_to_utc_in_tz(naive, team_timezone);
+        }
     }
 
-    None
+    // Fallback for any exotic format the explicit list misses; assumes UTC for
+    // naive input — preferable to failing the match outright.
+    parse_date(date_str).ok()
 }
 
-fn determine_parsed_date_for_property_matching(value: Option<&Value>) -> Option<DateTime<Utc>> {
+fn determine_parsed_date_for_property_matching(
+    value: Option<&Value>,
+    team_timezone: Tz,
+) -> Option<DateTime<Utc>> {
     let value = value?;
 
     if let Some(date_str) = value.as_str() {
-        // First try parsing as a float timestamp
+        // First try parsing as a float timestamp (an unambiguous epoch instant).
         if let Ok(num) = date_str.parse::<f64>() {
             return parse_float_timestamp(num);
         }
-        // Then try relative date parsing
-        return parse_date_string(date_str);
+        // Otherwise interpret the string in the team timezone, like the filter side.
+        return parse_date_string_in_tz(date_str, team_timezone);
     }
 
     if let Some(num) = value.as_number() {
@@ -485,7 +766,7 @@ fn parse_float_timestamp(value: f64) -> Option<DateTime<Utc>> {
     DateTime::from_timestamp(whole_seconds, nanos)
 }
 
-/// Copy of https://github.com/hanzoai/insights/blob/main/insights/queries/test/test_base.py#L35
+/// Copy of https://github.com/Insights/insights/blob/master/insights/queries/test/test_base.py#L35
 /// with some modifications to match Rust's behavior
 /// and to test the match_property function
 #[cfg(test)]
@@ -497,6 +778,16 @@ mod test_match_properties {
     use serde_json::json;
     use test_case::test_case;
 
+    /// UTC-defaulting wrapper so timezone-agnostic tests stay terse. Date-specific
+    /// tests call `super::match_property` directly with the team timezone they need.
+    fn match_property(
+        property: &PropertyFilter,
+        matching_property_values: &HashMap<String, Value>,
+        partial_props: bool,
+    ) -> Result<bool, FlagMatchingError> {
+        super::match_property(property, matching_property_values, partial_props, Tz::UTC)
+    }
+
     #[test]
     fn test_match_properties_exact_with_partial_props() {
         let property_a = PropertyFilter {
@@ -506,6 +797,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -560,6 +853,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -583,6 +878,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -619,6 +916,61 @@ mod test_match_properties {
         .is_err());
     }
 
+    #[rstest::rstest]
+    #[case("us", true)]
+    #[case("Us", true)]
+    #[case("US", true)]
+    #[case("ca", true)]
+    #[case("uk", true)]
+    #[case("UK", true)]
+    #[case("de", false)]
+    fn test_match_properties_exact_array_is_case_insensitive(
+        #[case] user_value: &str,
+        #[case] expected: bool,
+    ) {
+        // Array Exact comparisons lowercase both sides, so a mixed-case filter
+        // value must still match a lowercase user property and vice-versa.
+        let property = PropertyFilter {
+            key: "country".to_string(),
+            value: Some(json!(["US", "CA", "Uk"])),
+            operator: Some(OperatorType::Exact),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        let actual = match_property(
+            &property,
+            &HashMap::from([("country".to_string(), json!(user_value))]),
+            true,
+        )
+        .expect("expected match to exist");
+
+        assert_eq!(actual, expected, "user_value = {user_value}");
+    }
+
+    #[test]
+    fn test_match_properties_exact_empty_array_never_matches() {
+        let property = PropertyFilter {
+            key: "country".to_string(),
+            value: Some(json!([])),
+            operator: Some(OperatorType::Exact),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+        assert!(!match_property(
+            &property,
+            &HashMap::from([("country".to_string(), json!("us"))]),
+            true
+        )
+        .expect("expected match to exist"));
+    }
+
     #[test]
     fn test_match_properties_is_not() {
         let property_a = PropertyFilter {
@@ -628,6 +980,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -666,6 +1020,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -741,6 +1097,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -790,6 +1148,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -848,6 +1208,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -880,6 +1242,214 @@ mod test_match_properties {
     }
 
     #[test]
+    fn test_match_properties_starts_with() {
+        let property_starts_with = PropertyFilter {
+            key: "key".to_string(),
+            value: Some(json!("Val")),
+            operator: Some(OperatorType::StartsWith),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // case-insensitive match at the start
+        assert!(match_property(
+            &property_starts_with,
+            &HashMap::from([("key".to_string(), json!("value"))]),
+            true
+        )
+        .expect("expected match to exist"));
+        assert!(match_property(
+            &property_starts_with,
+            &HashMap::from([("key".to_string(), json!("VALUE"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // non-match: substring present but not at the start
+        assert!(!match_property(
+            &property_starts_with,
+            &HashMap::from([("key".to_string(), json!("prevalue"))]),
+            true
+        )
+        .expect("expected match to exist"));
+        assert!(!match_property(
+            &property_starts_with,
+            &HashMap::from([("key".to_string(), json!("Alakazam"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // numeric property value is stringified before matching
+        let property_starts_with_numeric = PropertyFilter {
+            key: "key".to_string(),
+            value: Some(json!("3")),
+            operator: Some(OperatorType::StartsWith),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+        assert!(match_property(
+            &property_starts_with_numeric,
+            &HashMap::from([("key".to_string(), json!(323))]),
+            true
+        )
+        .expect("expected match to exist"));
+        assert!(!match_property(
+            &property_starts_with_numeric,
+            &HashMap::from([("key".to_string(), json!(123))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // negation
+        let property_not_starts_with = PropertyFilter {
+            key: "key".to_string(),
+            value: Some(json!("Val")),
+            operator: Some(OperatorType::NotStartsWith),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+        assert!(!match_property(
+            &property_not_starts_with,
+            &HashMap::from([("key".to_string(), json!("value"))]),
+            true
+        )
+        .expect("expected match to exist"));
+        assert!(match_property(
+            &property_not_starts_with,
+            &HashMap::from([("key".to_string(), json!("Alakazam"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // missing property: negative operator matches (true), positive operator does not (false)
+        assert!(!match_property(
+            &property_starts_with,
+            &HashMap::from([("key2".to_string(), json!("value"))]),
+            false
+        )
+        .expect("Expected no errors with full props mode"));
+        assert!(match_property(
+            &property_not_starts_with,
+            &HashMap::from([("key2".to_string(), json!("value"))]),
+            false
+        )
+        .expect("Expected no errors with full props mode"));
+    }
+
+    #[test]
+    fn test_match_properties_ends_with() {
+        let property_ends_with = PropertyFilter {
+            key: "key".to_string(),
+            value: Some(json!("Lue")),
+            operator: Some(OperatorType::EndsWith),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // case-insensitive match at the end
+        assert!(match_property(
+            &property_ends_with,
+            &HashMap::from([("key".to_string(), json!("value"))]),
+            true
+        )
+        .expect("expected match to exist"));
+        assert!(match_property(
+            &property_ends_with,
+            &HashMap::from([("key".to_string(), json!("VALUE"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // non-match: substring present but not at the end
+        assert!(!match_property(
+            &property_ends_with,
+            &HashMap::from([("key".to_string(), json!("valueish"))]),
+            true
+        )
+        .expect("expected match to exist"));
+        assert!(!match_property(
+            &property_ends_with,
+            &HashMap::from([("key".to_string(), json!("Alakazam"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // numeric property value is stringified before matching
+        let property_ends_with_numeric = PropertyFilter {
+            key: "key".to_string(),
+            value: Some(json!("3")),
+            operator: Some(OperatorType::EndsWith),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+        assert!(match_property(
+            &property_ends_with_numeric,
+            &HashMap::from([("key".to_string(), json!(323))]),
+            true
+        )
+        .expect("expected match to exist"));
+        assert!(!match_property(
+            &property_ends_with_numeric,
+            &HashMap::from([("key".to_string(), json!(321))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // negation
+        let property_not_ends_with = PropertyFilter {
+            key: "key".to_string(),
+            value: Some(json!("Lue")),
+            operator: Some(OperatorType::NotEndsWith),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+        assert!(!match_property(
+            &property_not_ends_with,
+            &HashMap::from([("key".to_string(), json!("value"))]),
+            true
+        )
+        .expect("expected match to exist"));
+        assert!(match_property(
+            &property_not_ends_with,
+            &HashMap::from([("key".to_string(), json!("Alakazam"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // missing property: negative operator matches (true), positive operator does not (false)
+        assert!(!match_property(
+            &property_ends_with,
+            &HashMap::from([("key2".to_string(), json!("value"))]),
+            false
+        )
+        .expect("Expected no errors with full props mode"));
+        assert!(match_property(
+            &property_not_ends_with,
+            &HashMap::from([("key2".to_string(), json!("value"))]),
+            false
+        )
+        .expect("Expected no errors with full props mode"));
+    }
+
+    #[test]
     fn test_match_properties_regex() {
         let property_a = PropertyFilter {
             key: "key".to_string(),
@@ -888,6 +1458,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -929,6 +1501,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
         assert!(match_property(
             &property_b,
@@ -964,6 +1538,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -987,6 +1563,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
         assert!(match_property(
             &property_d,
@@ -1018,6 +1596,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1061,6 +1641,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1108,6 +1690,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1150,6 +1734,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1197,6 +1783,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1268,6 +1856,126 @@ mod test_match_properties {
         // );
     }
 
+    #[test_case(json!(70000), true; "at lower bound is inclusive")]
+    #[test_case(json!(80000), true; "at upper bound is inclusive")]
+    #[test_case(json!(75000), true; "inside range")]
+    #[test_case(json!("75000"), true; "string number property value coerces")]
+    #[test_case(json!(69999), false; "below range")]
+    #[test_case(json!(80001), false; "above range")]
+    fn test_match_properties_between_operator(property_value: Value, expected: bool) {
+        let between = PropertyFilter {
+            key: "key".to_string(),
+            value: Some(json!([70000, 80000])),
+            operator: Some(OperatorType::Between),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+        let not_between = PropertyFilter {
+            operator: Some(OperatorType::NotBetween),
+            ..between.clone()
+        };
+        let props = HashMap::from([("key".to_string(), property_value)]);
+
+        assert_eq!(
+            match_property(&between, &props, true).expect("expected match to exist"),
+            expected
+        );
+        // not_between is the exact complement
+        assert_eq!(
+            match_property(&not_between, &props, true).expect("expected match to exist"),
+            !expected
+        );
+    }
+
+    #[test]
+    fn test_match_properties_between_operator_edge_cases() {
+        let between = PropertyFilter {
+            key: "key".to_string(),
+            // String bounds coerce to numbers like the Gt/Lt operators do
+            value: Some(json!(["70000", "80000"])),
+            operator: Some(OperatorType::Between),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        assert!(match_property(
+            &between,
+            &HashMap::from([("key".to_string(), json!(75000))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Missing person property is not a match, for both between and not_between
+        assert!(!match_property(&between, &HashMap::new(), false).expect("expected match to exist"));
+        let not_between = PropertyFilter {
+            operator: Some(OperatorType::NotBetween),
+            ..between.clone()
+        };
+        assert!(
+            !match_property(&not_between, &HashMap::new(), false).expect("expected match to exist")
+        );
+
+        // Non-numeric person property value is a validation error (like Gt/Lt), which
+        // cohort evaluation resolves to a non-match
+        assert!(matches!(
+            match_property(
+                &between,
+                &HashMap::from([("key".to_string(), json!("abc"))]),
+                true
+            ),
+            Err(FlagMatchingError::ValidationError(_))
+        ));
+
+        // A filter with no value is not a match
+        let no_value = PropertyFilter {
+            value: None,
+            ..between.clone()
+        };
+        assert!(!match_property(
+            &no_value,
+            &HashMap::from([("key".to_string(), json!(75000))]),
+            true
+        )
+        .expect("expected match to exist"));
+    }
+
+    #[test_case(json!(75000); "not an array")]
+    #[test_case(json!([70000]); "one element")]
+    #[test_case(json!([70000, 75000, 80000]); "three elements")]
+    #[test_case(json!(["a", "b"]); "non-numeric bounds")]
+    #[test_case(json!([80000, 70000]); "min greater than max")]
+    #[test_case(json!(["NaN", 80000]); "NaN lower bound")]
+    #[test_case(json!([70000, "NaN"]); "NaN upper bound")]
+    fn test_match_properties_between_operator_malformed_filter_value(filter_value: Value) {
+        for operator in [OperatorType::Between, OperatorType::NotBetween] {
+            let property = PropertyFilter {
+                key: "key".to_string(),
+                value: Some(filter_value.clone()),
+                operator: Some(operator),
+                prop_type: PropertyType::Person,
+                group_type_index: None,
+                negation: None,
+                compiled_regex: None,
+                extra: Default::default(),
+            };
+
+            assert!(matches!(
+                match_property(
+                    &property,
+                    &HashMap::from([("key".to_string(), json!(75000))]),
+                    true
+                ),
+                Err(FlagMatchingError::ValidationError(_))
+            ));
+        }
+    }
+
     #[test]
     fn test_none_property_value_with_all_operators() {
         let property_a = PropertyFilter {
@@ -1277,6 +1985,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1299,6 +2009,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1315,6 +2027,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1337,6 +2051,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1353,6 +2069,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1387,6 +2105,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1407,6 +2127,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1423,6 +2145,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1439,6 +2163,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1476,6 +2202,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1492,6 +2220,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1508,6 +2238,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1524,6 +2256,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1540,6 +2274,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1556,6 +2292,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1572,6 +2310,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1588,6 +2328,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1605,6 +2347,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(!match_property(
@@ -1622,6 +2366,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Test with ISO8601 format in person properties
@@ -1657,6 +2403,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1717,6 +2465,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         match_property(
@@ -1736,6 +2486,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Get current time and 3 days ago
@@ -1797,9 +2549,11 @@ mod test_match_properties {
             .with_timezone(&Utc);
         let timestamp_number = 1836277747;
         let timestamp_string = timestamp_number.to_string();
-        let date = determine_parsed_date_for_property_matching(Some(&json!(timestamp_number)));
+        let date =
+            determine_parsed_date_for_property_matching(Some(&json!(timestamp_number)), Tz::UTC);
         assert_eq!(date, Some(expected_date));
-        let date = determine_parsed_date_for_property_matching(Some(&json!(timestamp_string)));
+        let date =
+            determine_parsed_date_for_property_matching(Some(&json!(timestamp_string)), Tz::UTC);
         assert_eq!(date, Some(expected_date));
     }
 
@@ -1809,20 +2563,23 @@ mod test_match_properties {
             .unwrap()
             .with_timezone(&Utc);
         let timestamp_number = 1836277747.86753;
-        let date = determine_parsed_date_for_property_matching(Some(&json!(timestamp_number)));
+        let date =
+            determine_parsed_date_for_property_matching(Some(&json!(timestamp_number)), Tz::UTC);
         assert_eq!(date, Some(expected_date));
 
         let timestamp_string = "1836277747.86753";
-        let date = determine_parsed_date_for_property_matching(Some(&json!(timestamp_string)));
+        let date =
+            determine_parsed_date_for_property_matching(Some(&json!(timestamp_string)), Tz::UTC);
         assert_eq!(date, Some(expected_date));
     }
 
     #[test]
     fn test_parse_iso8601_with_milliseconds_no_timezone() {
-        // Test parsing ISO 8601 format with milliseconds but no timezone
-        // This format is generated by some systems and should be parsed as UTC
+        // Test parsing ISO 8601 format with milliseconds but no timezone. A naive
+        // value like this is interpreted in the team timezone; this test passes
+        // Tz::UTC, so the result lands at UTC midnight.
         let date_string = "2025-12-19T00:00:00.000";
-        let date = parse_date_string(date_string);
+        let date = parse_date_string_in_tz(date_string, Tz::UTC);
         assert!(
             date.is_some(),
             "Should be able to parse ISO 8601 with milliseconds"
@@ -1840,13 +2597,13 @@ mod test_match_properties {
     #[test]
     fn test_parse_iso8601_with_variable_millisecond_precision() {
         // Test 1 digit milliseconds
-        assert!(parse_date_string("2025-12-19T00:00:00.5").is_some());
+        assert!(parse_date_string_in_tz("2025-12-19T00:00:00.5", Tz::UTC).is_some());
 
         // Test 2 digit milliseconds
-        assert!(parse_date_string("2025-12-19T00:00:00.12").is_some());
+        assert!(parse_date_string_in_tz("2025-12-19T00:00:00.12", Tz::UTC).is_some());
 
         // Test 3 digit milliseconds (existing case)
-        assert!(parse_date_string("2025-12-19T00:00:00.123").is_some());
+        assert!(parse_date_string_in_tz("2025-12-19T00:00:00.123", Tz::UTC).is_some());
     }
 
     #[test]
@@ -1859,6 +2616,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1897,6 +2656,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1921,6 +2682,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1952,6 +2715,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -1990,6 +2755,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2021,6 +2788,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2045,6 +2814,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2073,6 +2844,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Test with 'v' prefix in property value
@@ -2091,6 +2864,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2118,6 +2893,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Pre-release versions are less than the release version
@@ -2143,6 +2920,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2166,6 +2945,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Invalid semver in property value should return false
@@ -2194,14 +2975,6 @@ mod test_match_properties {
         assert!(match_property(
             &property,
             &HashMap::from([("version".to_string(), json!("1.2.3 "))]),
-            true
-        )
-        .expect("expected match to exist"));
-
-        // Leading zeros are not valid semver
-        assert!(!match_property(
-            &property,
-            &HashMap::from([("version".to_string(), json!("01.02.03"))]),
             true
         )
         .expect("expected match to exist"));
@@ -2254,6 +3027,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2271,6 +3046,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2287,6 +3064,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2298,6 +3077,146 @@ mod test_match_properties {
     }
 
     #[test]
+    fn test_semver_zero_padded_and_short_form_versions() {
+        // These shapes used to be rejected as invalid semver; canonicalization now accepts
+        // them, so they're covered separately from `test_semver_invalid_versions`.
+        let property = PropertyFilter {
+            key: "version".to_string(),
+            value: Some(json!("1.0.0")),
+            operator: Some(OperatorType::SemverGt),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // Zero-padded components are canonicalized ("01.02.03" -> "1.2.3"), which many
+        // mobile SDKs emit. 1.2.3 > 1.0.0, so this matches.
+        assert!(match_property(
+            &property,
+            &HashMap::from([("version".to_string(), json!("01.02.03"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // A leading zero in a single component is canonicalized too ("3.07" -> "3.7.0").
+        assert!(match_property(
+            &property,
+            &HashMap::from([("version".to_string(), json!("3.07"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Two-part versions get a padded patch component ("3.7" -> "3.7.0"), the common
+        // shape mobile SDKs emit. 3.7.0 > 1.0.0, so this matches.
+        assert!(match_property(
+            &property,
+            &HashMap::from([("version".to_string(), json!("3.7"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        assert!(match_property(
+            &property,
+            &HashMap::from([("version".to_string(), json!("3.0"))]),
+            true
+        )
+        .expect("expected match to exist"));
+    }
+
+    #[test]
+    fn test_semver_mobile_version_formats() {
+        // Mobile SDKs commonly emit two-component versions ("3.10") and zero-padded
+        // components ("3.08"), neither of which is strict semver. Before canonicalization
+        // these silently failed to parse, so version-gated flag conditions never matched.
+
+        // "3.08+" is the reported enterprise case: property "3.08" (-> 3.8.0) satisfies
+        // a SemverGte "3.08" (-> 3.8.0) condition.
+        let gte_308 = PropertyFilter {
+            key: "version".to_string(),
+            value: Some(json!("3.08")),
+            operator: Some(OperatorType::SemverGte),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        for version in ["3.08", "3.8", "3.8.0", "3.9", "3.10", "4.0.0"] {
+            assert!(
+                match_property(
+                    &gte_308,
+                    &HashMap::from([("version".to_string(), json!(version))]),
+                    true
+                )
+                .expect("expected match to exist"),
+                "expected {version} to satisfy SemverGte 3.08"
+            );
+        }
+
+        for version in ["3.07", "3.7", "2.48", "3.0"] {
+            assert!(
+                !match_property(
+                    &gte_308,
+                    &HashMap::from([("version".to_string(), json!(version))]),
+                    true
+                )
+                .expect("expected match to exist"),
+                "expected {version} to not satisfy SemverGte 3.08"
+            );
+        }
+
+        // Two-component ordering: 3.10 (-> 3.10.0) is greater than 3.9 (-> 3.9.0), not a
+        // string comparison where "3.10" < "3.9".
+        let gt_39 = PropertyFilter {
+            key: "version".to_string(),
+            value: Some(json!("3.9")),
+            operator: Some(OperatorType::SemverGt),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        assert!(match_property(
+            &gt_39,
+            &HashMap::from([("version".to_string(), json!("3.10"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Canonicalization also applies to the filter value in tilde/caret ranges.
+        let tilde_308 = PropertyFilter {
+            key: "version".to_string(),
+            value: Some(json!("3.08")),
+            operator: Some(OperatorType::SemverTilde),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // ~3.08 (-> ~3.8.0) means >=3.8.0 <3.9.0
+        assert!(match_property(
+            &tilde_308,
+            &HashMap::from([("version".to_string(), json!("3.8.5"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        assert!(!match_property(
+            &tilde_308,
+            &HashMap::from([("version".to_string(), json!("3.9.0"))]),
+            true
+        )
+        .expect("expected match to exist"));
+    }
+
+    #[test]
     fn test_semver_missing_property() {
         let property = PropertyFilter {
             key: "version".to_string(),
@@ -2306,6 +3225,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Missing property should return false
@@ -2335,6 +3256,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Should match: same version
@@ -2392,6 +3315,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2412,6 +3337,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Should match: same version
@@ -2479,6 +3406,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Should match: any patch version in 1.2.x
@@ -2526,6 +3455,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Should match: any version in 1.x.x
@@ -2573,6 +3504,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2597,6 +3530,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2621,6 +3556,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Invalid patterns return an error (configuration error)
@@ -2630,6 +3567,66 @@ mod test_match_properties {
             true
         )
         .is_err());
+
+        // Mobile SDKs emit zero-padded/two-part versions on the property side too.
+        let property_mobile_wildcard = PropertyFilter {
+            key: "version".to_string(),
+            value: Some(json!("3.*")),
+            operator: Some(OperatorType::SemverWildcard),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        assert!(match_property(
+            &property_mobile_wildcard,
+            &HashMap::from([("version".to_string(), json!("3.08"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        assert!(match_property(
+            &property_mobile_wildcard,
+            &HashMap::from([("version".to_string(), json!("3.10"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        assert!(!match_property(
+            &property_mobile_wildcard,
+            &HashMap::from([("version".to_string(), json!("2.9"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // The filter value itself can be zero-padded ("3.08.*"), which needs the same
+        // canonicalization as "~3.08"/"^3.08" to parse as a VersionReq.
+        let property_zero_padded_filter = PropertyFilter {
+            key: "version".to_string(),
+            value: Some(json!("3.08.*")),
+            operator: Some(OperatorType::SemverWildcard),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        assert!(match_property(
+            &property_zero_padded_filter,
+            &HashMap::from([("version".to_string(), json!("3.8.5"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        assert!(!match_property(
+            &property_zero_padded_filter,
+            &HashMap::from([("version".to_string(), json!("3.9.0"))]),
+            true
+        )
+        .expect("expected match to exist"));
     }
 
     #[test]
@@ -2642,6 +3639,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Should match higher pre-release in same patch version
@@ -2675,6 +3674,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2701,6 +3702,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Invalid version in property value should return false
@@ -2719,6 +3722,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2739,6 +3744,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2777,6 +3784,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2811,6 +3820,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2849,6 +3860,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2883,6 +3896,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2921,6 +3936,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2955,6 +3972,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -2966,7 +3985,7 @@ mod test_match_properties {
 
         assert!(match_property(
             &property,
-            &HashMap::from([("email".to_string(), json!("test@hanzo.ai"))]),
+            &HashMap::from([("email".to_string(), json!("test@insights.org"))]),
             true
         )
         .expect("expected match to exist"));
@@ -2986,6 +4005,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         assert!(match_property(
@@ -3033,6 +4054,8 @@ mod test_match_properties {
             prop_type: PropertyType::Person,
             group_type_index: None,
             negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
         };
 
         // Should match when the string is repeated correctly
@@ -3069,5 +4092,416 @@ mod test_match_properties {
             "Expected InvalidRegexPattern error due to backtrack limit, got {:?}",
             result
         );
+    }
+
+    #[test]
+    fn test_match_properties_icontains_multi() {
+        // Test icontains_multi with array of values
+        let property_array = PropertyFilter {
+            key: "email".to_string(),
+            value: Some(json!(["@gmail.com", "@yahoo.com"])),
+            operator: Some(OperatorType::IcontainsMulti),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // Should match gmail
+        assert!(match_property(
+            &property_array,
+            &HashMap::from([("email".to_string(), json!("user@gmail.com"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Should match yahoo
+        assert!(match_property(
+            &property_array,
+            &HashMap::from([("email".to_string(), json!("user@yahoo.com"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Should not match hotmail
+        assert!(!match_property(
+            &property_array,
+            &HashMap::from([("email".to_string(), json!("user@hotmail.com"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Test icontains_multi with single value
+        let property_single = PropertyFilter {
+            key: "name".to_string(),
+            value: Some(json!("john")),
+            operator: Some(OperatorType::IcontainsMulti),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // Should match case-insensitively
+        assert!(match_property(
+            &property_single,
+            &HashMap::from([("name".to_string(), json!("John Doe"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Should not match different name
+        assert!(!match_property(
+            &property_single,
+            &HashMap::from([("name".to_string(), json!("Jane Doe"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Should return error when key doesn't exist in partial mode
+        assert!(match_property(
+            &property_single,
+            &HashMap::from([("other_key".to_string(), json!("value"))]),
+            true
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn test_match_properties_not_icontains_multi() {
+        // Test not_icontains_multi with array of values
+        let property_array = PropertyFilter {
+            key: "email".to_string(),
+            value: Some(json!(["@gmail.com", "@yahoo.com"])),
+            operator: Some(OperatorType::NotIcontainsMulti),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // Should not match gmail (negated)
+        assert!(!match_property(
+            &property_array,
+            &HashMap::from([("email".to_string(), json!("user@gmail.com"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Should not match yahoo (negated)
+        assert!(!match_property(
+            &property_array,
+            &HashMap::from([("email".to_string(), json!("user@yahoo.com"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Should match hotmail (does not contain any of the blocked domains)
+        assert!(match_property(
+            &property_array,
+            &HashMap::from([("email".to_string(), json!("user@hotmail.com"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Test not_icontains_multi with single value
+        let property_single = PropertyFilter {
+            key: "name".to_string(),
+            value: Some(json!("spam")),
+            operator: Some(OperatorType::NotIcontainsMulti),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // Should match when value doesn't contain spam
+        assert!(match_property(
+            &property_single,
+            &HashMap::from([("name".to_string(), json!("John Doe"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Should not match when value contains spam
+        assert!(!match_property(
+            &property_single,
+            &HashMap::from([("name".to_string(), json!("Spam Email"))]),
+            true
+        )
+        .expect("expected match to exist"));
+    }
+
+    #[test]
+    fn test_match_properties_icontains_multi_empty_values() {
+        // Test with empty array
+        let property_empty = PropertyFilter {
+            key: "test".to_string(),
+            value: Some(json!([])),
+            operator: Some(OperatorType::IcontainsMulti),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // Empty array should not match anything
+        assert!(!match_property(
+            &property_empty,
+            &HashMap::from([("test".to_string(), json!("any value"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Test with missing key should default to false for icontains_multi
+        assert!(!match_property(
+            &property_empty,
+            &HashMap::from([("other_key".to_string(), json!("value"))]),
+            false // non-partial mode
+        )
+        .expect("expected match to exist"));
+    }
+
+    #[test]
+    fn test_match_properties_not_icontains_multi_empty_values() {
+        // Test with empty array
+        let property_empty = PropertyFilter {
+            key: "test".to_string(),
+            value: Some(json!([])),
+            operator: Some(OperatorType::NotIcontainsMulti),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // Empty array should match everything (nothing to exclude)
+        assert!(match_property(
+            &property_empty,
+            &HashMap::from([("test".to_string(), json!("any value"))]),
+            true
+        )
+        .expect("expected match to exist"));
+
+        // Test with missing key should default to true for not_icontains_multi
+        assert!(match_property(
+            &property_empty,
+            &HashMap::from([("other_key".to_string(), json!("value"))]),
+            false // non-partial mode
+        )
+        .expect("expected match to exist"));
+    }
+
+    // Timezone parity tests
+    //
+    // These prove the Rust matcher interprets a naive datetime filter (the
+    // right-hand side) in the team timezone — exactly as InsightsQL/Datastore cohort
+    // evaluation does. InsightsQL lowers a naive IS_DATE_* constant to
+    // `toDateTime(value, <team_tz>)`, so for an `America/Los_Angeles` team the
+    // filter "2024-06-01" means 2024-06-01 00:00 Pacific = 2024-06-01 07:00 UTC
+    // (PDT, UTC-7 in June), not 2024-06-01 00:00 UTC.
+    //
+    // The person value (left-hand side) is supplied as an unambiguous UTC instant
+    // (a `Z`-suffixed ISO string or an epoch), so both engines agree on it and the
+    // only thing under test is the right-hand-side interpretation. Each case also
+    // asserts the pre-fix UTC interpretation produced a different decision in the
+    // offset window straddling local midnight.
+
+    const PACIFIC: Tz = Tz::America__Los_Angeles;
+
+    fn date_filter(value: &str, operator: OperatorType) -> PropertyFilter {
+        PropertyFilter {
+            key: "joined_at".to_string(),
+            value: Some(json!(value)),
+            operator: Some(operator),
+            prop_type: PropertyType::Person,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        }
+    }
+
+    fn match_date(person_value: Value, filter: &PropertyFilter, tz: Tz) -> bool {
+        super::match_property(
+            filter,
+            &HashMap::from([("joined_at".to_string(), person_value)]),
+            true,
+            tz,
+        )
+        .expect("expected match to exist")
+    }
+
+    #[test_case("2024-06-01T03:00:00Z", false; "person before pacific midnight does not match")]
+    #[test_case("2024-06-01T08:00:00Z", true; "person after pacific midnight matches")]
+    fn test_is_date_after_interpreted_in_team_tz(person_iso: &str, expected_pacific: bool) {
+        // Filter "2024-06-01" after-midnight resolves to 07:00 UTC for a Pacific team.
+        let filter = date_filter("2024-06-01", OperatorType::IsDateAfter);
+        assert_eq!(
+            match_date(json!(person_iso), &filter, PACIFIC),
+            expected_pacific
+        );
+
+        // The same person value at 03:00 UTC sits inside the offset window: it is
+        // "after" UTC midnight but "before" Pacific midnight, so the pre-fix UTC
+        // interpretation disagrees with the team-tz one.
+        if person_iso == "2024-06-01T03:00:00Z" {
+            assert!(match_date(json!(person_iso), &filter, Tz::UTC));
+            assert_ne!(
+                match_date(json!(person_iso), &filter, PACIFIC),
+                match_date(json!(person_iso), &filter, Tz::UTC)
+            );
+        }
+    }
+
+    #[test_case("2024-06-01T03:00:00Z", true; "person before pacific midnight is before")]
+    #[test_case("2024-06-01T08:00:00Z", false; "person after pacific midnight is not before")]
+    fn test_is_date_before_interpreted_in_team_tz(person_iso: &str, expected_pacific: bool) {
+        let filter = date_filter("2024-06-01", OperatorType::IsDateBefore);
+        assert_eq!(
+            match_date(json!(person_iso), &filter, PACIFIC),
+            expected_pacific
+        );
+
+        // Pre-fix UTC interpretation flips the decision inside the offset window.
+        if person_iso == "2024-06-01T03:00:00Z" {
+            assert!(!match_date(json!(person_iso), &filter, Tz::UTC));
+        }
+    }
+
+    #[test]
+    fn test_is_date_exact_interpreted_in_team_tz() {
+        // "2024-06-01" == 2024-06-01 07:00 UTC for a Pacific team.
+        let filter = date_filter("2024-06-01", OperatorType::IsDateExact);
+
+        assert!(match_date(json!("2024-06-01T07:00:00Z"), &filter, PACIFIC));
+        assert!(!match_date(json!("2024-06-01T00:00:00Z"), &filter, PACIFIC));
+
+        // Under UTC the equality lands on 00:00Z instead — the opposite decision.
+        assert!(match_date(json!("2024-06-01T00:00:00Z"), &filter, Tz::UTC));
+        assert!(!match_date(json!("2024-06-01T07:00:00Z"), &filter, Tz::UTC));
+    }
+
+    #[test]
+    fn test_is_date_after_with_explicit_offset_filter_ignores_team_tz() {
+        // A filter value carrying an explicit offset is honored as written, so the
+        // team timezone must not shift it. "2024-06-01T00:00:00Z" is 00:00 UTC
+        // regardless of the team timezone.
+        let filter = date_filter("2024-06-01T00:00:00Z", OperatorType::IsDateAfter);
+        let person = json!("2024-06-01T03:00:00Z");
+        assert!(match_date(person.clone(), &filter, PACIFIC));
+        assert_eq!(
+            match_date(person.clone(), &filter, PACIFIC),
+            match_date(person, &filter, Tz::UTC)
+        );
+    }
+
+    #[test]
+    fn test_is_date_after_with_epoch_person_value() {
+        // Epoch person values are unambiguous instants; only the naive filter is
+        // reinterpreted. 1717225200 = 2024-06-01 07:00:00 UTC, exactly Pacific
+        // midnight, so it is not strictly after the "2024-06-01" boundary.
+        let filter = date_filter("2024-06-01", OperatorType::IsDateAfter);
+        assert!(!match_date(json!(1717225200_i64), &filter, PACIFIC));
+        // One second later is after the boundary.
+        assert!(match_date(json!(1717225201_i64), &filter, PACIFIC));
+    }
+
+    #[test]
+    fn test_relative_date_filter_evaluates_in_team_tz_without_panicking() {
+        // Relative dates anchor to "now" in the team timezone. The exact instant
+        // depends on wall-clock time, so use a comfortable margin: a person who
+        // joined 30 days ago is "before -7d", one who joined now is not. This
+        // exercises the non-UTC relative path end to end (the deterministic
+        // team-tz anchoring is covered in relative_date.rs).
+        //
+        // Use a non-DST zone (Tokyo, UTC+9 year-round) so "now - 7d" can never land
+        // in a spring-forward wall-clock gap. That keeps the test deterministic
+        // every day of the year — no skip path that would silently drop coverage.
+        const TOKYO: Tz = Tz::Asia__Tokyo;
+        let filter = date_filter("-7d", OperatorType::IsDateBefore);
+
+        let thirty_days_ago = (Utc::now() - chrono::Duration::days(30)).to_rfc3339();
+        let now = Utc::now().to_rfc3339();
+        assert!(match_date(json!(thirty_days_ago), &filter, TOKYO));
+        assert!(!match_date(json!(now), &filter, TOKYO));
+    }
+
+    #[test]
+    fn test_naive_person_value_interpreted_in_team_tz() {
+        // A naive person value is also read in the team timezone (matching InsightsQL,
+        // which wraps both sides in the team tz). Against a fixed absolute filter
+        // this changes the decision: a naive person clock of 08:00 is 15:00 UTC in
+        // Pacific (after the 14:00Z filter) but 08:00 UTC if misread as UTC (before
+        // it). This is the half of the fix that keeps the person side consistent.
+        let filter = date_filter("2024-06-01T14:00:00Z", OperatorType::IsDateAfter);
+        let person = json!("2024-06-01 08:00:00"); // naive wall clock, no offset
+
+        assert!(match_date(person.clone(), &filter, PACIFIC));
+        assert!(!match_date(person, &filter, Tz::UTC));
+    }
+
+    #[test]
+    fn test_naive_person_and_naive_filter_agree_across_timezones() {
+        // When both the person value and the filter are naive, they receive the
+        // same team-tz shift, so the comparison reduces to a wall-clock comparison
+        // that lands the same way in every timezone — matching InsightsQL (which reads
+        // both sides in team tz) and never diverging at the day boundary. This is
+        // the case a filter-only fix would have regressed.
+        let after = date_filter("2024-06-01", OperatorType::IsDateAfter);
+        let before = date_filter("2024-06-01", OperatorType::IsDateBefore);
+        let person = json!("2024-06-01 03:00:00"); // naive: 03:00 is after midnight
+
+        assert!(match_date(person.clone(), &after, PACIFIC));
+        assert!(!match_date(person.clone(), &before, PACIFIC));
+
+        // Identical decision under UTC — both sides move together, so naive+naive
+        // has no day-boundary divergence between the two engines.
+        assert_eq!(
+            match_date(person.clone(), &after, PACIFIC),
+            match_date(person.clone(), &after, Tz::UTC)
+        );
+        assert_eq!(
+            match_date(person.clone(), &before, PACIFIC),
+            match_date(person, &before, Tz::UTC)
+        );
+    }
+
+    #[test]
+    fn test_match_property_person_metadata_uses_sentinel_key() {
+        // PersonMetadata filters look up under a sentinel-prefixed key so they don't
+        // collide with user-set properties of the same name.
+        let filter = PropertyFilter {
+            key: "created_at".to_string(),
+            value: Some(json!("2024-01-01")),
+            operator: Some(OperatorType::IsDateAfter),
+            prop_type: PropertyType::PersonMetadata,
+            group_type_index: None,
+            negation: None,
+            compiled_regex: None,
+            extra: Default::default(),
+        };
+
+        // A user-set "created_at" property must NOT satisfy a person_metadata filter:
+        // the metadata field is intentionally segregated so user-set values can't
+        // override the canonical persons-table value.
+        let user_set_only = HashMap::from([(
+            "created_at".to_string(),
+            json!("2099-01-01"), // Far-future user-set value
+        )]);
+        assert!(match_property(&filter, &user_set_only, false).is_ok());
+        assert!(!match_property(&filter, &user_set_only, false).expect("filter evaluated"));
+
+        // The sentinel-prefixed key (which the matcher injects from Person.created_at)
+        // is what actually resolves the filter.
+        let metadata_only =
+            HashMap::from([(person_metadata_key("created_at"), json!("2025-06-01"))]);
+        assert!(match_property(&filter, &metadata_only, false).expect("filter evaluated"));
     }
 }

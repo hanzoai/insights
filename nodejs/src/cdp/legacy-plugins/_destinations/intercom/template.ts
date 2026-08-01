@@ -12,7 +12,7 @@ export const intercomPlugin: LegacyDestinationPlugin = {
         id: 'plugin-insights-intercom-plugin',
         name: 'Intercom',
         description: 'Send event data to Intercom on Insights events.',
-        icon_url: 'https://raw.githubusercontent.com/hanzoai/insights-intercom-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/Insights/insights-intercom-plugin/main/logo.png',
         category: [],
         code_language: 'javascript',
         code: `return event`,

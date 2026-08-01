@@ -18,12 +18,12 @@ from temporalio.common import RetryPolicy
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from insights.batch_exports.service import BackfillDetails, BatchExportModel
 from insights.sync import database_sync_to_async
 from insights.temporal.common.datastore import DatastoreClient
 from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 from insights.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export, afetch_batch_export_runs
 
+from products.batch_exports.backend.service import BackfillDetails, BatchExportModel
 from products.batch_exports.backend.temporal.batch_exports import (
     finish_batch_export_run,
     iter_records,

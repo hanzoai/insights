@@ -1,6 +1,6 @@
 //! Ingestion events pipeline implementation.
 //!
-//! This module contains the deduplication logic specific to Insights'
+//! This module contains the deduplication logic specific to Insights's
 //! ingestion events (CapturedEvent/RawEvent from the capture service).
 //!
 //! # Event Types

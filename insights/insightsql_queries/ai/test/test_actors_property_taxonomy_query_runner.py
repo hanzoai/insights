@@ -7,8 +7,9 @@ from insights.schema import ActorsPropertyTaxonomyQuery, ActorsPropertyTaxonomyR
 from insights.insightsql_queries.ai.actors_property_taxonomy_query_runner import ActorsPropertyTaxonomyQueryRunner
 from insights.models import PropertyDefinition
 from insights.models.group.util import create_group
-from insights.models.property_definition import PropertyType
 from insights.test.test_utils import create_group_type_mapping_without_created_at
+
+from products.event_definitions.backend.models.property_definition import PropertyType
 
 
 @override_settings(IN_UNIT_TESTING=True)

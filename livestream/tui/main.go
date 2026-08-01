@@ -5,8 +5,8 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/hanzoai/insights/livestream/tui/auth"
-	"github.com/hanzoai/insights/livestream/tui/debug"
+	"github.com/insights/insights/livestream/tui/auth"
+	"github.com/insights/insights/livestream/tui/debug"
 	"github.com/spf13/cobra"
 )
 
@@ -56,7 +56,7 @@ func main() {
 	}
 
 	rootCmd.Flags().StringVar(&token, "token", "", "JWT token (for scripting)")
-	rootCmd.Flags().StringVar(&host, "host", "", "Insights app host (default: https://insights.hanzo.ai, use http://localhost:8000 for local dev)")
+	rootCmd.Flags().StringVar(&host, "host", "", "Insights app host (default: https://app.hanzo.ai, use http://localhost:8000 for local dev)")
 	rootCmd.Flags().StringVar(&livestreamHost, "livestream-host", "", "Livestream service host override (default: http://localhost:8010 for local dev)")
 	rootCmd.Flags().StringVar(&eventType, "event-type", "", "Filter by event type(s), comma-separated")
 	rootCmd.Flags().StringVar(&distinctID, "distinct-id", "", "Filter by distinct ID")

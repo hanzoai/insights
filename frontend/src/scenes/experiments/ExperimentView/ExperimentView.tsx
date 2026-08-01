@@ -1,191 +1,105 @@
 import { useActions, useValues } from 'kea'
 
-import { Tabs, Tag } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
+import { Tab, Tabs } from '@hanzo/elements'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
-import { WebExperimentImplementationDetails } from 'scenes/experiments/WebExperimentImplementationDetails'
+import { FEATURE_FLAGS } from 'lib/constants'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { PendingChangeRequestBanner } from 'scenes/approvals/PendingChangeRequestBanner'
 import { EXPERIMENT_MIN_EXPOSURES_FOR_RESULTS } from 'scenes/experiments/constants'
+import { WebExperimentImplementationDetails } from 'scenes/experiments/WebExperimentImplementationDetails'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import type { CachedExperimentQueryResponse } from '~/queries/schema/schema-general'
-import { ExperimentForm } from '~/scenes/experiments/ExperimentForm'
-import { LegacyExperimentInfo } from '~/scenes/experiments/legacy/LegacyExperimentInfo'
-import { ActivityScope, ExperimentProgressStatus } from '~/types'
+import { LegacyExperimentView } from '~/scenes/experiments/legacy'
+import { ActivityScope } from '~/types'
 
-import { ExperimentImplementationDetails } from '../ExperimentImplementationDetails'
-import { ExperimentMetricModal } from '../Metrics/ExperimentMetricModal'
-import { LegacyMetricModal } from '../Metrics/LegacyMetricModal'
-import { LegacyMetricSourceModal } from '../Metrics/LegacyMetricSourceModal'
-import { LegacySharedMetricModal } from '../Metrics/LegacySharedMetricModal'
-import { MetricSourceModal } from '../Metrics/MetricSourceModal'
-import { SharedMetricModal } from '../Metrics/SharedMetricModal'
-import { experimentMetricModalLogic } from '../Metrics/experimentMetricModalLogic'
-import { sharedMetricModalLogic } from '../Metrics/sharedMetricModalLogic'
-import { MetricsViewLegacy } from '../MetricsView/legacy/MetricsViewLegacy'
-import { VariantDeltaTimeseries } from '../MetricsView/legacy/VariantDeltaTimeseries'
-import { Metrics } from '../MetricsView/new/Metrics'
-import { RunningTimeCalculatorModal } from '../RunningTimeCalculator/RunningTimeCalculatorModal'
-import {
-    ExploreAsInsightButton,
-    ResultsBreakdown,
-    ResultsBreakdownSkeleton,
-    ResultsInsightInfoBanner,
-    ResultsQuery,
-} from '../components/ResultsBreakdown'
 import { SummarizeExperimentButton } from '../components/SummarizeExperimentButton'
 import { SummarizeSessionReplaysButton } from '../components/SummarizeSessionReplaysButton'
+import { EmptyMetricsPanel } from '../ExperimentForm/MetricsPanel/EmptyMetricsPanel'
+import { ExperimentImplementationDetails } from '../ExperimentImplementationDetails'
 import { experimentLogic } from '../experimentLogic'
-import type { ExperimentSceneLogicProps } from '../experimentSceneLogic'
 import { experimentSceneLogic } from '../experimentSceneLogic'
-import { getExperimentStatus } from '../experimentsLogic'
-import { isLegacyExperiment, isLegacyExperimentQuery } from '../utils'
+import { ExperimentMetricModal } from '../Metrics/ExperimentMetricModal'
+import { experimentMetricModalLogic } from '../Metrics/experimentMetricModalLogic'
+import { MetricSourceModal } from '../Metrics/MetricSourceModal'
+import { SharedMetricDetailsModal } from '../Metrics/SharedMetricDetailsModal'
+import { SharedMetricModal } from '../Metrics/SharedMetricModal'
+import { sharedMetricModalLogic } from '../Metrics/sharedMetricModalLogic'
+import { Metrics } from '../MetricsView/new/Metrics'
+import { RecalculationStatus } from '../MetricsView/shared/RecalculationStatus'
+import { isLegacyExperiment } from '../utils'
 import { DistributionModal, DistributionTable } from './DistributionTable'
+import { ExperimentDebugPanel } from './ExperimentExecutionPathComparison'
 import { ExperimentFeedbackTab } from './ExperimentFeedbackTab'
 import { ExperimentHeader } from './ExperimentHeader'
+import { EditConclusionModal } from './ExperimentModals'
+import { ExperimentReplayTab } from './ExperimentReplayTab'
+import { ExperimentWarningBanner } from './ExperimentWarningBanners'
 import { ExposureCriteriaModal } from './ExposureCriteria'
 import { Exposures } from './Exposures'
+import { Hypothesis } from './Hypothesis'
 import { Info } from './Info'
-import { LegacyExperimentHeader } from './LegacyExperimentHeader'
-import { Overview } from './Overview'
+import { LoadingState } from './LoadingState'
+import { MultiVariantBiasWarning } from './MultiVariantBiasWarning'
+import { PageHeaderCustom } from './PageHeader'
 import { ReleaseConditionsModal, ReleaseConditionsTable } from './ReleaseConditionsTable'
-import { SummaryTable } from './SummaryTable'
-import {
-    EditConclusionModal,
-    LegacyExploreButton,
-    LegacyResultsQuery,
-    LoadingState,
-    PageHeaderCustom,
-} from './components'
+import { ResultsNotificationBanner } from './ResultsNotificationBanner'
+import { SettingsTab } from './SettingsTab'
+
+const AiAnalysisTab = (): JSX.Element => {
+    const { experiment, hasMinimumExposureForResults } = useValues(experimentLogic)
+
+    return (
+        <div className="flex flex-col gap-4 items-start">
+            <div className="flex flex-col gap-1 items-start">
+                <SummarizeExperimentButton
+                    disabledReason={
+                        !hasMinimumExposureForResults
+                            ? `Experiment needs at least ${EXPERIMENT_MIN_EXPOSURES_FOR_RESULTS} exposures to summarize results.`
+                            : undefined
+                    }
+                />
+                <p className="text-muted text-xs m-0">
+                    Analyze your experiment's metric results, statistical significance, and variant performance using
+                    AI.
+                </p>
+            </div>
+            <div className="flex flex-col gap-1 items-start">
+                <SummarizeSessionReplaysButton experiment={experiment} />
+                <p className="text-muted text-xs m-0">
+                    Compare session recordings across variants to identify differences in user behavior.
+                </p>
+            </div>
+        </div>
+    )
+}
 
 const MetricsTab = (): JSX.Element => {
-    const {
-        experiment,
-        legacyPrimaryMetricsResults,
-        firstPrimaryMetric,
-        primaryMetricsLengthWithSharedMetrics,
-        hasMinimumExposureForResults,
-        usesNewQueryRunner,
-    } = useValues(experimentLogic)
-    /**
-     * we still use the legacy metric results here. Results on the new format are loaded
-     * in the primaryMetricsResults state key. We'll eventually move into using the new state.
-     */
-    const hasSomeResults = legacyPrimaryMetricsResults?.some((result) => result?.insight)
+    const { experiment, orderedPrimaryMetricsWithResults, orderedSecondaryMetricsWithResults, isExperimentLaunched } =
+        useValues(experimentLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
 
-    const hasSinglePrimaryMetric = primaryMetricsLengthWithSharedMetrics === 1
-
-    const firstPrimaryMetricResult = legacyPrimaryMetricsResults?.[0]
-
-    const hasLegacyResults = legacyPrimaryMetricsResults.some((result) => result != null)
-
-    /**
-     * Show a detailed results if:
-     * - there's a single primary metric
-     * - if the metric has insight results
-     * - if we have the minimum number of exposures
-     * - if it's the first primary metric (?)
-     *
-     * this is only for legacy experiments.
-     */
-    const showResultDetails =
-        hasSomeResults &&
-        hasMinimumExposureForResults &&
-        hasSinglePrimaryMetric &&
-        firstPrimaryMetric &&
-        firstPrimaryMetricResult
+    const hasMetrics = orderedPrimaryMetricsWithResults.length > 0 || orderedSecondaryMetricsWithResults.length > 0
+    const showRecalculationStatus = !!featureFlags[FEATURE_FLAGS.EXPERIMENTS_METRICS_RECALCULATION] && hasMetrics
 
     return (
         <>
-            {usesNewQueryRunner && (
-                <div className="mt-1 mb-4 flex justify-start gap-2">
-                    <SummarizeExperimentButton
-                        disabledReason={
-                            !hasMinimumExposureForResults
-                                ? `Experiment needs at least ${EXPERIMENT_MIN_EXPOSURES_FOR_RESULTS} exposures to summarize results.`
-                                : undefined
-                        }
-                    />
-                    <SummarizeSessionReplaysButton experiment={experiment} />
-                </div>
-            )}
-            {usesNewQueryRunner && (
-                <div className="w-full mb-4">
-                    <Exposures />
-                </div>
-            )}
+            <ResultsNotificationBanner />
 
-            {/* Show overview if there's only a single primary metric */}
-            {hasSinglePrimaryMetric && hasMinimumExposureForResults && (
-                <div className="mb-4 mt-2">
-                    <Overview metricUuid={firstPrimaryMetric?.uuid || ''} />
+            <div className="w-full mb-4 flex flex-col gap-4">
+                <Hypothesis />
+                <div>
+                    <Exposures />
+                    <MultiVariantBiasWarning />
                 </div>
-            )}
-            {/**
-             *  check if we should render the legacy metrics view or the new one
-             */}
-            {isLegacyExperiment(experiment) || hasLegacyResults ? (
-                <>
-                    <MetricsViewLegacy isSecondary={false} />
-                    {showResultDetails && (
-                        <div>
-                            <div className="pb-4">
-                                <SummaryTable metric={firstPrimaryMetric} displayOrder={0} isSecondary={false} />
-                            </div>
-                            {isLegacyExperimentQuery(firstPrimaryMetricResult) ? (
-                                <>
-                                    <div className="flex justify-end">
-                                        <LegacyExploreButton result={firstPrimaryMetricResult} size="xsmall" />
-                                    </div>
-                                    <div className="pb-4">
-                                        <LegacyResultsQuery
-                                            result={firstPrimaryMetricResult || null}
-                                            showTable={true}
-                                        />
-                                    </div>
-                                </>
-                            ) : (
-                                /**
-                                 * altough we don't have a great typeguard here, we know that the result is a CachedExperimentQueryResponse
-                                 * because we're only showing results for experiment queries (legacy check)
-                                 */
-                                <ResultsBreakdown
-                                    result={firstPrimaryMetricResult as CachedExperimentQueryResponse}
-                                    experiment={experiment}
-                                    metricUuid={firstPrimaryMetric?.uuid || ''}
-                                    isPrimary={true}
-                                >
-                                    {({
-                                        query,
-                                        breakdownResults,
-                                        breakdownResultsLoading,
-                                        exposureDifference,
-                                        breakdownLastRefresh,
-                                    }) => (
-                                        <div>
-                                            {breakdownResultsLoading && <ResultsBreakdownSkeleton />}
-                                            {query && breakdownResults && (
-                                                <div>
-                                                    <div className="flex justify-end">
-                                                        <ExploreAsInsightButton query={query} />
-                                                    </div>
-                                                    <ResultsInsightInfoBanner exposureDifference={exposureDifference} />
-                                                    <div className="pb-4">
-                                                        <ResultsQuery
-                                                            query={query}
-                                                            breakdownResults={breakdownResults}
-                                                            breakdownLastRefresh={breakdownLastRefresh}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </ResultsBreakdown>
-                            )}
-                        </div>
-                    )}
-                    <MetricsViewLegacy isSecondary={true} />
-                </>
+            </div>
+
+            {showRecalculationStatus && <RecalculationStatus experiment={experiment} />}
+
+            {/* Modern metrics view */}
+            {!hasMetrics ? (
+                <EmptyMetricsPanel isLaunched={isExperimentLaunched} />
             ) : (
                 <>
                     <Metrics isSecondary={false} />
@@ -195,6 +109,7 @@ const MetricsTab = (): JSX.Element => {
         </>
     )
 }
+
 const CodeTab = (): JSX.Element => {
     const { experiment } = useValues(experimentLogic)
 
@@ -218,39 +133,103 @@ const VariantsTab = (): JSX.Element => {
     )
 }
 
-export function ExperimentView({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId'>): JSX.Element {
-    const { experimentLoading, experimentId, experiment, usesNewQueryRunner, isExperimentDraft, exposureCriteria } =
-        useValues(experimentLogic)
-    const { setExperiment, updateExperimentMetrics, addSharedMetricsToExperiment, removeSharedMetricFromExperiment } =
-        useActions(experimentLogic)
+export function ExperimentView(): JSX.Element {
+    const {
+        experimentLoading,
+        experimentId,
+        experiment,
+        isExperimentDraft,
+        isExperimentLaunched,
+        orderedPrimaryMetricsWithResults,
+        exposureCriteria,
+        showDebugPanel,
+    } = useValues(experimentLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
+    const {
+        setExperiment,
+        setExposureCriteria,
+        updateExposureCriteria,
+        updateExperimentMetrics,
+        addSharedMetricsToExperiment,
+        removeSharedMetricFromExperiment,
+        removeMetric,
+    } = useActions(experimentLogic)
 
-    if (!tabId) {
-        throw new Error('<ExperimentView /> must receive a tabId prop')
-    }
-
-    const { activeTabKey } = useValues(experimentSceneLogic({ tabId }))
-    const { setActiveTabKey } = useActions(experimentSceneLogic({ tabId }))
+    const { activeTabKey } = useValues(experimentSceneLogic)
+    const { setActiveTabKey } = useActions(experimentSceneLogic)
 
     const { closeExperimentMetricModal } = useActions(experimentMetricModalLogic)
     const { closeSharedMetricModal } = useActions(sharedMetricModalLogic)
 
-    /**
-     * We show the create form if the experiment is draft + has no primary metrics. Otherwise,
-     * we show the experiment view.
-     */
-    const allPrimaryMetrics = [
-        ...(experiment.metrics || []),
-        ...(experiment.saved_metrics || []).filter((sm) => sm.metadata.type === 'primary'),
-    ]
-
-    if (
-        !experimentLoading &&
-        getExperimentStatus(experiment) === ExperimentProgressStatus.Draft &&
-        experiment.type === 'product' &&
-        allPrimaryMetrics.length === 0
-    ) {
-        return <ExperimentForm draftExperiment={experiment} tabId={tabId} />
+    // Branch to legacy view for legacy experiments
+    if (!experimentLoading && isLegacyExperiment(experiment)) {
+        return <LegacyExperimentView />
     }
+
+    const tabs: Tab<string>[] = [
+        {
+            key: 'settings',
+            label: 'Settings',
+            content: <SettingsTab />,
+        },
+        {
+            key: 'metrics',
+            label: 'Metrics',
+            content: <MetricsTab />,
+        },
+        // Both AI analysis actions require a launched experiment with primary metrics
+        ...(isExperimentLaunched && orderedPrimaryMetricsWithResults.length > 0
+            ? [
+                  {
+                      key: 'ai_analysis',
+                      label: (
+                          <div className="flex items-center gap-1">
+                              <IconSparkles />
+                              <span>AI analysis</span>
+                          </div>
+                      ),
+                      content: <AiAnalysisTab />,
+                  },
+              ]
+            : []),
+        ...(featureFlags[FEATURE_FLAGS.EXPERIMENT_RECORDINGS_TAB]
+            ? [
+                  {
+                      key: 'recordings',
+                      label: 'Recordings',
+                      content: <ExperimentReplayTab experiment={experiment} />,
+                  },
+              ]
+            : []),
+        ...(!isExperimentDraft
+            ? [
+                  {
+                      key: 'code',
+                      label: 'Code',
+                      content: <CodeTab />,
+                  },
+              ]
+            : []),
+        {
+            key: 'variants',
+            label: 'Variants',
+            content: <VariantsTab />,
+        },
+        {
+            key: 'history',
+            label: 'History',
+            content: <ActivityLog scope={ActivityScope.EXPERIMENT} id={experimentId} />,
+        },
+        ...(experiment.feature_flag
+            ? [
+                  {
+                      key: 'feedback',
+                      label: 'User feedback',
+                      content: <ExperimentFeedbackTab experiment={experiment} />,
+                  },
+              ]
+            : []),
+    ]
 
     return (
         <SceneContent>
@@ -259,124 +238,91 @@ export function ExperimentView({ tabId }: Pick<ExperimentSceneLogicProps, 'tabId
                 <LoadingState />
             ) : (
                 <>
-                    {usesNewQueryRunner ? <Info tabId={tabId} /> : <LegacyExperimentInfo />}
-                    {usesNewQueryRunner ? <ExperimentHeader /> : <LegacyExperimentHeader />}
+                    <ExperimentWarningBanner />
+                    {showDebugPanel && (
+                        <div className="mb-4">
+                            <ExperimentDebugPanel
+                                experimentId={typeof experiment.id === 'number' ? experiment.id : null}
+                            />
+                        </div>
+                    )}
+                    {experiment.feature_flag?.id && (
+                        <PendingChangeRequestBanner
+                            resourceType="feature_flag"
+                            resourceId={experiment.feature_flag.id}
+                            context="experiment"
+                        />
+                    )}
+                    <Info />
+                    <ExperimentHeader />
                     <Tabs
-                        activeKey={activeTabKey}
+                        // Fall back to the default tab if the active one is conditionally hidden
+                        activeKey={tabs.some((tab) => tab.key === activeTabKey) ? activeTabKey : 'metrics'}
                         onChange={(key) => setActiveTabKey(key)}
                         sceneInset
-                        tabs={[
-                            {
-                                key: 'metrics',
-                                label: 'Metrics',
-                                content: <MetricsTab />,
-                            },
-                            ...(!isExperimentDraft
-                                ? [
-                                      {
-                                          key: 'code',
-                                          label: 'Code',
-                                          content: <CodeTab />,
-                                      },
-                                  ]
-                                : []),
-                            {
-                                key: 'variants',
-                                label: 'Variants',
-                                content: <VariantsTab />,
-                            },
-                            {
-                                key: 'history',
-                                label: 'History',
-                                content: <ActivityLog scope={ActivityScope.EXPERIMENT} id={experimentId} />,
-                            },
-                            ...(experiment.feature_flag
-                                ? [
-                                      {
-                                          key: 'feedback',
-                                          label: (
-                                              <div className="flex flex-row">
-                                                  <div>User feedback</div>
-                                                  <Tag className="ml-2 float-right uppercase" type="primary">
-                                                      New
-                                                  </Tag>
-                                              </div>
-                                          ),
-                                          content: <ExperimentFeedbackTab experiment={experiment} />,
-                                      },
-                                  ]
-                                : []),
-                        ]}
+                        // Keep the tab bar full-width, but cap the content under each tab for readability
+                        tabs={tabs.map((tab) =>
+                            'content' in tab
+                                ? {
+                                      ...tab,
+                                      content: <div className="w-full max-w-[1400px] mx-auto">{tab.content}</div>,
+                                  }
+                                : tab
+                        )}
                     />
 
-                    {usesNewQueryRunner ? (
-                        <>
-                            <MetricSourceModal />
-                            <ExperimentMetricModal
-                                experiment={experiment}
-                                exposureCriteria={exposureCriteria}
-                                onSave={(metric, context) => {
-                                    const metrics = experiment[context.field]
-                                    const isNew = !metrics.some(({ uuid }) => uuid === metric.uuid)
+                    {/* Modern experiment modals */}
+                    <MetricSourceModal />
+                    <ExperimentMetricModal
+                        experiment={experiment}
+                        exposureCriteria={exposureCriteria}
+                        onSave={(metric, context) => {
+                            const metrics = experiment[context.field]
+                            const isNew = !metrics.some(({ uuid }) => uuid === metric.uuid)
 
-                                    setExperiment({
-                                        [context.field]: isNew
-                                            ? [...metrics, metric]
-                                            : metrics.map((m) => (m.uuid === metric.uuid ? metric : m)),
-                                    })
+                            setExperiment({
+                                [context.field]: isNew
+                                    ? [...metrics, metric]
+                                    : metrics.map((m) => (m.uuid === metric.uuid ? metric : m)),
+                            })
 
-                                    updateExperimentMetrics()
-                                    closeExperimentMetricModal()
-                                }}
-                                onDelete={(metric, context) => {
-                                    if (!metric.uuid) {
-                                        return
-                                    }
+                            updateExperimentMetrics()
+                            closeExperimentMetricModal()
+                        }}
+                        onDelete={(metric, context) => {
+                            if (!metric.uuid) {
+                                return
+                            }
 
-                                    setExperiment({
-                                        [context.field]: experiment[context.field].filter(
-                                            (m) => m.uuid !== metric.uuid
-                                        ),
-                                    })
-
-                                    updateExperimentMetrics()
-                                    closeExperimentMetricModal()
-                                }}
-                            />
-                            <SharedMetricModal
-                                experiment={experiment}
-                                onSave={(metrics, context) => {
-                                    addSharedMetricsToExperiment(
-                                        metrics.map(({ id }) => id),
-                                        { type: context.type }
-                                    )
-                                    closeSharedMetricModal()
-                                }}
-                                onDelete={(metric) => {
-                                    removeSharedMetricFromExperiment(metric.id)
-                                    closeSharedMetricModal()
-                                }}
-                            />
-                            <ExposureCriteriaModal />
-                            <RunningTimeCalculatorModal />
-                        </>
-                    ) : (
-                        <>
-                            <LegacyMetricSourceModal isSecondary={true} />
-                            <LegacyMetricSourceModal isSecondary={false} />
-                            <LegacySharedMetricModal isSecondary={true} />
-                            <LegacySharedMetricModal isSecondary={false} />
-                            <LegacyMetricModal isSecondary={true} />
-                            <LegacyMetricModal isSecondary={false} />
-                        </>
-                    )}
-
+                            removeMetric(metric.uuid, context.type)
+                            closeExperimentMetricModal()
+                        }}
+                    />
+                    <SharedMetricModal
+                        experiment={experiment}
+                        onSave={(metrics, context) => {
+                            addSharedMetricsToExperiment(
+                                metrics.map(({ id }) => id),
+                                { type: context.type }
+                            )
+                            closeSharedMetricModal()
+                        }}
+                    />
+                    <SharedMetricDetailsModal onDelete={removeSharedMetricFromExperiment} />
+                    <ExposureCriteriaModal
+                        onSave={(exposureCriteria) => {
+                            setExposureCriteria(exposureCriteria)
+                            /**
+                             * this will trigger a save of the experiment and
+                             * a refresh of the results
+                             */
+                            updateExposureCriteria()
+                        }}
+                    />
                     <DistributionModal />
                     <ReleaseConditionsModal />
 
                     <EditConclusionModal />
-
-                    <VariantDeltaTimeseries />
                 </>
             )}
         </SceneContent>

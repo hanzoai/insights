@@ -1,7 +1,10 @@
 from datetime import datetime
 
-from insights.test.base import BaseTest
+from insights.test.base import BaseTest, DatastoreTestMixin
 
+from parameterized import parameterized
+
+from insights.insightsql import ast
 from insights.insightsql.errors import QueryError, ResolutionError
 from insights.insightsql.escape_sql import (
     escape_datastore_identifier,
@@ -10,8 +13,23 @@ from insights.insightsql.escape_sql import (
     escape_insightsql_string,
     escape_postgres_identifier,
 )
+from insights.insightsql.parser import parse_expr
 
-from insights.models.utils import UUIDT
+from insights.datastore.client.execute import sync_execute
+from insights.uuidt import UUIDT
+
+_ROUNDTRIP_IDENTIFIER_SAMPLES = [
+    "back`tick",
+    "a``b",
+    "`leading",
+    "trailing`",
+    "``",
+    "a\\b",
+    "a\\`b",
+    "`a\\`b`",
+    "with space",
+    "a.b.c",
+]
 
 
 class TestPrintString(BaseTest):
@@ -25,7 +43,7 @@ class TestPrintString(BaseTest):
         self.assertEqual(escape_insightsql_identifier("a.b.c"), "`a.b.c`")
         self.assertEqual(escape_insightsql_identifier("a-b-c"), "`a-b-c`")
         self.assertEqual(escape_insightsql_identifier("a#$#"), "`a#$#`")
-        self.assertEqual(escape_insightsql_identifier("back`tick"), "`back\\`tick`")
+        self.assertEqual(escape_insightsql_identifier("back`tick"), "`back``tick`")
         self.assertEqual(escape_insightsql_identifier("single'quote"), "`single'quote`")
         self.assertEqual(escape_insightsql_identifier('double"quote'), '`double"quote`')
         self.assertEqual(
@@ -43,13 +61,28 @@ class TestPrintString(BaseTest):
         self.assertEqual(escape_datastore_identifier("a.b.c"), "`a.b.c`")
         self.assertEqual(escape_datastore_identifier("a-b-c"), "`a-b-c`")
         self.assertEqual(escape_datastore_identifier("a#$#"), "`a#$#`")
-        self.assertEqual(escape_datastore_identifier("back`tick"), "`back\\`tick`")
+        self.assertEqual(escape_datastore_identifier("back`tick"), "`back``tick`")
         self.assertEqual(escape_datastore_identifier("single'quote"), "`single'quote`")
         self.assertEqual(escape_datastore_identifier('double"quote'), '`double"quote`')
         self.assertEqual(
             escape_datastore_identifier("other escapes: \b \f \n \t \0 \a \v \\"),
             "`other escapes: \\b \\f \\n \\t \\0 \\a \\v \\\\`",
         )
+
+    @parameterized.expand(
+        [
+            (f"{label}-{backend}-{i}", escape_fn, backend, sample)
+            for label, escape_fn in [("insightsql", escape_insightsql_identifier), ("datastore", escape_datastore_identifier)]
+            for backend in ["rust-py", "cpp-json"]
+            for i, sample in enumerate(_ROUNDTRIP_IDENTIFIER_SAMPLES)
+        ]
+    )
+    def test_identifier_roundtrips_through_production_parser(self, _name, escape_fn, backend, identifier):
+        # Round-trips through the real parsers, not the lenient parse_string_literal_text; the datastore case still parses via the InsightsQL parser (shared grammar), not Datastore itself.
+        escaped = escape_fn(identifier)
+        node = parse_expr(escaped, backend=backend)
+        assert isinstance(node, ast.Field), f"{identifier!r} escaped to {escaped!r} did not parse to a Field"
+        self.assertEqual(node.chain, [identifier], f"{identifier!r} escaped to {escaped!r} did not round-trip")
 
     def test_sanitize_postgres_identifier(self):
         self.assertEqual(escape_postgres_identifier("a"), "a")
@@ -177,3 +210,13 @@ class TestPrintString(BaseTest):
         with self.assertRaises(ResolutionError) as context:
             escape_datastore_string({"a": 1, "b": 2})  # type: ignore
         self.assertTrue("SQLValueEscaper has no method visit_dict" in str(context.exception))
+
+
+class TestDatastoreIdentifierExecution(DatastoreTestMixin, BaseTest):
+    @parameterized.expand([(f"sample-{i}", sample) for i, sample in enumerate(_ROUNDTRIP_IDENTIFIER_SAMPLES)])
+    def test_escaped_identifier_round_trips_through_datastore(self, _name, identifier):
+        # Datastore, not just the InsightsQL parser, is the real consumer of escape_datastore_identifier:
+        # it must parse the escaped alias and report the original name back.
+        escaped = escape_datastore_identifier(identifier)
+        _, columns = sync_execute(f"SELECT 1 AS {escaped}", with_column_types=True)
+        self.assertEqual(columns[0][0], identifier)

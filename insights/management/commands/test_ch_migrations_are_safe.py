@@ -89,7 +89,8 @@ class Command(BaseCommand):
             logger.warning("Not running migration-specific checks. See .github/workflows/ci-backend.yml for usage.")
             return
 
-        migrations = [m.strip() for m in sys.stdin.readlines() if m.strip()]
+        migration_path_re = re.compile(r"^[a-z]+/datastore/migrations/[0-9]+_[a-zA-Z_0-9]+\.py$")
+        migrations = [m.strip() for m in sys.stdin.readlines() if m.strip() and migration_path_re.match(m.strip())]
 
         if len(migrations) > 1:
             logger.error("Multiple migrations in PR. Please limit to one migration per PR.")
@@ -105,7 +106,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _check_migration_against_master(new_migration: str) -> None:
-        """Check that new migration number doesn't conflict with migrations on main."""
+        """Check that new migration number doesn't conflict with migrations on master."""
         repo = Repo(os.getcwd())
 
         try:
@@ -114,7 +115,7 @@ class Command(BaseCommand):
             original_ref = repo.head.commit.hexsha
 
         try:
-            repo.git.checkout("main")
+            repo.git.checkout("master")
             master_migrations = os.listdir(MIGRATIONS_DIR)
         finally:
             repo.git.checkout(original_ref)
@@ -135,5 +136,5 @@ class Command(BaseCommand):
 
         collisions = [f"{idx}_{n}" for idx, n in old_migrations if idx == index]
         if collisions:
-            logger.error(f"Migration {index}_{name} conflicts with main: {', '.join(collisions)}")
+            logger.error(f"Migration {index}_{name} conflicts with master: {', '.join(collisions)}")
             sys.exit(1)

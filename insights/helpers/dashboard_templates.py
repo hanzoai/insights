@@ -1,14 +1,24 @@
+from __future__ import annotations
+
 from collections.abc import Callable
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Optional
+
+from django.db.models import Q
 
 import structlog
 
 from insights.constants import ENRICHED_DASHBOARD_INSIGHT_IDENTIFIER
-from insights.models.dashboard import Dashboard
-from insights.models.dashboard_templates import DashboardTemplate
-from insights.models.dashboard_tile import DashboardTile, Text
-from insights.models.insight import Insight
+from insights.models.scoping import team_scope
 from insights.models.tag import Tag
+
+from products.dashboards.backend.models.dashboard import Dashboard
+from products.dashboards.backend.models.dashboard_templates import DashboardTemplate
+from products.dashboards.backend.models.dashboard_tile import ButtonTile, DashboardTile, Text
+from products.dashboards.backend.models.dashboard_widget import DashboardWidget
+from products.product_analytics.backend.models.insight import Insight
+
+if TYPE_CHECKING:
+    from insights.rbac.user_access_control import UserAccessControl
 
 DASHBOARD_COLORS: list[str] = ["white", "blue", "green", "purple", "black"]
 
@@ -465,11 +475,34 @@ DASHBOARD_TEMPLATES: dict[str, Callable] = {
 # end of area to be removed
 
 
-def create_from_template(dashboard: Dashboard, template: DashboardTemplate, user=None) -> None:
+def dashboard_template_from_creation_payload(template: dict[str, Any]) -> DashboardTemplate:
+    """Build an unsaved DashboardTemplate from create_from_template_json body.
+
+    The client may send API-shaped objects (e.g. nested ``created_by``). Only fields used for
+    dashboard instantiation are passed through; read-only / relation blobs are not unpacked into ``__init__``.
+    """
+    return DashboardTemplate(
+        template_name=template["template_name"],
+        dashboard_description=template["dashboard_description"],
+        dashboard_filters=template["dashboard_filters"],
+        tiles=template["tiles"],
+        tags=template.get("tags"),
+        variables=template.get("variables"),
+    )
+
+
+def create_from_template(
+    dashboard: Dashboard,
+    template: DashboardTemplate,
+    user=None,
+    *,
+    user_access_control: UserAccessControl | None = None,
+) -> None:
     if not dashboard.name or dashboard.name == "":
         dashboard.name = template.template_name
     dashboard.filters = template.dashboard_filters
-    dashboard.description = template.dashboard_description
+    dashboard.description = template.dashboard_description or ""
+
     for template_tag in template.tags or []:
         tag, _ = Tag.objects.get_or_create(
             name=template_tag,
@@ -479,8 +512,9 @@ def create_from_template(dashboard: Dashboard, template: DashboardTemplate, user
         dashboard.tagged_items.create(tag_id=tag.id)
     dashboard.save()
 
-    for template_tile in template.tiles:
-        if template_tile["type"] == "INSIGHT":
+    for template_tile in template.tiles or []:
+        tile_type = template_tile.get("type")
+        if tile_type == "INSIGHT":
             query = template_tile.get("query", None)
             _create_tile_for_insight(
                 dashboard,
@@ -491,18 +525,48 @@ def create_from_template(dashboard: Dashboard, template: DashboardTemplate, user
                 layouts=template_tile.get("layouts"),
                 user=user,
             )
-        elif template_tile["type"] == "TEXT":
+        elif tile_type == "TEXT":
             _create_tile_for_text(
                 dashboard,
                 color=template_tile.get("color"),
                 layouts=template_tile.get("layouts"),
                 body=template_tile.get("body"),
+                transparent_background=template_tile.get("transparent_background"),
+            )
+        elif tile_type == "BUTTON":
+            button = {**template_tile, **(template_tile.get("button_tile") or {})}
+            _create_tile_for_button(
+                dashboard,
+                color=template_tile.get("color"),
+                layouts=template_tile.get("layouts"),
+                url=button.get("url", ""),
+                text=button.get("text", ""),
+                placement=button.get("placement", "left"),
+                style=button.get("style", "primary"),
+                transparent_background=template_tile.get("transparent_background"),
+            )
+        elif tile_type == "WIDGET":
+            _create_tile_for_widget(
+                dashboard,
+                widget_type=template_tile.get("widget_type", ""),
+                config=template_tile.get("config", {}),
+                color=template_tile.get("color"),
+                layouts=template_tile.get("layouts"),
+                transparent_background=template_tile.get("transparent_background"),
+                user=user,
+                user_access_control=user_access_control,
             )
         else:
             logger.error("dashboard_templates.creation.unknown_type", template=template)
 
 
-def _create_tile_for_text(dashboard: Dashboard, body: str, layouts: dict, color: Optional[str]) -> None:
+def _create_tile_for_text(
+    dashboard: Dashboard,
+    body: str,
+    layouts: dict,
+    color: Optional[str],
+    transparent_background: Optional[bool] = None,
+) -> None:
     text = Text.objects.create(
         team=dashboard.team,
         body=body,
@@ -510,8 +574,77 @@ def _create_tile_for_text(dashboard: Dashboard, body: str, layouts: dict, color:
     DashboardTile.objects.create(
         text=text,
         dashboard=dashboard,
+        team_id=dashboard.team_id,
         layouts=layouts,
         color=color,
+        transparent_background=transparent_background,
+    )
+
+
+def _create_tile_for_button(
+    dashboard: Dashboard,
+    url: str,
+    text: str,
+    layouts: dict,
+    color: Optional[str],
+    placement: str = "left",
+    style: str = "primary",
+    transparent_background: Optional[bool] = None,
+) -> None:
+    button_tile = ButtonTile.objects.create(
+        team=dashboard.team,
+        url=url,
+        text=text,
+        placement=placement,
+        style=style,
+    )
+    DashboardTile.objects.create(
+        button_tile=button_tile,
+        dashboard=dashboard,
+        team_id=dashboard.team_id,
+        layouts=layouts,
+        color=color,
+        transparent_background=transparent_background,
+    )
+
+
+def _create_tile_for_widget(
+    dashboard: Dashboard,
+    widget_type: str,
+    config: dict,
+    layouts: dict | None,
+    color: Optional[str],
+    transparent_background: Optional[bool] = None,
+    user=None,
+    *,
+    user_access_control: UserAccessControl | None = None,
+) -> None:
+    from products.dashboards.backend.widget_create import (
+        prepare_widget_tile_create,  # noqa: PLC0415 — breaks insights.models import cycle
+    )
+
+    normalized_widget_type, validated_config = prepare_widget_tile_create(
+        team=dashboard.team,
+        widget_type=widget_type,
+        config=config,
+        user=user,
+        user_access_control=user_access_control,
+    )
+    with team_scope(dashboard.team_id):
+        widget = DashboardWidget.objects.create(
+            team=dashboard.team,
+            widget_type=normalized_widget_type,
+            config=validated_config,
+            created_by=user,
+            last_modified_by=user,
+        )
+    DashboardTile.objects.create(
+        widget=widget,
+        dashboard=dashboard,
+        team_id=dashboard.team_id,
+        layouts=layouts or {},
+        color=color,
+        transparent_background=transparent_background,
     )
 
 
@@ -536,16 +669,28 @@ def _create_tile_for_insight(
     DashboardTile.objects.create(
         insight=insight,
         dashboard=dashboard,
+        team_id=dashboard.team_id,
         layouts=layouts,
         color=color,
     )
 
 
-def create_dashboard_from_template(template_key: str, dashboard: Dashboard) -> None:
+def create_dashboard_from_template(
+    template_key: str,
+    dashboard: Dashboard,
+    user=None,
+    *,
+    user_access_control: UserAccessControl | None = None,
+) -> None:
     if template_key in DASHBOARD_TEMPLATES:
         return DASHBOARD_TEMPLATES[template_key](dashboard)
 
-    template = DashboardTemplate.objects.filter(template_name=template_key).first()
+    template = DashboardTemplate.objects.filter(
+        Q(team_id=dashboard.team_id)
+        | Q(scope=DashboardTemplate.Scope.GLOBAL)
+        | Q(scope=DashboardTemplate.Scope.ORGANIZATION, team__organization_id=dashboard.team.organization_id),
+        template_name=template_key,
+    ).first()
     if not template:
         original_template = DashboardTemplate.original_template()
         if template_key == original_template.template_name:
@@ -553,11 +698,85 @@ def create_dashboard_from_template(template_key: str, dashboard: Dashboard) -> N
         else:
             raise AttributeError(f"Invalid template key `{template_key}` provided.")
 
-    create_from_template(dashboard, template)
+    create_from_template(dashboard, template, user, user_access_control=user_access_control)
 
 
 FEATURE_FLAG_TOTAL_VOLUME_INSIGHT_NAME = "Feature Flag Called Total Volume"
 FEATURE_FLAG_UNIQUE_USERS_INSIGHT_NAME = "Feature Flag calls made by unique users per variant"
+
+
+def _get_aggregation_entity_labels(feature_flag) -> tuple[str | None, str | None]:
+    group_type_index = feature_flag.aggregation_group_type_index
+    if group_type_index is None:
+        return None, None
+
+    from insights.models.group_type_mapping import GroupTypeMapping, get_group_type_mapping_instance
+
+    try:
+        mapping = get_group_type_mapping_instance(
+            feature_flag.team.project_id,
+            group_type_index,
+            team=feature_flag.team,
+        )
+    except GroupTypeMapping.DoesNotExist:
+        return "group", "groups"
+
+    singular = mapping.name_singular or mapping.group_type
+    plural = mapping.name_plural or f"{mapping.group_type}s"
+    return singular, plural
+
+
+def _build_feature_flag_called_property_group(feature_flag) -> dict[str, Any]:
+    filter_values: list[dict[str, Any]] = [
+        {
+            "key": "$feature_flag",
+            "operator": "exact",
+            "type": "event",
+            "value": feature_flag.key,
+        }
+    ]
+    group_type_index = feature_flag.aggregation_group_type_index
+    if group_type_index is not None:
+        filter_values.append(
+            {
+                "key": f"$group_{group_type_index}",
+                "operator": "is_set",
+                "type": "event",
+                "value": "is_set",
+            }
+        )
+
+    return {
+        "type": "AND",
+        "values": [
+            {
+                "type": "AND",
+                "values": filter_values,
+            }
+        ],
+    }
+
+
+def _get_feature_flag_unique_calls_series(feature_flag) -> dict[str, Any]:
+    series: dict[str, Any] = {
+        "event": "$feature_flag_called",
+        "kind": "EventsNode",
+        "name": "$feature_flag_called",
+    }
+    group_type_index = feature_flag.aggregation_group_type_index
+    if group_type_index is not None:
+        series["math"] = "unique_group"
+        series["math_group_type_index"] = group_type_index
+    else:
+        series["math"] = "dau"
+    return series
+
+
+def _get_feature_flag_unique_calls_insight_name(feature_flag) -> str:
+    _, plural = _get_aggregation_entity_labels(feature_flag)
+    if plural is None:
+        return FEATURE_FLAG_UNIQUE_USERS_INSIGHT_NAME
+    return f"Feature Flag calls made by unique {plural} per variant"
 
 
 def create_feature_flag_dashboard(feature_flag, dashboard: Dashboard, user) -> None:
@@ -574,7 +793,7 @@ def create_feature_flag_dashboard(feature_flag, dashboard: Dashboard, user) -> N
     _create_tile_for_insight(
         dashboard,
         name=FEATURE_FLAG_TOTAL_VOLUME_INSIGHT_NAME,
-        description=_get_feature_flag_total_volume_insight_description(feature_flag.key),
+        description=_get_feature_flag_total_volume_insight_description(feature_flag),
         query={
             "kind": "InsightVizNode",
             "source": {
@@ -583,22 +802,7 @@ def create_feature_flag_dashboard(feature_flag, dashboard: Dashboard, user) -> N
                 "filterTestAccounts": False,
                 "interval": "day",
                 "kind": "TrendsQuery",
-                "properties": {
-                    "type": "AND",
-                    "values": [
-                        {
-                            "type": "AND",
-                            "values": [
-                                {
-                                    "key": "$feature_flag",
-                                    "operator": "exact",
-                                    "type": "event",
-                                    "value": feature_flag.key,
-                                }
-                            ],
-                        }
-                    ],
-                },
+                "properties": _build_feature_flag_called_property_group(feature_flag),
                 "series": [{"event": "$feature_flag_called", "kind": "EventsNode", "name": "$feature_flag_called"}],
                 "trendsFilter": {
                     "aggregationAxisFormat": "numeric",
@@ -630,8 +834,8 @@ def create_feature_flag_dashboard(feature_flag, dashboard: Dashboard, user) -> N
 
     _create_tile_for_insight(
         dashboard,
-        name=FEATURE_FLAG_UNIQUE_USERS_INSIGHT_NAME,
-        description=_get_feature_flag_unique_users_insight_description(feature_flag.key),
+        name=_get_feature_flag_unique_calls_insight_name(feature_flag),
+        description=_get_feature_flag_unique_calls_insight_description(feature_flag),
         query={
             "kind": "InsightVizNode",
             "source": {
@@ -640,30 +844,8 @@ def create_feature_flag_dashboard(feature_flag, dashboard: Dashboard, user) -> N
                 "filterTestAccounts": False,
                 "interval": "day",
                 "kind": "TrendsQuery",
-                "properties": {
-                    "type": "AND",
-                    "values": [
-                        {
-                            "type": "AND",
-                            "values": [
-                                {
-                                    "key": "$feature_flag",
-                                    "operator": "exact",
-                                    "type": "event",
-                                    "value": feature_flag.key,
-                                }
-                            ],
-                        }
-                    ],
-                },
-                "series": [
-                    {
-                        "event": "$feature_flag_called",
-                        "kind": "EventsNode",
-                        "math": "dau",
-                        "name": "$feature_flag_called",
-                    }
-                ],
+                "properties": _build_feature_flag_called_property_group(feature_flag),
+                "series": [_get_feature_flag_unique_calls_series(feature_flag)],
                 "trendsFilter": {
                     "aggregationAxisFormat": "numeric",
                     "display": "ActionsTable",
@@ -855,6 +1037,7 @@ def create_group_type_mapping_detail_dashboard(group_type_mapping, user) -> Dash
         tile = DashboardTile.objects.create(
             insight=insight,
             dashboard=dashboard,
+            team_id=dashboard.team_id,
             layouts={
                 "sm": {"h": 5, "w": 6, "x": x, "y": y, "minH": 1, "minW": 1},
                 "xs": {"h": 5, "w": 1, "x": 0, "y": 0, "minH": 1, "minW": 1},
@@ -879,12 +1062,73 @@ def create_group_type_mapping_detail_dashboard(group_type_mapping, user) -> Dash
     return dashboard
 
 
-def _get_feature_flag_total_volume_insight_description(feature_flag_key: str) -> str:
-    return f"Shows the number of total calls made on feature flag with key: {feature_flag_key}"
+def create_data_ops_dashboard(team, user) -> Dashboard:
+    """
+    Creates the default data ops overview dashboard for a team.
+    Seeded with a starter tile — users can add more to track sync health, row counts, etc.
+    """
+    dashboard = Dashboard.objects.create(
+        name="Data ops overview",
+        description="Your data ops overview. Add insights to track sync health, row counts, and anything else you care about.",
+        team=team,
+        created_by=user,
+        creation_mode="template",
+    )
+
+    _create_tile_for_insight(
+        dashboard,
+        name="Events ingested",
+        description="",
+        query={
+            "kind": "InsightVizNode",
+            "source": {
+                "kind": "TrendsQuery",
+                "series": [
+                    {
+                        "kind": "EventsNode",
+                        "math": "total",
+                        "name": "All events",
+                        "event": None,
+                    }
+                ],
+                "version": 2,
+                "interval": "hour",
+                "dateRange": {
+                    "date_to": None,
+                    "date_from": "-24h",
+                    "explicitDate": False,
+                },
+                "trendsFilter": {"display": "BoldNumber"},
+                "compareFilter": {"compare": True, "compare_to": "-1w"},
+            },
+        },
+        layouts={
+            "sm": {
+                "h": 3,
+                "w": 2,
+                "x": 0,
+                "y": 0,
+                "minH": 1,
+                "minW": 1,
+            },
+        },
+        color=None,
+        user=user,
+    )
+
+    return dashboard
 
 
-def _get_feature_flag_unique_users_insight_description(feature_flag_key: str) -> str:
-    return f"Shows the number of unique user calls made on feature flag per variant with key: {feature_flag_key}"
+def _get_feature_flag_total_volume_insight_description(feature_flag, *, key: str | None = None) -> str:
+    return f"Shows the number of total calls made on feature flag with key: {key or feature_flag.key}"
+
+
+def _get_feature_flag_unique_calls_insight_description(feature_flag, *, key: str | None = None) -> str:
+    singular, _ = _get_aggregation_entity_labels(feature_flag)
+    flag_key = key or feature_flag.key
+    if singular is None:
+        return f"Shows the number of unique user calls made on feature flag per variant with key: {flag_key}"
+    return f"Shows the number of unique {singular} calls made on feature flag per variant with key: {flag_key}"
 
 
 def update_feature_flag_dashboard(feature_flag, old_key: str) -> None:
@@ -898,24 +1142,33 @@ def update_feature_flag_dashboard(feature_flag, old_key: str) -> None:
     if total_volume_insight:
         _update_tile_with_new_key(
             total_volume_insight,
-            feature_flag.key,
+            feature_flag,
             old_key,
             _get_feature_flag_total_volume_insight_description,
         )
 
-    unique_users_insight = dashboard.insights.filter(name=FEATURE_FLAG_UNIQUE_USERS_INSIGHT_NAME).first()
-    if unique_users_insight:
+    unique_calls_insight = dashboard.insights.filter(
+        name=_get_feature_flag_unique_calls_insight_name(feature_flag)
+    ).first()
+    if unique_calls_insight is None:
+        unique_calls_insight = dashboard.insights.filter(name=FEATURE_FLAG_UNIQUE_USERS_INSIGHT_NAME).first()
+    if unique_calls_insight:
         _update_tile_with_new_key(
-            unique_users_insight,
-            feature_flag.key,
+            unique_calls_insight,
+            feature_flag,
             old_key,
-            _get_feature_flag_unique_users_insight_description,
+            _get_feature_flag_unique_calls_insight_description,
         )
 
 
-def _update_tile_with_new_key(insight, new_key: str, old_key: str, descriptionFunction: Callable[[str], str]) -> None:
-    old_description = descriptionFunction(old_key)
-    new_description = descriptionFunction(new_key)
+def _update_tile_with_new_key(
+    insight,
+    feature_flag,
+    old_key: str,
+    description_fn: Callable[..., str],
+) -> None:
+    old_description = description_fn(feature_flag, key=old_key)
+    new_description = description_fn(feature_flag, key=feature_flag.key)
 
     if insight.description != old_description:  # We don't touch insights that have been manually edited
         return
@@ -927,14 +1180,15 @@ def _update_tile_with_new_key(insight, new_key: str, old_key: str, descriptionFu
 
         property_group = property_values[0]
         values = property_group.get("values", [])
-        # Only proceed if there's exactly one value and it's a feature flag
-        if len(values) == 1 and values[0].get("key") == "$feature_flag" and values[0].get("value") == old_key:
-            values[0]["value"] = new_key
-            insight.query = insight.query  # Trigger field update
-            # Only update the insight if it matches what we expect for the system created insights
-            insight.description = new_description
-            insight.save()
+        feature_flag_filter = next((value for value in values if value.get("key") == "$feature_flag"), None)
+        if feature_flag_filter is None or feature_flag_filter.get("value") != old_key:
             return
+
+        feature_flag_filter["value"] = feature_flag.key
+        insight.query = insight.query  # Trigger field update
+        # Only update the insight if it matches what we expect for the system created insights
+        insight.description = new_description
+        insight.save()
 
 
 def add_enriched_insights_to_feature_flag_dashboard(feature_flag, dashboard: Dashboard) -> None:

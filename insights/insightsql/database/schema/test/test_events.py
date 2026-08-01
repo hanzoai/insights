@@ -3,7 +3,7 @@ from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.models.utils import uuid7
+from insights.uuidt import uuid7
 
 
 class TestEvents(DatastoreTestMixin, APIBaseTest):

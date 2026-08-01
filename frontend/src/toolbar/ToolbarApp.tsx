@@ -6,8 +6,10 @@ import { Slide, ToastContainer } from 'react-toastify'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { useSecondRender } from 'lib/hooks/useSecondRender'
 
-import { ToolbarContainer } from '~/toolbar/ToolbarContainer'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
+import { ToolbarContainer } from '~/toolbar/ToolbarContainer'
+import { toolbarLogger } from '~/toolbar/toolbarLogger'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { ToolbarProps } from '~/types'
 
 import { TOOLBAR_ID } from './utils'
@@ -36,15 +38,42 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
                   const styleLink = document.createElement('link')
                   styleLink.rel = 'stylesheet'
                   styleLink.type = 'text/css'
-                  // toolbar.js is served from the Insights CDN, this has a TTL of 24 hours.
-                  // the toolbar asset includes a rotating "token" that is valid for 5 minutes.
-                  const fiveMinutesInMillis = 5 * 60 * 1000
-                  // this ensures that we bust the cache periodically
-                  const timestampToNearestFiveMinutes =
-                      Math.floor(Date.now() / fiveMinutesInMillis) * fiveMinutesInMillis
-                  // Load CSS from API host (where static assets are served, same place as the JS was loaded from)
-                  styleLink.href = `${apiHost}/static/toolbar.css?t=${timestampToNearestFiveMinutes}`
+
+                  // The stylesheet is the app entry's CSS, emitted as a hashless copy inside
+                  // dist/toolbar/ next to the JS. It must be fetched from there — its url()
+                  // references (fonts) are relative, so they only resolve alongside the
+                  // toolbar/assets/ directory it was built with.
+                  //
+                  // When __POSTFN_TOOLBAR_PUBLIC_PATH__ is baked in at build
+                  // time (insights-js versioned bundle), load the CSS from the
+                  // same versioned URL as the JS bundle. The version is the
+                  // cache key, so no cache-busting query param is needed.
+                  //
+                  // Otherwise (i.e. insights/insights's own deploys), fall back to
+                  // serving it from the API host alongside toolbar.js, with a
+                  // 5-minute cache-buster on the unversioned URL.
+                  if (__POSTFN_TOOLBAR_PUBLIC_PATH__) {
+                      styleLink.href = `${__POSTFN_TOOLBAR_PUBLIC_PATH__}toolbar/toolbar-app.css`
+                  } else {
+                      const fiveMinutesInMillis = 5 * 60 * 1000
+                      const timestampToNearestFiveMinutes =
+                          Math.floor(Date.now() / fiveMinutesInMillis) * fiveMinutesInMillis
+                      styleLink.href = `${apiHost}/static/toolbar/toolbar-app.css?t=${timestampToNearestFiveMinutes}`
+                  }
+
                   styleLink.onload = () => setDidLoadStyles(true)
+                  // Without onerror the toolbar silently stays invisible when the
+                  // CSS 404s (didLoadStyles never flips to true). That masks
+                  // misconfigured apiHost / rejected URLs. A failed stylesheet
+                  // request is expected on customer pages (ad blockers, offline,
+                  // misconfigured hosts), so surface it via logger + telemetry -
+                  // not error tracking - and render the toolbar anyway; missing
+                  // styles is a worse UX than nothing.
+                  styleLink.onerror = () => {
+                      toolbarLogger.error('config', 'Failed to load toolbar.css', { href: styleLink.href })
+                      toolbarInsightsJS.capture('toolbar css load failed', { href: styleLink.href })
+                      setDidLoadStyles(true)
+                  }
                   const shadowRoot =
                       shadowRef.current?.shadowRoot || window.document.getElementById(TOOLBAR_ID)?.shadowRoot
                   shadowRoot?.getElementById('insights-toolbar-styles')?.appendChild(styleLink)
@@ -56,7 +85,7 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
     // which conflicts with our toolbar's internal mouse down listeners
     //
     // To workaround that we simply prevent the event from bubbling further than the toolbar
-    // See https://github.com/hanzoai/insights-js/issues/1425
+    // See https://github.com/Insights/insights-js/issues/1425
     const onMouseDown = ({ nativeEvent: event }: React.MouseEvent<HTMLDivElement>): void => {
         event.stopImmediatePropagation()
     }
@@ -66,13 +95,7 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
             <root.div id={TOOLBAR_ID} className="ph-no-capture" ref={shadowRef} onMouseDown={onMouseDown}>
                 <div id="insights-toolbar-styles" />
                 {didRender && (didLoadStyles || props.disableExternalStyles) ? <ToolbarContainer /> : null}
-                <ToastContainer
-                    autoClose={60000}
-                    transition={Slide}
-                    closeOnClick={false}
-                    draggable={false}
-                    position="bottom-center"
-                />
+                <ToastContainer autoClose={60000} transition={Slide} position="bottom-center" />
             </root.div>
         </>
     )

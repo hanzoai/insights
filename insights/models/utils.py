@@ -1,17 +1,17 @@
 import re
 import json
-import uuid
 import string
+import hashlib
 import secrets
 import datetime
-from collections import defaultdict, namedtuple
+from collections import namedtuple
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from decimal import Decimal
-from time import time, time_ns
-from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
+from django.contrib.auth.hashers import PBKDF2PasswordHasher
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, connections, models, transaction
 from django.db.backends.ddl_references import Statement
@@ -20,132 +20,19 @@ from django.db.models import Q, Subquery, UniqueConstraint
 from django.db.models.constraints import BaseConstraint
 from django.utils.text import slugify
 
-from insights.insightsql import ast
-
 from insights.constants import MAX_SLUG_LENGTH
-from insights.person_db_router import PERSONS_DB_MODELS
+from insights.uuidt import UUIDT, uuid7
 
 if TYPE_CHECKING:
-    from random import Random
+    from insights.insightsql import ast
 
 T = TypeVar("T")
 
 BASE62 = string.digits + string.ascii_letters  # All lowercase ASCII letters + all uppercase ASCII letters + digits
-
-
-class UUIDT(uuid.UUID):
-    """
-    Deprecated, you probably want to use UUIDv7 instead. As of May 2024 the latest RFC with the UUIv7 spec is at
-    Proposed Standard (see RFC9562 https://www.rfc-editor.org/rfc/rfc9562#name-uuid-version-7). This class was written
-    well before that, is still in use in Insights, but should not be used for new columns / models / features / etc.
-
-    UUID (mostly) sortable by generation time.
-
-    This doesn't adhere to any official UUID version spec, but it is superior as a primary key:
-    to incremented integers (as they can reveal sensitive business information about usage volumes and patterns),
-    to UUID v4 (as the complete randomness of v4 makes its indexing performance suboptimal),
-    and to UUID v1 (as despite being time-based it can't be used practically for sorting by generation time).
-
-    Order can be messed up if system clock is changed or if more than 65 536 IDs are generated per millisecond
-    (that's over 5 trillion events per day), but it should be largely safe to assume that these are time-sortable.
-
-    Anatomy:
-    - 6 bytes - Unix time milliseconds unsigned integer
-    - 2 bytes - autoincremented series unsigned integer (per millisecond, rolls over to 0 after reaching 65 535 UUIDs in one ms)
-    - 8 bytes - securely random gibberish
-
-    Loosely based on Segment's KSUID (https://github.com/segmentio/ksuid) and on Twitter's snowflake ID
-    (https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake.html).
-    """
-
-    current_series_per_ms: dict[int, int] = defaultdict(int)
-
-    def __init__(
-        self,
-        unix_time_ms: Optional[int] = None,
-        uuid_str: Optional[str] = None,
-        *,
-        seeded_random: Optional["Random"] = None,
-    ) -> None:
-        if uuid_str and self.is_valid_uuid(uuid_str):
-            super().__init__(uuid_str)
-            return
-
-        if unix_time_ms is None:
-            unix_time_ms = int(time() * 1000)
-        time_component = unix_time_ms.to_bytes(6, "big", signed=False)  # 48 bits for time, WILL FAIL in 10 895 CE
-        series_component = self.get_series(unix_time_ms).to_bytes(2, "big", signed=False)  # 16 bits for series
-        if seeded_random is not None:
-            random_component = bytes(seeded_random.getrandbits(8) for _ in range(8))  # 64 bits for random gibberish
-        else:
-            random_component = secrets.token_bytes(8)  # 64 bits for random gibberish
-        input_bytes = time_component + series_component + random_component
-        assert len(input_bytes) == 16
-        super().__init__(bytes=input_bytes)
-
-    @classmethod
-    def get_series(cls, unix_time_ms: int) -> int:
-        """Get per-millisecond series integer in range [0-65536)."""
-        series = cls.current_series_per_ms[unix_time_ms]
-        if len(cls.current_series_per_ms) > 10_000:  # Clear class dict periodically
-            cls.current_series_per_ms.clear()
-            cls.current_series_per_ms[unix_time_ms] = series
-        cls.current_series_per_ms[unix_time_ms] += 1
-        cls.current_series_per_ms[unix_time_ms] %= 65_536
-        return series
-
-    @classmethod
-    def is_valid_uuid(cls, candidate: Any) -> bool:
-        if not isinstance(candidate, str):
-            return False
-        hex = candidate.replace("urn:", "").replace("uuid:", "")
-        hex = hex.strip("{}").replace("-", "")
-        if len(hex) != 32:
-            return False
-        return 0 <= int(hex, 16) < 1 << 128
-
-
-# Delete this when we can use the version from the stdlib directly, see https://github.com/python/cpython/issues/102461
-def uuid7(unix_ms_time: Optional[Union[int, str]] = None, random: Optional[Union["Random", int]] = None) -> uuid.UUID:
-    # timestamp part
-    unix_ms_time_int: int
-    if isinstance(unix_ms_time, str):
-        # parse the ISO format string, use the timestamp from that
-        date = datetime.datetime.fromisoformat(unix_ms_time)
-        unix_ms_time_int = int(date.timestamp() * 1000)
-    elif unix_ms_time is None:
-        # use the current system time
-        unix_ms_time_int = time_ns() // (10**6)
-    else:
-        # use the provided timestamp directly
-        unix_ms_time_int = unix_ms_time
-
-    # random part
-    if isinstance(random, int):
-        # use the integer directly as the random component
-        rand_a = random & 0x0FFF
-        rand_b = random >> 12 & 0x03FFFFFFFFFFFFFFF
-    elif random is not None:
-        # use the provided random generator
-        rand_a = random.getrandbits(12)
-        rand_b = random.getrandbits(56)
-    else:
-        # use the system random generator
-        rand_bytes = int.from_bytes(secrets.token_bytes(10), byteorder="little")
-        rand_a = rand_bytes & 0x0FFF
-        rand_b = (rand_bytes >> 12) & 0x03FFFFFFFFFFFFFFF
-
-    # fixed constants
-    ver = 7
-    var = 0b10
-
-    # construct the UUID int
-    uuid_int = (unix_ms_time_int & 0x0FFFFFFFFFFFF) << 80
-    uuid_int |= ver << 76
-    uuid_int |= rand_a << 64
-    uuid_int |= var << 62
-    uuid_int |= rand_b
-    return uuid.UUID(int=uuid_int)
+AMBIGUOUS_CHARS = frozenset("01OIl")
+BASE57 = "".join(c for c in BASE62 if c not in AMBIGUOUS_CHARS)  # Base62 minus visually ambiguous characters
+EncryptionModeType = Literal["sha256", "pbkdf2"]
+SHA256_HASH_PREFIX = "sha256$"
 
 
 class CreatedMetaFields(models.Model):
@@ -234,7 +121,7 @@ class BytecodeModelMixin(models.Model):
                 self.bytecode = None
                 self.bytecode_error = str(e)
 
-    def get_expr(self) -> ast.Expr:
+    def get_expr(self) -> "ast.Expr":
         raise NotImplementedError()
 
 
@@ -261,36 +148,52 @@ def generate_random_token(nbytes: int = 32) -> str:
 
     Random 32 bytes - default value here - is believed to be sufficiently secure for practically all purposes:
     https://docs.python.org/3/library/secrets.html#how-many-bytes-should-tokens-use
+
+    Uses base57 encoding (base62 minus 0, 1, O, I, l) to avoid visually ambiguous characters.
     """
-    return int_to_base(secrets.randbits(nbytes * 8), 62)
+    bits = nbytes * 8
+    # Force the top bit on so the encoded token always has the same number of
+    # digits (costs 1 bit of entropy: 255 instead of 256, still far above any
+    # practical brute-force threshold).
+    value = secrets.randbits(bits) | (1 << (bits - 1))
+    return int_to_base(value, 57, alphabet=BASE57)
+
+
+# Key/token prefixes. Reserved-prefix checks elsewhere (auth, the admin key search) must
+# reference these constants rather than hardcoding the strings.
+PROJECT_API_TOKEN_PREFIX = "phc_"  # "c" standing for "client"
+PERSONAL_API_KEY_PREFIX = "phx_"  # "x" standing for nothing in particular
+SECRET_API_TOKEN_PREFIX = "phs_"  # "s" standing for "secret"; team secret tokens and project secret API keys
+OAUTH_ACCESS_TOKEN_PREFIX = "pha_"  # "a" standing for "access"
+OAUTH_REFRESH_TOKEN_PREFIX = "phr_"  # "r" standing for "refresh"
 
 
 def generate_random_token_project() -> str:
-    return "hi_" + generate_random_token()  # Hanzo Insights project token
+    return PROJECT_API_TOKEN_PREFIX + generate_random_token()
 
 
 def generate_random_token_personal() -> str:
     # We want 32 bytes of entropy (https://docs.python.org/3/library/secrets.html#how-many-bytes-should-tokens-use).
     # Note that we store the last 4 characters of a personal API key in plain text in the database, so that users
     # can recognize their keys in the UI. This means we need 3 bytes of extra entropy. Ultimately, we want 35 bytes.
-    return "hix_" + generate_random_token(35)  # Hanzo Insights personal key
+    return PERSONAL_API_KEY_PREFIX + generate_random_token(35)
 
 
 def generate_random_token_secret() -> str:
     # Similar to personal API keys, but for retrieving feature flag definitions for local evaluation.
-    return "his_" + generate_random_token(35)  # Hanzo Insights secret key
+    return SECRET_API_TOKEN_PREFIX + generate_random_token(35)
 
 
 def generate_random_oauth_access_token(_request) -> str:
-    return "hia_" + generate_random_token()  # Hanzo Insights access token
+    return OAUTH_ACCESS_TOKEN_PREFIX + generate_random_token()
 
 
 def generate_random_oauth_refresh_token(_request) -> str:
-    return "hir_" + generate_random_token()  # Hanzo Insights refresh token
+    return OAUTH_REFRESH_TOKEN_PREFIX + generate_random_token()
 
 
 def mask_key_value(value: str) -> str:
-    """Turn 'hix_123456abcd' into 'hix_...abcd'."""
+    """Turn 'phx_123456abcd' into 'phx_...abcd'."""
     if len(value) < 16:
         # If the token is less than 16 characters, mask the whole token.
         # This should never happen, but want to be safe.
@@ -298,17 +201,40 @@ def mask_key_value(value: str) -> str:
     return f"{value[:4]}...{value[-4:]}"
 
 
-def int_to_base(number: int, base: int) -> str:
-    if base > 62:
-        raise ValueError("Cannot convert integer to base above 62")
-    alphabet = BASE62[:base]
+def hash_key_value(
+    value: str, mode: EncryptionModeType = "sha256", legacy_salt: Optional[str] = None, iterations: Optional[int] = None
+) -> str:
+    if mode == "pbkdf2":
+        if not iterations:
+            raise ValueError("Iterations must be provided when using legacy PBKDF2 mode")
+        if not legacy_salt:
+            raise ValueError("Salt must be provided when using legacy PBKDF2 mode")
+        hasher = PBKDF2PasswordHasher()
+        return hasher.encode(value, legacy_salt, iterations=iterations)
+
+    if iterations:
+        raise ValueError("Iterations must not be provided when using simple hashing mode")
+
+    # Inspiration on why no salt:
+    # https://github.com/jazzband/django-rest-knox/issues/188
+    value = hashlib.sha256(value.encode()).hexdigest()
+    return f"sha256${value}"  # Following format from Django's PBKDF2PasswordHasher
+
+
+def int_to_base(number: int, base: int, *, alphabet: Optional[str] = None) -> str:
+    if alphabet is None:
+        if base > 62:
+            raise ValueError("Cannot convert integer to base above 62")
+        alphabet = BASE62[:base]
+    elif len(alphabet) != base:
+        raise ValueError(f"Alphabet length {len(alphabet)} does not match base {base}")
     if number < 0:
-        return "-" + int_to_base(-number, base)
+        return "-" + int_to_base(-number, base, alphabet=alphabet)
     value = ""
     while number != 0:
         number, index = divmod(number, len(alphabet))
         value = alphabet[index] + value
-    return value or "0"
+    return value or alphabet[0]
 
 
 class Percentile(models.Aggregate):
@@ -445,23 +371,11 @@ class RootTeamQuerySet(models.QuerySet):
         if "team_id" in kwargs:
             team_id = kwargs.pop("team_id")
 
-            # Check if this model is in the persons database
-            # For persons DB models, we can't join with the Team table (cross-database)
-            if self.model._meta.model_name in PERSONS_DB_MODELS:
-                # Fetch the effective team_id directly from the default database
-                # Cannot use subquery as it would execute against persons_db
-                try:
-                    team = Team.objects.using("default").get(id=team_id)
-                    effective_team_id = team.parent_team_id if team.parent_team_id else team_id
-                except Team.DoesNotExist:
-                    effective_team_id = team_id
-                team_filter = Q(team_id=effective_team_id)
-            else:
-                # For non-persons DB models: use the original logic with JOIN
-                parent_team_subquery = Team.objects.filter(id=team_id).values("parent_team_id")[:1]
-                team_filter = Q(team_id=Subquery(parent_team_subquery)) | Q(
-                    team_id=team_id, team__parent_team_id__isnull=True
-                )
+            # Scope to the team and, when it is an environment, its project root team.
+            parent_team_subquery = Team.objects.filter(id=team_id).values("parent_team_id")[:1]
+            team_filter = Q(team_id=Subquery(parent_team_subquery)) | Q(
+                team_id=team_id, team__parent_team_id__isnull=True
+            )
             return super().filter(team_filter, *args, **kwargs)
         return super().filter(*args, **kwargs)
 
@@ -489,26 +403,8 @@ class RootTeamMixin(models.Model):
         abstract = True
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        if self._meta.model_name in PERSONS_DB_MODELS:
-            return self._save_in_persons_db(*args, **kwargs)
-
         if hasattr(self, "team") and self.team and hasattr(self.team, "parent_team") and self.team.parent_team:  # type: ignore
             self.team = self.team.parent_team  # type: ignore
-        super().save(*args, **kwargs)
-
-    def _save_in_persons_db(self, *args, **kwargs) -> None:
-        """
-        If the model is stored in persons db, referencing the foreign key will raise an error.
-        Reference the actual table column instead and query `team` manually.
-        """
-        team_id: Optional[int] = getattr(self, "team_id", None)
-        if team_id:
-            from insights.models import Team
-
-            team = Team.objects.get(id=team_id)
-            if hasattr(team, "parent_team") and team.parent_team:
-                self.team_id = team.parent_team.id
-
         super().save(*args, **kwargs)
 
 
@@ -652,5 +548,12 @@ class ActivityDetailEncoder(json.JSONEncoder):
             return {
                 "id": obj.id,
                 "name": obj.name,
+            }
+        if hasattr(obj, "__class__") and obj.__class__.__name__ == "LLMModelConfiguration":
+            return {
+                "id": str(obj.id),
+                "provider": obj.provider,
+                "model": obj.model,
+                "provider_key_id": str(obj.provider_key_id) if obj.provider_key_id else None,
             }
         return json.JSONEncoder.default(self, obj)

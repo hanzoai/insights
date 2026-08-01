@@ -42,11 +42,11 @@ export function DebugScene(): JSX.Element {
                         >
                             SQL Debug
                         </Button>
-                        {featureFlags[FEATURE_FLAGS.SCRIPT] ? (
+                        {featureFlags[FEATURE_FLAGS.HOG] ? (
                             <Button
                                 size="small"
-                                active={query1 === stringifiedExamples.FibonacciScript}
-                                onClick={() => setQuery1(stringifiedExamples.FibonacciScript)}
+                                active={query1 === stringifiedExamples.Hoggonacci}
+                                onClick={() => setQuery1(stringifiedExamples.Hoggonacci)}
                             >
                                 Script
                             </Button>

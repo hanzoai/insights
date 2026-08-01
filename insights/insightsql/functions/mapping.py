@@ -17,7 +17,7 @@ from .datastore.mathematical import MATH_FUNCTIONS
 from .datastore.strings import STRINGS_FUNCTIONS
 from .config import INSIGHTSQL_PERMITTED_PARAMETRIC_FUNCTIONS
 from .core import InsightsQLFunctionMeta
-from .insights import INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
+from .insights import INSIGHTSQL_POSTFN_FUNCTIONS
 from .udfs import UDFS
 
 INSIGHTSQL_COMPARISON_MAPPING: dict[str, ast.CompareOperationOp] = {
@@ -142,6 +142,30 @@ INSIGHTSQL_DATASTORE_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "cutFragment": InsightsQLFunctionMeta("cutFragment", 1, 1),
     "cutQueryStringAndFragment": InsightsQLFunctionMeta("cutQueryStringAndFragment", 1, 1),
     "cutURLParameter": InsightsQLFunctionMeta("cutURLParameter", 2, 2),
+    # ip addresses
+    "IPv4NumToString": InsightsQLFunctionMeta("IPv4NumToString", 1, 1),
+    "IPv4StringToNum": InsightsQLFunctionMeta("IPv4StringToNum", 1, 1),
+    "IPv4StringToNumOrDefault": InsightsQLFunctionMeta("IPv4StringToNumOrDefault", 1, 1),
+    "IPv4StringToNumOrNull": InsightsQLFunctionMeta("IPv4StringToNumOrNull", 1, 1),
+    "IPv6NumToString": InsightsQLFunctionMeta("IPv6NumToString", 1, 1),
+    "IPv6StringToNum": InsightsQLFunctionMeta("IPv6StringToNum", 1, 1),
+    "IPv6StringToNumOrDefault": InsightsQLFunctionMeta("IPv6StringToNumOrDefault", 1, 1),
+    "IPv6StringToNumOrNull": InsightsQLFunctionMeta("IPv6StringToNumOrNull", 1, 1),
+    "IPv4ToIPv6": InsightsQLFunctionMeta("IPv4ToIPv6", 1, 1),
+    "toIPv4": InsightsQLFunctionMeta("toIPv4", 1, 1),
+    "toIPv4OrDefault": InsightsQLFunctionMeta("toIPv4OrDefault", 1, 2),
+    "toIPv4OrNull": InsightsQLFunctionMeta("toIPv4OrNull", 1, 1),
+    "toIPv4OrZero": InsightsQLFunctionMeta("toIPv4OrZero", 1, 1),
+    "toIPv6": InsightsQLFunctionMeta("toIPv6", 1, 1),
+    "toIPv6OrDefault": InsightsQLFunctionMeta("toIPv6OrDefault", 1, 2),
+    "toIPv6OrNull": InsightsQLFunctionMeta("toIPv6OrNull", 1, 1),
+    "toIPv6OrZero": InsightsQLFunctionMeta("toIPv6OrZero", 1, 1),
+    "isIPv4String": InsightsQLFunctionMeta("isIPv4String", 1, 1),
+    "isIPv6String": InsightsQLFunctionMeta("isIPv6String", 1, 1),
+    "isIPAddressInRange": InsightsQLFunctionMeta("isIPAddressInRange", 2, 2),
+    "IPv4CIDRToRange": InsightsQLFunctionMeta("IPv4CIDRToRange", 2, 2),
+    "IPv6CIDRToRange": InsightsQLFunctionMeta("IPv6CIDRToRange", 2, 2),
+    "cutIPv6": InsightsQLFunctionMeta("cutIPv6", 3, 3),
     # tuples
     "tuple": InsightsQLFunctionMeta("tuple", 0, None),
     "tupleElement": InsightsQLFunctionMeta("tupleElement", 2, 3),
@@ -240,7 +264,13 @@ INSIGHTSQL_DATASTORE_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 INSIGHTSQL_DATASTORE_FUNCTIONS.update(UDFS)
 
 ALL_EXPOSED_FUNCTION_NAMES = [
-    name for name in chain(INSIGHTSQL_DATASTORE_FUNCTIONS.keys(), INSIGHTSQL_AGGREGATIONS.keys()) if not name.startswith("_")
+    name
+    for name in chain(
+        INSIGHTSQL_DATASTORE_FUNCTIONS.keys(),
+        INSIGHTSQL_AGGREGATIONS.keys(),
+        INSIGHTSQL_POSTFN_FUNCTIONS.keys(),
+    )
+    if not name.startswith("_")
 ]
 
 
@@ -270,7 +300,7 @@ def find_insightsql_function(name: str) -> Optional[InsightsQLFunctionMeta]:
 
 
 def find_insightsql_postinsights_function(name: str) -> Optional[InsightsQLFunctionMeta]:
-    return _find_function(name, INSIGHTSQL_POSTINSIGHTS_FUNCTIONS)
+    return _find_function(name, INSIGHTSQL_POSTFN_FUNCTIONS)
 
 
 def is_allowed_parametric_function(name: str) -> bool:

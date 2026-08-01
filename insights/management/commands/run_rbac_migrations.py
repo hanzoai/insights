@@ -11,6 +11,8 @@ from insights.rbac.migrations.rbac_dashboard_migration import rbac_dashboard_acc
 from insights.rbac.migrations.rbac_feature_flag_migration import rbac_feature_flag_role_access_migration
 from insights.rbac.migrations.rbac_team_migration import rbac_team_access_control_migration
 
+from ee.models.rbac.organization_resource_access import OrganizationResourceAccess
+from ee.models.rbac.role import Role
 
 logger = structlog.get_logger(__name__)
 logger.setLevel(logging.INFO)
@@ -161,7 +163,7 @@ class Command(BaseCommand):
         logger.info(f"Found {len(orgs_with_feature_flag_roles)} organizations with feature flag roles")
 
         # Find organizations with dashboards that have restriction level 37
-        from insights.models.dashboard import Dashboard
+        from products.dashboards.backend.models.dashboard import Dashboard
 
         orgs_with_restricted_dashboards = (
             Organization.objects.filter(
@@ -209,11 +211,12 @@ class Command(BaseCommand):
         results: dict[str, Any] = {"total": len(organization_ids), "successful": 0, "failed": 0, "details": []}
 
         for org_id in organization_ids:
+            migration_init: dict[str, bool | str | None] = {"success": False, "error": None}
             org_result: dict[str, Any] = {
                 "organization_id": org_id,
-                "team_migration": {"success": False, "error": None},
-                "feature_flag_migration": {"success": False, "error": None},
-                "dashboard_migration": {"success": False, "error": None},
+                "team_migration": dict(migration_init),
+                "feature_flag_migration": dict(migration_init),
+                "dashboard_migration": dict(migration_init),
             }
 
             # Verify organization exists
