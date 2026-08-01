@@ -3,8 +3,11 @@
 // width — 300px in a column, 214px in an input.
 //
 // Both producers emit `Icon`: icons.tsx here, and @hanzo/icons since 0.36.7,
-// which is what lets the sixteen contextual `.Icon` selectors across the design
-// system keep reaching package icons at all.
+// which is what lets the thirteen contextual `.Icon` selectors across the design
+// system keep reaching package icons at all. Those are the ones that size an
+// icon for its surroundings -- an input icon is 20px, not the 14px this rule
+// alone would give it -- so a fix that revives only this rule looks right in a
+// column and stays wrong everywhere else.
 .Icon {
     display: inline-block;
     width: 1em;
