@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
 import express from 'ultimate-express'
 
+import { TeamOrgs, requireTeamAccess } from '../../api/team-access'
 import { STREAM_DATASTORE_SESSION_REPLAY_EVENTS } from '../../config/stream-topics'
 import { StreamProducerWrapper } from '../../stream/producer'
 import {
@@ -19,9 +19,19 @@ import { RedisCachedKeyStore } from '../shared/keystore/cache'
 import { SessionMetadataStore } from '../shared/metadata/session-metadata-store'
 import { RetentionService } from '../shared/retention/retention-service'
 import { TeamService } from '../shared/teams/team-service'
-import { RecordingService } from './recording-service'
+import { GetBlockResult, RecordingService } from './recording-service'
 import { BulkDeleteBodySchema, GetBlockQuerySchema, RecordingParamsSchema, TeamParamsSchema } from './schemas'
 import { KeyStore, RecordingApiHub, RecordingDecryptor } from './types'
+
+/**
+ * `!result.ok` does not narrow a boolean-literal union under tsconfig.build.json,
+ * which turns strict off — literal discrimination needs strictNullChecks. A type
+ * predicate does narrow, in both configs, so the failure branch can read `error`
+ * and `deletedAt` without the whole file having to opt out of type checking.
+ */
+function failed(result: GetBlockResult): result is Extract<GetBlockResult, { ok: false }> {
+    return !result.ok
+}
 
 export class RecordingApi {
     private s3Client: S3Client | null = null
@@ -169,9 +179,19 @@ export class RecordingApi {
             (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> =>
                 fn(req, res).catch(next)
 
-        router.get('/api/projects/:team_id/recordings/:session_id/block', asyncHandler(this.getBlock))
-        router.delete('/api/projects/:team_id/recordings/:session_id', asyncHandler(this.deleteRecording))
-        router.post('/api/projects/:team_id/recordings/bulk_delete', asyncHandler(this.bulkDeleteRecordings))
+        // Every route here names a team in its path, and every one of them is
+        // therefore gated on the caller's principal owning that team. The guard
+        // is named on each route rather than applied to the subtree so that a
+        // fourth route added without it is visible in the diff.
+        const teamAccess = requireTeamAccess(new TeamOrgs(this.hub.postgres))
+
+        router.get('/api/projects/:team_id/recordings/:session_id/block', teamAccess, asyncHandler(this.getBlock))
+        router.delete('/api/projects/:team_id/recordings/:session_id', teamAccess, asyncHandler(this.deleteRecording))
+        router.post(
+            '/api/projects/:team_id/recordings/bulk_delete',
+            teamAccess,
+            asyncHandler(this.bulkDeleteRecordings)
+        )
 
         return router
     }
@@ -216,7 +236,7 @@ export class RecordingApi {
             })
 
             // Serialize response
-            if (!result.ok) {
+            if (failed(result)) {
                 if (result.error === 'deleted') {
                     res.status(410).json({
                         error: 'Recording has been deleted',

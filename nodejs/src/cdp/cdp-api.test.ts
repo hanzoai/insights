@@ -5,6 +5,7 @@ import { Server } from 'http'
 import supertest from 'supertest'
 import express from 'ultimate-express'
 
+import { TestIam, startTestIam } from '~/api/_tests/iam'
 import { setupExpressApp } from '~/api/router'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 import { InsightsFlow } from '~/schema/insightsflow'
@@ -13,6 +14,7 @@ import { forSnapshot } from '../../tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '../../tests/helpers/sql'
 import { Hub, Team } from '../types'
 import { closeHub, createHub } from '../utils/db/hub'
+import { PostgresUse } from '../utils/db/postgres'
 import { UUIDT } from '../utils/utils'
 import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from './_tests/examples'
 import { insertInsightsFunction as _insertInsightsFunction, createInsightsFunction } from './_tests/fixtures'
@@ -23,10 +25,12 @@ import { insightsFilterOutPlugin } from './legacy-plugins/_transformations/insig
 import { BASE_KV_KEY, ScriptWatcherState } from './services/monitoring/script-watcher.service'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from './types'
 
-// The internal HTTP surface refuses uncredentialed callers, so these tests present
-// the credential and exercise the router. The gate itself is tested in
-// api/middleware/internal-api-auth.test.ts.
-const INTERNAL_API_SECRET = 'test-internal-api-secret'
+// The internal HTTP surface refuses callers with no verified IAM principal, and
+// refuses a principal that does not own the team named in the path, so these
+// tests present a token for the fixture team's own org. The gate itself is tested
+// in api/principal.test.ts and api/team-access.test.ts.
+let iam: TestIam
+let bearer: string
 
 describe('CDP API', () => {
     let hub: Hub
@@ -36,8 +40,8 @@ describe('CDP API', () => {
     let api: CdpApi
 
     const internal = () => ({
-        get: (url: string) => supertest(app).get(url).set('x-internal-api-secret', INTERNAL_API_SECRET),
-        post: (url: string) => supertest(app).post(url).set('x-internal-api-secret', INTERNAL_API_SECRET),
+        get: (url: string) => supertest(app).get(url).set('authorization', `Bearer ${bearer}`),
+        post: (url: string) => supertest(app).post(url).set('authorization', `Bearer ${bearer}`),
     })
     let insightsFunction: InsightsFunctionType
     let insightsFunctionMultiFetch: InsightsFunctionType
@@ -86,8 +90,20 @@ describe('CDP API', () => {
         hub.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN = 'ADWORDS_TOKEN'
         team = await getFirstTeam(hub)
 
+        // The bearer has to name the org that actually owns the fixture team —
+        // the routes authorize the path's team against the token's org, so a
+        // token minted for some other org would (correctly) be refused.
+        iam = await startTestIam()
+        const org = await hub.postgres.query<{ slug: string }>(
+            PostgresUse.COMMON_READ,
+            `SELECT o.slug FROM insights_team t JOIN insights_organization o ON o.id = t.organization_id WHERE t.id = $1`,
+            [team.id],
+            'testTeamOrg'
+        )
+        bearer = iam.token(org.rows[0].slug)
+
         api = new CdpApi(hub)
-        app = setupExpressApp({ internalApiSecret: INTERNAL_API_SECRET })
+        app = setupExpressApp({ iam: iam.iam })
         app.use('/', api.router())
         server = app.listen(0, () => {})
     })
@@ -125,12 +141,25 @@ describe('CDP API', () => {
         expect(res.status).toEqual(404)
     })
 
-    it('errors if missing team', async () => {
+    it('refuses a team the caller does not own, without saying whether it exists', async () => {
+        // This used to reach the handler and answer 404. It now stops at
+        // authorization with 403, and that ordering is the point: a caller does
+        // not get to learn which team ids exist before proving it may ask about
+        // one. 404-vs-403 is exactly the oracle that makes sweeping team ids
+        // worthwhile.
         const res = await internal()
             .post(`/api/projects/${new UUIDT().toString()}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals })
 
-        expect(res.status).toEqual(404)
+        expect(res.status).toEqual(403)
+    })
+
+    it('refuses a caller with no IAM principal at all', async () => {
+        const res = await supertest(app)
+            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+            .send({ globals })
+
+        expect(res.status).toEqual(401)
     })
 
     it('errors if missing values', async () => {
