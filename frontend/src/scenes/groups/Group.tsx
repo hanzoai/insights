@@ -240,7 +240,7 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                                 Related people & groups
                             </div>
                         ),
-                        tooltip: `People and groups that have shared events with this ${groupTypeName} in the last 90 days.`,
+                        tooltip: `Users and groups that have shared events with this ${groupTypeName} in the last 90 days.`,
                         content: <RelatedGroups id={groupKey} groupTypeIndex={groupTypeIndex} />,
                     },
                     {

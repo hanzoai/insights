@@ -256,7 +256,7 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
         },
         {
             identifier: 'People',
-            label: 'People & groups',
+            label: 'Users & groups',
             icon: <IconPeople />,
             onClick: (e?: React.KeyboardEvent) => {
                 if (!e || e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') {
