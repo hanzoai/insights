@@ -43,6 +43,27 @@ on:
   # Keep triggers scoped to branches.
   workflow_dispatch:
 
+# ONE release at a time, because the immutability guard below is check-then-act.
+#
+# The guard reads the published tags, computes the next patch, and requires a 404
+# before proceeding — then the build runs for 30-60 minutes and only THEN pushes.
+# Two runs starting close together both read the same last tag, both compute the
+# same next one, and both pass the 404 probe, because at probe time it genuinely
+# is free. The second push then silently replaces the first image behind that
+# name.
+#
+# That is not hypothetical: 1.52.37 was observed pointing at two different config
+# digests an hour apart, from two different commits — exactly the "two digests
+# behind one name" outcome the guard's own comment says it exists to prevent.
+#
+# Re-probing just before the push narrows the window; it does not close it.
+# Serializing does. cancel-in-progress stays FALSE: a cancelled run can leave a
+# pushed image with no tag and no pin, which is the state that took a day to
+# diagnose the first time.
+concurrency:
+  group: insights-release
+  cancel-in-progress: false
+
 jobs:
   build:
     # The live runner fleet advertises `hanzo-build-linux-amd64`. The old
