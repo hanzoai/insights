@@ -175,11 +175,23 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
 
 ## Live deploy (do-sfo3-hanzo-k8s / ns hanzo)
 
-- `ghcr.io/hanzoai/insights:<FULL-40-CHAR-SHA>` — built by the NATIVE pipeline
-  in `.hanzo/workflows/deploy.yml` (git.hanzo.ai push → in-cluster act_runner →
-  docker build → GHCR), tagged by **commit sha only**, never semver: a re-pushed
-  tag means two digests behind one name. `container-images-cd.yml` is
-  neutralized; GitHub Actions is a mirror and builds nothing.
+- **Three images come out of this repo, each with its own workflow and version
+  counter**: `ghcr.io/hanzoai/insights` (the monolith, `.hanzo/workflows/
+  deploy.yml`), `-livestream` (`livestream.yml`) and `-plugin` (`plugin.yml`).
+  All build on the NATIVE pipeline (git.hanzo.ai push → in-cluster act_runner →
+  docker build → GHCR → `charts/app/pin.sh` → Hanzo CD). GitHub Actions is
+  disabled account-wide and builds NOTHING — its runs sit queued against labels
+  that match no runner and get cancelled at 24h, so a green-looking
+  `.github/workflows/*` file is not a build.
+- **`insights-plugin` had no builder until now, and is still pinned to a sha.**
+  `ci-nodejs-container.yml` was its only pipeline and GitHub cannot run it, so
+  anything merged under `nodejs/` sat unbuilt — a change could be reviewed,
+  merged and never reach the pod. `plugin.yml` builds it now, but the values file
+  still reads `tag: sha-fe74083`, and pin.sh cannot order a sha against a semver,
+  so the first published version must be adopted by hand (set `image.tag` in
+  `charts/app/values/hanzo/insights-plugin.yaml`) once the image is seen to start
+  and consume. Until that happens **the plugin runs `sha-fe74083`, whatever main
+  says** — check the running pod's image before believing a nodejs fix is live.
 - `insights-web` (Django) + `insights-worker` (Celery) — **LIVE** on
   `insights.hanzo.ai`. Operator App CRs in `hanzoai/universe`
   (`infra/k8s/operator/crs/insights-*`, `infra/k8s/ingress/routes.yaml`) pin the
