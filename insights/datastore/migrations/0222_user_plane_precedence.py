@@ -33,8 +33,24 @@ migration does silently.
     -- removes is re-projected by the backfill in this migration.
     DELETE FROM `insights`.`person` WHERE version >= 6917529027641081856
 
-Applied to insights.hanzo.ai on 2026-08-01: 1348 rows retired, 11 fork-written
-rows untouched, all users re-projected.
+Applied to insights.hanzo.ai on 2026-08-01: 1350 rows retired, all users
+re-projected, 0 rows left above the plane's ceiling.
+
+STILL OUTSTANDING on that warehouse, and not something a migration should do
+silently. Verifying this plane by POSTING events was a mistake: a probe is a
+real user row in a real tenant, and four synthetic visitors ended up aliased
+onto an actual customer's account. The identity effect is retired — those users
+and bindings carry override-band tombstones, so no re-projection brings them
+back — but the EVENTS that produced them are still counted:
+
+    -- 20 rows in the source plane, 19 already projected into team 1
+    DELETE FROM `event`.`event` WHERE distinct_id LIKE 'probe-%'
+       OR anonymous_id IN ('anon-chat-1785606764','anon-console-1785606764','anon-site-1785606764')
+    DELETE FROM `insights`.`sharded_events` WHERE distinct_id LIKE 'probe-%'
+       OR distinct_id IN ('anon-chat-1785606764','anon-console-1785606764','anon-site-1785606764')
+
+`event.event` is Cloud's table; insights only reads it. Confirm ingest by
+watching real traffic land, never by writing a probe.
 """
 
 from insights.datastore.client.connection import NodeRole
