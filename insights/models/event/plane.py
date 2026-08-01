@@ -34,37 +34,48 @@ from .sql import WRITABLE_EVENTS_DATA_TABLE
 EVENT_TABLE = "event.event"
 EVENT_MV = "event_mv"
 
-# org -> team. Every org on the plane that is not listed here lands in
-# UNATTRIBUTED_TEAM, so no event is ever dropped. Routing an org to another team
-# is an INSERT into this table, never an edit to this file.
-ORG_TEAM_TABLE = "org_team"
+# ── routing: which PROJECT an org's events land in ───────────────────────────
+#
+# THE TENANT IS THE ORG. It is what IAM issues, what the envelope carries and
+# what every question about isolation is actually about. `team` is the fork's
+# word for the thing an org's events are stored under, and — like `person`
+# below — it is a PHYSICAL name the query engine compiles against, not a
+# choice: `team_id` sits INSIDE `sharded_events`' sort key
+# `(team_id, toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid))`,
+# so renaming it is a rebuild of the events table, not an edit.
+#
+# So the two words meet HERE, and only here. Everything above this line is named
+# for what it means to us — org, project — and is written into the name the
+# fork reads. The fork's word is spelled exactly twice, immediately below.
+ORG_PROJECT_TABLE = "org_team"
+ORG_PROJECT_COLUMN = "team"
 
 # Traffic that belongs to no provisioned tenant: the anonymous `$public` org,
 # and any org that has not been routed yet.
 #
-# Team ids are handed out by `insights_team_id_seq`, which starts at 1, so 0 is
-# a team that cannot exist and therefore one no project can read. That is the
-# point: an org is only ever readable once someone deliberately routes it, so a
+# Project ids are handed out by `insights_team_id_seq`, which starts at 1, so 0
+# is a project that cannot exist and therefore one nobody can read. That is the
+# point: an org is only ever readable once it is deliberately routed, so a
 # tenant that appears on the plane tomorrow cannot land in another tenant's
-# project by default. Seeding this as a real team is what commingled ~95% of
-# traffic — every anonymous pageview, plus every org nobody had mapped — into
-# team 1, which belongs to an actual customer.
+# project by default. Defaulting this to a real project is what commingled ~95%
+# of traffic — every anonymous pageview, plus every org nobody had mapped —
+# into project 1, which belongs to an actual customer.
 #
-# Nothing is lost: the rows are in the warehouse with team_id 0, and routing
-# them to a real project later is the same one INSERT as any other org.
-UNATTRIBUTED_TEAM = 0
-ROOT_TEAM = UNATTRIBUTED_TEAM
+# Nothing is lost: the rows are in the warehouse under project 0, and routing
+# them to a real project later is the same one write as any other org.
+UNATTRIBUTED_PROJECT = 0
 
-# Only orgs with a provisioned Insights team are routed to one. `admin` and
-# `maxpower` are carried explicitly rather than dropped from the seed: this
-# table keeps the newest row per org, so a mapping is corrected by writing over
-# it, and leaving them out would leave their old rows pointing at team 1.
-ORG_TEAM = [
-    ("hanzo", 1),
-    ("admin", UNATTRIBUTED_TEAM),
-    ("maxpower", UNATTRIBUTED_TEAM),
-    ("$public", UNATTRIBUTED_TEAM),
-]
+# THE ROUTING IS DERIVED, NEVER AUTHORED. There is no list of orgs in this file
+# and there must not be one: the app already knows which project an org owns —
+# `Organization.slug` is the same value the envelope carries as `org` — so a
+# second copy written by hand can only ever be a chance to disagree with it, and
+# it did. `admin` and `maxpower` were both mapped to project 1 here, so a
+# separate funded org's data was routed into Hanzo's own project.
+#
+# `manage.py route_orgs` publishes that mapping from the app's own org records
+# and is the ONLY writer of this table. Routing is still a deliberate act — the
+# command is run, not scheduled — because an org that nobody has routed is
+# invisible, which is the safe way to be wrong.
 
 EMPTY_JSON = "'{}'"
 
@@ -217,13 +228,21 @@ USER_SQL = f"reinterpretAsUUID(MD5(if({IDENTIFIED_SQL}, person_id, {DISTINCT_SQL
 
 # Both arrays come from the identical subquery, so they are ordered alike and
 # element i of one names element i of the other. An empty table yields empty
-# arrays and `transform` returns the default, so the lookup cannot throw.
-ORG_TEAM_SQL = f"SELECT org, team FROM `{DATASTORE_DATABASE}`.`{ORG_TEAM_TABLE}` FINAL ORDER BY org"
-TEAM_SQL = (
+# arrays and `transform` returns the default, so the lookup cannot throw — an
+# unrouted warehouse attributes nothing rather than failing to project.
+#
+# The SELECT names the PHYSICAL column, unaliased. Our vocabulary is carried by
+# the names in this file; aliasing it to `project` in the emitted text would
+# only make the SQL describe a column the warehouse does not have, and would
+# rewrite every view that embeds this expression to say so.
+ORG_PROJECT_SQL = (
+    f"SELECT org, {ORG_PROJECT_COLUMN} FROM `{DATASTORE_DATABASE}`.`{ORG_PROJECT_TABLE}` FINAL ORDER BY org"
+)
+PROJECT_SQL = (
     "transform(org"
-    f", (SELECT groupArray(org) FROM ({ORG_TEAM_SQL}))"
-    f", (SELECT groupArray(team) FROM ({ORG_TEAM_SQL}))"
-    f", toInt64({ROOT_TEAM}))"
+    f", (SELECT groupArray(org) FROM ({ORG_PROJECT_SQL}))"
+    f", (SELECT groupArray({ORG_PROJECT_COLUMN}) FROM ({ORG_PROJECT_SQL}))"
+    f", toInt64({UNATTRIBUTED_PROJECT}))"
 )
 
 
@@ -233,7 +252,7 @@ def EVENT_COLUMNS(historical: bool) -> list[tuple[str, str]]:
         ("event", EVENT_NAME_SQL),
         ("properties", PROPERTIES_SQL),
         ("timestamp", "toDateTime64(time, 6, 'UTC')"),
-        ("team_id", TEAM_SQL),
+        ("team_id", PROJECT_SQL),
         ("distinct_id", DISTINCT_SQL),
         ("elements_chain", "''"),
         ("created_at", "toDateTime64(ingested_at, 6, 'UTC')"),
@@ -250,20 +269,28 @@ def EVENT_SELECT_SQL(historical: bool) -> str:
     return f"SELECT\n    {projection}\nFROM {EVENT_TABLE}"
 
 
-def ORG_TEAM_TABLE_SQL() -> str:
+def ORG_PROJECT_TABLE_SQL() -> str:
     return f"""
-CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.`{ORG_TEAM_TABLE}` (
+CREATE TABLE IF NOT EXISTS `{DATASTORE_DATABASE}`.`{ORG_PROJECT_TABLE}` (
     org String,
-    team Int64,
+    {ORG_PROJECT_COLUMN} Int64,
     version UInt32 DEFAULT toUnixTimestamp(now())
-) ENGINE = {ReplacingMergeTree(ORG_TEAM_TABLE, ver="version", replication_scheme=ReplicationScheme.REPLICATED)}
+) ENGINE = {ReplacingMergeTree(ORG_PROJECT_TABLE, ver="version", replication_scheme=ReplicationScheme.REPLICATED)}
 ORDER BY org
 """
 
 
-def ORG_TEAM_DATA_SQL(rows: list[tuple[str, int]] = ORG_TEAM) -> str:
-    values = ", ".join(f"('{org}', {team})" for org, team in rows)
-    return f"INSERT INTO `{DATASTORE_DATABASE}`.`{ORG_TEAM_TABLE}` (org, team) VALUES {values}"
+def ORG_PROJECT_ROWS_SQL(rows: list[tuple[str, int]]) -> str:
+    """Route each `(org, project)` — the newest row per org is the live one.
+
+    Takes the rows rather than defaulting to a list, because there is no
+    correct list to default to: the answer lives in the app's org records and
+    is read from them by `route_orgs`, the one caller.
+    """
+    if not rows:
+        raise ValueError("ORG_PROJECT_ROWS_SQL needs at least one org to route")
+    values = ", ".join(f"('{org}', {project})" for org, project in rows)
+    return f"INSERT INTO `{DATASTORE_DATABASE}`.`{ORG_PROJECT_TABLE}` (org, {ORG_PROJECT_COLUMN}) VALUES {values}"
 
 
 def EVENT_MV_SQL() -> str:
@@ -404,7 +431,7 @@ def USER_COLUMNS() -> list[tuple[str, str]]:
         # clock that decides which row survives, so the surviving row's
         # `created_at` is the one its version was earned with.
         ("created_at", "toDateTime64(ingested_at, 3, 'UTC')"),
-        ("team_id", TEAM_SQL),
+        ("team_id", PROJECT_SQL),
         # The plane carries no user profile — `event_mv` writes events as
         # `propertyless` for exactly this reason — so the row claims none.
         # Traits belong to IAM, and inventing them here would put a second,
@@ -426,7 +453,7 @@ def USER_COLUMNS() -> list[tuple[str, str]]:
 
 def USER_ALIAS_COLUMNS() -> list[tuple[str, str]]:
     return [
-        ("team_id", TEAM_SQL),
+        ("team_id", PROJECT_SQL),
         # The id the visitor carried BEFORE signing in — the one every earlier
         # event of theirs was written under.
         ("distinct_id", "anonymous_id"),
