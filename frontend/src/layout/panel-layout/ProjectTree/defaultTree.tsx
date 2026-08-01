@@ -419,7 +419,7 @@ export const getDefaultTreeGames = (): FileSystemImport[] =>
 export const getDefaultTreePersons = (): FileSystemImport[] => [
     {
         path: 'Users',
-        category: 'People',
+        category: 'Users',
         iconType: 'persons',
         href: urls.persons(),
         visualOrder: 10,
@@ -428,7 +428,7 @@ export const getDefaultTreePersons = (): FileSystemImport[] => [
     },
     {
         path: 'Cohorts',
-        category: 'People',
+        category: 'Users',
         type: 'cohort',
         href: urls.cohorts(),
         visualOrder: 20,
