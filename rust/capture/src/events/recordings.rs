@@ -232,7 +232,12 @@ pub async fn process_replay_events<'a>(
             now_ts: context.now.timestamp(),
         };
 
-        let restrictions = service.get_restrictions(&context.token, &event_ctx).await;
+        // PII path: fail CLOSED. If the drop-list cache is stale we drop the
+        // recording rather than silently keep capturing user sessions we may have
+        // been told to stop recording (analytics uses the fail-open variant).
+        let restrictions = service
+            .get_restrictions_fail_closed(&context.token, &event_ctx)
+            .await;
         let applied = AppliedRestrictions::from_restrictions(restrictions, CaptureMode::Recordings);
 
         if applied.should_drop {
