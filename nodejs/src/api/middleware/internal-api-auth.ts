@@ -6,36 +6,73 @@ import { logger } from '~/utils/logger'
 /**
  * Internal API authentication middleware.
  *
- * NOTE: This provides defense-in-depth authentication for internal service-to-service
- * calls (e.g., Django -> Node.js CDP API). The primary protection comes from Contour
- * routing configuration at the infrastructure level, which restricts access to internal
- * endpoints. This middleware adds an additional layer of verification using a shared secret.
+ * This is the ONLY gate in front of the internal HTTP surface — the recording API
+ * (block reads, recording deletion, bulk deletion) and the CDP API. Network
+ * placement is NOT a second gate: a ClusterIP service, or no service at all, still
+ * leaves the pod IP routable by every other workload in the cluster.
+ *
+ * Therefore an unconfigured secret DENIES. An empty secret is a misconfiguration,
+ * never permission — previously it called next(), which served and deleted any
+ * team's recordings to any in-cluster caller with zero credentials.
+ *
+ * One principal: presenting the secret proves "a trusted internal service", not
+ * "a user of team N". Per-team authorization belongs to the caller — Django's
+ * session_recording_api.py resolves team_id from the authenticated user, never
+ * from user input. An HMAC over team_id keyed by this same shared secret would add
+ * nothing, since anyone holding the secret could mint one.
  */
 
 const HEADER_NAME = 'X-Internal-Api-Secret'
 
-// Paths that don't require authentication (public endpoints and health checks)
+// Paths that never require authentication: kubelet probes and prometheus scrapes,
+// which arrive without credentials, plus the public webhook surface.
 const PUBLIC_PATH_PREFIXES = ['/public/', '/healthz', '/_ready', '/_metrics', '/metrics']
+
+// Denials are indistinguishable to the client. The reason goes to the log, so an
+// operator can tell "no secret deployed" from "wrong secret" without handing a
+// caller an oracle for which of the two it is hitting.
+const DENIED = { error: 'Unauthorized' }
 
 export interface InternalApiAuthOptions {
     secret: string
     excludedPathPrefixes?: string[]
 }
 
+/**
+ * Compare in time independent of content AND of length. timingSafeEqual throws on
+ * unequal lengths, so comparing raw values forces a length short-circuit that leaks
+ * the secret's length. Digests are always 32 bytes, so the comparison is total.
+ */
+function secretsMatch(configured: string, provided: string): boolean {
+    const a = crypto.createHash('sha256').update(configured, 'utf8').digest()
+    const b = crypto.createHash('sha256').update(provided, 'utf8').digest()
+    return crypto.timingSafeEqual(a, b)
+}
+
 export function createInternalApiAuthMiddleware(options: InternalApiAuthOptions) {
     const { secret, excludedPathPrefixes = [] } = options
     const allExcludedPrefixes = [...PUBLIC_PATH_PREFIXES, ...excludedPathPrefixes]
 
+    if (!secret) {
+        // Announced once at wiring time, not per request: without this line the
+        // refusals below look like a routing fault rather than a missing secret.
+        logger.warn(
+            'INTERNAL_API_SECRET is not configured — the internal HTTP API will refuse every authenticated route'
+        )
+    }
+
     return (req: Request, res: Response, next: NextFunction): void => {
-        // Skip auth if no secret is configured (for backwards compatibility and local dev)
-        if (!secret) {
+        if (allExcludedPrefixes.some((prefix) => req.path.startsWith(prefix))) {
             next()
             return
         }
 
-        // Skip auth for excluded paths
-        if (allExcludedPrefixes.some((prefix) => req.path.startsWith(prefix))) {
-            next()
+        if (!secret) {
+            logger.warn('Internal API request refused: no secret is configured', {
+                path: req.path,
+                method: req.method,
+            })
+            res.status(401).json(DENIED)
             return
         }
 
@@ -47,20 +84,16 @@ export function createInternalApiAuthMiddleware(options: InternalApiAuthOptions)
                 path: req.path,
                 method: req.method,
             })
-            res.status(401).json({ error: 'Unauthorized: Missing authentication header' })
+            res.status(401).json(DENIED)
             return
         }
 
-        // Use timing-safe comparison to prevent timing attacks
-        const secretBuffer = Buffer.from(secret)
-        const providedBuffer = Buffer.from(providedSecret)
-
-        if (secretBuffer.length !== providedBuffer.length || !crypto.timingSafeEqual(secretBuffer, providedBuffer)) {
+        if (!secretsMatch(secret, providedSecret)) {
             logger.warn('Internal API request with invalid secret', {
                 path: req.path,
                 method: req.method,
             })
-            res.status(401).json({ error: 'Unauthorized: Invalid authentication' })
+            res.status(401).json(DENIED)
             return
         }
 
