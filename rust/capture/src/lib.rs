@@ -15,6 +15,7 @@ pub mod router;
 pub mod s3_client;
 pub mod server;
 pub mod sinks;
+pub mod team;
 pub mod test_endpoint;
 pub mod time;
 pub mod token;

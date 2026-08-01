@@ -34,6 +34,7 @@ rdkafka = { workspace = true }
 redis = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+serde-pickle = { version = "1.1.1" }
 serde_urlencoded = { workspace = true }
 thiserror = { workspace = true }
 time = { workspace = true }
