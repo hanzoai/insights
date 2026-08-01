@@ -16,7 +16,8 @@
 // same package. The name below is a third party's identifier for their artifact,
 // not a word we use about our warehouse — which is exactly why it is confined to
 // this file.
-import { ClickHouseClient, createClient } from '@clickhouse/client'
+import { ClickHouseClient, ExecResult, createClient } from '@clickhouse/client'
 
 export type DatastoreNativeClient = ClickHouseClient
+export type DatastoreExecResult<T> = ExecResult<T>
 export const createDatastoreNativeClient = createClient
