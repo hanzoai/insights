@@ -4,9 +4,10 @@ from typing import Union
 import requests
 import structlog
 
+from insights import iam
 from insights.models.utils import UUIDT
 from insights.redis import get_client
-from insights.settings import CDP_API_URL, INTERNAL_API_SECRET, PLUGINS_RELOAD_REDIS_URL
+from insights.settings import CDP_API_URL, PLUGINS_RELOAD_REDIS_URL
 
 logger = structlog.get_logger(__name__)
 
@@ -14,7 +15,9 @@ logger = structlog.get_logger(__name__)
 
 
 def get_internal_api_headers() -> dict[str, str]:
-    return {"x-internal-api-secret": INTERNAL_API_SECRET} if INTERNAL_API_SECRET else {}
+    """This deployment's IAM identity. The CDP API reads the org off the signed
+    claim in here, so an unauthenticated call is refused rather than served."""
+    return iam.authorization()
 
 
 def publish_message(channel: str, payload: Union[dict, str]):
@@ -126,7 +129,9 @@ def get_insights_function_templates() -> requests.Response:
     )
 
 
-def create_batch_insights_flow_job_invocation(team_id: int, insights_flow_id: UUIDT, batch_job_id: UUIDT) -> requests.Response:
+def create_batch_insights_flow_job_invocation(
+    team_id: int, insights_flow_id: UUIDT, batch_job_id: UUIDT
+) -> requests.Response:
     return requests.post(
         CDP_API_URL + f"/api/projects/{team_id}/insights_flows/{insights_flow_id}/batch_invocations/{batch_job_id}",
         headers=get_internal_api_headers(),

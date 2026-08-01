@@ -4,6 +4,7 @@ import * as schedule from 'node-schedule'
 import { Counter } from 'prom-client'
 import express from 'ultimate-express'
 
+import { Iam } from './api/principal'
 import { setupCommonRoutes, setupExpressApp } from './api/router'
 import { getPluginServerCapabilities } from './capabilities'
 import { CdpApi } from './cdp/cdp-api'
@@ -26,18 +27,18 @@ import {
 } from './config/stream-topics'
 import { startEvaluationScheduler } from './evaluation-scheduler/evaluation-scheduler'
 import { IngestionConsumer } from './ingestion/ingestion-consumer'
-import { StreamProducerWrapper } from './stream/producer'
 import { onShutdown } from './lifecycle'
 import { LogsIngestionConsumer } from './logs-ingestion/logs-ingestion-consumer'
 import { SessionRecordingIngester } from './session-recording/consumer'
 import { RecordingApi } from './session-replay/recording-api/recording-api'
+import { StreamProducerWrapper } from './stream/producer'
 import { Hub, PluginServerService, PluginsServerConfig } from './types'
 import { ServerCommands } from './utils/commands'
 import { closeHub, createHub } from './utils/db/hub'
 import { isTestEnv } from './utils/env-utils'
+import { captureException, shutdown as insightsShutdown } from './utils/insights'
 import { logger } from './utils/logger'
 import { NodeInstrumentation } from './utils/node-instrumentation'
-import { captureException, shutdown as insightsShutdown } from './utils/insights'
 import { PubSub } from './utils/pubsub'
 import { delay } from './utils/utils'
 
@@ -68,7 +69,12 @@ export class PluginServer {
             ...config,
         }
 
-        this.expressApp = setupExpressApp({ internalApiSecret: this.config.INTERNAL_API_SECRET })
+        this.expressApp = setupExpressApp({
+            iam:
+                this.config.IAM_ISSUER && this.config.IAM_JWKS_URL
+                    ? new Iam({ issuer: this.config.IAM_ISSUER, jwksUrl: this.config.IAM_JWKS_URL })
+                    : null,
+        })
         this.nodeInstrumentation = new NodeInstrumentation(this.config)
         this.setupContinuousProfiling()
     }
