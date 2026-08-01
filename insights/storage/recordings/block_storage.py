@@ -1,4 +1,5 @@
 import re
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Protocol, runtime_checkable
@@ -12,6 +13,7 @@ import aioboto3
 import structlog
 from botocore.client import Config
 
+from insights import iam
 from insights.storage.recordings.errors import BlockFetchError, RecordingDeletedError
 
 logger = structlog.get_logger(__name__)
@@ -317,11 +319,12 @@ async def encrypted_block_storage() -> AsyncIterator[EncryptedBlockStorage]:
     if not settings.RECORDING_API_URL:
         raise RuntimeError("RECORDING_API_URL is not configured")
 
-    headers: dict[str, str] = {}
-    if settings.INTERNAL_API_SECRET:
-        headers["X-Internal-Api-Secret"] = settings.INTERNAL_API_SECRET
-    elif not settings.DEBUG:
-        logger.warning("encrypted_block_storage.missing_internal_api_secret")
+    # The recording API reads the tenant off this token's signed `owner` claim,
+    # not off the team_id in the URL, so an unauthenticated session would be
+    # refused rather than served. Minting happens off the event loop: it is a
+    # blocking HTTP call, made once per token lifetime, and blocking here would
+    # stall every other block fetch in flight.
+    headers = await asyncio.to_thread(iam.authorization)
 
     timeout = aiohttp.ClientTimeout(total=30, connect=5)
     async with aiohttp.ClientSession(timeout=timeout, headers=headers) as session:

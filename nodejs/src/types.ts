@@ -499,8 +499,10 @@ export interface PluginsServerConfig
     // Super properties for internal analytics (matching Python insightsanalytics.super_properties)
     OTEL_SERVICE_NAME: string | null
     OTEL_SERVICE_ENVIRONMENT: string | null
-    // Internal API authentication
-    INTERNAL_API_SECRET: string
+    // Hanzo IAM — issuer and signing keys for the principal every non-public
+    // HTTP route is gated on.
+    IAM_ISSUER: string
+    IAM_JWKS_URL: string
 
     // Destination Migration Diffing
     DESTINATION_MIGRATION_DIFFING_ENABLED: boolean
