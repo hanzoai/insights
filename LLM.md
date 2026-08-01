@@ -261,6 +261,35 @@ the squash.
   the operator CR pins an explicit tag so it won't auto-move to a squash image
   without this step.
 
+## What the Ship-it step needs, and how it failed silently for a day
+
+The step below is right, but it depended on three things nobody had checked, and
+missing any one of them makes a build publish an image and pin nothing — while
+every dashboard stays green, because the BUILD succeeded:
+
+ 1. `KMS_CLIENT_ID` / `KMS_CLIENT_SECRET` as ORG-level forge action secrets.
+    They were absent. `hanzo` had `GHCR_TOKEN`, `GHCR_USER`, `GH_PAT`, `OCI_*`
+    and nothing else — which is exactly why builds worked and deploys did not.
+    Repo-level secrets on `hanzo/insights` are empty; everything is inherited.
+    Check with: `GET /v1/orgs/hanzo/actions/secrets` (names only, never values).
+ 2. A VALID `UNIVERSE_PIN_TOKEN` in KMS. The one provisioned there matched no
+    live token in the forge and answered 401 on every username, so even a
+    successful KMS login could not have pushed.
+ 3. The token must be able to push to `hanzo/universe`. Verify without pushing:
+    `curl -o /dev/null -w '%{http_code}' -u "z:$TOKEN" \
+      https://git.hanzo.ai/hanzo/universe/info/refs?service=git-receive-pack`
+    200 means yes; 401 means the token is dead; 403 means the repo is a PULL
+    MIRROR and cannot be pushed to at all (several `hanzoai/*` repos are).
+
+The lesson worth keeping: `1.52.37`, `.38` and `.39` all built and published
+while production sat on `.36`. A green build is not a deploy, and the only
+honest check is the pin — `git log charts/app/values/` in universe.
+
+Which is why pin.sh stamps `Pinned-by: ci run <id>` or `Pinned-by: hand`. The
+commit author is always `hanzo-ci` whoever runs it, so authorship cannot tell
+you whether the automation works. Twice a hand-run pin was read back as proof
+the pipeline was healthy.
+
 ## The build ships itself now — and the trap that hid it
 
 A push to `main` builds the next patch semver and pins it in `hanzoai/universe`;
