@@ -6,6 +6,12 @@ use chrono::serde::ts_microseconds;
 use chrono::DateTime;
 use chrono::Utc;
 use datastore::Row;
+// `#[derive(Row)]` expands to `impl clickhouse::Row`, an unqualified path the
+// macro resolves in THIS crate's namespace rather than its own (upstream
+// clickhouse-derive carries a TODO to emit `::clickhouse` instead). The crate is
+// linked under our name, so bind the name the macro emits to it. This is the one
+// place the generated code forces it; every path we write is `datastore`.
+use datastore as clickhouse;
 use opentelemetry_proto::tonic::{
     common::v1::{
         any_value::{self, Value},
