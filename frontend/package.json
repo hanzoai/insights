@@ -71,7 +71,7 @@
         "@hanzo/mascot-mode": "^0.0.48",
         "@hanzo/insightsql-parser": "workspace:*",
         "@hanzo/scriptvm": "workspace:*",
-        "@hanzo/icons": "^0.36.6",
+        "@hanzo/icons": "^0.36.7",
         "@hanzo/plugin-scaffold": "workspace:*",
         "@hanzo/products-actions": "workspace:*",
         "@hanzo/products-cohorts": "workspace:*",

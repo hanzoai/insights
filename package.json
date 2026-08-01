@@ -90,7 +90,7 @@
             "react-dom": "18.3.1",
             "sha.js": ">=2.4.12",
             "typescript": "5.4.5",
-            "@hanzo/icons": "npm:@hanzo/insights-icons@0.36.6",
+            "@hanzo/icons": "npm:@hanzo/insights-icons@0.36.7",
             "@hanzo/mascot-mode": "npm:@hanzo/insights-mascot-mode@0.0.48",
             "@hanzo/rrweb": "npm:@hanzo/insights-rrweb@0.0.26",
             "@hanzo/rrweb-types": "npm:@hanzo/insights-rrweb-types@0.0.26",
@@ -99,8 +99,7 @@
         "patchedDependencies": {
             "heatmap.js@2.0.5": "patches/heatmap.js@2.0.5.patch",
             "dayjs@1.11.11": "patches/dayjs@1.11.11.patch",
-            "chartjs-plugin-crosshair@2.0.0": "patches/chartjs-plugin-crosshair@2.0.0.patch",
-            "@hanzo/insights-icons@0.36.6": "patches/@hanzo__insights-icons@0.36.6.patch"
+            "chartjs-plugin-crosshair@2.0.0": "patches/chartjs-plugin-crosshair@2.0.0.patch"
         },
         "// Known dependencies that we need preinstall scripts for, add new ones with caution": "",
         "onlyBuiltDependencies": [
