@@ -1,10 +1,11 @@
-// adapted from https://github.com/react-monaco-editor/react-monaco-editor/blob/d2fd2521e0557c880dec93acaab9a087f025426c/src/diff.tsx
 import * as monaco from 'monaco-editor'
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 
+// adapted from https://github.com/react-monaco-editor/react-monaco-editor/blob/d2fd2521e0557c880dec93acaab9a087f025426c/src/diff.tsx
+import 'lib/monaco/monacoEnvironment'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
-interface MonacoDiffEditorProps {
+export interface MonacoDiffEditorProps {
     width?: number | string
     height?: number | string
     value?: string | null
@@ -14,9 +15,13 @@ interface MonacoDiffEditorProps {
     theme?: string | null
     options?: monaco.editor.IDiffEditorConstructionOptions
     onChange?: (value: string, event: monaco.editor.IModelContentChangedEvent) => void
+    /** Make the right (modified) pane editable, keeping the left pane read-only. Defaults to read-only. */
+    modifiedEditable?: boolean
     className?: string | null
     originalUri?: (m: typeof monaco) => monaco.Uri
     modifiedUri?: (m: typeof monaco) => monaco.Uri
+    /** Optional placeholder overlaid on the editor until it has laid out its first content. */
+    loading?: React.ReactNode
 }
 
 const LINE_HEIGHT = 18
@@ -39,9 +44,11 @@ function MonacoDiffEditor(
         theme = null,
         options = {},
         onChange = () => {},
+        modifiedEditable = false,
         className = null,
         originalUri,
         modifiedUri,
+        loading = null,
     }: MonacoDiffEditorProps,
     ref: React.ForwardedRef<{ editor: monaco.editor.IStandaloneDiffEditor | null }>
 ): JSX.Element {
@@ -86,7 +93,8 @@ function MonacoDiffEditor(
             ...(className ? { extraEditorClassName: className } : {}),
             ...options,
             ...(theme ? { theme } : {}),
-            readOnly: true,
+            // readOnly only governs the modified (right) pane; the original pane is always read-only.
+            readOnly: !modifiedEditable,
         })
 
         // Create models
@@ -108,24 +116,27 @@ function MonacoDiffEditor(
         })
 
         // Get initial content height
-        setTimeout(() => {
+        const initialHeightTimer = setTimeout(() => {
             if (editorRef.current) {
                 const modEditor = editorRef.current.getModifiedEditor()
                 setContentHeight(modEditor.getContentHeight())
             }
         }, 100)
 
-        // Cleanup
+        // Cleanup — order matters: detach the models from the DiffEditorWidget via setModel(null)
+        // before disposing anything, so Monaco's internal onWillDispose listeners don't fire
+        // against models that are about to be torn down ("TextModel got disposed before
+        // DiffEditorWidget model got reset").
         return () => {
-            const model = editorRef.current?.getModel()
-            if (editorRef.current && model) {
-                const { original: originalEditor, modified } = model
-                editorRef.current.dispose()
-                originalEditor.dispose()
-                modified.dispose()
-            }
+            clearTimeout(initialHeightTimer)
             subscriptionRef.current?.dispose()
-            contentSizeListener?.dispose()
+            contentSizeListener.dispose()
+            editorRef.current?.setModel(null)
+            editorRef.current?.dispose()
+            originalModel.dispose()
+            modifiedModel.dispose()
+            editorRef.current = null
+            subscriptionRef.current = null
         }
     })
 
@@ -134,8 +145,9 @@ function MonacoDiffEditor(
         editorRef.current?.updateOptions({
             ...(className ? { extraEditorClassName: className } : {}),
             ...options,
+            readOnly: !modifiedEditable,
         })
-    }, [className, options])
+    }, [className, options, modifiedEditable])
 
     // Update layout on size changes
     useEffect(() => {
@@ -152,12 +164,12 @@ function MonacoDiffEditor(
         }
     }, [language])
 
-    // Update value
+    // Update value. Skip when the model already matches, so an editable pane echoing its own
+    // onChange back through props does not reset the caret.
     useEffect(() => {
         const model = editorRef.current?.getModel()
-        if (model) {
-            const { modified: modifiedEditor } = model
-            modifiedEditor.setValue(modified ?? '')
+        if (model && model.modified.getValue() !== (modified ?? '')) {
+            model.modified.setValue(modified ?? '')
         }
     }, [modified])
 
@@ -186,14 +198,17 @@ function MonacoDiffEditor(
 
     return (
         <div
-            ref={containerRef}
+            className="relative"
             // eslint-disable-next-line react/forbid-dom-props
             style={{
                 width: processSize(width),
                 height: processSize(calculatedHeight),
             }}
-            className="react-monaco-editor-container"
-        />
+        >
+            <div ref={containerRef} className="react-monaco-editor-container w-full h-full" />
+            {/* Overlay the placeholder until Monaco reports its first content size (editor laid out). */}
+            {loading && contentHeight === null && <div className="absolute inset-0">{loading}</div>}
+        </div>
     )
 }
 

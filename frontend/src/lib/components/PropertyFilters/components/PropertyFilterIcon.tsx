@@ -1,7 +1,7 @@
 import { IconBuilding, IconPeople, IconPerson, IconPiggyBank } from '@hanzo/icons'
 
-import { Tooltip } from 'lib/elements/Tooltip'
 import { IconUnverifiedEvent } from 'lib/elements/icons'
+import { Tooltip } from 'lib/elements/Tooltip'
 
 import { PropertyFilterType } from '~/types'
 
@@ -15,7 +15,7 @@ export function PropertyFilterIcon({ type }: { type?: PropertyFilterType }): JSX
             )
         case 'person':
             return (
-                <Tooltip title="User property">
+                <Tooltip title="Person property">
                     <IconPerson />
                 </Tooltip>
             )

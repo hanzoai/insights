@@ -1,4 +1,4 @@
-import { ProcessedPluginEvent } from '@hanzo/plugin-scaffold'
+import { ProcessedPluginEvent } from '~/plugin-scaffold'
 
 import { SalesforceMeta, SalesforcePluginConfig, sendEventToSalesforce } from '../index'
 

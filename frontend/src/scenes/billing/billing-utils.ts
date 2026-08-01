@@ -1,14 +1,17 @@
-import equal from 'fast-deep-equal'
+import { deepEqual as equal } from 'fast-equals'
 import { LogicWrapper } from 'kea'
 import { routerType } from 'kea-router/lib/routerType'
 import Papa from 'papaparse'
 
 import { FEATURE_FLAGS, OrganizationMembershipLevel } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { compactNumber, dateStringToDayJs, wordPluralize } from 'lib/utils'
+import type { FeatureFlagsSet } from 'lib/logic/featureFlagLogic'
+import { dateStringToDayJs } from 'lib/utils/dateFilters'
+import { compactNumber } from 'lib/utils/numbers'
+import { membershipLevelToName } from 'lib/utils/permissioning'
+import { wordPluralize } from 'lib/utils/strings'
 import { Params } from 'scenes/sceneTypes'
 
-import { OrganizationType } from '~/types'
 import { BillingPeriod, BillingProductV2AddonType, BillingProductV2Type, BillingTierType, BillingType } from '~/types'
 
 import { USAGE_TYPES } from './constants'
@@ -16,10 +19,16 @@ import type { BillingFilters, BillingSeriesForCsv, BillingUsageInteractionProps,
 import { BillingGaugeItemKind, BillingGaugeItemType } from './types'
 
 export const isProductVariantPrimary = (productType: string): boolean =>
-    ['session_replay', 'realtime_destinations', 'data_warehouse', 'workflows_emails'].includes(productType)
+    ['session_replay', 'realtime_destinations', 'data_warehouse', 'workflows_emails', 'logs'].includes(productType)
 
 export const isProductVariantSecondary = (productType: string): boolean =>
-    ['mobile_replay', 'batch_exports', 'data_warehouse_historical', 'workflows_destinations'].includes(productType)
+    [
+        'mobile_replay',
+        'batch_exports',
+        'data_warehouse_historical',
+        'workflows_destinations',
+        'logs_retention_30d',
+    ].includes(productType)
 
 export const calculateFreeTier = (product: BillingProductV2Type | BillingProductV2AddonType): number => {
     // If subscribed and has tiers, check if the first tier is free
@@ -423,15 +432,21 @@ export const currencyFormatter = (value: number): string => {
 }
 
 /**
- * Determines if the user has sufficient permissions to read billing information based on their organization membership level.
+ * Returns the minimum membership level required to access billing.
+ * When ownerOnlyBilling is true (via the owner-only-billing feature flag), only org owners can access billing.
  */
-export function canAccessBilling(
-    currentOrganization: Pick<OrganizationType, 'membership_level'> | null | undefined
-): boolean {
-    if (!currentOrganization || !currentOrganization.membership_level) {
+export function getMinimumBillingAccessLevel(ownerOnlyBilling: boolean): OrganizationMembershipLevel {
+    return ownerOnlyBilling ? OrganizationMembershipLevel.Owner : OrganizationMembershipLevel.Admin
+}
+
+/**
+ * Determines if the user has sufficient permissions to access billing based on their org membership level.
+ */
+export function canAccessBilling(membershipLevel: number | null | undefined, ownerOnlyBilling: boolean): boolean {
+    if (!membershipLevel) {
         return false
     }
-    return currentOrganization.membership_level >= OrganizationMembershipLevel.Admin
+    return membershipLevel >= getMinimumBillingAccessLevel(ownerOnlyBilling)
 }
 
 /**
@@ -490,6 +505,12 @@ export function buildTrackingProperties(
         interval: values.filters.interval || 'day',
     }
 }
+
+// The Replay vision entry stays hidden until the replay-vision flag rolls out with the pricing launch
+export const getUsageTypeOptions = (featureFlags: FeatureFlagsSet): { key: string; label: string }[] =>
+    USAGE_TYPES.filter(
+        (opt) => opt.value !== 'replay_vision_credits_used_in_period' || featureFlags[FEATURE_FLAGS.REPLAY_VISION]
+    ).map((opt) => ({ key: opt.value, label: opt.label }))
 
 export const isAddonVisible = (
     product: BillingProductV2Type,
@@ -633,7 +654,11 @@ export function getUsageLimitConsequence(productName: string): string {
 /**
  * Build a consolidated message for products that have exceeded their usage limits
  */
-export function buildUsageLimitExceededMessage(products: Array<{ name: string; subscribed: boolean | null }>): {
+export function buildUsageLimitExceededMessage(
+    products: Array<{ name: string; subscribed: boolean | null }>,
+    hasBillingAccess: boolean = true,
+    minimumBillingAccessLevel: OrganizationMembershipLevel = OrganizationMembershipLevel.Admin
+): {
     title: string
     message: string
 } {
@@ -648,8 +673,17 @@ export function buildUsageLimitExceededMessage(products: Array<{ name: string; s
     const consequences = [...new Set(products.map((p) => getUsageLimitConsequence(p.name)))]
 
     const productListText = formatProductNames(productNames)
-    const actionText = allSubscribed ? 'increase your billing limit' : 'upgrade your plan'
     const consequenceText = consequences.join(' and ')
+
+    let actionText: string
+    if (hasBillingAccess) {
+        actionText = allSubscribed ? 'increase your billing limit' : 'upgrade your plan'
+    } else {
+        const roleName = membershipLevelToName.get(minimumBillingAccessLevel)
+        actionText = allSubscribed
+            ? `ask an organization ${roleName} to increase the billing limit`
+            : `ask an organization ${roleName} to upgrade the plan`
+    }
 
     return {
         title: products.length === 1 ? 'Usage limit exceeded' : 'Usage limits exceeded',
@@ -661,7 +695,13 @@ export function buildUsageLimitExceededMessage(products: Array<{ name: string; s
  * Build a consolidated message for products approaching their usage limits
  */
 export function buildUsageLimitApproachingMessage(
-    products: Array<{ name: string; percentage_usage: number; usage_key?: string | null }>
+    products: Array<{
+        name: string
+        percentage_usage: number
+        usage_key?: string | null
+    }>,
+    hasBillingAccess: boolean = true,
+    minimumBillingAccessLevel: OrganizationMembershipLevel = OrganizationMembershipLevel.Admin
 ): { title: string; message: string } {
     if (products.length === 0) {
         return { title: '', message: '' }
@@ -669,14 +709,17 @@ export function buildUsageLimitApproachingMessage(
 
     const usageDetails = products.map((p) => {
         const percentage = parseFloat((p.percentage_usage * 100).toFixed(2))
-        const usageKey = p.usage_key?.toLowerCase() || 'usage'
-        return `${percentage}% of your ${usageKey} allocation`
+        const productName = p.name || p.usage_key?.toLowerCase() || 'usage'
+        return `${percentage}% of your ${productName} allocation`
     })
+
+    const roleName = membershipLevelToName.get(minimumBillingAccessLevel)
+    const adminSuffix = hasBillingAccess ? '' : ` Please ask an organization ${roleName} to increase the billing limit.`
 
     const message =
         products.length === 1
-            ? `You have currently used ${usageDetails[0]}.`
-            : `You are approaching your usage limits: ${usageDetails.join(', ')}.`
+            ? `You have currently used ${usageDetails[0]}.${adminSuffix}`
+            : `You are approaching your usage limits: ${usageDetails.join(', ')}.${adminSuffix}`
 
     return {
         title: products.length === 1 ? 'You will soon hit your usage limit' : 'You will soon hit your usage limits',

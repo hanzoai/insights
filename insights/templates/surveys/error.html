@@ -4,248 +4,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {# Absolute app-origin URLs: reverse-proxy domains don't serve Django staticfiles. #}
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ site_url }}/static/icons/apple-touch-icon.png?v=2023-07-07">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ site_url }}/static/icons/favicon-32x32.png?v=2023-07-07">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ site_url }}/static/icons/favicon-16x16.png?v=2023-07-07">
     <title>{{ error_title }}</title>
     <style>
         :root {
-            --brand-blue: #1D4AFF;
-            --brand-orange: #F54E00;
-            --brand-yellow: #F9BD2B;
-            --brand-black: #000;
-            --brand-white: #fff;
-
-            --ph-bg-primary: #fafaf9;
-            --ph-bg-surface-primary: #fff;
-            --ph-text-primary: #1d1f27;
-            --ph-text-secondary: #6b7280;
-            --ph-text-tertiary: #9ca3af;
-            --ph-border-primary: #e5e7eb;
-            --ph-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --ph-radius: 0.75rem;
-            --ph-radius-lg: 1rem;
-
-            --ph-font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', helvetica, arial, sans-serif;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --ph-bg-primary: #1d1f27;
-                --ph-bg-surface-primary: #2d2f3a;
-                --ph-text-primary: #fff;
-                --ph-text-secondary: #d1d5db;
-                --ph-text-tertiary: #9ca3af;
-                --ph-border-primary: #374151;
-                --brand-black: #fff;
-            }
+            --ph-survey-page-background: #ffffff;
+            --ph-survey-page-text: #111111;
+            --ph-survey-page-text-subtle: #6b6b6b;
+            --ph-survey-page-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --ph-survey-pill-background: rgba(255, 255, 255, 0.7);
         }
 
         * {
             box-sizing: border-box;
+        }
+
+        html,
+        body {
             margin: 0;
             padding: 0;
+            background: var(--ph-survey-page-background);
+            color: var(--ph-survey-page-text);
+            font-family: var(--ph-survey-page-font);
+            font-size: 16px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
         body {
-            font-family: var(--ph-font-family);
-            background: var(--ph-bg-primary);
+            min-height: 100vh;
+        }
+
+        .main-container {
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            color: var(--ph-text-primary);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            flex-direction: column;
+            padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 4vw, 2.5rem);
         }
 
-        .error-container {
-            background: var(--ph-bg-surface-primary);
-            border: 1px solid var(--ph-border-primary);
-            border-radius: var(--ph-radius-lg);
-            box-shadow: var(--ph-shadow-lg);
-            max-width: 600px;
+        .error-stage {
             width: 100%;
-            padding: 3rem 2rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .error-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg,
-                    var(--brand-blue) 0%,
-                    var(--brand-orange) 50%,
-                    var(--brand-yellow) 100%);
-        }
-
-        .logo-container {
-            margin-bottom: 2rem;
-        }
-
-        .logo {
-            height: 40px;
-            width: auto;
-        }
-
-        .error-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            background: var(--brand-orange);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .error-icon::before {
-            content: '!';
-            color: white;
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .error-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--ph-text-primary);
-            margin-bottom: 1rem;
-            line-height: 1.2;
-        }
-
-        .error-message {
-            font-size: 1.125rem;
-            color: var(--ph-text-secondary);
-            margin-bottom: 2rem;
-            line-height: 1.5;
-        }
-
-        .error-actions {
+            max-width: 44rem;
+            margin: auto;
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            align-items: center;
         }
 
-        .btn {
+        .error-title {
+            margin: 0;
+            font-size: clamp(1.5rem, 2.4vw, 1.875rem);
+            font-weight: 600;
+            line-height: 1.25;
+            letter-spacing: -0.015em;
+            color: var(--ph-survey-page-text);
+            text-wrap: balance;
+        }
+
+        .error-message {
+            margin: 0;
+            font-size: 0.975rem;
+            line-height: 1.6;
+            color: var(--ph-survey-page-text-subtle);
+            text-wrap: pretty;
+        }
+
+        .footer-branding {
+            position: fixed;
+            bottom: 1.25rem;
+            right: 1.25rem;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--ph-radius);
-            font-weight: 600;
+            gap: 0.35rem;
+            padding: 0.4rem 0.7rem;
+            border-radius: 999px;
+            background: var(--ph-survey-pill-background);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 1px 2px rgba(17, 17, 17, 0.04), 0 4px 14px rgba(17, 17, 17, 0.06);
+            color: var(--ph-survey-page-text-subtle);
+            font-size: 0.72rem;
+            font-weight: 500;
             text-decoration: none;
-            transition: all 0.15s ease;
-            cursor: pointer;
-            font-size: 0.875rem;
-            min-width: 140px;
+            opacity: 0.75;
+            transition: opacity 140ms ease;
+            z-index: 10;
         }
 
-        .btn-primary {
-            background: var(--brand-orange);
-            color: white;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background: #e04400;
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--ph-text-secondary);
-            border: 1px solid var(--ph-border-primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--ph-bg-primary);
-            color: var(--ph-text-primary);
-        }
-
-        .error-code {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            font-size: 0.75rem;
-            color: var(--ph-text-tertiary);
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-        }
-
-        .decorative-dots {
-            position: absolute;
-            bottom: -20px;
-            right: -20px;
-            width: 120px;
-            height: 120px;
-            opacity: 0.05;
-            background-image: radial-gradient(var(--brand-blue) 2px, transparent 2px);
-            background-size: 20px 20px;
-            border-radius: 50%;
+        .footer-branding:hover {
+            opacity: 1;
         }
 
         @media (max-width: 640px) {
-            .error-container {
-                padding: 2rem 1.5rem;
-                margin: 1rem;
+            .main-container {
+                padding: 1.25rem;
             }
 
-            .error-title {
-                font-size: 1.5rem;
-            }
-
-            .error-message {
-                font-size: 1rem;
-            }
-
-            .logo {
-                height: 32px;
-            }
-
-            .error-icon {
-                width: 64px;
-                height: 64px;
-            }
-
-            .error-icon::before {
-                font-size: 1.5rem;
+            .footer-branding {
+                bottom: 0.75rem;
+                right: 0.75rem;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="error-container">
-        <div class="error-code">ERROR</div>
-        <div class="decorative-dots"></div>
-
-        <div class="logo-container">
-            <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 30" fill="none" role="img" aria-label="Hanzo">
-                <path d="M4 4h4v9h10V4h4v22h-4V17H8v9H4V4z" fill="currentColor" />
-                <path d="M26 26l8-22h4l8 22h-4.2l-1.8-5H32l-1.8 5H26zm7.2-8.5h5.6L36 10l-2.8 7.5z" fill="currentColor" />
-                <path d="M50 26V4h4l12 14.5V4h4v22h-3.8L54 11.5V26h-4z" fill="currentColor" />
-                <path d="M74 4h16v4l-9 14h9v4H74v-4l9-14h-9V4z" fill="currentColor" />
-                <path d="M104 4a10 11 0 1 0 0 22 10 11 0 1 0 0-22zm0 4a6 7 0 1 1 0 14 6 7 0 1 1 0-14z" fill="currentColor" />
-            </svg>
-        </div>
-
-        <div class="error-icon"></div>
-
-        <h1 class="error-title">{{ error_title }}</h1>
-        <p class="error-message">{{ error_message }}</p>
-
-        <div class="error-actions">
-            <a href="javascript:history.back()" class="btn btn-primary">Go Back</a>
-            <a href="javascript:location.reload()" class="btn btn-secondary">Try Again</a>
+    <div class="main-container">
+        <div class="error-stage">
+            <h1 class="error-title">{{ error_title }}</h1>
+            <p class="error-message">{{ error_message }}</p>
         </div>
     </div>
+    <a class="footer-branding" href="https://hanzo.ai/surveys?utm_source=survey-error" target="_blank" rel="noopener">
+        Survey by Insights
+    </a>
+
+    {% if appearance %}
+    {{ appearance|json_script:"survey-appearance" }}
+    {% include "surveys/_appearance_helpers.html" %}
+    <script nonce="{{ request.csp_nonce }}">
+        (function () {
+            var appearance = JSON.parse(document.getElementById('survey-appearance').textContent) || {}
+            var root = document.documentElement
+
+            if (appearance.backgroundColor) {
+                root.style.setProperty('--ph-survey-page-background', appearance.backgroundColor)
+            }
+
+            var explicitText = appearance.textColor || appearance.inputTextColor
+            var derivedText = getContrastingTextColor(appearance.backgroundColor)
+            if (explicitText || derivedText) {
+                root.style.setProperty('--ph-survey-page-text', explicitText || derivedText)
+            }
+
+            var bgLuminance = getLuminance(appearance.backgroundColor)
+            if (bgLuminance !== null && bgLuminance < 0.5) {
+                root.style.setProperty('--ph-survey-pill-background', 'rgba(17, 17, 17, 0.55)')
+            }
+
+            if (appearance.textSubtleColor) {
+                root.style.setProperty('--ph-survey-page-text-subtle', appearance.textSubtleColor)
+            }
+            if (appearance.fontFamily && appearance.fontFamily !== 'inherit') {
+                root.style.setProperty('--ph-survey-page-font', appearance.fontFamily)
+            }
+        })()
+    </script>
+    {% endif %}
 </body>
 
 </html>

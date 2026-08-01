@@ -1,11 +1,14 @@
 from typing import Optional
 
 from insights.test.base import APIBaseTest, DatastoreTestMixin
+from unittest.mock import patch
 
+from django.conf import settings
+from django.db import DatabaseError
 from django.test import override_settings
 
 from insights.schema import (
-    InsightsLanguage,
+    HogLanguage,
     InsightsQLMetadata,
     InsightsQLMetadataResponse,
     InsightsQLQuery,
@@ -13,21 +16,30 @@ from insights.schema import (
     SessionTableVersion,
 )
 
+from insights.insightsql.direct_connection import INVALID_CONNECTION_ID_ERROR
 from insights.insightsql.metadata import get_insightsql_metadata
+from insights.insightsql.parser import parse_select
 
-from insights.models import Cohort, PropertyDefinition
+from insights.models import EventDefinition, PropertyDefinition
 
-from products.data_warehouse.backend.models import ExternalDataSource, ExternalDataSourceType
+from products.cohorts.backend.models.cohort import Cohort
+from products.product_analytics.backend.models.insight_variable import InsightVariable
+from products.warehouse_sources.backend.facade.models import DataWarehouseTable, ExternalDataSchema, ExternalDataSource
+from products.warehouse_sources.backend.facade.types import ExternalDataSourceType
 
 
 class TestMetadata(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
+    # No test here writes per-team Datastore data, so the per-test team isolation
+    # that DatastoreTestMixin defaults to (CLASS_DATA_LEVEL_SETUP = False) only adds
+    # ~100ms of org/team/user creation to every test.
+    CLASS_DATA_LEVEL_SETUP = True
 
     def _expr(self, query: str, table: str = "events", debug=True) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=InsightsLanguage.INSIGHTS_QL_EXPR,
+                language=HogLanguage.FN_QL_EXPR,
                 query=query,
                 sourceQuery=InsightsQLQuery(query=f"select * from {table}"),
                 response=None,
@@ -39,7 +51,22 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
     def _select(self, query: str, modifiers: Optional[InsightsQLQueryModifiers] = None) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=InsightsLanguage.INSIGHTS_QL, query=query, response=None, modifiers=modifiers
+                kind="InsightsQLMetadata", language=HogLanguage.FN_QL, query=query, response=None, modifiers=modifiers
+            ),
+            team=self.team,
+        )
+
+    def _select_with_variables(
+        self, query: str, variables: Optional[dict[str, dict]] = None, globals: Optional[dict] = None
+    ) -> InsightsQLMetadataResponse:
+        return get_insightsql_metadata(
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata",
+                language=HogLanguage.FN_QL,
+                query=query,
+                response=None,
+                variables=variables,
+                globals=globals,
             ),
             team=self.team,
         )
@@ -47,14 +74,14 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
     def _program(self, query: str, globals: Optional[dict] = None) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=InsightsLanguage.INSIGHTS_SCRIPT, query=query, globals=globals, response=None
+                kind="InsightsQLMetadata", language=HogLanguage.HOG, query=query, globals=globals, response=None
             ),
             team=self.team,
         )
 
     def _template(self, query: str) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
-            query=InsightsQLMetadata(kind="InsightsQLMetadata", language=InsightsLanguage.INSIGHTS_TEMPLATE, query=query, response=None),
+            query=InsightsQLMetadata(kind="InsightsQLMetadata", language=HogLanguage.FN_TEMPLATE, query=query, response=None),
             team=self.team,
         )
 
@@ -68,7 +95,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
                 "query": "select 1",
                 "errors": [
                     {
-                        "message": "extraneous input '1' expecting <EOF>",
+                        "message": "trailing tokens after expression: '1' (Number)",
                         "start": 7,
                         "end": 8,
                         "fix": None,
@@ -155,6 +182,188 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             },
         )
 
+    def test_metadata_warns_for_unknown_event_literal(self):
+        EventDefinition.objects.create(team=self.team, name="paid_bill")
+
+        metadata = self._select("SELECT count() FROM events WHERE event = 'purchase'")
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(len(metadata.errors), 0)
+        self.assertEqual(len(metadata.warnings), 1)
+        self.assertEqual(
+            metadata.warnings[0].message,
+            "Event 'purchase' was not found in this project taxonomy.",
+        )
+        self.assertIsNone(metadata.warnings[0].fix)
+
+    def test_metadata_suggests_similar_event_literal(self):
+        EventDefinition.objects.create(team=self.team, name="$pageview")
+
+        metadata = self._select("SELECT count() FROM events WHERE event = 'pageview'")
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(len(metadata.warnings), 1)
+        self.assertEqual(
+            metadata.warnings[0].message,
+            "Event 'pageview' was not found in this project taxonomy. Did you mean '$pageview'?",
+        )
+        self.assertEqual(metadata.warnings[0].fix, "'$pageview'")
+
+    def test_metadata_does_not_warn_for_known_event_literal(self):
+        EventDefinition.objects.create(team=self.team, name="paid_bill")
+
+        metadata = self._select("SELECT count() FROM events WHERE event = 'paid_bill'")
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(metadata.warnings, [])
+
+    def test_metadata_warns_for_unknown_event_in_literal(self):
+        EventDefinition.objects.create(team=self.team, name="signed_up")
+
+        metadata = self._select("SELECT count() FROM events WHERE event IN ('signed_up', 'signup')")
+
+        self.assertTrue(metadata.isValid)
+        warning_messages = [warning.message for warning in metadata.warnings]
+        self.assertIn(
+            "Event 'signup' was not found in this project taxonomy. Did you mean 'signed_up'?", warning_messages
+        )
+        self.assertNotIn("Event 'signed_up' was not found in this project taxonomy.", warning_messages)
+
+    def test_metadata_warns_for_unknown_property_field_access(self):
+        PropertyDefinition.objects.create(team=self.team, name="$geoip_country_code")
+
+        metadata = self._select("SELECT properties.country_code, count() FROM events GROUP BY properties.country_code")
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(len(metadata.errors), 0)
+        self.assertEqual(len(metadata.warnings), 1)
+        self.assertEqual(
+            metadata.warnings[0].message,
+            "Property 'country_code' was not found in this project taxonomy. Did you mean '$geoip_country_code'?",
+        )
+        self.assertEqual(metadata.warnings[0].fix, "properties.$geoip_country_code")
+
+    def test_metadata_warns_for_unknown_property_array_access(self):
+        PropertyDefinition.objects.create(team=self.team, name="$geoip_country_code")
+
+        metadata = self._select("SELECT properties['country_code'] FROM events")
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(len(metadata.errors), 0)
+        self.assertEqual(len(metadata.warnings), 1)
+        self.assertEqual(metadata.warnings[0].fix, "'$geoip_country_code'")
+
+    def test_metadata_does_not_warn_for_known_property_access(self):
+        PropertyDefinition.objects.create(team=self.team, name="country_code")
+
+        metadata = self._select("SELECT properties.country_code FROM events")
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(metadata.warnings, [])
+
+    def test_metadata_does_not_warn_for_dynamic_event_expression(self):
+        EventDefinition.objects.create(team=self.team, name="paid_bill")
+
+        metadata = self._select("SELECT count() FROM events WHERE event = concat('paid_', 'bill')")
+
+        taxonomy_warnings = [warning for warning in metadata.warnings if "project taxonomy" in warning.message]
+        self.assertEqual(taxonomy_warnings, [])
+
+    def test_metadata_does_not_warn_for_dynamic_property_access(self):
+        metadata = self._select("SELECT properties[key] FROM events")
+
+        taxonomy_warnings = [warning for warning in metadata.warnings if "project taxonomy" in warning.message]
+        self.assertEqual(taxonomy_warnings, [])
+
+    def test_metadata_does_not_warn_for_allowlisted_dynamic_property(self):
+        PropertyDefinition.objects.create(team=self.team, name="$geoip_country_code")
+
+        metadata = self._select("SELECT properties['$feature/my-flag'] FROM events")
+
+        taxonomy_warnings = [warning for warning in metadata.warnings if "project taxonomy" in warning.message]
+        self.assertEqual(taxonomy_warnings, [])
+
+    def test_metadata_skips_full_taxonomy_fetch_for_known_event(self):
+        EventDefinition.objects.create(team=self.team, name="paid_bill")
+
+        with patch("insights.insightsql.taxonomy_validation._known_names") as known_names:
+            metadata = self._select("SELECT count() FROM events WHERE event = 'paid_bill'")
+
+        self.assertTrue(metadata.isValid)
+        known_names.assert_not_called()
+
+    def test_metadata_event_literal_fix_preserves_quotes(self):
+        EventDefinition.objects.create(team=self.team, name="$pageview")
+
+        query = "SELECT count() FROM events WHERE event = 'pagevisit'"
+        warning = self._select(query).warnings[0]
+
+        # Apply the fix exactly as the editor quick-fix does: replace [start, end] with fix.
+        replaced = query[: warning.start] + (warning.fix or "") + query[warning.end :]
+        self.assertEqual(replaced, "SELECT count() FROM events WHERE event = '$pageview'")
+
+    def test_metadata_property_field_fix_preserves_prefix(self):
+        PropertyDefinition.objects.create(team=self.team, name="$geoip_country_code")
+
+        query = "SELECT properties.country_code FROM events"
+        warning = self._select(query).warnings[0]
+
+        replaced = query[: warning.start] + (warning.fix or "") + query[warning.end :]
+        self.assertEqual(replaced, "SELECT properties.$geoip_country_code FROM events")
+
+    def test_metadata_event_literal_fix_escapes_quote_in_suggestion(self):
+        EventDefinition.objects.create(team=self.team, name="o'brien")
+
+        query = "SELECT count() FROM events WHERE event = 'obrien'"
+        warning = self._select(query).warnings[0]
+
+        # A suggested name containing a quote must be escaped so the quick-fix stays valid InsightsQL.
+        replaced = query[: warning.start] + (warning.fix or "") + query[warning.end :]
+        self.assertEqual(replaced, "SELECT count() FROM events WHERE event = 'o\\'brien'")
+        parse_select(replaced)  # round-trips to a parseable query
+
+    def test_metadata_property_field_fix_quotes_suggestion_needing_backticks(self):
+        PropertyDefinition.objects.create(team=self.team, name="my prop")
+
+        query = "SELECT properties.myprop FROM events"
+        warning = self._select(query).warnings[0]
+
+        replaced = query[: warning.start] + (warning.fix or "") + query[warning.end :]
+        self.assertEqual(replaced, "SELECT properties.`my prop` FROM events")
+        parse_select(replaced)
+
+    def test_metadata_taxonomy_db_error_fails_open(self):
+        EventDefinition.objects.create(team=self.team, name="paid_bill")
+
+        with patch(
+            "insights.insightsql.taxonomy_validation.EventDefinition.objects.filter",
+            side_effect=DatabaseError("boom"),
+        ):
+            metadata = self._select("SELECT count() FROM events WHERE event = 'purchase'")
+
+        # A DB error during the advisory taxonomy lookup must not invalidate a valid query.
+        self.assertTrue(metadata.isValid)
+        self.assertEqual([w for w in metadata.warnings if "project taxonomy" in w.message], [])
+
+    def test_metadata_does_not_query_taxonomy_without_taxonomy_references(self):
+        with (
+            patch("insights.insightsql.taxonomy_validation.EventDefinition.objects.filter") as event_filter,
+            patch("insights.insightsql.taxonomy_validation.PropertyDefinition.objects.filter") as property_filter,
+        ):
+            metadata = self._select("SELECT count() FROM events")
+
+        self.assertTrue(metadata.isValid)
+        event_filter.assert_not_called()
+        property_filter.assert_not_called()
+
+    def test_metadata_does_not_warn_for_event_column_outside_events_table(self):
+        EventDefinition.objects.create(team=self.team, name="paid_bill")
+
+        metadata = self._select("SELECT count() FROM (SELECT 'signup' AS event) WHERE event = 'signup'")
+
+        taxonomy_warnings = [warning for warning in metadata.warnings if "project taxonomy" in warning.message]
+        self.assertEqual(taxonomy_warnings, [])
+
     def test_metadata_table(self):
         metadata = self._expr("timestamp", "events")
         self.assertEqual(metadata.isValid, True)
@@ -167,6 +376,288 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
 
         metadata = self._expr("is_identified", "persons")
         self.assertEqual(metadata.isValid, True)
+
+    @patch("insights.insightsql.metadata.Database.create_for")
+    def test_metadata_resolves_database_from_connection_id(self, mock_create_for):
+        source = ExternalDataSource.objects.create(
+            source_id="selected-upstream-source",
+            connection_id="selected-connection",
+            destination_id="destination-1",
+            team=self.team,
+            status=ExternalDataSource.Status.COMPLETED,
+            source_type=ExternalDataSourceType.POSTGRES,
+            access_method=ExternalDataSource.AccessMethod.DIRECT,
+        )
+
+        get_insightsql_metadata(
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata",
+                language=HogLanguage.FN_QL,
+                query="SELECT 1",
+                response=None,
+                connectionId=str(source.id),
+            ),
+            team=self.team,
+            user=self.user,
+        )
+
+        self.assertEqual(mock_create_for.call_count, 1)
+        self.assertEqual(mock_create_for.call_args.kwargs["team"], self.team)
+        self.assertEqual(mock_create_for.call_args.kwargs["user"], self.user)
+        self.assertEqual(mock_create_for.call_args.kwargs["connection_id"], str(source.id))
+        self.assertIn("modifiers", mock_create_for.call_args.kwargs)
+
+    def test_metadata_rejects_soft_deleted_connection_id(self):
+        source = ExternalDataSource.objects.create(
+            source_id="selected-upstream-source",
+            connection_id="selected-connection",
+            destination_id="destination-1",
+            team=self.team,
+            status=ExternalDataSource.Status.COMPLETED,
+            source_type=ExternalDataSourceType.POSTGRES,
+            access_method=ExternalDataSource.AccessMethod.DIRECT,
+            deleted=True,
+        )
+
+        metadata = get_insightsql_metadata(
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata",
+                language=HogLanguage.FN_QL,
+                query="SELECT 1",
+                response=None,
+                connectionId=str(source.id),
+            ),
+            team=self.team,
+        )
+
+        self.assertFalse(metadata.isValid)
+        self.assertEqual([error.message for error in metadata.errors], [INVALID_CONNECTION_ID_ERROR])
+
+    def test_metadata_with_direct_connection_does_not_allow_insights_tables(self):
+        source = ExternalDataSource.objects.create(
+            source_id="selected-upstream-source",
+            connection_id="selected-connection",
+            destination_id="destination-1",
+            team=self.team,
+            status=ExternalDataSource.Status.COMPLETED,
+            source_type=ExternalDataSourceType.POSTGRES,
+            access_method=ExternalDataSource.AccessMethod.DIRECT,
+            prefix="ph3",
+        )
+        DataWarehouseTable.objects.create(
+            name="insights_user",
+            format="Parquet",
+            team=self.team,
+            external_data_source=source,
+            url_pattern="direct://postgres",
+            columns={"id": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "valid": True}},
+        )
+
+        metadata = get_insightsql_metadata(
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata",
+                language=HogLanguage.FN_QL,
+                query="SELECT * FROM persons LIMIT 1",
+                response=None,
+                connectionId=str(source.id),
+            ),
+            team=self.team,
+        )
+
+        self.assertFalse(metadata.isValid)
+        self.assertTrue(any("persons" in (error.message or "") for error in metadata.errors))
+
+    def test_metadata_with_direct_connection_allows_canonical_direct_table_names(self):
+        source = ExternalDataSource.objects.create(
+            source_id="selected-upstream-source",
+            connection_id="selected-connection",
+            destination_id="destination-1",
+            team=self.team,
+            status=ExternalDataSource.Status.COMPLETED,
+            source_type=ExternalDataSourceType.POSTGRES,
+            access_method=ExternalDataSource.AccessMethod.DIRECT,
+            prefix="ph3",
+        )
+        table = DataWarehouseTable.objects.create(
+            name="insights_user",
+            format="Parquet",
+            team=self.team,
+            external_data_source=source,
+            url_pattern="direct://postgres",
+            columns={"id": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "valid": True}},
+        )
+        ExternalDataSchema.objects.create(
+            name="insights_user",
+            team=self.team,
+            source=source,
+            table=table,
+        )
+
+        metadata = get_insightsql_metadata(
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata",
+                language=HogLanguage.FN_QL,
+                query="SELECT * FROM insights_user LIMIT 1",
+                response=None,
+                connectionId=str(source.id),
+            ),
+            team=self.team,
+        )
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(metadata.errors, [])
+
+    def test_metadata_with_datastore_direct_connection_does_not_report_direct_only_error(self):
+        # Regression: Datastore direct sources print through the native Datastore printer, whose
+        # direct-table guard raises "can only be queried through its direct connection" unless the
+        # context is marked direct. The metadata path did not set is_direct_query, so it reported a
+        # false error for a query that actually runs. (Postgres/MySQL direct printers lack the guard,
+        # so this only regressed for Datastore.)
+        source = ExternalDataSource.objects.create(
+            source_id="ch-source",
+            connection_id="ch-connection",
+            destination_id="ch-destination",
+            team=self.team,
+            status=ExternalDataSource.Status.COMPLETED,
+            source_type=ExternalDataSourceType.DATASTORE,
+            access_method=ExternalDataSource.AccessMethod.DIRECT,
+            prefix="ch",
+            job_inputs={"host": "localhost", "database": "insights"},
+        )
+        table = DataWarehouseTable.objects.create(
+            name="events",
+            format="Parquet",
+            team=self.team,
+            external_data_source=source,
+            url_pattern="direct://datastore",
+            columns={
+                "uuid": {"insightsql": "StringDatabaseField", "datastore": "String", "valid": True},
+                "team_id": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "valid": True},
+            },
+        )
+        ExternalDataSchema.objects.create(name="events", team=self.team, source=source, table=table)
+
+        metadata = get_insightsql_metadata(
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata",
+                language=HogLanguage.FN_QL,
+                query="SELECT * FROM events LIMIT 1",
+                response=None,
+                connectionId=str(source.id),
+            ),
+            team=self.team,
+        )
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(metadata.errors, [])
+
+    def test_metadata_with_direct_connection_allows_connection_metadata_function_in_expr(self):
+        source = ExternalDataSource.objects.create(
+            source_id="selected-upstream-source",
+            connection_id="selected-connection",
+            destination_id="destination-1",
+            team=self.team,
+            status=ExternalDataSource.Status.COMPLETED,
+            source_type=ExternalDataSourceType.POSTGRES,
+            access_method=ExternalDataSource.AccessMethod.DIRECT,
+            prefix="ph3",
+            connection_metadata={"available_functions": ["icu_collate_nl"]},
+        )
+        table = DataWarehouseTable.objects.create(
+            name="insights_user",
+            format="Parquet",
+            team=self.team,
+            external_data_source=source,
+            url_pattern="direct://postgres",
+            columns={"name": {"insightsql": "StringDatabaseField", "datastore": "String", "valid": True}},
+        )
+        ExternalDataSchema.objects.create(
+            name="insights_user",
+            team=self.team,
+            source=source,
+            table=table,
+        )
+
+        metadata = get_insightsql_metadata(
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata",
+                language=HogLanguage.FN_QL_EXPR,
+                query="icu_collate_nl(name, 'nl')",
+                sourceQuery=InsightsQLQuery(query="select * from insights_user"),
+                response=None,
+                connectionId=str(source.id),
+            ),
+            team=self.team,
+        )
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(metadata.errors, [])
+
+    def test_metadata_with_direct_connection_does_not_allow_disabled_tables(self):
+        source = ExternalDataSource.objects.create(
+            source_id="selected-upstream-source",
+            connection_id="selected-connection",
+            destination_id="destination-1",
+            team=self.team,
+            status=ExternalDataSource.Status.COMPLETED,
+            source_type=ExternalDataSourceType.POSTGRES,
+            access_method=ExternalDataSource.AccessMethod.DIRECT,
+            prefix="ph3",
+        )
+        table = DataWarehouseTable.objects.create(
+            name="insights_user",
+            format="Parquet",
+            team=self.team,
+            external_data_source=source,
+            url_pattern="direct://postgres",
+            columns={"id": {"insightsql": "IntegerDatabaseField", "datastore": "Int64", "valid": True}},
+        )
+        ExternalDataSchema.objects.create(
+            name="insights_user",
+            team=self.team,
+            source=source,
+            table=table,
+            should_sync=False,
+        )
+
+        metadata = get_insightsql_metadata(
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata",
+                language=HogLanguage.FN_QL,
+                query="SELECT * FROM insights_user LIMIT 1",
+                response=None,
+                connectionId=str(source.id),
+            ),
+            team=self.team,
+        )
+
+        self.assertFalse(metadata.isValid)
+        self.assertTrue(any("insights_user" in (error.message or "") for error in metadata.errors))
+
+    def test_metadata_rejects_non_direct_connection_id(self):
+        selected_source = ExternalDataSource.objects.create(
+            source_id="selected-upstream-source",
+            connection_id="selected-connection",
+            destination_id="destination-1",
+            team=self.team,
+            status=ExternalDataSource.Status.COMPLETED,
+            source_type=ExternalDataSourceType.STRIPE,
+            access_method=ExternalDataSource.AccessMethod.WAREHOUSE,
+            prefix="stripe",
+        )
+        metadata = get_insightsql_metadata(
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata",
+                language=HogLanguage.FN_QL,
+                query="SELECT 1",
+                response=None,
+                connectionId=str(selected_source.id),
+            ),
+            team=self.team,
+        )
+
+        self.assertFalse(metadata.isValid)
+        self.assertEqual([error.message for error in metadata.errors], [INVALID_CONNECTION_ID_ERROR])
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False)
     def test_metadata_in_cohort(self):
@@ -183,7 +674,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
                 "query": query,
                 "notices": [
                     {
-                        "message": "Field 'person_id' is of type 'String'",
+                        "message": "Field 'person_id' is of type 'UUID'",
                         "start": 7,
                         "end": 16,
                         "fix": None,
@@ -195,7 +686,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
                         "fix": f"'{cohort.name}'",
                     },
                     {
-                        "message": "Field 'person_id' is of type 'String'",
+                        "message": "Field 'person_id' is of type 'UUID'",
                         "start": 35,
                         "end": 44,
                         "fix": None,
@@ -207,7 +698,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
                         "fix": str(cohort.pk),
                     },
                     {
-                        "message": "Field 'person_id' is of type 'String'",
+                        "message": "Field 'person_id' is of type 'UUID'",
                         "start": 59 + len(str(cohort.pk)),
                         "end": 68 + len(str(cohort.pk)),
                         "fix": None,
@@ -217,11 +708,20 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         )
 
     def test_metadata_property_type_notice_debug(self):
+        try:
+            from ee.datastore.materialized_columns.analyze import materialize
+        except ModuleNotFoundError:
+            # EE not available? Assume we're good
+            self.assertEqual(1 + 2, 3)
+            return
         materialize("events", "number")
 
         PropertyDefinition.objects.create(team=self.team, name="string", property_type="String")
         PropertyDefinition.objects.create(team=self.team, name="number", property_type="Numeric")
         metadata = self._expr("properties.string || properties.number")
+        materialized_notice = (
+            "not materialized 🐢." if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA else "materialized (mat_*) ⚡️."
+        )
         self.assertEqual(
             metadata.dict(),
             metadata.dict()
@@ -236,7 +736,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
                         "fix": None,
                     },
                     {
-                        "message": "Event property 'number' is of type 'Float'. This property is materialized (mat_*) ⚡️.",
+                        "message": f"Event property 'number' is of type 'Float'. This property is {materialized_notice}",
                         "start": 32,
                         "end": 38,
                         "fix": None,
@@ -245,7 +745,41 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             },
         )
 
+    def test_metadata_replaces_variable_placeholders(self):
+        insight_variable = InsightVariable.objects.create(
+            team=self.team,
+            name="Company",
+            code_name="company_name",
+            type=InsightVariable.Type.STRING,
+        )
+        metadata = self._select_with_variables(
+            "SELECT {variables.company_name}",
+            variables={
+                "company_name": {
+                    "code_name": "company_name",
+                    "value": "Acme",
+                    "variableId": str(insight_variable.id),
+                }
+            },
+        )
+
+        self.assertTrue(metadata.isValid)
+        self.assertEqual(metadata.errors, [])
+
+    def test_metadata_variable_placeholder_without_variables(self):
+        metadata = self._select_with_variables("SELECT {variables.company_name}")
+
+        self.assertFalse(metadata.isValid)
+        self.assertEqual(len(metadata.errors), 1)
+        self.assertIn("company_name", metadata.errors[0].message)
+
     def test_metadata_property_type_notice_no_debug(self):
+        try:
+            from ee.datastore.materialized_columns.analyze import materialize
+        except ModuleNotFoundError:
+            # EE not available? Assume we're good
+            self.assertEqual(1 + 2, 3)
+            return
         materialize("events", "number")
 
         PropertyDefinition.objects.create(team=self.team, name="string", property_type="String")
@@ -322,7 +856,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             },
         )
 
-    def test_iql_program(self):
+    def test_hog_program(self):
         metadata = self._program("let i := 3")
         self.assertEqual(
             metadata.dict(),
@@ -333,7 +867,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             },
         )
 
-    def test_iql_program_invalid(self):
+    def test_hog_program_invalid(self):
         metadata = self._program("let i := NONO()")
         self.assertEqual(
             metadata.dict(),
@@ -343,11 +877,11 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
                 "isValid": False,
                 "notices": [],
                 "warnings": [],
-                "errors": [{"end": 15, "fix": None, "message": "Custom function `NONO` is not implemented", "start": 9}],
+                "errors": [{"end": 15, "fix": None, "message": "Script function `NONO` is not implemented", "start": 9}],
             },
         )
 
-    def test_iql_program_globals(self):
+    def test_hog_program_globals(self):
         metadata = self._program("print(event, region)", globals={"event": "banana"})
         self.assertEqual(
             metadata.dict(),
@@ -379,7 +913,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             metadata.dict()
             | {
                 "isValid": False,
-                "errors": [{"end": 17, "fix": None, "message": "Custom function `NONO` is not implemented", "start": 11}],
+                "errors": [{"end": 17, "fix": None, "message": "Script function `NONO` is not implemented", "start": 11}],
             },
         )
 
@@ -551,3 +1085,66 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         # Doesn't include `name` because it's a property access and not a field
         # TODO: Should *probably* update the code to resolve that type as well
         self.assertEqual([notice.message for notice in metadata.notices or []], ["Field 'metadata' is of type 'JSON'"])
+
+    def test_metadata_warns_about_similar_subquery_in_singular(self):
+        metadata = self._select(
+            """
+            SELECT *
+            FROM (
+                SELECT person_id, count() AS total
+                FROM events
+                GROUP BY person_id
+            ) a
+            JOIN (
+                SELECT person_id, max(timestamp) AS last_seen
+                FROM events
+                GROUP BY person_id
+            ) b ON a.person_id = b.person_id
+            """
+        )
+
+        self.assertTrue(any("very similar to 1 other subquery" in warning.message for warning in metadata.warnings))
+        self.assertTrue(all(warning.fix is None for warning in metadata.warnings))
+
+    def test_metadata_warns_about_similar_subquery_in_plural(self):
+        metadata = self._select(
+            """
+            SELECT *
+            FROM (
+                SELECT person_id, count() AS total
+                FROM events
+                GROUP BY person_id
+            ) a
+            JOIN (
+                SELECT person_id, max(timestamp) AS last_seen
+                FROM events
+                GROUP BY person_id
+            ) b ON a.person_id = b.person_id
+            JOIN (
+                SELECT person_id, min(timestamp) AS first_seen
+                FROM events
+                GROUP BY person_id
+            ) c ON a.person_id = c.person_id
+            """
+        )
+
+        self.assertTrue(any("very similar to 2 other subqueries" in warning.message for warning in metadata.warnings))
+        self.assertTrue(all(warning.fix is None for warning in metadata.warnings))
+
+    def test_metadata_does_not_warn_for_distinct_subquery_sources(self):
+        metadata = self._select(
+            """
+            SELECT *
+            FROM (
+                SELECT person_id, count() AS total
+                FROM events
+                GROUP BY person_id
+            ) a
+            JOIN (
+                SELECT id, created_at
+                FROM persons
+            ) b ON a.person_id = b.id
+            """
+        )
+
+        self.assertFalse(any("very similar" in warning.message for warning in metadata.warnings))

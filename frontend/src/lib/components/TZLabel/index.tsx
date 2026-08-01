@@ -11,15 +11,37 @@ import { dayjs } from 'lib/dayjs'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { IconLinux, IconWeb } from 'lib/elements/icons'
-import { humanFriendlyDetailedTime, shortTimeZone } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
+import { cn } from 'lib/utils/css-classes'
+import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
+import { shortTimeZone } from 'lib/utils/timezones'
 import { urls } from 'scenes/urls'
 
 import { teamLogic } from '../../../scenes/teamLogic'
 
 const BASE_OUTPUT_FORMAT = 'ddd, MMM D, YYYY h:mm A'
 const BASE_OUTPUT_FORMAT_WITH_SECONDS = 'ddd, MMM D, YYYY h:mm:ss A'
+
+// One shared 1s ticker for every mounted TZLabel: a table can render hundreds of them, and an
+// interval per instance means hundreds of timer wake-ups per second for text that changes about
+// once a minute. The interval only runs while at least one label is subscribed.
+const tickerListeners = new Set<() => void>()
+let tickerId: number | null = null
+
+function subscribeToTicker(listener: () => void): () => void {
+    tickerListeners.add(listener)
+    if (tickerId === null) {
+        tickerId = window.setInterval(() => tickerListeners.forEach((tick) => tick()), 1000)
+    }
+    return () => {
+        tickerListeners.delete(listener)
+        if (tickerListeners.size === 0 && tickerId !== null) {
+            window.clearInterval(tickerId)
+            tickerId = null
+        }
+    }
+}
 
 export type TZLabelProps = Omit<DropdownProps, 'overlay' | 'trigger' | 'children'> & {
     time: string | dayjs.Dayjs
@@ -37,6 +59,8 @@ export type TZLabelProps = Omit<DropdownProps, 'overlay' | 'trigger' | 'children
     /** Timezone to display the time in (e.g., 'UTC', 'America/New_York'). If not set, uses local timezone.
      * Note: When set, forces timestampStyle to 'absolute' to avoid broken relative date comparisons. */
     displayTimezone?: string
+    /** Custom suffix to replace "ago" in relative time display. e.g. suffix="old" renders "5 hours old" */
+    suffix?: string
 }
 
 const TZLabelPopoverContent = React.memo(function TZLabelPopoverContent({
@@ -44,13 +68,15 @@ const TZLabelPopoverContent = React.memo(function TZLabelPopoverContent({
     time,
     title,
     displayTimezone,
-}: Pick<TZLabelProps, 'showSeconds' | 'title' | 'displayTimezone'> & { time: dayjs.Dayjs }): JSX.Element {
+}: Pick<TZLabelProps, 'showSeconds' | 'title' | 'displayTimezone'> & {
+    time: dayjs.Dayjs
+}): JSX.Element {
     const DATE_OUTPUT_FORMAT = !showSeconds ? BASE_OUTPUT_FORMAT : BASE_OUTPUT_FORMAT_WITH_SECONDS
     const { currentTeam } = useValues(teamLogic)
     const { reportTimezoneComponentViewed } = useActions(eventUsageLogic)
 
     const copyDateTime = (dateTime: dayjs.Dayjs, label: string): void => {
-        void copyToClipboard(dateTime.toDate().toISOString(), label)
+        void copyToClipboard(dateTime.format(DATE_OUTPUT_FORMAT), label)
     }
 
     const copyUnixTimestamp = (unixTimestamp: number, label: string): void => {
@@ -179,6 +205,7 @@ const TZLabelRaw = forwardRef<HTMLElement, TZLabelProps>(function TZLabelRaw(
         className,
         children,
         displayTimezone,
+        suffix,
         ...dropdownProps
     },
     ref
@@ -194,20 +221,25 @@ const TZLabelRaw = forwardRef<HTMLElement, TZLabelProps>(function TZLabelRaw(
             return parsedTime
         }
     }, [parsedTime, displayTimezone])
+    const effectiveTimestampStyle = displayTimezone ? 'absolute' : timestampStyle
 
     const format = useCallback(() => {
-        return formatDate || formatTime
-            ? humanFriendlyDetailedTime(displayTime, formatDate, formatTime, {
-                  timestampStyle: displayTimezone ? 'absolute' : timestampStyle,
-              })
-            : displayTime.fromNow()
-    }, [formatDate, formatTime, displayTime, timestampStyle, displayTimezone])
+        if (formatDate || formatTime || effectiveTimestampStyle === 'absolute') {
+            return humanFriendlyDetailedTime(displayTime, formatDate, formatTime, {
+                timestampStyle: effectiveTimestampStyle,
+            })
+        }
+        if (suffix) {
+            return `${displayTime.fromNow(true)} ${suffix}`
+        }
+        return displayTime.fromNow()
+    }, [formatDate, formatTime, displayTime, effectiveTimestampStyle, suffix])
 
     const [formattedContent, setFormattedContent] = useState(format)
 
     const { isVisible: isPageVisible } = usePageVisibility()
 
-    // NOTE: This is an optimization to make sure we don't needlessly re-render the component every second.
+    // NOTE: The guarded setState makes sure we don't needlessly re-render the component every second.
     useEffect(() => {
         if (!isPageVisible) {
             return
@@ -218,17 +250,16 @@ const TZLabelRaw = forwardRef<HTMLElement, TZLabelProps>(function TZLabelRaw(
             setFormattedContent((current) => (newContent !== current ? newContent : current))
         }
 
-        const interval = setInterval(run, 1000)
         run()
 
-        return () => clearInterval(interval)
+        return subscribeToTicker(run)
     }, [displayTime, format, isPageVisible])
 
     const innerContent = children ?? (
         <span
             className={
                 !noStyles
-                    ? clsx('whitespace-nowrap align-middle', showPopover && 'border-dotted border-b', className)
+                    ? cn('whitespace-nowrap align-middle', showPopover && 'border-dotted border-b', className)
                     : className
             }
             ref={ref}

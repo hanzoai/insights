@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { isActorsQuery, isEventsQuery, isGroupsQuery, isSessionsQuery } from '~/queries/utils'
@@ -31,11 +31,7 @@ export function DataTableCount(): JSX.Element | null {
 
 function getEntityType(query: any): { singular: string; plural: string } {
     if (isActorsQuery(query)) {
-        // The noun the count renders — "0 users", not "0 persons". `person` is the
-        // fork's word for the human behind an event; ours is `user`, the same word IAM
-        // uses. An ActorsQuery still SELECTS the person columns, because those are the
-        // physical schema; only what a reader is shown changes here.
-        return { singular: 'user', plural: 'users' }
+        return { singular: 'person', plural: 'persons' }
     }
     if (isEventsQuery(query)) {
         return { singular: 'event', plural: 'events' }

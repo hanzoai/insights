@@ -193,16 +193,6 @@ class TestGetLowercaseIndexHintDatastore(DatastoreTestMixin, APIBaseTest):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        schema_path = os.path.join(
-            os.path.dirname(__file__), "../../../products/logs/backend/test/test_logs_schema.sql"
-        )
-        with open(schema_path) as f:
-            schema_sql = f.read()
-        for sql in schema_sql.split(";"):
-            if not sql.strip():
-                continue
-            sync_execute(sql)
-        # Insert a single row so EXPLAIN has data to plan against
         logs_path = os.path.join(os.path.dirname(__file__), "../../../products/logs/backend/test/test_logs.jsonnd")
         with open(logs_path) as f:
             log_item = json.loads(f.readline())
@@ -246,7 +236,15 @@ class TestGetLowercaseIndexHintDatastore(DatastoreTestMixin, APIBaseTest):
             settings=runner.settings,
         )
         datastore_sql, _ = executor.generate_datastore_sql()
-        index_info = get_index_from_explain(datastore_sql, "idx_body_ngram3")
+        context = executor.datastore_context
+        values = None
+        if context is not None:
+            values = cast(InsightsQLContext, executor.datastore_context).values
+        index_info = get_index_from_explain(
+            datastore_sql,
+            "idx_body_ngram3",
+            placeholder_values=values,
+        )
         assert index_info is not None, (
             f"Expected idx_body_ngram3 to be used in EXPLAIN output for query:\n{datastore_sql}"
         )

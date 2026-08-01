@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 
 import { Tag } from '@hanzo/elements'
 
-import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
+import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
 import { InsightsFlowEdge } from '../types'
 import { MINIMUM_EDGE_SPACING } from './constants'
 
@@ -235,7 +235,7 @@ export function SmartEdge({
     ...props
 }: EdgeProps): JSX.Element {
     const edges = useEdges()
-    const { animatingEdgePair, mode } = useValues(insightsFlowEditorLogic)
+    const { animatingEdgePair, mode } = useValues(hogFlowEditorLogic)
 
     const isAnimating = mode === 'test' && animatingEdgePair === `${source}->${target}`
     const animPathRef = useRef<SVGPathElement>(null)

@@ -5,7 +5,7 @@ from temporalio import activity
 from insights.models import Integration
 from insights.temporal.common.utils import asyncify
 
-from products.tasks.backend.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate
+from products.tasks.backend.logic.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate
 from products.tasks.backend.temporal.oauth import create_oauth_access_token_for_user
 from products.tasks.backend.temporal.observability import log_activity_execution
 from products.tasks.backend.temporal.process_task.utils import get_github_token, get_sandbox_api_url
@@ -40,9 +40,9 @@ def create_sandbox(input: CreateSandboxInput) -> CreateSandboxOutput:
 
         environment_variables = {
             "GITHUB_TOKEN": github_token,
-            "INSIGHTS_PERSONAL_API_KEY": access_token,
-            "INSIGHTS_API_URL": get_sandbox_api_url(),
-            "INSIGHTS_PROJECT_ID": str(ctx.team_id),
+            "POSTFN_PERSONAL_API_KEY": access_token,
+            "POSTFN_API_URL": get_sandbox_api_url(),
+            "POSTFN_PROJECT_ID": str(ctx.team_id),
         }
 
         config = SandboxConfig(

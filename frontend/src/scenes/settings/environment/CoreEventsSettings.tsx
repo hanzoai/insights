@@ -6,7 +6,7 @@ import { Button, Input, Label, Modal, Select, TextArea } from '@hanzo/elements'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { Table } from 'lib/elements/Table'
-import { uuid } from 'lib/utils'
+import { uuid } from 'lib/utils/dom'
 import { ActionFilter as ActionFilterComponent } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 
@@ -19,7 +19,14 @@ import {
     EventsNode,
     NodeKind,
 } from '~/queries/schema/schema-general'
-import { ActionFilter, BaseMathType, DataWarehouseFilter, FilterType, GroupMathType, PropertyMathType } from '~/types'
+import {
+    ActionFilter,
+    BaseMathType,
+    AnyDataWarehouseFilter,
+    FilterType,
+    GroupMathType,
+    PropertyMathType,
+} from '~/types'
 
 import { coreEventsLogic } from './coreEventsLogic'
 
@@ -78,7 +85,7 @@ function actionFilterToNode(filters: FilterType): EventsNode | ActionsNode | Dat
         {
             actions: filters.actions as ActionFilter[] | undefined,
             events: filters.events as ActionFilter[] | undefined,
-            data_warehouse: filters.data_warehouse as DataWarehouseFilter[] | undefined,
+            data_warehouse: filters.data_warehouse as AnyDataWarehouseFilter[] | undefined,
         },
         true,
         MathAvailability.All

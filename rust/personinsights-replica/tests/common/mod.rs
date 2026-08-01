@@ -14,7 +14,7 @@ fn random_person_id() -> i64 {
 
 /// Test context that manages database connections and provides test data helpers.
 pub struct TestContext {
-    pool: PgPool,
+    pub pool: PgPool,
     pub storage: Arc<dyn FullStorage>,
     pub team_id: i64,
 }
@@ -28,8 +28,15 @@ impl TestContext {
         let pool = PgPool::connect(&database_url)
             .await
             .expect("Failed to connect to test database");
-        // In tests, use the same pool for both primary and replica
-        let storage = Arc::new(PostgresStorage::new(pool.clone(), pool.clone()));
+        // In tests, use the same pool for everything
+        let storage = Arc::new(PostgresStorage::new(
+            pool.clone(),
+            pool.clone(),
+            pool.clone(),
+            pool.clone(),
+            50, // bulk_chunk_size — small so parallel path is exercised with fewer test rows
+            5,  // bulk_max_concurrent_chunks
+        ));
         let team_id = random_team_id();
 
         Self {
@@ -114,14 +121,19 @@ impl TestContext {
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"INSERT INTO insights_grouptypemapping
-            (team_id, project_id, group_type, group_type_index, name_singular, name_plural)
-            VALUES ($1, $2, $3, $4, NULL, NULL)
+            (team_id, project_id, group_type, group_type_index,
+             name_singular, name_plural, default_columns, detail_dashboard_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             ON CONFLICT DO NOTHING"#,
         )
         .bind(self.team_id)
         .bind(self.team_id)
         .bind(group_type)
         .bind(group_type_index)
+        .bind(format!("{group_type} (singular)"))
+        .bind(format!("{group_type}s"))
+        .bind(vec!["col_a".to_string(), "col_b".to_string()])
+        .bind(group_type_index + 1000)
         .execute(&self.pool)
         .await?;
 
@@ -206,8 +218,31 @@ impl TestContext {
         Ok(())
     }
 
+    pub async fn insert_personless_distinct_id(
+        &self,
+        distinct_id: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            r#"INSERT INTO insights_personlessdistinctid
+            (distinct_id, team_id, is_merged, created_at)
+            VALUES ($1, $2, false, NOW())
+            ON CONFLICT DO NOTHING"#,
+        )
+        .bind(distinct_id)
+        .bind(self.team_id)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
     pub async fn cleanup(&self) -> Result<(), sqlx::Error> {
         sqlx::query("DELETE FROM insights_featureflaghashkeyoverride WHERE team_id = $1")
+            .bind(self.team_id)
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query("DELETE FROM insights_personlessdistinctid WHERE team_id = $1")
             .bind(self.team_id)
             .execute(&self.pool)
             .await?;

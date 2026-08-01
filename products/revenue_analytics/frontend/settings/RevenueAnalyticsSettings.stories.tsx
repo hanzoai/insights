@@ -9,13 +9,21 @@ import { EMPTY_PAGINATED_RESPONSE } from '~/mocks/handlers'
 
 import DatabaseSchemaQuery from '../__mocks__/DatabaseSchemaQuery.json'
 
+const getEffectiveQueryKind = (req: {
+    body?: { query?: { kind?: string; source?: { kind?: string } } }
+}): string | undefined => req.body?.query?.source?.kind ?? req.body?.query?.kind
+
 const meta: Meta = {
     component: App,
     title: 'Scenes-App/Data Management/Revenue Analytics',
     parameters: {
         layout: 'fullscreen',
         viewMode: 'story',
+        mockDate: '2025-01-01',
         pageUrl: urls.revenueSettings(),
+        testOptions: {
+            waitForSelector: ['[data-attr="scene-name"]'],
+        },
     },
     decorators: [
         mswDecorator({
@@ -50,11 +58,22 @@ const meta: Meta = {
                     ]
                 },
             },
-            post: { '/api/environments/:team_id/query': () => [200, DatabaseSchemaQuery] },
+            post: {
+                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                    const body = (await request.json()) as {
+                        query?: { kind?: string; source?: { kind?: string } }
+                    }
+                    const queryKind = getEffectiveQueryKind({ body })
+
+                    if (queryKind === 'DatabaseSchemaQuery') {
+                        return [200, DatabaseSchemaQuery]
+                    }
+                },
+            },
         }),
     ],
 }
 export default meta
 
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<{}>
 export const Settings: Story = {}

@@ -8,7 +8,7 @@ import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 import { CohortType, FilterLogicalOperator } from '~/types'
 
-import { cohortsModel } from './cohortsModel'
+import { cohortsModel, processCohort } from './cohortsModel'
 
 const MOCK_COHORTS = {
     count: 2,
@@ -58,8 +58,8 @@ describe('cohortsModel', () => {
                 '/api/projects/:team/cohorts/:id/': { success: true },
             },
             patch: {
-                '/api/projects/:team/cohorts/:id/': (req) => {
-                    const data = req.body as Record<string, any>
+                '/api/projects/:team/cohorts/:id/': async ({ request }) => {
+                    const data = (await request.json()) as Record<string, any>
                     return { ...MOCK_COHORTS.results[0], ...data }
                 },
             },
@@ -136,6 +136,36 @@ describe('cohortsModel', () => {
             })
         })
 
+        it('adds a directly-opened cohort to cohortsById when not already loaded', async () => {
+            // Mirrors cohortEditLogic.fetchCohort dispatching updateCohort for a cohort that
+            // isn't in the loaded list (e.g. opened directly by URL) — its name must reach
+            // cohortsById so the breadcrumb / browser tab title shows it instead of "Untitled".
+            await expectLogic(logic).toDispatchActions(['loadAllCohortsSuccess'])
+
+            const openedCohort: CohortType = {
+                id: 99,
+                name: 'Directly opened cohort',
+                count: 0,
+                groups: [],
+                filters: {
+                    properties: {
+                        type: FilterLogicalOperator.And,
+                        values: [],
+                    },
+                },
+                is_calculating: false,
+                is_static: false,
+            }
+
+            await expectLogic(logic, () => {
+                logic.actions.updateCohort(openedCohort)
+            }).toMatchValues({
+                cohortsById: expect.objectContaining({
+                    99: expect.objectContaining({ id: 99, name: 'Directly opened cohort' }),
+                }),
+            })
+        })
+
         it('can delete a cohort', async () => {
             // Wait for initial load
             await expectLogic(logic).toDispatchActions(['loadCohortsSuccess'])
@@ -168,6 +198,121 @@ describe('cohortsModel', () => {
                         2: expect.objectContaining({ id: 2, name: 'Cohort two' }),
                     }),
                 })
+        })
+    })
+
+    describe('processCohort', () => {
+        it.each([
+            {
+                name: 'wraps flat criteria into nested group format',
+                cohort: {
+                    id: 3,
+                    name: 'Flat format cohort',
+                    count: 0,
+                    groups: [],
+                    is_calculating: false,
+                    is_static: false,
+                    filters: {
+                        properties: {
+                            type: FilterLogicalOperator.And,
+                            values: [
+                                {
+                                    type: 'behavioral',
+                                    key: 'purchase',
+                                    value: 'performed_event',
+                                    event_type: 'events',
+                                    operator: 'gte',
+                                    operator_value: 2,
+                                    time_value: 30,
+                                    time_interval: 'day',
+                                    negation: false,
+                                },
+                            ],
+                        },
+                    },
+                } as CohortType,
+                expectedType: FilterLogicalOperator.And,
+                expectedCriteriaKey: 'purchase',
+            },
+            {
+                name: 'leaves already nested criteria unchanged',
+                cohort: {
+                    id: 4,
+                    name: 'Nested format cohort',
+                    count: 0,
+                    groups: [],
+                    is_calculating: false,
+                    is_static: false,
+                    filters: {
+                        properties: {
+                            type: FilterLogicalOperator.And,
+                            values: [
+                                {
+                                    type: FilterLogicalOperator.And,
+                                    values: [
+                                        {
+                                            type: 'behavioral',
+                                            key: 'purchase',
+                                            value: 'performed_event',
+                                            event_type: 'events',
+                                            explicit_datetime: '-30d',
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                } as CohortType,
+                expectedType: FilterLogicalOperator.And,
+                expectedCriteriaKey: 'purchase',
+            },
+        ])('$name', ({ cohort, expectedType, expectedCriteriaKey }) => {
+            const result = processCohort(cohort)
+            const group = result.filters.properties.values[0]
+            expect(group).toHaveProperty('type', expectedType)
+            expect(group).toHaveProperty('values')
+            expect((group as any).values).toHaveLength(1)
+            expect((group as any).values[0]).toMatchObject({
+                type: 'behavioral',
+                key: expectedCriteriaKey,
+            })
+        })
+
+        it('restores a saved person_metadata criterion to editor format (value -> value_property)', () => {
+            const cohort = {
+                id: 5,
+                name: 'First seen cohort',
+                count: 0,
+                groups: [],
+                is_calculating: false,
+                is_static: false,
+                filters: {
+                    properties: {
+                        type: FilterLogicalOperator.And,
+                        values: [
+                            {
+                                type: 'person_metadata',
+                                key: 'created_at',
+                                operator: 'is_date_after',
+                                value: '2024-01-01',
+                                negation: false,
+                            },
+                        ],
+                    },
+                },
+            } as unknown as CohortType
+
+            const result = processCohort(cohort)
+            const group = result.filters.properties.values[0]
+            // value carries the behavioral row key the editor renders against; the actual
+            // filter value moves to value_property. Without this, criteriaToBehavioralFilterType
+            // returns the raw date and ROWS[date] is undefined, crashing CohortCriteriaRowBuilder.
+            expect((group as any).values[0]).toMatchObject({
+                type: 'person_metadata',
+                key: 'created_at',
+                value: 'have_property',
+                value_property: '2024-01-01',
+            })
         })
     })
 })

@@ -4,34 +4,32 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ReactNode, useRef, useState } from 'react'
 
-import { IconMagicWand, IconSidebarClose } from '@hanzo/icons'
+import { IconSidebarClose } from '@hanzo/icons'
 import {
     Badge,
     Banner,
     Button,
     Collapse,
     Skeleton,
-    Tag,
     Link,
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
-import { FEATURE_FLAGS } from 'lib/constants'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { TableLoader } from 'lib/elements/Table/TableLoader'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { range } from 'lib/utils'
-import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
+import { range } from 'lib/utils/arrays'
+import { pluralize } from 'lib/utils/strings'
 import { DraggableToNotebook } from 'scenes/notebooks/AddToNotebook/DraggableToNotebook'
 import { useNotebookNode } from 'scenes/notebooks/Nodes/NotebookNodeContext'
 import { RecordingsUniversalFiltersEmbedButton } from 'scenes/session-recordings/filters/RecordingsUniversalFiltersEmbed'
 import { playerSettingsLogic } from 'scenes/session-recordings/player/playerSettingsLogic'
+import { playlistFiltersLogic } from 'scenes/session-recordings/playlist/playlistFiltersLogic'
 import { SessionRecordingPreview } from 'scenes/session-recordings/playlist/SessionRecordingPreview'
+import { sessionRecordingsPlaylistLogic } from 'scenes/session-recordings/playlist/sessionRecordingsPlaylistLogic'
 import { SessionRecordingsPlaylistTopSettings } from 'scenes/session-recordings/playlist/SessionRecordingsPlaylistSettings'
 import { SessionRecordingsPlaylistTroubleshooting } from 'scenes/session-recordings/playlist/SessionRecordingsPlaylistTroubleshooting'
-import { sessionRecordingsPlaylistLogic } from 'scenes/session-recordings/playlist/sessionRecordingsPlaylistLogic'
 import { urls } from 'scenes/urls'
 
 import { ReplayTabs, SessionRecordingType } from '~/types'
@@ -73,9 +71,6 @@ export function Playlist({
     description,
     selectInitialItem,
 }: PlaylistProps): JSX.Element {
-    const { featureFlags } = useValues(featureFlagLogic)
-    const { askSidePanelMax } = useActions(maxGlobalLogic)
-
     const { isPlaylistCollapsed } = useValues(playerSettingsLogic)
     const { setPlaylistCollapsed } = useActions(playerSettingsLogic)
 
@@ -97,12 +92,14 @@ export function Playlist({
         activeSessionRecordingId,
         totalFiltersCount,
         sessionRecordingsResponseLoading,
-        pinnedRecordings,
+        visiblePinnedRecordings: pinnedRecordings,
         otherRecordings,
         hasNext,
+        selectedRecordingOutsideFilters,
     } = useValues(sessionRecordingsPlaylistLogic)
-    const { maybeLoadSessionRecordings, setFilters, setSelectedRecordingId, loadSessionRecordings } =
+    const { maybeLoadSessionRecordings, setFilters, setSelectedRecordingId } =
         useActions(sessionRecordingsPlaylistLogic)
+    const { setIsFiltersExpanded } = useActions(playlistFiltersLogic)
 
     const onScrollListEdge = (edge: 'bottom' | 'top'): void => {
         if (edge === 'top') {
@@ -169,6 +166,29 @@ export function Playlist({
                             'No more results'
                         )}
                     </div>
+                    {!sessionRecordingsResponseLoading && !hasNext && (
+                        <div className="flex flex-col items-center gap-1 pt-2 pb-2">
+                            <span className="text-xs text-secondary">Looking for older recordings?</span>
+                            <div className="flex gap-2">
+                                {(filters.date_from === '-3d' || filters.date_from === '-7d') && (
+                                    <Button
+                                        type="secondary"
+                                        size="small"
+                                        onClick={() =>
+                                            setFilters({
+                                                date_from: filters.date_from === '-3d' ? '-7d' : '-30d',
+                                            })
+                                        }
+                                    >
+                                        Search last {filters.date_from === '-3d' ? '7' : '30'} days
+                                    </Button>
+                                )}
+                                <Button type="secondary" size="small" onClick={() => setIsFiltersExpanded(true)}>
+                                    Show filters
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             ),
         })
@@ -235,9 +255,25 @@ export function Playlist({
                             setFilters={setFilters}
                             totalFiltersCount={totalFiltersCount}
                             currentSessionRecordingId={activeSessionRecordingId}
-                            onReload={() => loadSessionRecordings()}
+                            onReload={() => maybeLoadSessionRecordings()}
                         />
                     </DraggableToNotebook>
+                </div>
+            )}
+            {!!filters?.session_ids?.length && (
+                <div className="mb-2 flex items-center justify-between gap-2 rounded border bg-fill-primary px-2 py-1">
+                    <span className="min-w-0 truncate text-xs text-secondary">
+                        Showing {pluralize(filters.session_ids.length, 'selected recording')}
+                    </span>
+                    <Button
+                        className="shrink-0"
+                        size="xsmall"
+                        type="tertiary"
+                        onClick={() => setFilters({ session_ids: undefined })}
+                        loading={!!sessionRecordingsResponseLoading}
+                    >
+                        Show all
+                    </Button>
                 </div>
             )}
             <div
@@ -256,9 +292,9 @@ export function Playlist({
                     className="Playlist__list flex flex-col relative overflow-hidden h-full w-full"
                 >
                     <div className="flex flex-col relative w-full bg-bg-light overflow-hidden h-full Playlist__list">
-                        <DraggableToNotebook href={urls.replay(ReplayTabs.Home, filters)}>
-                            <div className="flex flex-col gap-1">
-                                <div className="shrink-0 bg-bg-3000 relative flex justify-between items-center gap-0.5 whitespace-nowrap border-b">
+                        <div className="relative">
+                            <DraggableToNotebook href={urls.replay(ReplayTabs.Home, filters)}>
+                                <div className="shrink-0 bg-bg-3000 flex justify-between items-center gap-0.5 whitespace-nowrap border-b">
                                     {title && <TitleWithCount title={title} count={itemsCount} />}
                                     <div className="flex items-center gap-0.5">
                                         <Button
@@ -280,9 +316,15 @@ export function Playlist({
                                         />
                                     </div>
                                 </div>
-                                <TableLoader loading={sessionRecordingsResponseLoading} />
-                            </div>
-                        </DraggableToNotebook>
+                            </DraggableToNotebook>
+                            <TableLoader loading={sessionRecordingsResponseLoading} />
+                        </div>
+                        {selectedRecordingOutsideFilters && (
+                            <Banner type="info" className="m-2 text-xs">
+                                The selected recording doesn't match the current filters. It's shown because it was
+                                opened from a direct link.
+                            </Banner>
+                        )}
                         <div className="overflow-y-auto flex-1 min-h-0" onScroll={handleScroll} ref={contentRef}>
                             {sectionCount > 1 ? (
                                 <Collapse
@@ -323,24 +365,6 @@ export function Playlist({
                             )}
                         </div>
                     </div>
-                    {featureFlags[FEATURE_FLAGS.MAX_SESSION_SUMMARIZATION_BUTTON] && (
-                        <Button
-                            icon={<IconMagicWand />}
-                            type="primary"
-                            onClick={() => {
-                                askSidePanelMax('Summarize recordings based on the current filters')
-                            }}
-                            fullWidth
-                            size="small"
-                            className="mt-2"
-                            disabledReason={!firstItem ? 'No recordings in the list' : undefined}
-                        >
-                            Summarize these recordings
-                            <Tag type="warning" size="small" className="ml-auto uppercase">
-                                Beta
-                            </Tag>
-                        </Button>
-                    )}
                 </div>
             </div>
         </div>

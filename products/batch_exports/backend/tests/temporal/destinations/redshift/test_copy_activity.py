@@ -7,9 +7,9 @@ import pytest
 import pytest_asyncio
 from psycopg import sql
 
-from insights.batch_exports.service import BatchExportInsertInputs, BatchExportModel, BatchExportSchema
 from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
+from products.batch_exports.backend.service import BatchExportInsertInputs, BatchExportModel, BatchExportSchema
 from products.batch_exports.backend.temporal.destinations.redshift_batch_export import (
     AWSCredentials,
     ConnectionParameters,
@@ -28,8 +28,8 @@ from products.batch_exports.backend.tests.temporal.destinations.redshift.utils i
     MISSING_REQUIRED_ENV_VARS,
     TEST_MODELS,
     assert_datastore_records_in_redshift,
-    has_valid_credentials,
 )
+from products.batch_exports.backend.tests.temporal.destinations.s3.utils import has_valid_credentials
 from products.batch_exports.backend.tests.temporal.utils.persons import (
     generate_test_person_distinct_id2_in_datastore,
     generate_test_persons_in_datastore,
@@ -129,7 +129,7 @@ async def _run_activity(
     )
 
     assert copy_inputs.batch_export.batch_export_id is not None
-    stage_folder = await activity_environment.run(
+    stage_result = await activity_environment.run(
         insert_into_internal_stage_activity,
         BatchExportInsertIntoInternalStageInputs(
             team_id=copy_inputs.batch_export.team_id,
@@ -145,7 +145,8 @@ async def _run_activity(
             destination_default_fields=redshift_default_fields(),
         ),
     )
-    copy_inputs.batch_export.stage_folder = stage_folder
+    copy_inputs.batch_export.stage_folder = stage_result.stage_folder
+    copy_inputs.batch_export.records_total = stage_result.records_total
     result = await activity_environment.run(copy_into_redshift_activity_from_stage, copy_inputs)
 
     if not assert_records:

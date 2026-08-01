@@ -1,6 +1,7 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
+import { SDK_DEFAULTS_DATE } from './_snippets/sdkDefaults'
 
 export const getSvelteClientSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
     const { CodeBlock, Markdown, CalloutBox, dedent } = ctx
@@ -55,17 +56,17 @@ export const getSvelteClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 language: 'javascript',
                                 file: 'src/routes/+layout.js',
                                 code: dedent`
-                                    import insights from '@hanzo/insights'
+                                    import insights from 'insights-js'
                                     import { browser } from '$app/environment';
                                     import { onMount } from 'svelte';
 
                                     export const load = async () => {
                                       if (browser) {
                                         insights.init(
-                                          '<ph_project_api_key>',
+                                          '<ph_project_token>',
                                           {
                                             api_host: '<ph_client_api_host>',
-                                            defaults: '2026-01-30'
+                                            defaults: '${SDK_DEFAULTS_DATE}'
                                           }
                                         )
                                       }
@@ -143,7 +144,7 @@ export const getSvelteServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                     import { Insights } from 'insights-node';
 
                                     export async function load() {
-                                      const insights = new Insights('<ph_project_api_key>', { host: '<ph_client_api_host>' });
+                                      const insights = new Insights('<ph_project_token>', { host: '<ph_client_api_host>' });
 
                                       insights.capture({
                                         distinctId: 'distinct_id_of_the_user',

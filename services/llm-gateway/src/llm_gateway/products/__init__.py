@@ -1,4 +1,9 @@
 from llm_gateway.products.config import (
+    POSTFN_AI_DEV_APP_ID,
+    POSTFN_AI_EU_APP_ID,
+    POSTFN_AI_US_APP_ID,
+    POSTFN_CODE_EU_APP_ID,
+    POSTFN_CODE_US_APP_ID,
     PRODUCTS,
     TWIG_EU_APP_ID,
     TWIG_US_APP_ID,
@@ -10,6 +15,11 @@ from llm_gateway.products.config import (
 )
 
 __all__ = [
+    "POSTFN_CODE_EU_APP_ID",
+    "POSTFN_CODE_US_APP_ID",
+    "POSTFN_AI_DEV_APP_ID",
+    "POSTFN_AI_EU_APP_ID",
+    "POSTFN_AI_US_APP_ID",
     "PRODUCTS",
     "ProductConfig",
     "TWIG_EU_APP_ID",

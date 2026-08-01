@@ -17,6 +17,6 @@ class DashboardTileVisitor(
 ):
     @classmethod
     def get_model(cls) -> type[models.Model]:
-        from insights.models import DashboardTile
+        from products.dashboards.backend.models.dashboard_tile import DashboardTile
 
         return DashboardTile

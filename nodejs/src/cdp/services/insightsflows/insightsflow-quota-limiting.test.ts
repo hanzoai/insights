@@ -1,12 +1,13 @@
+import { InsightsFlow } from '~/cdp/schema/hogflow'
+
 import { QuotaLimiting } from '../../../common/services/quota-limiting.service'
-import { InsightsFlow } from '../../../schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow } from '../../types'
-import { InsightsFunctionMonitoringService } from '../monitoring/insights-function-monitoring.service'
+import { InsightsFunctionMonitoringService } from '../monitoring/script-function-monitoring.service'
 import {
     checkInsightsFlowQuotaLimits,
     counterInsightsFlowQuotaLimited,
     shouldBlockInsightsFlowDueToQuota,
-} from './insightsflow-quota-limiting'
+} from './hogflow-quota-limiting'
 
 describe('InsightsFlow Quota Limiting', () => {
     let mockQuotaLimiting: jest.Mocked<QuotaLimiting>
@@ -33,17 +34,18 @@ describe('InsightsFlow Quota Limiting', () => {
         it('should not limit workflow when team has no quota limits', async () => {
             mockQuotaLimiting.isTeamQuotaLimited.mockResolvedValue(false)
 
-            const insightsFlow: InsightsFlow = {
+            const hogFlow: InsightsFlow = {
                 ...baseInsightsFlow,
                 actions: [{ type: 'function_email' } as any, { type: 'function' } as any],
                 billable_action_types: ['function_email', 'function'],
             }
 
-            const result = await checkInsightsFlowQuotaLimits(insightsFlow, teamId, mockQuotaLimiting)
+            const result = await checkInsightsFlowQuotaLimits(hogFlow, teamId, mockQuotaLimiting)
 
             expect(result.isLimited).toBe(false)
-            expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledTimes(2)
+            expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledTimes(3)
             expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(teamId, 'workflow_emails')
+            expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(teamId, 'workflow_push')
             expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
                 teamId,
                 'workflow_destinations_dispatched'
@@ -55,13 +57,29 @@ describe('InsightsFlow Quota Limiting', () => {
                 return Promise.resolve(resource === 'workflow_emails')
             })
 
-            const insightsFlow: InsightsFlow = {
+            const hogFlow: InsightsFlow = {
                 ...baseInsightsFlow,
                 actions: [{ type: 'function_email' } as any, { type: 'function' } as any],
                 billable_action_types: ['function_email', 'function'],
             }
 
-            const result = await checkInsightsFlowQuotaLimits(insightsFlow, teamId, mockQuotaLimiting)
+            const result = await checkInsightsFlowQuotaLimits(hogFlow, teamId, mockQuotaLimiting)
+
+            expect(result.isLimited).toBe(true)
+        })
+
+        it('should limit workflow with push action when team has push quota limit', async () => {
+            mockQuotaLimiting.isTeamQuotaLimited.mockImplementation((_teamId, resource) => {
+                return Promise.resolve(resource === 'workflow_push')
+            })
+
+            const hogFlow: InsightsFlow = {
+                ...baseInsightsFlow,
+                actions: [{ type: 'function_push' } as any, { type: 'function' } as any],
+                billable_action_types: ['function_push', 'function'],
+            }
+
+            const result = await checkInsightsFlowQuotaLimits(hogFlow, teamId, mockQuotaLimiting)
 
             expect(result.isLimited).toBe(true)
         })
@@ -71,13 +89,13 @@ describe('InsightsFlow Quota Limiting', () => {
                 return Promise.resolve(resource === 'workflow_destinations_dispatched')
             })
 
-            const insightsFlow: InsightsFlow = {
+            const hogFlow: InsightsFlow = {
                 ...baseInsightsFlow,
                 actions: [{ type: 'delay' } as any, { type: 'function' } as any, { type: 'function_email' } as any],
                 billable_action_types: ['function', 'function_email'],
             }
 
-            const result = await checkInsightsFlowQuotaLimits(insightsFlow, teamId, mockQuotaLimiting)
+            const result = await checkInsightsFlowQuotaLimits(hogFlow, teamId, mockQuotaLimiting)
 
             expect(result.isLimited).toBe(true)
         })
@@ -85,13 +103,13 @@ describe('InsightsFlow Quota Limiting', () => {
         it('should not limit workflow with no billable action types', async () => {
             mockQuotaLimiting.isTeamQuotaLimited.mockResolvedValue(true)
 
-            const insightsFlow: InsightsFlow = {
+            const hogFlow: InsightsFlow = {
                 ...baseInsightsFlow,
                 actions: [{ type: 'delay' } as any, { type: 'conditional_branch' } as any],
                 billable_action_types: [],
             }
 
-            const result = await checkInsightsFlowQuotaLimits(insightsFlow, teamId, mockQuotaLimiting)
+            const result = await checkInsightsFlowQuotaLimits(hogFlow, teamId, mockQuotaLimiting)
 
             expect(result.isLimited).toBe(false)
             expect(mockQuotaLimiting.isTeamQuotaLimited).not.toHaveBeenCalled()
@@ -100,13 +118,13 @@ describe('InsightsFlow Quota Limiting', () => {
         it('should not limit workflow when billable_action_types is null', async () => {
             mockQuotaLimiting.isTeamQuotaLimited.mockResolvedValue(true)
 
-            const insightsFlow: InsightsFlow = {
+            const hogFlow: InsightsFlow = {
                 ...baseInsightsFlow,
                 actions: [{ type: 'function' } as any],
                 billable_action_types: null,
             }
 
-            const result = await checkInsightsFlowQuotaLimits(insightsFlow, teamId, mockQuotaLimiting)
+            const result = await checkInsightsFlowQuotaLimits(hogFlow, teamId, mockQuotaLimiting)
 
             expect(result.isLimited).toBe(false)
             expect(mockQuotaLimiting.isTeamQuotaLimited).not.toHaveBeenCalled()
@@ -115,13 +133,13 @@ describe('InsightsFlow Quota Limiting', () => {
         it('should not check quota limits when billable_action_types is undefined', async () => {
             mockQuotaLimiting.isTeamQuotaLimited.mockResolvedValue(true)
 
-            const insightsFlow: InsightsFlow = {
+            const hogFlow: InsightsFlow = {
                 ...baseInsightsFlow,
                 actions: [{ type: 'function' } as any],
                 billable_action_types: undefined,
             }
 
-            const result = await checkInsightsFlowQuotaLimits(insightsFlow, teamId, mockQuotaLimiting)
+            const result = await checkInsightsFlowQuotaLimits(hogFlow, teamId, mockQuotaLimiting)
 
             expect(result.isLimited).toBe(false)
             expect(mockQuotaLimiting.isTeamQuotaLimited).not.toHaveBeenCalled()
@@ -130,17 +148,18 @@ describe('InsightsFlow Quota Limiting', () => {
         it('should only check relevant quota limits based on billable action types', async () => {
             mockQuotaLimiting.isTeamQuotaLimited.mockResolvedValue(false)
 
-            const insightsFlow: InsightsFlow = {
+            const hogFlow: InsightsFlow = {
                 ...baseInsightsFlow,
                 actions: [{ type: 'function' } as any, { type: 'delay' } as any],
                 billable_action_types: ['function'],
             }
 
-            const result = await checkInsightsFlowQuotaLimits(insightsFlow, teamId, mockQuotaLimiting)
+            const result = await checkInsightsFlowQuotaLimits(hogFlow, teamId, mockQuotaLimiting)
 
             expect(result.isLimited).toBe(false)
-            expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledTimes(2)
+            expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledTimes(3)
             expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(teamId, 'workflow_emails')
+            expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(teamId, 'workflow_push')
             expect(mockQuotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
                 teamId,
                 'workflow_destinations_dispatched'
@@ -154,7 +173,7 @@ describe('InsightsFlow Quota Limiting', () => {
         const baseItem: CyclotronJobInvocationInsightsFlow = {
             teamId,
             functionId: 'test-flow-id',
-            insightsFlow: {
+            hogFlow: {
                 id: 'test-flow',
                 team_id: teamId,
                 name: 'Test Flow',
@@ -182,14 +201,14 @@ describe('InsightsFlow Quota Limiting', () => {
 
             const item: CyclotronJobInvocationInsightsFlow = {
                 ...baseItem,
-                insightsFlow: {
-                    ...baseItem.insightsFlow,
+                hogFlow: {
+                    ...baseItem.hogFlow,
                     billable_action_types: ['function_email'],
                 },
             }
 
             const result = await shouldBlockInsightsFlowDueToQuota(item, {
-                hub: { quotaLimiting: mockQuotaLimiting },
+                quotaLimiting: mockQuotaLimiting,
                 insightsFunctionMonitoringService: mockInsightsFunctionMonitoringService,
             })
 
@@ -205,14 +224,14 @@ describe('InsightsFlow Quota Limiting', () => {
 
             const item: CyclotronJobInvocationInsightsFlow = {
                 ...baseItem,
-                insightsFlow: {
-                    ...baseItem.insightsFlow,
+                hogFlow: {
+                    ...baseItem.hogFlow,
                     billable_action_types: ['function_email'],
                 },
             }
 
             const result = await shouldBlockInsightsFlowDueToQuota(item, {
-                hub: { quotaLimiting: mockQuotaLimiting },
+                quotaLimiting: mockQuotaLimiting,
                 insightsFunctionMonitoringService: mockInsightsFunctionMonitoringService,
             })
 
@@ -226,7 +245,7 @@ describe('InsightsFlow Quota Limiting', () => {
                     metric_name: 'quota_limited',
                     count: 1,
                 },
-                'insights_flow'
+                'hog_flow'
             )
         })
 
@@ -235,14 +254,14 @@ describe('InsightsFlow Quota Limiting', () => {
 
             const item: CyclotronJobInvocationInsightsFlow = {
                 ...baseItem,
-                insightsFlow: {
-                    ...baseItem.insightsFlow,
+                hogFlow: {
+                    ...baseItem.hogFlow,
                     billable_action_types: [],
                 },
             }
 
             const result = await shouldBlockInsightsFlowDueToQuota(item, {
-                hub: { quotaLimiting: mockQuotaLimiting },
+                quotaLimiting: mockQuotaLimiting,
                 insightsFunctionMonitoringService: mockInsightsFunctionMonitoringService,
             })
 

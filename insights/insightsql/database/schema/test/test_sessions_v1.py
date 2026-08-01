@@ -16,9 +16,10 @@ from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
 from insights.models import Organization, Team
-from insights.models.property_definition import PropertyType
 from insights.models.sessions.sql import ALLOWED_TEAM_IDS
-from insights.models.utils import uuid7
+from insights.uuidt import uuid7
+
+from products.event_definitions.backend.models.property_definition import PropertyType
 
 
 class TestSessionsV1(DatastoreDestroyTablesMixin, DatastoreTestMixin, APIBaseTest):
@@ -375,6 +376,7 @@ class TestGetLazySessionProperties(DatastoreTestMixin, APIBaseTest):
             ["Organic Social"],
             ["Organic Video"],
             ["Organic Shopping"],
+            ["AI"],
             ["Push"],
             ["SMS"],
             ["Audio"],

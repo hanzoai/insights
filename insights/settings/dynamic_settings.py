@@ -8,6 +8,12 @@ CONSTANCE_DATABASE_PREFIX = "constance:insights:"
 # To edit, visit: ${SITE_URL}/admin/insights/instancesetting/
 
 CONSTANCE_CONFIG = {
+    "WAREHOUSE_PERSON_PROPERTY_SET_RATE_PER_SEC": (
+        5000,
+        "Global max rate (events/sec) at which the warehouse person-property consumer sends $set "
+        "events to capture. Throttles the shared ingestion person-write path; ops can retune live.",
+        int,
+    ),
     "RECORDINGS_PERFORMANCE_EVENTS_TTL_WEEKS": (
         3,
         "Number of weeks recording performance events will be kept before removing them (for all projects). Storing performance events for a shorter timeframe can help reduce Datastore disk usage.",
@@ -32,6 +38,16 @@ CONSTANCE_CONFIG = {
         get_from_env("PERSON_ON_EVENTS_ENABLED", False, type_cast=str_to_bool),
         "Whether to use query path using person_id and person_properties on events or the old query",
         bool,
+    ),
+    "DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA": (
+        False,
+        "Whether InsightsQL queries read from the native-JSON events tables (events_json) instead of the legacy events table.",
+        bool,
+    ),
+    "DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA_TEAMS": (
+        "",
+        "Comma-separated team IDs whose InsightsQL queries read from the native-JSON events tables even while the global setting is off.",
+        str,
     ),
     "PERSON_ON_EVENTS_V2_ENABLED": (
         get_from_env("PERSON_ON_EVENTS_V2_ENABLED", False, type_cast=str_to_bool),
@@ -63,8 +79,8 @@ CONSTANCE_CONFIG = {
         "(Advanced) Whether having an async migration running, errored or required should prevent upgrades.",
         bool,
     ),
-    "ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION": (
-        get_from_env("ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION", False, type_cast=str_to_bool),
+    "ASYNC_MIGRATIONS_IGNORE_POSTFN_VERSION": (
+        get_from_env("ASYNC_MIGRATIONS_IGNORE_POSTFN_VERSION", False, type_cast=str_to_bool),
         "(Advanced) Whether to ignore async migrations insights version restrictions",
         bool,
     ),
@@ -120,6 +136,12 @@ CONSTANCE_CONFIG = {
         "Reply address to which email clients should send responses.",
         str,
     ),
+    "EMAIL_TIMEOUT": (
+        get_from_env("EMAIL_TIMEOUT", 30, type_cast=int),
+        "Socket timeout in seconds for SMTP connections. Bounds how long a send waits on an "
+        "unresponsive relay before raising (and being retried), instead of blocking forever.",
+        int,
+    ),
     "ASYNC_MIGRATIONS_OPT_OUT_EMAILS": (
         get_from_env("ASYNC_MIGRATIONS_OPT_OUT_EMAILS", False, type_cast=str_to_bool),
         "Used to disable emails from async migrations service",
@@ -145,6 +167,70 @@ CONSTANCE_CONFIG = {
         "Used to validate Slack events for example when unfurling links",
         str,
     ),
+    "SUPPORT_SLACK_APP_CLIENT_ID": (
+        get_from_env("SUPPORT_SLACK_APP_CLIENT_ID", default=""),
+        "Used to enable the 'Add to Slack' button for the SupportHog Slack app.",
+        str,
+    ),
+    "SUPPORT_SLACK_APP_CLIENT_SECRET": (
+        get_from_env("SUPPORT_SLACK_APP_CLIENT_SECRET", default=""),
+        "Used by the SupportHog Slack OAuth callback to exchange authorization codes.",
+        str,
+    ),
+    "SUPPORT_SLACK_SIGNING_SECRET": (
+        get_from_env("SUPPORT_SLACK_SIGNING_SECRET", default=""),
+        "Used to validate incoming webhook events for the Support Slack bot.",
+        str,
+    ),
+    "SUPPORT_TEAMS_APP_ID": (
+        get_from_env("SUPPORT_TEAMS_APP_ID", default=""),
+        "Azure AD Application (client) ID for the SupportHog Teams bot. Shared across all tenants.",
+        str,
+    ),
+    "SUPPORT_TEAMS_APP_SECRET": (
+        get_from_env("SUPPORT_TEAMS_APP_SECRET", default=""),
+        "Azure AD client secret for the SupportHog Teams bot.",
+        str,
+    ),
+    "SUPPORT_TEAMS_APP_TENANT_ID": (
+        get_from_env("SUPPORT_TEAMS_APP_TENANT_ID", default=""),
+        (
+            "Azure AD tenant ID where the SupportHog Teams bot app is registered. "
+            "Set this only if the Azure Bot resource was created as SingleTenant. "
+            "Leave empty for MultiTenant bots (default)."
+        ),
+        str,
+    ),
+    "SUPPORT_TEAMS_CATALOG_APP_ID": (
+        get_from_env("SUPPORT_TEAMS_CATALOG_APP_ID", default=""),
+        (
+            "Teams catalog app id (GUID) for the published SupportHog manifest. This is the id "
+            "Microsoft assigns when the manifest is listed in the Teams Store (AppSource) or uploaded "
+            "to an org catalog — different from SUPPORT_TEAMS_APP_ID, which is the bot's Azure AD "
+            "client id. Required for programmatic install via Graph /teams/{id}/installedApps."
+        ),
+        str,
+    ),
+    "CONVERSATIONS_HMAC_SIGNING_SECRET": (
+        get_from_env("CONVERSATIONS_HMAC_SIGNING_SECRET", default=""),
+        "HMAC signing secret for conversations widget identity verification in the support sidebar.",
+        str,
+    ),
+    "CONVERSATIONS_EMAIL_INBOUND_DOMAIN": (
+        get_from_env("CONVERSATIONS_EMAIL_INBOUND_DOMAIN", default=""),
+        "Mailgun receiving domain for inbound email routing, e.g. mg.hanzo.ai.",
+        str,
+    ),
+    "CONVERSATIONS_EMAIL_WEBHOOK_SIGNING_KEY": (
+        get_from_env("CONVERSATIONS_EMAIL_WEBHOOK_SIGNING_KEY", default=""),
+        "HMAC signing key for validating inbound Mailgun webhook authenticity.",
+        str,
+    ),
+    "CONVERSATIONS_EMAIL_MAILGUN_API_KEY": (
+        get_from_env("CONVERSATIONS_EMAIL_MAILGUN_API_KEY", default=""),
+        "Mailgun API key for domain management (add/verify/delete sending domains).",
+        str,
+    ),
     "GITHUB_WEBHOOK_SECRET": (
         get_from_env("GITHUB_WEBHOOK_SECRET", default=""),
         "Used to validate GitHub webhook events (HMAC-SHA256 signature verification)",
@@ -165,30 +251,90 @@ CONSTANCE_CONFIG = {
         "Whether rate limiting is enabled",
         bool,
     ),
+    "DATASTORE_KILL_SWITCH": (
+        get_from_env("DATASTORE_KILL_SWITCH", "off"),
+        "Datastore overload protection. Values: 'off', 'light' (reduce resources, shed background work), 'full' (aggressive caps on everything).",
+        str,
+    ),
+    "DATASTORE_KILL_SWITCH_LIGHT_TEAMS": (
+        get_from_env("DATASTORE_KILL_SWITCH_LIGHT_TEAMS", default=[], type_cast=list[int]),
+        "Comma-separated team IDs always subject to the 'light' Datastore kill switch, even when the global kill switch is 'off'. Use this to restrict heavy or abusive teams without degrading the rest of the cluster. The global level wins if higher.",
+        list[int],
+    ),
+    "DATASTORE_KILL_SWITCH_FULL_TEAMS": (
+        get_from_env("DATASTORE_KILL_SWITCH_FULL_TEAMS", default=[], type_cast=list[int]),
+        "Comma-separated team IDs always subject to the 'full' Datastore kill switch, even when the global kill switch is 'off'. Use this to restrict heavy or abusive teams without degrading the rest of the cluster.",
+        list[int],
+    ),
+    "DATASTORE_HEDGED_APP_QUERIES": (
+        get_from_env("DATASTORE_HEDGED_APP_QUERIES", False, type_cast=str_to_bool),
+        "Enable hedged requests for online APP queries to Datastore.",
+        bool,
+    ),
     "RATE_LIMITING_ALLOW_LIST_TEAMS": (
         get_from_env("RATE_LIMITING_ALLOW_LIST_TEAMS", ""),
         "Whether teams are on an allow list to bypass rate limiting. Comma separated list of team-ids",
         str,
     ),
+    "FLAGS_LOG_BODIES_TEAMS": (
+        get_from_env("FLAGS_LOG_BODIES_TEAMS", "{}"),
+        'Per-team /flags request and response body logging. JSON object mapping team_id (string) to a non-empty list of flag-key wildcard patterns; the response is filtered to flags matching any pattern. "{}" disables logging entirely. Examples: \'{"123": ["my-feature", "checkout-*"]}\' logs only matching flag keys for team 123. To capture every flag (rare, noisy), use [\\"*\\"] explicitly. The Rust feature-flags service polls this every ~60s. Limits: at most 100 teams, 50 patterns per team, 256 bytes per pattern.',
+        str,
+    ),
     "REDIRECT_APP_TO_US": (
         get_from_env("REDIRECT_APP_TO_US", False, type_cast=str_to_bool),
-        "Temporary option to redirect all app traffic from insights.hanzo.ai to insights.hanzo.ai.",
+        "Temporary option to redirect all app traffic from app.hanzo.ai to us.hanzo.ai.",
         bool,
     ),
     "WEB_ANALYTICS_WARMING_DAYS": (
-        get_from_env("WEB_ANALYTICS_WARMING_DAYS", default=7, type_cast=int),
-        "Number of days to look back for frequently-run web analytics queries",
+        get_from_env("WEB_ANALYTICS_WARMING_DAYS", default=14, type_cast=int),
+        "Number of days of system.query_log to look back for frequently-run web analytics queries. "
+        "A longer window catches teams that use web analytics every few days rather than daily. "
+        "The selection is cached (WEB_ANALYTICS_WARMING_SELECTION_TTL_SECONDS), so the fleet-wide "
+        "scan runs on that cadence — not every warming run.",
+        int,
+    ),
+    "WEB_ANALYTICS_WARMING_SELECTION_TTL_SECONDS": (
+        get_from_env("WEB_ANALYTICS_WARMING_SELECTION_TTL_SECONDS", default=21600, type_cast=int),
+        "How long the fleet-wide demand selection is cached in object storage. Warming replays the "
+        "cached shape list every run; the expensive query_log scan only re-runs once this expires (default 6h).",
         int,
     ),
     "WEB_ANALYTICS_WARMING_MIN_QUERY_COUNT": (
-        get_from_env("WEB_ANALYTICS_WARMING_MIN_QUERY_COUNT", default=10, type_cast=int),
-        "Minimum query count threshold for web analytics cache warming",
+        get_from_env("WEB_ANALYTICS_WARMING_MIN_QUERY_COUNT", default=2, type_cast=int),
+        "Per-shape floor: minimum runs in the lookback window for a query shape to be warmed. "
+        "2 covers every shape a user returned to; misses cost only a live serve (warm-behind).",
         int,
     ),
     "WEB_ANALYTICS_WARMING_TEAMS_TO_WARM": (
         get_from_env("WEB_ANALYTICS_WARMING_TEAMS_TO_WARM", default=[2], type_cast=list[int]),
         "Teams that will have web analytics cache warming enabled",
         list[int],
+    ),
+    "WEB_ANALYTICS_WARMING_MAX_SHAPES": (
+        get_from_env("WEB_ANALYTICS_WARMING_MAX_SHAPES", default=400000, type_cast=int),
+        "Cap on the number of hot query shapes web analytics warming selects fleet-wide per run. "
+        "Sized above the ~234k shapes the 14-day min=2 selection produces, with headroom for growth, so "
+        "the cap doesn't silently truncate weekly-cadence teams; raising it warms more shapes at the cost "
+        "of more background compute.",
+        int,
+    ),
+    # Renamed from WEB_ANALYTICS_WARMING_SHAPE_CONCURRENCY when its meaning changed
+    # from total workers to per-shard workers, so stale overrides sized for the old
+    # semantics (e.g. 24 total) can't silently become 24 threads in every shard.
+    "WEB_ANALYTICS_WARMING_SHARD_THREADS": (
+        get_from_env("WEB_ANALYTICS_WARMING_SHARD_THREADS", default=6, type_cast=int),
+        "Worker threads inside each warm shard (total Datastore-side concurrency is shards x this). "
+        "Threads overlap the IO-bound parts; CPU-bound InsightsQL compilation parallelizes across shards, "
+        "not threads. Clamped to 1-64; applies when the next warming run starts.",
+        int,
+    ),
+    "WEB_ANALYTICS_WARMING_SHARDS": (
+        get_from_env("WEB_ANALYTICS_WARMING_SHARDS", default=8, type_cast=int),
+        "Number of team-disjoint shards the warm pass fans out into, one subprocess each. Each shard "
+        "compiles InsightsQL on its own core, so this bounds real CPU parallelism; the run pod requests "
+        "CPU to match (dagster-k8s/config on the job). Clamped to 1-16; applies at the next run.",
+        int,
     ),
 }
 
@@ -200,7 +346,7 @@ SETTINGS_ALLOWING_API_OVERRIDE = (
     "ASYNC_MIGRATIONS_DISABLE_AUTO_ROLLBACK",
     "ASYNC_MIGRATIONS_AUTO_CONTINUE",
     "ASYNC_MIGRATIONS_BLOCK_UPGRADE",
-    "ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION",
+    "ASYNC_MIGRATIONS_IGNORE_POSTFN_VERSION",
     "EMAIL_ENABLED",
     "EMAIL_HOST",
     "EMAIL_PORT",
@@ -210,22 +356,45 @@ SETTINGS_ALLOWING_API_OVERRIDE = (
     "EMAIL_USE_SSL",
     "EMAIL_DEFAULT_FROM",
     "EMAIL_REPLY_TO",
+    "EMAIL_TIMEOUT",
     "ASYNC_MIGRATIONS_OPT_OUT_EMAILS",
     "PERSON_ON_EVENTS_ENABLED",
     "PERSON_ON_EVENTS_V2_ENABLED",
+    "DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA",
+    "DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA_TEAMS",
     "STRICT_CACHING_TEAMS",
     "GITHUB_APP_SLUG",
     "SLACK_APP_CLIENT_ID",
     "SLACK_APP_CLIENT_SECRET",
     "SLACK_APP_SIGNING_SECRET",
+    "SUPPORT_SLACK_APP_CLIENT_ID",
+    "SUPPORT_SLACK_APP_CLIENT_SECRET",
+    "SUPPORT_SLACK_SIGNING_SECRET",
+    "SUPPORT_TEAMS_APP_ID",
+    "SUPPORT_TEAMS_APP_SECRET",
+    "SUPPORT_TEAMS_APP_TENANT_ID",
+    "SUPPORT_TEAMS_CATALOG_APP_ID",
+    "CONVERSATIONS_HMAC_SIGNING_SECRET",
+    "CONVERSATIONS_EMAIL_INBOUND_DOMAIN",
+    "CONVERSATIONS_EMAIL_WEBHOOK_SIGNING_KEY",
+    "CONVERSATIONS_EMAIL_MAILGUN_API_KEY",
     "GITHUB_WEBHOOK_SECRET",
     "PARALLEL_DASHBOARD_ITEM_CACHE",
     "ALLOW_EXPERIMENTAL_ASYNC_MIGRATIONS",
     "RATE_LIMIT_ENABLED",
     "RATE_LIMITING_ALLOW_LIST_TEAMS",
+    "FLAGS_LOG_BODIES_TEAMS",
+    "DATASTORE_KILL_SWITCH",
+    "DATASTORE_KILL_SWITCH_LIGHT_TEAMS",
+    "DATASTORE_KILL_SWITCH_FULL_TEAMS",
+    "DATASTORE_HEDGED_APP_QUERIES",
     "REDIRECT_APP_TO_US",
     "WEB_ANALYTICS_WARMING_DAYS",
+    "WEB_ANALYTICS_WARMING_SELECTION_TTL_SECONDS",
     "WEB_ANALYTICS_WARMING_MIN_QUERY_COUNT",
+    "WEB_ANALYTICS_WARMING_MAX_SHAPES",
+    "WEB_ANALYTICS_WARMING_SHARD_THREADS",
+    "WEB_ANALYTICS_WARMING_SHARDS",
 )
 
 # SECRET_SETTINGS can only be updated but will never be exposed through the API (we do store them plain text in the DB)
@@ -234,5 +403,11 @@ SECRET_SETTINGS = [
     "EMAIL_HOST_PASSWORD",
     "SLACK_APP_CLIENT_SECRET",
     "SLACK_APP_SIGNING_SECRET",
+    "SUPPORT_SLACK_SIGNING_SECRET",
+    "SUPPORT_SLACK_APP_CLIENT_SECRET",
+    "SUPPORT_TEAMS_APP_SECRET",
+    "CONVERSATIONS_HMAC_SIGNING_SECRET",
+    "CONVERSATIONS_EMAIL_WEBHOOK_SIGNING_KEY",
+    "CONVERSATIONS_EMAIL_MAILGUN_API_KEY",
     "GITHUB_WEBHOOK_SECRET",
 ]

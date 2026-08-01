@@ -4,8 +4,8 @@ import pytest
 
 from asgiref.sync import async_to_sync
 
-from products.tasks.backend.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate
-from products.tasks.backend.temporal.exceptions import SandboxNotFoundError
+from products.tasks.backend.exceptions import SandboxNotFoundError
+from products.tasks.backend.logic.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate
 from products.tasks.backend.temporal.process_task.activities.execute_task_in_sandbox import (
     ExecuteTaskInput,
     execute_task_in_sandbox,
@@ -25,6 +25,8 @@ class TestExecuteTaskInSandboxActivity:
             task_id=task_id,
             run_id=run_id,
             team_id=github_integration.team_id,
+            team_uuid=str(github_integration.team.uuid),
+            organization_id=str(github_integration.team.organization_id),
             github_integration_id=github_integration.id,
             repository=repository,
             distinct_id="test-user-id",
@@ -42,7 +44,7 @@ class TestExecuteTaskInSandboxActivity:
         sandbox = None
         try:
             sandbox = Sandbox.create(config)
-            context = self._create_context(github_integration, "Hanzo Insights/insights-js")
+            context = self._create_context(github_integration, "Insights/insights-js")
 
             input_data = ExecuteTaskInput(context=context, sandbox_id=sandbox.id)
             result = async_to_sync(activity_environment.run)(execute_task_in_sandbox, input_data)
@@ -55,7 +57,7 @@ class TestExecuteTaskInSandboxActivity:
 
     @pytest.mark.django_db
     def test_execute_task_sandbox_not_found(self, activity_environment, github_integration):
-        context = self._create_context(github_integration, "Hanzo Insights/insights-js")
+        context = self._create_context(github_integration, "Insights/insights-js")
         input_data = ExecuteTaskInput(context=context, sandbox_id="non-existent-sandbox-id")
 
         with pytest.raises(SandboxNotFoundError):

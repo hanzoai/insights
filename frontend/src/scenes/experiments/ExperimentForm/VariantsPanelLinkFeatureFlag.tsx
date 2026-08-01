@@ -1,17 +1,22 @@
 import { useState } from 'react'
 
+import { IconX } from '@hanzo/icons'
+
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Tag } from 'lib/elements/Tag'
 import { Link } from 'lib/elements/Link'
-import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import type { FeatureFlagType } from '~/types'
+
+import { getFlagVariants } from '../utils'
 
 interface VariantsPanelLinkFeatureFlagProps {
     linkedFeatureFlag: FeatureFlagType | null
     setShowFeatureFlagSelector: () => void
     disabled?: boolean
+    onRemove?: () => void
 }
 
 const getTargetingSummary = (flag: FeatureFlagType): string[] => {
@@ -69,6 +74,7 @@ export const VariantsPanelLinkFeatureFlag = ({
     linkedFeatureFlag,
     setShowFeatureFlagSelector,
     disabled = false,
+    onRemove,
 }: VariantsPanelLinkFeatureFlagProps): JSX.Element => {
     if (!linkedFeatureFlag) {
         if (disabled) {
@@ -94,7 +100,7 @@ export const VariantsPanelLinkFeatureFlag = ({
         )
     }
 
-    const variants = linkedFeatureFlag.filters?.multivariate?.variants || []
+    const variants = getFlagVariants(linkedFeatureFlag)
 
     return (
         <div>
@@ -116,16 +122,26 @@ export const VariantsPanelLinkFeatureFlag = ({
                     </div>
                     {/* Only show Change button when not read-only */}
 
-                    <Button
-                        type="secondary"
-                        size="small"
-                        onClick={setShowFeatureFlagSelector}
-                        disabledReason={
-                            disabled ? 'You cannot change the feature flag when editing an experiment.' : undefined
-                        }
-                    >
-                        Change
-                    </Button>
+                    <div className="flex items-center gap-1">
+                        <Button
+                            type="secondary"
+                            size="small"
+                            onClick={setShowFeatureFlagSelector}
+                            disabledReason={
+                                disabled ? 'You cannot change the feature flag when editing an experiment.' : undefined
+                            }
+                        >
+                            Change
+                        </Button>
+                        {onRemove && (
+                            <Button
+                                size="small"
+                                icon={<IconX />}
+                                onClick={onRemove}
+                                tooltip="Remove linked flag"
+                            />
+                        )}
+                    </div>
                 </div>
 
                 {/* Description */}

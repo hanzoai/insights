@@ -9,6 +9,7 @@ import {
     InputSelect,
     Modal,
     Select,
+    SelectOption,
     SelectProps,
     Table,
     Tooltip,
@@ -20,8 +21,8 @@ import { UserSelectItem } from 'lib/components/UserSelectItem'
 import { TableColumns } from 'lib/elements/Table'
 import { TableLink } from 'lib/elements/Table/TableLink'
 import { ProfileBubbles, ProfilePicture } from 'lib/elements/ProfilePicture'
-import { capitalizeFirstLetter, fullName } from 'lib/utils'
 import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'
+import { fullName } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
@@ -36,7 +37,8 @@ import {
     RoleType,
 } from '~/types'
 
-import { AccessControlLogicProps, accessControlLogic } from './accessControlLogic'
+import { AccessControlLogicProps, InheritedAccess, accessControlLogic } from './accessControlLogic'
+import { humanizeAccessControlLevel } from './ResourceAccessControlsV2/helpers'
 
 export function AccessControlObject(props: AccessControlLogicProps): JSX.Element | null {
     const { canEditAccessControls, humanReadableResource, resource } = useValues(accessControlLogic(props))
@@ -56,7 +58,7 @@ export function AccessControlObject(props: AccessControlLogicProps): JSX.Element
                     )}
                 </h2>
                 <p>{props.description}</p>
-                <PayGateMini feature={AvailableFeature.ADVANCED_PERMISSIONS}>
+                <PayGateMini feature={AvailableFeature.ACCESS_CONTROL}>
                     <div className="deprecated-space-y-6">
                         {canEditAccessControls === false ? (
                             <Banner type="warning">
@@ -87,25 +89,28 @@ export function AccessControlObject(props: AccessControlLogicProps): JSX.Element
 }
 
 function AccessControlObjectDefaults(): JSX.Element | null {
-    const { accessControlDefault, accessControlDefaultOptions, accessControlsLoading, canEditAccessControls } =
+    const { accessControlDefault, accessControls, accessControlsLoading, availableLevelsWithNone, inheritedAccess } =
         useValues(accessControlLogic)
     const { updateAccessControlDefault } = useActions(accessControlLogic)
     const { guardAvailableFeature } = useValues(upgradeModalLogic)
 
+    if (!accessControls) {
+        // A null level is a real state ("No override") for this select, so it can't double as
+        // the loading state the way it does elsewhere — loading needs its own placeholder
+        return <Select placeholder="Loading..." disabledReason="Loading…" options={[]} />
+    }
+
     return (
-        <Select
-            placeholder="Loading..."
-            value={accessControlDefault?.access_level ?? undefined}
+        <SimplLevelComponent
+            level={accessControlDefault?.access_level ?? null}
+            levels={availableLevelsWithNone}
+            inherited={inheritedAccess}
+            disabledReason={accessControlsLoading ? 'Loading…' : undefined}
             onChange={(newValue) => {
-                guardAvailableFeature(AvailableFeature.ADVANCED_PERMISSIONS, () => {
-                    updateAccessControlDefault(newValue as AccessControlLevel)
+                guardAvailableFeature(AvailableFeature.ACCESS_CONTROL, () => {
+                    updateAccessControlDefault(newValue)
                 })
             }}
-            disabledReason={
-                accessControlsLoading ? 'Loading…' : !canEditAccessControls ? 'You cannot edit this' : undefined
-            }
-            dropdownMatchSelectWidth={false}
-            options={accessControlDefaultOptions}
         />
     )
 }
@@ -243,7 +248,7 @@ function AccessControlObjectUsers(): JSX.Element | null {
                 setModelOpen={setModelOpen}
                 placeholder="Search for team members to add…"
                 onAdd={async (newValues, level) => {
-                    if (guardAvailableFeature(AvailableFeature.ADVANCED_PERMISSIONS)) {
+                    if (guardAvailableFeature(AvailableFeature.ACCESS_CONTROL)) {
                         await updateAccessControlMembers(newValues.map((member) => ({ member, level })))
                         setModelOpen(false)
                     }
@@ -356,7 +361,7 @@ function AccessControlObjectRoles(): JSX.Element | null {
                 setModelOpen={setModelOpen}
                 placeholder="Search for roles to add…"
                 onAdd={async (newValues, level) => {
-                    if (guardAvailableFeature(AvailableFeature.ADVANCED_PERMISSIONS)) {
+                    if (guardAvailableFeature(AvailableFeature.ROLE_BASED_ACCESS)) {
                         await updateAccessControlRoles(newValues.map((role) => ({ role, level })))
                         setModelOpen(false)
                     }
@@ -374,28 +379,80 @@ function SimplLevelComponent(props: {
     size?: SelectProps<any>['size']
     level: AccessControlLevel | null
     levels: AccessControlLevel[]
-    onChange: (newValue: AccessControlLevel) => void
+    onChange: (newValue: AccessControlLevel | null) => void
     disabled?: boolean
+    disabledReason?: string
+    /**
+     * What applies once the rule is removed. Passing it offers "No override" as a way back, so
+     * only the object default sets it — member and role rows are removed with their own button.
+     */
+    inherited?: InheritedAccess | null
 }): JSX.Element | null {
     const { canEditAccessControls, minimumAccessLevel } = useValues(accessControlLogic)
+    const { inherited } = props
+
+    // The trigger and the menu entry read identically, so what you pick is what you end up looking at.
+    // The inherited half drops to the button's normal weight so it reads as a consequence, not a second value.
+    const noOverrideLabel = inherited ? (
+        <span className="whitespace-nowrap">
+            No override <span className="font-normal text-tertiary">· {inherited.label}</span>
+        </span>
+    ) : null
+
+    const levelOptions: SelectOption<AccessControlLevel | null>[] = props.levels.map((level) => {
+        const isDisabled = minimumAccessLevel
+            ? props.levels.indexOf(level) < props.levels.indexOf(minimumAccessLevel)
+            : false
+        return {
+            value: level,
+            label: humanizeAccessControlLevel(level),
+            disabledReason: isDisabled ? 'Not available for this resource type' : undefined,
+        }
+    })
 
     return (
-        <Select
+        <Select<AccessControlLevel | null>
             size={props.size}
             placeholder="Select level..."
             value={props.level}
-            onChange={(newValue) => props.onChange(newValue as AccessControlLevel)}
-            disabledReason={!canEditAccessControls || props.disabled ? 'You cannot edit this' : undefined}
-            options={props.levels.map((level) => {
-                const isDisabled = minimumAccessLevel
-                    ? props.levels.indexOf(level) < props.levels.indexOf(minimumAccessLevel)
-                    : false
-                return {
-                    value: level,
-                    label: capitalizeFirstLetter(level ?? ''),
-                    disabledReason: isDisabled ? 'Not available for this resource type' : undefined,
-                }
-            })}
+            onChange={props.onChange}
+            // The permission gate wins over any caller-supplied reason, so a reason passed for
+            // some other purpose can never re-enable the control for someone who cannot edit
+            disabledReason={!canEditAccessControls || props.disabled ? 'You cannot edit this' : props.disabledReason}
+            dropdownMatchSelectWidth={false}
+            tooltip={
+                inherited
+                    ? props.level === null
+                        ? inherited.reason
+                        : `Overrides ${inherited.label}. ${inherited.reason}.`
+                    : undefined
+            }
+            renderButtonContent={
+                noOverrideLabel ? (leaf) => (props.level === null ? noOverrideLabel : (leaf?.label ?? '')) : undefined
+            }
+            options={
+                inherited
+                    ? [
+                          {
+                              options: [
+                                  {
+                                      value: null,
+                                      label: 'No override',
+                                      labelInMenu: (
+                                          <div className="flex flex-col items-start gap-1 py-1">
+                                              {noOverrideLabel}
+                                              <span className="text-xs font-normal text-tertiary whitespace-nowrap">
+                                                  {inherited.reason}
+                                              </span>
+                                          </div>
+                                      ),
+                                  },
+                              ],
+                          },
+                          { options: levelOptions },
+                      ]
+                    : levelOptions
+            }
         />
     )
 }
@@ -442,7 +499,7 @@ function AddItemsControlsModal(props: {
     const { availableLevels, canEditAccessControls } = useValues(accessControlLogic)
     // TODO: Move this into a form logic
     const [items, setItems] = useState<string[]>([])
-    const [level, setLevel] = useState<AccessControlLevel>(availableLevels[0] ?? null)
+    const [level, setLevel] = useState<AccessControlLevel | null>(availableLevels[0] ?? null)
 
     useEffect(() => {
         setLevel(availableLevels[0] ?? null)

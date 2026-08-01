@@ -1,5 +1,5 @@
-import llm
-from llm.integrations.custom_logger import CustomLogger
+import litellm
+from litellm.integrations.custom_logger import CustomLogger
 
 from llm_gateway.callbacks.insights import InsightsCallback
 from llm_gateway.callbacks.prometheus import PrometheusCallback
@@ -16,10 +16,14 @@ def init_callbacks() -> None:
             InsightsCallback(
                 api_key=settings.insights_project_token,
                 host=settings.insights_host,
+                # Reuses the plan-resolver URL — same per-region value.
+                region_url=settings.insights_api_base_url,
+                secondary_api_key=settings.insights_secondary_project_token,
+                secondary_host=settings.insights_secondary_host,
             )
         )
 
     callbacks.append(RateLimitCallback())
     callbacks.append(PrometheusCallback())
 
-    llm.callbacks = callbacks
+    litellm.callbacks = callbacks

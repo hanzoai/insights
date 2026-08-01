@@ -3,6 +3,7 @@ import { useActions, useValues } from 'kea'
 
 import {
     IconCake,
+    IconConfetti,
     IconCopy,
     IconDatabase,
     IconDay,
@@ -14,19 +15,24 @@ import {
     IconLive,
     IconNight,
     IconPalette,
+    IconPeople,
     IconPlusSmall,
     IconReceipt,
     IconServer,
     IconShieldLock,
+    IconToggle,
 } from '@hanzo/icons'
 
+import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { FEATURE_FLAGS } from 'lib/constants'
+import { IconBlank } from 'lib/elements/icons'
 import { Tag } from 'lib/elements/Tag/Tag'
 import { Link } from 'lib/elements/Link/Link'
 import { ProfilePicture } from 'lib/elements/ProfilePicture/ProfilePicture'
 import { UploadedLogo } from 'lib/elements/UploadedLogo/UploadedLogo'
-import { IconBlank } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { preflightLogic } from 'lib/logic/preflightLogic'
+import { themeLogic } from 'lib/logic/themeLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     DropdownMenu,
@@ -43,24 +49,19 @@ import { Label } from 'lib/ui/Label/Label'
 import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { inviteLogic } from 'scenes/settings/organization/inviteLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
 import { navigation3000Logic } from '~/layout/navigation-3000/navigationLogic'
-import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
-import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import { AccessLevelIndicator } from '~/layout/navigation/AccessLevelIndicator'
-import { navigationLogic } from '~/layout/navigation/navigationLogic'
 import { getTreeItemsGames } from '~/products'
-import { SidePanelTab, UserTheme } from '~/types'
+import { UserTheme } from '~/types'
 
-import { appShortcutLogic } from '../AppShortcuts/appShortcutLogic'
-import { openCHQueriesDebugModal } from '../AppShortcuts/utils/DebugCHQueries'
+import { shortcutLogic } from '../Shortcuts/shortcutLogic'
+import { openCHQueriesDebugModal } from '../Shortcuts/utils/DebugCHQueries'
 import { OrgCombobox } from './OrgCombobox'
 
 interface AccountMenuProps extends DropdownMenuContentProps {
@@ -142,14 +143,12 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
     const { currentOrganization } = useValues(organizationLogic)
     const { isCloudOrDev, isCloud, preflight } = useValues(preflightLogic)
     const { featureFlags } = useValues(featureFlagLogic)
-    const { billing } = useValues(billingLogic)
+    const { billing, canAccessBilling } = useValues(billingLogic)
     const { showInviteModal } = useActions(inviteLogic)
     const { reportInviteMembersButtonClicked } = useActions(eventUsageLogic)
     const { reportAccountOwnerClicked } = useActions(eventUsageLogic)
     const { logout } = useActions(userLogic)
-    const { mobileLayout } = useValues(navigationLogic)
-    const { openSidePanel } = useActions(sidePanelStateLogic)
-    const { setAppShortcutMenuOpen } = useActions(appShortcutLogic)
+    const { setShortcutMenuOpen } = useActions(shortcutLogic)
     const { toggleZenMode } = useActions(navigation3000Logic)
 
     return (
@@ -188,7 +187,7 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                             </div>
                         </Link>
                     </DropdownMenuItem>
-                    {isCloudOrDev ? (
+                    {isCloudOrDev && canAccessBilling ? (
                         <DropdownMenuItem asChild>
                             <Link
                                 to={
@@ -318,7 +317,7 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                         <ButtonPrimitive
                             tooltip="Hide navigation and focus on content"
                             tooltipPlacement="right"
-                            onClick={toggleZenMode}
+                            onClick={() => toggleZenMode('account_menu')}
                             menuItem
                         >
                             <IconExpand45 />
@@ -331,7 +330,7 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                         <ButtonPrimitive
                             tooltip="Open shortcut menu"
                             tooltipPlacement="right"
-                            onClick={() => setAppShortcutMenuOpen(true)}
+                            onClick={() => setShortcutMenuOpen(true)}
                             menuItem
                         >
                             <span className="size-4 flex items-center justify-center">⌘</span>
@@ -349,12 +348,6 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                             to="https://hanzo.ai/changelog"
                             buttonProps={{
                                 menuItem: true,
-                            }}
-                            onClick={(e) => {
-                                if (!mobileLayout) {
-                                    e.preventDefault()
-                                    openSidePanel(SidePanelTab.Docs, '/changelog')
-                                }
                             }}
                             data-attr="whats-new-button"
                             target="_blank"
@@ -433,6 +426,30 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                                     Instance panel
                                 </Link>
                             </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    to={urls.featureFlagsStaffTools()}
+                                    buttonProps={{
+                                        menuItem: true,
+                                    }}
+                                    data-attr="top-menu-flags-staff-tools"
+                                >
+                                    <IconToggle />
+                                    Flags staff tools
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    to={urls.cohortsStaffTools()}
+                                    buttonProps={{
+                                        menuItem: true,
+                                    }}
+                                    data-attr="top-menu-cohorts-staff-tools"
+                                >
+                                    <IconPeople />
+                                    Cohorts staff tools
+                                </Link>
+                            </DropdownMenuItem>
 
                             {user?.is_impersonated ||
                             preflight?.is_debug ||
@@ -452,6 +469,20 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                                 </DropdownMenuItem>
                             ) : null}
                         </>
+                    )}
+                    {!isCloud && (
+                        <DropdownMenuItem asChild>
+                            <Link
+                                to={urls.moveToInsightsCloud()}
+                                buttonProps={{
+                                    menuItem: true,
+                                }}
+                                data-attr="top-menu-item-upgrade-to-cloud"
+                            >
+                                <IconConfetti />
+                                Try Insights Cloud
+                            </Link>
+                        </DropdownMenuItem>
                     )}
 
                     <DropdownMenuSeparator />

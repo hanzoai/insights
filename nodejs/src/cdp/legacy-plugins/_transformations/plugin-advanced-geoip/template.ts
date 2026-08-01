@@ -13,7 +13,7 @@ export const pluginAdvancedGeoip: LegacyTransformationPlugin = {
         name: 'Advanced GeoIP',
         description:
             'This plugin will add advanced geoip properties to your events. You will not be billed for any events that this plugin drops.',
-        icon_url: 'https://raw.githubusercontent.com/hanzoai/advanced-geoip-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/insights/advanced-geoip-plugin/main/logo.png',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,
@@ -36,7 +36,7 @@ export const pluginAdvancedGeoip: LegacyTransformationPlugin = {
                 label: 'Discard GeoIP for libraries',
                 type: 'string',
                 description:
-                    'Comma-separated list of libraries ($lib) for which GeoIP should be ignored (e.g. `hanzo-insights-node,hanzo-insights-python`)',
+                    'Comma-separated list of libraries ($lib) for which GeoIP should be ignored (e.g. `insights-node,insights-python`)',
                 required: false,
             },
         ],

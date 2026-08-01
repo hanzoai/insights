@@ -5,7 +5,7 @@ import {
     DEFAULT_TIMEOUT_MS,
     MAX_FUNCTION_ARGS_LENGTH,
 } from './constants'
-import { isIQLCallable, isIQLClosure, isIQLError, isIQLUpValue, newIQLCallable, newIQLClosure } from './objects'
+import { isHogCallable, isHogClosure, isHogError, isHogUpValue, newHogCallable, newHogClosure } from './objects'
 import { Operation, operations } from './operation'
 import { BYTECODE_STL } from './stl/bytecode'
 import { ASYNC_STL, STL } from './stl/stl'
@@ -15,15 +15,15 @@ import {
     CallFrame,
     ExecOptions,
     ExecResult,
-    IQLUpValue,
+    HogUpValue,
     Telemetry,
     ThrowFrame,
     VMState,
 } from './types'
 import {
     calculateCost,
-    convertIQLToJS,
-    convertJSToIQL,
+    convertHogToJS,
+    convertJSToHog,
     getNestedValue,
     ScriptVMException,
     like,
@@ -55,10 +55,13 @@ export async function execAsync(bytecode: any[] | VMState | Bytecodes, options?:
         }
         if (response.state && response.asyncFunctionName && response.asyncFunctionArgs) {
             vmState = response.state
-            if (options?.asyncFunctions && response.asyncFunctionName in options.asyncFunctions) {
+            if (
+                options?.asyncFunctions &&
+                Object.prototype.hasOwnProperty.call(options.asyncFunctions, response.asyncFunctionName)
+            ) {
                 const result = await options?.asyncFunctions[response.asyncFunctionName](...response.asyncFunctionArgs)
                 vmState.stack.push(result)
-            } else if (response.asyncFunctionName in ASYNC_STL) {
+            } else if (Object.prototype.hasOwnProperty.call(ASYNC_STL, response.asyncFunctionName)) {
                 const result = await ASYNC_STL[response.asyncFunctionName].fn(
                     response.asyncFunctionArgs,
                     response.asyncFunctionName,
@@ -102,17 +105,17 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
 
     const asyncSteps = vmState ? vmState.asyncSteps : 0
     const syncDuration = vmState ? vmState.syncDuration : 0
-    const sortedUpValues: IQLUpValue[] = vmState
-        ? vmState.upvalues.map((v) => ({ ...v, value: convertJSToIQL(v.value) }))
+    const sortedUpValues: HogUpValue[] = vmState
+        ? vmState.upvalues.map((v) => ({ ...v, value: convertJSToHog(v.value) }))
         : []
-    const upvaluesById: Record<number, IQLUpValue> = {}
+    const upvaluesById: Record<number, HogUpValue> = {}
     for (const upvalue of sortedUpValues) {
         upvaluesById[upvalue.id] = upvalue
     }
-    const stack: any[] = vmState ? vmState.stack.map((v) => convertJSToIQL(v)) : []
+    const stack: any[] = vmState ? vmState.stack.map((v) => convertJSToHog(v)) : []
     const memStack: number[] = stack.map((s) => calculateCost(s))
     const callStack: CallFrame[] = vmState
-        ? vmState.callStack.map((v) => ({ ...v, closure: convertJSToIQL(v.closure) }))
+        ? vmState.callStack.map((v) => ({ ...v, closure: convertJSToHog(v.closure) }))
         : []
     const throwStack: ThrowFrame[] = vmState ? vmState.throwStack : []
     const declaredFunctions: Record<string, [number, number]> = vmState ? vmState.declaredFunctions : {}
@@ -133,8 +136,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
             chunk: 'root',
             stackStart: 0,
             argCount: 0,
-            closure: newIQLClosure(
-                newIQLCallable('local', {
+            closure: newHogClosure(
+                newHogCallable('local', {
                     name: '',
                     argCount: 0,
                     upvalueCount: 0,
@@ -156,7 +159,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
         if (!frame.chunk || frame.chunk === 'root') {
             chunkBytecode = rootBytecode
             chunkGlobals = rootGlobals
-        } else if (frame.chunk.startsWith('stl/') && frame.chunk.substring(4) in BYTECODE_STL) {
+        } else if (frame.chunk.startsWith('stl/') && Object.hasOwn(BYTECODE_STL, frame.chunk.substring(4))) {
             chunkBytecode = BYTECODE_STL[frame.chunk.substring(4)][1]
             chunkGlobals = {}
         } else if (bytecodes[frame.chunk]) {
@@ -240,11 +243,11 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
     function getVMState(): VMState {
         return {
             bytecodes: bytecodes,
-            stack: stack.map((v) => convertIQLToJS(v)),
-            upvalues: sortedUpValues.map((v) => ({ ...v, value: convertIQLToJS(v.value) })),
+            stack: stack.map((v) => convertHogToJS(v)),
+            upvalues: sortedUpValues.map((v) => ({ ...v, value: convertHogToJS(v.value) })),
             callStack: callStack.map((v) => ({
                 ...v,
-                closure: convertIQLToJS(v.closure),
+                closure: convertHogToJS(v.closure),
             })),
             throwStack,
             declaredFunctions,
@@ -256,7 +259,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
         }
     }
 
-    function captureUpValue(index: number): IQLUpValue {
+    function captureUpValue(index: number): HogUpValue {
         for (let i = sortedUpValues.length - 1; i >= 0; i--) {
             if (sortedUpValues[i].location < index) {
                 break
@@ -266,12 +269,12 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
             }
         }
         const createdUpValue = {
-            __iqlUpValue__: true,
+            __hogUpValue__: true,
             id: sortedUpValues.length + 1, // used to deduplicate post deserialization
             location: index,
             closed: false,
             value: null,
-        } satisfies IQLUpValue
+        } satisfies HogUpValue
         upvaluesById[createdUpValue.id] = createdUpValue
         sortedUpValues.push(createdUpValue)
         sortedUpValues.sort((a, b) => a.location - b.location)
@@ -471,8 +474,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     for (let i = 0; i < count; i++) {
                         chain.push(popStack())
                     }
-                    if (chunkGlobals && chain[0] in chunkGlobals && Object.hasOwn(chunkGlobals, chain[0])) {
-                        pushStack(convertJSToIQL(getNestedValue(chunkGlobals, chain, true)))
+                    if (chunkGlobals && Object.hasOwn(chunkGlobals, chain[0])) {
+                        pushStack(convertJSToHog(getNestedValue(chunkGlobals, chain, true)))
                     } else if (
                         options?.asyncFunctions &&
                         chain.length == 1 &&
@@ -480,8 +483,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         options.asyncFunctions[chain[0]]
                     ) {
                         pushStack(
-                            newIQLClosure(
-                                newIQLCallable('async', {
+                            newHogClosure(
+                                newHogCallable('async', {
                                     name: chain[0],
                                     argCount: 0, // TODO
                                     upvalueCount: 0,
@@ -490,10 +493,10 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 })
                             )
                         )
-                    } else if (chain.length == 1 && chain[0] in ASYNC_STL && Object.hasOwn(ASYNC_STL, chain[0])) {
+                    } else if (chain.length == 1 && Object.hasOwn(ASYNC_STL, chain[0])) {
                         pushStack(
-                            newIQLClosure(
-                                newIQLCallable('async', {
+                            newHogClosure(
+                                newHogCallable('async', {
                                     name: chain[0],
                                     argCount: ASYNC_STL[chain[0]].maxArgs ?? 0,
                                     upvalueCount: 0,
@@ -502,10 +505,10 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 })
                             )
                         )
-                    } else if (chain.length == 1 && chain[0] in STL && Object.hasOwn(STL, chain[0])) {
+                    } else if (chain.length == 1 && Object.hasOwn(STL, chain[0])) {
                         pushStack(
-                            newIQLClosure(
-                                newIQLCallable('stl', {
+                            newHogClosure(
+                                newHogCallable('stl', {
                                     name: chain[0],
                                     argCount: STL[chain[0]].maxArgs ?? 0,
                                     upvalueCount: 0,
@@ -514,10 +517,10 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 })
                             )
                         )
-                    } else if (chain.length == 1 && chain[0] in BYTECODE_STL && Object.hasOwn(BYTECODE_STL, chain[0])) {
+                    } else if (chain.length == 1 && Object.hasOwn(BYTECODE_STL, chain[0])) {
                         pushStack(
-                            newIQLClosure(
-                                newIQLCallable('stl', {
+                            newHogClosure(
+                                newHogCallable('stl', {
                                     name: chain[0],
                                     argCount: BYTECODE_STL[chain[0]][0].length,
                                     upvalueCount: 0,
@@ -596,7 +599,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 case Operation.TUPLE:
                     temp = next()
                     tempArray = spliceStack2(stack.length - temp, temp)
-                    ;(tempArray as any).__isIQLTuple = true
+                    ;(tempArray as any).__isHogTuple = true
                     pushStack(tempArray)
                     break
                 case Operation.JUMP:
@@ -629,7 +632,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     const argCount = next()
                     const upvalueCount = next()
                     const bodyLength = next()
-                    const callable = newIQLCallable('local', {
+                    const callable = newHogCallable('local', {
                         name,
                         argCount,
                         upvalueCount,
@@ -642,7 +645,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 }
                 case Operation.CLOSURE: {
                     const callable = popStack()
-                    if (!isIQLCallable(callable)) {
+                    if (!isHogCallable(callable)) {
                         throw new ScriptVMException(`Invalid callable: ${JSON.stringify(callable)}`)
                     }
                     const upvalueCount = next()
@@ -661,7 +664,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             closureUpValues.push(frame.closure.upvalues[index])
                         }
                     }
-                    pushStack(newIQLClosure(callable, closureUpValues))
+                    pushStack(newHogClosure(callable, closureUpValues))
                     break
                 }
                 case Operation.GET_UPVALUE: {
@@ -670,7 +673,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         throw new ScriptVMException(`Invalid upvalue index: ${index}`)
                     }
                     const upvalue = upvaluesById[frame.closure.upvalues[index]]
-                    if (!isIQLUpValue(upvalue)) {
+                    if (!isHogUpValue(upvalue)) {
                         throw new ScriptVMException(`Invalid upvalue: ${upvalue}`)
                     }
                     if (upvalue.closed) {
@@ -686,7 +689,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         throw new ScriptVMException(`Invalid upvalue index: ${index}`)
                     }
                     const upvalue = upvaluesById[frame.closure.upvalues[index]]
-                    if (!isIQLUpValue(upvalue)) {
+                    if (!isHogUpValue(upvalue)) {
                         throw new ScriptVMException(`Invalid upvalue: ${upvalue}`)
                     }
                     if (upvalue.closed) {
@@ -700,7 +703,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     checkTimeout()
                     const name = next()
                     temp = next() // args.length
-                    if (name in declaredFunctions && name !== 'toString') {
+                    if (Object.prototype.hasOwnProperty.call(declaredFunctions, name) && name !== 'toString') {
                         // This is for backwards compatibility. We use a closure on the stack with local functions now.
                         const [funcIp, argLen] = declaredFunctions[name]
                         frame.ip += 1 // advance for when we return
@@ -714,8 +717,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             chunk: frame.chunk,
                             stackStart: stack.length - argLen,
                             argCount: argLen,
-                            closure: newIQLClosure(
-                                newIQLCallable('local', {
+                            closure: newHogClosure(
+                                newHogCallable('local', {
                                     name: name,
                                     argCount: argLen,
                                     upvalueCount: 0,
@@ -751,8 +754,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 chunk: args[0],
                                 stackStart: stack.length,
                                 argCount: 0,
-                                closure: newIQLClosure(
-                                    newIQLCallable('local', {
+                                closure: newHogClosure(
+                                    newHogCallable('local', {
                                         name: args[0],
                                         argCount: 0,
                                         upvalueCount: 0,
@@ -775,13 +778,13 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                           .fill(null)
                                           .map(() => popStack())
                                     : stackKeepFirstElements(stack.length - temp)
-                            pushStack(convertJSToIQL(options.functions[name](...args.map((v) => convertIQLToJS(v)))))
+                            pushStack(convertJSToHog(options.functions[name](...args.map((v) => convertHogToJS(v)))))
                         } else if (
                             name !== 'toString' &&
                             ((options?.asyncFunctions &&
                                 Object.hasOwn(options.asyncFunctions, name) &&
                                 options.asyncFunctions[name]) ||
-                                name in ASYNC_STL)
+                                Object.hasOwn(ASYNC_STL, name))
                         ) {
                             if (asyncSteps >= maxAsyncSteps) {
                                 throw new ScriptVMException(`Exceeded maximum number of async steps: ${maxAsyncSteps}`)
@@ -800,13 +803,13 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 result: undefined,
                                 finished: false,
                                 asyncFunctionName: name,
-                                asyncFunctionArgs: args.map((v) => convertIQLToJS(v)),
+                                asyncFunctionArgs: args.map((v) => convertHogToJS(v)),
                                 state: {
                                     ...getVMState(),
                                     asyncSteps: asyncSteps + 1,
                                 },
                             } satisfies ExecResult
-                        } else if (name in STL) {
+                        } else if (Object.hasOwn(STL, name)) {
                             const args =
                                 version === 0
                                     ? Array(temp)
@@ -814,7 +817,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                           .map(() => popStack())
                                     : stackKeepFirstElements(stack.length - temp)
                             pushStack(STL[name].fn(args, name, options))
-                        } else if (name in BYTECODE_STL) {
+                        } else if (Object.hasOwn(BYTECODE_STL, name)) {
                             const argNames = BYTECODE_STL[name][0]
                             if (argNames.length !== temp) {
                                 throw new ScriptVMException(
@@ -827,8 +830,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 chunk: `stl/${name}`,
                                 stackStart: stack.length - temp,
                                 argCount: temp,
-                                closure: newIQLClosure(
-                                    newIQLCallable('stl', {
+                                closure: newHogClosure(
+                                    newHogCallable('stl', {
                                         name,
                                         argCount: temp,
                                         upvalueCount: 0,
@@ -852,10 +855,10 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 case Operation.CALL_LOCAL: {
                     checkTimeout()
                     const closure = popStack()
-                    if (!isIQLClosure(closure)) {
+                    if (!isHogClosure(closure)) {
                         throw new ScriptVMException(`Invalid closure: ${JSON.stringify(closure)}`)
                     }
-                    if (!isIQLCallable(closure.callable)) {
+                    if (!isHogCallable(closure.callable)) {
                         throw new ScriptVMException(`Invalid callable: ${JSON.stringify(closure.callable)}`)
                     }
                     temp = next() // args.length
@@ -865,7 +868,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     if (temp > MAX_FUNCTION_ARGS_LENGTH) {
                         throw new ScriptVMException('Too many arguments')
                     }
-                    if (closure.callable.__iqlCallable__ === 'local') {
+                    if (closure.callable.__hogCallable__ === 'local') {
                         if (closure.callable.argCount > temp) {
                             for (let i = temp; i < closure.callable.argCount; i++) {
                                 pushStack(null)
@@ -889,8 +892,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             throw new ScriptVMException(`Call stack exceeded maximum length of ${CALLSTACK_LENGTH}`)
                         }
                         continue // resume the loop without incrementing frame.ip
-                    } else if (closure.callable.__iqlCallable__ === 'stl') {
-                        if (!closure.callable.name || !(closure.callable.name in STL)) {
+                    } else if (closure.callable.__hogCallable__ === 'stl') {
+                        if (!closure.callable.name || !Object.hasOwn(STL, closure.callable.name)) {
                             throw new ScriptVMException(`Unsupported function call: ${closure.callable.name}`)
                         }
                         const stlFn = STL[closure.callable.name]
@@ -916,7 +919,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             }
                         }
                         pushStack(stlFn.fn(args, closure.callable.name, options))
-                    } else if (closure.callable.__iqlCallable__ === 'async') {
+                    } else if (closure.callable.__hogCallable__ === 'async') {
                         if (asyncSteps >= maxAsyncSteps) {
                             throw new ScriptVMException(`Exceeded maximum number of async steps: ${maxAsyncSteps}`)
                         }
@@ -927,7 +930,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             result: undefined,
                             finished: false,
                             asyncFunctionName: closure.callable.name,
-                            asyncFunctionArgs: args.map((v) => convertIQLToJS(v)),
+                            asyncFunctionArgs: args.map((v) => convertHogToJS(v)),
                             state: { ...getVMState(), asyncSteps: asyncSteps + 1 },
                         } satisfies ExecResult
                     } else {
@@ -951,7 +954,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     break
                 case Operation.THROW: {
                     const exception = popStack()
-                    if (!isIQLError(exception)) {
+                    if (!isHogError(exception)) {
                         throw new ScriptVMException('Can not throw: value is not of type Error')
                     }
                     if (throwStack.length > 0) {

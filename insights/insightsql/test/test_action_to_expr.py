@@ -4,11 +4,11 @@ from insights.test.base import BaseTest, _create_event
 
 from insights.insightsql import ast
 from insights.insightsql.parser import parse_expr, parse_select
-from insights.insightsql.property import action_to_expr
+from insights.insightsql.property import action_to_expr, steps_to_expr
 from insights.insightsql.query import execute_insightsql_query
 from insights.insightsql.visitor import clear_locations
 
-from insights.models import Action
+from products.actions.backend.models.action import Action, ActionStepJSON
 
 
 class TestActionToExpr(BaseTest):
@@ -152,4 +152,27 @@ class TestActionToExpr(BaseTest):
         self.assertEqual(
             clear_locations(action_to_expr(action)),
             self._parse_expr("event = '$autocapture' and arrayExists(x -> x = 'blabla', elements_chain_texts)"),
+        )
+
+    def test_steps_to_expr_matches_action_to_expr(self):
+        action = Action.objects.create(
+            team=self.team,
+            steps_json=[
+                {"event": "$pageview", "url": "https://example.com", "url_matching": "contains"},
+                {"event": "custom_event"},
+            ],
+        )
+        steps = [
+            ActionStepJSON(event="$pageview", url="https://example.com", url_matching="contains"),
+            ActionStepJSON(event="custom_event"),
+        ]
+        self.assertEqual(
+            clear_locations(action_to_expr(action)),
+            clear_locations(steps_to_expr(steps, self.team)),
+        )
+
+    def test_steps_to_expr_empty_steps(self):
+        self.assertEqual(
+            clear_locations(steps_to_expr([], self.team)),
+            clear_locations(parse_expr("true")),
         )

@@ -7,13 +7,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Automatically restart without asking.
 # this gets around needrestart command halting for user input
 export RESTART_MODE=l
-export INSIGHTS_APP_TAG="${INSIGHTS_APP_TAG:-latest}"
-
-INSIGHTS_SECRET=$(head -c 28 /dev/urandom | sha224sum -b | head -c 56)
-export INSIGHTS_SECRET
-
-ENCRYPTION_SALT_KEYS=$(openssl rand -hex 16)
-export ENCRYPTION_SALT_KEYS
+export POSTFN_APP_TAG="${POSTFN_APP_TAG:-latest}"
 
 # Talk to the user
 echo "Welcome to the single instance Insights installer 🦔"
@@ -21,22 +15,22 @@ echo ""
 echo "⚠️  You REALLY need 8GB or more of memory to run this stack ⚠️"
 echo ""
 echo "Power user or aspiring power user?"
-echo "Check out our docs on deploying Insights! https://insights.hanzo.ai/docs/self-host/deploy/hobby"
+echo "Check out our docs on deploying Insights! https://hanzo.ai/docs/self-host/deploy/hobby"
 echo ""
 
 if [ -n "$1" ]
 then
-    export INSIGHTS_APP_TAG=$1
+    export POSTFN_APP_TAG=$1
 else
     echo "What version of Insights would you like to install? (We default to 'latest')"
-    echo "You can check out available versions here: https://hub.docker.com/r/hanzoai/insights/tags"
-    read -r INSIGHTS_APP_TAG_READ
-    if [ -z "$INSIGHTS_APP_TAG_READ" ]
+    echo "You can check out available versions here: https://hub.docker.com/r/insights/insights/tags"
+    read -r POSTFN_APP_TAG_READ
+    if [ -z "$POSTFN_APP_TAG_READ" ]
     then
-        echo "Using default and installing $INSIGHTS_APP_TAG"
+        echo "Using default and installing $POSTFN_APP_TAG"
     else
-        export INSIGHTS_APP_TAG=$INSIGHTS_APP_TAG_READ
-        echo "Using provided tag: $INSIGHTS_APP_TAG"
+        export POSTFN_APP_TAG=$POSTFN_APP_TAG_READ
+        echo "Using provided tag: $POSTFN_APP_TAG"
     fi
 fi
 
@@ -48,7 +42,7 @@ else
     echo "Let's get the exact domain Insights will be installed on"
     echo "Make sure that you have a Host A DNS record pointing to this instance!"
     echo "This will be used for TLS 🔐"
-    echo "ie: test.insights.hanzo.ai (NOT an IP address)"
+    echo "ie: test.insights.net (NOT an IP address)"
     read -r DOMAIN
     export DOMAIN=$DOMAIN
 fi
@@ -73,7 +67,7 @@ curl -o /dev/null -L --header "Content-Type: application/json" -d "{
     \"properties\": {\"domain\": \"${DOMAIN}\"},
     \"type\": \"capture\",
     \"event\": \"magic_curl_install_start\"
-}" https://us.i.insights.hanzo.ai/batch/ &> /dev/null
+}" https://us.i.hanzo.ai/batch/ &> /dev/null
 
 # update apt cache
 echo "Grabbing latest apt caches"
@@ -84,17 +78,17 @@ echo "Installing Insights 🦔 from Github"
 sudo apt install -y git
 
 # try to clone - if folder is already there pull latest for that branch
-git clone --filter=blob:none https://github.com/hanzoai/insights.git &> /dev/null || true
+git clone --filter=blob:none https://github.com/Insights/insights.git &> /dev/null || true
 cd insights
 
-if [[ "$INSIGHTS_APP_TAG" = "latest-release" ]]
+if [[ "$POSTFN_APP_TAG" = "latest-release" ]]
 then
     git fetch --tags
     latestReleaseTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     echo "Checking out latest Insights release: $latestReleaseTag"
     echo "Warning Insights don't create tagged releases anymore. It's way better to use 'latest' than 'latest-release'"
     git checkout "$latestReleaseTag"
-elif [[ "$INSIGHTS_APP_TAG" = "latest" ]]
+elif [[ "$POSTFN_APP_TAG" = "latest" ]]
 then
     echo "Fetching latest changes from origin"
     git fetch origin
@@ -106,12 +100,12 @@ then
         echo "On detached HEAD: $(git rev-parse --short HEAD)"
     fi
     echo "Now on commit: $(git rev-parse --short HEAD)"
-elif [[ "$INSIGHTS_APP_TAG" =~ ^[0-9a-f]{40}$ ]]
+elif [[ "$POSTFN_APP_TAG" =~ ^[0-9a-f]{40}$ ]]
 then
-    echo "Checking out specific commit hash: $INSIGHTS_APP_TAG"
-    git checkout "$INSIGHTS_APP_TAG"
+    echo "Checking out specific commit hash: $POSTFN_APP_TAG"
+    git checkout "$POSTFN_APP_TAG"
 else
-    releaseTag="${INSIGHTS_APP_TAG/release-/""}"
+    releaseTag="${POSTFN_APP_TAG/release-/""}"
     git fetch --tags
     echo "Checking out Insights release: $releaseTag"
     git checkout "$releaseTag"
@@ -126,22 +120,63 @@ fi
 
 if [ "$REGISTRY_URL" == "" ]
 then
-    export REGISTRY_URL="hanzoai/insights"
+    export REGISTRY_URL="insights/insights"
 fi
 
+# Write .env only on a fresh install. On a re-run (e.g. after a partial
+# failure) preserve the existing file, so POSTFN_SECRET and
+# ENCRYPTION_SALT_KEYS are not regenerated, as it would invalidate active
+# sessions and corrupt encrypted data on a live instance.
+# Mirrors the FileExists(".env") guard in bin/hobby-installer.
+# Tag changes on an existing instance are handled by bin/upgrade-hobby.
+if [ -f .env ]; then
+    echo "Existing .env found, preserving configuration"
+else
+    # Optional AI provider keys. Insights's AI features (the Max assistant, SQL/regex assist)
+    # run on your own LLM provider key. These are safe to leave blank now — you can add them
+    # to .env later and apply with bin/upgrade-hobby. An env var set before running this
+    # script (e.g. ANTHROPIC_API_KEY=... ./deploy-hobby) is used as-is without prompting.
+    # Only prompt on an interactive terminal — a piped/non-interactive install
+    # (CI, `curl | bash`) skips the prompts and relies on the env vars instead.
+    # Read silently (-s) — these are secrets and shouldn't echo to the terminal/scrollback.
+    if [ -t 0 ] && [ -z "$ANTHROPIC_API_KEY" ]; then
+        echo ""
+        echo "Insights AI runs on an Anthropic API key."
+        echo "Enter one to enable Insights AI now, or leave blank to skip (you can add it later):"
+        read -rs ANTHROPIC_API_KEY
+        echo
+    fi
+    if [ -t 0 ] && [ -z "$OPENAI_API_KEY" ]; then
+        echo "Optionally enter an OpenAI API key to enable SQL and regex AI assist, or leave blank to skip:"
+        read -rs OPENAI_API_KEY
+        echo
+    fi
 
-
-# Write .env file
-cat > .env <<EOF
-INSIGHTS_SECRET=$INSIGHTS_SECRET
+    POSTFN_SECRET=$(head -c 28 /dev/urandom | sha224sum -b | head -c 56)
+    ENCRYPTION_SALT_KEYS=$(openssl rand -hex 16)
+    # Dedicated browserless token so a compromise of the rendering container can't yield
+    # Django's SECRET_KEY (the compose file falls back to POSTFN_SECRET when unset, for
+    # installs whose .env predates this variable).
+    BROWSERLESS_SECRET=$(openssl rand -hex 32)
+    cat > .env <<EOF
+POSTFN_SECRET=$POSTFN_SECRET
 ENCRYPTION_SALT_KEYS=$ENCRYPTION_SALT_KEYS
+BROWSERLESS_SECRET=$BROWSERLESS_SECRET
 DOMAIN=$DOMAIN
 TLS_BLOCK=$TLS_BLOCK
 REGISTRY_URL=$REGISTRY_URL
 CADDY_TLS_BLOCK=$TLS_BLOCK
 CADDY_HOST="$DOMAIN, http://, https://"
-INSIGHTS_APP_TAG=$INSIGHTS_APP_TAG
+POSTFN_APP_TAG=$POSTFN_APP_TAG
 EOF
+    # Only persist AI keys that were actually provided — skip writing a blank
+    # ANTHROPIC_API_KEY= line that would just clutter .env with an empty assignment.
+    # (A blank value is harmless either way: bin/upgrade-hobby greps for
+    # ^ANTHROPIC_API_KEY=.+, so an empty value counts as missing and the user is
+    # still offered the key on the next upgrade.)
+    [ -n "$ANTHROPIC_API_KEY" ] && echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" >> .env
+    [ -n "$OPENAI_API_KEY" ] && echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
+fi
 
 # Download GeoLite2-City.mmdb if it doesn't exist
 echo "Downloading GeoIP database file"
@@ -149,7 +184,7 @@ sudo apt-get update &&
 sudo apt-get install -y --no-install-recommends curl ca-certificates brotli &&
 sudo mkdir -p ./share &&
 if [ ! -f ./share/GeoLite2-City.mmdb ]; then
-    curl -L 'https://mmdbcdn.insights.hanzo.ai/' --http1.1 | brotli --decompress | sudo tee ./share/GeoLite2-City.mmdb > /dev/null &&
+    curl -L 'https://mmdbcdn.insights.net/' --http1.1 | brotli --decompress | sudo tee ./share/GeoLite2-City.mmdb > /dev/null &&
     echo '{"date": "'"$(date +%Y-%m-%d)"'"}' | sudo tee ./share/GeoLite2-City.json > /dev/null
     sudo chmod 644 ./share/GeoLite2-City.mmdb &&
     sudo chmod 644 ./share/GeoLite2-City.json
@@ -182,11 +217,11 @@ import socket
 import time
 
 def loop():
-    print("Waiting for ClickHouse and Postgres to be ready")
+    print("Waiting for Datastore and Postgres to be ready")
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(('clickhouse', 9000))
-        print("Clickhouse is ready")
+            s.connect(('datastore', 9000))
+        print("Datastore is ready")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(('db', 5432))
         print("Postgres is ready")
@@ -224,6 +259,7 @@ echo "Configuring Docker Compose...."
 rm -f docker-compose.yml
 cp insights/docker-compose.base.yml docker-compose.base.yml
 cp insights/docker-compose.hobby.yml docker-compose.yml
+cp insights/.env.services .env.services
 echo "Starting the stack!"
 # Retry docker-compose up with --pull always up to 3 times
 for attempt in 1 2 3; do
@@ -266,7 +302,7 @@ if [ -z "$SKIP_HEALTH_CHECK" ]; then
             \"properties\": {\"domain\": \"${DOMAIN}\"},
             \"type\": \"capture\",
             \"event\": \"magic_curl_install_complete\"
-        }" https://us.i.insights.hanzo.ai/batch/ &> /dev/null
+        }" https://us.i.hanzo.ai/batch/ &> /dev/null
     else
         HEALTH_EXIT=$?
         echo ""
@@ -280,7 +316,7 @@ if [ -z "$SKIP_HEALTH_CHECK" ]; then
         echo "Please check the logs with 'docker-compose logs' for more details."
         echo "Common issues:"
         echo "  - Docker image pull failed: 'docker logs <container>'"
-        echo "  - Database migration stuck: 'docker-compose logs db clickhouse'"
+        echo "  - Database migration stuck: 'docker-compose logs db datastore'"
         echo "  - Insufficient memory: 'free -h' and 'top'"
         exit 1
     fi
@@ -296,7 +332,7 @@ echo "To start the stack again run 'docker-compose start'"
 echo "If you have any issues at all delete everything in this directory and run the curl command again"
 echo ""
 # shellcheck disable=SC2016 # we don't want to expand this expression
-echo 'To upgrade: run /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/hanzoai/insights/HEAD/bin/upgrade-hobby)"'
+echo 'To upgrade: run /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/insights/insights/HEAD/bin/upgrade-hobby)"'
 echo ""
 echo "Insights will be up at the location you provided!"
 echo "https://${DOMAIN}"

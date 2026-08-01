@@ -3,6 +3,13 @@ import { performance } from 'perf_hooks'
 import { Readable } from 'stream'
 
 import { withSpan } from '~/common/tracing/tracing-utils'
+import { timeoutGuard } from '~/common/utils/db/utils'
+import { isTestEnv } from '~/common/utils/env-utils'
+import { parseRawDatastoreEvent } from '~/common/utils/event'
+import { parseJSON } from '~/common/utils/json-parse'
+import { logger } from '~/common/utils/logger'
+import { fetch } from '~/common/utils/request'
+import { delay, escapeDatastoreString } from '~/common/utils/utils'
 import {
     DatastoreEvent,
     DatastorePerson,
@@ -13,14 +20,20 @@ import {
     RawDatastoreEvent,
     RawSessionRecordingEvent,
 } from '~/types'
-import { timeoutGuard } from '~/utils/db/utils'
-import { isTestEnv } from '~/utils/env-utils'
-import { parseRawDatastoreEvent } from '~/utils/event'
-import { parseJSON } from '~/utils/json-parse'
-import { fetch } from '~/utils/request'
 
-import { logger } from '../../src/utils/logger'
-import { delay, escapeDatastoreString } from '../../src/utils/utils'
+import { assertTestDatabaseName } from './database-guard'
+
+// Extracts the topic(s) a Datastore Kafka engine table consumes from its `engine_full` string.
+// Handles both the keyword form (`kafka_topic_list = 'a,b'`) and the positional form
+// (`Kafka('broker', 'topic', 'group', 'format')`, where the topic is the second quoted argument).
+function extractKafkaTopicList(engineFull: string): string[] {
+    const keyword = engineFull.match(/kafka_topic_list\s*=\s*'([^']+)'/)
+    const raw = keyword ? keyword[1] : ([...engineFull.matchAll(/'([^']*)'/g)].map((m) => m[1])[1] ?? '')
+    return raw
+        .split(',')
+        .map((topic) => topic.trim())
+        .filter(Boolean)
+}
 
 export class Datastore {
     private client: DatastoreClient
@@ -63,12 +76,34 @@ export class Datastore {
         this.client.close()
     }
 
+    // Memoized so repeated truncates don't re-query the database name. The
+    // onRejected handler resets the cache when the `query` itself fails (a
+    // transient connection error), so it isn't cached as a permanently rejected
+    // promise. An assertTestDatabaseName failure throws from onFulfilled and
+    // stays cached on purpose: it's a deterministic verdict on a fixed database
+    // name, so re-querying would only reach the same conclusion.
+    private databaseGuard?: Promise<void>
+    private ensureTestDatabase(): Promise<void> {
+        this.databaseGuard ??= this.query<{ name: string }>('SELECT currentDatabase() AS name').then(
+            (rows) => assertTestDatabaseName(rows[0].name, 'Datastore'),
+            (error) => {
+                this.databaseGuard = undefined
+                throw error
+            }
+        )
+        return this.databaseGuard
+    }
+
     async truncate(table: string) {
+        await this.ensureTestDatabase()
         await this.exec(`TRUNCATE ${table}`)
     }
 
     async resetTestDatabase(): Promise<void> {
         await this.waitForHealthy()
+        // Guard before the truncates: Promise.allSettled below would swallow
+        // the guard error if it only surfaced inside truncate().
+        await this.ensureTestDatabase()
         // NOTE: Don't do more than 5 at once otherwise we get socket timeout errors
         await Promise.allSettled([
             this.truncate('sharded_events'),
@@ -86,7 +121,22 @@ export class Datastore {
             this.truncate('ingestion_warnings'),
         ])
 
-        await Promise.allSettled([this.truncate('sharded_ingestion_warnings'), this.truncate('sharded_app_metrics')])
+        await Promise.allSettled([
+            this.truncate('sharded_ingestion_warnings'),
+            this.truncate('sharded_app_metrics'),
+            this.truncate('ingestion_warnings_v2'),
+        ])
+    }
+
+    // Topics that this database's Kafka engine tables consume from. Tests pre-create every
+    // subscribed topic so no consumer is left retrying "Can't get assignment" against a missing
+    // topic — those retries saturate Datastore's background scheduler and intermittently starve
+    // the consumers the tests depend on (e.g. the ingestion_warnings warmup probe).
+    async getKafkaEngineTopics(): Promise<string[]> {
+        const rows = await this.query<{ engine_full: string }>(
+            `SELECT engine_full FROM system.tables WHERE database = currentDatabase() AND engine = 'Kafka'`
+        )
+        return [...new Set(rows.flatMap((row) => extractKafkaTopicList(row.engine_full)))]
     }
 
     async waitForHealthy(delayMs = 100, maxDelayCount = 300): Promise<void> {
@@ -122,7 +172,7 @@ export class Datastore {
         fetchData: () => T | Promise<T>,
         minLength = 1,
         delayMs = 100,
-        maxDelayCount = 1000
+        maxDelayCount = 300
     ): Promise<T> {
         const timer = performance.now()
         let data: T | null = null

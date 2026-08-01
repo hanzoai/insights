@@ -5,7 +5,7 @@ from semantic_version.base import SimpleSpec
 
 from insights.async_migrations.definition import AsyncMigrationDefinition
 from insights.async_migrations.setup import (
-    FROZEN_INSIGHTS_VERSION,
+    FROZEN_POSTFN_VERSION,
     get_async_migration_definition,
     get_async_migration_dependency,
 )
@@ -260,7 +260,7 @@ def attempt_migration_rollback(migration_instance: AsyncMigration):
 
 
 def is_insights_version_compatible(insights_min_version, insights_max_version):
-    return get_instance_setting("ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION") or FROZEN_INSIGHTS_VERSION in SimpleSpec(
+    return get_instance_setting("ASYNC_MIGRATIONS_IGNORE_POSTFN_VERSION") or FROZEN_POSTFN_VERSION in SimpleSpec(
         f">={insights_min_version},<={insights_max_version}"
     )
 

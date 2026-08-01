@@ -14,7 +14,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Update marketing contacts in Sendgrid",
     icon_url="/static/services/sendgrid.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.email)) {
     print('`email` input is empty. Not updating contacts.')
@@ -114,12 +114,12 @@ if (res.status > 300) {
 
 
 class TemplateSendGridMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/sendgrid-plugin"
+    plugin_url = "https://github.com/Insights/sendgrid-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         sendgridApiKey = obj.config.get("sendgridApiKey", "")

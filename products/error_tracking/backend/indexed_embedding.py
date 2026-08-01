@@ -122,7 +122,7 @@ MODEL_SPECIFIC_SHARDED_TABLE_SQL = (
     + """
     PARTITION BY toMonday(timestamp)
     ORDER BY (team_id, toDate(timestamp), product, document_type, rendering, cityHash64(document_id))
-    TTL toDateTime(timestamp) + INTERVAL 3 MONTH
+    TTL timestamp + INTERVAL 3 MONTH
     SETTINGS index_granularity = 512, ttl_only_drop_parts = 1
     """
 )
@@ -186,7 +186,7 @@ def DOCUMENT_EMBEDDINGS_BUFFER_SHARDED_TABLE_SQL():
         + """
 PARTITION BY toDate(inserted_at)
 ORDER BY (inserted_at, model_name, cityHash64(document_id))
-TTL toDateTime(inserted_at) + INTERVAL 1 DAY
+TTL inserted_at + INTERVAL 1 DAY
 SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
 """
     )

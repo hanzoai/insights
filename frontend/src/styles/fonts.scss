@@ -1,35 +1,112 @@
-/* Geist Sans and Geist Mono — Vercel's open-source typeface, SIL OFL 1.1.
- *
- * Self-hosted rather than pulled from a CDN. The previous jsDelivr `@import`s
- * pointed at stylesheets the `geist` package does not publish — both returned 404,
- * so the app silently rendered in the fallback face. An `@import` is also governed
- * by `style-src`, which does not list jsDelivr, so a corrected CDN path would have
- * been blocked anyway. Serving from our own origin satisfies `font-src 'self'`.
- *
- * Each file is a variable font covering weights 100–900, so one file per family
- * replaces the entire static weight set.
- *
- * The paths are RELATIVE so esbuild's `.woff2` file loader resolves them, emits
- * them content-hashed under `assets/`, and rewrites the URL with the ONE configured
- * `publicPath` (common/esbuilder/utils.mjs). An absolute `/static/fonts/…` re-typed
- * that publicPath in a second place AND asked esbuild to resolve a path that only
- * exists at runtime — which does not fail quietly: it breaks the whole frontend
- * build (`Could not resolve "/static/fonts/Geist-Variable.woff2"`), and with it
- * every insights image. Keep them relative.
- */
-
+/* Inter; bold (700); latin */
 @font-face {
-    font-family: Geist;
+    font-family: Inter;
     font-style: normal;
-    font-weight: 100 900;
-    src: url('../../public/fonts/Geist-Variable.woff2') format('woff2');
+    font-weight: 700;
+    src:
+        url('../../public/Inter.woff2') format('woff2'),
+        url('../../public/Inter.woff') format('woff');
     font-display: swap;
+    unicode-range:
+        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
+        U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-    font-family: 'Geist Mono';
+    font-family: Inter;
     font-style: normal;
-    font-weight: 100 900;
-    src: url('../../public/fonts/GeistMono-Variable.woff2') format('woff2');
+    font-weight: 500;
+    src:
+        url('../../public/Inter.woff2') format('woff2'),
+        url('../../public/Inter.woff') format('woff');
+    font-display: swap;
+    unicode-range:
+        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
+        U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Inter; normal (400); latin */
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 400;
+    src:
+        url('../../public/Inter.woff2') format('woff2'),
+        url('../../public/Inter.woff') format('woff');
+    font-display: swap;
+    unicode-range:
+        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
+        U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* RoundHog; bold (800); latin */
+@font-face {
+    font-family: RoundHog;
+    font-style: normal;
+    font-weight: 800;
+    src: url('../../node_modules/@hanzo/brand/dist/fonts/RoundHog-Bold.woff2') format('woff2');
+    font-display: swap;
+}
+
+/* RoundHog; semibold (700); latin */
+@font-face {
+    font-family: RoundHog;
+    font-style: normal;
+    font-weight: 700;
+    src: url('../../node_modules/@hanzo/brand/dist/fonts/RoundHog-SemiBold.woff2') format('woff2');
+    font-display: swap;
+}
+
+/* RoundHog; medium (500); latin */
+@font-face {
+    font-family: RoundHog;
+    font-style: normal;
+    font-weight: 500;
+    src: url('../../node_modules/@hanzo/brand/dist/fonts/RoundHog-Medium.woff2') format('woff2');
+    font-display: swap;
+}
+
+/* RoundHog; regular (400); latin */
+@font-face {
+    font-family: RoundHog;
+    font-style: normal;
+    font-weight: 400;
+    src: url('../../node_modules/@hanzo/brand/dist/fonts/RoundHog.woff2') format('woff2');
+    font-display: swap;
+}
+
+/* RoundHog; regular italic (400); latin */
+@font-face {
+    font-family: RoundHog;
+    font-style: italic;
+    font-weight: 400;
+    src: url('../../node_modules/@hanzo/brand/dist/fonts/RoundHog-Italic.woff2') format('woff2');
+    font-display: swap;
+}
+
+/* RoundHog; medium italic (500); latin */
+@font-face {
+    font-family: RoundHog;
+    font-style: italic;
+    font-weight: 500;
+    src: url('../../node_modules/@hanzo/brand/dist/fonts/RoundHog-Medium-Italic.woff2') format('woff2');
+    font-display: swap;
+}
+
+/* RoundHog; semibold italic (700); latin */
+@font-face {
+    font-family: RoundHog;
+    font-style: italic;
+    font-weight: 700;
+    src: url('../../node_modules/@hanzo/brand/dist/fonts/RoundHog-SemiBold-Italic.woff2') format('woff2');
+    font-display: swap;
+}
+
+/* RoundHog; bold italic (800); latin */
+@font-face {
+    font-family: RoundHog;
+    font-style: italic;
+    font-weight: 800;
+    src: url('../../node_modules/@hanzo/brand/dist/fonts/RoundHog-Bold-Italic.woff2') format('woff2');
     font-display: swap;
 }

@@ -13,24 +13,29 @@ import {
     NodeKind,
 } from '~/queries/schema/schema-general'
 import { isDataWarehouseNode } from '~/queries/utils'
-import { conversionGoalPopoverFields } from '~/taxonomy/taxonomy'
-import { ActionFilter, BaseMathType, DataWarehouseFilter, EntityTypes, FilterType, PropertyMathType } from '~/types'
-
 import {
     ConversionGoalSchema,
     DISTINCT_ID_FIELD_SCHEMA_FIELD,
     TIMESTAMP_FIELD_SCHEMA_FIELD,
     UTM_CAMPAIGN_NAME_SCHEMA_FIELD,
     UTM_SOURCE_NAME_SCHEMA_FIELD,
-} from '../../../utils'
+} from '~/taxonomy/marketingAnalytics'
+import { conversionGoalPopoverFields } from '~/taxonomy/taxonomy'
+import { ActionFilter, BaseMathType, AnyDataWarehouseFilter, EntityTypes, FilterType, PropertyMathType } from '~/types'
 
 interface ConversionGoalDropdownProps {
     value: ConversionGoalFilter
     onChange: (filter: ConversionGoalFilter) => void
     typeKey: string
+    disabledReason?: string | null
 }
 
-export function ConversionGoalDropdown({ value, onChange, typeKey }: ConversionGoalDropdownProps): JSX.Element {
+export function ConversionGoalDropdown({
+    value,
+    onChange,
+    typeKey,
+    disabledReason,
+}: ConversionGoalDropdownProps): JSX.Element {
     const [error, setError] = useState<string | null>(null)
 
     // Create a proper ActionFilter-compatible filter object
@@ -91,7 +96,7 @@ export function ConversionGoalDropdown({ value, onChange, typeKey }: ConversionG
                         {
                             actions: actions as ActionFilter[] | undefined,
                             events: events as ActionFilter[] | undefined,
-                            data_warehouse: data_warehouse as DataWarehouseFilter[] | undefined,
+                            data_warehouse: data_warehouse as AnyDataWarehouseFilter[] | undefined,
                         },
                         true,
                         MathAvailability.All
@@ -132,7 +137,9 @@ export function ConversionGoalDropdown({ value, onChange, typeKey }: ConversionG
 
                     // Override the schema with the schema from the data warehouse
                     if (data_warehouse?.[0]?.type === EntityTypes.DATA_WAREHOUSE) {
-                        const dwNode = data_warehouse[0] as DataWarehouseFilter & Record<ConversionGoalSchema, string>
+                        const dwNode = data_warehouse[0] as AnyDataWarehouseFilter &
+                            Record<ConversionGoalSchema, string> &
+                            Partial<Pick<DataWarehouseNode, 'id_field' | 'dw_source_type'>>
                         const schema = dwNode
                         const overrideSchema: Record<ConversionGoalSchema, string> = {
                             utm_campaign_name: schema[UTM_CAMPAIGN_NAME_SCHEMA_FIELD],
@@ -177,6 +184,7 @@ export function ConversionGoalDropdown({ value, onChange, typeKey }: ConversionG
                 excludedProperties={{
                     [TaxonomicFilterGroupType.Events]: [null],
                 }}
+                disabled={!!disabledReason}
             />
             {error && <div className="text-danger mt-2 text-sm">{error}</div>}
         </div>

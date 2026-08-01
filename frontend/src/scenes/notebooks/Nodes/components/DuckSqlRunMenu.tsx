@@ -3,10 +3,10 @@ import { useActions, useValues } from 'kea'
 import { IconChevronDown, IconPlay } from '@hanzo/icons'
 import { Button, MenuItems, MenuOverlay } from '@hanzo/elements'
 
-import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { notebookSettingsLogic } from '../../Notebook/notebookSettingsLogic'
+import { isKernelUiEnabled } from '../../utils'
 import { NotebookRunMode, buildRunMenuItems } from './runMenuItems'
 
 export type DuckSqlRunMode = NotebookRunMode
@@ -36,7 +36,7 @@ export const DuckSqlRunMenu = ({
 
     const duckSqlRunMenuItems: MenuItems = [...buildRunMenuItems(onRun)]
 
-    if (featureFlags[FEATURE_FLAGS.NOTEBOOK_PYTHON]) {
+    if (isKernelUiEnabled(featureFlags)) {
         duckSqlRunMenuItems.push({
             label: 'Toggle kernel info',
             onClick: () => setShowKernelInfo(!showKernelInfo),

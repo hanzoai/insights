@@ -1,14 +1,15 @@
-import { useActions, useValues } from 'kea'
+import { useValues } from 'kea'
 import { combineUrl } from 'kea-router'
-import { useEffect } from 'react'
 
 import { Button, Link } from '@hanzo/elements'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
+import { FEATURE_FLAGS } from 'lib/constants'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Spinner } from 'lib/elements/Spinner'
-import { IconOpenInNew } from 'lib/elements/icons'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { getDefaultEventsSceneQuery } from 'scenes/activity/explore/defaults'
 import { NotebookSelectButton } from 'scenes/notebooks/NotebookSelectButton/NotebookSelectButton'
 import { NotebookNodeType } from 'scenes/notebooks/types'
@@ -16,8 +17,10 @@ import { urls } from 'scenes/urls'
 
 import { ActivityTab, PropertyDefinitionType, PropertyFilterType, PropertyOperator } from '~/types'
 
-import { asDisplay } from './person-utils'
-import { personsLogic } from './personsLogic'
+import { ComposeTicketButton } from 'products/conversations/frontend/components/ComposeTicket'
+
+import { asDisplay, pickBestPersonDistinctId } from './person-utils'
+import { personLogic } from './personLogic'
 
 export type PersonPreviewProps = {
     distinctId?: string
@@ -26,20 +29,16 @@ export type PersonPreviewProps = {
 }
 
 export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
-    const { loadPerson, loadPersonUUID } = useActions(personsLogic({ syncWithUrl: false }))
-    const { person, personLoading } = useValues(personsLogic({ syncWithUrl: false }))
-
-    useEffect(() => {
-        if (props.distinctId) {
-            loadPerson(props.distinctId)
-        } else if (props.personId) {
-            loadPersonUUID(props.personId)
-        }
-    }, [loadPerson, loadPersonUUID, props.distinctId, props.personId])
-
     if (!props.distinctId && !props.personId) {
         return null
     }
+    return <PersonPreviewInner {...props} />
+}
+
+function PersonPreviewInner(props: PersonPreviewProps): JSX.Element | null {
+    const logicProps = { id: props.personId, distinctId: props.distinctId }
+    const { person, personLoading } = useValues(personLogic(logicProps))
+    const { featureFlags } = useValues(featureFlagLogic)
 
     if (personLoading) {
         return <Spinner />
@@ -60,8 +59,8 @@ export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
             <div className="p-2 max-w-160">
                 <h4>No profile associated with this ID</h4>
                 <p>
-                    User profiles allow you to see a detailed view of a user's properties, track users across
-                    devices, and more. To create user profiles, see{' '}
+                    Person profiles allow you to see a detailed view of a Person's user properties, track users across
+                    devices, and more. To create person profiles, see{' '}
                     <Link to="https://hanzo.ai/docs/data/persons#capturing-person-profiles">here.</Link>
                 </p>
                 <div className="flex justify-center mt-2 w-fit">
@@ -79,7 +78,8 @@ export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
     }
 
     const display = asDisplay(person)
-    const url = urls.personByDistinctId(person?.distinct_ids[0])
+    const bestDistinctId = pickBestPersonDistinctId(person?.distinct_ids)
+    const url = urls.personByDistinctId(bestDistinctId ?? person?.distinct_ids[0])
 
     return (
         <div className="flex flex-col overflow-hidden max-h-80 max-w-160 gap-2">
@@ -96,7 +96,17 @@ export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
                     onNotebookOpened={() => props.onClose?.()}
                     size="small"
                 />
-                <Button size="small" icon={<IconOpenInNew />} to={url} />
+                {featureFlags[FEATURE_FLAGS.PRODUCT_SUPPORT_CREATE_TICKET] && (
+                    <ComposeTicketButton
+                        size="small"
+                        type="tertiary"
+                        iconOnly
+                        distinctId={bestDistinctId}
+                        email={typeof person?.properties?.email === 'string' ? person.properties.email : undefined}
+                        onCompose={() => props.onClose?.()}
+                    />
+                )}
+                <Button size="small" icon={<IconOpenInNew />} to={url} targetBlank tooltip="Open in new tab" />
             </div>
 
             <ScrollableShadows direction="vertical">

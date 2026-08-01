@@ -19,6 +19,12 @@ from insights.models import Team, User
 from insights.temporal.ai.base import AgentBaseWorkflow
 from insights.temporal.common.client import async_connect
 
+from products.insights_ai.backend.models.assistant import Conversation
+
+from ee.hogai.chat_agent.runner import ChatAgentRunner
+from ee.hogai.queue import ConversationQueueMessage, ConversationQueueStore
+from ee.hogai.stream.redis_stream import ConversationRedisStream, get_conversation_stream_key
+from ee.hogai.utils.types import AssistantMode, AssistantOutput
 
 logger = structlog.get_logger(__name__)
 
@@ -44,7 +50,7 @@ class AssistantConversationRunnerWorkflowInputs:
     is_new_conversation: bool = False
     trace_id: Optional[str] = None
     session_id: Optional[str] = None
-    mode: Optional[str] = None  # Legacy field, AssistantMode was removed with ee/
+    mode: AssistantMode = AssistantMode.ASSISTANT
     billing_context: Optional[MaxBillingContext] = None
     agent_mode: AgentMode | None = None
     is_agent_billable: bool = True
@@ -171,7 +177,7 @@ async def process_chat_agent_activity(inputs: ChatAgentWorkflowInputs) -> None:
                 return True
         return False
 
-    async def stream_runner(runner: ChatAgentRunner) -> AsyncGenerator[AssistantOutput, None]:
+    async def stream_runner(runner: ChatAgentRunner) -> AsyncGenerator[AssistantOutput]:
         nonlocal should_stop_queue
         async for event_type, message in runner.astream():
             if event_type == AssistantEventType.APPROVAL:
@@ -179,7 +185,7 @@ async def process_chat_agent_activity(inputs: ChatAgentWorkflowInputs) -> None:
                 should_stop_queue = True
             yield cast(AssistantOutput, (event_type, message))
 
-    async def queue_stream() -> AsyncGenerator[AssistantOutput, None]:
+    async def queue_stream() -> AsyncGenerator[AssistantOutput]:
         assistant = ChatAgentRunner(
             team,
             conversation,
@@ -287,7 +293,7 @@ async def process_chat_agent_activity(inputs: ChatAgentWorkflowInputs) -> None:
         )
 
     redis_stream = ConversationRedisStream(inputs.stream_key)
-    stream = cast(AsyncGenerator[AssistantOutput, None], queue_stream())
+    stream = cast(AsyncGenerator[AssistantOutput], queue_stream())
     await redis_stream.write_to_stream(stream, activity.heartbeat, emit_completion=False)
 
     if should_stop_queue:

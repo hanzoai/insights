@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 
 import { Button } from '@hanzo/elements'
 
-import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { IconTableChart } from 'lib/elements/icons'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { urls } from 'scenes/urls'
 
 import { DataTableNode } from '~/queries/schema/schema-general'

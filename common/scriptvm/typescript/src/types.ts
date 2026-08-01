@@ -13,7 +13,7 @@ export interface VMState {
     /** Stack of the VM */
     stack: any[]
     /** Values hoisted from the stack */
-    upvalues: IQLUpValue[]
+    upvalues: HogUpValue[]
     /** Call stack of the VM */
     callStack: CallFrame[] // [number, number, number][]
     /** Throw stack of the VM */
@@ -53,6 +53,8 @@ export interface ExecOptions {
         /** RegEx (RE2) matching. Uses '(?ism)' and '(?-ism)' on the regex as modifiers */
         regex?: {
             match: (regex: string, value: string) => boolean
+            /** Extract first capture group (or whole match if no groups). Returns empty string if no match. */
+            extract?: (regex: string, value: string) => string
         }
         /** NodeJS crypto */
         crypto?: typeof crypto
@@ -87,7 +89,7 @@ export interface ExecResult {
 }
 
 export interface CallFrame {
-    closure: IQLClosure
+    closure: HogClosure
     ip: number
     chunk: string
     stackStart: number
@@ -100,29 +102,29 @@ export interface ThrowFrame {
     catchIp: number
 }
 
-export interface IQLDate {
-    __iqlDate__: true
+export interface HogDate {
+    __hogDate__: true
     year: number
     month: number
     day: number
 }
 
-export interface IQLDateTime {
-    __iqlDateTime__: true
+export interface HogDateTime {
+    __hogDateTime__: true
     /** Timestamp float in seconds */
     dt: number
     zone: string
 }
 
-export interface IQLError {
-    __iqlError__: true
+export interface HogError {
+    __hogError__: true
     type: string
     message: string
     payload?: Record<string, any>
 }
 
-export interface IQLCallable {
-    __iqlCallable__: 'local' | 'stl' | 'async'
+export interface HogCallable {
+    __hogCallable__: 'local' | 'stl' | 'async'
     name?: string
     argCount: number
     upvalueCount: number
@@ -130,22 +132,22 @@ export interface IQLCallable {
     chunk: string
 }
 
-export interface IQLUpValue {
-    __iqlUpValue__: true
+export interface HogUpValue {
+    __hogUpValue__: true
     id: number
     location: number
     closed: boolean
     value: any
 }
 
-export interface IQLClosure {
-    __iqlClosure__: true
-    callable: IQLCallable
+export interface HogClosure {
+    __hogClosure__: true
+    callable: HogCallable
     upvalues: number[]
 }
 
-export interface IQLInterval {
-    __iqlInterval__: true
+export interface HogInterval {
+    __hogInterval__: true
     value: number
     unit: string
 }

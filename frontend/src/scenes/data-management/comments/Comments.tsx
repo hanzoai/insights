@@ -1,22 +1,23 @@
+import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
+import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
 import { IconTrash } from '@hanzo/icons'
-import { Button, Input, Select } from '@hanzo/elements'
+import { Button, Checkbox, Input, Select, Tooltip } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
-import { MicrophoneMascot } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { Table, TableColumns } from 'lib/elements/Table'
 import { Tag } from 'lib/elements/Tag/Tag'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
-import { Tooltip } from 'lib/elements/Tooltip'
-import { IconOpenInApp } from 'lib/elements/icons'
 import { getText } from 'scenes/comments/Comment'
-import { Scene } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene } from 'scenes/sceneTypes'
 import { userLogic } from 'scenes/userLogic'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -26,13 +27,45 @@ import { CommentType } from '~/types'
 
 import { SCOPE_OPTIONS, commentsLogic, openURLFor } from './commentsLogic'
 
+const MascotReporter = pngHoggie(reporterPng)
+
+const KIND_OPTIONS = [
+    { value: 'any', label: 'Any' },
+    { value: 'comment', label: 'Comments' },
+    { value: 'task', label: 'Tasks' },
+] as const
+
+const COMPLETED_OPTIONS = [
+    { value: 'any', label: 'Any' },
+    { value: 'open', label: 'Open' },
+    { value: 'completed', label: 'Completed' },
+] as const
+
 export function Comments(): JSX.Element {
     const { user } = useValues(userLogic)
 
-    const { comments, shouldShowEmptyState, commentsLoading, scope, filterCreatedBy, searchText } =
-        useValues(commentsLogic)
+    const {
+        comments,
+        shouldShowEmptyState,
+        commentsLoading,
+        scope,
+        filterCreatedBy,
+        searchText,
+        kind,
+        completedFilter,
+    } = useValues(commentsLogic)
 
-    const { setScope, setFilterCreatedBy, setSearchText, deleteComment, loadComments } = useActions(commentsLogic)
+    const {
+        setScope,
+        setFilterCreatedBy,
+        setSearchText,
+        setKind,
+        setCompletedFilter,
+        deleteComment,
+        completeComment,
+        reopenComment,
+        loadComments,
+    } = useActions(commentsLogic)
 
     useEffect(() => {
         loadComments()
@@ -42,27 +75,34 @@ export function Comments(): JSX.Element {
         {
             title: 'Comment',
             key: 'content',
-            width: '30%',
+            width: '45%',
             render: function RenderComment(_, comment: CommentType): JSX.Element {
-                const textContent = getText(comment)
-                let renderedContent = <>{textContent}</>
-                if (textContent.length > 50) {
-                    renderedContent = (
-                        <Tooltip
-                            title={
-                                <div
-                                    className="whitespace-pre-wrap break-words"
-                                    data-attr="comment-scene-comment-title-rendered-content"
-                                >
-                                    {textContent}
-                                </div>
-                            }
+                const isCompleted = !!comment.completed_at
+                const completionTooltip = isCompleted
+                    ? `Completed by ${comment.completed_by?.first_name ?? 'Unknown user'}`
+                    : 'Mark as complete'
+                return (
+                    <div className="flex items-center gap-2">
+                        {comment.is_task ? (
+                            <Tooltip title={completionTooltip}>
+                                <Checkbox
+                                    checked={isCompleted}
+                                    onChange={() => (isCompleted ? reopenComment(comment) : completeComment(comment))}
+                                    data-attr="comment-task-checkbox"
+                                />
+                            </Tooltip>
+                        ) : null}
+                        <div
+                            className={clsx(
+                                'whitespace-pre-wrap break-words max-h-64 overflow-y-auto min-w-0 flex-1',
+                                isCompleted && 'line-through text-secondary'
+                            )}
+                            data-attr="comment-scene-comment-title-rendered-content"
                         >
-                            {textContent.slice(0, 47) + '...'}
-                        </Tooltip>
-                    )
-                }
-                return <div className="font-semibold">{renderedContent}</div>
+                            {getText(comment)}
+                        </div>
+                    </div>
+                )
             },
         },
         {
@@ -72,6 +112,13 @@ export function Comments(): JSX.Element {
                 return <TZLabel time={dayjs(comment.created_at)} />
             },
             sorter: (a, b) => dayjs(a.created_at).diff(dayjs(b.created_at)),
+        },
+        {
+            title: 'Kind',
+            key: 'kind',
+            render: function RenderKind(_, comment: CommentType): JSX.Element {
+                return <span>{comment.is_task ? 'Task' : 'Comment'}</span>
+            },
         },
         {
             title: 'Scope',
@@ -152,6 +199,23 @@ export function Comments(): JSX.Element {
                 <div>
                     <div className="flex flex-row items-center gap-4 flex-wrap">
                         <div className="flex flex-row items-center gap-2">
+                            <div>Kind:</div>
+                            <Select options={[...KIND_OPTIONS]} value={kind} onSelect={setKind} size="small" />
+                        </div>
+
+                        {kind === 'task' ? (
+                            <div className="flex flex-row items-center gap-2">
+                                <div>Status:</div>
+                                <Select
+                                    options={[...COMPLETED_OPTIONS]}
+                                    value={completedFilter}
+                                    onSelect={setCompletedFilter}
+                                    size="small"
+                                />
+                            </div>
+                        ) : null}
+
+                        <div className="flex flex-row items-center gap-2">
                             <div>Scope:</div>
                             <Select options={SCOPE_OPTIONS} value={scope} onSelect={setScope} size="small" />
                         </div>
@@ -177,7 +241,7 @@ export function Comments(): JSX.Element {
                         thingName="comment"
                         description="Comments allow you to provide context and discussions on various elements in Insights."
                         isEmpty={shouldShowEmptyState}
-                        customInsights={MicrophoneMascot}
+                        customHog={MascotReporter}
                     />
                 </div>
                 {!shouldShowEmptyState && (

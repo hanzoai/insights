@@ -7,10 +7,10 @@ import { LogsViewer } from 'scenes/insights-functions/logs/LogsViewer'
 import { urls } from 'scenes/urls'
 
 import { renderWorkflowLogMessage } from '../../logs/log-utils'
-import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
+import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
 
 export function InsightsFlowEditorPanelLogs(): JSX.Element | null {
-    const { workflow, selectedNode } = useValues(insightsFlowEditorLogic)
+    const { workflow, selectedNode } = useValues(hogFlowEditorLogic)
 
     const actionId = selectedNode?.data.id
 
@@ -28,9 +28,9 @@ export function InsightsFlowEditorPanelLogs(): JSX.Element | null {
             {shouldShowActionLevelLogs && (
                 <div className="p-2 flex flex-col gap-2 overflow-y-auto">
                     <LogsViewer
-                        logicKey={`fn-flow-editor-panel-${actionId || 'all'}`}
+                        logicKey={`script-flow-editor-panel-${actionId || 'all'}`}
                         instanceLabel="workflow run"
-                        sourceType="insights_flow"
+                        sourceType="hog_flow"
                         sourceId={workflow.id}
                         groupByInstanceId={!selectedNode}
                         searchGroups={actionId ? [`[Action:${actionId}]`] : undefined}

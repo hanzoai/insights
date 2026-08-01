@@ -1,4 +1,5 @@
-import { UUIDT } from '../../utils/utils'
+import { UUIDT } from '~/common/utils/utils'
+
 import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '../types'
 import { SAMPLE_GLOBALS, createInsightsFunction } from './fixtures'
 
@@ -21,7 +22,7 @@ export const createExampleSegmentInvocation = (
         teamId: insightsFunction.team_id,
         functionId: insightsFunction.id,
         insightsFunction,
-        queue: 'fn',
+        queue: 'script',
         queuePriority: 0,
     }
 }
@@ -59,7 +60,7 @@ export const amplitudeInputs = {
         utm_term: null,
         $pathname: '/project/1/activity/explore',
         $referrer:
-            'http://localhost:8000/project/1/pipeline/new/destination/insights-function-template-meta-ads?showPaused=true&kind&search=meta',
+            'http://localhost:8000/project/1/pipeline/new/destination/script-template-meta-ads?showPaused=true&kind&search=meta',
         joined_at: '2025-04-04T11:33:18.022897+00:00',
         li_fat_id: null,
         strapi_id: null,
@@ -196,7 +197,7 @@ export const amplitudeInputs = {
         utm_campaign: null,
     },
     referrer:
-        'http://localhost:8000/project/1/pipeline/new/destination/insights-function-template-meta-ads?showPaused=true&kind&search=meta',
+        'http://localhost:8000/project/1/pipeline/new/destination/script-template-meta-ads?showPaused=true&kind&search=meta',
     library: 'web',
     userAgentData: {
         model: '',

@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Updates properties of a Insights person',
     icon_url: '/static/insights-icon.svg',
     category: ['Custom', 'Analytics'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 if (empty(inputs.distinct_id)) {
   throw Error('Distinct ID is required')

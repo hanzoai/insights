@@ -2,10 +2,10 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from insights.models.insights_flow.insights_flow import InsightsFlow
 from insights.models.user import User
 
-from products.workflows.backend.models.insights_flow_batch_job import InsightsFlowBatchJob
+from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
+from products.workflows.backend.models.hog_flow_batch_job import InsightsFlowBatchJob
 
 
 class TestInsightsFlowBatchJob(TestCase):
@@ -17,7 +17,7 @@ class TestInsightsFlowBatchJob(TestCase):
         self.org = org
 
         # Create a InsightsFlow for testing
-        self.insights_flow = InsightsFlow.objects.create(
+        self.hog_flow = InsightsFlow.objects.create(
             team=self.team,
             name="Test Flow",
             actions=[
@@ -36,18 +36,18 @@ class TestInsightsFlowBatchJob(TestCase):
         )
 
     @patch(
-        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
+        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
     )
-    def test_insights_flow_batch_job_creation(self, mock_create_invocation):
+    def test_hog_flow_batch_job_creation(self, mock_create_invocation):
         batch_job = InsightsFlowBatchJob.objects.create(
             team=self.team,
-            insights_flow=self.insights_flow,
+            hog_flow=self.hog_flow,
             created_by=self.user,
             variables=[{"key": "event_name", "value": "$pageview"}],
         )
 
         assert batch_job.team == self.team
-        assert batch_job.insights_flow == self.insights_flow
+        assert batch_job.hog_flow == self.hog_flow
         assert batch_job.created_by == self.user
         assert batch_job.status == InsightsFlowBatchJob.State.QUEUED
         assert batch_job.variables == [{"key": "event_name", "value": "$pageview"}]
@@ -55,10 +55,10 @@ class TestInsightsFlowBatchJob(TestCase):
         mock_create_invocation.assert_called_once()
 
     @patch(
-        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
+        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
     )
-    def test_insights_flow_batch_job_can_fail(self, mock_create_invocation):
-        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=self.insights_flow, variables=[])
+    def test_hog_flow_batch_job_can_fail(self, mock_create_invocation):
+        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, hog_flow=self.hog_flow, variables=[])
 
         batch_job.status = InsightsFlowBatchJob.State.FAILED
         batch_job.save()
@@ -66,24 +66,24 @@ class TestInsightsFlowBatchJob(TestCase):
         assert batch_job.status == InsightsFlowBatchJob.State.FAILED
 
     @patch(
-        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
+        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
     )
-    @patch("products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.handle_insights_flow_batch_job_created")
-    def test_insights_flow_batch_job_created_signal(self, mock_handler, mock_create_invocation):
+    @patch("products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.handle_hog_flow_batch_job_created")
+    def test_hog_flow_batch_job_created_signal(self, mock_handler, mock_create_invocation):
         # Disconnect the signal temporarily to test it
         from django.db.models.signals import post_save
 
-        from products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job import (
-            handle_insights_flow_batch_job_created,
+        from products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job import (
+            handle_hog_flow_batch_job_created,
         )
 
-        post_save.disconnect(handle_insights_flow_batch_job_created, sender=InsightsFlowBatchJob)
+        post_save.disconnect(handle_hog_flow_batch_job_created, sender=InsightsFlowBatchJob)
 
         try:
             # Reconnect with our mock
             post_save.connect(mock_handler, sender=InsightsFlowBatchJob)
 
-            batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=self.insights_flow, variables=[])
+            batch_job = InsightsFlowBatchJob.objects.create(team=self.team, hog_flow=self.hog_flow, variables=[])
 
             mock_handler.assert_called_once()
             call_kwargs = mock_handler.call_args[1]
@@ -93,26 +93,26 @@ class TestInsightsFlowBatchJob(TestCase):
         finally:
             # Reconnect the original signal
             post_save.disconnect(mock_handler, sender=InsightsFlowBatchJob)
-            post_save.connect(handle_insights_flow_batch_job_created, sender=InsightsFlowBatchJob)
+            post_save.connect(handle_hog_flow_batch_job_created, sender=InsightsFlowBatchJob)
 
     @patch(
-        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
+        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
     )
-    def test_insights_flow_batch_job_without_created_by(self, mock_create_invocation):
-        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=self.insights_flow, variables=[])
+    def test_hog_flow_batch_job_without_created_by(self, mock_create_invocation):
+        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, hog_flow=self.hog_flow, variables=[])
 
         assert batch_job.created_by is None
         assert batch_job.team == self.team
 
     @patch(
-        "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
+        "products.workflows.backend.models.hog_flow_batch_job.hog_flow_batch_job.create_batch_hog_flow_job_invocation"
     )
-    def test_insights_flow_batch_job_complex_variables(self, mock_create_invocation):
+    def test_hog_flow_batch_job_complex_variables(self, mock_create_invocation):
         variables = [
             {"key": "first_name", "value": "John"},
             {"key": "last_name", "value": "Doe"},
             {"key": "email", "value": "john@hanzo.ai"},
         ]
-        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=self.insights_flow, variables=variables)
+        batch_job = InsightsFlowBatchJob.objects.create(team=self.team, hog_flow=self.hog_flow, variables=variables)
 
         assert batch_job.variables == variables

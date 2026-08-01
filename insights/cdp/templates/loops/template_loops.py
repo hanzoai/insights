@@ -12,7 +12,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Update contacts in Loops.so",
     icon_url="/static/services/loops.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')
@@ -111,7 +111,7 @@ template_send_event: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send events to Loops.so",
     icon_url="/static/services/loops.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')
@@ -203,12 +203,12 @@ if (res.status >= 400) {
 
 
 class TemplateLoopsMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-loops-plugin"
+    plugin_url = "https://github.com/Insights/insights-loops-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         apiKey = obj.config.get("apiKey", "")

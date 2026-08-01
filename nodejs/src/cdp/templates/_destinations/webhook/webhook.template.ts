@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Sends a webhook templated by the incoming event data',
     icon_url: '/static/services/webhook.svg',
     category: ['Custom'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 let payload := {
   'headers': inputs.headers,

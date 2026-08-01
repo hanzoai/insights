@@ -29,7 +29,9 @@ User ─────────────────────────
                               │     _repository            │
                               │  3. start_agent_server     │
                               │  4. wait_condition         │
-                              │     (60 min timeout)       │
+                              │     (2 hr inactivity       │
+                              │      timeout, heartbeat-   │
+                              │      extended)             │
                               │  5. cleanup_sandbox        │
                               └─────────┬──────────────────┘
                                         │
@@ -50,7 +52,7 @@ User ─────────────────────────
 
 ### Insights API
 
-`backend/api.py` — `TaskViewSet.run` creates a `TaskRun` (status=QUEUED) and calls `execute_task_processing_workflow()` which starts the Temporal workflow. `TaskRunViewSet.partial_update` handles status transitions and signals the Temporal workflow on terminal statuses via `_signal_workflow_completion`.
+`backend/presentation/views/api.py` (thin viewsets) over `backend/facade/api.py` (behavior) — every user-triggered cloud launch path, including prewarming and task automations, checks server-side Insights Desktop access before provisioning or activating a run. Scheduled automations repeat the entitlement check at execution time so revoked access cannot launch later. `TaskViewSet.run` creates a `TaskRun` (status=QUEUED) and starts the Temporal workflow. `TaskRunViewSet.partial_update` handles status transitions and signals the Temporal workflow on terminal statuses via `signal_workflow_completion`. `TaskRunViewSet.cancel` (`POST .../runs/{id}/cancel/`) is the user-facing kill switch: `cancel_task_run` interrupts the in-flight agent turn, signals `complete_task("cancelled")` so the workflow snapshots the session and tears down the sandbox, and falls back to finalizing the run directly when no workflow is running.
 
 ### Temporal workflow
 
@@ -59,8 +61,25 @@ User ─────────────────────────
 1. **get_task_processing_context** — Loads the TaskRun, validates GitHub integration and repository, builds a `TaskProcessingContext` with IDs and credentials
 2. **get_sandbox_for_repository** — Creates an OAuth token, provisions a sandbox (with snapshot if available), clones the repo, stores `sandbox_id`/`sandbox_url`/`sandbox_connect_token` in TaskRun.state
 3. **start_agent_server** — Runs `npx agent-server` inside the sandbox, waits for health check
-4. **wait_condition** — Blocks for up to 60 minutes waiting for a `complete_task` signal
+4. **wait_condition** — Blocks with a 2-hour inactivity timeout. The agent sends `heartbeat` signals to keep the workflow alive; each heartbeat resets the timer. The workflow exits when it receives a `complete_task` signal or when no heartbeat arrives within 2 hours
 5. **cleanup_sandbox** — Destroys the sandbox container (always runs via `finally`)
+
+#### History management (`continue_as_new`)
+
+Long interactive runs accumulate a large event history — mostly streamed agent updates and
+periodic heartbeats. A very large history makes a single workflow-task activation (notably a
+cold replay after cache eviction or a deploy) slow enough to trip Temporal's 2-second deadlock
+detector (`[TMPRL1101]`). Two mechanisms bound this:
+
+- The relay coalesces streamed `agent_message_chunk` deltas into one `agent_text_delta` signal
+  per second (and at turn/tool boundaries), rather than one signal per chunk — see
+  `TEXT_DELTA_FLUSH_INTERVAL_SECONDS` in `activities/relay_sandbox_events.py`.
+- When enabled, the workflow calls `continue_as_new` from a clean idle point once its history is
+  large (Temporal's `is_continue_as_new_suggested()`, or `TASKS_CONTINUE_AS_NEW_HISTORY_THRESHOLD`
+  events), re-attaching to the same running sandbox instead of re-provisioning. It's off by
+  default and toggled per-org by the `tasks-cloud-run-continue-as-new` feature flag; `TASKS_CONTINUE_AS_NEW_ENABLED`
+  force-enables it (local E2E / emergency on). The enable decision is captured at workflow start,
+  so in-flight runs and the trigger stay deterministic across replay.
 
 ### Temporal client
 
@@ -70,7 +89,7 @@ User ─────────────────────────
 
 `backend/services/sandbox.py` — Protocol-based abstraction. `get_sandbox_class()` returns `DockerSandbox` when `SANDBOX_PROVIDER=docker` (requires `DEBUG=True`), otherwise `ModalSandbox`.
 
-- **DockerSandbox** (`backend/services/docker_sandbox.py`) — Local dev. Port 47821, no auth token needed. Builds images from `backend/sandbox/images/Dockerfile.sandbox-base`.
+- **DockerSandbox** (`backend/services/docker_sandbox.py`) — Local dev. Internal port 47821 (host port is dynamically assigned), no auth token needed. Automatically rewrites `POSTFN_API_URL` so the container can reach the host: `localhost`/`127.0.0.1` → `host.docker.internal`, port `8010` (Caddy) → `8000` (Django direct, since Caddy returns empty responses from inside Docker). `SANDBOX_API_URL` should not be set when using Docker — the auto-transform handles it. Builds images from `backend/sandbox/images/Dockerfile.sandbox-base`.
 - **ModalSandbox** (`backend/services/modal_sandbox.py`) — Production. Port 8080, gVisor isolation, Modal connect tokens for authenticated access. Images from `ghcr.io/insights/insights-sandbox-base`.
 
 ### Agent server and runner
@@ -82,9 +101,9 @@ Environment variables consumed inside the sandbox:
 | Variable                   | Purpose                                              |
 | -------------------------- | ---------------------------------------------------- |
 | `GITHUB_TOKEN`             | GitHub installation access token for repo operations |
-| `INSIGHTS_PERSONAL_API_KEY` | OAuth access token (6h TTL) for Insights API          |
-| `INSIGHTS_API_URL`          | Insights instance URL                                 |
-| `INSIGHTS_PROJECT_ID`       | Team ID for API scoping                              |
+| `POSTFN_PERSONAL_API_KEY` | OAuth access token (6h TTL) for Insights API          |
+| `POSTFN_API_URL`          | Insights instance URL                                 |
+| `POSTFN_PROJECT_ID`       | Team ID for API scoping                              |
 | `JWT_PUBLIC_KEY`           | Public key for verifying sandbox connection tokens   |
 
 ## End-to-end flow
@@ -95,9 +114,11 @@ Environment variables consumed inside the sandbox:
 4. **update_task_run_status** — Sets status to IN_PROGRESS
 5. **get_sandbox_for_repository** — Gets GitHub token from integration, creates OAuth access token, provisions sandbox, clones repo (unless snapshot used), stores sandbox credentials in TaskRun.state
 6. **start_agent_server** — Starts `npx agent-server` in sandbox, polls `/health` until ready
-7. **wait_condition** — Workflow blocks up to 60 min. Twig IDE or the agent server signals completion via the API
+7. **wait_condition** — Workflow blocks with a 2-hour inactivity timeout, extended by `heartbeat` signals from the agent. Insights Desktop or the agent server signals completion via the API
 8. Agent server calls `PATCH /api/projects/{team_id}/task_runs/{run_id}/` with terminal status
 9. API handler sends `complete_task(status, error_message)` signal to the Temporal workflow
+   - A user can end the run early via `POST .../runs/{run_id}/cancel/`, which sends the same signal with status `cancelled`
+   - For wizard cloud runs, the GitHub merge webhook sends the same signal with status `completed`, so the run ends at merge instead of riding out the sandbox TTL
 10. **cleanup_sandbox** — Sandbox destroyed
 
 ## Data model
@@ -130,14 +151,30 @@ Per-team configuration for sandbox execution: network access level (trusted/full
 
 ## Sandbox providers
 
-|              | DockerSandbox             | ModalSandbox                           |
-| ------------ | ------------------------- | -------------------------------------- |
-| Use case     | Local development         | Production                             |
-| Port         | 47821                     | 8080                                   |
-| Isolation    | Standard Docker container | gVisor kernel-level sandboxing         |
-| Auth         | No token needed           | Modal connect token                    |
-| Image source | Local Dockerfile build    | `ghcr.io/insights/insights-sandbox-base` |
-| Snapshots    | Docker commit/tag         | Modal `snapshot_filesystem()`          |
+|                   | DockerSandbox                                                  | ModalSandbox                                                          |
+| ----------------- | -------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Use case          | Local development                                              | Production                                                            |
+| Internal port     | 47821                                                          | 8080                                                                  |
+| Host port         | Dynamically assigned                                           | N/A (cloud-routed)                                                    |
+| Isolation         | Standard Docker container                                      | gVisor kernel-level sandboxing                                        |
+| Auth              | No token needed                                                | Modal connect token                                                   |
+| Image source      | Local Dockerfile build                                         | `ghcr.io/insights/insights-sandbox-base`                                |
+| Snapshots         | Docker commit/tag                                              | Modal `snapshot_filesystem()`                                         |
+| URL rewriting     | Auto (`localhost` → `host.docker.internal`, `:8010` → `:8000`) | None (uses `SANDBOX_API_URL` or ngrok)                                |
+| `SANDBOX_API_URL` | Not needed (auto-transform handles it)                         | Only for local dev with Modal (ngrok URL); production uses `SITE_URL` |
+
+### Local development with Docker
+
+Docker is the recommended sandbox provider for local development. To use it, set `SANDBOX_PROVIDER=docker` and `DEBUG=1` in your `.env`.
+
+**Do not set `SANDBOX_API_URL`** when using Docker. The `DockerSandbox` automatically rewrites `POSTFN_API_URL` inside the container:
+
+- `localhost` / `127.0.0.1` → `host.docker.internal` (Docker's host gateway)
+- Port `8010` (Caddy) → `8000` (Django directly) — Caddy returns empty responses when called from inside Docker
+
+The container is started with `--add-host host.docker.internal:host-gateway` so `host.docker.internal` resolves to the host machine. The internal agent-server port is 47821; the host port is dynamically assigned to avoid conflicts.
+
+Setting `SANDBOX_API_URL` is unnecessary with Docker — the auto-transform already does the right thing. If you need to override, use port 8000: `SANDBOX_API_URL=http://host.docker.internal:8000`.
 
 ### Local development with Modal
 
@@ -167,15 +204,16 @@ Set `SANDBOX_API_URL` to the ngrok URL. `SITE_URL` stays as `http://localhost:80
 
 ## Frontend
 
-- **TaskDetailPage** (`frontend/components/TaskDetailPage.tsx`) — Task detail view with run history, "Run task" button, "Open in Twig" link
+- **TaskDetailPage** (`frontend/components/TaskDetailPage.tsx`) — Task detail view with run history, "Run task" button, "Open in Insights Desktop" link
 - **TaskSessionView** (`frontend/components/TaskSessionView.tsx`) — Live log streaming with mascot animation during agent execution
-- Twig IDE integration via `twig://task/{id}` deep links
+- Insights Desktop integration via `insights-code://task/{id}` deep links
 
 ## Key files
 
 | File                                        | Role                                                          |
 | ------------------------------------------- | ------------------------------------------------------------- |
-| `backend/api.py`                            | REST API — TaskViewSet, TaskRunViewSet                        |
+| `backend/presentation/views/api.py`         | REST API — TaskViewSet, TaskRunViewSet                        |
+| `backend/facade/api.py`                     | Facade services behind the viewsets (incl. `cancel_task_run`) |
 | `backend/models.py`                         | Task, TaskRun, SandboxSnapshot, SandboxEnvironment            |
 | `backend/temporal/client.py`                | Workflow triggering, feature flag check                       |
 | `backend/temporal/process_task/workflow.py` | ProcessTaskWorkflow orchestration                             |

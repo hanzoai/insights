@@ -1,5 +1,5 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import { IconInfo } from '@hanzo/icons'
 import { Banner, Input, Switch } from '@hanzo/elements'
@@ -16,16 +16,17 @@ import { Table, TableColumns } from 'lib/elements/Table'
 import { Tag } from 'lib/elements/Tag/Tag'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { capitalizeFirstLetter, fullName } from 'lib/utils'
 import {
     getReasonForAccessLevelChangeProhibition,
     membershipLevelToName,
     organizationMembershipLevelIntegers,
 } from 'lib/utils/permissioning'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
-import { twoFactorLogic } from 'scenes/authentication/twoFactorLogic'
+import { capitalizeFirstLetter, fullName } from 'lib/utils/strings'
+import { twoFactorLogic } from 'scenes/authentication/two-factor-setup/twoFactorLogic'
+import { membersExportLogic } from 'scenes/organization/membersExportLogic'
 import { membersLogic } from 'scenes/organization/membersLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
+import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature, OrganizationMemberType } from '~/types'
@@ -44,10 +45,10 @@ function RemoveMemberModal({ member }: { member: OrganizationMemberType }): JSX.
             {scopedApiKeys?.keys && scopedApiKeys.keys.length > 0 && (
                 <div className="mt-4">
                     <Banner type="warning" className="mb-2">
-                        The following API keys which belong to {member.user.uuid == user?.uuid ? 'you' : 'this member'}{' '}
-                        will lose access to this organization and will stop working immediately. Please confirm they
-                        will not affect any services that depend on them before removing{' '}
-                        {member.user.uuid == user?.uuid ? 'yourself' : 'this member'}.
+                        The following personal API keys which belong to{' '}
+                        {member.user.uuid == user?.uuid ? 'you' : 'this member'} will lose access to this organization
+                        and will stop working immediately. Please confirm they will not affect any services that depend
+                        on them before removing {member.user.uuid == user?.uuid ? 'yourself' : 'this member'}.
                     </Banner>
                     <Table
                         dataSource={scopedApiKeys.keys}
@@ -184,21 +185,19 @@ function ActionsComponent(_: any, member: OrganizationMemberType): JSX.Element |
 }
 
 export function Members(): JSX.Element | null {
-    const { filteredMembers, membersLoading, search } = useValues(membersLogic)
+    const { filteredMembers, members, membersLoading, search } = useValues(membersLogic)
+    const { downloadMembersListDisabledReason } = useValues(membersExportLogic)
     const { currentOrganization } = useValues(organizationLogic)
     const { preflight } = useValues(preflightLogic)
     const { user } = useValues(userLogic)
     const { setSearch, ensureAllMembersLoaded } = useActions(membersLogic)
+    const { downloadMembersList } = useActions(membersExportLogic)
     const { updateOrganization } = useActions(organizationLogic)
     const { openTwoFactorSetupModal } = useActions(twoFactorLogic)
 
-    const twoFactorRestrictionReason = useRestrictedArea({ minimumAccessLevel: OrganizationMembershipLevel.Admin })
-    const membersCanInviteRestrictionReason = useRestrictedArea({
-        minimumAccessLevel: OrganizationMembershipLevel.Admin,
-    })
-    const membersCanUsePersonalApiKeysRestrictionReason = useRestrictedArea({
-        minimumAccessLevel: OrganizationMembershipLevel.Admin,
-    })
+    const adminRestrictionReason = useRestrictedArea({ minimumAccessLevel: OrganizationMembershipLevel.Admin })
+    const hasHiddenMembers =
+        (members?.length ?? 0) > 0 && (members?.length ?? 0) < (currentOrganization?.member_count ?? 0)
 
     useOnMountEffect(ensureAllMembersLoaded)
 
@@ -325,7 +324,25 @@ export function Members(): JSX.Element | null {
 
     return (
         <>
-            <Input type="search" placeholder="Search for members" value={search} onChange={setSearch} />
+            <div className="flex flex-wrap gap-2 justify-between items-center">
+                <Input
+                    type="search"
+                    placeholder="Search for members"
+                    value={search}
+                    onChange={setSearch}
+                    className="flex-1 basis-[min(100%,18rem)]"
+                />
+                {!adminRestrictionReason && (
+                    <Button
+                        type="secondary"
+                        onClick={downloadMembersList}
+                        disabledReason={downloadMembersListDisabledReason}
+                        data-attr="org-members-download-csv"
+                    >
+                        Download members list
+                    </Button>
+                )}
+            </div>
 
             <Table
                 dataSource={filteredMembers ?? []}
@@ -336,6 +353,29 @@ export function Members(): JSX.Element | null {
                 data-attr="org-members-table"
                 defaultSorting={{ columnKey: 'level', order: -1 }}
                 pagination={{ pageSize: 50 }}
+                footer={
+                    hasHiddenMembers && (
+                        <div className="flex items-center gap-2 px-3 py-2">
+                            <div className="flex">
+                                {[0, 1, 2].map((index) => (
+                                    <ProfilePicture
+                                        key={index}
+                                        name="?"
+                                        index={index}
+                                        size="md"
+                                        className={index > 0 ? '-ml-1.5' : ''}
+                                    />
+                                ))}
+                            </div>
+                            <span className="text-secondary">
+                                Other organization members{' '}
+                                <Tooltip title="Your organization only shows the full member list to admins.">
+                                    <IconInfo className="text-base align-middle" />
+                                </Tooltip>
+                            </span>
+                        </div>
+                    )
+                }
             />
             <h3 className="mt-4">Two-factor authentication</h3>
             <PayGateMini feature={AvailableFeature.TWOFA_ENFORCEMENT}>
@@ -345,7 +385,7 @@ export function Members(): JSX.Element | null {
                     bordered
                     checked={!!currentOrganization?.enforce_2fa}
                     onChange={(enforce_2fa) => updateOrganization({ enforce_2fa })}
-                    disabledReason={twoFactorRestrictionReason}
+                    disabledReason={adminRestrictionReason}
                 />
             </PayGateMini>
 
@@ -362,7 +402,22 @@ export function Members(): JSX.Element | null {
                     data-attr="org-members-can-invite-toggle"
                     checked={!!currentOrganization?.members_can_invite}
                     onChange={(members_can_invite) => updateOrganization({ members_can_invite })}
-                    disabledReason={membersCanInviteRestrictionReason}
+                    disabledReason={adminRestrictionReason}
+                />
+                <p className="mt-4">
+                    Control who can create new projects. Admins and owners can always create projects.
+                </p>
+                <Switch
+                    label={
+                        <span>
+                            Members can create new projects in <i>{currentOrganization?.name}</i>
+                        </span>
+                    }
+                    bordered
+                    data-attr="org-members-can-create-projects-toggle"
+                    checked={!!currentOrganization?.members_can_create_projects}
+                    onChange={(members_can_create_projects) => updateOrganization({ members_can_create_projects })}
+                    disabledReason={adminRestrictionReason}
                 />
             </PayGateMini>
 
@@ -386,7 +441,7 @@ export function Members(): JSX.Element | null {
                             onChange={(members_can_use_personal_api_keys) =>
                                 updateOrganization({ members_can_use_personal_api_keys })
                             }
-                            disabledReason={membersCanUsePersonalApiKeysRestrictionReason}
+                            disabledReason={adminRestrictionReason}
                         />
                     </PayGateMini>
                 </>

@@ -2,6 +2,8 @@ import { useActions, useValues } from 'kea'
 
 import { Button, Input, Modal, Tag } from '@hanzo/elements'
 
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { Banner } from 'lib/elements/Banner'
 
 import { DataWarehouseManagedViewsetSavedQuery } from '~/types'
@@ -34,6 +36,10 @@ export function DataWarehouseManagedViewsetImpactModal({
     const logic = disableDataWarehouseManagedViewsetModalLogic({ type })
     const { isOpen, confirmationInput, views: logicViews, viewsLoading, isDeleting } = useValues(logic)
     const { closeModal, setIsDeleting, setConfirmationInput } = useActions(logic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     const isConfirmationValid = confirmationInput === confirmText
     const views = propViews !== undefined ? propViews : logicViews
@@ -57,7 +63,7 @@ export function DataWarehouseManagedViewsetImpactModal({
                     <Button
                         type="secondary"
                         onClick={closeModal}
-                        disabledReason={isDeleting ? 'Deleting...' : undefined}
+                        disabledReason={isDeleting ? 'Deleting...' : restrictedReason}
                     >
                         Cancel
                     </Button>
@@ -65,7 +71,9 @@ export function DataWarehouseManagedViewsetImpactModal({
                         type="primary"
                         status="danger"
                         loading={isDeleting}
-                        disabledReason={!isConfirmationValid ? 'Please type the correct confirmation text' : undefined}
+                        disabledReason={
+                            !isConfirmationValid ? 'Please type the correct confirmation text' : restrictedReason
+                        }
                         onClick={onConfirm}
                     >
                         {confirmButtonText}
@@ -112,7 +120,7 @@ export function DataWarehouseManagedViewsetImpactModal({
                         value={confirmationInput}
                         onChange={setConfirmationInput}
                         placeholder={`Type "${confirmText}" to confirm`}
-                        disabledReason={isDeleting ? 'Deleting...' : undefined}
+                        disabledReason={isDeleting ? 'Deleting...' : restrictedReason}
                         autoFocus
                     />
                 </div>

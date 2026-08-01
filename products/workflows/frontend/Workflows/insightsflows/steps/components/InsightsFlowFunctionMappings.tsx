@@ -85,13 +85,6 @@ export function InsightsFlowFunctionMappings({
         }
     }
 
-    const toggleDisabled = (mapping: InsightsFunctionMappingType): void => {
-        const index = mappingsValue.findIndex((m) => m === mapping)
-        if (index !== -1) {
-            onChange(mappingsValue.map((m, i) => (i === index ? { ...m, disabled: !m.disabled } : m)))
-        }
-    }
-
     const renameMapping = (mapping: InsightsFunctionMappingType): void => {
         Dialog.openForm({
             title: 'Rename mapping',
@@ -156,9 +149,6 @@ export function InsightsFlowFunctionMappings({
                                             dropdown: {
                                                 overlay: (
                                                     <div className="deprecated-space-y-px">
-                                                        <Button onClick={() => toggleDisabled(mapping)}>
-                                                            {mapping.disabled ? 'Enable' : 'Disable'}
-                                                        </Button>
                                                         <Button onClick={() => renameMapping(mapping)}>
                                                             Rename
                                                         </Button>

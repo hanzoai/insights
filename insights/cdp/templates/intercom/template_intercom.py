@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Update contacts in Intercom",
     icon_url="/static/services/intercom.png",
     category=["Customer Success"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')
@@ -171,7 +171,7 @@ template_send_event: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send events to Intercom",
     icon_url="/static/services/intercom.png",
     category=["Customer Success"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')

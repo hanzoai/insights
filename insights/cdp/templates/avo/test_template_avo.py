@@ -5,7 +5,8 @@ from insights.cdp.templates.avo.template_avo import (
     template as template_avo,
 )
 from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
-from insights.models import PluginConfig
+
+from products.cdp.backend.models.plugin import PluginConfig
 
 
 class TestTemplateAvo(BaseInsightsFunctionTemplateTest):
@@ -32,7 +33,7 @@ class TestTemplateAvo(BaseInsightsFunctionTemplateTest):
                     "event": "sign up",
                     "properties": {
                         "distinct_id": "66e614bd-d9f2-491e-9e2c-eeab3090f72f",
-                        "token": "hi_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpicMFKELQXGGTYQO",
+                        "token": "phc_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpicMFKELQXGGTYQO",
                         "bob": {"name": "bob"},
                         "age": 99,
                         "name": "bob",

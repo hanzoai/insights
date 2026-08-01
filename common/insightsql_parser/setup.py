@@ -36,13 +36,13 @@ module = Extension(
 
 setup(
     name="insightsql_parser",
-    version="1.3.14",
-    url="https://github.com/hanzoai/insights/tree/main/common/insightsql_parser",
-    description="InsightsQL parser for Hanzo Insights",
-    author="Hanzo AI Inc.",
-    author_email="eng@hanzo.ai",
-    maintainer="Hanzo AI Inc.",
-    maintainer_email="eng@hanzo.ai",
+    version="1.3.83",
+    url="https://github.com/Insights/insights/tree/master/common/insightsql_parser",
+    description="InsightsQL parser for internal Insights use",
+    author="Insights Inc.",
+    author_email="hey@hanzo.ai",
+    maintainer="Insights Inc.",
+    maintainer_email="hey@hanzo.ai",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     packages=["insightsql_parser-stubs"],
@@ -58,5 +58,6 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
     ],
 )

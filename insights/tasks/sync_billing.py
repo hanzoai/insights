@@ -1,7 +1,11 @@
 from celery import shared_task
 
+from insights.exceptions_capture import capture_exception
+from insights.scoping_audit import skip_team_scope_audit
+
 
 @shared_task(ignore_result=True, rate_limit="5/s")
+@skip_team_scope_audit
 def sync_members_to_billing(organization_id: str) -> None:
     from insights.models import Organization, OrganizationMembership
 
@@ -12,11 +16,22 @@ def sync_members_to_billing(organization_id: str) -> None:
     ).first()
 
     if not first_owner:
+        capture_exception(Exception(f"Organization has no owner", {"organization_id": organization.id}))
         return
 
     first_owner.update_billing_organization_users(organization)
 
 
 @shared_task(ignore_result=True, rate_limit="5/s")
+@skip_team_scope_audit
 def sync_from_billing(organization_id: str) -> None:
-    pass
+    from insights.cloud_utils import get_cached_instance_license
+    from insights.models import Organization
+
+    from ee.billing.billing_manager import BillingManager
+
+    license = get_cached_instance_license()
+    billing_manager = BillingManager(license, None)
+
+    organization = Organization.objects.get(id=organization_id)
+    billing_manager.get_billing(organization, {})

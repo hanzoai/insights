@@ -1,14 +1,14 @@
-import insights from '@hanzo/insights'
-import { sampleOnProperty } from '@hanzo/insights/lib/src/extensions/sampling'
-
-type InsightsInterface = typeof insights
+import insights, { BeforeSendFn, InsightsInterface, SessionRecordingOptions } from 'insights-js'
+import { sampleOnProperty } from 'insights-js/lib/src/extensions/sampling'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { inStorybook, inStorybookTestRunner } from 'lib/utils'
+import { isOAuthMode } from 'lib/oauth/oauthClient'
+import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 
+import { startDetachedElementTracking } from './detachedElementTracker'
 import { startFramerateTracking } from './framerateTracker'
 
-export const SDK_DEFAULTS_DATE = '2026-01-30'
+export const SDK_DEFAULTS_DATE = '2026-05-30'
 
 const shouldDefer = (): boolean => {
     const sessionId = insights.get_session_id()
@@ -17,31 +17,46 @@ const shouldDefer = (): boolean => {
 
 const shouldTrackFramerate = (loadedInstance: InsightsInterface): boolean => {
     return (
-        !!window.INSIGHTS_APP_CONTEXT?.preflight?.is_debug ||
-        (!!loadedInstance.getFeatureFlag(FEATURE_FLAGS.TRACK_REACT_FRAMERATE) &&
-            sampleOnProperty(loadedInstance.get_session_id(), 0.5))
+        !!window.POSTFN_APP_CONTEXT?.preflight?.is_debug ||
+        !!loadedInstance.getFeatureFlag(FEATURE_FLAGS.TRACK_REACT_FRAMERATE)
     )
 }
 
-export function loadInsightsJS(): void {
-    if (window.JS_INSIGHTS_API_KEY) {
-        insights.init(window.JS_INSIGHTS_API_KEY, {
+export interface LoadInsightsJSOptions {
+    /**
+     * Hook insights-js's `before_send` so the caller can mutate or drop events before they leave
+     * the browser. Used by the exporter app to redact the SharingConfiguration access token from
+     * URL-shaped properties on the interview share page — see `frontend/src/exporter/index.tsx`.
+     */
+    beforeSend?: BeforeSendFn | BeforeSendFn[]
+    /**
+     * Extra `session_recording` config merged on top of the defaults — useful for overriding URL
+     * / network-payload masking when the page renders sensitive bearer tokens in its own URL.
+     */
+    sessionRecording?: Partial<SessionRecordingOptions>
+}
+
+export function loadInsightsJS(options: LoadInsightsJSOptions = {}): void {
+    if (window.JS_POSTFN_API_KEY) {
+        insights.init(window.JS_POSTFN_API_KEY, {
             opt_out_useragent_filter: window.location.hostname === 'localhost', // we ARE a bot when running in localhost, so we need to enable this opt-out
-            api_host: window.JS_INSIGHTS_HOST,
-            ui_host: window.JS_INSIGHTS_UI_HOST,
+            api_host: window.JS_POSTFN_HOST,
+            ui_host: window.JS_POSTFN_UI_HOST,
             defaults: SDK_DEFAULTS_DATE,
             persistence: 'localStorage+cookie',
             cookie_persisted_properties: [
                 'prod_interest', // hanzo.ai sets these based on what docs were browsed
             ],
-            bootstrap: window.INSIGHTS_USER_IDENTITY_WITH_FLAGS ? window.INSIGHTS_USER_IDENTITY_WITH_FLAGS : {},
+            bootstrap: window.POSTFN_USER_IDENTITY_WITH_FLAGS ? window.POSTFN_USER_IDENTITY_WITH_FLAGS : {},
             opt_in_site_apps: true,
             disable_surveys: window.IMPERSONATED_SESSION,
-            disable_product_tours: window.IMPERSONATED_SESSION,
+            disable_product_tours: true,
+            opt_out_capturing_by_default: window.IMPERSONATED_SESSION,
             __preview_deferred_init_extensions: shouldDefer(),
             error_tracking: {
                 __captureInsightsExceptions: true,
             },
+            before_send: options.beforeSend,
             loaded: (loadedInstance) => {
                 if (loadedInstance.sessionRecording) {
                     loadedInstance.sessionRecording._forceAllowLocalhostNetworkCapture = true
@@ -56,6 +71,13 @@ export function loadInsightsJS(): void {
                     if (shouldTrackFramerate(loadedInstance)) {
                         console.info('tracking react framerate')
                         startFramerateTracking(loadedInstance)
+                    }
+
+                    if (
+                        !!window.POSTFN_APP_CONTEXT?.preflight?.is_debug ||
+                        !!loadedInstance.getFeatureFlag(FEATURE_FLAGS.TRACK_DETACHED_ELEMENTS)
+                    ) {
+                        startDetachedElementTracking(loadedInstance)
                     }
 
                     if (loadedInstance.getFeatureFlag(FEATURE_FLAGS.TRACK_MEMORY_USAGE)) {
@@ -137,15 +159,20 @@ export function loadInsightsJS(): void {
             },
             session_recording: {
                 blockSelector: '.ph-replay-block',
+                ...options.sessionRecording,
             },
             person_profiles: 'always',
-            __add_tracing_headers: ['insights.hanzo.ai', 'insights.hanzo.ai'],
+            // insights-js patches fetch to add X-INSIGHTS-* tracing headers to these hosts. In OAuth
+            // mode the app's own /api calls go cross-origin to one of them, where the cloud CORS
+            // allowlist rejects those headers — so disable the feature then.
+            tracing_headers: isOAuthMode() ? [] : ['eu.hanzo.ai', 'us.hanzo.ai'],
             __preview_disable_xhr_credentials: true,
-            external_scripts_inject_target: 'head',
             capture_performance: {
                 //disabling to investigate if this is associated with memory leak in the insights app
                 web_vitals_attribution: false,
             },
+            identity_distinct_id: window.JS_POSTFN_IDENTITY_DISTINCT_ID,
+            identity_hash: window.JS_POSTFN_IDENTITY_HASH,
         })
 
         insights.onFeatureFlags((_flags, _variants, context) => {
@@ -156,21 +183,11 @@ export function loadInsightsJS(): void {
             insights.capture('onFeatureFlags error')
 
             // Track that we failed to load feature flags
-            window.INSIGHTS_GLOBAL_ERRORS ||= {}
-            window.INSIGHTS_GLOBAL_ERRORS['onFeatureFlagsLoadError'] = true
+            window.POSTFN_GLOBAL_ERRORS ||= {}
+            window.POSTFN_GLOBAL_ERRORS['onFeatureFlagsLoadError'] = true
         })
     } else {
-        // api_host is REQUIRED even for the opted-out stub. Without it the SDK falls
-        // back to its vendored default host, which the debrand rewrote into
-        // us.i.insights.com -- and the snippet's CDN rule then loads
-        // us-assets.i.insights.com/array/fake_token/config.js as a <script>.
-        //
-        // insights.com is a LIVE third-party domain (51.140.153.150) Hanzo does not
-        // own; only the subdomain is unregistered. Whoever holds that domain could
-        // create it and execute arbitrary JS inside a logged-in admin session on
-        // insights.hanzo.ai. Pinning our own origin closes that outright.
         insights.init('fake_token', {
-            api_host: window.location.origin,
             autocapture: false,
             loaded: function (ph) {
                 ph.opt_out_capturing()

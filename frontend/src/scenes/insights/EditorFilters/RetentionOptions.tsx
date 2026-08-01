@@ -4,7 +4,7 @@ import { Link } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { retentionLogic } from 'scenes/retention/retentionLogic'
 
@@ -24,8 +24,8 @@ export function RetentionOptions(): JSX.Element {
     return (
         <div className="deprecated-space-y-3" data-attr="retention-options">
             {featureFlags[FEATURE_FLAGS.PRODUCT_ANALYTICS_RETENTION_AGGREGATION] && (
-                <div className="flex items-center gap-2">
-                    <div>Calculate</div>
+                <div className="flex items-start gap-2">
+                    <div className="mt-1.5">Calculate</div>
                     <RetentionAggregationSelector />
                 </div>
             )}

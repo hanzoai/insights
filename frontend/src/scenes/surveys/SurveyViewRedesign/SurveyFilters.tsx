@@ -5,14 +5,14 @@ import { IconCopy, IconFilter, IconGraph, IconRefresh, IconX } from '@hanzo/icon
 import { Button, Select, SelectOptions, Switch } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
-import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
+import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { Divider } from 'lib/elements/Divider'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
-import { OPERATOR_OPTIONS } from 'scenes/surveys/SurveyResponseFilters'
 import { QUESTION_TYPE_ICON_MAP, SurveyQuestionLabel } from 'scenes/surveys/constants'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
+import { OPERATOR_OPTIONS } from 'scenes/surveys/SurveyResponseFilters'
 import { getSurveyEndDateForQuery, getSurveyIdBasedResponseKey, getSurveyStartDateForQuery } from 'scenes/surveys/utils'
 
 import { groupsModel } from '~/models/groupsModel'

@@ -8,7 +8,7 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use axum::async_trait;
+use async_trait::async_trait;
 use common_types::DatastoreEvent;
 use futures::future::join_all;
 use itertools::Itertools;
@@ -20,7 +20,7 @@ use crate::kafka::types::Partition;
 use crate::pipelines::timestamp_deduplicator::{
     TimestampDeduplicator, TimestampDeduplicatorConfig,
 };
-use crate::pipelines::traits::EventParser;
+use crate::pipelines::traits::{EventParser, FailOpenProcessor};
 use crate::store::DeduplicationStoreConfig;
 use crate::store_manager::StoreManager;
 
@@ -30,6 +30,8 @@ use super::parser::DatastoreEventParser;
 #[derive(Debug, Clone)]
 pub struct DatastoreEventsConfig {
     pub store_config: DeduplicationStoreConfig,
+    /// When true, bypass all deduplication and skip processing entirely.
+    pub fail_open: bool,
 }
 
 /// Batch processor for Datastore events with timestamp-based deduplication.
@@ -37,12 +39,17 @@ pub struct DatastoreEventsConfig {
 /// This processor wraps `TimestampDeduplicator<DatastoreEvent>` and implements
 /// the `BatchConsumerProcessor` trait for Kafka batch consumption.
 pub struct DatastoreEventsBatchProcessor {
+    config: DatastoreEventsConfig,
     deduplicator: TimestampDeduplicator<DatastoreEvent>,
 }
 
 #[async_trait]
 impl BatchConsumerProcessor<DatastoreEvent> for DatastoreEventsBatchProcessor {
     async fn process_batch(&self, messages: Vec<KafkaMessage<DatastoreEvent>>) -> Result<()> {
+        if self.config.fail_open {
+            return self.process_batch_fail_open(messages).await;
+        }
+
         // Organize messages by partition
         let messages_by_partition = messages
             .iter()
@@ -65,9 +72,20 @@ impl BatchConsumerProcessor<DatastoreEvent> for DatastoreEventsBatchProcessor {
     }
 }
 
+#[async_trait]
+impl FailOpenProcessor<DatastoreEvent> for DatastoreEventsBatchProcessor {
+    async fn process_batch_fail_open(
+        &self,
+        _messages: Vec<KafkaMessage<DatastoreEvent>>,
+    ) -> Result<()> {
+        // Read-only pipeline — nothing to forward in fail-open mode
+        Ok(())
+    }
+}
+
 impl DatastoreEventsBatchProcessor {
     /// Create a new Datastore events deduplication processor
-    pub fn new(_config: DatastoreEventsConfig, store_manager: Arc<StoreManager>) -> Self {
+    pub fn new(config: DatastoreEventsConfig, store_manager: Arc<StoreManager>) -> Self {
         let dedup_config = TimestampDeduplicatorConfig {
             pipeline_name: "datastore_events".to_string(),
             publisher: None, // Datastore events pipeline doesn't publish
@@ -76,7 +94,10 @@ impl DatastoreEventsBatchProcessor {
 
         let deduplicator = TimestampDeduplicator::new(dedup_config, store_manager);
 
-        Self { deduplicator }
+        Self {
+            config,
+            deduplicator,
+        }
     }
 
     async fn process_partition_batch(
@@ -138,6 +159,7 @@ impl DatastoreEventsBatchProcessor {
 mod tests {
     use super::*;
     use crate::pipelines::{DeduplicationResult, DuplicateReason};
+    use crate::rocksdb::store::RocksDbConfig;
     use crate::test_utils::create_test_tracker;
     use common_types::PersonMode;
     use tempfile::TempDir;
@@ -148,9 +170,13 @@ mod tests {
         let store_config = DeduplicationStoreConfig {
             path: temp_dir.path().to_path_buf(),
             max_capacity: 1000,
+            rocksdb: RocksDbConfig::default(),
         };
 
-        let config = DatastoreEventsConfig { store_config };
+        let config = DatastoreEventsConfig {
+            store_config,
+            fail_open: false,
+        };
         (config, temp_dir)
     }
 

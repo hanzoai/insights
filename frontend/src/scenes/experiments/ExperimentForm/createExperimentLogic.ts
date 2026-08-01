@@ -1,13 +1,13 @@
-import { actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
+import { MakeLogicType, actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
 import api from 'lib/api'
+import { tryShowMCPHint } from 'lib/components/MCPHint/mcpHintLogic'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
-import { FEATURE_FLAGS } from 'lib/constants'
 import { toast } from 'lib/elements/Toast/Toast'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { featureFlagsLogic } from 'scenes/feature-flags/featureFlagsLogic'
+import { projectLogic } from 'scenes/projectLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
@@ -21,74 +21,35 @@ import {
 } from '~/queries/schema/schema-general'
 import type { Experiment, FeatureFlagFilters, MultivariateFlagVariant } from '~/types'
 
+import type { ExperimentFeatureFlagFiltersApi } from 'products/experiments/frontend/generated/api.schemas'
+
+import type { ProductIntentProperties } from '../../../lib/utils/product-intents'
+import type { ExperimentMetricUnion } from '../../../queries/schema/schema-general'
+import type { FeatureFlagType } from '../../../types'
 import { NEW_EXPERIMENT } from '../constants'
 import { FORM_MODES, experimentLogic } from '../experimentLogic'
 import { experimentSceneLogic } from '../experimentSceneLogic'
-import type { createExperimentLogicType } from './createExperimentLogicType'
+import { getExperimentVariants, toExperimentWritePayload, toFlagVariantsInput } from '../utils'
 import { validateExperimentSubmission } from './experimentSubmissionValidation'
+import type { FeatureFlagKeyValidation } from './variantsPanelLogic'
 import { variantsPanelLogic } from './variantsPanelLogic'
 import { validateVariants } from './variantsPanelValidation'
 
-/**
- * Fields that can be updated on an existing experiment.
- *
- * This list must match the backend's `expected_keys` in the ExperimentSerializer.update().
- *
- * The backend will reject any fields not in this list with a ValidationError.
- *
- * Note: 'deleted' is in backend but not in frontend types, so we omit it here.
- * Note: 'saved_metrics_ids' is handled separately in the payload but is also allowed.
- */
-const ALLOWED_UPDATE_FIELDS: (keyof Experiment)[] = [
-    'name',
-    'description',
-    'start_date',
-    'end_date',
-    'filters',
-    'parameters',
-    'archived',
-    'secondary_metrics',
-    'holdout',
-    'exposure_criteria',
-    'metrics',
-    'metrics_secondary',
-    'stats_config',
-    'conclusion',
-    'conclusion_comment',
-    'primary_metrics_ordered_uuids',
-    'secondary_metrics_ordered_uuids',
-]
-
-/**
- * Filters an experiment object to only include fields that can be updated.
- * This prevents validation errors from the backend when updating experiments.
- */
-const filterExperimentForUpdate = (experiment: Experiment): Partial<Experiment> => {
-    const filtered: any = {}
-
-    for (const key of ALLOWED_UPDATE_FIELDS) {
-        if (key in experiment) {
-            filtered[key] = experiment[key as keyof Experiment]
-        }
-    }
-
-    return filtered as Partial<Experiment>
-}
-
 const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
-const draftStorageKey = (tabId: string): string => `experiment-draft-${tabId}`
+// Scope the draft key per project so a draft started in one project can't prefill or be submitted in another within the same browser session.
+export const DRAFT_STORAGE_KEY = `experiment-draft-${window.POSTFN_APP_CONTEXT?.current_team?.id ?? 'unknown'}`
 
 type ExperimentDraft = {
     experiment: Experiment
     timestamp: number
 }
 
-const readDraftFromStorage = (tabId?: string): Experiment | null => {
-    if (!tabId || typeof sessionStorage === 'undefined') {
+const readDraftFromStorage = (): Experiment | null => {
+    if (typeof sessionStorage === 'undefined') {
         return null
     }
-    const raw = sessionStorage.getItem(draftStorageKey(tabId))
+    const raw = sessionStorage.getItem(DRAFT_STORAGE_KEY)
     if (!raw) {
         return null
     }
@@ -97,7 +58,7 @@ const readDraftFromStorage = (tabId?: string): Experiment | null => {
         if (parsed && typeof parsed === 'object' && 'experiment' in parsed && 'timestamp' in parsed) {
             const { experiment, timestamp } = parsed as ExperimentDraft
             if (Date.now() - timestamp > DRAFT_TTL_MS) {
-                sessionStorage.removeItem(draftStorageKey(tabId))
+                sessionStorage.removeItem(DRAFT_STORAGE_KEY)
                 return null
             }
             return experiment
@@ -108,68 +69,193 @@ const readDraftFromStorage = (tabId?: string): Experiment | null => {
     }
 }
 
-const writeDraftToStorage = (tabId: string | undefined, experiment: Experiment): void => {
-    if (!tabId || typeof sessionStorage === 'undefined') {
+const writeDraftToStorage = (experiment: Experiment): void => {
+    if (typeof sessionStorage === 'undefined') {
         return
     }
     const draft: ExperimentDraft = { experiment, timestamp: Date.now() }
-    sessionStorage.setItem(draftStorageKey(tabId), JSON.stringify(draft))
+    sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft))
 }
 
-const clearDraftStorage = (tabId?: string): void => {
-    if (!tabId || typeof sessionStorage === 'undefined') {
+const clearDraftStorage = (): void => {
+    if (typeof sessionStorage === 'undefined') {
         return
     }
-    sessionStorage.removeItem(draftStorageKey(tabId))
+    sessionStorage.removeItem(DRAFT_STORAGE_KEY)
 }
 
-export interface CreateExperimentLogicProps {
-    experiment?: Experiment
-    tabId?: string
+export interface CreateExperimentLogicProps {}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface createExperimentLogicValues {
+    currentProjectId: number | null // projectLogic
+    featureFlagKeyValidation: FeatureFlagKeyValidation | null // variantsPanelLogic
+    featureFlagKeyValidationLoading: boolean // variantsPanelLogic
+    canSubmitExperiment: boolean
+    experiment: Experiment & {
+        feature_flag_filters?: FeatureFlagFilters
+    }
+    experimentErrors: Record<string, string>
+    experimentValidationErrors: string | undefined
+    formCanceled: boolean
+    isExperimentSubmitting: boolean
+    mode: 'create' | 'link'
+    sharedMetrics: {
+        primary: ExperimentMetric[]
+        secondary: ExperimentMetric[]
+    }
 }
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface createExperimentLogicActions {
+    reportExperimentCreated: (
+        experiment: Experiment,
+        metadata?:
+            | {
+                  creation_source?: string
+                  has_linked_flag?: boolean
+              }
+            | undefined
+    ) => {
+        experiment: Experiment
+        metadata:
+            | {
+                  creation_source?: string | undefined
+                  has_linked_flag?: boolean | undefined
+              }
+            | undefined
+    } // eventUsageLogic
+    updateFlag: (flag: FeatureFlagType) => {
+        flag: FeatureFlagType
+    } // featureFlagsLogic
+    addProductIntent: (properties: ProductIntentProperties) => ProductIntentProperties // teamLogic
+    cancelForm: () => {
+        value: true
+    }
+    createExperimentSuccess: () => {
+        value: true
+    }
+    resetExperiment: () => {
+        value: true
+    }
+    saveExperiment: () => {
+        value: true
+    }
+    saveExperimentFailure: () => {
+        value: true
+    }
+    saveExperimentStarted: () => {
+        value: true
+    }
+    saveExperimentSuccess: () => {
+        value: true
+    }
+    setExperiment: (experiment: Experiment) => {
+        experiment: Experiment
+    }
+    setExperimentErrors: (errors: Record<string, string>) => {
+        errors: Record<string, string>
+    }
+    setExperimentValue: (
+        name: string,
+        value: any
+    ) => {
+        name: string
+        value: any
+    }
+    setExposureCriteria: (criteria: ExperimentExposureCriteria) => {
+        criteria: ExperimentExposureCriteria
+    }
+    setFeatureFlagConfig: (config: {
+        ensure_experience_continuity?: boolean
+        feature_flag_key?: string
+        rollout_percentage?: number
+        variants?: MultivariateFlagVariant[]
+    }) => {
+        config: {
+            ensure_experience_continuity?: boolean | undefined
+            feature_flag_key?: string | undefined
+            rollout_percentage?: number | undefined
+            variants?: MultivariateFlagVariant[] | undefined
+        }
+    }
+    setSharedMetrics: (sharedMetrics: { primary: ExperimentMetric[]; secondary: ExperimentMetric[] }) => {
+        sharedMetrics: {
+            primary: ExperimentMetricUnion[]
+            secondary: ExperimentMetricUnion[]
+        }
+    }
+    validateField: (field: 'name') => {
+        field: 'name'
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface createExperimentLogicMeta {
+    key: string
+    __keaTypeGenInternalSelectorTypes: {
+        canSubmitExperiment: (
+            experiment: Experiment & {
+                feature_flag_filters?: FeatureFlagFilters
+            },
+            featureFlagKeyValidation: FeatureFlagKeyValidation | null,
+            mode: 'create' | 'link',
+            experimentErrors: Record<string, string>
+        ) => boolean
+        experimentValidationErrors: (
+            experiment: Experiment & {
+                feature_flag_filters?: FeatureFlagFilters
+            },
+            featureFlagKeyValidation: FeatureFlagKeyValidation | null,
+            mode: 'create' | 'link',
+            experimentErrors: Record<string, string>
+        ) => string | undefined
+        mode: (
+            experiment: Experiment & {
+                feature_flag_filters?: FeatureFlagFilters
+            }
+        ) => 'create' | 'link'
+    }
+}
+
+export type createExperimentLogicType = MakeLogicType<
+    createExperimentLogicValues,
+    createExperimentLogicActions,
+    CreateExperimentLogicProps,
+    createExperimentLogicMeta
+>
 
 export const createExperimentLogic = kea<createExperimentLogicType>([
     props({} as CreateExperimentLogicProps),
-    key((props) => `${props.tabId ?? 'global'}-${props.experiment?.id ?? 'create-experiment'}`),
+    key(() => 'create-experiment'),
     path((key) => ['scenes', 'experiments', 'create', 'createExperimentLogic', key]),
-    connect((props: CreateExperimentLogicProps) => {
-        const experiment = props.experiment || { ...NEW_EXPERIMENT }
-        const disabled = experiment.id !== 'new' && experiment.id !== null
-        const variantsPanelLogicInstance = variantsPanelLogic({
-            experiment,
-            disabled,
-        })
-
-        return {
-            values: [
-                variantsPanelLogicInstance,
-                ['featureFlagKeyValidation', 'featureFlagKeyValidationLoading'],
-                featureFlagLogic,
-                ['featureFlags'],
-            ],
-            actions: [
-                eventUsageLogic,
-                ['reportExperimentCreated', 'reportExperimentUpdated'],
-                featureFlagsLogic,
-                ['updateFlag'],
-                teamLogic,
-                ['addProductIntent'],
-            ],
-        }
-    }),
+    connect(() => ({
+        values: [
+            variantsPanelLogic({ experiment: { ...NEW_EXPERIMENT }, disabled: false }),
+            ['featureFlagKeyValidation', 'featureFlagKeyValidationLoading'],
+            projectLogic,
+            ['currentProjectId'],
+        ],
+        actions: [
+            eventUsageLogic,
+            ['reportExperimentCreated'],
+            featureFlagsLogic,
+            ['updateFlag'],
+            teamLogic,
+            ['addProductIntent'],
+        ],
+    })),
     actions(() => ({
         setExperiment: (experiment: Experiment) => ({ experiment }),
         setExperimentValue: (name: string, value: any) => ({ name, value }),
         resetExperiment: true,
-        clearDraft: true,
+        cancelForm: true,
         setExposureCriteria: (criteria: ExperimentExposureCriteria) => ({ criteria }),
         setFeatureFlagConfig: (config: {
             feature_flag_key?: string
-            feature_flag_variants?: MultivariateFlagVariant[]
-            parameters?: {
-                feature_flag_variants?: MultivariateFlagVariant[]
-                ensure_experience_continuity?: boolean
-            }
+            variants?: MultivariateFlagVariant[]
+            rollout_percentage?: number
+            ensure_experience_continuity?: boolean
         }) => ({ config }),
         saveExperiment: true,
         saveExperimentStarted: true,
@@ -182,9 +268,9 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
             sharedMetrics,
         }),
     })),
-    reducers(({ props }) => ({
+    reducers(() => ({
         experiment: [
-            (props.experiment ?? { ...NEW_EXPERIMENT }) as Experiment & { feature_flag_filters?: FeatureFlagFilters },
+            { ...NEW_EXPERIMENT } as Experiment & { feature_flag_filters?: FeatureFlagFilters },
             {
                 setExperiment: (_, { experiment }) => experiment,
                 setExperimentValue: (state, { name, value }) => ({ ...state, [name]: value }),
@@ -195,50 +281,35 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                         ...criteria,
                     },
                 }),
-                setFeatureFlagConfig: (state, { config }) => ({
-                    ...state,
-                    ...(config.feature_flag_key !== undefined && {
-                        feature_flag_key: config.feature_flag_key,
-                    }),
-                    parameters: {
-                        ...state.parameters,
-                        // Handle both flat structure (feature_flag_variants) and nested (parameters.*)
-                        ...(config.feature_flag_variants !== undefined && {
-                            feature_flag_variants: config.feature_flag_variants,
+                setFeatureFlagConfig: (state, { config }) => {
+                    const currentConfig = state.feature_flag_config ?? {}
+                    const filters: ExperimentFeatureFlagFiltersApi = { ...currentConfig.filters }
+                    if (config.variants !== undefined) {
+                        filters.multivariate = { variants: toFlagVariantsInput(config.variants) }
+                    }
+                    if (config.rollout_percentage !== undefined) {
+                        filters.groups = [{ properties: [], rollout_percentage: config.rollout_percentage }]
+                    }
+                    return {
+                        ...state,
+                        ...(config.feature_flag_key !== undefined && {
+                            feature_flag_key: config.feature_flag_key,
                         }),
-                        ...(config.parameters && config.parameters),
-                    },
-                }),
+                        feature_flag_config: {
+                            ...currentConfig,
+                            filters,
+                            ...(config.ensure_experience_continuity !== undefined && {
+                                ensure_experience_continuity: config.ensure_experience_continuity,
+                            }),
+                        },
+                    }
+                },
                 updateFeatureFlagKey: (state, { key }) => ({ ...state, feature_flag_key: key }),
-                resetExperiment: () => props.experiment ?? { ...NEW_EXPERIMENT },
+                resetExperiment: () => ({ ...NEW_EXPERIMENT }),
             },
         ],
         sharedMetrics: [
-            (() => {
-                if (!props.experiment?.saved_metrics) {
-                    return { primary: [], secondary: [] }
-                }
-
-                const primary = props.experiment.saved_metrics
-                    .filter((sm) => sm.metadata.type === 'primary')
-                    .map((sm) => ({
-                        ...sm.query,
-                        name: sm.name,
-                        sharedMetricId: sm.saved_metric,
-                        isSharedMetric: true,
-                    }))
-
-                const secondary = props.experiment.saved_metrics
-                    .filter((sm) => sm.metadata.type === 'secondary')
-                    .map((sm) => ({
-                        ...sm.query,
-                        name: sm.name,
-                        sharedMetricId: sm.saved_metric,
-                        isSharedMetric: true,
-                    }))
-
-                return { primary, secondary }
-            })() as { primary: ExperimentMetric[]; secondary: ExperimentMetric[] },
+            { primary: [], secondary: [] } as { primary: ExperimentMetric[]; secondary: ExperimentMetric[] },
             {
                 setSharedMetrics: (_, { sharedMetrics }) => sharedMetrics,
             },
@@ -260,13 +331,19 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                 resetExperiment: () => ({}),
             },
         ],
+        formCanceled: [
+            false,
+            {
+                cancelForm: () => true,
+            },
+        ],
     })),
     selectors(() => ({
         canSubmitExperiment: [
             (s) => [s.experiment, s.featureFlagKeyValidation, s.mode, s.experimentErrors],
             (
                 experiment: Experiment,
-                featureFlagKeyValidation: { valid: boolean; error: string | null } | null,
+                featureFlagKeyValidation: FeatureFlagKeyValidation | null,
                 mode: 'create' | 'link',
                 experimentErrors: Record<string, string>
             ) => {
@@ -283,7 +360,7 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
             (s) => [s.experiment, s.featureFlagKeyValidation, s.mode, s.experimentErrors],
             (
                 experiment: Experiment,
-                featureFlagKeyValidation: { valid: boolean; error: string | null } | null,
+                featureFlagKeyValidation: FeatureFlagKeyValidation | null,
                 mode: 'create' | 'link',
                 experimentErrors: Record<string, string>
             ): string | undefined => {
@@ -296,23 +373,16 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                 return validation.errors.length > 0 ? validation.errors.join(', ') : undefined
             },
         ],
-        isEditMode: [
-            (s) => [s.experiment],
-            (experiment: Experiment) => experiment.id !== 'new' && experiment.id !== null,
-        ],
-        isCreateMode: [(s) => [s.isEditMode], (isEditMode: boolean) => !isEditMode],
         mode: [
-            (s) => [s.experiment, (_, props) => props],
-            (experiment: Experiment, props: CreateExperimentLogicProps): 'create' | 'link' => {
-                const disabled = experiment.id !== 'new' && experiment.id !== null
-                return variantsPanelLogic({ experiment: props.experiment || { ...NEW_EXPERIMENT }, disabled }).values
-                    .mode
+            (s) => [s.experiment],
+            (): 'create' | 'link' => {
+                return variantsPanelLogic({ experiment: { ...NEW_EXPERIMENT }, disabled: false }).values.mode
             },
         ],
     })),
-    events(({ actions, values, props }) => ({
+    events(({ actions, values }) => ({
         afterMount: () => {
-            if (props.experiment || values.experiment.id !== 'new') {
+            if (values.experiment.id !== 'new') {
                 return
             }
 
@@ -339,24 +409,26 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                 // Continue to draft fallback
             }
 
-            const draft = readDraftFromStorage(props.tabId)
+            const draft = readDraftFromStorage()
             if (draft) {
                 actions.setExperiment(draft)
             }
         },
         beforeUnmount: () => {
-            if (props.experiment || values.experiment.id !== 'new') {
+            if (values.formCanceled || values.experiment.id !== 'new') {
                 return
             }
-            writeDraftToStorage(props.tabId, values.experiment)
+            // Use cases covered:
+            // - navigating away from the form without saving
+            writeDraftToStorage(values.experiment)
         },
     })),
-    listeners(({ values, actions, props }) => ({
-        clearDraft: () => {
-            if (props.experiment || values.experiment.id !== 'new') {
+    listeners(({ values, actions }) => ({
+        cancelForm: () => {
+            if (values.experiment.id !== 'new') {
                 return
             }
-            clearDraftStorage(props.tabId)
+            clearDraftStorage()
         },
         setExperiment: () => {},
         setExperimentValue: () => {},
@@ -398,7 +470,7 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                 // Show toast with what's wrong
                 const validation = validateVariants({
                     flagKey: values.experiment.feature_flag_key,
-                    variants: values.experiment.parameters?.feature_flag_variants ?? [],
+                    variants: getExperimentVariants(values.experiment),
                     featureFlagKeyValidation: values.featureFlagKeyValidation,
                     mode: values.mode,
                 })
@@ -415,15 +487,28 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
             // Set loading state after all validation passes
             actions.saveExperimentStarted()
 
-            try {
-                const isEditMode = values.isEditMode
-
-                // Make experiment eligible for timeseries
-                const schedulingConfig = {
-                    ...values.experiment?.scheduling_config,
-                    timeseries: true,
+            // Whether the key is available decides whether flag config is sent (an available key
+            // means the backend creates the flag and applies the config; an existing key means the
+            // experiment links to that flag as-is and explicit config is rejected). A missing or
+            // stale availability check must not decide this silently: re-run it, and fail loud if
+            // it still can't complete.
+            const flagKey = values.experiment.feature_flag_key
+            const panelLogic = variantsPanelLogic({ experiment: { ...NEW_EXPERIMENT }, disabled: false })
+            if (values.featureFlagKeyValidation?.key !== flagKey) {
+                try {
+                    await panelLogic.asyncActions.validateFeatureFlagKey(flagKey)
+                } catch {
+                    // Handled below: featureFlagKeyValidation stays stale or null.
                 }
+            }
+            const keyValidation = panelLogic.values.featureFlagKeyValidation
+            if (keyValidation?.key !== flagKey) {
+                toast.error("Couldn't verify the feature flag key. Please try again.")
+                actions.saveExperimentFailure()
+                return
+            }
 
+            try {
                 const savedMetrics = [
                     ...values.sharedMetrics.primary.map((metric) => ({
                         id: metric.sharedMetricId!,
@@ -439,32 +524,20 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                     })),
                 ]
 
-                const experimentPayload: Experiment = {
-                    ...values.experiment,
-                    scheduling_config: schedulingConfig,
+                // A key confirmed available means the backend will create the flag and can apply
+                // config to it; a taken key means the experiment links to the pre-existing flag
+                // as-is, and the API rejects explicit flag config.
+                const experimentPayload = {
+                    ...toExperimentWritePayload(values.experiment, {
+                        omitFlagConfig: keyValidation.valid !== true,
+                    }),
                     saved_metrics_ids: savedMetrics,
-                    exposure_preaggregation_enabled:
-                        !!values.featureFlags[FEATURE_FLAGS.EXPERIMENT_QUERY_PREAGGREGATION],
                 }
 
-                let response: Experiment
-
-                if (isEditMode) {
-                    // Update existing experiment - filter to only allowed fields
-                    const filteredPayload = {
-                        ...filterExperimentForUpdate(experimentPayload),
-                        // Ensure these are always included for update
-                        scheduling_config: schedulingConfig,
-                        saved_metrics_ids: savedMetrics,
-                    }
-                    response = (await api.update(
-                        `api/projects/@current/experiments/${values.experiment.id}`,
-                        filteredPayload
-                    )) as Experiment
-                } else {
-                    // Create new experiment - send all fields
-                    response = (await api.create(`api/projects/@current/experiments`, experimentPayload)) as Experiment
-                }
+                const response = (await api.create(
+                    `api/projects/${values.currentProjectId}/experiments`,
+                    experimentPayload
+                )) as Experiment
 
                 if (response.id) {
                     // Refresh tree navigation
@@ -477,28 +550,23 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                     // This ensures we have the full experiment data including feature_flag, etc.
                     actions.setExperiment(response)
 
-                    if (isEditMode) {
-                        // Update flow
-                        actions.reportExperimentUpdated(response)
-                        toast.success('Experiment updated successfully!')
-                    } else {
-                        // Create flow
-                        actions.reportExperimentCreated(response)
-                        actions.addProductIntent({
-                            product_type: ProductKey.EXPERIMENTS,
-                            intent_context: ProductIntentContext.EXPERIMENT_CREATED,
-                        })
-                        actions.createExperimentSuccess()
-                        globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.CreateExperiment)
-                        toast.success('Experiment created successfully!')
-                        // Don't reset - we just set the fresh data above
-                    }
+                    actions.addProductIntent({
+                        product_type: ProductKey.EXPERIMENTS,
+                        intent_context: ProductIntentContext.EXPERIMENT_CREATED,
+                    })
+                    actions.createExperimentSuccess()
+                    globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.CreateExperiment)
+                    toast.success('Experiment created successfully!')
+                    tryShowMCPHint('experiments.create', {
+                        derivedPrompt: response.name ? `Create an A/B experiment called ${response.name}` : undefined,
+                    })
+                    // Don't reset - we just set the fresh data above
 
                     actions.saveExperimentSuccess()
-                    clearDraftStorage(props.tabId)
+                    clearDraftStorage()
 
-                    if (props.tabId) {
-                        const sceneLogicInstance = experimentSceneLogic({ tabId: props.tabId })
+                    const sceneLogicInstance = experimentSceneLogic.findMounted()
+                    if (sceneLogicInstance) {
                         sceneLogicInstance.actions.setSceneState(response.id, FORM_MODES.update)
                         const logicRef = sceneLogicInstance.values.experimentLogicRef
 
@@ -507,7 +575,6 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                         } else {
                             experimentLogic({
                                 experimentId: response.id,
-                                tabId: props.tabId,
                             }).actions.loadExperimentSuccess(response)
                         }
                     } else {

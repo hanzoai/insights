@@ -20,9 +20,9 @@ remote_state {
     if_exists = "overwrite"
   }
   config = {
-    bucket         = get_env("INSIGHTS_PROVIDER_TF_STATE_BUCKET")
+    bucket         = get_env("POSTFN_PROVIDER_TF_STATE_BUCKET")
     key            = "insights-provider/${path_relative_to_include()}/terraform.tfstate"
-    region         = get_env("INSIGHTS_PROVIDER_TF_STATE_REGION")
+    region         = get_env("POSTFN_PROVIDER_TF_STATE_REGION")
     use_lockfile   = true
     encrypt        = true
   }

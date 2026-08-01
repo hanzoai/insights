@@ -1,26 +1,548 @@
+use std::fmt;
+use std::str::FromStr;
+
 use envconfig::Envconfig;
 use std::net::SocketAddr;
 use std::time::Duration;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ReplicaDiscoveryMode {
+    /// DNS mode: static channels to ClusterIP URL.
+    Dns,
+    /// K8s mode: EndpointSlice watcher with client-side p2c balancing.
+    K8s,
+}
+
+impl fmt::Display for ReplicaDiscoveryMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ReplicaDiscoveryMode::Dns => write!(f, "dns"),
+            ReplicaDiscoveryMode::K8s => write!(f, "k8s"),
+        }
+    }
+}
+
+impl FromStr for ReplicaDiscoveryMode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "dns" => Ok(ReplicaDiscoveryMode::Dns),
+            "k8s" => Ok(ReplicaDiscoveryMode::K8s),
+            other => Err(format!(
+                "unknown replica discovery mode '{other}', expected 'dns' or 'k8s'"
+            )),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RouterMode {
+    /// Replica-only mode: all requests go to personinsights-replica.
+    Replica,
+    /// Leader mode: person writes and strong reads go to leader pods
+    /// via etcd-coordinated partition routing. Everything else goes to replica.
+    Leader,
+}
+
+impl fmt::Display for RouterMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            RouterMode::Replica => write!(f, "replica"),
+            RouterMode::Leader => write!(f, "leader"),
+        }
+    }
+}
+
+impl FromStr for RouterMode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "replica" => Ok(RouterMode::Replica),
+            "leader" => Ok(RouterMode::Leader),
+            other => Err(format!(
+                "unknown router mode '{other}', expected 'replica' or 'leader'"
+            )),
+        }
+    }
+}
 
 #[derive(Envconfig, Clone, Debug)]
 pub struct Config {
     #[envconfig(default = "127.0.0.1:50052")]
     pub grpc_address: SocketAddr,
 
-    /// URL of the personinsights-replica backend
+    /// Router mode: "replica" (default) or "leader"
+    #[envconfig(default = "replica")]
+    pub router_mode: RouterMode,
+
+    /// URL of the personinsights-replica backend (DNS mode only)
     #[envconfig(default = "http://127.0.0.1:50051")]
     pub replica_url: String,
+
+    /// Number of gRPC channels to open to the replica service (DNS mode only).
+    /// Multiple channels distribute requests across K8s service endpoints.
+    #[envconfig(default = "4")]
+    pub replica_channels: usize,
+
+    /// Discovery mode for replica endpoints: "dns" (default)
+    /// or "k8s" (EndpointSlice watcher with client-side balancing)
+    #[envconfig(default = "dns")]
+    pub replica_discovery_mode: ReplicaDiscoveryMode,
+
+    /// Kubernetes service name to watch for replica endpoints (k8s mode only)
+    #[envconfig(default = "personinsights-replica")]
+    pub replica_service_name: String,
+
+    /// Kubernetes namespace for replica endpoint discovery (k8s mode only).
+    /// If empty, reads from the service account mount.
+    #[envconfig(default = "")]
+    pub replica_service_namespace: String,
+
+    /// gRPC port on replica pods (k8s mode only)
+    #[envconfig(default = "50051")]
+    pub replica_port: u16,
 
     /// Timeout for backend requests in milliseconds
     #[envconfig(default = "5000")]
     pub backend_timeout_ms: u64,
 
+    /// Connect timeout for backend connections in milliseconds (k8s mode only)
+    #[envconfig(default = "2000")]
+    pub backend_connect_timeout_ms: u64,
+
     #[envconfig(default = "9101")]
     pub metrics_port: u16,
+
+    /// Maximum number of retry attempts for transient backend errors (0 = no retries)
+    #[envconfig(default = "3")]
+    pub max_retries: u32,
+
+    /// Initial backoff delay in milliseconds before the first retry
+    #[envconfig(default = "25")]
+    pub initial_backoff_ms: u64,
+
+    /// Maximum backoff delay in milliseconds (caps exponential growth)
+    #[envconfig(default = "500")]
+    pub max_backoff_ms: u64,
+
+    /// Interval between HTTP/2 keepalive pings sent by the gRPC server (0 = disabled)
+    #[envconfig(default = "30")]
+    pub grpc_keepalive_interval_secs: u64,
+
+    /// Timeout for a keepalive ping ack before considering the connection dead
+    #[envconfig(default = "10")]
+    pub grpc_keepalive_timeout_secs: u64,
+
+    /// Interval between HTTP/2 keepalive pings sent to the replica backend (0 = disabled)
+    #[envconfig(default = "30")]
+    pub backend_keepalive_interval_secs: u64,
+
+    /// Timeout for a keepalive ping ack from the replica backend
+    #[envconfig(default = "10")]
+    pub backend_keepalive_timeout_secs: u64,
+
+    /// Maximum request body size the proxy will collect before forwarding,
+    /// in bytes. Oversized requests are rejected with RESOURCE_EXHAUSTED.
+    /// Responses stream through unbounded (see `response_size_warn_bytes`).
+    #[envconfig(default = "134217728")]
+    pub grpc_max_recv_message_size: usize,
+
+    /// Log a warning when a gRPC response exceeds this size in bytes.
+    /// Set to 0 to disable. Default: 10 MiB.
+    #[envconfig(default = "10485760")]
+    pub response_size_warn_bytes: usize,
+
+    // ── etcd coordination (leader mode only) ─────────────────────
+    #[envconfig(default = "http://localhost:2379")]
+    pub etcd_endpoints: String,
+
+    #[envconfig(default = "/personinsights/")]
+    pub etcd_prefix: String,
+
+    /// Router name for etcd registration (typically set from K8s downward API)
+    #[envconfig(default = "router-0")]
+    pub pod_name: String,
+
+    /// Registration lease TTL. A crashed router stays in every freeze
+    /// quorum until this expires, stalling any handoff frozen in that
+    /// window — keep it short. Graceful exits deregister immediately.
+    #[envconfig(default = "10")]
+    pub lease_ttl: i64,
+
+    #[envconfig(default = "3")]
+    pub heartbeat_interval_secs: u64,
+
+    /// Fail the coordination run when the handoff watch loop makes no
+    /// progress for this long, so the router deregisters and restarts as
+    /// a healthy participant instead of wedging freeze quorums while its
+    /// lease stays alive. `0` disables the watchdog.
+    #[envconfig(default = "60")]
+    pub router_participant_stall_secs: u64,
+
+    /// How often the routing table re-derives stash, table, and drain
+    /// state from a fresh etcd snapshot, independent of watch events.
+    #[envconfig(default = "5")]
+    pub router_reconcile_secs: u64,
+
+    /// How many consecutive reconcile-pass failures the routing table
+    /// tolerates before failing the run. A failed pass only means the
+    /// router stays as stale as the previous tick — the watch-driven
+    /// steady state — so brief etcd blips must not be fatal; sustained
+    /// outage is already handled by lease self-fencing. The budget
+    /// bounds the partial-failure mode where snapshot reads fail while
+    /// the lease stays healthy, which would otherwise silently degrade
+    /// the liveness the reconcile provides.
+    #[envconfig(default = "12")]
+    pub router_reconcile_failure_budget: u32,
+
+    /// How many consecutive coordination-attempt failures the routing
+    /// table's run supervisor tolerates (rebuilding coordination in
+    /// place while the data plane keeps serving) before giving up and
+    /// letting the process restart. A healthy attempt resets the count.
+    #[envconfig(default = "10")]
+    pub router_run_retry_budget: u32,
+
+    /// Base backoff in milliseconds between coordination attempts;
+    /// doubles per consecutive failure up to a fixed cap.
+    #[envconfig(default = "500")]
+    pub router_run_retry_backoff_ms: u64,
+
+    /// How long a handoff may sit in Warming before the coordinator
+    /// cancels it by replacement. Warming replays the partition's
+    /// changelog, so its budget is far above the general handoff
+    /// deadline; `0` disables it.
+    #[envconfig(default = "1800")]
+    pub coordinator_warming_deadline_secs: u64,
+
+    /// Maximum number of stashed write requests held per partition while
+    /// a handoff is in progress. Excess requests return UNAVAILABLE and
+    /// rely on caller-side retries.
+    #[envconfig(default = "5000")]
+    pub stash_max_messages_per_partition: usize,
+
+    /// Maximum total payload bytes held in the stash per partition. Bounds
+    /// memory pressure independent of message count, which matters when
+    /// payload sizes vary widely (typical for person properties). Default
+    /// is 50 MiB.
+    #[envconfig(default = "52428800")]
+    pub stash_max_bytes_per_partition: usize,
+
+    /// Per-request deadline for stashed writes, in milliseconds. When
+    /// drain dequeues a request whose `enqueued_at` is older than this,
+    /// it returns `UNAVAILABLE` to the original caller without
+    /// forwarding to the leader. This bounds individual request
+    /// latency under sustained drain load and gives clients a
+    /// definitive retryable error instead of an ambiguous gRPC timeout.
+    /// Should be smaller than typical client gRPC timeouts (often
+    /// 30+ seconds). Default 10 seconds.
+    #[envconfig(default = "10000")]
+    pub stash_max_wait_ms: u64,
+
+    /// Maximum number of stashed requests to forward concurrently
+    /// during a drain, grouped by `(team_id, person_id)`. Within each
+    /// key the requests are forwarded sequentially to preserve per-key
+    /// ordering at the leader; across keys the drain fans out to
+    /// shrink wall-clock drain duration. Set to 1 to force fully
+    /// sequential drain.
+    #[envconfig(default = "32")]
+    pub stash_drain_concurrency: usize,
+
+    // ── coordinator (leader election among router-leader pods) ───
+    /// Whether this leader-mode router campaigns for the coordinator
+    /// election. Disabled, the router still registers in the routing
+    /// table, serves traffic, and acks freezes — it just never
+    /// coordinates. Production leaves this on everywhere; the test
+    /// harness disables it on its traffic router so chaos targeting
+    /// "the coordinator" can never land on the traffic path.
+    #[envconfig(default = "true")]
+    pub coordinator_enabled: bool,
+
+    /// Lease TTL for the coordinator leader election. A crashed leader
+    /// blocks every handoff until this expires and a survivor's campaign
+    /// fires, so the worst-case coordinator outage is roughly this plus
+    /// the election retry interval. Graceful exits revoke the lease and
+    /// fail over immediately.
+    #[envconfig(default = "5")]
+    pub coordinator_lease_ttl: i64,
+
+    /// Keepalive interval for the coordinator lease. Several attempts
+    /// must fit inside the TTL; a keepalive that reports the lease gone
+    /// makes the leader abdicate.
+    #[envconfig(default = "1")]
+    pub coordinator_keepalive_secs: u64,
+
+    /// Retry interval between a standby candidate's election campaigns.
+    #[envconfig(default = "1")]
+    pub coordinator_election_retry_secs: u64,
+
+    /// Debounce interval (ms) for batching pod events before rebalancing
+    #[envconfig(default = "1000")]
+    pub coordinator_rebalance_debounce_ms: u64,
+
+    /// How often the coordinator re-evaluates in-flight handoffs
+    /// regardless of watch events — the liveness backstop for state
+    /// changes that fire no event (e.g. router departures) and for
+    /// events missed before a watch attaches.
+    #[envconfig(default = "5")]
+    pub coordinator_reconcile_secs: u64,
+
+    /// How long a handoff may run before the coordinator cancels it so a
+    /// later plan can retry. The backstop for a handoff that can never
+    /// satisfy its quorum: nothing else removes one whose new owner is
+    /// alive, and an in-flight handoff pins its partition, so without
+    /// this it waits for a human. Sized well above healthy handoffs,
+    /// which complete in seconds.
+    #[envconfig(default = "120")]
+    pub coordinator_handoff_deadline_secs: u64,
+
+    // ── K8s awareness (leader mode only) ────────────────────────
+    /// Enable K8s-aware departure classification for smarter rebalancing.
+    /// When disabled, falls back to lease-based behavior.
+    #[envconfig(default = "false")]
+    pub k8s_awareness_enabled: bool,
+
+    /// Kubernetes namespace to watch. If empty, auto-reads from the
+    /// service account mount at /var/run/secrets/kubernetes.io/serviceaccount/namespace.
+    #[envconfig(default = "")]
+    pub k8s_namespace: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ── ReplicaDiscoveryMode ──────────────────────────────────────────────────
+
+    #[test]
+    fn replica_discovery_mode_from_str_valid_variants() {
+        let cases = [
+            ("dns", ReplicaDiscoveryMode::Dns),
+            ("k8s", ReplicaDiscoveryMode::K8s),
+            // case-insensitive
+            ("DNS", ReplicaDiscoveryMode::Dns),
+            ("K8S", ReplicaDiscoveryMode::K8s),
+            ("Dns", ReplicaDiscoveryMode::Dns),
+        ];
+        for (input, expected) in cases {
+            let result: Result<ReplicaDiscoveryMode, _> = input.parse();
+            assert_eq!(
+                result.unwrap(),
+                expected,
+                "'{input}' should parse to {expected:?}",
+            );
+        }
+    }
+
+    #[test]
+    fn replica_discovery_mode_from_str_invalid_returns_error() {
+        let invalid_inputs = ["endpoint", "", "replica", "kubernetes", "k8s1"];
+        for input in invalid_inputs {
+            let result: Result<ReplicaDiscoveryMode, _> = input.parse();
+            assert!(result.is_err(), "'{input}' should be an error");
+            let msg = result.unwrap_err();
+            assert!(
+                msg.contains(input) || msg.contains("expected"),
+                "error message should mention the bad input or expected values, got: {msg}",
+            );
+        }
+    }
+
+    #[test]
+    fn replica_discovery_mode_display() {
+        assert_eq!(ReplicaDiscoveryMode::Dns.to_string(), "dns");
+        assert_eq!(ReplicaDiscoveryMode::K8s.to_string(), "k8s");
+    }
+
+    #[test]
+    fn replica_discovery_mode_roundtrips() {
+        for mode in [ReplicaDiscoveryMode::Dns, ReplicaDiscoveryMode::K8s] {
+            let s = mode.to_string();
+            let parsed: ReplicaDiscoveryMode = s.parse().unwrap();
+            assert_eq!(
+                parsed, mode,
+                "Display → FromStr roundtrip failed for {mode:?}"
+            );
+        }
+    }
+
+    // ── RouterMode ───────────────────────────────────────────────────────────
+
+    #[test]
+    fn router_mode_from_str_valid_variants() {
+        let cases = [
+            ("replica", RouterMode::Replica),
+            ("leader", RouterMode::Leader),
+            ("REPLICA", RouterMode::Replica),
+            ("LEADER", RouterMode::Leader),
+        ];
+        for (input, expected) in cases {
+            let result: Result<RouterMode, _> = input.parse();
+            assert_eq!(
+                result.unwrap(),
+                expected,
+                "'{input}' should parse to {expected:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn router_mode_from_str_invalid_returns_error() {
+        let invalid_inputs = ["dns", "", "follow", "primary"];
+        for input in invalid_inputs {
+            let result: Result<RouterMode, _> = input.parse();
+            assert!(result.is_err(), "'{input}' should be an error");
+        }
+    }
+
+    #[test]
+    fn router_mode_display() {
+        assert_eq!(RouterMode::Replica.to_string(), "replica");
+        assert_eq!(RouterMode::Leader.to_string(), "leader");
+    }
+
+    #[test]
+    fn router_mode_roundtrips() {
+        for mode in [RouterMode::Replica, RouterMode::Leader] {
+            let s = mode.to_string();
+            let parsed: RouterMode = s.parse().unwrap();
+            assert_eq!(
+                parsed, mode,
+                "Display → FromStr roundtrip failed for {mode:?}"
+            );
+        }
+    }
 }
 
 impl Config {
     pub fn backend_timeout(&self) -> Duration {
         Duration::from_millis(self.backend_timeout_ms)
     }
+
+    pub fn backend_connect_timeout(&self) -> Duration {
+        Duration::from_millis(self.backend_connect_timeout_ms)
+    }
+
+    pub fn grpc_keepalive_interval(&self) -> Option<Duration> {
+        if self.grpc_keepalive_interval_secs == 0 {
+            None
+        } else {
+            Some(Duration::from_secs(self.grpc_keepalive_interval_secs))
+        }
+    }
+
+    pub fn grpc_keepalive_timeout(&self) -> Option<Duration> {
+        if self.grpc_keepalive_timeout_secs == 0 {
+            None
+        } else {
+            Some(Duration::from_secs(self.grpc_keepalive_timeout_secs))
+        }
+    }
+
+    pub fn backend_keepalive_interval(&self) -> Option<Duration> {
+        if self.backend_keepalive_interval_secs == 0 {
+            None
+        } else {
+            Some(Duration::from_secs(self.backend_keepalive_interval_secs))
+        }
+    }
+
+    pub fn backend_keepalive_timeout(&self) -> Option<Duration> {
+        if self.backend_keepalive_timeout_secs == 0 {
+            None
+        } else {
+            Some(Duration::from_secs(self.backend_keepalive_timeout_secs))
+        }
+    }
+
+    pub fn retry_config(&self) -> RetryConfig {
+        RetryConfig {
+            max_retries: self.max_retries,
+            initial_backoff_ms: self.initial_backoff_ms,
+            max_backoff_ms: self.max_backoff_ms,
+        }
+    }
+
+    pub fn etcd_endpoint_list(&self) -> Vec<String> {
+        self.etcd_endpoints
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect()
+    }
+
+    pub fn heartbeat_interval(&self) -> Duration {
+        Duration::from_secs(self.heartbeat_interval_secs)
+    }
+
+    pub fn coordinator_keepalive_interval(&self) -> Duration {
+        Duration::from_secs(self.coordinator_keepalive_secs)
+    }
+
+    pub fn coordinator_election_retry_interval(&self) -> Duration {
+        Duration::from_secs(self.coordinator_election_retry_secs)
+    }
+
+    pub fn coordinator_rebalance_debounce_interval(&self) -> Duration {
+        Duration::from_millis(self.coordinator_rebalance_debounce_ms)
+    }
+
+    pub fn coordinator_reconcile_interval(&self) -> Duration {
+        Duration::from_secs(self.coordinator_reconcile_secs)
+    }
+
+    pub fn coordinator_handoff_deadline(&self) -> Duration {
+        Duration::from_secs(self.coordinator_handoff_deadline_secs)
+    }
+
+    pub fn router_reconcile_interval(&self) -> Duration {
+        Duration::from_secs(self.router_reconcile_secs)
+    }
+
+    pub fn coordinator_warming_deadline(&self) -> Duration {
+        Duration::from_secs(self.coordinator_warming_deadline_secs)
+    }
+
+    pub fn participant_stall_threshold(&self) -> Option<Duration> {
+        (self.router_participant_stall_secs > 0)
+            .then(|| Duration::from_secs(self.router_participant_stall_secs))
+    }
+
+    pub fn stash_max_wait(&self) -> Duration {
+        Duration::from_millis(self.stash_max_wait_ms)
+    }
+
+    /// Resolve the replica service namespace from config or the service account mount.
+    pub fn resolve_replica_namespace(&self) -> Result<String, String> {
+        if !self.replica_service_namespace.is_empty() {
+            return Ok(self.replica_service_namespace.clone());
+        }
+        std::fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+            .map(|s| s.trim().to_string())
+            .map_err(|e| {
+                format!(
+                    "replica_service_namespace not set and failed to read from service account: {e}"
+                )
+            })
+    }
+
+    /// Resolve the K8s namespace from config or the service account mount.
+    pub fn resolve_k8s_namespace(&self) -> Result<String, String> {
+        if !self.k8s_namespace.is_empty() {
+            return Ok(self.k8s_namespace.clone());
+        }
+        std::fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+            .map(|s| s.trim().to_string())
+            .map_err(|e| {
+                format!("k8s_namespace not set and failed to read from service account: {e}")
+            })
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct RetryConfig {
+    pub max_retries: u32,
+    pub initial_backoff_ms: u64,
+    pub max_backoff_ms: u64,
 }

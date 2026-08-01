@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Creates a new company in Hubspot whenever an event is triggered.',
     icon_url: '/static/services/hubspot.png',
     category: ['CRM', 'Customer Success'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 let data := {
     'properties': {

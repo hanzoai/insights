@@ -7,7 +7,7 @@ from insights.test.base import APIBaseTest
 from parameterized import parameterized
 from rest_framework import status
 
-from insights.models import FeatureFlag
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
 
 class TestCircularDependencyDetection(APIBaseTest):

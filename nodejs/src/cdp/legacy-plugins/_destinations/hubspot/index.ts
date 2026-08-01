@@ -1,6 +1,6 @@
-import { ProcessedPluginEvent, RetryError } from '@hanzo/plugin-scaffold'
+import { FetchResponse } from '~/common/utils/request'
+import { ProcessedPluginEvent, RetryError } from '~/plugin-scaffold'
 
-import { FetchResponse } from '../../../../utils/request'
 import { LegacyDestinationPluginMeta } from '../../types'
 
 const hubspotPropsMap = {

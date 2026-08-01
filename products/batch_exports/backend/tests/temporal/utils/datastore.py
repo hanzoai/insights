@@ -25,7 +25,9 @@ async def execute_query(datastore_client: DatastoreClient, query: str, *data):
 
 
 async def create_datastore_tables_and_views(datastore_client):
-    from insights.batch_exports.sql import (
+    from insights.datastore.schema import CREATE_KAFKA_TABLE_QUERIES, build_query
+
+    from products.batch_exports.backend.sql import (
         CREATE_EVENTS_BATCH_EXPORT_VIEW,
         CREATE_EVENTS_BATCH_EXPORT_VIEW_BACKFILL,
         CREATE_EVENTS_BATCH_EXPORT_VIEW_RECENT,
@@ -33,7 +35,6 @@ async def create_datastore_tables_and_views(datastore_client):
         CREATE_PERSONS_BATCH_EXPORT_VIEW,
         CREATE_PERSONS_BATCH_EXPORT_VIEW_BACKFILL,
     )
-    from insights.datastore.schema import CREATE_KAFKA_TABLE_QUERIES, build_query
 
     create_view_queries = (
         CREATE_EVENTS_BATCH_EXPORT_VIEW,
@@ -78,9 +79,11 @@ async def truncate_events(datastore_client):
 
 async def truncate_persons(datastore_client):
     await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS person_distinct_id2")
+    await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS person")
 
 
 async def truncate_sessions(datastore_client):
+    await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS sharded_raw_sessions")
     await execute_query(datastore_client, "TRUNCATE TABLE IF EXISTS raw_sessions")
 
 

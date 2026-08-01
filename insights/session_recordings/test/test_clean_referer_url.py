@@ -27,7 +27,7 @@ class TestCleanRefererUrl(SimpleTestCase):
             (None, "unknown"),
             ("/replay/0194a8c7-8477-7952-80d1-04288c62daf5", "replay-direct"),
             ("/replay/playlists/", "replay-playlists"),
-            ("https://insights.hanzo.ai/project/2/replay/playlists/UeykLhgA", "replay-playlists-direct"),
+            ("https://us.hanzo.ai/project/2/replay/playlists/UeykLhgA", "replay-playlists-direct"),
         ]
     )
     def test_cleaning_referer_url(self, referer_url: str | None, expected_output: str) -> None:

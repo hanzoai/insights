@@ -2,16 +2,19 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Error};
 
-// IF `INSIGHTS_HOME` is set, use that, otherwise use $HOME/.insights
-pub fn insights_home_dir() -> PathBuf {
-    match std::env::var("INSIGHTS_HOME") {
-        Ok(home) => PathBuf::from(home),
-        Err(_) => {
-            let mut home = dirs::home_dir().expect("Could not find home directory");
-            home.push(".insights");
-            home
-        }
+// IF `POSTFN_HOME` is set, use that, otherwise use $HOME/.insights
+pub fn insights_home_dir_if_available() -> Option<PathBuf> {
+    if let Some(home) = std::env::var_os("POSTFN_HOME") {
+        return Some(PathBuf::from(home));
     }
+
+    let mut home = dirs::home_dir()?;
+    home.push(".insights");
+    Some(home)
+}
+
+pub fn insights_home_dir() -> PathBuf {
+    insights_home_dir_if_available().expect("Could not find home directory")
 }
 
 pub fn ensure_homedir_exists() -> Result<(), Error> {

@@ -5,40 +5,52 @@ import { Button, SpinnerOverlay } from '@hanzo/elements'
 
 import { AppMetricsFilters } from 'lib/components/AppMetrics/AppMetricsFilters'
 import { appMetricsLogic } from 'lib/components/AppMetrics/appMetricsLogic'
+import {
+    AppMetricsSeriesOverride,
+    AppMetricsTimeSeriesChart,
+} from 'lib/components/AppMetrics/AppMetricsTimeSeriesChart'
 import { IconOpenInApp } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
-import { LineGraph } from '~/queries/nodes/DataVisualization/Components/Charts/LineGraph'
-import { ChartDisplayType } from '~/types'
-
-import { WORKFLOW_METRICS_INFO } from '../../WorkflowMetrics'
 import { EXIT_NODE_ID, TRIGGER_NODE_ID } from '../../workflowLogic'
-import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
+import { WORKFLOW_METRICS_INFO } from '../../WorkflowMetrics'
+import { WORKFLOW_EMAIL_METRICS, WORKFLOW_PUSH_METRICS } from '../../workflowMetricsSummaryLogic'
+import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
 
 export function InsightsFlowEditorPanelMetrics(): JSX.Element | null {
-    const { selectedNode, workflow } = useValues(insightsFlowEditorLogic)
-    const { loadActionMetricsById } = useActions(insightsFlowEditorLogic)
+    const { selectedNode, workflow } = useValues(hogFlowEditorLogic)
+    const { loadActionMetricsById } = useActions(hogFlowEditorLogic)
     const actionId = selectedNode?.data.id
     const id = useMemo(() => {
         return actionId ? ([TRIGGER_NODE_ID, EXIT_NODE_ID].includes(actionId) ? '' : actionId) : undefined
     }, [actionId])
 
-    const logicKey = `fn-flow-metrics-${workflow.id}`
+    const logicKey = `script-flow-metrics-${workflow.id}`
+
+    const shouldShowActionLevelMetrics = workflow.trigger?.type !== 'batch'
+
+    const selectedAction = workflow.actions.find((action) => action.id === actionId)
+    const isEmailAction = selectedAction?.type === 'function_email'
+    const isPushAction = selectedAction?.type === 'function_push'
 
     const metricName = useMemo(() => {
         return actionId === TRIGGER_NODE_ID
-            ? ['triggered', 'rate_limited', 'disabled_permanently', 'filtered']
+            ? ['triggered', 'rate_limited']
             : actionId === EXIT_NODE_ID
               ? ['succeeded', 'failed']
-              : undefined
-    }, [actionId])
+              : isEmailAction
+                ? (Object.keys(WORKFLOW_EMAIL_METRICS) as string[])
+                : isPushAction
+                  ? (Object.keys(WORKFLOW_PUSH_METRICS) as string[])
+                  : undefined
+    }, [actionId, isEmailAction, isPushAction])
 
     const logic = appMetricsLogic({
         logicKey,
-        loadOnChanges: true,
-        loadOnMount: true,
+        loadOnChanges: shouldShowActionLevelMetrics,
+        loadOnMount: shouldShowActionLevelMetrics,
         forceParams: {
-            appSource: 'insights_flow',
+            appSource: 'hog_flow',
             appSourceId: workflow.id,
             instanceId: id,
             breakdownBy: 'metric_name',
@@ -48,7 +60,25 @@ export function InsightsFlowEditorPanelMetrics(): JSX.Element | null {
 
     const { appMetricsTrendsLoading, appMetricsTrends, params, currentTeam, getDateRangeAbsolute } = useValues(logic)
 
+    const seriesOverrides = useMemo(() => {
+        if (!appMetricsTrends) {
+            return undefined
+        }
+        const colorSource = (
+            isEmailAction ? WORKFLOW_EMAIL_METRICS : isPushAction ? WORKFLOW_PUSH_METRICS : WORKFLOW_METRICS_INFO
+        ) as Record<string, { name: string; color: string }>
+        return Object.fromEntries(
+            appMetricsTrends.series.map((x): [string, AppMetricsSeriesOverride] => [
+                x.name,
+                { label: colorSource[x.name]?.name, color: colorSource[x.name]?.color },
+            ])
+        )
+    }, [appMetricsTrends, isEmailAction, isPushAction])
+
     useEffect(() => {
+        if (!shouldShowActionLevelMetrics) {
+            return
+        }
         // Bit hacky - we load the values here from the logic as connecting the logics together was weirdly tricky
         loadActionMetricsById(
             {
@@ -60,6 +90,7 @@ export function InsightsFlowEditorPanelMetrics(): JSX.Element | null {
             currentTeam?.timezone ?? 'UTC'
         )
     }, [
+        shouldShowActionLevelMetrics,
         params.appSource,
         params.appSourceId,
         params.dateFrom,
@@ -73,61 +104,37 @@ export function InsightsFlowEditorPanelMetrics(): JSX.Element | null {
         <>
             <div className="border-b">
                 <Button to={urls.workflow(workflow.id, 'metrics')} size="xsmall" sideIcon={<IconOpenInApp />}>
-                    Click here to open in full metrics viewer
+                    {shouldShowActionLevelMetrics
+                        ? 'Click here to open in full metrics viewer'
+                        : 'Click here to open batch workflow metrics tab'}
                 </Button>
             </div>
-            <div className="p-2 flex flex-col gap-2 overflow-y-auto">
-                <div className="flex flex-row gap-2 flex-wrap justify-end">
-                    <AppMetricsFilters logicKey={logicKey} />
-                </div>
+            {shouldShowActionLevelMetrics && (
+                <div className="p-2 flex flex-col gap-2 overflow-y-auto">
+                    <div className="flex flex-row gap-2 flex-wrap justify-end">
+                        <AppMetricsFilters logicKey={logicKey} />
+                    </div>
 
-                <div className="relative border rounded min-h-[20rem] bg-white flex flex-1 flex-col">
-                    {appMetricsTrendsLoading ? (
-                        <div className="flex-1 flex items-center justify-center p-8">
-                            <SpinnerOverlay />
-                        </div>
-                    ) : !appMetricsTrends ? (
-                        <div className="flex-1 flex items-center justify-center">
-                            <div className="text-muted">No data</div>
-                        </div>
-                    ) : (
-                        <LineGraph
-                            className="p-2"
-                            xData={{
-                                column: {
-                                    name: 'date',
-                                    type: {
-                                        name: 'DATE',
-                                        isNumerical: false,
-                                    },
-                                    label: 'Date',
-                                    dataIndex: 0,
-                                },
-                                data: appMetricsTrends.labels,
-                            }}
-                            yData={appMetricsTrends.series.map((x) => ({
-                                column: {
-                                    name: x.name,
-                                    type: { name: 'INTEGER', isNumerical: true },
-                                    label: x.name,
-                                    dataIndex: 0,
-                                },
-                                settings: {
-                                    display: {
-                                        color: WORKFLOW_METRICS_INFO[x.name]?.color,
-                                    },
-                                },
-                                data: x.values,
-                            }))}
-                            visualizationType={ChartDisplayType.ActionsLineGraph}
-                            chartSettings={{
-                                showLegend: true,
-                                showTotalRow: false,
-                            }}
-                        />
-                    )}
+                    <div className="relative border rounded min-h-[20rem] bg-surface-primary flex flex-1 flex-col">
+                        {appMetricsTrendsLoading ? (
+                            <div className="flex-1 flex items-center justify-center p-8">
+                                <SpinnerOverlay />
+                            </div>
+                        ) : !appMetricsTrends ? (
+                            <div className="flex-1 flex items-center justify-center">
+                                <div className="text-muted">No data</div>
+                            </div>
+                        ) : (
+                            <AppMetricsTimeSeriesChart
+                                className="p-2"
+                                timeSeries={appMetricsTrends}
+                                seriesOverrides={seriesOverrides}
+                                showLegend
+                            />
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
         </>
     )
 }

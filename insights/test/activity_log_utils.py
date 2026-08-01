@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from rest_framework import status
 
+from ee.api.test.base import APILicensedTest
 
 if TYPE_CHECKING:
     pass
@@ -94,12 +95,10 @@ class ActivityLogTestHelper(APILicensedTest):
     # Group
     def create_group(self, group_type_index: int = 0, group_key: Optional[str] = None, **kwargs) -> dict[str, Any]:
         """Create a group via API."""
-        # First ensure group type exists
-        from insights.models.group_type_mapping import GroupTypeMapping
+        # First ensure group type exists (seeds the personinsights fake, no persons DB write)
+        from insights.test.persons import create_group_type_mapping
 
-        GroupTypeMapping.objects.get_or_create(
-            team=self.team, group_type_index=group_type_index, defaults={"group_type": "organization"}
-        )
+        create_group_type_mapping(team=self.team, group_type_index=group_type_index, group_type="organization")
 
         if not group_key:
             group_key = f"org:{uuid4()}"
@@ -147,7 +146,7 @@ class ActivityLogTestHelper(APILicensedTest):
             "name": name,
             "plugin_type": "local",
             "description": "Test plugin",
-            "url": "https://github.com/Hanzo Insights/insights-plugin-test",
+            "url": "https://github.com/Insights/insights-plugin-test",
             **kwargs,
         }
         response = self.client.post("/api/organizations/@current/plugins/", data, format="json")
@@ -177,14 +176,14 @@ class ActivityLogTestHelper(APILicensedTest):
         return response.json()
 
     # InsightsFunction (using Plugin as base)
-    def create_insights_function(self, name: str = "Test Custom Function", **kwargs) -> dict[str, Any]:
-        """Create a custom function via API."""
+    def create_insights_function(self, name: str = "Test Script Function", **kwargs) -> dict[str, Any]:
+        """Create a script function via API."""
         data = {
             "name": name,
-            "description": "Test custom function",
+            "description": "Test script function",
             "enabled": True,
             "inputs": {},
-            "fn": "export function onEvent(event, { inputs }) { console.log(event) }",
+            "script": "export function onEvent(event, { inputs }) { console.log(event) }",
             **kwargs,
         }
         response = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data, format="json")
@@ -192,7 +191,7 @@ class ActivityLogTestHelper(APILicensedTest):
         return response.json()
 
     def update_insights_function(self, function_id: str, updates: dict[str, Any]) -> dict[str, Any]:
-        """Update a custom function via API."""
+        """Update a script function via API."""
         response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_functions/{function_id}/", updates, format="json"
         )
@@ -492,7 +491,7 @@ class ActivityLogTestHelper(APILicensedTest):
     # BatchExport
     def create_batch_export(self, name: str = "Test Export", **kwargs) -> dict[str, Any]:
         """Create a batch export via direct model creation (like the original tests)."""
-        from insights.batch_exports.models import BatchExport, BatchExportDestination
+        from products.batch_exports.backend.models.batch_export import BatchExport, BatchExportDestination
 
         # Create destination first (like the original tests do)
         destination = BatchExportDestination.objects.create(
@@ -517,7 +516,7 @@ class ActivityLogTestHelper(APILicensedTest):
 
     def update_batch_export(self, export_id: str, updates: dict[str, Any]) -> dict[str, Any]:
         """Update a batch export via direct model access (like the original tests)."""
-        from insights.batch_exports.models import BatchExport
+        from products.batch_exports.backend.models.batch_export import BatchExport
 
         batch_export = BatchExport.objects.get(id=export_id)
         for field, value in updates.items():
@@ -605,6 +604,7 @@ class ActivityLogTestHelper(APILicensedTest):
         data = {
             "name": name,
             "insight": insight["id"],
+            "condition": {"type": "absolute_value"},
             "config": {"type": "TrendsAlertConfig", "series_index": 0},
             "threshold": {"configuration": {"type": "absolute", "bounds": {"lower": 100, "upper": 1000}}},
             "enabled": True,
@@ -849,29 +849,36 @@ class ActivityLogTestHelper(APILicensedTest):
         from unittest.mock import patch
 
         # Mock the Stripe validation to avoid needing real credentials
-        with patch("insights.temporal.data_imports.sources.stripe.stripe.validate_credentials", return_value=True):
-            with patch("products.data_warehouse.backend.data_load.service.sync_external_data_job_workflow"):
-                data = {
-                    "source_type": source_type,
-                    "payload": {
-                        "stripe_account_id": "acct_test_placeholder",
-                        "stripe_secret_key": "test_key_placeholder_not_real",
-                        "schemas": [
-                            {
-                                "name": "Customer",
-                                "should_sync": kwargs.get("should_sync", True),
-                                "sync_type": kwargs.get("sync_type", "full_refresh"),
-                            }
-                        ],
-                        **kwargs.get("payload", {}),
-                    },
-                    **{k: v for k, v in kwargs.items() if k not in ["payload", "should_sync", "sync_type"]},
-                }
-                response = self.client.post(
-                    f"/api/environments/{self.team.id}/external_data_sources/", data, format="json"
-                )
-                self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-                return response.json()
+        with (
+            patch(
+                "products.warehouse_sources.backend.temporal.data_imports.sources.stripe.stripe.validate_credentials",
+                return_value=True,
+            ),
+            patch(
+                "products.warehouse_sources.backend.temporal.data_imports.sources.stripe.source.StripeSource.validate_credentials",
+                return_value=(True, None),
+            ),
+            patch("products.data_warehouse.backend.logic.data_load.service.sync_external_data_job_workflow"),
+        ):
+            data = {
+                "source_type": source_type,
+                "payload": {
+                    "stripe_account_id": "acct_test_placeholder",
+                    "auth_method": {"selection": "api_key", "stripe_secret_key": "test_key_placeholder_not_real"},
+                    "schemas": [
+                        {
+                            "name": "Customer",
+                            "should_sync": kwargs.get("should_sync", True),
+                            "sync_type": kwargs.get("sync_type", "full_refresh"),
+                        }
+                    ],
+                    **kwargs.get("payload", {}),
+                },
+                **{k: v for k, v in kwargs.items() if k not in ["payload", "should_sync", "sync_type"]},
+            }
+            response = self.client.post(f"/api/environments/{self.team.id}/external_data_sources/", data, format="json")
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            return response.json()
 
     def update_external_data_source(self, source_id: str, updates: dict[str, Any]) -> dict[str, Any]:
         """Update an external data source via API."""

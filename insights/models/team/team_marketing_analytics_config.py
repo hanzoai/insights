@@ -1,12 +1,18 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from insights.schema import AttributionMode, NodeKind, SourceMap
-
 from insights.models.team import Team
 from insights.models.team.extensions import register_team_extension_signal
+from insights.rbac.decorators import field_access_control
+from insights.schema_enums import AttributionMode, NodeKind
+
+# This model loads at django.setup() in every process; insights.schema (the pydantic models)
+# is runtime-imported in the accessors that materialize typed objects.
+if TYPE_CHECKING:
+    from insights.schema import SourceMap
 
 # ruff: noqa: DJ012  # Properties act as field accessors for mangled DB fields, so they need to come before save()
 
@@ -257,6 +263,13 @@ def validate_conversion_goals(conversion_goals: list) -> None:
                 f"Conversion goal kind must be one of {NodeKind.EVENTS_NODE}, {NodeKind.ACTIONS_NODE} or {NodeKind.DATA_WAREHOUSE_NODE}, got {goal.get('kind')}"
             )
 
+    # conversion_goal_name is used verbatim as a SQL column alias in marketing analytics
+    # queries, so duplicates collide at query time ("Cannot redefine an alias").
+    goal_names = [name for goal in conversion_goals if (name := goal.get("conversion_goal_name"))]
+    duplicates = sorted({name for name in goal_names if goal_names.count(name) > 1})
+    if duplicates:
+        raise ValidationError(f"Conversion goal names must be unique. Duplicate names: {', '.join(duplicates)}")
+
 
 # Intentionally not inheriting from UUIDModel because we're using a OneToOneField
 # and therefore using the exact same primary key as the Team model.
@@ -264,39 +277,61 @@ class TeamMarketingAnalyticsConfig(models.Model):
     team = models.OneToOneField(Team, on_delete=models.CASCADE, primary_key=True)
 
     # Attribution settings
-    attribution_window_days = models.IntegerField(default=90, help_text="Attribution window in days (1-90)")
-    attribution_mode = models.CharField(
-        max_length=20,
-        default=AttributionMode.LAST_TOUCH,
-        choices=[(mode.value, mode.value.replace("_", " ").title()) for mode in AttributionMode],
-        help_text="Attribution mode: first_touch or last_touch",
+    attribution_window_days = field_access_control(
+        models.IntegerField(default=90, help_text="Attribution window in days (1-90)"), "project", "admin"
+    )
+    attribution_mode = field_access_control(
+        models.CharField(
+            max_length=20,
+            default=AttributionMode.LAST_TOUCH,
+            choices=[(mode.value, mode.value.replace("_", " ").title()) for mode in AttributionMode],
+            help_text="Attribution mode: first_touch, last_touch, linear, time_decay, or position_based",
+        ),
+        "project",
+        "admin",
     )
 
     # Mangled fields incoming:
     # Because we want to validate the schema for these fields, we'll have mangled DB fields/columns
     # that are then wrapped by schema-validation getters/setters
-    _sources_map = models.JSONField(default=dict, db_column="sources_map", null=False, blank=True)
-    _conversion_goals = models.JSONField(default=list, db_column="conversion_goals", null=True, blank=True)
-    _campaign_name_mappings = models.JSONField(
-        default=dict,
-        db_column="campaign_name_mappings",
-        null=False,
-        blank=True,
-        help_text="Maps campaign names to lists of raw UTM values per data source",
+    _sources_map = field_access_control(
+        models.JSONField(default=dict, db_column="sources_map", null=False, blank=True), "project", "admin"
     )
-    _custom_source_mappings = models.JSONField(
-        default=dict,
-        db_column="custom_source_mappings",
-        null=False,
-        blank=True,
-        help_text="Custom UTM source mappings: maps integration types to lists of custom UTM source values",
+    _conversion_goals = field_access_control(
+        models.JSONField(default=list, db_column="conversion_goals", null=True, blank=True), "project", "admin"
     )
-    _campaign_field_preferences = models.JSONField(
-        default=dict,
-        db_column="campaign_field_preferences",
-        null=False,
-        blank=True,
-        help_text="Campaign field matching preferences: defines which field (campaign_name or campaign_id) to match utm_campaign against per integration. Manual mappings always take precedence.",
+    _campaign_name_mappings = field_access_control(
+        models.JSONField(
+            default=dict,
+            db_column="campaign_name_mappings",
+            null=False,
+            blank=True,
+            help_text="Maps campaign names to lists of raw UTM values per data source",
+        ),
+        "project",
+        "admin",
+    )
+    _custom_source_mappings = field_access_control(
+        models.JSONField(
+            default=dict,
+            db_column="custom_source_mappings",
+            null=False,
+            blank=True,
+            help_text="Custom UTM source mappings: maps integration types to lists of custom UTM source values",
+        ),
+        "project",
+        "admin",
+    )
+    _campaign_field_preferences = field_access_control(
+        models.JSONField(
+            default=dict,
+            db_column="campaign_field_preferences",
+            null=False,
+            blank=True,
+            help_text="Campaign field matching preferences: defines which field (campaign_name or campaign_id) to match utm_campaign against per integration. Manual mappings always take precedence.",
+        ),
+        "project",
+        "admin",
     )
 
     def clean(self):
@@ -324,8 +359,10 @@ class TeamMarketingAnalyticsConfig(models.Model):
             raise ValidationError(f"Invalid sources map schema: {str(e)}")
 
     @property
-    def sources_map_typed(self) -> dict[str, SourceMap]:
+    def sources_map_typed(self) -> dict[str, "SourceMap"]:
         """Return sources_map as typed SourceMap objects for Python usage"""
+        from insights.schema import SourceMap  # noqa: PLC0415
+
         response = {}
         for source_id, field_mapping in self._sources_map.items():
             if field_mapping is None:
@@ -423,6 +460,9 @@ class TeamMarketingAnalyticsConfig(models.Model):
             self.sources_map = current_sources
 
     def to_cache_key_dict(self) -> dict:
+        # Deferred: insights.insightsql imports models, and this module loads at django.setup() in every process.
+        from insights.insightsql.database.schema.marketing_costs_precomputed import costs_dedup_v2_enabled  # noqa: PLC0415
+
         return {
             "base_currency": self.team.base_currency,
             "sources_map": self.sources_map,
@@ -431,6 +471,8 @@ class TeamMarketingAnalyticsConfig(models.Model):
             "campaign_name_mappings": self.campaign_name_mappings,
             "custom_source_mappings": self.custom_source_mappings,
             "campaign_field_preferences": self.campaign_field_preferences,
+            # Without this the flag isn't a kill switch: flipping it leaves the old numbers cached.
+            "costs_dedup_v2": costs_dedup_v2_enabled(self.team),
         }
 
 

@@ -3,8 +3,9 @@ from unittest.mock import call, patch
 
 from django.core.management import call_command
 
-from insights.models.insights_functions.insights_function import InsightsFunction
 from insights.models.integration import Integration
+
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
 
 class TestResaveInsightsFunctions(BaseTest):
@@ -24,13 +25,13 @@ class TestResaveInsightsFunctions(BaseTest):
         )
 
         # Create two InsightsFunctions that use different integrations
-        with patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers"):
+        with patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers"):
             self.insights_function1 = InsightsFunction.objects.create(
                 team=self.team,
                 name="Test Function 1",
                 type="transformation",
                 description="Test Description 1",
-                iql="return event",
+                script="return event",
                 enabled=True,
                 inputs_schema=[{"type": "integration", "key": "integration"}],
                 inputs={"integration": {"value": str(self.integration1.id)}},
@@ -41,33 +42,34 @@ class TestResaveInsightsFunctions(BaseTest):
                 name="Test Function 2",
                 type="transformation",
                 description="Test Description 2",
-                iql="return event",
+                script="return event",
                 enabled=True,
                 inputs_schema=[{"type": "integration", "key": "integration"}],
                 inputs={"integration": {"value": str(self.integration2.id)}},
             )
 
-    @patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers")
+    @patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers")
     def test_resave_insights_functions(self, mock_reload):
         """Test that the command correctly identifies and resaves InsightsFunctions connected to integrations."""
 
         call_command("resave_insights_functions")
 
-        # Verify that reload_insights_functions_on_workers was called for each function
+        # any_order: the command applies no ORDER BY, so reload order isn't deterministic.
         mock_reload.assert_has_calls(
             [
                 call(team_id=self.team.id, insights_function_ids=[str(self.insights_function1.id)]),
                 call(team_id=self.team.id, insights_function_ids=[str(self.insights_function2.id)]),
-            ]
+            ],
+            any_order=True,
         )
         assert mock_reload.call_count == 2
 
-    @patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers")
+    @patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers")
     def test_only_resaves_enabled_non_deleted_functions(self, mock_reload):
         """Test that the command only resaves enabled and non-deleted functions."""
 
         # Create a disabled function
-        with patch("insights.models.insights_functions.insights_function.reload_insights_functions_on_workers"):
+        with patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers"):
             InsightsFunction.objects.create(
                 team=self.team,
                 name="Disabled Function",
@@ -89,11 +91,12 @@ class TestResaveInsightsFunctions(BaseTest):
 
         call_command("resave_insights_functions")
 
-        # Verify only the original enabled, non-deleted functions were reloaded
+        # any_order: the command applies no ORDER BY, so reload order isn't deterministic.
         mock_reload.assert_has_calls(
             [
                 call(team_id=self.team.id, insights_function_ids=[str(self.insights_function1.id)]),
                 call(team_id=self.team.id, insights_function_ids=[str(self.insights_function2.id)]),
-            ]
+            ],
+            any_order=True,
         )
         assert mock_reload.call_count == 2

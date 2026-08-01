@@ -5,12 +5,12 @@ import { useDebouncedCallback } from 'use-debounce'
 
 import { IconCornerDownRight } from '@hanzo/icons'
 
-import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { NotebookNodeAttributeProperties, NotebookNodeProps, NotebookNodeType } from '../types'
 import { NotebookDataframeTable } from './components/NotebookDataframeTable'
 import { getCellLabel } from './components/NotebookNodeTitle'
+import { NotebookCodeSQLEditorSettings } from './components/NotebookSQLEditor'
 import { notebookNodeLogic } from './notebookNodeLogic'
 import { PythonExecutionMedia, PythonExecutionResult } from './pythonExecution'
 import { buildMediaSource, renderAnsiText } from './utils'
@@ -284,19 +284,19 @@ const Settings = ({
     updateAttributes,
 }: NotebookNodeAttributeProperties<NotebookNodeInsightsQLAttributes>): JSX.Element => {
     const nodeLogic = useMountedLogic(notebookNodeLogic)
-    const { runInsightsqlSqlNodeWithMode } = useActions(nodeLogic)
+    const { runHogqlSqlNodeWithMode } = useActions(nodeLogic)
+    const { insightsqlSqlRunLoading, insightsqlSqlRunQueued } = useValues(nodeLogic)
 
     return (
-        <CodeEditorResizeable
-            language="sql"
-            value={attributes.code}
-            onChange={(value) => updateAttributes({ code: value ?? '' })}
-            onPressCmdEnter={() => {
-                void runInsightsqlSqlNodeWithMode({ mode: 'auto' })
+        <NotebookCodeSQLEditorSettings
+            attributes={attributes}
+            updateAttributes={updateAttributes}
+            tabIdSuffix="insightsql"
+            onRunQuery={() => {
+                void runHogqlSqlNodeWithMode({ mode: 'auto' })
             }}
-            allowManualResize={false}
-            minHeight={160}
-            embedded
+            runQueryLoading={insightsqlSqlRunLoading || insightsqlSqlRunQueued}
+            runQueryTooltip="Run SQL (InsightsQL) query"
         />
     )
 }

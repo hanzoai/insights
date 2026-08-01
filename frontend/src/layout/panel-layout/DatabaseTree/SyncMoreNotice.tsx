@@ -5,11 +5,12 @@ import { IconX } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
 
 import { queryDatabaseLogic } from 'scenes/data-warehouse/editor/sidebar/queryDatabaseLogic'
-import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
+
+import { SourceIcon } from 'products/data_warehouse/frontend/shared/components/SourceIcon'
 
 import { panelLayoutLogic } from '../panelLayoutLogic'
 
@@ -37,15 +38,15 @@ export const SyncMoreNotice = (): JSX.Element | null => {
                     icon={<IconX />}
                 />
                 <div className="mb-4 flex justify-center gap-6">
-                    <DataWarehouseSourceIcon type="Postgres" size="small" disableTooltip={true} />
-                    <DataWarehouseSourceIcon type="Stripe" size="small" disableTooltip={true} />
-                    <DataWarehouseSourceIcon type="GoogleAds" size="small" disableTooltip={true} />
+                    <SourceIcon type="Postgres" size="small" disableTooltip={true} />
+                    <SourceIcon type="Stripe" size="small" disableTooltip={true} />
+                    <SourceIcon type="GoogleAds" size="small" disableTooltip={true} />
                 </div>
-                <h4 className="mb-2">Connect more data sources</h4>
+                <h4 className="mb-2">No data warehouse sources connected</h4>
                 {/* eslint-disable-next-line react/forbid-dom-props */}
                 <p className="text-muted mb-4 text-xs px-2 break-words w" style={{ whiteSpace: 'normal' }}>
-                    Your datastore is already connected and queryable here. Add Postgres, Stripe, or another external
-                    source to join it with your product data.
+                    Import data from external sources like Postgres, Stripe, or other databases to enrich your
+                    analytics.
                 </p>
                 <Button
                     type="primary"

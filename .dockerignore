@@ -1,20 +1,22 @@
 *
+!Dockerfile.recording-rasterizer
 !.devcontainer
 !.kearc
 !bin
 !common/scriptvm
 !common/esbuilder
 !common/migration_utils
+!common/mosaic
+!common/replay-headless
+!common/replay-shared
 !common/plugin_transpiler/*.*
 !common/plugin_transpiler/src
 !common/tailwind
-!common/insightsql_parser
-!common/plugin-scaffold
-!common/siphash
-!common/insights-node
+!packages/quill
 !dags
 !docs/onboarding
-!frontend/@hanzo
+!ee
+!frontend/@insights
 !frontend/*.*
 !frontend/.storybook
 !frontend/bin
@@ -27,7 +29,6 @@
 !manage.py
 !turbo.json
 !package.json
-!.pnpmfile.cjs
 !patches
 !playwright.config.ts
 !nodejs
@@ -39,6 +40,25 @@
 !nodejs/assets
 !nodejs/tsconfig.eslint.json
 !nodejs/tsconfig.json
+!services/mcp
+!services/mcp/package.json
+!services/mcp/tsconfig.json
+!services/mcp/scripts
+!services/mcp/src
+!services/mcp/shared
+!services/mcp/types.d.ts
+!services/mcp/worker-configuration.d.ts
+!services/mcp/public
+!packages/quill
+services/agent-*/node_modules
+services/agent-*/dist
+services/agent-*/.next
+!services/agent-proxy
+!services/agent-proxy/package.json
+!services/agent-proxy/tsconfig.json
+!services/agent-proxy/scripts
+!services/agent-proxy/src
+!services/agent-proxy/types.d.ts
 !pnpm-lock.yaml
 !pnpm-workspace.yaml
 !pyproject.toml
@@ -52,16 +72,40 @@
 !share/GeoLite2-City.mmdb
 !staticfiles
 !tailwind.config.js
-!test-runner-jest-environment.js
-!test-runner-jest.config.js
+!tools/insightscli
+!tools/openapi-codegen
+!tools/owners
+!tools/pr-approval-agent
 !tsconfig.json
 !unit.json.tpl
 common/*/*/node_modules
 common/*/node_modules
 common/*/*/dist
 common/*/dist
+packages/quill/**/node_modules
+packages/quill/**/dist
 products/**/node_modules
+# Nested standalone workspace, not imported by any server image; `!products` above
+# would otherwise pull ~56 MiB of desktop assets into every image build context.
+products/desktop
 nodejs/node_modules
+# The image-scrub sidecar is a standalone package nested in nodejs/src; keep its deps and (Stage-2) model
+# artifacts out of the plugin-server build context.
+nodejs/src/ingestion/pipelines/sessionreplay/ml-mirror-image-scrub-sidecar/node_modules
+nodejs/src/ingestion/pipelines/sessionreplay/ml-mirror-image-scrub-sidecar/models
+nodejs/src/ingestion/pipelines/sessionreplay/ml-mirror-image-scrub-sidecar/corpus
+nodejs/src/ingestion/pipelines/sessionreplay/ml-mirror-image-scrub-sidecar/test-data
+nodejs/src/ingestion/pipelines/sessionreplay/ml-mirror-image-scrub-sidecar/out
+nodejs/src/ingestion/pipelines/sessionreplay/ml-mirror-image-scrub-sidecar/tmp
+nodejs/src/ingestion/pipelines/sessionreplay/ml-mirror-image-scrub-sidecar/*.traineddata
+services/mcp/node_modules
+services/mcp/dist
+services/mcp/.wrangler
+services/mcp/tests
+services/agent-proxy/node_modules
+services/agent-proxy/dist
+services/agent-proxy/tests
+ee/**/node_modules
 docs/**/node_modules
 **/__pycache__
 rust/.env
@@ -75,7 +119,15 @@ rust/target
 !docker-compose.base.yml
 !docker-compose.dev.yml
 !docker
-!playwright/package.json
-!services/mcp/package.json
-!nodejs/src/scripts/package.json
-!rust/cyclotron-node/package.json
+
+# Test / story / spec sources are never needed to build or run any image. Excluding them keeps them
+# out of the COPYed layers and stops test-only edits from busting the collectstatic + frontend-build
+# cache. Shared by all Dockerfiles — no image build (main, node, llm-analytics, etc.) needs them.
+products/**/test_*.py
+products/**/*_test.py
+products/**/*.test.*
+products/**/*.spec.*
+products/**/*.stories.*
+frontend/src/**/*.test.*
+frontend/src/**/*.spec.*
+frontend/src/**/*.stories.*

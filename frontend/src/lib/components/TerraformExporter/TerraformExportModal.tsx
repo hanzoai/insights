@@ -1,4 +1,6 @@
-import { IconDownload, IconWarning } from '@hanzo/icons'
+import { useEffect, useState } from 'react'
+
+import { IconDownload } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from '~/lib/components/CodeSnippet/CodeSnippet'
 import { Banner } from '~/lib/elements/Banner'
@@ -20,6 +22,7 @@ interface TerraformExportModalProps {
     isOpen: boolean
     onClose: () => void
     resource: TerraformExportResource
+    'data-attr'?: string
 }
 
 function getBaseName(resource: TerraformExportResource): string {
@@ -32,7 +35,7 @@ function getBaseName(resource: TerraformExportResource): string {
 function getDescription(resource: TerraformExportResource, result: TerraformExportResult | null): JSX.Element {
     const providerDocsUrl = 'https://registry.terraform.io/providers/Insights/insights/latest/docs'
     const exampleRepoUrl =
-        'https://github.com/hanzoai/insights/tree/main/terraform/us/project-2/team-analytics-platform'
+        'https://github.com/Insights/insights/tree/master/terraform/us/project-2/team-analytics-platform'
 
     const getExportPrefix = (): string => {
         const hasRelatedResources =
@@ -64,10 +67,22 @@ function getDescription(resource: TerraformExportResource, result: TerraformExpo
     )
 }
 
-export function TerraformExportModal({ isOpen, onClose, resource }: TerraformExportModalProps): JSX.Element {
+export function TerraformExportModal({
+    isOpen,
+    onClose,
+    resource,
+    'data-attr': dataAttr,
+}: TerraformExportModalProps): JSX.Element {
     const baseName = getBaseName(resource)
     const state = useTerraformExport(resource, isOpen)
     const handleDownload = useTerraformDownload(state.result, baseName)
+    const [warningsDismissed, setWarningsDismissed] = useState(false)
+
+    useEffect(() => {
+        if (isOpen) {
+            setWarningsDismissed(false)
+        }
+    }, [isOpen])
 
     const filename = `${baseName}.tf`
     const displayFilename = baseName.length > 30 ? `${baseName.slice(0, 30)}….tf` : filename
@@ -77,6 +92,7 @@ export function TerraformExportModal({ isOpen, onClose, resource }: TerraformExp
             isOpen={isOpen}
             onClose={onClose}
             title="Manage with Terraform"
+            data-attr={dataAttr}
             description={getDescription(resource, state.result)}
             footer={
                 <div className="flex justify-between w-full">
@@ -104,29 +120,21 @@ export function TerraformExportModal({ isOpen, onClose, resource }: TerraformExp
 
                 {state.error && (
                     <Banner type="error">
-                        <div className="flex items-start gap-2">
-                            <IconWarning className="text-danger shrink-0 mt-0.5" />
-                            <div>
-                                <strong>Error:</strong> {state.error}
-                            </div>
-                        </div>
+                        <strong>Error:</strong> {state.error}
                     </Banner>
                 )}
 
                 {state.result && (
                     <>
-                        {state.result.warnings.length > 0 && (
-                            <Banner type="warning">
-                                <div className="flex items-start gap-2">
-                                    <IconWarning className="text-warning shrink-0 mt-0.5" />
-                                    <div>
-                                        <strong>Warnings:</strong>
-                                        <ul className="list-disc ml-4 mt-1 mb-0">
-                                            {state.result.warnings.map((warning, index) => (
-                                                <li key={index}>{warning}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                        {state.result.warnings.length > 0 && !warningsDismissed && (
+                            <Banner type="warning" onClose={() => setWarningsDismissed(true)}>
+                                <div>
+                                    <strong>Warnings:</strong>
+                                    <ul className="list-disc ml-4 mt-1 mb-0">
+                                        {state.result.warnings.map((warning, index) => (
+                                            <li key={index}>{warning}</li>
+                                        ))}
+                                    </ul>
                                 </div>
                             </Banner>
                         )}

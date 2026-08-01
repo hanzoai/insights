@@ -1,16 +1,19 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { AccessControlAction } from 'lib/components/AccessControlAction'
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { Button } from 'lib/elements/Button'
 import { Switch } from 'lib/elements/Switch'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { AccessControlLevel, AccessControlResourceType } from '~/types'
-
 export function PreAggregatedTablesSetting(): JSX.Element {
     const { updateCurrentTeam } = useActions(teamLogic)
     const { currentTeam } = useValues(teamLogic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     const savedSetting = currentTeam?.modifiers?.useWebAnalyticsPreAggregatedTables
     const [useWebAnalyticsPreAggregatedTables, setUseWebAnalyticsPreAggregatedTables] = useState<boolean>(
@@ -23,30 +26,21 @@ export function PreAggregatedTablesSetting(): JSX.Element {
 
     return (
         <>
-            <AccessControlAction
-                resourceType={AccessControlResourceType.WebAnalytics}
-                minAccessLevel={AccessControlLevel.Editor}
-            >
-                <Switch
-                    checked={useWebAnalyticsPreAggregatedTables}
-                    onChange={(newValue) => setUseWebAnalyticsPreAggregatedTables(newValue)}
-                />
-            </AccessControlAction>
+            <Switch
+                checked={useWebAnalyticsPreAggregatedTables}
+                onChange={(newValue) => setUseWebAnalyticsPreAggregatedTables(newValue)}
+                disabledReason={restrictedReason}
+            />
             <div className="mt-4">
-                <AccessControlAction
-                    resourceType={AccessControlResourceType.WebAnalytics}
-                    minAccessLevel={AccessControlLevel.Editor}
+                <Button
+                    type="primary"
+                    onClick={() => handleChange(useWebAnalyticsPreAggregatedTables)}
+                    disabledReason={
+                        useWebAnalyticsPreAggregatedTables === savedSetting ? 'No changes to save' : restrictedReason
+                    }
                 >
-                    <Button
-                        type="primary"
-                        onClick={() => handleChange(useWebAnalyticsPreAggregatedTables)}
-                        disabledReason={
-                            useWebAnalyticsPreAggregatedTables === savedSetting ? 'No changes to save' : undefined
-                        }
-                    >
-                        Save
-                    </Button>
-                </AccessControlAction>
+                    Save
+                </Button>
             </div>
         </>
     )

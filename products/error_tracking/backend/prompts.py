@@ -163,7 +163,7 @@ Choose appropriate operators based on the query intent:
 **Exception-related (event type)**:
 - `$exception_types`: Type of exception (e.g., "TypeError", "ReferenceError") as a list of strings
 - `$exception_values`: Error message text as a list of strings
-- `$exception_stack_trace`: Stack trace information
+- `$exception_list`: Normalized exception chain, including stack trace frames
 - `$exception_sources`: Source file paths where error occurred as a list of strings
 
 **Context Properties (event type)**:
@@ -192,7 +192,7 @@ and the set of common library names is:
 ```ts
 export const COMMON_LIB_VALUES = new Set([
     'web', // This is the js frontend library
-    'hanzo-insights',
+    'insights-python',
     'insights-node',
     'insights-react-native',
     'insights-ruby',

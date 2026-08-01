@@ -22,200 +22,224 @@
 # consumer that turns session-recording snapshots into S3 blocks and warehouse
 # rows. Session replay is only alive because this pod is.
 #
-# PATH FILTER. Same reasoning as livestream: this image is built from the node
-# tree, so a push that does not touch it would produce a byte-identical image
-# under a new version — a number that claims something changed when nothing did.
-# The paths mirror ci-nodejs-container.yml's filter, which is the existing
-# statement of what this image is built from.
+# PATH FILTER — DERIVED FROM WHAT Dockerfile.node COPIES, not from taste. A
+# filter narrower than the build context is not a tidiness choice, it is a change
+# that silently never ships: the push looks green because no job was owed, and the
+# pod keeps running the old image.
+#
+# That is not hypothetical. The inherited filter (copied from
+# ci-nodejs-container.yml) listed `rust/cyclotron-node/**`, but this image builds
+# that crate with cargo, and cargo resolves the WHOLE workspace — so rust/Cargo.toml
+# breaking the workspace broke this image, and fixing rust/Cargo.toml did not
+# rebuild it. The filter has to name every path the COPY lines pull in.
+#
+# Cross-check against Dockerfile.node when either changes; they are one statement
+# of what this image is made of, written twice.
 name: plugin
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'nodejs/**'
-      - 'common/scriptvm/typescript/**'
-      - 'common/plugin_transpiler/**'
-      - 'common/esbuilder/**'
-      - 'rust/cyclotron-node/**'
-      - 'Dockerfile.node'
-      - '.hanzo/workflows/plugin.yml'
-  workflow_dispatch:
+    push:
+        branches: [main]
+        paths:
+            # nodejs/, and the workspace roots that decide how it resolves
+            - 'nodejs/**'
+            - 'package.json'
+            - 'pnpm-lock.yaml'
+            - 'pnpm-workspace.yaml'
+            - 'pnpmfile.cjs'
+            - '.pnpmfile.cjs'
+            - 'tsconfig.json'
+            - 'turbo.json'
+            - 'bin/turbo'
+            - 'patches/**'
+            # the whole cargo workspace: COPY ./rust ./rust, and cargo resolution is
+            # workspace-wide, so any member can break or change the cyclotron build
+            - 'rust/**'
+            # every common/ package the build stage copies
+            - 'common/esbuilder/**'
+            - 'common/insights-node/**'
+            - 'common/plugin-scaffold/**'
+            - 'common/plugin_transpiler/**'
+            - 'common/scriptvm/typescript/**'
+            - 'common/siphash/**'
+            - 'Dockerfile.node'
+            - '.hanzo/workflows/plugin.yml'
+    workflow_dispatch:
 
 # One release at a time. Two runs that both read the same last published tag both
 # compute the same next one, and the second would push a different digest behind
 # a name the first already used.
 concurrency:
-  group: insights-plugin-release
-  cancel-in-progress: false
+    group: insights-plugin-release
+    cancel-in-progress: false
 
 jobs:
-  build:
-    # The live runner fleet advertises `hanzo-build-linux-amd64`. Any other label
-    # matches no runner and the job queues forever instead of failing — the exact
-    # state the GitHub workflow has been stuck in.
-    runs-on: hanzo-build-linux-amd64
-    steps:
-      - uses: actions/checkout@v4
+    build:
+        # The live runner fleet advertises `hanzo-build-linux-amd64`. Any other label
+        # matches no runner and the job queues forever instead of failing — the exact
+        # state the GitHub workflow has been stuck in.
+        runs-on: hanzo-build-linux-amd64
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+            - name: Log in to GHCR
+              run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
 
-      # The next patch is derived from what is PUBLISHED, then proven unused
-      # before anything is pushed. Both halves matter: the first stops us
-      # colliding with a tag git does not know about, the second stops us
-      # overwriting one at all.
-      - name: Next patch semver
-        id: ver
-        env:
-          GHCR_USER: ${{ secrets.GHCR_USER }}
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: |
-          set -euo pipefail
-          TOKEN=$(curl -fsSL -u "$GHCR_USER:$GHCR_TOKEN" \
-            "https://ghcr.io/token?scope=repository:hanzoai/insights-plugin:pull&service=ghcr.io" | jq -r .token)
+            # The next patch is derived from what is PUBLISHED, then proven unused
+            # before anything is pushed. Both halves matter: the first stops us
+            # colliding with a tag git does not know about, the second stops us
+            # overwriting one at all.
+            - name: Next patch semver
+              id: ver
+              env:
+                  GHCR_USER: ${{ secrets.GHCR_USER }}
+                  GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  TOKEN=$(curl -fsSL -u "$GHCR_USER:$GHCR_TOKEN" \
+                    "https://ghcr.io/token?scope=repository:hanzoai/insights-plugin:pull&service=ghcr.io" | jq -r .token)
 
-          # Not -f: this repository exists but has never held a SEMVER tag, and a
-          # tag list that returns nothing useful must be allowed to mean "none
-          # yet". A genuine auth or network failure is caught by the guard below,
-          # which refuses to push unless it gets a positive 404 for the exact tag
-          # it is about to write.
-          LAST=$(curl -sSL -H "Authorization: Bearer $TOKEN" \
-            "https://ghcr.io/v2/hanzoai/insights-plugin/tags/list?n=10000" \
-            | jq -r '.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' \
-            | sort -V | tail -1)
+                  # Not -f: this repository exists but has never held a SEMVER tag, and a
+                  # tag list that returns nothing useful must be allowed to mean "none
+                  # yet". A genuine auth or network failure is caught by the guard below,
+                  # which refuses to push unless it gets a positive 404 for the exact tag
+                  # it is about to write.
+                  LAST=$(curl -sSL -H "Authorization: Bearer $TOKEN" \
+                    "https://ghcr.io/v2/hanzoai/insights-plugin/tags/list?n=10000" \
+                    | jq -r '.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))' \
+                    | sort -V | tail -1)
 
-          # The existing sha- tags are deliberately not read. They cannot be
-          # ordered, which is the whole reason the fleet is versioned, so the
-          # first semver starts a fresh counter rather than trying to derive one
-          # from a name that carries no sequence.
-          if [ -z "${LAST:-}" ]; then
-            NEXT="1.0.0"
-            echo "no published semver tags — seeding first publish $NEXT"
-          else
-            IFS=. read -r MAJ MIN PAT <<<"$LAST"
-            NEXT="$MAJ.$MIN.$((PAT + 1))"
-            echo "last published $LAST -> building $NEXT"
-          fi
+                  # The existing sha- tags are deliberately not read. They cannot be
+                  # ordered, which is the whole reason the fleet is versioned, so the
+                  # first semver starts a fresh counter rather than trying to derive one
+                  # from a name that carries no sequence.
+                  if [ -z "${LAST:-}" ]; then
+                    NEXT="1.0.0"
+                    echo "no published semver tags — seeding first publish $NEXT"
+                  else
+                    IFS=. read -r MAJ MIN PAT <<<"$LAST"
+                    NEXT="$MAJ.$MIN.$((PAT + 1))"
+                    echo "last published $LAST -> building $NEXT"
+                  fi
 
-          # Immutability guard. 404 is the ONLY acceptable answer: anything else
-          # means the tag is taken (200) or we cannot tell (network/auth), and
-          # pushing on either would risk a second digest behind an existing name.
-          # This is also what makes the 1.0.0 seed safe.
-          CODE=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
-            -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json' \
-            "https://ghcr.io/v2/hanzoai/insights-plugin/manifests/$NEXT")
-          if [ "$CODE" != "404" ]; then
-            echo "::error::refusing to push $NEXT — manifest probe returned $CODE, expected 404 (tag taken, or existence unverifiable)"
-            exit 1
-          fi
+                  # Immutability guard. 404 is the ONLY acceptable answer: anything else
+                  # means the tag is taken (200) or we cannot tell (network/auth), and
+                  # pushing on either would risk a second digest behind an existing name.
+                  # This is also what makes the 1.0.0 seed safe.
+                  CODE=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
+                    -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json' \
+                    "https://ghcr.io/v2/hanzoai/insights-plugin/manifests/$NEXT")
+                  if [ "$CODE" != "404" ]; then
+                    echo "::error::refusing to push $NEXT — manifest probe returned $CODE, expected 404 (tag taken, or existence unverifiable)"
+                    exit 1
+                  fi
 
-          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
+                  echo "version=$NEXT" >> "$GITHUB_OUTPUT"
 
-      # docker, not buildctl: the runner image (catthehacker/ubuntu:act-24.04)
-      # ships a docker client against the privileged dind sidecar and carries no
-      # buildctl-daemonless.sh. Same shape as deploy.yml, which is proven green.
-      #
-      # Context is the repo root with -f Dockerfile.node: the node build copies
-      # from common/ and rust/ as well as nodejs/, which is why the GitHub
-      # workflow it replaces also built from the root.
-      - name: Build + push
-        run: |
-          set -euo pipefail
-          VERSION="${{ steps.ver.outputs.version }}"
-          IMAGE="ghcr.io/hanzoai/insights-plugin:${VERSION}"
-          # The commit rides the image, so dropping it from the tag loses nothing:
-          # `docker inspect` still answers which source built this.
-          docker build -f Dockerfile.node \
-            --build-arg COMMIT_HASH="${GITHUB_SHA}" \
-            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
-            --label "org.opencontainers.image.version=${VERSION}" \
-            --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
-            -t "$IMAGE" .
-          docker push "$IMAGE"
-          echo "built $IMAGE (revision ${GITHUB_SHA})"
+            # docker, not buildctl: the runner image (catthehacker/ubuntu:act-24.04)
+            # ships a docker client against the privileged dind sidecar and carries no
+            # buildctl-daemonless.sh. Same shape as deploy.yml, which is proven green.
+            #
+            # Context is the repo root with -f Dockerfile.node: the node build copies
+            # from common/ and rust/ as well as nodejs/, which is why the GitHub
+            # workflow it replaces also built from the root.
+            - name: Build + push
+              run: |
+                  set -euo pipefail
+                  VERSION="${{ steps.ver.outputs.version }}"
+                  IMAGE="ghcr.io/hanzoai/insights-plugin:${VERSION}"
+                  # The commit rides the image, so dropping it from the tag loses nothing:
+                  # `docker inspect` still answers which source built this.
+                  docker build -f Dockerfile.node \
+                    --build-arg COMMIT_HASH="${GITHUB_SHA}" \
+                    --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+                    --label "org.opencontainers.image.version=${VERSION}" \
+                    --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
+                    -t "$IMAGE" .
+                  docker push "$IMAGE"
+                  echo "built $IMAGE (revision ${GITHUB_SHA})"
 
-      # THE DEPLOY. Everything above PUBLISHES an image; this is the step that
-      # makes production run it. cd.hanzo.ai watches hanzoai/universe, not the
-      # registry, so an image nothing points at is just bytes in ghcr.
-      #
-      # THE FIRST RUN CANNOT PIN, AND MUST NOT. The values file still reads
-      # `tag: sha-fe74083`, and pin.sh compares versions with sort -V, which
-      # orders 1.0.0 BEFORE sha-fe74083 — so it would read the first semver as a
-      # rollback and refuse. That refusal is correct and this step declines
-      # rather than fights it: moving a pod that is ingesting live session
-      # recordings onto the first build of an image no pipeline has produced in
-      # months is a deliberate act, not a side effect of merging.
-      #
-      # So the bootstrap is one human edit — set image.tag in
-      # charts/app/values/hanzo/insights-plugin.yaml to the version this run
-      # publishes, once the image has been seen to start and consume. From then
-      # on the pin is semver, the guard has two comparable numbers, and every
-      # later run ships itself with no special case.
-      - name: Ship it
-        env:
-          KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
-          KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
-          KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://kms.hanzo.ai' }}
-          KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
-          KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
-          # pin.sh probes the registry before it moves anything; these let it read
-          # a private manifest instead of falling back to anonymous.
-          GHCR_USER: ${{ secrets.GHCR_USER }}
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: |
-          set -euo pipefail
-          VERSION="${{ steps.ver.outputs.version }}"
+            # THE DEPLOY. Everything above PUBLISHES an image; this is the step that
+            # makes production run it. cd.hanzo.ai watches hanzoai/universe, not the
+            # registry, so an image nothing points at is just bytes in ghcr.
+            #
+            # THE FIRST RUN CANNOT PIN, AND MUST NOT. The values file still reads
+            # `tag: sha-fe74083`, and pin.sh compares versions with sort -V, which
+            # orders 1.0.0 BEFORE sha-fe74083 — so it would read the first semver as a
+            # rollback and refuse. That refusal is correct and this step declines
+            # rather than fights it: moving a pod that is ingesting live session
+            # recordings onto the first build of an image no pipeline has produced in
+            # months is a deliberate act, not a side effect of merging.
+            #
+            # So the bootstrap is one human edit — set image.tag in
+            # charts/app/values/hanzo/insights-plugin.yaml to the version this run
+            # publishes, once the image has been seen to start and consume. From then
+            # on the pin is semver, the guard has two comparable numbers, and every
+            # later run ships itself with no special case.
+            - name: Ship it
+              env:
+                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://kms.hanzo.ai' }}
+                  KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
+                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+                  # pin.sh probes the registry before it moves anything; these let it read
+                  # a private manifest instead of falling back to anonymous.
+                  GHCR_USER: ${{ secrets.GHCR_USER }}
+                  GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  VERSION="${{ steps.ver.outputs.version }}"
 
-          # Secrets come from KMS, never from a file or a repo variable.
-          KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
-            -H 'Content-Type: application/json' \
-            -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
-            | jq -r '.accessToken // empty')
-          [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+                  # Secrets come from KMS, never from a file or a repo variable.
+                  KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+                    | jq -r '.accessToken // empty')
+                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
 
-          PIN_TOKEN=$(curl -fsS \
-            "${KMS_ENDPOINT}/v1/kms/orgs/${KMS_ORG}/secrets/deploy/UNIVERSE_PIN_TOKEN?env=${KMS_SECRET_ENV}" \
-            -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.secret.value // empty')
-          [ -n "$PIN_TOKEN" ] || { echo "::error::UNIVERSE_PIN_TOKEN missing in KMS at ${KMS_ORG}/deploy (env ${KMS_SECRET_ENV})"; exit 1; }
-          echo "::add-mask::${PIN_TOKEN}"
+                  PIN_TOKEN=$(curl -fsS \
+                    "${KMS_ENDPOINT}/v1/kms/orgs/${KMS_ORG}/secrets/deploy/UNIVERSE_PIN_TOKEN?env=${KMS_SECRET_ENV}" \
+                    -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.secret.value // empty')
+                  [ -n "$PIN_TOKEN" ] || { echo "::error::UNIVERSE_PIN_TOKEN missing in KMS at ${KMS_ORG}/deploy (env ${KMS_SECRET_ENV})"; exit 1; }
+                  echo "::add-mask::${PIN_TOKEN}"
 
-          # Shallow: universe is ~600MB of history and this needs one file from
-          # the tip.
-          git clone --quiet --depth 1 \
-            "https://x-access-token:${PIN_TOKEN}@git.hanzo.ai/hanzo/universe" /tmp/universe
+                  # Shallow: universe is ~600MB of history and this needs one file from
+                  # the tip.
+                  git clone --quiet --depth 1 \
+                    "https://x-access-token:${PIN_TOKEN}@git.hanzo.ai/hanzo/universe" /tmp/universe
 
-          VALUES=/tmp/universe/charts/app/values/hanzo/insights-plugin.yaml
-          CURRENT=$(awk '
-            /^image:/            { in_image = 1; next }
-            in_image && /^[^[:space:]]/ { in_image = 0 }
-            in_image && $1 == "tag:" { print $2; exit }
-          ' "$VALUES")
+                  VALUES=/tmp/universe/charts/app/values/hanzo/insights-plugin.yaml
+                  CURRENT=$(awk '
+                    /^image:/            { in_image = 1; next }
+                    in_image && /^[^[:space:]]/ { in_image = 0 }
+                    in_image && $1 == "tag:" { print $2; exit }
+                  ' "$VALUES")
 
-          # Publish, then stop — see the header. Exit 0: the image is built and
-          # pushed, which is everything this run was asked to do, and a red build
-          # would say otherwise.
-          if ! printf '%s' "${CURRENT#v}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "insights-plugin is pinned at '${CURRENT}', which is not semver, so pin.sh cannot order it against ${VERSION}."
-            echo "Published ghcr.io/hanzoai/insights-plugin:${VERSION}. To adopt it, set image.tag to ${VERSION} in charts/app/values/hanzo/insights-plugin.yaml once the image is confirmed to start and consume; every run after that pins itself."
-            exit 0
-          fi
+                  # Publish, then stop — see the header. Exit 0: the image is built and
+                  # pushed, which is everything this run was asked to do, and a red build
+                  # would say otherwise.
+                  if ! printf '%s' "${CURRENT#v}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+                    echo "insights-plugin is pinned at '${CURRENT}', which is not semver, so pin.sh cannot order it against ${VERSION}."
+                    echo "Published ghcr.io/hanzoai/insights-plugin:${VERSION}. To adopt it, set image.tag to ${VERSION} in charts/app/values/hanzo/insights-plugin.yaml once the image is confirmed to start and consume; every run after that pins itself."
+                    exit 0
+                  fi
 
-          # Another service can land its own pin between our clone and our push.
-          # That is a normal race on a shared tree, not a failure — but a shallow
-          # clone has no common history to rebase onto, so RE-APPLY rather than
-          # merge: reset to the new tip and pin again. Pinning is idempotent and
-          # derives everything from the file it finds, so the retry also re-checks
-          # the monotonic guard against whatever just landed.
-          for attempt in 1 2 3 4 5; do
-            /tmp/universe/charts/app/pin.sh insights-plugin "$VERSION"
+                  # Another service can land its own pin between our clone and our push.
+                  # That is a normal race on a shared tree, not a failure — but a shallow
+                  # clone has no common history to rebase onto, so RE-APPLY rather than
+                  # merge: reset to the new tip and pin again. Pinning is idempotent and
+                  # derives everything from the file it finds, so the retry also re-checks
+                  # the monotonic guard against whatever just landed.
+                  for attempt in 1 2 3 4 5; do
+                    /tmp/universe/charts/app/pin.sh insights-plugin "$VERSION"
 
-            if git -C /tmp/universe push --quiet origin HEAD:main 2>/dev/null; then
-              echo "pinned insights-plugin to ${VERSION}"; exit 0
-            fi
+                    if git -C /tmp/universe push --quiet origin HEAD:main 2>/dev/null; then
+                      echo "pinned insights-plugin to ${VERSION}"; exit 0
+                    fi
 
-            echo "universe moved under us (attempt ${attempt}/5) — re-applying on the new tip"
-            git -C /tmp/universe fetch --quiet --depth 1 origin main
-            git -C /tmp/universe reset --hard --quiet FETCH_HEAD
-          done
-          echo "::error::could not push the pin after 5 attempts"; exit 1
+                    echo "universe moved under us (attempt ${attempt}/5) — re-applying on the new tip"
+                    git -C /tmp/universe fetch --quiet --depth 1 origin main
+                    git -C /tmp/universe reset --hard --quiet FETCH_HEAD
+                  done
+                  echo "::error::could not push the pin after 5 attempts"; exit 1

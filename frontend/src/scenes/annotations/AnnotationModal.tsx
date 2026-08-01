@@ -1,19 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import {
-    Button,
-    CalendarSelectInput,
-    Modal,
-    ModalProps,
-    Select,
-    SelectOptions,
-    TextAreaMarkdown,
-    Link,
-} from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
+import { Button, Modal, ModalProps, Select, SelectOptions, Link } from '@hanzo/elements'
 
+import { DatePicker } from 'lib/components/DatePicker/DatePicker'
+import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
+import { dayjs } from 'lib/dayjs'
 import { Field } from 'lib/elements/Field'
-import { shortTimeZone } from 'lib/utils'
+import { TextAreaMarkdown } from 'lib/elements/TextArea/TextAreaMarkdown'
+import { shortTimeZone } from 'lib/utils/timezones'
 import { urls } from 'scenes/urls'
 
 import { AnnotationScope, AnnotationType } from '~/types'
@@ -37,6 +33,7 @@ export function AnnotationModal({
         isModalOpen,
         existingModalAnnotation,
         annotationModal,
+        annotationModalChanged,
         isAnnotationModalSubmitting,
         onSavedInsight,
         timezone,
@@ -103,6 +100,7 @@ export function AnnotationModal({
             contentRef={contentRef}
             isOpen={isModalOpen}
             onClose={closeModal}
+            hasUnsavedInput={annotationModalChanged}
             title={existingModalAnnotation ? 'Edit annotation' : 'New annotation'}
             description="Use annotations to comment on insights, dashboards"
             footer={
@@ -162,7 +160,14 @@ export function AnnotationModal({
                         }
                         className="flex-1"
                     >
-                        <CalendarSelectInput granularity="minute" />
+                        {({ value, onChange }) => (
+                            <DatePicker
+                                value={value}
+                                onChange={onChange}
+                                granularity="minute"
+                                maxDate={dayjs().add(1, 'year')}
+                            />
+                        )}
                     </Field>
                     <Field name="scope" label="Scope" className="flex-1">
                         <Select options={scopeOptions} fullWidth />
@@ -175,6 +180,35 @@ export function AnnotationModal({
                         data-attr="create-annotation-input"
                         maxLength={400}
                     />
+                </Field>
+                <Field
+                    name="emoji"
+                    label="Emoji"
+                    showOptional
+                    info="Shown in place of the default badge when this annotation appears on a chart."
+                >
+                    {({ value, onChange }) => (
+                        <div className="flex items-center gap-2">
+                            <EmojiPickerPopover
+                                onSelect={(emoji) => onChange(emoji)}
+                                data-attr="annotation-emoji-picker"
+                            />
+                            {value ? (
+                                <div className="flex items-center gap-1">
+                                    <span className="text-2xl leading-none">{value}</span>
+                                    <Button
+                                        size="small"
+                                        icon={<IconX />}
+                                        tooltip="Remove emoji"
+                                        onClick={() => onChange(null)}
+                                        data-attr="annotation-emoji-clear"
+                                    />
+                                </div>
+                            ) : (
+                                <span className="text-secondary text-sm">No emoji selected</span>
+                            )}
+                        </div>
+                    )}
                 </Field>
             </Form>
         </Modal>

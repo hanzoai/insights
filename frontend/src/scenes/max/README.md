@@ -122,17 +122,17 @@ reducers({
 ```typescript
 // For direct selection from taxonomic filter
 if (groupType === TaxonomicFilterGroupType.MyEntities) {
-    actions.addOrUpdateContextMyEntity(item as { id: string; name?: string })
-    return
+  actions.addOrUpdateContextMyEntity(item as { id: string; name?: string })
+  return
 }
 
 // For selection from MaxAIContext (scene context items)
 if (_item.type === MaxContextType.MY_ENTITY) {
-    actions.addOrUpdateContextMyEntity({
-        id: _item.value as string,
-        name: _item.name ?? null,
-    })
-    return null
+  actions.addOrUpdateContextMyEntity({
+    id: _item.value as string,
+    name: _item.name ?? null,
+  })
+  return null
 }
 ```
 
@@ -203,6 +203,6 @@ Caveat: we currently support these types of insights: trends, funnels, retention
 This means that if you expose a dashboard with custom queries, these will show up in the frontend logic,
 but won't be actually available to Max in the backend.
 
-To add support for **reading** custom queries, refer to the README in ee/insightsai
+To add support for **reading** custom queries, refer to the README in ee/hogai
 
 To add support for **generating** insights with custom queries, talk to the Max AI team

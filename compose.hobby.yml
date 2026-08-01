@@ -38,10 +38,10 @@ services:
         volumes:
             - ./insights/insights/idl:/idl
             - ./insights/docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-            - ./insights/docker/datastore/config.xml:/etc/clickhouse-server/config.xml
-            - ./insights/docker/datastore/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
-            - ./insights/docker/datastore/users.xml:/etc/clickhouse-server/users.xml
-            - ./insights/docker/datastore/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
+            - ./insights/docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./insights/docker/datastore/config.d/default.xml:/etc/datastore-server/config.d/default.xml
+            - ./insights/docker/datastore/users.xml:/etc/datastore-server/users.xml
+            - ./insights/docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
             - ./insights/insights/user_scripts:/var/lib/datastore/user_scripts
             - datastore-data:/var/lib/datastore
 

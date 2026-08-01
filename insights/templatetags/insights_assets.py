@@ -50,7 +50,7 @@ def strip_protocol(path: str) -> str:
     """
     Returns a URL removing the http/https protocol
     Example:
-      {% strip_protocol 'https://insights.hanzo.ai' %}
-      =>  "insights.hanzo.ai"
+      {% strip_protocol 'https://app.hanzo.ai' %}
+      =>  "app.hanzo.ai"
     """
     return re.sub(r"https?:\/\/", "", path)

@@ -1,24 +1,24 @@
 # Methods used for rendering a Datastore query, given a template string and a
 # set of parameters.
 #
-# This uses the `escape_param` function from the `clickhouse-driver` package,
+# This uses the `escape_param` function from the `datastore-driver` package,
 # but passes an empty `Context` object to it. Prior to
-# https://github.com/mymarilyn/clickhouse-driver/commit/87090902f0270ed51a0b6754d5cbf0dc8544ec4b
+# https://github.com/mymarilyn/datastore-driver/commit/87090902f0270ed51a0b6754d5cbf0dc8544ec4b
 # the `escape_param` function didn't take a `Context` object. As of
-# `clickhouse-driver` 0.2.4 all it uses the context for is to determine the
+# `datastore-driver` 0.2.4 all it uses the context for is to determine the
 # "server" timezone, so passing an empty context maintains the existing
-# behaviour of `clickhouse-driver` 0.2.1, the version we were previously using.
+# behaviour of `datastore-driver` 0.2.1, the version we were previously using.
 #
 # This is of course a bit of a hack but we want to be able to render queries
 # without the need of having a connection, which seems like a reasonable thing
 # to be able to do. Having a dependency on a connection to render a query is a
 # little over the top.
 #
-# NOTE: this change is necessary because the `clickhouse-driver` package up to
+# NOTE: this change is necessary because the `datastore-driver` package up to
 # 0.2.3 uses an invalid `python_requires` in it's `setup.py` at least for
 # recent versions of setuptools. This was highlighted as a consequence of
 # upgrading to Python 3.10. See
-# https://github.com/mymarilyn/clickhouse-driver/pull/291 for further context.
+# https://github.com/mymarilyn/datastore-driver/pull/291 for further context.
 
 
 from typing import Any
@@ -28,9 +28,9 @@ from datastore_driver.context import Context
 from datastore_driver.util.escape import escape_param
 
 
-def substitute_params(query, params):
+def substitute_params(query: str, params: dict[str, Any]) -> str:
     """
-    This is a copy of clickhouse-driver's `substitute_params` function without
+    This is a copy of datastore-driver's `substitute_params` function without
     the dependency that you need to connect to the server before you can escape
     params. There was a bug in which we were trying to substitute params before
     the connection was established, which caused the query to fail. Presumably
@@ -41,7 +41,7 @@ def substitute_params(query, params):
     and remove that dependency.
 
     See
-    https://github.com/mymarilyn/clickhouse-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/datastore_driver/client.py#L593
+    https://github.com/mymarilyn/datastore-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/datastore_driver/client.py#L593
     for the original function.
     """
     if not isinstance(params, dict):
@@ -51,14 +51,14 @@ def substitute_params(query, params):
     return query % escaped
 
 
-def escape_params(params):
+def escape_params(params: dict[str, Any]) -> dict[str, str]:
     """
-    This is a copy of clickhouse-driver's `escape_params` function without the
+    This is a copy of datastore-driver's `escape_params` function without the
     dependency that you need to connect to the server before you can escape
     params.
 
     See
-    https://github.com/mymarilyn/clickhouse-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/datastore_driver/util/escape.py#L60
+    https://github.com/mymarilyn/datastore-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/datastore_driver/util/escape.py#L60
     for the original function.
     """
     escaped = {}
@@ -72,13 +72,13 @@ def escape_params(params):
 def escape_param_for_datastore(param: Any) -> str:
     """
     This is a wrapper around the `escape_param` function from the
-    `clickhouse-driver` package, but passes a placeholder `Context` object to it
+    `datastore-driver` package, but passes a placeholder `Context` object to it
     just such that it can run. The only value that the real `escape_param` uses
     from the context is the server timezone. We assume that the server timezone
     is UTC.
 
     See
-    https://github.com/mymarilyn/clickhouse-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/datastore_driver/util/escape.py#L31
+    https://github.com/mymarilyn/datastore-driver/blob/87090902f0270ed51a0b6754d5cbf0dc8544ec4b/datastore_driver/util/escape.py#L31
     for the wrapped function.
     """
     context = Context()
@@ -93,3 +93,32 @@ def escape_param_for_datastore(param: Any) -> str:
         timezone="UTC",
     )
     return escape_param(param, context=context)
+
+
+def substitute_params_for_display(query: str, params: dict[str, Any]) -> str:
+    """
+    Substitute query parameters for display/debug purposes.
+
+    This function is for generating SQL output shown to users in debug panels.
+    Parameters marked with '_sensitive' suffix are replaced with '[HIDDEN]'.
+
+    DO NOT use this function for query execution - use substitute_params instead.
+
+    Args:
+        query: SQL query string with %(param_name)s placeholders
+        params: Dictionary of parameter values
+
+    Returns:
+        Query string with parameters substituted
+    """
+    if not isinstance(params, dict):
+        raise ValueError("Parameters are expected in dict form")
+
+    escaped = {}
+    for key, value in params.items():
+        if key.endswith("_sensitive"):
+            escaped[key] = "'[HIDDEN]'"
+        else:
+            escaped[key] = escape_param_for_datastore(value)
+
+    return query % escaped

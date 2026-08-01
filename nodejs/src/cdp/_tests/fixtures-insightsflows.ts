@@ -1,17 +1,17 @@
-import { InsightsFlow } from '~/schema/insightsflow'
+import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { PostgresRouter } from '~/common/utils/db/postgres'
+import { UUIDT } from '~/common/utils/utils'
 import { insertRow } from '~/tests/helpers/sql'
 
-import { PostgresRouter } from '../../utils/db/postgres'
-import { UUIDT } from '../../utils/utils'
 import { CyclotronJobInvocationInsightsFlow, CyclotronPerson, InsightsFlowInvocationContext } from '../types'
-import { convertToInsightsFunctionFilterGlobal } from '../utils/insights-function-filtering'
-import { createScriptExecutionGlobals } from './fixtures'
+import { convertToInsightsFunctionFilterGlobal } from '../utils/script-function-filtering'
+import { createHogExecutionGlobals } from './fixtures'
 
-export const insertInsightsFlow = async (postgres: PostgresRouter, insightsFlow: InsightsFlow): Promise<InsightsFlow> => {
+export const insertInsightsFlow = async (postgres: PostgresRouter, hogFlow: InsightsFlow): Promise<InsightsFlow> => {
     // This is only used for testing so we need to override some values
 
-    const res = await insertRow(postgres, 'insights_flow', {
-        ...insightsFlow,
+    const res = await insertRow(postgres, 'insights_hogflow', {
+        ...hogFlow,
         description: '',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -25,7 +25,7 @@ export const createInsightsFlowInvocationContext = (
 ): InsightsFlowInvocationContext => {
     return {
         event: {
-            ...createScriptExecutionGlobals().event,
+            ...createHogExecutionGlobals().event,
             ...data.event,
         },
         actionStepCount: 0,
@@ -34,9 +34,9 @@ export const createInsightsFlowInvocationContext = (
 }
 
 export const createExampleInsightsFlowInvocation = (
-    insightsFlow: InsightsFlow,
+    hogFlow: InsightsFlow,
     _context: Partial<InsightsFlowInvocationContext> = {},
-    _person: CyclotronPerson | undefined = undefined
+    _person: Partial<CyclotronPerson> | undefined = undefined
 ): CyclotronJobInvocationInsightsFlow => {
     // Add the source of the trigger to the globals
 
@@ -57,9 +57,9 @@ export const createExampleInsightsFlowInvocation = (
         state: {
             ...context,
         },
-        teamId: insightsFlow.team_id,
-        functionId: insightsFlow.id,
-        insightsFlow,
+        teamId: hogFlow.team_id,
+        functionId: hogFlow.id,
+        hogFlow,
         person,
         filterGlobals: convertToInsightsFunctionFilterGlobal({
             event: context.event,
@@ -67,7 +67,7 @@ export const createExampleInsightsFlowInvocation = (
             groups: {},
             variables: context.variables || {},
         }),
-        queue: 'customflow',
+        queue: 'hogflow',
         queuePriority: 0,
     }
 }

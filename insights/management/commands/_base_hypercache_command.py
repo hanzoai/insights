@@ -9,6 +9,7 @@ For other cache types, create a different base class.
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import connection
+from django.db.models import QuerySet
 
 from insights.caching.flags_redis_cache import FLAGS_DEDICATED_CACHE_ALIAS
 from insights.models.team.team import Team
@@ -53,18 +54,13 @@ class BaseHyperCacheCommand(BaseCommand):
         """
         Add arguments specific to warming commands.
 
-        Includes: --batch-size, --invalidate-first, --no-stagger, --min-ttl-days, --max-ttl-days
+        Includes: --batch-size, --no-stagger, --min-ttl-days, --max-ttl-days
         """
         parser.add_argument(
             "--batch-size",
             type=int,
             default=1000,
             help="Number of teams to process at a time (default: 1000)",
-        )
-        parser.add_argument(
-            "--invalidate-first",
-            action="store_true",
-            help="Invalidate all existing caches before warming (use when schema changes)",
         )
         parser.add_argument(
             "--no-stagger",
@@ -224,7 +220,7 @@ class BaseHyperCacheCommand(BaseCommand):
                     pass
 
             total = self.process_teams_in_chunks(
-                Team.objects.select_related("organization", "project"),
+                self.get_teams_queryset(),
                 chunk_size=1000,
                 process_chunk_fn=process_chunk
             )
@@ -249,6 +245,33 @@ class BaseHyperCacheCommand(BaseCommand):
                 self.stdout.write(f"Progress: {total_processed} teams processed...")
 
         return total_processed
+
+    # Team scoping
+
+    # Team columns the commands read beyond the config's refresh_only_fields:
+    # the interactive output prints team.name next to each issue/fix line.
+    COMMAND_EXTRA_TEAM_FIELDS: tuple[str, ...] = ("name",)
+
+    def narrow_team_queryset(self, queryset: QuerySet[Team]) -> QuerySet[Team]:
+        """Narrow a Team queryset via the config, keeping the columns commands print."""
+        return self.get_hypercache_config().narrow_team_queryset(queryset, extra_fields=self.COMMAND_EXTRA_TEAM_FIELDS)
+
+    def get_teams_queryset(self) -> QuerySet:
+        """Return the base queryset of teams to process.
+
+        Uses the config's ``get_teams_queryset()`` method when set, falling
+        back to all teams. Narrowed so a Team column the read replica hasn't
+        migrated yet can't break the command's SELECT.
+        """
+        return self.narrow_team_queryset(self.get_hypercache_config().get_teams_queryset())
+
+    def _print_scope_info(self, scoped_count: int, total_count: int):
+        """Print a message when team scoping reduces the verification set."""
+        if scoped_count < total_count:
+            skipped = total_count - scoped_count
+            self.stdout.write(
+                f"Scope: {scoped_count:,} of {total_count:,} teams ({skipped:,} teams skipped — no relevant data)\n"
+            )
 
     # Verification framework
 
@@ -299,17 +322,23 @@ class BaseHyperCacheCommand(BaseCommand):
 
             # Process teams in chunks to avoid loading all teams into memory at once
             if team_ids:
-                teams_queryset = Team.objects.filter(id__in=team_ids).select_related("organization", "project")
+                teams_queryset = self.narrow_team_queryset(Team.objects.filter(id__in=team_ids))
                 self.stdout.write(f"Verifying {teams_queryset.count()} specific teams...\n")
                 self._verify_teams_batch(list(teams_queryset), stats, mismatches, verbose, fix)
             elif sample_size:
-                teams_queryset = Team.objects.select_related("organization", "project").order_by("?")[:sample_size]
-                self.stdout.write(f"Verifying random sample of {teams_queryset.count()} teams...\n")
-                self._verify_teams_batch(list(teams_queryset), stats, mismatches, verbose, fix)
+                total_teams = Team.objects.count()
+                scoped_queryset = self.get_teams_queryset()
+                scoped_count = scoped_queryset.count()
+                self._print_scope_info(scoped_count, total_teams)
+                teams = list(scoped_queryset.order_by("?")[:sample_size])
+                self.stdout.write(f"Verifying random sample of {len(teams)} teams...\n")
+                self._verify_teams_batch(teams, stats, mismatches, verbose, fix)
             else:
                 # For all teams, use chunked iteration to avoid memory exhaustion
-                teams_queryset = Team.objects.select_related("organization", "project")
+                total_teams = Team.objects.count()
+                teams_queryset = self.get_teams_queryset()
                 total = teams_queryset.count()
+                self._print_scope_info(total, total_teams)
                 self.stdout.write(f"Verifying all {total} teams...\n")
 
                 # Process teams in chunks using the helper method
@@ -668,7 +697,7 @@ class BaseHyperCacheCommand(BaseCommand):
         """
         self.stdout.write(f"\nWarming {cache_name} cache for {len(team_ids)} specific team(s)...\n")
 
-        teams = list(Team.objects.filter(id__in=team_ids).select_related("organization", "project"))
+        teams = list(self.narrow_team_queryset(Team.objects.filter(id__in=team_ids)))
         found_ids = {team.id for team in teams}
         missing_ids = set(team_ids) - found_ids
 
@@ -677,30 +706,10 @@ class BaseHyperCacheCommand(BaseCommand):
 
         return teams if teams else None
 
-    def _confirm_invalidate(self, cache_name: str) -> bool:
-        """
-        Get user confirmation for invalidating all caches.
-
-        Returns:
-            True if user confirmed, False otherwise
-        """
-        self.stdout.write(
-            self.style.WARNING(
-                f"WARNING: This will invalidate ALL existing {cache_name} caches before warming.\n"
-                "This should only be used when the cache schema has changed.\n"
-            )
-        )
-        confirm = input("Are you sure? Type 'yes' to continue: ")
-        if confirm.lower() != "yes":
-            self.stdout.write(self.style.ERROR("Aborted."))
-            return False
-        return True
-
     def run_warm(
         self,
         team_ids: list[int] | None,
         batch_size: int,
-        invalidate_first: bool,
         stagger_ttl: bool,
         min_ttl_days: int,
         max_ttl_days: int,
@@ -714,7 +723,6 @@ class BaseHyperCacheCommand(BaseCommand):
         Args:
             team_ids: Specific team IDs to warm, or None for all teams
             batch_size: Number of teams to process at a time
-            invalidate_first: Whether to invalidate all caches before warming
             stagger_ttl: Whether to randomize TTLs
             min_ttl_days: Minimum TTL in days (when staggering)
             max_ttl_days: Maximum TTL in days (when staggering)
@@ -733,28 +741,24 @@ class BaseHyperCacheCommand(BaseCommand):
 
             # Process all specific teams at once (small batch)
             actual_batch_size = len(teams)
-            actual_invalidate_first = False  # Never invalidate for specific teams
         else:
             # Get current cache stats for upfront reporting
             total_teams = Team.objects.count()
+            scoped_teams = self.get_teams_queryset().count()
+            self._print_scope_info(scoped_teams, total_teams)
             cache_stats = get_cache_stats(config)
 
             # Handle all teams - show configuration and current state
             self.stdout.write(
                 f"\nStarting {cache_name} cache warm:\n"
-                f"  Total teams: {total_teams:,}\n"
+                f"  Teams to warm: {scoped_teams:,}\n"
                 f"  Current cache coverage: {cache_stats.get('cache_coverage', 'unknown')}\n"
                 f"  Batch size: {batch_size}\n"
-                f"  Invalidate first: {invalidate_first}\n"
                 f"  Stagger TTL: {stagger_ttl}\n"
                 f"  TTL range: {min_ttl_days}-{max_ttl_days} days\n"
             )
 
-            if invalidate_first and not self._confirm_invalidate(cache_name):
-                return
-
             actual_batch_size = batch_size
-            actual_invalidate_first = invalidate_first
 
         # Callbacks to write progress to stdout
         last_percent_reported = [0]  # Use list to allow mutation in closure
@@ -778,7 +782,6 @@ class BaseHyperCacheCommand(BaseCommand):
         successful, failed = warm_caches(
             config,
             batch_size=actual_batch_size,
-            invalidate_first=actual_invalidate_first,
             stagger_ttl=stagger_ttl,
             min_ttl_days=min_ttl_days,
             max_ttl_days=max_ttl_days,

@@ -1,10 +1,14 @@
 import { IconClock } from '@hanzo/icons'
 
+import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
+import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/elements/icons'
 import { Row } from 'lib/elements/Row'
 import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/elements/icons'
-import { capitalizeFirstLetter, humanFriendlyDuration, percentage, pluralize } from 'lib/utils'
+import { humanFriendlyDuration } from 'lib/utils/durations'
+import { percentage } from 'lib/utils/numbers'
+import { capitalizeFirstLetter, pluralize } from 'lib/utils/strings'
+import { getActionFilterFromFunnelStep } from 'scenes/insights/views/Funnels/funnelStepTableUtils'
 
 import { isExperimentFunnelMetric } from '~/queries/schema/schema-general'
 import { FunnelStepWithConversionMetrics, StepOrderValue } from '~/types'
@@ -23,9 +27,7 @@ export function StepLegend({ step, stepIndex, showTime }: StepLegendProps): JSX.
 
     const isUnorderedFunnel =
         !!metric && isExperimentFunnelMetric(metric) && metric.funnel_order_type === StepOrderValue.UNORDERED
-    const stepLabel = isUnorderedFunnel
-        ? `Completed ${stepIndex + 1} ${stepIndex === 0 ? 'step' : 'steps'}`
-        : step.custom_name || step.name
+    const unorderedStepLabel = `Completed ${stepIndex + 1} ${stepIndex === 0 ? 'step' : 'steps'}`
 
     const convertedCountPresentation = pluralize(
         step.count ?? 0,
@@ -54,7 +56,11 @@ export function StepLegend({ step, stepIndex, showTime }: StepLegendProps): JSX.
     return (
         <div className="StepLegend">
             <Row icon={<Lettermark name={stepIndex + 1} color={LettermarkColor.Gray} />}>
-                <span title={stepLabel}>{stepLabel}</span>
+                {isUnorderedFunnel ? (
+                    <span title={unorderedStepLabel}>{unorderedStepLabel}</span>
+                ) : (
+                    <EntityFilterInfo filter={getActionFilterFromFunnelStep(step)} allowWrap />
+                )}
             </Row>
             <Row icon={<IconTrendingFlat />} status="success" style={{ color: 'unset' }}>
                 <Tooltip

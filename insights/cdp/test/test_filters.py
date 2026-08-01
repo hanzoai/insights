@@ -1,14 +1,31 @@
+import re
 import json
 
 from insights.test.base import APIBaseTest, DatastoreTestMixin, QueryMatchingTest
 
+from parameterized import parameterized
+
 from insights.insightsql.compiler.bytecode import create_bytecode
 
-from insights.cdp.filters import compile_filters_bytecode, insights_function_filters_to_expr
-from insights.models.action.action import Action
+from insights.cdp.filters import (
+    build_behavioral_event_expr,
+    cohort_filters_to_expr,
+    compile_filters_bytecode,
+    insights_function_filters_to_expr,
+)
+
+from products.actions.backend.models.action import Action
+from products.cohorts.backend.models.cohort import Cohort
 
 from common.scriptvm.python.execute import execute_bytecode
 from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
+
+
+def _normalize_error(error: str) -> str:
+    """Replace dynamic IDs and URLs in error messages with stable placeholders."""
+    error = re.sub(r"id=\d+", "id=N", error)
+    error = re.sub(r"https?://[^/]+/project/\d+/settings/project-customization", "SETTINGS_URL", error)
+    return error
 
 
 class TestInsightsFunctionFilters(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
@@ -193,6 +210,63 @@ class TestInsightsFunctionFilters(DatastoreTestMixin, APIBaseTest, QueryMatching
             2,
         ]
 
+    def test_multi_value_exact_filter_matches_numeric_property(self):
+        # Survey ratings and other numeric event properties arrive as numbers, while a multi-value
+        # "exact" filter stores its values as strings. Membership must still match (it compiles to a
+        # type-coercing equality chain, not a strict IN).
+        filters = {
+            "properties": [
+                {
+                    "key": "$survey_response_1",
+                    "value": ["1", "2", "3", "4", "5", "6"],
+                    "operator": "exact",
+                    "type": "event",
+                }
+            ]
+        }
+        bytecode = compile_filters_bytecode(filters, self.team)["bytecode"]
+        assert execute_bytecode(bytecode, {"properties": {"$survey_response_1": 6}}).result is True
+        assert execute_bytecode(bytecode, {"properties": {"$survey_response_1": 7}}).result is False
+
+    @parameterized.expand(
+        [
+            (True, True),
+            ("true", True),
+            (1, True),
+            (False, False),
+            ("false", False),
+            (0, False),
+        ]
+    )
+    def test_multi_value_exact_filter_matches_mcp_error_encodings(
+        self, property_value: bool | str | int, expected: bool
+    ) -> None:
+        filters = {
+            "events": [
+                {
+                    "id": "$mcp_tool_call",
+                    "type": "events",
+                    "properties": [
+                        {
+                            "key": "$mcp_is_error",
+                            "value": ["true", True, 1],
+                            "operator": "exact",
+                            "type": "event",
+                        }
+                    ],
+                }
+            ]
+        }
+        bytecode = compile_filters_bytecode(filters, self.team)["bytecode"]
+
+        assert (
+            execute_bytecode(
+                bytecode,
+                {"event": "$mcp_tool_call", "properties": {"$mcp_is_error": property_value}},
+            ).result
+            is expected
+        )
+
     def test_filters_full(self):
         bytecode = self.filters_to_bytecode(filters=self.filters)
         assert bytecode == [
@@ -282,11 +356,72 @@ class TestInsightsFunctionFilters(DatastoreTestMixin, APIBaseTest, QueryMatching
             4,
         ]
 
+    @parameterized.expand(
+        [
+            # `detail` is a nested object on `$activity_log_entry_created`, so a `detail.name` filter
+            # must resolve to `properties.detail.name` rather than a flat `properties["detail.name"]` key.
+            (
+                "activity_log_nested_detail_matches",
+                {
+                    "events": [{"id": "$activity_log_entry_created", "type": "events", "order": 0}],
+                    "properties": [{"key": "detail.name", "value": "cheese", "operator": "icontains", "type": "event"}],
+                },
+                {"event": "$activity_log_entry_created", "properties": {"detail": {"name": "cheese wheel"}}},
+                True,
+            ),
+            (
+                "activity_log_nested_detail_does_not_match",
+                {
+                    "events": [{"id": "$activity_log_entry_created", "type": "events", "order": 0}],
+                    "properties": [{"key": "detail.name", "value": "cheese", "operator": "icontains", "type": "event"}],
+                },
+                {"event": "$activity_log_entry_created", "properties": {"detail": {"name": "bananas"}}},
+                False,
+            ),
+            # Outside internal events a dotted key stays a single flat property lookup, so existing
+            # destinations keep matching properties whose names literally contain a dot.
+            (
+                "regular_event_dotted_key_stays_flat",
+                {
+                    "events": [{"id": "$pageview", "type": "events", "order": 0}],
+                    "properties": [{"key": "foo.bar", "value": "baz", "operator": "exact", "type": "event"}],
+                },
+                {"event": "$pageview", "properties": {"foo.bar": "baz"}},
+                True,
+            ),
+            (
+                "regular_event_dotted_key_not_treated_as_nested",
+                {
+                    "events": [{"id": "$pageview", "type": "events", "order": 0}],
+                    "properties": [{"key": "foo.bar", "value": "baz", "operator": "exact", "type": "event"}],
+                },
+                {"event": "$pageview", "properties": {"foo": {"bar": "baz"}}},
+                False,
+            ),
+            # A global property filter applies to every event branch, so when an internal event is
+            # mixed with an analytics event the dotted key must stay flat — resolving it would break
+            # the `$pageview` branch that reads `sdk.version` as a literal flat property.
+            (
+                "mixed_events_global_dotted_key_stays_flat",
+                {
+                    "events": [
+                        {"id": "$activity_log_entry_created", "type": "events", "order": 0},
+                        {"id": "$pageview", "type": "events", "order": 1},
+                    ],
+                    "properties": [{"key": "sdk.version", "value": "1.2", "operator": "exact", "type": "event"}],
+                },
+                {"event": "$pageview", "properties": {"sdk.version": "1.2"}},
+                True,
+            ),
+        ]
+    )
+    def test_dotted_property_key_resolution(self, _name: str, filters: dict, hog_globals: dict, expected: bool):
+        bytecode = self.filters_to_bytecode(filters=filters)
+        assert execute_bytecode(bytecode, hog_globals).result is expected
+
 
 class TestCohortExprHelpers(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_build_behavioral_event_expr_supported_with_event_filters(self):
-        from insights.cdp.filters import build_behavioral_event_expr
-
         behavioral = {
             "type": "behavioral",
             "key": "$pageview",
@@ -320,8 +455,6 @@ class TestCohortExprHelpers(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         ]
 
     def test_build_behavioral_event_expr_unsupported_returns_none(self):
-        from insights.cdp.filters import build_behavioral_event_expr
-
         behavioral = {
             "type": "behavioral",
             "key": "$pageview",
@@ -333,8 +466,6 @@ class TestCohortExprHelpers(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         assert expr is None
 
     def test_cohort_filters_to_expr_and_bytecode(self):
-        from insights.cdp.filters import cohort_filters_to_expr
-
         filters = {
             "properties": {
                 "type": "AND",
@@ -388,3 +519,334 @@ class TestCohortExprHelpers(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             3,
             2,
         ]
+
+
+class TestCohortInlining(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
+    def _make_person_property_cohort(self, properties: list[dict] | dict) -> Cohort:
+        return Cohort.objects.create(
+            team=self.team,
+            name="Person property cohort",
+            filters={"properties": properties},
+            is_static=False,
+        )
+
+    def test_person_property_cohort_inlined_in_test_account_filters(self):
+        cohort = self._make_person_property_cohort(
+            {
+                "type": "AND",
+                "values": [
+                    {"type": "person", "key": "email", "operator": "not_icontains", "value": "@test.com"},
+                    {"type": "person", "key": "is_internal", "operator": "is_not", "value": "true"},
+                ],
+            }
+        )
+        self.team.test_account_filters = [{"type": "cohort", "key": "id", "value": cohort.pk}]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
+        assert "bytecode_error" not in result
+
+    def test_person_property_cohort_with_negation(self):
+        cohort = self._make_person_property_cohort(
+            {
+                "type": "AND",
+                "values": [
+                    {"type": "person", "key": "email", "operator": "icontains", "value": "@hanzo.ai"},
+                ],
+            }
+        )
+        self.team.test_account_filters = [{"type": "cohort", "key": "id", "value": cohort.pk, "operator": "not_in"}]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
+
+        # The negated cohort should produce a NOT(...) expression that compiles to bytecode
+        hog_globals = {"person": {"properties": {"email": "test@other.com"}}}
+        res = execute_bytecode(result["bytecode"], hog_globals)
+        assert res.result is True
+
+        # A person matching the cohort should be filtered out (NOT matches)
+        hog_globals = {"person": {"properties": {"email": "ben@hanzo.ai"}}}
+        res = execute_bytecode(result["bytecode"], hog_globals)
+        assert res.result is False
+
+    def test_person_property_cohort_mixed_with_regular_filters(self):
+        cohort = self._make_person_property_cohort(
+            {"type": "AND", "values": [{"type": "person", "key": "plan", "operator": "exact", "value": "enterprise"}]}
+        )
+        self.team.test_account_filters = [
+            {"type": "cohort", "key": "id", "value": cohort.pk},
+            {"type": "person", "key": "email", "operator": "not_icontains", "value": "@test.com"},
+        ]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
+
+        # Both filters should be applied: plan=enterprise AND email not containing @test.com
+        hog_globals = {"person": {"properties": {"plan": "enterprise", "email": "user@real.com"}}}
+        res = execute_bytecode(result["bytecode"], hog_globals)
+        assert res.result is True
+
+        hog_globals = {"person": {"properties": {"plan": "free", "email": "user@real.com"}}}
+        res = execute_bytecode(result["bytecode"], hog_globals)
+        assert res.result is False
+
+    def test_behavioral_cohort_still_errors(self):
+        cohort = Cohort.objects.create(
+            team=self.team,
+            name="Behavioral cohort",
+            filters={
+                "properties": {
+                    "type": "AND",
+                    "values": [
+                        {
+                            "type": "behavioral",
+                            "key": "$pageview",
+                            "value": "performed_event",
+                            "event_type": "events",
+                        }
+                    ],
+                }
+            },
+            is_static=False,
+        )
+        self.team.test_account_filters = [{"type": "cohort", "key": "id", "value": cohort.pk}]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result["bytecode"] is None
+        assert _normalize_error(result["bytecode_error"]) == (
+            "Your internal/test user filters include cohorts that can't be used in real-time filters: "
+            "cohort 'Behavioral cohort' (id=N) contains behavioral filters — "
+            "only cohorts with exclusively person property filters can be used in real-time filters. "
+            "Either switch to a cohort that only uses person properties, "
+            "or replace the cohort with inline person property filters. "
+            "Update your filters at: SETTINGS_URL#internal-user-filtering"
+        )
+
+    def test_nested_cohort_reference_still_errors(self):
+        inner_cohort = Cohort.objects.create(
+            team=self.team,
+            name="Inner cohort",
+            filters={
+                "properties": {
+                    "type": "AND",
+                    "values": [{"type": "person", "key": "email", "operator": "exact", "value": "x@y.com"}],
+                }
+            },
+            is_static=False,
+        )
+        outer_cohort = Cohort.objects.create(
+            team=self.team,
+            name="Outer cohort with nested ref",
+            filters={
+                "properties": {
+                    "type": "AND",
+                    "values": [{"type": "cohort", "key": "id", "value": inner_cohort.pk}],
+                }
+            },
+            is_static=False,
+        )
+        self.team.test_account_filters = [{"type": "cohort", "key": "id", "value": outer_cohort.pk}]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result["bytecode"] is None
+        assert _normalize_error(result["bytecode_error"]) == (
+            "Your internal/test user filters include cohorts that can't be used in real-time filters: "
+            "cohort 'Outer cohort with nested ref' (id=N) contains cohort filters — "
+            "only cohorts with exclusively person property filters can be used in real-time filters. "
+            "Either switch to a cohort that only uses person properties, "
+            "or replace the cohort with inline person property filters. "
+            "Update your filters at: SETTINGS_URL#internal-user-filtering"
+        )
+
+    def test_nonexistent_cohort_falls_through_to_error(self):
+        self.team.test_account_filters = [{"type": "cohort", "key": "id", "value": 999999}]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result["bytecode"] is None
+        assert _normalize_error(result["bytecode_error"]) == (
+            "Your internal/test user filters include cohorts that can't be used in real-time filters: "
+            "cohort id=N not found. "
+            "Either switch to a cohort that only uses person properties, "
+            "or replace the cohort with inline person property filters. "
+            "Update your filters at: SETTINGS_URL#internal-user-filtering"
+        )
+
+    def test_multiple_person_property_cohorts_all_inlined(self):
+        cohort1 = self._make_person_property_cohort(
+            {"type": "AND", "values": [{"type": "person", "key": "role", "operator": "exact", "value": "admin"}]}
+        )
+        cohort2 = self._make_person_property_cohort(
+            {"type": "AND", "values": [{"type": "person", "key": "org", "operator": "exact", "value": "internal"}]}
+        )
+        self.team.test_account_filters = [
+            {"type": "cohort", "key": "id", "value": cohort1.pk},
+            {"type": "cohort", "key": "id", "value": cohort2.pk},
+        ]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
+
+        hog_globals = {"person": {"properties": {"role": "admin", "org": "internal"}}}
+        res = execute_bytecode(result["bytecode"], hog_globals)
+        assert res.result is True
+
+        hog_globals = {"person": {"properties": {"role": "user", "org": "internal"}}}
+        res = execute_bytecode(result["bytecode"], hog_globals)
+        assert res.result is False
+
+    def test_exclude_test_and_internal_user_cohorts(self):
+        test_users_cohort = Cohort.objects.create(
+            team=self.team,
+            name="Test users",
+            filters={
+                "properties": {
+                    "type": "AND",
+                    "values": [{"type": "person", "key": "$test_user", "operator": "exact", "value": "true"}],
+                }
+            },
+            is_static=False,
+        )
+        internal_users_cohort = Cohort.objects.create(
+            team=self.team,
+            name="Internal users",
+            filters={
+                "properties": {
+                    "type": "AND",
+                    "values": [{"type": "person", "key": "email", "operator": "icontains", "value": "@example.com"}],
+                }
+            },
+            is_static=False,
+        )
+        self.team.test_account_filters = [
+            {"type": "cohort", "key": "id", "value": test_users_cohort.pk, "operator": "not_in"},
+            {"type": "cohort", "key": "id", "value": internal_users_cohort.pk, "operator": "not_in"},
+        ]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
+        assert "bytecode_error" not in result
+
+        # Real external user — passes both filters
+        hog_globals = {"person": {"properties": {"$test_user": "false", "email": "customer@gmail.com"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is True
+
+        # Test user — filtered out by the test users cohort negation
+        hog_globals = {"person": {"properties": {"$test_user": "true", "email": "customer@gmail.com"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+
+        # Internal user — filtered out by the internal users cohort negation
+        hog_globals = {"person": {"properties": {"$test_user": "false", "email": "alice@example.com"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+
+        # Both test and internal — also filtered out
+        hog_globals = {"person": {"properties": {"$test_user": "true", "email": "dev@example.com"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+
+    def test_cohort_with_or_structure_preserves_boolean_logic(self):
+        cohort = Cohort.objects.create(
+            team=self.team,
+            name="Internal domains",
+            filters={
+                "properties": {
+                    "type": "OR",
+                    "values": [
+                        {"type": "person", "key": "email", "operator": "icontains", "value": "@example.com"},
+                        {"type": "person", "key": "email", "operator": "icontains", "value": "@test.io"},
+                    ],
+                }
+            },
+            is_static=False,
+        )
+        # "not in cohort" = exclude anyone whose email matches either domain
+        self.team.test_account_filters = [{"type": "cohort", "key": "id", "value": cohort.pk, "operator": "not_in"}]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
+
+        # External user — matches neither domain, passes filter
+        hog_globals = {"person": {"properties": {"email": "customer@gmail.com"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is True
+
+        # Matches first domain — filtered out
+        hog_globals = {"person": {"properties": {"email": "alice@example.com"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+
+        # Matches second domain — also filtered out
+        # (would incorrectly pass if OR was flattened to AND, since NOT(a AND b) != NOT(a OR b))
+        hog_globals = {"person": {"properties": {"email": "bot@test.io"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+
+    def test_cohort_with_nested_and_or_structure(self):
+        cohort = Cohort.objects.create(
+            team=self.team,
+            name="Complex filter cohort",
+            filters={
+                "properties": {
+                    "type": "AND",
+                    "values": [
+                        {
+                            "type": "OR",
+                            "values": [
+                                {"type": "person", "key": "email", "operator": "icontains", "value": "@example.com"},
+                                {"type": "person", "key": "email", "operator": "icontains", "value": "@test.io"},
+                            ],
+                        },
+                        {"type": "person", "key": "role", "operator": "exact", "value": "engineer"},
+                    ],
+                }
+            },
+            is_static=False,
+        )
+        # Non-negated: include only people matching the cohort (internal engineers)
+        self.team.test_account_filters = [{"type": "cohort", "key": "id", "value": cohort.pk}]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
+
+        # Matches both: internal domain AND engineer role
+        hog_globals = {"person": {"properties": {"email": "alice@example.com", "role": "engineer"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is True
+
+        # Matches domain but wrong role — fails the AND
+        hog_globals = {"person": {"properties": {"email": "alice@example.com", "role": "designer"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+
+        # Right role but external domain — fails the OR
+        hog_globals = {"person": {"properties": {"email": "alice@gmail.com", "role": "engineer"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+
+        # Second OR branch works: test.io domain + engineer
+        hog_globals = {"person": {"properties": {"email": "bot@test.io", "role": "engineer"}}}
+        assert execute_bytecode(result["bytecode"], hog_globals).result is True
+
+    def test_empty_cohort_properties_falls_through(self):
+        cohort = Cohort.objects.create(
+            team=self.team,
+            name="Empty cohort",
+            filters={"properties": {}},
+            is_static=False,
+        )
+        self.team.test_account_filters = [{"type": "cohort", "key": "id", "value": cohort.pk}]
+        self.team.save()
+
+        result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
+        # Empty properties caught by _try_inline_cohort_filter, raises CohortInlineError
+        assert result["bytecode"] is None
+        assert _normalize_error(result["bytecode_error"]) == (
+            "Your internal/test user filters include cohorts that can't be used in real-time filters: "
+            "cohort 'Empty cohort' (id=N) has no properties defined. "
+            "Either switch to a cohort that only uses person properties, "
+            "or replace the cohort with inline person property filters. "
+            "Update your filters at: SETTINGS_URL#internal-user-filtering"
+        )

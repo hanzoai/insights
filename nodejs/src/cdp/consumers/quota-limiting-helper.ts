@@ -1,7 +1,7 @@
 import { Counter } from 'prom-client'
 
 import { QuotaResource } from '../../common/services/quota-limiting.service'
-import { InsightsFunctionMonitoringService } from '../services/monitoring/insights-function-monitoring.service'
+import { InsightsFunctionMonitoringService } from '../services/monitoring/script-function-monitoring.service'
 import { CyclotronJobInvocationInsightsFunction } from '../types'
 
 const counterQuotaLimited = new Counter({
@@ -11,10 +11,8 @@ const counterQuotaLimited = new Counter({
 })
 
 export interface QuotaLimitingContext {
-    hub: {
-        quotaLimiting: {
-            isTeamQuotaLimited: (teamId: number, resource: QuotaResource) => Promise<boolean>
-        }
+    quotaLimiting: {
+        isTeamQuotaLimited: (teamId: number, resource: QuotaResource) => Promise<boolean>
     }
     insightsFunctionMonitoringService: InsightsFunctionMonitoringService
 }
@@ -27,7 +25,7 @@ export async function shouldBlockInvocationDueToQuota(
     item: CyclotronJobInvocationInsightsFunction,
     context: QuotaLimitingContext
 ): Promise<boolean> {
-    const isQuotaLimited = await context.hub.quotaLimiting.isTeamQuotaLimited(item.teamId, 'cdp_trigger_events')
+    const isQuotaLimited = await context.quotaLimiting.isTeamQuotaLimited(item.teamId, 'cdp_trigger_events')
 
     if (isQuotaLimited) {
         counterQuotaLimited.labels({ team_id: item.teamId }).inc()

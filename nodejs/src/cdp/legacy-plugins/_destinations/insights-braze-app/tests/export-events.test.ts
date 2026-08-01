@@ -1,4 +1,4 @@
-import { RetryError } from '@hanzo/plugin-scaffold'
+import { RetryError } from '~/plugin-scaffold'
 
 import { BrazePluginMeta, onEvent } from '../index'
 
@@ -45,7 +45,7 @@ describe('Braze: export-events', () => {
                 timestamp: '2023-06-16T00:00:00.00Z',
                 properties: {
                     $set: {
-                        email: 'test@hanzo.ai',
+                        email: 'test@insights',
                         name: 'Test User',
                     },
                     is_a_demo_user: true,
@@ -70,7 +70,7 @@ describe('Braze: export-events', () => {
             body: JSON.stringify({
                 attributes: [
                     {
-                        email: 'test@hanzo.ai',
+                        email: 'test@insights',
                         name: 'Test User',
                         external_id: 'test',
                     },
@@ -119,7 +119,7 @@ describe('Braze: export-events', () => {
                 timestamp: '2023-06-16T00:00:00.00Z',
                 properties: {
                     $set: {
-                        email: 'test@hanzo.ai',
+                        email: 'test@insights',
                         name: 'Test User',
                     },
                     is_a_demo_user: true,
@@ -186,7 +186,7 @@ describe('Braze: export-events', () => {
                 timestamp: '2023-06-16T00:00:00.00Z',
                 properties: {
                     $set: {
-                        email: 'test@hanzo.ai',
+                        email: 'test@insights',
                         name: 'Test User',
                     },
                     is_a_demo_user: true,
@@ -253,7 +253,7 @@ describe('Braze: export-events', () => {
                 timestamp: '2023-06-16T00:00:00.00Z',
                 properties: {
                     $set: {
-                        email: 'test@hanzo.ai',
+                        email: 'test@insights',
                         name: 'Test User',
                     },
                     is_a_demo_user: true,
@@ -278,7 +278,7 @@ describe('Braze: export-events', () => {
             body: JSON.stringify({
                 attributes: [
                     {
-                        email: 'test@hanzo.ai',
+                        email: 'test@insights',
                         external_id: 'test',
                     },
                 ],
@@ -316,7 +316,7 @@ describe('Braze: export-events', () => {
                 timestamp: '2023-06-16T00:00:00.00Z',
                 properties: {
                     $set: {
-                        email: 'test@hanzo.ai',
+                        email: 'test@insights',
                         name: 'Test User',
                     },
                     is_a_demo_user: true,
@@ -373,7 +373,7 @@ describe('Braze: export-events', () => {
                 timestamp: '2023-06-16T00:00:00.00Z',
                 properties: {
                     $set: {
-                        email: 'test@hanzo.ai',
+                        email: 'test@insights',
                         name: 'Test User',
                     },
                     is_a_demo_user: true,
@@ -425,7 +425,7 @@ describe('Braze: export-events', () => {
                     timestamp: '2023-06-16T00:00:00.00Z',
                     properties: {
                         $set: {
-                            email: 'test@hanzo.ai',
+                            email: 'test@insights',
                             name: 'Test User',
                         },
                         is_a_demo_user: true,
@@ -476,7 +476,7 @@ describe('Braze: export-events', () => {
                     timestamp: '2023-06-16T00:00:00.00Z',
                     properties: {
                         $set: {
-                            email: 'test@hanzo.ai',
+                            email: 'test@insights',
                             name: 'Test User',
                         },
                         is_a_demo_user: true,

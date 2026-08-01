@@ -11,17 +11,29 @@ export const manifest: ProductManifest = {
             projectBased: true,
             activityScope: 'Games',
         },
+        FlappyHog: {
+            name: 'FlappyHog',
+            import: () => import('./FlappyHog/FlappyHog'),
+            projectBased: true,
+            activityScope: 'Games',
+        },
     },
     routes: {
         '/games/368mascots': ['Game368Mascots', 'game368Mascots'],
+        '/games/flappyhog': ['FlappyHog', 'flappyHog'],
     },
     urls: {
         game368mascots: (): string => `/games/368mascots`,
+        flappyHog: (): string => `/games/flappyhog`,
     },
     treeItemsGames: [
         {
             path: '368 Mascots',
             href: urls.game368mascots(),
+        },
+        {
+            path: 'Flappy Script',
+            href: '/games/flappyhog',
         },
     ],
 }

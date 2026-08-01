@@ -5,9 +5,10 @@ from unittest.mock import patch
 
 from django.core.management import call_command
 
-from insights.management.commands.refresh_insights_flows import remove_event_filters_from_conditionals
+from insights.management.commands.refresh_hog_flows import remove_event_filters_from_conditionals
 from insights.models import Team
-from insights.models.insights_flow.insights_flow import InsightsFlow
+
+from products.workflows.backend.models.hog_flow.hog_flow import InsightsFlow
 
 
 class TestRefreshInsightsFlows(BaseTest):
@@ -18,7 +19,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.team2 = Team.objects.create(organization=self.organization, name="Test Team 2")
 
         # Create InsightsFlows for testing with proper trigger actions
-        with patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers"):
+        with patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers"):
             trigger_config_1 = {
                 "type": "event",
                 "filters": {
@@ -26,7 +27,7 @@ class TestRefreshInsightsFlows(BaseTest):
                     "source": "events",
                 },
             }
-            self.insights_flow1 = InsightsFlow.objects.create(
+            self.hog_flow1 = InsightsFlow.objects.create(
                 team=self.team,
                 name="Test Flow 1",
                 status=InsightsFlow.State.ACTIVE,
@@ -44,7 +45,7 @@ class TestRefreshInsightsFlows(BaseTest):
                     "source": "events",
                 },
             }
-            self.insights_flow2 = InsightsFlow.objects.create(
+            self.hog_flow2 = InsightsFlow.objects.create(
                 team=self.team,
                 name="Test Flow 2",
                 status=InsightsFlow.State.DRAFT,
@@ -62,7 +63,7 @@ class TestRefreshInsightsFlows(BaseTest):
                     "source": "events",
                 },
             }
-            self.insights_flow3 = InsightsFlow.objects.create(
+            self.hog_flow3 = InsightsFlow.objects.create(
                 team=self.team2,
                 name="Test Flow 3",
                 status=InsightsFlow.State.ACTIVE,
@@ -94,12 +95,12 @@ class TestRefreshInsightsFlows(BaseTest):
                 version=1,
             )
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
-    def test_refresh_all_insights_flows(self, mock_reload):
+    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
+    def test_refresh_all_hog_flows(self, mock_reload):
         """Test refreshing all InsightsFlows across all teams."""
 
         out = StringIO()
-        call_command("refresh_insights_flows", stdout=out)
+        call_command("refresh_hog_flows", stdout=out)
 
         # Should have refreshed all 4 flows (including archived)
         assert mock_reload.call_count == 4
@@ -110,14 +111,14 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Updated: 4", output)
         self.assertIn("Errors: 0", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
     def test_refresh_by_team_id(self, mock_reload):
         """Test refreshing InsightsFlows for a specific team."""
 
         out = StringIO()
-        call_command("refresh_insights_flows", team_id=self.team.id, stdout=out)
+        call_command("refresh_hog_flows", team_id=self.team.id, stdout=out)
 
-        # Should have refreshed flows from team1 (insights_flow1, insights_flow2, archived_flow)
+        # Should have refreshed flows from team1 (hog_flow1, hog_flow2, archived_flow)
         assert mock_reload.call_count == 3
 
         output = out.getvalue()
@@ -125,27 +126,27 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Found 3 InsightsFlows to process", output)
         self.assertIn("Updated: 3", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
-    def test_refresh_by_insights_flow_id(self, mock_reload):
+    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
+    def test_refresh_by_hog_flow_id(self, mock_reload):
         """Test refreshing a specific InsightsFlow by ID."""
 
         out = StringIO()
-        call_command("refresh_insights_flows", insights_flow_id=str(self.insights_flow1.id), stdout=out)
+        call_command("refresh_hog_flows", hog_flow_id=str(self.hog_flow1.id), stdout=out)
 
         # Should have refreshed only the specific flow
         assert mock_reload.call_count == 1
 
         output = out.getvalue()
-        self.assertIn(f"Processing single InsightsFlow: {self.insights_flow1.id}", output)
+        self.assertIn(f"Processing single InsightsFlow: {self.hog_flow1.id}", output)
         self.assertIn("Found 1 InsightsFlows to process", output)
         self.assertIn("Updated: 1", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
     def test_nonexistent_team_id(self, mock_reload):
         """Test handling of nonexistent team ID."""
 
         out = StringIO()
-        call_command("refresh_insights_flows", team_id=99999, stdout=out)
+        call_command("refresh_hog_flows", team_id=99999, stdout=out)
 
         assert mock_reload.call_count == 0
 
@@ -153,14 +154,14 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Found 0 InsightsFlows to process", output)
         self.assertIn("No InsightsFlows found matching criteria", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
-    def test_nonexistent_insights_flow_id(self, mock_reload):
+    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
+    def test_nonexistent_hog_flow_id(self, mock_reload):
         """Test handling of nonexistent InsightsFlow ID."""
 
         out = StringIO()
         # Use a valid UUID format that doesn't exist
         nonexistent_uuid = "00000000-0000-0000-0000-000000000000"
-        call_command("refresh_insights_flows", insights_flow_id=nonexistent_uuid, stdout=out)
+        call_command("refresh_hog_flows", hog_flow_id=nonexistent_uuid, stdout=out)
 
         assert mock_reload.call_count == 0
 
@@ -168,13 +169,13 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Found 0 InsightsFlows to process", output)
         self.assertIn("No InsightsFlows found matching criteria", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
     def test_page_size_option(self, mock_reload):
         """Test that the page_size option works correctly."""
 
         out = StringIO()
         # Set page size to 2, should process all flows but in multiple pages
-        call_command("refresh_insights_flows", page_size=2, stdout=out)
+        call_command("refresh_hog_flows", page_size=2, stdout=out)
 
         # Should still refresh all 4 flows
         assert mock_reload.call_count == 4
@@ -186,7 +187,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertIn("Processed: 4", output)
         self.assertIn("Updated: 4", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
     def test_error_handling(self, mock_reload):
         """Test error handling when a flow fails to save."""
 
@@ -198,7 +199,7 @@ class TestRefreshInsightsFlows(BaseTest):
         def mock_save_method(self):
             save_call_count[0] += 1
             # Raise exception only for the first flow
-            if self.id == test_instance.insights_flow1.id:
+            if self.id == test_instance.hog_flow1.id:
                 raise Exception("Test exception")
             # Call original save for other flows
             return original_save(self)
@@ -206,7 +207,7 @@ class TestRefreshInsightsFlows(BaseTest):
         # Patch the save method
         with patch.object(InsightsFlow, "save", mock_save_method):
             out = StringIO()
-            call_command("refresh_insights_flows", stdout=out)
+            call_command("refresh_hog_flows", stdout=out)
 
             # Should have attempted to process all 4 flows
             # But only 3 should succeed
@@ -217,7 +218,7 @@ class TestRefreshInsightsFlows(BaseTest):
             self.assertIn("Errors: 1", output)  # 1 failure
             self.assertIn("Check logs for details on 1 errors encountered", output)
 
-    @patch("insights.models.insights_flow.insights_flow.reload_insights_flows_on_workers")
+    @patch("products.workflows.backend.models.hog_flow.hog_flow.reload_hog_flows_on_workers")
     def test_bytecode_regeneration_on_conditional_branch(self, mock_reload):
         """Test that bytecode is regenerated when a conditional branch action is missing bytecode."""
 
@@ -291,7 +292,7 @@ class TestRefreshInsightsFlows(BaseTest):
         self.assertNotIn("bytecode", conditional_branch["config"]["conditions"][0]["filters"])
 
         out = StringIO()
-        call_command("refresh_insights_flows", insights_flow_id=str(test_flow.id), stdout=out)
+        call_command("refresh_hog_flows", hog_flow_id=str(test_flow.id), stdout=out)
 
         # Refresh the flow from database
         test_flow.refresh_from_db()

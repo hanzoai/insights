@@ -1,85 +1,140 @@
-import { useAsyncActions, useValues } from 'kea'
+import { useActions, useAsyncActions, useValues } from 'kea'
+import { useCallback } from 'react'
 
-import { IconArrowRight, IconLock } from '@hanzo/icons'
+import { IconArrowRight, IconCheck, IconLock } from '@hanzo/icons'
 import { Button, Popover, PopoverProps, Tooltip } from '@hanzo/elements'
 
-import { dayjs } from 'lib/dayjs'
-import { Link } from 'lib/elements/Link'
-import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
+import { organizationLogic } from 'scenes/organizationLogic'
+
+import { getExternalAIProvidersTooltipTitle, openAIConsentLegalDialog } from './aiConsentCopy'
+import { aiConsentLogic } from './aiConsentLogic'
+
+export function AIConsentPopoverContent({
+    onApprove,
+    onDismiss,
+    approvalDisabledReason,
+    hideTrainingDisclaimer,
+}: {
+    onApprove: () => void
+    onDismiss: () => void
+    approvalDisabledReason: string | null
+    /** Omit the "won't be used for training third-party models" line where it doesn't apply. */
+    hideTrainingDisclaimer?: boolean
+}): JSX.Element {
+    const focusOnMount = useCallback((el: HTMLButtonElement | null) => {
+        el?.focus()
+    }, [])
+
+    return (
+        <div className="flex flex-col gap-2 m-1.5 max-w-prose">
+            <p className="font-medium text-pretty">
+                Insights AI needs your approval to potentially process identifying user data with{' '}
+                <Tooltip title={getExternalAIProvidersTooltipTitle()}>
+                    <dfn>external AI providers</dfn>
+                </Tooltip>
+                .{!hideTrainingDisclaimer && <i> Your data won't be used for training third-party models.</i>}
+            </p>
+            <div className="flex gap-1.5 self-end">
+                <Button data-attr="ai-consent-cancel" type="secondary" size="xsmall" onClick={onDismiss}>
+                    Cancel
+                </Button>
+                <Button
+                    data-attr="ai-consent-approve"
+                    type="primary"
+                    size="xsmall"
+                    onClick={() => openAIConsentLegalDialog({ onConfirm: onApprove })}
+                    sideIcon={approvalDisabledReason ? <IconLock /> : <IconArrowRight />}
+                    disabledReason={approvalDisabledReason}
+                    tooltip={approvalDisabledReason ? undefined : 'You are approving this as an organization admin'}
+                    tooltipPlacement="bottom"
+                    ref={focusOnMount}
+                >
+                    I allow AI analysis in this organization
+                </Button>
+            </div>
+        </div>
+    )
+}
+
+function AIAccessRequestPopoverContent(): JSX.Element {
+    const { requestingAiAccess, aiAccessRequested } = useValues(aiConsentLogic)
+    const { requestAiAccess } = useActions(aiConsentLogic)
+
+    return (
+        <div className="flex flex-col gap-2 m-1.5 max-w-prose">
+            <p className="font-medium text-pretty">
+                Insights AI access has not been enabled for this organization. You can request access from an
+                organization owner or admin.
+            </p>
+            <div className="flex self-end">
+                <Button
+                    data-attr="ai-access-request"
+                    type="primary"
+                    size="xsmall"
+                    onClick={() => requestAiAccess()}
+                    loading={requestingAiAccess}
+                    disabledReason={aiAccessRequested ? 'Your request has been sent' : undefined}
+                    sideIcon={aiAccessRequested ? <IconCheck /> : <IconArrowRight />}
+                >
+                    {aiAccessRequested ? 'Request sent' : 'Request access'}
+                </Button>
+            </div>
+        </div>
+    )
+}
 
 export function AIConsentPopoverWrapper({
     hidden,
     children,
+    ignoreDismissal,
     onApprove,
     onDismiss,
+    hideTrainingDisclaimer,
     ...popoverProps
 }: Pick<PopoverProps, 'placement' | 'fallbackPlacements' | 'middleware' | 'showArrow'> & {
     children: JSX.Element
     hidden?: boolean
+    /** Always show popover regardless of prior dismissal. */
+    ignoreDismissal?: boolean
     onApprove?: () => void
     onDismiss?: () => void
+    /** Passed through to AIConsentPopoverContent. */
+    hideTrainingDisclaimer?: boolean
 }): JSX.Element {
-    const { acceptDataProcessing } = useAsyncActions(maxGlobalLogic)
-    const { dataProcessingApprovalDisabledReason, dataProcessingAccepted } = useValues(maxGlobalLogic)
+    const { acceptDataProcessing } = useAsyncActions(aiConsentLogic)
+    const { dataProcessingApprovalDisabledReason, dataProcessingAccepted, dataProcessingDismissed } =
+        useValues(aiConsentLogic)
+    const { dismissDataProcessing } = useActions(aiConsentLogic)
+    const { isAdminOrOwner } = useValues(organizationLogic)
 
-    const handleClickOutside = (): void => {
+    const handleDismiss = (): void => {
+        if (!ignoreDismissal) {
+            dismissDataProcessing()
+        }
         onDismiss?.()
     }
 
     return (
         <Popover
-            // Note: Sync the copy below with organization-ai-consent in SettingsMap.tsx
             overlay={
-                <div className="flex flex-col m-1.5">
-                    <p className="font-medium text-pretty mb-0">
-                        Hanzo AI needs your approval to potentially process
-                        <br />
-                        identifying user data with{' '}
-                        <Tooltip title={`As of ${dayjs().format('MMMM YYYY')}: Anthropic and OpenAI`}>
-                            <dfn>external AI providers</dfn>
-                        </Tooltip>
-                        .<br />
-                        <i>Your data won't be used for training models.</i>
-                    </p>
-                    <p className="text-muted text-xs leading-relaxed mb-2">
-                        If your org requires a Data Processing Agreement (DPA)
-                        <br />
-                        for compliance (and your existing DPA doesn't already
-                        <br />
-                        cover AI subprocessors),{' '}
-                        <Link to="https://hanzo.ai/dpa" target="_blank">
-                            you can get a fresh DPA here
-                        </Link>
-                        .
-                    </p>
-                    <div className="flex gap-1.5 self-end">
-                        <Button type="secondary" size="xsmall" onClick={onDismiss}>
-                            Cancel
-                        </Button>
-                        <Button
-                            type="primary"
-                            size="xsmall"
-                            onClick={() =>
-                                void acceptDataProcessing()
-                                    .then(() => onApprove?.())
-                                    .catch(console.error)
-                            }
-                            sideIcon={dataProcessingApprovalDisabledReason ? <IconLock /> : <IconArrowRight />}
-                            disabledReason={dataProcessingApprovalDisabledReason}
-                            tooltip="You are approving this as an organization admin"
-                            tooltipPlacement="bottom"
-                            ref={(el) => {
-                                el?.focus() // Auto-focus the button when the popover is opened, so that you just hit enter to approve
-                            }}
-                        >
-                            I allow AI analysis in this organization
-                        </Button>
-                    </div>
-                </div>
+                isAdminOrOwner ? (
+                    <AIConsentPopoverContent
+                        approvalDisabledReason={dataProcessingApprovalDisabledReason}
+                        hideTrainingDisclaimer={hideTrainingDisclaimer}
+                        onApprove={() =>
+                            void acceptDataProcessing()
+                                .then(() => onApprove?.())
+                                .catch(console.error)
+                        }
+                        onDismiss={handleDismiss}
+                    />
+                ) : (
+                    <AIAccessRequestPopoverContent />
+                )
             }
             style={{ zIndex: 'var(--z-modal)' }} // Don't show above the re-authentication modal
-            visible={!hidden && !dataProcessingAccepted}
-            onClickOutside={handleClickOutside}
+            visible={!hidden && !dataProcessingAccepted && (ignoreDismissal || !dataProcessingDismissed)}
+            onClickOutside={handleDismiss}
             {...popoverProps}
         >
             {children}

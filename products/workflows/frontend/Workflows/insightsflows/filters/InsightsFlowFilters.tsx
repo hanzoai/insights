@@ -3,15 +3,19 @@ import { useValues } from 'kea'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { isOperatorSemver } from 'lib/utils/operators'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
 
+import { groupsModel } from '~/models/groupsModel'
 import { defaultDataTableColumns } from '~/queries/nodes/DataTable/utils'
-import { NodeKind } from '~/queries/schema/schema-general'
-import { FilterType } from '~/types'
+import { DatabaseSchemaField, NodeKind } from '~/queries/schema/schema-general'
+import { FilterType, PropertyOperator } from '~/types'
 
 import { workflowLogic } from '../../workflowLogic'
 import { InsightsFlowAction } from '../types'
+
+export const WORKFLOW_OPERATOR_ALLOWLIST = Object.values(PropertyOperator).filter((op) => !isOperatorSemver(op))
 
 function useSampleGlobals(): Record<string, any> {
     const { workflow } = useValues(workflowLogic)
@@ -40,27 +44,48 @@ export type InsightsFlowFiltersProps = {
     setFilters: (filters: InsightsFlowAction['filters']) => void
     typeKey?: string
     buttonCopy?: string
+    // Drop group-property filters from the taxonomy. The subscription matcher wakes parked
+    // wait_until_condition jobs from person- and event-keyed signals only; a group-property change
+    // has no such key, so a group-based wait could never be woken and would only ever time out.
+    // Used by wait conditions to keep them constrained to matcher-observable signals.
+    excludeGroupProperties?: boolean
+    // When filtering rows of a data warehouse table, pass the selected table's columns so they appear
+    // as suggestions and resolve their distinct values.
+    schemaColumns?: DatabaseSchemaField[]
+    dataWarehouseTableName?: string
 }
 
 /**
- * Standard components wherever we do conditional matching to support whatever we know the customflow engine supports
+ * Standard components wherever we do conditional matching to support whatever we know the hogflow engine supports
  */
-export function InsightsFlowEventFilters({ filters, setFilters, typeKey, buttonCopy }: InsightsFlowFiltersProps): JSX.Element {
+export function InsightsFlowEventFilters({
+    filters,
+    setFilters,
+    typeKey,
+    buttonCopy,
+    excludeGroupProperties,
+}: InsightsFlowFiltersProps): JSX.Element {
     const shouldShowInternalEvents = useFeatureFlag('WORKFLOWS_INTERNAL_EVENT_FILTERS')
     const sampleGlobals = useSampleGlobals()
+    const { groupsTaxonomicTypes } = useValues(groupsModel)
 
     const actionsTaxonomicGroupTypes = [TaxonomicFilterGroupType.Events, TaxonomicFilterGroupType.Actions]
     if (shouldShowInternalEvents) {
         actionsTaxonomicGroupTypes.push(TaxonomicFilterGroupType.InternalEvents)
     }
 
+    // WorkflowVariables comes first so its dedicated tab renders first in the category list.
+    // ActionFilter does not pipe `taxonomicFilterOptionsFromProp`, so the All/Suggestions tab
+    // does not aggregate variables here — variable surfacing in All/Suggestions only kicks in
+    // for the property-level filter (InsightsFlowPropertyFilters below).
     const propertyTaxonomicGroupTypes = [
+        TaxonomicFilterGroupType.WorkflowVariables,
         TaxonomicFilterGroupType.EventProperties,
         TaxonomicFilterGroupType.EventFeatureFlags,
         TaxonomicFilterGroupType.Elements,
         TaxonomicFilterGroupType.PersonProperties,
+        ...(excludeGroupProperties ? [] : groupsTaxonomicTypes),
         TaxonomicFilterGroupType.InsightsQLExpression,
-        TaxonomicFilterGroupType.WorkflowVariables,
     ]
     if (shouldShowInternalEvents) {
         propertyTaxonomicGroupTypes.push(TaxonomicFilterGroupType.InternalEventProperties)
@@ -73,7 +98,7 @@ export function InsightsFlowEventFilters({ filters, setFilters, typeKey, buttonC
                 // TODO: Improve the types here...
                 setFilters(filters as InsightsFlowAction['filters'])
             }}
-            typeKey={typeKey ?? 'customflow-filters'}
+            typeKey={typeKey ?? 'hogflow-filters'}
             mathAvailability={MathAvailability.None}
             hideRename
             hideDuplicate
@@ -86,13 +111,31 @@ export function InsightsFlowEventFilters({ filters, setFilters, typeKey, buttonC
             }}
             buttonCopy={buttonCopy ?? 'Add filter'}
             allowNonCapturedEvents
-            insightsQLGlobals={sampleGlobals}
+            hogQLGlobals={sampleGlobals}
+            operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
         />
     )
 }
 
-export function InsightsFlowPropertyFilters({ filtersKey, filters, setFilters }: InsightsFlowFiltersProps): JSX.Element {
+export function InsightsFlowPropertyFilters({
+    filtersKey,
+    filters,
+    setFilters,
+    excludeGroupProperties,
+    schemaColumns,
+    dataWarehouseTableName,
+}: InsightsFlowFiltersProps): JSX.Element {
     const sampleGlobals = useSampleGlobals()
+    const { groupsTaxonomicTypes } = useValues(groupsModel)
+    const { workflow } = useValues(workflowLogic)
+    // Surface workflow variables in the All/Suggestions tab so a user searching by variable key
+    // sees a match alongside event/person properties. The dedicated tab still works without this.
+    const taxonomicFilterOptionsFromProp = {
+        [TaxonomicFilterGroupType.WorkflowVariables]: (workflow?.variables ?? []).map((variable) => ({
+            name: variable.key,
+        })),
+    }
+    const isDataWarehouse = !!dataWarehouseTableName
     return (
         <PropertyFilters
             propertyFilters={filters?.properties}
@@ -100,20 +143,31 @@ export function InsightsFlowPropertyFilters({ filtersKey, filters, setFilters }:
                 setFilters({ ...filters, properties: properties ?? [] } as InsightsFlowAction['filters'])
             }}
             pageKey={`InsightsFlowPropertyFilters.${filtersKey}`}
-            taxonomicGroupTypes={[
-                TaxonomicFilterGroupType.WorkflowVariables,
-                TaxonomicFilterGroupType.EventProperties,
-                TaxonomicFilterGroupType.EventFeatureFlags,
-                TaxonomicFilterGroupType.PersonProperties,
-                TaxonomicFilterGroupType.InsightsQLExpression,
-                TaxonomicFilterGroupType.EventMetadata,
-            ]}
+            taxonomicGroupTypes={
+                // Warehouse rows are row-scoped — only the synced row's columns make sense to filter on,
+                // so event/feature-flag/person/group properties don't apply here.
+                isDataWarehouse
+                    ? [TaxonomicFilterGroupType.DataWarehouseProperties, TaxonomicFilterGroupType.InsightsQLExpression]
+                    : [
+                          TaxonomicFilterGroupType.WorkflowVariables,
+                          TaxonomicFilterGroupType.EventProperties,
+                          TaxonomicFilterGroupType.EventFeatureFlags,
+                          TaxonomicFilterGroupType.PersonProperties,
+                          ...(excludeGroupProperties ? [] : groupsTaxonomicTypes),
+                          TaxonomicFilterGroupType.InsightsQLExpression,
+                          TaxonomicFilterGroupType.EventMetadata,
+                      ]
+            }
+            taxonomicFilterOptionsFromProp={taxonomicFilterOptionsFromProp}
+            schemaColumns={schemaColumns}
+            dataWarehouseTableName={dataWarehouseTableName}
             metadataSource={{
                 kind: NodeKind.EventsQuery,
                 select: defaultDataTableColumns(NodeKind.EventsQuery),
                 after: '-30d',
             }}
-            insightsQLGlobals={sampleGlobals}
+            hogQLGlobals={sampleGlobals}
+            operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
         />
     )
 }

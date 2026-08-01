@@ -8,9 +8,9 @@ import { Button } from 'lib/elements/Button'
 import { Collapse } from 'lib/elements/Collapse'
 import { Input } from 'lib/elements/Input/Input'
 
+import { experimentsTabLogic } from '~/toolbar/experiments/experimentsTabLogic'
 import { WebExperimentTransformField } from '~/toolbar/experiments/WebExperimentTransformField'
 import { WebExperimentTransformHeader } from '~/toolbar/experiments/WebExperimentTransformHeader'
-import { experimentsTabLogic } from '~/toolbar/experiments/experimentsTabLogic'
 
 interface WebExperimentVariantProps {
     variant: string
@@ -43,7 +43,7 @@ export function WebExperimentVariant({ variant }: WebExperimentVariantProps): JS
                                 }
                             }
                         }}
-                        placeholder={`Example: "test-1"`}
+                        placeholder='Example: "test-1"'
                     />
                 </div>
             )}

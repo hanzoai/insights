@@ -6,6 +6,9 @@ from uuid import UUID
 import pytest
 from freezegun import freeze_time
 from insights.test.base import BaseTest, DatastoreTestMixin, _create_event, _create_person, snapshot_datastore_queries
+from unittest.mock import patch
+
+from parameterized import parameterized
 
 from insights.schema import (
     DateRange,
@@ -18,10 +21,14 @@ from insights.schema import (
 )
 
 from insights.insightsql.constants import MAX_SELECT_TRACES_LIMIT_EXPORT, LimitContext
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.modifiers import create_default_modifiers_for_team
+from insights.insightsql.printer import prepare_and_print_ast
 
 from insights.insightsql_queries.ai.traces_query_runner import TracesQueryRunner
 from insights.models import PropertyDefinition, Team
-from insights.models.property_definition import PropertyType
+
+from products.event_definitions.backend.models.property_definition import PropertyType
 
 
 class InputMessage(TypedDict):
@@ -196,6 +203,38 @@ def _create_ai_embedding_event(
     )
 
 
+def _create_ai_sentiment_evaluation_event(
+    *,
+    trace_id: str,
+    generation_id: str,
+    team: Team | None = None,
+    distinct_id: str | None = None,
+    timestamp: datetime | None = None,
+) -> None:
+    _create_event(
+        event="$ai_evaluation",
+        distinct_id=distinct_id,
+        team=team,
+        timestamp=timestamp,
+        properties={
+            "$ai_trace_id": trace_id,
+            "$ai_evaluation_runtime": "sentiment",
+            "$ai_target_event_id": generation_id,
+            "$ai_sentiment_label": "negative",
+            "$ai_sentiment_score": 0.8,
+            "$ai_sentiment_scores": {"positive": 0.1, "neutral": 0.1, "negative": 0.8},
+            "$ai_sentiment_messages": {
+                "0": {
+                    "label": "negative",
+                    "score": 0.8,
+                    "scores": {"positive": 0.1, "neutral": 0.1, "negative": 0.8},
+                }
+            },
+            "$ai_sentiment_message_count": 1,
+        },
+    )
+
+
 class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
     def setUp(self):
         super().setUp()
@@ -308,6 +347,72 @@ class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
     # test_trace_id_filter removed - TracesQuery no longer supports traceId parameter
 
     @freeze_time("2025-01-16T00:00:00Z")
+    def test_stored_sentiment_evaluations_are_mapped_to_trace_and_generation(self):
+        event_uuid = uuid.uuid4()
+        generation_id = "generation-id-1"
+        _create_person(distinct_ids=["person1"], team=self.team)
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace1",
+            input="Foo",
+            output="Bar",
+            team=self.team,
+            timestamp=datetime(2025, 1, 15, 0),
+            event_uuid=event_uuid,
+            properties={"$ai_parent_id": "trace1", "$ai_generation_id": generation_id},
+        )
+        _create_ai_sentiment_evaluation_event(
+            distinct_id="person1",
+            trace_id="trace1",
+            generation_id=generation_id,
+            team=self.team,
+            timestamp=datetime(2025, 1, 15, 0, 1),
+        )
+
+        response = TracesQueryRunner(
+            team=self.team,
+            query=TracesQuery(
+                includeSentiment=True,
+                dateRange=DateRange(date_from="2025-01-15T00:00:00Z", date_to="2025-01-15T02:00:00Z"),
+            ),
+        ).calculate()
+
+        assert len(response.results) == 1
+        trace = response.results[0]
+        assert trace.sentiment is not None
+        assert trace.sentiment.label == "negative"
+        assert trace.sentiment.score == 0.8
+        assert trace.sentiment.messages is not None
+        assert trace.sentiment.messages[f"{generation_id}:0"].label == "negative"
+        assert len(trace.events) == 1
+        assert trace.events[0].sentiment is None
+
+    @freeze_time("2025-01-16T00:00:00Z")
+    @patch("insights.insightsql_queries.ai.traces_query_runner.load_trace_sentiment_evaluations")
+    def test_stored_sentiment_evaluation_lookup_is_opt_in(self, mock_load_sentiment):
+        _create_person(distinct_ids=["person1"], team=self.team)
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace1",
+            input="Foo",
+            output="Bar",
+            team=self.team,
+            timestamp=datetime(2025, 1, 15, 0),
+            properties={"$ai_parent_id": "trace1"},
+        )
+
+        response = TracesQueryRunner(
+            team=self.team,
+            query=TracesQuery(
+                dateRange=DateRange(date_from="2025-01-15T00:00:00Z", date_to="2025-01-15T02:00:00Z"),
+            ),
+        ).calculate()
+
+        assert len(response.results) == 1
+        assert response.results[0].sentiment is None
+        mock_load_sentiment.assert_not_called()
+
+    @freeze_time("2025-01-16T00:00:00Z")
     @snapshot_datastore_queries
     def test_pagination(self):
         _create_person(distinct_ids=["person1"], team=self.team)
@@ -343,6 +448,55 @@ class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
         self.assertEqual(response.results[0].id, "trace_0")
 
     @freeze_time("2025-01-16T00:00:00Z")
+    def test_pagination_with_multi_event_traces(self):
+        """
+        Regression test: pagination must not produce overlapping results when traces
+        have multiple events. The subquery orders trace IDs by min(timestamp) DESC to
+        match the main query's ORDER BY first_timestamp DESC. If these orderings
+        diverge (e.g. using max(timestamp) in the subquery), offset-based pagination
+        breaks because trace positions shift between pages.
+
+        Setup: 5 traces where max(timestamp) and min(timestamp) give reversed orderings.
+          trace_0: events at hour 0 and hour 10 → min=0, max=10
+          trace_1: events at hour 1 and hour 9  → min=1, max=9
+          trace_2: events at hour 2 and hour 8  → min=2, max=8
+          trace_3: events at hour 3 and hour 7  → min=3, max=7
+          trace_4: events at hour 4 and hour 6  → min=4, max=6
+
+        By min(timestamp) DESC: trace_4, trace_3, trace_2, trace_1, trace_0
+        By max(timestamp) DESC: trace_0, trace_1, trace_2, trace_3, trace_4
+        """
+        _create_person(distinct_ids=["person1"], team=self.team)
+        for i in range(5):
+            _create_ai_generation_event(
+                distinct_id="person1",
+                team=self.team,
+                trace_id=f"trace_{i}",
+                timestamp=datetime(2025, 1, 15, i),
+            )
+            _create_ai_generation_event(
+                distinct_id="person1",
+                team=self.team,
+                trace_id=f"trace_{i}",
+                timestamp=datetime(2025, 1, 15, 10 - i),
+            )
+
+        # Page 1 (limit=2, offset=0): returns limit+1=3 results, hasMore=True
+        response = TracesQueryRunner(team=self.team, query=TracesQuery(limit=2, offset=0)).calculate()
+        self.assertEqual(response.hasMore, True)
+        page1_ids = [t.id for t in response.results]
+        self.assertEqual(page1_ids, ["trace_4", "trace_3", "trace_2"])
+
+        # Page 2 (limit=2, offset=3): returns remaining 2 traces, hasMore=False
+        response = TracesQueryRunner(team=self.team, query=TracesQuery(limit=2, offset=3)).calculate()
+        self.assertEqual(response.hasMore, False)
+        page2_ids = [t.id for t in response.results]
+        self.assertEqual(page2_ids, ["trace_1", "trace_0"])
+
+        # No trace ID appears on both pages
+        self.assertEqual(len(set(page1_ids) & set(page2_ids)), 0)
+
+    @freeze_time("2025-01-16T00:00:00Z")
     def test_maps_all_fields(self):
         _create_person(distinct_ids=["person1"], team=self.team)
         _create_ai_generation_event(
@@ -352,9 +506,9 @@ class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
             properties={
                 "$ai_latency": 10.5,
                 "$ai_provider": "insights",
-                "$ai_model": "fn-destroyer",
+                "$ai_model": "script-destroyer",
                 "$ai_http_status": 200,
-                "$ai_base_url": "https://insights.hanzo.ai",
+                "$ai_base_url": "https://us.hanzo.ai",
                 "$ai_parent_id": "trace1",
             },
         )
@@ -368,9 +522,9 @@ class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
             {
                 "$ai_latency": 10.5,
                 "$ai_provider": "insights",
-                "$ai_model": "fn-destroyer",
+                "$ai_model": "script-destroyer",
                 "$ai_http_status": 200,
-                "$ai_base_url": "https://insights.hanzo.ai",
+                "$ai_base_url": "https://us.hanzo.ai",
                 "$ai_parent_id": "trace1",
             }.items(),
             response.results[0].events[0].properties.items(),
@@ -387,6 +541,55 @@ class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
         response = TracesQueryRunner(team=self.team, query=TracesQuery()).calculate()
         self.assertEqual(len(response.results), 1)
         self.assertIsNone(response.results[0].person)
+        self.assertEqual(response.results[0].distinctId, "person1")
+
+    @freeze_time("2025-01-01T00:00:00Z")
+    def test_distinct_id_prefers_trace_event(self):
+        """When a $ai_trace event exists, its distinct_id should be used even if
+        other events in the trace have an earlier timestamp with a different distinct_id."""
+        _create_person(distinct_ids=["server-internal-id"], team=self.team)
+        _create_person(distinct_ids=["real-user-id"], team=self.team)
+
+        _create_ai_generation_event(
+            distinct_id="server-internal-id",
+            trace_id="trace1",
+            team=self.team,
+            timestamp=datetime(2024, 12, 31, 23, 59, 0),
+        )
+        _create_ai_trace_event(
+            trace_id="trace1",
+            trace_name="my-trace",
+            input_state={},
+            output_state={},
+            distinct_id="real-user-id",
+            team=self.team,
+            timestamp=datetime(2024, 12, 31, 23, 59, 30),
+        )
+
+        response = TracesQueryRunner(team=self.team, query=TracesQuery()).calculate()
+        self.assertEqual(len(response.results), 1)
+        self.assertEqual(response.results[0].distinctId, "real-user-id")
+
+    @freeze_time("2025-01-01T00:00:00Z")
+    def test_distinct_id_falls_back_without_trace_event(self):
+        """When no $ai_trace event exists, the distinct_id from the earliest event should be used."""
+        _create_person(distinct_ids=["person1"], team=self.team)
+
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace1",
+            team=self.team,
+            timestamp=datetime(2024, 12, 31, 23, 59, 0),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace1",
+            team=self.team,
+            timestamp=datetime(2024, 12, 31, 23, 59, 30),
+        )
+
+        response = TracesQueryRunner(team=self.team, query=TracesQuery()).calculate()
+        self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].distinctId, "person1")
 
     @freeze_time("2025-01-16T00:00:00Z")
@@ -472,7 +675,7 @@ class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].id, "trace1")
 
-        # Date is before the capture range
+        # Date is before the capture range but overlaps (last event at window start)
         _create_ai_generation_event(
             distinct_id="person1",
             trace_id="trace3",
@@ -489,8 +692,119 @@ class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
             team=self.team,
             query=TracesQuery(dateRange=DateRange(date_from="2024-12-01T00:00:00Z", date_to="2024-12-01T00:10:00Z")),
         ).calculate()
-        self.assertEqual(len(response.results), 1)
-        self.assertEqual(response.results[0].id, "trace1")
+        # trace3 overlaps the window (last_timestamp=00:00 >= date_from=00:00)
+        self.assertEqual(len(response.results), 2)
+        result_ids = {t.id for t in response.results}
+        self.assertIn("trace1", result_ids)
+        self.assertIn("trace3", result_ids)
+
+    def test_trailing_buffer_does_not_swallow_window_traces(self):
+        # Regression: when more traces exist in the +10 min trailing capture
+        # buffer than the page size, the trace_ids subquery's `ORDER BY
+        # min(timestamp) DESC LIMIT N` used to pick exclusively buffer traces,
+        # which were then dropped by the overlap post-filter — producing an
+        # empty page even though the user window contained valid traces.
+        _create_person(distinct_ids=["person1"], team=self.team)
+
+        for i in range(5):
+            _create_ai_generation_event(
+                distinct_id="person1",
+                team=self.team,
+                trace_id=f"in_window_{i}",
+                timestamp=datetime(2024, 12, 1, 10, 10 * i),
+            )
+
+        # 6 traces in (date_to, date_to + 10 min] — all newer than the in-window
+        # ones, so a naive `ORDER BY min(timestamp) DESC LIMIT 5` would pick them.
+        for i in range(6):
+            _create_ai_generation_event(
+                distinct_id="person1",
+                team=self.team,
+                trace_id=f"buffer_{i}",
+                timestamp=datetime(2024, 12, 1, 11, 1 + i),
+            )
+
+        response = TracesQueryRunner(
+            team=self.team,
+            query=TracesQuery(
+                limit=4,  # pagination_limit = 4 + 0 + 1 = 5; smaller than the buffer count
+                dateRange=DateRange(
+                    date_from="2024-12-01T10:00:00Z",
+                    date_to="2024-12-01T11:00:00Z",
+                ),
+            ),
+        ).calculate()
+
+        result_ids = [t.id for t in response.results]
+        self.assertEqual(
+            len(response.results),
+            5,
+            f"expected 5 in-window traces; got {len(response.results)}: {result_ids}",
+        )
+        for rid in result_ids:
+            self.assertTrue(rid.startswith("in_window_"), f"unexpected trace id {rid} in results")
+
+    def test_overlap_semantics_trace_started_before_window(self):
+        _create_person(distinct_ids=["person1"], team=self.team)
+
+        # Trace A: first event within capture range but before date_from
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_a",
+            team=self.team,
+            timestamp=datetime(2024, 12, 1, 10, 55),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_a",
+            team=self.team,
+            timestamp=datetime(2024, 12, 1, 11, 30),
+        )
+
+        # Trace B: fully within window
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_b",
+            team=self.team,
+            timestamp=datetime(2024, 12, 1, 11, 15),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_b",
+            team=self.team,
+            timestamp=datetime(2024, 12, 1, 11, 40),
+        )
+
+        # Trace C: entirely before the window and capture range
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_c",
+            team=self.team,
+            timestamp=datetime(2024, 12, 1, 9, 0),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_c",
+            team=self.team,
+            timestamp=datetime(2024, 12, 1, 9, 30),
+        )
+
+        # Window: 11:00 to 12:00
+        response = TracesQueryRunner(
+            team=self.team,
+            query=TracesQuery(
+                dateRange=DateRange(
+                    date_from="2024-12-01T11:00:00Z",
+                    date_to="2024-12-01T12:00:00Z",
+                )
+            ),
+        ).calculate()
+
+        result_ids = {t.id for t in response.results}
+        self.assertEqual(len(response.results), 2)
+        self.assertIn("trace_a", result_ids)
+        self.assertIn("trace_b", result_ids)
+        self.assertNotIn("trace_c", result_ids)
 
     def test_event_property_filters(self):
         _create_person(distinct_ids=["person1"], team=self.team)
@@ -543,6 +857,203 @@ class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
         ).calculate()
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].id, "trace1")
+
+    def _create_search_fixture(self):
+        _create_person(distinct_ids=["person1"], team=self.team)
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_walrus",
+            team=self.team,
+            input="Where does the walrus sleep?",
+            output="On an ice floe.",
+            timestamp=datetime(2024, 12, 1, 0, 0),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_penguin",
+            team=self.team,
+            input="Tell me about penguins.",
+            output="Penguins prefer icebergs.",
+            timestamp=datetime(2024, 12, 1, 0, 10),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_paris",
+            team=self.team,
+            input="What is the capital of France?",
+            output="Paris.",
+            timestamp=datetime(2024, 12, 1, 0, 20),
+        )
+        # Older SDKs emit $ai_output (the `output` column) instead of $ai_output_choices.
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_albatross",
+            team=self.team,
+            input="What flies at night?",
+            properties={"$ai_output": {"role": "assistant", "content": "The albatross flies at night."}},
+            timestamp=datetime(2024, 12, 1, 0, 30),
+        )
+
+    def _run_search_query(self, search_term: str, **kwargs: Any):
+        return TracesQueryRunner(
+            team=self.team,
+            query=TracesQuery(
+                dateRange=DateRange(date_from="2024-12-01T00:00:00Z", date_to="2024-12-01T01:00:00Z"),
+                searchTerm=search_term,
+                **kwargs,
+            ),
+        ).calculate()
+
+    @parameterized.expand(
+        [
+            ("input_match", "walrus", {"trace_walrus"}),
+            ("output_choices_match", "icebergs", {"trace_penguin"}),
+            ("legacy_output_match", "albatross", {"trace_albatross"}),
+            ("case_insensitive", "WALRUS", {"trace_walrus"}),
+            ("multiple_traces", "ice", {"trace_walrus", "trace_penguin"}),
+            ("no_match", "platypus", set()),
+            ("blank_is_ignored", "   ", {"trace_walrus", "trace_penguin", "trace_paris", "trace_albatross"}),
+        ]
+    )
+    def test_search_term_filters_by_generation_content(self, _name, search_term, expected_trace_ids):
+        self._create_search_fixture()
+
+        response = self._run_search_query(search_term)
+        self.assertEqual({trace.id for trace in response.results}, expected_trace_ids)
+
+    @parameterized.expand(
+        [
+            ("percent", "100% off", "Discount is 100% off", "Discount is 100x off today"),
+            ("underscore", "sold a_b units", "We sold a_b units", "We sold aXb units"),
+        ]
+    )
+    def test_search_term_treats_like_metacharacters_literally(self, _name, search_term, matching, non_matching):
+        _create_person(distinct_ids=["person1"], team=self.team)
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_literal",
+            team=self.team,
+            input=matching,
+            timestamp=datetime(2024, 12, 1, 0, 0),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_wildcard",
+            team=self.team,
+            input=non_matching,
+            timestamp=datetime(2024, 12, 1, 0, 10),
+        )
+
+        response = self._run_search_query(search_term)
+        self.assertEqual({trace.id for trace in response.results}, {"trace_literal"})
+
+    def test_search_term_combines_with_property_filters(self):
+        _create_person(distinct_ids=["person1"], team=self.team)
+        # Filter and search match different events of trace_both: they must combine at trace level.
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_both",
+            team=self.team,
+            input="Contains the needle.",
+            timestamp=datetime(2024, 12, 1, 0, 0),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_both",
+            team=self.team,
+            input="Unrelated content.",
+            properties={"foo": "bar"},
+            timestamp=datetime(2024, 12, 1, 0, 1),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_search_only",
+            team=self.team,
+            input="Contains the needle.",
+            timestamp=datetime(2024, 12, 1, 0, 10),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_filter_only",
+            team=self.team,
+            input="Unrelated content.",
+            properties={"foo": "bar"},
+            timestamp=datetime(2024, 12, 1, 0, 20),
+        )
+
+        response = self._run_search_query(
+            "needle",
+            properties=[EventPropertyFilter(key="foo", value="bar", operator=PropertyOperator.EXACT)],
+        )
+        self.assertEqual({trace.id for trace in response.results}, {"trace_both"})
+
+    def test_search_term_respects_date_range(self):
+        _create_person(distinct_ids=["person1"], team=self.team)
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_in_range",
+            team=self.team,
+            input="Contains the needle.",
+            timestamp=datetime(2024, 12, 1, 0, 0),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_out_of_range",
+            team=self.team,
+            input="Contains the needle.",
+            timestamp=datetime(2024, 12, 2, 5, 0),
+        )
+
+        response = self._run_search_query("needle")
+        self.assertEqual({trace.id for trace in response.results}, {"trace_in_range"})
+
+    def test_search_filter_prints_as_global_in(self):
+        # A plain IN passes single-node CI but re-executes the subquery per events
+        # shard in production; only the printed SQL can catch the downgrade.
+        runner = TracesQueryRunner(
+            team=self.team,
+            query=TracesQuery(
+                dateRange=DateRange(date_from="2024-12-01T00:00:00Z", date_to="2024-12-01T01:00:00Z"),
+                searchTerm="needle",
+            ),
+        )
+        context = InsightsQLContext(
+            team_id=self.team.pk,
+            enable_select_queries=True,
+            modifiers=create_default_modifiers_for_team(self.team),
+        )
+        sql, _ = prepare_and_print_ast(runner._build_trace_ids_query(), context, "datastore")
+        # The printer emits GLOBAL IN in function form.
+        assert "globalIn(" in sql
+        assert "ai_events" in sql
+
+    def test_search_candidate_cap_applies_after_filters(self):
+        # With the cap at 1, the more recent trace matches the term but not the property
+        # filter. Drawing the cap from the filtered set keeps the older matching trace;
+        # capping raw text matches first would keep the recent one and empty the page.
+        _create_person(distinct_ids=["person1"], team=self.team)
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_match",
+            team=self.team,
+            input="Contains the needle.",
+            properties={"foo": "bar"},
+            timestamp=datetime(2024, 12, 1, 0, 0),
+        )
+        _create_ai_generation_event(
+            distinct_id="person1",
+            trace_id="trace_recent",
+            team=self.team,
+            input="Contains the needle.",
+            timestamp=datetime(2024, 12, 1, 0, 30),
+        )
+
+        with patch("insights.insightsql_queries.ai.traces_query_runner.SEARCH_CANDIDATE_TRACE_LIMIT", 1):
+            response = self._run_search_query(
+                "needle",
+                properties=[EventPropertyFilter(key="foo", value="bar", operator=PropertyOperator.EXACT)],
+            )
+        self.assertEqual({trace.id for trace in response.results}, {"trace_match"})
 
     def test_model_parameters(self):
         _create_person(distinct_ids=["person1"], team=self.team, properties={"foo": "bar"})
@@ -1665,3 +2176,54 @@ class TestTracesQueryRunner(DatastoreTestMixin, BaseTest):
             trace_num = int(trace_id.split("_")[1])
             self.assertGreaterEqual(trace_num, 0)
             self.assertLess(trace_num, 10)
+
+    @freeze_time("2025-01-16T00:00:00Z")
+    def test_request_and_web_search_cost_aggregation(self):
+        _create_person(distinct_ids=["person1"], team=self.team)
+        trace_id = "trace_cost_components"
+
+        _create_ai_generation_event(
+            distinct_id="person1",
+            team=self.team,
+            trace_id=trace_id,
+            input="first generation",
+            output="first response",
+            timestamp=datetime(2025, 1, 15, 0, 0),
+            properties={
+                "$ai_input_cost_usd": 0.01,
+                "$ai_output_cost_usd": 0.02,
+                "$ai_request_cost_usd": 0.003,
+                "$ai_web_search_cost_usd": 0.015,
+                "$ai_total_cost_usd": 0.048,
+            },
+        )
+        # Second event omits web_search_cost — verify partial presence sums correctly
+        _create_ai_generation_event(
+            distinct_id="person1",
+            team=self.team,
+            trace_id=trace_id,
+            input="second generation",
+            output="second response",
+            timestamp=datetime(2025, 1, 15, 0, 1),
+            properties={
+                "$ai_input_cost_usd": 0.005,
+                "$ai_output_cost_usd": 0.01,
+                "$ai_request_cost_usd": 0.002,
+                "$ai_total_cost_usd": 0.017,
+            },
+        )
+
+        response = TracesQueryRunner(
+            team=self.team,
+            query=TracesQuery(dateRange=DateRange(date_from="2025-01-15T00:00:00Z", date_to="2025-01-15T01:00:00Z")),
+        ).calculate()
+
+        self.assertEqual(len(response.results), 1)
+        trace = response.results[0]
+
+        # Values chosen to be exact in IEEE 754 after Datastore round(..., 10)
+        self.assertEqual(trace.inputCost, 0.015)
+        self.assertEqual(trace.outputCost, 0.03)
+        self.assertEqual(trace.requestCost, 0.005)
+        self.assertEqual(trace.webSearchCost, 0.015)
+        self.assertEqual(trace.totalCost, 0.065)

@@ -7,9 +7,9 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from cachetools import cached
-from datastore_orm import Database
-from datastore_orm.migrations import MigrationHistory
-from datastore_orm.utils import import_submodules
+from infi.datastore_orm import Database
+from infi.datastore_orm.migrations import MigrationHistory
+from infi.datastore_orm.utils import import_submodules
 
 from insights.datastore.client.connection import default_client
 from insights.settings import DATASTORE_DATABASE, DATASTORE_HTTP_URL, DATASTORE_PASSWORD, DATASTORE_USER
@@ -17,22 +17,9 @@ from insights.settings.data_stores import DATASTORE_MIGRATIONS_CLUSTER
 
 MIGRATIONS_PACKAGE_NAME = "insights.datastore.migrations"
 
-# Every package name this migrations module has ever been called. The history
-# table keys on package_name, so a rename makes every prior row invisible: the
-# runner sees zero applied migrations, replays from 0001, and dies partway (0026
-# raises NameError under a modern Python). That is not hypothetical — it is what
-# the posthog -> insights rename did, and it silently blocked EVERY datastore
-# migration until the rows were re-keyed by hand.
-#
-# Renaming the package is the normal thing to want to do. Re-keying the ledger
-# by hand at 3am is not. So the rename carries its own fixup: adopt() runs before
-# any migration and claims prior names, which makes this list the one place a
-# future rename has to touch.
-LEGACY_PACKAGE_NAMES = ("insights.clickhouse.migrations", "posthog.clickhouse.migrations")
-
 
 class Command(BaseCommand):
-    help = "Migrate Hanzo Datastore"
+    help = "Migrate datastore"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -68,6 +55,7 @@ class Command(BaseCommand):
     def migrate(self, host, options):
         # Infi only creates the DB in one node, but not the rest. Create it before running migrations.
         self._create_database_if_not_exists(DATASTORE_DATABASE, DATASTORE_MIGRATIONS_CLUSTER)
+        self._create_migration_tracking_tables_if_not_exist(DATASTORE_DATABASE, DATASTORE_MIGRATIONS_CLUSTER)
         database = Database(
             DATASTORE_DATABASE,
             db_url=host,
@@ -76,6 +64,8 @@ class Command(BaseCommand):
             cluster=DATASTORE_MIGRATIONS_CLUSTER,
             verify_ssl_cert=False,
             randomize_replica_paths=settings.TEST or settings.E2E_TESTING,
+            # don't use the egress proxy, datastore is internal
+            trust_env=False,
         )
 
         if options["plan"] or options["check"]:
@@ -112,31 +102,8 @@ class Command(BaseCommand):
                 )
             print("Migrations done")
         else:
-            self.adopt_legacy_history(database)
             database.migrate(MIGRATIONS_PACKAGE_NAME, options["upto"], replicated=True)
             print("✅ Migration successful")
-
-    def adopt_legacy_history(self, database):
-        """Re-key history rows written under a previous package name.
-
-        Idempotent and additive: rows already under the current name are left
-        alone and the legacy rows stay put, so this is safe to run on every
-        invocation and on a fresh database, where it is a no-op.
-        """
-        legacy = ", ".join(f"'{name}'" for name in LEGACY_PACKAGE_NAMES)
-        adopted = database.raw(
-            f"""INSERT INTO {DATASTORE_DATABASE}.migrations
-                    (package_name, module_name, applied)
-                SELECT '{MIGRATIONS_PACKAGE_NAME}', module_name, applied
-                FROM {DATASTORE_DATABASE}.migrations
-                WHERE package_name IN ({legacy})
-                  AND module_name NOT IN (
-                    SELECT module_name
-                    FROM {DATASTORE_DATABASE}.migrations
-                    WHERE package_name = '{MIGRATIONS_PACKAGE_NAME}')"""
-        )
-        if adopted:
-            print(f"Adopted migration history from {legacy}")
 
     def get_migrations(self, database, upto):
         modules = import_submodules(MIGRATIONS_PACKAGE_NAME)
@@ -154,8 +121,59 @@ class Command(BaseCommand):
         return database._get_applied_migrations(MIGRATIONS_PACKAGE_NAME, replicated=True)
 
     def _create_database_if_not_exists(self, database: str, cluster: str):
-        if settings.TEST or settings.E2E_TESTING:
+        # MULTINODE_DATASTORE: infi.datastore_orm creates the Distributed
+        # migration-tracking table across the migrations cluster before the
+        # first migration runs, so the database has to exist on every node up
+        # front — otherwise the CREATE TABLE fans out to satellites that have
+        # no `insights` database yet and fails with UNKNOWN_DATABASE.
+        if settings.TEST or settings.E2E_TESTING or settings.MULTINODE_DATASTORE:
             with default_client() as client:
                 client.execute(
                     f"CREATE DATABASE IF NOT EXISTS {database} ON CLUSTER {cluster}",
                 )
+
+    def _create_migration_tracking_tables_if_not_exist(self, database: str, cluster: str):
+        # MULTINODE_DATASTORE only: infi.datastore_orm's auto-create path
+        # issues `CREATE TABLE` without `ON CLUSTER`, so the underlying
+        # ReplicatedMergeTree only lands on the migrations host. With a real
+        # multi-node `insights_migrations` cluster, the Distributed tracking
+        # table fans out to every shard and trips UNKNOWN_TABLE on satellites
+        # that never received the local replica. Pre-create both tables on
+        # the cluster so the very first SELECT in infi's migrate() succeeds
+        # and the auto-create branch never runs.
+        #
+        # Schema (`package_name String, module_name String, applied Date`) and
+        # the ZK path mirror `infi.datastore_orm.migrations.MigrationHistory`
+        # / `MigrationHistoryReplicated`. If `infi` ever changes those, this
+        # pre-create will silently diverge — keep the two in sync.
+        if not settings.MULTINODE_DATASTORE:
+            return
+        with default_client() as client:
+            client.execute(
+                f"""
+                CREATE TABLE IF NOT EXISTS {database}.infi_datastore_orm_migrations
+                ON CLUSTER {cluster} (
+                    package_name String,
+                    module_name String,
+                    applied Date
+                )
+                ENGINE = ReplicatedMergeTree(
+                    '/datastore/prod/tables/noshard/{{database}}/{{table}}',
+                    '{{replica}}-{{shard}}'
+                )
+                PARTITION BY toYYYYMM(applied)
+                ORDER BY (package_name, module_name)
+                SETTINGS index_granularity = 8192
+                """
+            )
+            client.execute(
+                f"""
+                CREATE TABLE IF NOT EXISTS {database}.infi_datastore_orm_migrations_distributed
+                ON CLUSTER {cluster} (
+                    package_name String,
+                    module_name String,
+                    applied Date
+                )
+                ENGINE = Distributed({cluster}, {database}, infi_datastore_orm_migrations, rand())
+                """
+            )

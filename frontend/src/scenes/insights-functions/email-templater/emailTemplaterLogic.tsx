@@ -1,5 +1,18 @@
-import { actions, afterMount, connect, kea, listeners, path, props, propsChanged, reducers, selectors } from 'kea'
+import {
+    MakeLogicType,
+    actions,
+    afterMount,
+    connect,
+    kea,
+    listeners,
+    path,
+    props,
+    propsChanged,
+    reducers,
+    selectors,
+} from 'kea'
 import { forms } from 'kea-forms'
+import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { Editor, EmailEditorProps, EditorRef as _EditorRef } from 'react-email-editor'
 
@@ -7,31 +20,86 @@ import { Dialog } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { toast } from 'lib/elements/Toast'
-import { objectsEqual } from 'lib/utils'
+import { objectsEqual } from 'lib/utils/objects'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { PreflightStatus, PropertyDefinition, PropertyDefinitionType, Realm } from '~/types'
 
-import { MessageTemplate } from 'products/workflows/frontend/TemplateLibrary/messageTemplatesLogic'
+import { MessageTemplate } from 'products/workflows/frontend/TemplateLibrary/types'
 
-import { EmailTemplaterType } from './EmailTemplater'
-import type { emailTemplaterLogicType } from './emailTemplaterLogicType'
+import type { EmailTemplate } from './types'
+
+export type { EmailTemplate }
 
 export type UnlayerMergeTags = NonNullable<EmailEditorProps['options']>['mergeTags']
+
+/**
+ * email: basic email editor with free-text fields, used for configuring email platform realtime destinations
+ * native_email: advanced editor with email integration dropdown, and additional email metafields
+ * native_email_template: editor for creating reusable templates, with only subject and preheader, and email content fields
+ */
+export type EmailTemplaterType = 'email' | 'native_email' | 'native_email_template'
+export type EmailMetaFieldKey = 'from' | 'to' | 'replyTo' | 'cc' | 'bcc' | 'subject' | 'preheader'
+export type EmailMetaField = {
+    key: EmailMetaFieldKey
+    label: string
+    optional: boolean
+    helpText?: string
+    isAdvancedField?: boolean
+}
+
+const EMAIL_META_FIELDS = {
+    FROM: { key: 'from', label: 'From', optional: false },
+    TO: { key: 'to', label: 'To', optional: false },
+    REPLY_TO: {
+        key: 'replyTo',
+        label: 'Reply-To',
+        optional: true,
+        isAdvancedField: true,
+        helpText: 'Optional reply-to email address. You can comma separate multiple reply-to addresses.',
+    },
+    CC: {
+        key: 'cc',
+        label: 'Cc',
+        optional: true,
+        isAdvancedField: true,
+        helpText: 'Comma-separated list of CC recipients.',
+    },
+    BCC: {
+        key: 'bcc',
+        label: 'Bcc',
+        optional: true,
+        isAdvancedField: true,
+        helpText: 'Comma-separated list of BCC recipients.',
+    },
+    PREHEADER: {
+        key: 'preheader',
+        label: 'Preheader',
+        optional: true,
+        isAdvancedField: true,
+        helpText: 'This is the preview text that appears below the subject line in an inbox.',
+    },
+    SUBJECT: { key: 'subject', label: 'Subject', optional: false },
+} as const
+
+export const EMAIL_TYPE_SUPPORTED_FIELDS: Record<EmailTemplaterType, EmailMetaField[]> = {
+    email: [EMAIL_META_FIELDS.FROM, EMAIL_META_FIELDS.TO, EMAIL_META_FIELDS.SUBJECT],
+    native_email: [
+        EMAIL_META_FIELDS.FROM,
+        EMAIL_META_FIELDS.TO,
+        EMAIL_META_FIELDS.REPLY_TO,
+        EMAIL_META_FIELDS.CC,
+        EMAIL_META_FIELDS.BCC,
+        EMAIL_META_FIELDS.SUBJECT,
+        EMAIL_META_FIELDS.PREHEADER,
+    ],
+    native_email_template: [EMAIL_META_FIELDS.SUBJECT, EMAIL_META_FIELDS.PREHEADER],
+}
 
 // Helping kea-typegen navigate the exported type
 export interface EditorRef extends _EditorRef {}
 
 type JSONTemplate = Parameters<Editor['loadDesign']>[0]
-
-export type EmailTemplate = {
-    design: JSONTemplate | null
-    html: string
-    subject: string
-    text: string
-    from: string
-    to: string
-}
 
 export interface EmailTemplaterLogicProps {
     value: EmailTemplate | null
@@ -39,9 +107,184 @@ export interface EmailTemplaterLogicProps {
     variables?: Record<string, any>
     type: EmailTemplaterType
     defaultValue?: EmailTemplate | null
-    templating?: boolean | 'fn' | 'liquid'
-    onChangeTemplating?: (templating: 'fn' | 'liquid') => void
+    templating?: boolean | 'script' | 'liquid'
+    onChangeTemplating?: (templating: 'script' | 'liquid') => void
 }
+
+function autoRevealAdvancedFields(
+    actions: { revealAdvancedField: (key: EmailMetaFieldKey) => void },
+    props: EmailTemplaterLogicProps
+): void {
+    if (!props.value) {
+        return
+    }
+    for (const field of EMAIL_TYPE_SUPPORTED_FIELDS[props.type]) {
+        if (field.isAdvancedField) {
+            const value = (props.value as Record<string, any>)[field.key]
+            if (value !== undefined && value !== null && value !== '') {
+                actions.revealAdvancedField(field.key as EmailMetaFieldKey)
+            }
+        }
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface emailTemplaterLogicValues {
+    preflight: PreflightStatus | null // preflightLogic
+    activeContentTab: 'plaintext' | 'visual'
+    appliedTemplate: MessageTemplate | null
+    emailEditorRef: EditorRef | null
+    emailTemplate: EmailTemplate
+    emailTemplateAllErrors: Record<string, any>
+    emailTemplateChanged: boolean
+    emailTemplateErrors: DeepPartialMap<EmailTemplate, ValidationErrorType>
+    emailTemplateHasErrors: boolean
+    emailTemplateManualErrors: Record<string, any>
+    emailTemplateTouched: boolean
+    emailTemplateTouches: Record<string, boolean>
+    emailTemplateValidationErrors: DeepPartialMap<EmailTemplate, ValidationErrorType>
+    hiddenAdvancedFields: EmailMetaField[]
+    isEmailEditorReady: boolean
+    isEmailTemplateSubmitting: boolean
+    isEmailTemplateValid: boolean
+    isModalOpen: boolean
+    isSaveTemplateModalOpen: boolean
+    logicProps: EmailTemplaterLogicProps
+    mergeTags: UnlayerMergeTags
+    personPropertyDefinitions: PropertyDefinition[]
+    personPropertyDefinitionsLoading: boolean
+    revealedAdvancedFields: EmailMetaFieldKey[]
+    showEmailTemplateErrors: boolean
+    templates: MessageTemplate[]
+    templatesLoading: boolean
+    templatingEngine: 'script' | 'liquid'
+    unlayerEditorProjectId: 275430 | undefined
+    visibleFields: EmailMetaField[]
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface emailTemplaterLogicActions {
+    applyTemplate: (template: MessageTemplate) => {
+        template: MessageTemplate
+    }
+    closeWithConfirmation: () => {
+        value: true
+    }
+    hideAdvancedField: (key: EmailMetaFieldKey) => {
+        key: EmailMetaFieldKey
+    }
+    loadPersonPropertyDefinitions: () => any
+    loadPersonPropertyDefinitionsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadPersonPropertyDefinitionsSuccess: (
+        personPropertyDefinitions: PropertyDefinition[],
+        payload?: any
+    ) => {
+        personPropertyDefinitions: PropertyDefinition[]
+        payload?: any
+    }
+    loadTemplates: () => any
+    loadTemplatesFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadTemplatesSuccess: (
+        templates: MessageTemplate[],
+        payload?: any
+    ) => {
+        templates: MessageTemplate[]
+        payload?: any
+    }
+    onEmailEditorReady: () => {
+        value: true
+    }
+    resetEmailTemplate: (values?: EmailTemplate) => {
+        values?: EmailTemplate
+    }
+    revealAdvancedField: (key: EmailMetaFieldKey) => {
+        key: EmailMetaFieldKey
+    }
+    saveAsTemplate: (
+        name: string,
+        description: string
+    ) => {
+        description: string
+        name: string
+    }
+    setActiveContentTab: (tab: 'plaintext' | 'visual') => {
+        tab: 'plaintext' | 'visual'
+    }
+    setEmailEditorRef: (emailEditorRef: EditorRef | null) => {
+        emailEditorRef: EditorRef | null
+    }
+    setEmailTemplateManualErrors: (errors: Record<string, any>) => {
+        errors: Record<string, any>
+    }
+    setEmailTemplateValue: (
+        key: FieldName,
+        value: any
+    ) => {
+        name: FieldName
+        value: any
+    }
+    setEmailTemplateValues: (values: DeepPartial<EmailTemplate>) => {
+        values: DeepPartial<EmailTemplate>
+    }
+    setIsModalOpen: (isModalOpen: boolean) => {
+        isModalOpen: boolean
+    }
+    setIsSaveTemplateModalOpen: (isOpen: boolean) => {
+        isOpen: boolean
+    }
+    setTemplatingEngine: (templating: 'script' | 'liquid') => {
+        templating: 'script' | 'liquid'
+    }
+    submitEmailTemplate: () => {
+        value: boolean
+    }
+    submitEmailTemplateFailure: (
+        error: Error,
+        errors: Record<string, any>
+    ) => {
+        error: Error
+        errors: Record<string, any>
+    }
+    submitEmailTemplateRequest: (emailTemplate: EmailTemplate) => {
+        emailTemplate: EmailTemplate
+    }
+    submitEmailTemplateSuccess: (emailTemplate: EmailTemplate) => {
+        emailTemplate: EmailTemplate
+    }
+    touchEmailTemplateField: (key: string) => {
+        key: string
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface emailTemplaterLogicMeta {
+    __keaTypeGenInternalSelectorTypes: {
+        logicProps: (arg: any) => EmailTemplaterLogicProps
+        mergeTags: (personPropertyDefinitions: PropertyDefinition[]) => UnlayerMergeTags
+        unlayerEditorProjectId: (preflight: PreflightStatus | null) => 275430 | undefined
+        visibleFields: (arg: EmailTemplaterType, revealedAdvancedFields: EmailMetaFieldKey[]) => EmailMetaField[]
+        hiddenAdvancedFields: (arg: EmailTemplaterType, visibleFields: EmailMetaField[]) => EmailMetaField[]
+    }
+}
+
+export type emailTemplaterLogicType = MakeLogicType<
+    emailTemplaterLogicValues,
+    emailTemplaterLogicActions,
+    EmailTemplaterLogicProps,
+    emailTemplaterLogicMeta
+>
 
 export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
     props({} as EmailTemplaterLogicProps),
@@ -56,9 +299,11 @@ export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
         setIsSaveTemplateModalOpen: (isOpen: boolean) => ({ isOpen }),
         applyTemplate: (template: MessageTemplate) => ({ template }),
         closeWithConfirmation: true,
-        setTemplatingEngine: (templating: 'fn' | 'liquid') => ({ templating }),
+        setTemplatingEngine: (templating: 'script' | 'liquid') => ({ templating }),
         saveAsTemplate: (name: string, description: string) => ({ name, description }),
         setActiveContentTab: (tab: 'visual' | 'plaintext') => ({ tab }),
+        revealAdvancedField: (key: EmailMetaFieldKey) => ({ key }),
+        hideAdvancedField: (key: EmailMetaFieldKey) => ({ key }),
     }),
     reducers({
         emailEditorRef: [
@@ -93,11 +338,20 @@ export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
             },
         ],
         templatingEngine: [
-            'liquid' as 'fn' | 'liquid',
+            'liquid' as 'script' | 'liquid',
             {
                 setTemplatingEngine: (_, { templating }) => {
                     return templating
                 },
+            },
+        ],
+        revealedAdvancedFields: [
+            [] as EmailMetaFieldKey[],
+            {
+                revealAdvancedField: (state: EmailMetaFieldKey[], { key }: { key: EmailMetaFieldKey }) =>
+                    state.includes(key) ? state : [...state, key],
+                hideAdvancedField: (state: EmailMetaFieldKey[], { key }: { key: EmailMetaFieldKey }) =>
+                    state.filter((k) => k !== key),
             },
         ],
         activeContentTab: [
@@ -173,6 +427,18 @@ export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
                     return 275430
                 }
             },
+        ],
+        visibleFields: [
+            (s) => [(_, props: EmailTemplaterLogicProps) => props.type, s.revealedAdvancedFields],
+            (type: EmailTemplaterType, revealedAdvancedFields: EmailMetaFieldKey[]): EmailMetaField[] =>
+                EMAIL_TYPE_SUPPORTED_FIELDS[type].filter(
+                    (field) => !field.isAdvancedField || revealedAdvancedFields.includes(field.key)
+                ),
+        ],
+        hiddenAdvancedFields: [
+            (s) => [(_, props: EmailTemplaterLogicProps) => props.type, s.visibleFields],
+            (type: EmailTemplaterType, visibleFields: EmailMetaField[]): EmailMetaField[] =>
+                EMAIL_TYPE_SUPPORTED_FIELDS[type].filter((f) => f.isAdvancedField && !visibleFields.includes(f)),
         ],
     }),
 
@@ -347,12 +613,14 @@ export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
     propsChanged(({ actions, props }, oldProps) => {
         if (props.value && !objectsEqual(props.value, oldProps.value)) {
             actions.resetEmailTemplate(props.value)
+            autoRevealAdvancedFields(actions, props)
         }
     }),
 
     afterMount(({ actions, props }) => {
         if (props.value) {
             actions.resetEmailTemplate(props.value)
+            autoRevealAdvancedFields(actions, props)
         }
 
         actions.loadTemplates()

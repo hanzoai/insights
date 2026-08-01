@@ -7,7 +7,8 @@ import { Badge } from '@hanzo/elements'
 import { Dayjs } from 'lib/dayjs'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { humanFriendlyDetailedTime, pluralize } from 'lib/utils'
+import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
+import { pluralize } from 'lib/utils/strings'
 
 export interface TimelinePoint {
     timestamp: Dayjs

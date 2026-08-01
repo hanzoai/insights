@@ -1,16 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { BindLogic } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
-import { IconFunnels, IconRetention, IconTrends } from '@hanzo/icons'
-
+import { IconInsightFunnels, IconInsightRetention, IconInsightTrends } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
 import { Modal } from 'lib/elements/Modal'
 import { Popover } from 'lib/elements/Popover'
+import { addSavedInsightsModalLogic } from 'scenes/saved-insights/addSavedInsightsModalLogic'
 import { AddSavedInsightsToDashboard } from 'scenes/saved-insights/AddSavedInsightsToDashboard'
 import { INSIGHT_TYPES_METADATA } from 'scenes/saved-insights/SavedInsights'
-import { addSavedInsightsModalLogic } from 'scenes/saved-insights/addSavedInsightsModalLogic'
 import { urls } from 'scenes/urls'
 
 import { InsightType } from '~/types'
@@ -19,9 +18,9 @@ import { addInsightToDashboardLogic } from '../addInsightToDashboardModalLogic'
 import { dashboardLogic } from '../dashboardLogic'
 
 const QUICK_CREATE_TYPES = [
-    { type: InsightType.TRENDS, icon: IconTrends, label: 'Trend' },
-    { type: InsightType.FUNNELS, icon: IconFunnels, label: 'Funnel' },
-    { type: InsightType.RETENTION, icon: IconRetention, label: 'Retention' },
+    { type: InsightType.TRENDS, icon: IconInsightTrends, label: 'Trend' },
+    { type: InsightType.FUNNELS, icon: IconInsightFunnels, label: 'Funnel' },
+    { type: InsightType.RETENTION, icon: IconInsightRetention, label: 'Retention' },
 ]
 
 export function AddInsightToDashboardModal(): JSX.Element {
@@ -45,7 +44,7 @@ export function AddInsightToDashboardModal(): JSX.Element {
         ([type, meta]) =>
             meta.inMenu &&
             type !== InsightType.JSON &&
-            type !== InsightType.SCRIPT &&
+            type !== InsightType.HOG &&
             !QUICK_CREATE_TYPES.some((qt) => qt.type === type)
     )
 
@@ -67,12 +66,12 @@ export function AddInsightToDashboardModal(): JSX.Element {
                                     Build a new insight and add it to this dashboard
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 sm:ml-auto flex-wrap">
+                            <div className="flex items-center gap-2 sm:ml-auto flex-wrap pr-0.5">
                                 {QUICK_CREATE_TYPES.map(({ type, icon: Icon, label }) => (
                                     <Button
                                         key={type}
                                         type="primary"
-                                        size="xsmall"
+                                        size="small"
                                         icon={<Icon />}
                                         to={urls.insightNew({ type: type, dashboardId: dashboard?.id })}
                                         tooltip={INSIGHT_TYPES_METADATA[type]?.description}
@@ -89,16 +88,22 @@ export function AddInsightToDashboardModal(): JSX.Element {
                                         <div className="p-2 space-y-1 min-w-48">
                                             {additionalTypes.map(([type, metadata]) => {
                                                 const Icon = metadata.icon
+                                                const typeUrl =
+                                                    type === InsightType.SQL
+                                                        ? urls.sqlEditor({
+                                                              dashboard: dashboard?.id,
+                                                          })
+                                                        : urls.insightNew({
+                                                              type: type as InsightType,
+                                                              dashboardId: dashboard?.id,
+                                                          })
                                                 return (
                                                     <Button
                                                         key={type}
                                                         type="tertiary"
                                                         fullWidth
                                                         icon={Icon ? <Icon /> : undefined}
-                                                        to={urls.insightNew({
-                                                            type: type as InsightType,
-                                                            dashboardId: dashboard?.id,
-                                                        })}
+                                                        to={typeUrl}
                                                         data-attr={`create-${type.toLowerCase()}`}
                                                         onClick={() => handleNewInsightClicked(type)}
                                                     >
@@ -111,7 +116,7 @@ export function AddInsightToDashboardModal(): JSX.Element {
                                 >
                                     <Button
                                         type="secondary"
-                                        size="xsmall"
+                                        size="small"
                                         onClick={() => toggleShowMoreInsightTypes()}
                                     >
                                         More

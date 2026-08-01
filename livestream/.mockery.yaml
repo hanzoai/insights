@@ -6,7 +6,7 @@ outpkg: '{{.PackageName}}'
 filename: '{{.InterfaceName}}.go'
 all: True
 packages:
-    github.com/hanzoai/insights/livestream:
+    github.com/insights/insights/livestream:
         config:
             recursive: True
             outpkg: mocks

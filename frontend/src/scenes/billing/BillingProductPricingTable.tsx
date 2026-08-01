@@ -10,7 +10,6 @@ import {
     ProductPricingTierSubrows,
 } from '~/types'
 
-import { getTierDescription } from './BillingProduct'
 import {
     createProductValueFormatter,
     formatWithDecimals,
@@ -18,6 +17,7 @@ import {
     isProductVariantPrimary,
 } from './billing-utils'
 import { billingLogic } from './billingLogic'
+import { getTierDescription } from './BillingProduct'
 import { billingProductLogic } from './billingProductLogic'
 
 function Subrows(props: ProductPricingTierSubrows): JSX.Element {
@@ -232,9 +232,13 @@ export const BillingProductPricingTable = ({
         })
     }
 
+    const shouldShowPricingTable =
+        !!tableTierData &&
+        (product.tiered || product.tiers?.some((tier) => parseFloat(tier.unit_amount_usd || '0') > 0))
+
     return (
         <div className="pl-16 pb-8">
-            {product.tiered && tableTierData ? (
+            {shouldShowPricingTable ? (
                 <>
                     <Table
                         stealth
@@ -250,9 +254,11 @@ export const BillingProductPricingTable = ({
                             rowExpandable: (row) => !!row.subrows?.rows?.length,
                         }}
                     />
-                    <Banner type="warning" className="text-sm pt-2 mt-2">
-                        Tier breakdowns are updated once daily and may differ from the gauge above.
-                    </Banner>
+                    {product.tiered && (
+                        <Banner type="warning" className="text-sm pt-2 mt-2">
+                            Tier breakdowns are updated once daily and may differ from the gauge above.
+                        </Banner>
+                    )}
                 </>
             ) : parseFloat(product.unit_amount_usd || '0') > 0 ? (
                 <Table

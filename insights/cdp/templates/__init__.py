@@ -1,7 +1,7 @@
 from ._internal.template_blank import blank_site_app, blank_site_destination
 from ._siteapps.template_debug_insights import template as debug_insights
 from ._siteapps.template_early_access_features import template as early_access_features
-from ._siteapps.template_insightsdesk import template as insightsdesk
+from ._siteapps.template_hogdesk import template as hogdesk
 from ._siteapps.template_notification_bar import template as notification_bar
 from ._siteapps.template_pineapple_mode import template as pineapple_mode
 from .activecampaign.template_activecampaign import template as activecampaign
@@ -88,7 +88,7 @@ from .userlist.template_userlist import template as userlist
 from .zapier.template_zapier import template as zapier
 from .zendesk.template_zendesk import template as zendesk
 
-INSIGHTS_FUNCTION_TEMPLATES = [
+FN_FUNCTION_TEMPLATES = [
     blank_site_destination,
     blank_site_app,
     slack,
@@ -137,14 +137,14 @@ INSIGHTS_FUNCTION_TEMPLATES = [
     zapier,
     zendesk,
     early_access_features,
-    insightsdesk,
+    hogdesk,
     notification_bar,
     pineapple_mode,
     debug_insights,
 ]
 
 
-INSIGHTS_FUNCTION_MIGRATORS = {
+FN_FUNCTION_MIGRATORS = {
     TemplateCustomerioMigrator.plugin_url: TemplateCustomerioMigrator,
     TemplateSendGridMigrator.plugin_url: TemplateSendGridMigrator,
     TemplateGooglePubSubMigrator.plugin_url: TemplateGooglePubSubMigrator,

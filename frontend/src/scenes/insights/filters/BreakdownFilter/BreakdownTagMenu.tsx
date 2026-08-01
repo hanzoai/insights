@@ -8,8 +8,8 @@ import { Button, Divider, Input, Switch } from '@hanzo/elements'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { urls } from 'scenes/urls'
 
-import { GlobalBreakdownOptionsMenu } from './GlobalBreakdownOptionsMenu'
 import { breakdownTagLogic } from './breakdownTagLogic'
+import { GlobalBreakdownOptionsMenu } from './GlobalBreakdownOptionsMenu'
 import { taxonomicBreakdownFilterLogic } from './taxonomicBreakdownFilterLogic'
 
 export const BreakdownTagMenu = (): JSX.Element => {
@@ -80,6 +80,7 @@ export const BreakdownTagMenu = (): JSX.Element => {
                         <div className="flex flex-row items-center">
                             Path cleaning
                             <Tooltip
+                                interactive
                                 title={
                                     hasPathCleaningFilters ? (
                                         <>

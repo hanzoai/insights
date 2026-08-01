@@ -3,16 +3,16 @@ from unittest.mock import MagicMock, patch
 
 from insights.temporal.ingestion_acceptance_test.config import Config
 from insights.temporal.ingestion_acceptance_test.results import TestResult, TestSuiteResult
-from insights.temporal.ingestion_acceptance_test.slack import send_slack_notification
+from insights.temporal.ingestion_acceptance_test.runner import RunningTestInfo
+from insights.temporal.ingestion_acceptance_test.slack import send_slack_notification, send_slack_timeout_notification
 
 
 @pytest.fixture
 def config() -> Config:
     return Config(
         api_host="https://test.hanzo.ai",
-        project_api_key="hi_test_key",
-        project_id="12345",
-        personal_api_key="hix_personal_key",
+        project_api_key="phc_test_key",
+        team_id=12345,
         slack_webhook_url="https://hooks.slack.com/services/T00/B00/XXX",
     )
 
@@ -37,7 +37,7 @@ def passing_result() -> TestSuiteResult:
             ),
         ],
         total_duration_seconds=3.5,
-        environment={"api_host": "https://test.hanzo.ai", "project_id": "12345"},
+        environment={"api_host": "https://test.hanzo.ai", "team_id": "12345"},
         timestamp="2024-01-01T00:00:00Z",
     )
 
@@ -63,7 +63,7 @@ def failing_result() -> TestSuiteResult:
             ),
         ],
         total_duration_seconds=3.0,
-        environment={"api_host": "https://test.hanzo.ai", "project_id": "12345"},
+        environment={"api_host": "https://test.hanzo.ai", "team_id": "12345"},
         timestamp="2024-01-01T00:00:00Z",
     )
 
@@ -115,6 +115,7 @@ class TestSendSlackNotification:
         assert header_block["type"] == "section"
         header_text = header_block["text"]["text"]
         assert "Unsuccessful" in header_text
+        assert "main lane" in header_text
 
     @patch("insights.temporal.ingestion_acceptance_test.slack.requests.post")
     def test_payload_contains_summary_with_counts(
@@ -173,12 +174,106 @@ class TestSendSlackNotification:
     def test_does_nothing_when_no_webhook_url(self, mock_post: MagicMock, failing_result: TestSuiteResult) -> None:
         config_no_webhook = Config(
             api_host="https://test.hanzo.ai",
-            project_api_key="hi_test_key",
-            project_id="12345",
-            personal_api_key="hix_personal_key",
+            project_api_key="phc_test_key",
+            team_id=12345,
             slack_webhook_url=None,
         )
 
         send_slack_notification(config_no_webhook, failing_result)
 
         mock_post.assert_not_called()
+
+
+class TestSendSlackTimeoutNotification:
+    @patch("insights.temporal.ingestion_acceptance_test.slack.requests.post")
+    def test_posts_timeout_message_to_webhook(self, mock_post: MagicMock, config: Config) -> None:
+        mock_post.return_value.raise_for_status = MagicMock()
+
+        result = send_slack_timeout_notification(config)
+
+        assert result is True
+        mock_post.assert_called_once()
+        url = mock_post.call_args[0][0]
+        assert url == "https://hooks.slack.com/services/T00/B00/XXX"
+
+    @patch("insights.temporal.ingestion_acceptance_test.slack.requests.post")
+    def test_payload_contains_timeout_header(self, mock_post: MagicMock, config: Config) -> None:
+        mock_post.return_value.raise_for_status = MagicMock()
+
+        send_slack_timeout_notification(config)
+
+        payload = mock_post.call_args[1]["json"]
+        header_text = payload["blocks"][0]["text"]["text"]
+        assert "Timed Out" in header_text
+        assert "main lane" in header_text
+
+    @patch("insights.temporal.ingestion_acceptance_test.slack.requests.post")
+    def test_payload_contains_environment_timeout_and_token_info(self, mock_post: MagicMock, config: Config) -> None:
+        mock_post.return_value.raise_for_status = MagicMock()
+
+        send_slack_timeout_notification(config)
+
+        payload = mock_post.call_args[1]["json"]
+        context_text = payload["blocks"][1]["elements"][0]["text"]
+        assert "test.hanzo.ai" in context_text
+        assert "12345" in context_text
+        assert "3600s" in context_text
+        assert "phc_test_k..." in context_text
+
+    @patch("insights.temporal.ingestion_acceptance_test.slack.requests.post")
+    def test_does_nothing_when_no_webhook_url(self, mock_post: MagicMock) -> None:
+        config_no_webhook = Config(
+            api_host="https://test.hanzo.ai",
+            project_api_key="phc_test_key",
+            team_id=12345,
+            slack_webhook_url=None,
+        )
+
+        result = send_slack_timeout_notification(config_no_webhook)
+
+        assert result is True
+        mock_post.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "running_tests, expected_in_text, not_expected_in_text",
+        [
+            (
+                [
+                    RunningTestInfo(name="TestAlias::test_alias", pending_poll="person with distinct_id 'abc-123'"),
+                    RunningTestInfo(name="TestMerge::test_merge", pending_poll="events for person 'person-789'"),
+                ],
+                [
+                    "TestAlias::test_alias",
+                    "person with distinct_id 'abc-123'",
+                    "TestMerge::test_merge",
+                    "Still running (2)",
+                ],
+                [],
+            ),
+            (
+                [RunningTestInfo(name="TestBasic::test_capture", pending_poll=None)],
+                ["TestBasic::test_capture"],
+                ["waiting for"],
+            ),
+        ],
+        ids=["with_poll_descriptions", "without_poll_description"],
+    )
+    @patch("insights.temporal.ingestion_acceptance_test.slack.requests.post")
+    def test_payload_renders_running_tests(
+        self,
+        mock_post: MagicMock,
+        config: Config,
+        running_tests: list[RunningTestInfo],
+        expected_in_text: list[str],
+        not_expected_in_text: list[str],
+    ) -> None:
+        mock_post.return_value.raise_for_status = MagicMock()
+
+        send_slack_timeout_notification(config, running_tests=running_tests)
+
+        payload = mock_post.call_args[1]["json"]
+        running_text = payload["blocks"][2]["text"]["text"]
+        for expected in expected_in_text:
+            assert expected in running_text
+        for not_expected in not_expected_in_text:
+            assert not_expected not in running_text

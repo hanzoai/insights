@@ -3,10 +3,11 @@ from django.db import transaction
 import structlog
 
 from insights.exceptions_capture import capture_exception
-from insights.models.dashboard import Dashboard
 from insights.models.organization import Organization, OrganizationMembership
-from insights.models.ee_models import AccessControl
 
+from products.dashboards.backend.models.dashboard import Dashboard
+
+from ee.models.rbac.access_control import AccessControl
 
 logger = structlog.get_logger(__name__)
 
@@ -64,6 +65,7 @@ def rbac_dashboard_access_control_migration(organization_id: int):
 
                     # Convert dashboard privileges to access control entries
                     try:
+                        from ee.models import DashboardPrivilege
 
                         dashboard_privileges = DashboardPrivilege.objects.filter(dashboard_id=dashboard.id)
 

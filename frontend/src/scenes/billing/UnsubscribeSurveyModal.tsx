@@ -1,9 +1,9 @@
 import './UnsubscribeSurveyModal.scss'
 
 import { useActions, useValues } from 'kea'
+import { SurveyEventProperties } from 'insights-js'
 import { useState } from 'react'
 
-import { SurveyEventProperties } from '@hanzo/insights'
 import {
     Banner,
     Button,
@@ -16,9 +16,11 @@ import {
     Tooltip,
 } from '@hanzo/elements'
 
-import { useConfetti } from 'lib/components/Confetti/Confetti'
+import { HeartHog } from 'lib/components/mascots'
+import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { HeartMascot } from 'lib/components/mascots'
+import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
+import { humanFriendlyCurrency } from 'lib/utils/numbers'
 
 import { BillingProductV2AddonType, BillingProductV2Type } from '~/types'
 
@@ -36,10 +38,10 @@ export const UnsubscribeSurveyModal = ({
 }: {
     product: BillingProductV2Type | BillingProductV2AddonType
 }): JSX.Element | null => {
-    const { trigger, ConfettiComponent } = useConfetti()
+    const { trigger, HogfettiComponent } = useHogfetti()
 
     const { surveyID, surveyResponse, isAddonProduct, unsubscribeModalStep, unsubscribeReasonQuestions } = useValues(
-        billingProductLogic({ product, confettiTrigger: trigger })
+        billingProductLogic({ product, hogfettiTrigger: trigger })
     )
     const {
         setSurveyResponse,
@@ -47,17 +49,18 @@ export const UnsubscribeSurveyModal = ({
         reportSurveyDismissed,
         setUnsubscribeModalStep,
         resetUnsubscribeModalStep,
-        setSatisfied,
-        triggerConfetti,
+        setMascotSatisfied,
+        triggerMoreMascots,
     } = useActions(billingProductLogic({ product }))
     const { deactivateProduct, resetUnsubscribeError } = useActions(billingLogic)
     const { unsubscribeError, billingLoading, billing } = useValues(billingLogic)
     const { openSupportForm } = useActions(supportLogic)
-    const [randomizedReasons] = useState(
-        process?.env.STORYBOOK ? UNSUBSCRIBE_REASONS : randomizeReasons(UNSUBSCRIBE_REASONS)
+    const [randomizedReasons] = useState(() =>
+        inStorybook() || inStorybookTestRunner() ? UNSUBSCRIBE_REASONS : randomizeReasons(UNSUBSCRIBE_REASONS)
     )
 
     const textAreaNotEmpty = surveyResponse[SurveyEventProperties.SURVEY_RESPONSE]?.length > 0
+    const isOnDiscountedPrice = isAddonProduct && (product as BillingProductV2AddonType).default_unit_amount_usd != null
 
     let action = 'Unsubscribe'
     let actionVerb = 'unsubscribing'
@@ -67,26 +70,26 @@ export const UnsubscribeSurveyModal = ({
     }
 
     const handleUnsubscribe = (): void => {
-        if (surveyResponse['$survey_response_2'].includes('Missing features')) {
+        if (surveyResponse['$survey_response_2'].includes('Not enough mascots')) {
             setUnsubscribeModalStep(2)
-            triggerConfetti()
+            triggerMoreMascots()
         } else {
             deactivateProduct(billing?.subscription_level === 'paid' && !isAddonProduct ? 'all_products' : product.type)
         }
     }
 
-    const renderConfirmStep = (): JSX.Element => (
+    const renderMascotStep = (): JSX.Element => (
         <div className="flex flex-col gap-4">
             <div className="text-center">
-                <h3 className="text-lg mb-2">Are you sure you want to leave?</h3>
-                <p className="text-secondary mb-4">We would love to keep you around!</p>
+                <h3 className="text-lg mb-2">How about now? Was that enough mascots?</h3>
+                <p className="text-secondary mb-4">Look at all these adorable mascots dancing just for you! 🦔✨</p>
                 <div className="flex justify-center items-center">
-                    <HeartMascot width="100" height="100" />
+                    <HeartHog width="100" height="100" />
                 </div>
             </div>
             <div className="flex gap-2 justify-center">
-                <Link onClick={triggerConfetti} disabled={billingLoading}>
-                    I still want to leave
+                <Link onClick={triggerMoreMascots} disabled={billingLoading}>
+                    Still not enough! More mascots! 🦔
                 </Link>
             </div>
             <Divider />
@@ -95,7 +98,7 @@ export const UnsubscribeSurveyModal = ({
                     type="primary"
                     loading={billingLoading}
                     onClick={() => {
-                        setSatisfied(true)
+                        setMascotSatisfied(true)
                         deactivateProduct(
                             billing?.subscription_level === 'paid' && !isAddonProduct ? 'all_products' : product.type
                         )
@@ -119,7 +122,7 @@ export const UnsubscribeSurveyModal = ({
 
     return (
         <>
-            <ConfettiComponent />
+            <HogfettiComponent />
             <Modal
                 onClose={() => {
                     reportSurveyDismissed(surveyID)
@@ -173,10 +176,22 @@ export const UnsubscribeSurveyModal = ({
                             </Banner>
                         )}
                         {isAddonProduct ? (
-                            <p className="mb-0">
-                                We're sorry to see you go! Please note, you'll lose access to the addon features
-                                immediately.
-                            </p>
+                            isOnDiscountedPrice ? (
+                                <p className="mb-0">
+                                    We're sorry to see you go! You're on a special discounted price of{' '}
+                                    <strong>
+                                        {humanFriendlyCurrency(Number(product.unit_amount_usd), 0)} /{' '}
+                                        {product.unit ?? 'month'}
+                                    </strong>{' '}
+                                    — removing this add-on will end the discount and you'll lose access to the features
+                                    immediately.
+                                </p>
+                            ) : (
+                                <p className="mb-0">
+                                    We're sorry to see you go! Please note, you'll lose access to the addon features
+                                    immediately.
+                                </p>
+                            )
                         ) : (
                             <p className="mb-0">
                                 We're sorry to see you go! Please note, you'll lose access to platform features and
@@ -268,7 +283,7 @@ export const UnsubscribeSurveyModal = ({
                         </Banner>
                     </div>
                 ) : (
-                    renderConfirmStep()
+                    renderMascotStep()
                 )}
             </Modal>
         </>

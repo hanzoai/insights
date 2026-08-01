@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { getNextJSSteps as getNextJSStepsPA } from '../product-analytics/nextjs'
 import { StepDefinition } from '../steps'
@@ -43,8 +43,8 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 code: dedent`
                                     import { Insights } from 'insights-node'
 
-                                    const client = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_KEY!, {
-                                        host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
+                                    const client = new Insights(process.env.NEXT_PUBLIC_POSTFN_PROJECT_TOKEN!, {
+                                        host: process.env.NEXT_PUBLIC_POSTFN_HOST
                                     })
                                 `,
                             },

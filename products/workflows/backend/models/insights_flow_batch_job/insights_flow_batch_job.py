@@ -5,7 +5,9 @@ from django.dispatch import receiver
 import structlog
 
 from insights.models.utils import RootTeamMixin, UUIDTModel
-from insights.plugins.plugin_server_api import create_batch_insights_flow_job_invocation
+from insights.plugins.plugin_server_api import create_batch_hog_flow_job_invocation
+
+from products.workflows.backend.utils.batch_trigger_limit import get_hogflow_batch_trigger_limit
 
 logger = structlog.get_logger(__name__)
 
@@ -29,11 +31,10 @@ class InsightsFlowBatchJob(RootTeamMixin, UUIDTModel):
         FAILED = "failed"
 
     team = models.ForeignKey("insights.Team", on_delete=models.DO_NOTHING)
-    insights_flow = models.ForeignKey("insights.InsightsFlow", on_delete=models.DO_NOTHING)
+    hog_flow = models.ForeignKey("workflows.InsightsFlow", on_delete=models.DO_NOTHING)
     variables = models.JSONField(default=dict)
-    scheduled_at = models.DateTimeField(null=True, blank=True)
     filters = models.JSONField(default=dict)
-    status = models.CharField(max_length=20, choices=State.choices, default=State.QUEUED)
+    status = models.CharField(max_length=20, choices=State, default=State.QUEUED)
 
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey("insights.User", on_delete=models.DO_NOTHING, null=True, blank=True)
@@ -44,15 +45,21 @@ class InsightsFlowBatchJob(RootTeamMixin, UUIDTModel):
 
 
 @receiver(post_save, sender=InsightsFlowBatchJob)
-def handle_insights_flow_batch_job_created(sender, instance, created, **kwargs):
+def handle_hog_flow_batch_job_created(sender, instance, created, **kwargs):
     if created:
         try:
-            create_batch_insights_flow_job_invocation(
-                team_id=instance.team.id, insights_flow_id=instance.insights_flow.id, batch_job_id=instance.id
+            create_batch_hog_flow_job_invocation(
+                team_id=instance.team.id,
+                hog_flow_id=instance.hog_flow.id,
+                batch_job_id=instance.id,
+                max_audience_size=get_hogflow_batch_trigger_limit(instance.team.id),
+                # The audience snapshot the confirm check validated - the resolver dispatches from
+                # this, not the live trigger, so a trigger edit racing the dispatch can't widen it.
+                filters=instance.filters,
             )
         except Exception as e:
             logger.exception(
-                "Failed to create batch custom flow job invocation",
+                "Failed to create batch hogflow job invocation",
                 batch_job_id=instance.id,
                 error=str(e),
             )
