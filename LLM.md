@@ -240,14 +240,47 @@ is what makes the deletion survive the next backfill.
 routing is unchanged**; `event_mv`'s is never. `person` collapses on
 `(team_id, id)` and the overrides on `(team_id, distinct_id)` — the same shape as
 `sharded_events`, so the difference is not the collapse key alone: `team_id` is
-`transform(org, …)` over `org_team`, the table `0220` exists to mutate. Re-route
-an org that already has events and the old rows stay under the old team.
+`transform(org, …)` over the routing table. Re-route an org that already has
+events and the old rows stay under the old project.
 
-That is live here, and it is the plane's one known inconsistency: `0220` moved
-`$public` to team 0 after `event_mv` had written its events under team 1, so
-**~92% of team 1's events point at users team 1 cannot see** (4791 of 5191). The
-users are right; the events are stale. Reconciling them is the deliberate
-operator delete `0221` spells out, not a backfill.
+That is live here, and it is the plane's one known inconsistency. `0220` was
+applied on 2026-08-01 — it had never run, so the view still defaulted unrouted
+orgs to project 1 for days after the source said otherwise — and it moved
+`$public` to project 0 without re-projecting what `event_mv` had already written
+under project 1. So **94.6% of project 1's events point at users project 1
+cannot see** (7,713 of 8,151, measured after the fix). The users are right; the
+events are stale. Reconciling them is the deliberate operator delete `0221`
+spells out, not a backfill.
+
+**A committed migration is not an applied one.** That gap is what made this
+whole class of bug survivable in the first place: the source read `toInt64(0)`
+while the warehouse ran `toInt64(1)`, and nothing reconciles the two but running
+`manage.py migrate_datastore`. Check the warehouse, not the file:
+
+    SELECT extract(create_table_query, 'toInt64\([0-9]+\)') FROM system.tables
+    WHERE database = 'insights' AND name = 'event_mv'
+
+### Routing is derived, and `route_orgs` is its only writer
+
+Which project an org's events land in is **not** written by hand and **not**
+seeded by a migration any more. `Organization.slug` is the same value the
+envelope carries as `org`, and the org's first project is the project, so
+`manage.py route_orgs` publishes that mapping from the app's own records. A
+hand-written second copy is what routed `maxpower` — a separate funded org —
+into Hanzo's project 1.
+
+Run it after `migrate_datastore` whenever an org gains or loses a project;
+`--dry-run` reports without writing, and it is a no-op when nothing changed. An
+org it has never routed is UNATTRIBUTED (project 0, an id `insights_team_id_seq`
+cannot mint), so it is invisible rather than someone else's — the safe way to be
+wrong. It is deliberate rather than scheduled because re-routing an org strands
+its existing events under the old project, which is the same sort-key hazard
+above; the command prints how many rows that would be.
+
+The tenant is the ORG. `team_id` is the fork's physical column, inside
+`sharded_events`' sort key, so it cannot be renamed without rebuilding the
+events table — the two words meet at ONE boundary in `plane.py` (where `person`
+and `user` already meet), and nothing above it says `team`.
 
 An MV over `event.event` runs inside Cloud's INSERT, so **an expression that can
 throw takes down fleet-wide ingest.** Every expression in the projection is total
