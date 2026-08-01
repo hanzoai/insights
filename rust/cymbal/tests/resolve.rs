@@ -1,23 +1,26 @@
 use core::str;
 use std::sync::Arc;
 
-use axum::async_trait;
+use async_trait::async_trait;
 use common_types::DatastoreEvent;
+use cymbal::symbolication::resolve::Resolve;
 use cymbal::{
-    config::Config,
     frames::{Frame, RawFrame},
-    symbol_store::{
+    modes::processing::ProcessingConfig,
+    symbolication::symbol_store::{
+        apple::AppleProvider,
         caching::{Caching, SymbolSetCache},
         chunk_id::OrChunkId,
         hermesmap::HermesMapProvider,
+        native::NativeProvider,
         proguard::ProguardProvider,
         sourcemap::{OwnedSourceMapCache, SourcemapProvider},
         Catalog, Fetcher, Parser,
     },
-    types::{RawErrProps, Stacktrace},
+    types::{RawExceptionProperties, Stacktrace},
 };
 use httpmock::MockServer;
-use insights_symbol_data::{read_symbol_data, SourceAndMap};
+use insights_symbol_data::{read_symbol_data_with_byte_count, SourceAndMap};
 use symbolic::sourcemapcache::SourcePosition;
 use tokio::sync::Mutex;
 
@@ -82,7 +85,8 @@ async fn end_to_end_resolver_test() {
     });
 
     let exception: DatastoreEvent = serde_json::from_str(EXAMPLE_EXCEPTION).unwrap();
-    let mut props: RawErrProps = serde_json::from_str(&exception.properties.unwrap()).unwrap();
+    let mut props: RawExceptionProperties =
+        serde_json::from_str(&exception.properties.unwrap()).unwrap();
     let Stacktrace::Raw {
         frames: mut test_stack,
     } = props.exception_list.swap_remove(0).stack.unwrap()
@@ -109,12 +113,12 @@ async fn end_to_end_resolver_test() {
         frame.source_url = Some(server.url(CHUNK_PATH).to_string());
     }
 
-    let mut config = Config::init_with_defaults().unwrap();
-    config.allow_internal_ips = true; // We're hitting localhost for the tests
+    let mut config = ProcessingConfig::init_with_defaults().unwrap();
+    config.resolver.allow_internal_ips = true; // We're hitting localhost for the tests
 
-    let sourcemap = SourcemapProvider::new(&config);
+    let sourcemap = SourcemapProvider::new(&config.resolver);
     let cache = Arc::new(Mutex::new(SymbolSetCache::new(
-        config.symbol_store_cache_max_bytes,
+        config.resolver.symbol_store_cache_max_bytes,
     )));
 
     let wrapped = NoOpChunkIdFetcher { inner: sourcemap };
@@ -126,11 +130,24 @@ async fn end_to_end_resolver_test() {
         inner: ProguardProvider {},
     };
 
-    let catalog = Catalog::new(Caching::new(wrapped, cache), hmp, pgp);
+    let apple = NoOpChunkIdFetcher {
+        inner: AppleProvider {},
+    };
+
+    let native = NoOpChunkIdFetcher {
+        inner: NativeProvider {},
+    };
+
+    let catalog = Catalog::new(Caching::new(wrapped, cache), hmp, pgp, apple, native);
 
     let mut resolved_frames = Vec::new();
     for frame in test_stack {
-        resolved_frames.push(frame.resolve(exception.team_id, &catalog).await.unwrap());
+        resolved_frames.push(
+            frame
+                .resolve(exception.team_id, &catalog, &[], 15)
+                .await
+                .unwrap(),
+        );
     }
 
     // The use of the caching layer is tested here - we should only have hit the server once
@@ -143,9 +160,10 @@ async fn sourcemap_nulls_dont_go_on_frames() {
     let content = "{\"colno\":15,\"filename\":\"irrelevant_for_test\",\"function\":\"?\",\"in_app\":true,\"lineno\":476,\"platform\":\"web:javascript\"}";
     let frame: RawFrame = serde_json::from_str(content).unwrap();
 
-    let jsdata_bytes = include_bytes!("static/sourcemap_with_nulls.jsdata").to_vec();
-    let data: SourceAndMap = read_symbol_data(jsdata_bytes).unwrap();
-    let smc = OwnedSourceMapCache::from_source_and_map(data).unwrap();
+    let jsdata_bytes = include_bytes!("static/sourcemap_with_nulls.jsdata");
+    let (data, decompressed_bytes): (SourceAndMap, usize) =
+        read_symbol_data_with_byte_count(jsdata_bytes).unwrap();
+    let smc = OwnedSourceMapCache::from_source_and_map(data, decompressed_bytes).unwrap();
     let c = smc.get_smc();
 
     let RawFrame::JavaScriptWeb(frame) = frame else {
@@ -158,7 +176,7 @@ async fn sourcemap_nulls_dont_go_on_frames() {
         .lookup(SourcePosition::new(location.line - 1, location.column))
         .unwrap();
 
-    let res = Frame::from((&frame, token));
+    let res = Frame::from((&frame, token, 15));
 
     assert!(!res.source.unwrap().contains('\0'));
 }

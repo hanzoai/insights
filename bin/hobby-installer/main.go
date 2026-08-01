@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hanzoai/insights/bin/hobby-installer/ci"
-	"github.com/hanzoai/insights/bin/hobby-installer/core"
-	"github.com/hanzoai/insights/bin/hobby-installer/tui"
+	"github.com/insights/insights/bin/hobby-installer/ci"
+	"github.com/insights/insights/bin/hobby-installer/core"
+	"github.com/insights/insights/bin/hobby-installer/tui"
 )
 
 type config struct {

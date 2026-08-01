@@ -1,4 +1,4 @@
-import { buildIntegerMatcher, buildStringMatcher, getDefaultConfig, overrideWithEnv } from '../src/config/config'
+import { buildIntegerMatcher, buildStringMatcher, getDefaultConfig, overrideWithEnv } from '~/common/config/config'
 
 describe('config', () => {
     test('overrideWithEnv 1', () => {
@@ -6,14 +6,14 @@ describe('config', () => {
         const env = {
             INSTRUMENT_THREAD_PERFORMANCE: 'false',
             TASK_TIMEOUT: '3008',
-            KV_URL: '0.0.0.0',
+            REDIS_URL: '0.0.0.0',
             BASE_DIR: undefined,
         }
         const config = overrideWithEnv(getDefaultConfig(), env)
 
         expect(config.INSTRUMENT_THREAD_PERFORMANCE).toEqual(false)
         expect(config.TASK_TIMEOUT).toEqual(3008)
-        expect(config.KV_URL).toEqual('0.0.0.0')
+        expect(config.REDIS_URL).toEqual('0.0.0.0')
         expect(config.BASE_DIR).toEqual(defaultConfig.BASE_DIR)
     })
 
@@ -29,23 +29,23 @@ describe('config', () => {
     })
 
     describe('DATABASE_URL', () => {
-        test('Error if DATABASE_URL is not set AND INSIGHTS_DB_NAME is not set', () => {
+        test('Error if DATABASE_URL is not set AND POSTFN_DB_NAME is not set', () => {
             const env = {
                 DATABASE_URL: '',
-                INSIGHTS_DB_NAME: '',
+                POSTFN_DB_NAME: '',
             }
             expect(() => overrideWithEnv(getDefaultConfig(), env)).toThrow(
-                'You must specify either DATABASE_URL or the database options INSIGHTS_DB_NAME, INSIGHTS_DB_USER, INSIGHTS_DB_PASSWORD, INSIGHTS_POSTGRES_HOST, INSIGHTS_POSTGRES_PORT!'
+                'You must specify either DATABASE_URL or the database options POSTFN_DB_NAME, POSTFN_DB_USER, POSTFN_DB_PASSWORD, POSTFN_POSTGRES_HOST, POSTFN_POSTGRES_PORT!'
             )
         })
 
         test('Set DATABASE_URL to a string composed of URL-encoded connection options if DATABASE_URL is not explictly set', () => {
             const env = {
                 DATABASE_URL: '',
-                INSIGHTS_DB_NAME: 'mydb',
-                INSIGHTS_DB_USER: 'user1@domain',
-                INSIGHTS_DB_PASSWORD: 'strong?password',
-                INSIGHTS_POSTGRES_HOST: 'my.host',
+                POSTFN_DB_NAME: 'mydb',
+                POSTFN_DB_USER: 'user1@domain',
+                POSTFN_DB_PASSWORD: 'strong?password',
+                POSTFN_POSTGRES_HOST: 'my.host',
             }
             const config = overrideWithEnv(getDefaultConfig(), env)
             expect(config.DATABASE_URL).toEqual('postgres://user1%40domain:strong%3Fpassword@my.host:5432/mydb')
@@ -54,10 +54,10 @@ describe('config', () => {
         test('DATABASE_URL takes precedence to individual config options', () => {
             const env = {
                 DATABASE_URL: 'my_db_url',
-                INSIGHTS_DB_NAME: 'mydb',
-                INSIGHTS_DB_USER: 'user1',
-                INSIGHTS_DB_PASSWORD: 'strongpassword',
-                INSIGHTS_POSTGRES_HOST: 'my.host',
+                POSTFN_DB_NAME: 'mydb',
+                POSTFN_DB_USER: 'user1',
+                POSTFN_DB_PASSWORD: 'strongpassword',
+                POSTFN_POSTGRES_HOST: 'my.host',
             }
             const config = overrideWithEnv(getDefaultConfig(), env)
             expect(config.DATABASE_URL).toEqual('my_db_url')

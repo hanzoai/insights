@@ -1,5 +1,5 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useMemo } from 'react'
 
 import { IconSparkles, IconWarning } from '@hanzo/icons'

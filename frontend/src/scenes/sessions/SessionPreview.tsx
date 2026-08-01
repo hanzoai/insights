@@ -5,9 +5,9 @@ import { Button, Link, Tooltip } from '@hanzo/elements'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
-import { Spinner } from 'lib/elements/Spinner'
 import { IconOpenInNew } from 'lib/elements/icons'
 import { IconPlayCircle } from 'lib/elements/icons'
+import { Spinner } from 'lib/elements/Spinner'
 import { urls } from 'scenes/urls'
 
 import { PropertyDefinitionType } from '~/types'

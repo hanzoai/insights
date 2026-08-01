@@ -4,7 +4,7 @@ ingress:
   enabled: false
 
 image:
-  repository: ghcr.io/hanzoai/insights
+  repository: ghcr.io/insights/insights/insights
   pullPolicy: Always
 
 env:
@@ -13,12 +13,12 @@ env:
 - name: COMMIT_SHA
   value: $COMMIT_SHA
 
-siteUrl: https://$NAMESPACE.insights-kitefin.ts.net
+siteUrl: https://$NAMESPACE.mascot-kitefin.ts.net
 tailscale:
   enabled: true
   hostname: $NAMESPACE
 
-clickhouse:
+datastore:
   persistence:
     size: 100Gi
 
@@ -31,12 +31,12 @@ kafka:
 postgresql:
   persistence:
     size: 10Gi
-  main:
+  master:
     nodeSelector:
       kubernetes.io/arch: amd64
 
 redis:
-  main:
+  master:
     persistence:
       size: 1Gi
     nodeSelector:

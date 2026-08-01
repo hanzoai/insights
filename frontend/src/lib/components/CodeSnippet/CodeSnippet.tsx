@@ -1,40 +1,26 @@
 import './CodeSnippet.scss'
 
 import clsx from 'clsx'
+import { toHtml } from 'hast-util-to-html'
+import dart from 'highlight.js/lib/languages/dart'
+import elixir from 'highlight.js/lib/languages/elixir'
+import groovy from 'highlight.js/lib/languages/groovy'
+import http from 'highlight.js/lib/languages/http'
 import { useValues } from 'kea'
-import React, { type HTMLProps, useEffect, useState } from 'react'
-import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter'
-import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash'
-import csharp from 'react-syntax-highlighter/dist/esm/languages/prism/csharp'
-import dart from 'react-syntax-highlighter/dist/esm/languages/prism/dart'
-import elixir from 'react-syntax-highlighter/dist/esm/languages/prism/elixir'
-import go from 'react-syntax-highlighter/dist/esm/languages/prism/go'
-import groovy from 'react-syntax-highlighter/dist/esm/languages/prism/groovy'
-import hcl from 'react-syntax-highlighter/dist/esm/languages/prism/hcl'
-import http from 'react-syntax-highlighter/dist/esm/languages/prism/http'
-import java from 'react-syntax-highlighter/dist/esm/languages/prism/java'
-import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript'
-import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
-import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx'
-import kotlin from 'react-syntax-highlighter/dist/esm/languages/prism/kotlin'
-import markup from 'react-syntax-highlighter/dist/esm/languages/prism/markup'
-import objectiveC from 'react-syntax-highlighter/dist/esm/languages/prism/objectivec'
-import php from 'react-syntax-highlighter/dist/esm/languages/prism/php'
-import python from 'react-syntax-highlighter/dist/esm/languages/prism/python'
-import ruby from 'react-syntax-highlighter/dist/esm/languages/prism/ruby'
-import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql'
-import swift from 'react-syntax-highlighter/dist/esm/languages/prism/swift'
-import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript'
-import yaml from 'react-syntax-highlighter/dist/esm/languages/prism/yaml'
+import { common, createLowlight } from 'lowlight'
+import React, { useMemo, useState } from 'react'
 
 import { IconCollapse, IconCopy, IconExpand } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
+import { themeLogic } from 'lib/logic/themeLogic'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
-import { themeLogic } from '~/layout/navigation-3000/themeLogic'
+import terraform from './terraformLanguage'
 
-import { darkTheme, lightTheme } from './theme'
+// `common` already registers most of our languages (including rust, c, and cpp) — only add the missing ones.
+const lowlight = createLowlight(common)
+lowlight.register({ dart, elixir, groovy, http, terraform })
 
 export enum Language {
     Text = 'text',
@@ -52,16 +38,19 @@ export enum Language {
     Go = 'go',
     JSON = 'json',
     YAML = 'yaml',
-    HTML = 'html',
+    HTML = 'xml',
     XML = 'xml',
     HTTP = 'http',
-    Markup = 'markup',
+    Markup = 'xml',
     SQL = 'sql',
     Kotlin = 'kotlin',
     Groovy = 'groovy',
     CSharp = 'csharp',
     TypeScript = 'typescript',
-    HCL = 'hcl',
+    HCL = 'terraform',
+    Rust = 'rust',
+    C = 'c',
+    CPlusPlus = 'cpp',
 }
 
 export const getLanguage = (lang: string): Language => {
@@ -70,12 +59,11 @@ export const getLanguage = (lang: string): Language => {
             return Language.Bash
         case 'csharp':
             return Language.CSharp
-        case 'jsx':
-        case 'tsx':
-            return Language.JSX
         case 'javascript':
+        case 'jsx':
             return Language.JavaScript
         case 'typescript':
+        case 'tsx':
             return Language.TypeScript
         case 'java':
             return Language.Java
@@ -115,35 +103,16 @@ export const getLanguage = (lang: string): Language => {
             return Language.Groovy
         case 'hcl':
             return Language.HCL
+        case 'rust':
+            return Language.Rust
+        case 'c':
+            return Language.C
+        case 'cpp':
+            return Language.CPlusPlus
         default:
             return Language.Text
     }
 }
-
-SyntaxHighlighter.registerLanguage(Language.Bash, bash)
-SyntaxHighlighter.registerLanguage(Language.JSX, jsx)
-SyntaxHighlighter.registerLanguage(Language.JavaScript, javascript)
-SyntaxHighlighter.registerLanguage(Language.Java, java)
-SyntaxHighlighter.registerLanguage(Language.Ruby, ruby)
-SyntaxHighlighter.registerLanguage(Language.ObjectiveC, objectiveC)
-SyntaxHighlighter.registerLanguage(Language.Swift, swift)
-SyntaxHighlighter.registerLanguage(Language.Elixir, elixir)
-SyntaxHighlighter.registerLanguage(Language.PHP, php)
-SyntaxHighlighter.registerLanguage(Language.Python, python)
-SyntaxHighlighter.registerLanguage(Language.Dart, dart)
-SyntaxHighlighter.registerLanguage(Language.Go, go)
-SyntaxHighlighter.registerLanguage(Language.CSharp, csharp)
-SyntaxHighlighter.registerLanguage(Language.JSON, json)
-SyntaxHighlighter.registerLanguage(Language.YAML, yaml)
-SyntaxHighlighter.registerLanguage(Language.HTML, markup)
-SyntaxHighlighter.registerLanguage(Language.XML, markup)
-SyntaxHighlighter.registerLanguage(Language.Markup, markup)
-SyntaxHighlighter.registerLanguage(Language.HTTP, http)
-SyntaxHighlighter.registerLanguage(Language.SQL, sql)
-SyntaxHighlighter.registerLanguage(Language.Kotlin, kotlin)
-SyntaxHighlighter.registerLanguage(Language.TypeScript, typescript)
-SyntaxHighlighter.registerLanguage(Language.Groovy, groovy)
-SyntaxHighlighter.registerLanguage(Language.HCL, hcl)
 
 export interface CodeSnippetProps {
     children: string | undefined | null
@@ -156,6 +125,11 @@ export interface CodeSnippetProps {
     thing?: string
     /** If set, the snippet becomes expandable when there's more than this number of lines. */
     maxLinesWithoutExpansion?: number
+    /**
+     * Called after the snippet contents reach the clipboard. Useful for telemetry. Not called when
+     * the copy fails, so it is safe to treat as a successful copy.
+     */
+    onCopy?: () => void
 }
 
 export const CodeSnippet = React.memo(function CodeSnippet({
@@ -167,25 +141,17 @@ export const CodeSnippet = React.memo(function CodeSnippet({
     actions,
     thing = 'snippet',
     maxLinesWithoutExpansion,
+    onCopy,
 }: CodeSnippetProps): JSX.Element | null {
     const [expanded, setExpanded] = useState(false)
-    const [indexOfLimitNewline, setIndexOfLimitNewline] = useState(() =>
-        maxLinesWithoutExpansion ? indexOfNth(text || '', '\n', maxLinesWithoutExpansion) : -1
-    )
-    const [lineCount, setLineCount] = useState(() => text?.split('\n').length || -1)
-    const [displayedText, setDisplayedText] = useState(
-        () => (indexOfLimitNewline === -1 || expanded ? text : text?.slice(0, indexOfLimitNewline)) ?? ''
-    )
 
-    useEffect(() => {
-        if (text) {
-            setIndexOfLimitNewline(maxLinesWithoutExpansion ? indexOfNth(text, '\n', maxLinesWithoutExpansion) : -1)
-            setLineCount(text.split('\n').length)
-            setDisplayedText(indexOfLimitNewline === -1 || expanded ? text : text.slice(0, indexOfLimitNewline))
-        }
-    }, [text, maxLinesWithoutExpansion, expanded]) // oxlint-disable-line react-hooks/exhaustive-deps
+    // These all derive from props, so compute them during render rather than mirroring props into
+    // state via a useEffect (https://react.dev/learn/you-might-not-need-an-effect).
+    const indexOfLimitNewline = maxLinesWithoutExpansion ? indexOfNth(text || '', '\n', maxLinesWithoutExpansion) : -1
+    const lineCount = text?.split('\n').length ?? -1
+    const displayedText = (indexOfLimitNewline === -1 || expanded ? text : text?.slice(0, indexOfLimitNewline)) ?? ''
 
-    if (lineCount == -1) {
+    if (lineCount === -1) {
         return null
     }
 
@@ -199,7 +165,15 @@ export const CodeSnippet = React.memo(function CodeSnippet({
                     onClick={(e) => {
                         if (text) {
                             e.stopPropagation()
-                            void copyToClipboard(text, thing)
+                            // Only report a copy the user actually got: copyToClipboard resolves
+                            // false when the clipboard is unavailable (no navigator.clipboard over
+                            // plain HTTP) or the write is denied, and callers treat onCopy as
+                            // evidence of a successful copy.
+                            void copyToClipboard(text, thing).then((copied) => {
+                                if (copied) {
+                                    onCopy?.()
+                                }
+                            })
                         }
                     }}
                     size={compact ? 'small' : 'medium'}
@@ -227,14 +201,6 @@ export const CodeSnippet = React.memo(function CodeSnippet({
     )
 })
 
-const syntaxHighlighterLineProps: HTMLProps<HTMLElement> = {
-    style: { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' },
-}
-
-function PreTag({ children }: { children: JSX.Element }): JSX.Element {
-    return <pre className="m-0">{children}</pre>
-}
-
 export function CodeLine({
     text,
     wrapLines,
@@ -246,16 +212,20 @@ export function CodeLine({
 }): JSX.Element {
     const { isDarkModeOn } = useValues(themeLogic)
 
+    const highlighted = useMemo(
+        () => (lowlight.registered(language) ? lowlight.highlight(language, text) : lowlight.highlightAuto(text)),
+        [language, text]
+    )
+    const style = wrapLines ? ({ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' } as const) : {}
+
     return (
-        <SyntaxHighlighter
-            style={isDarkModeOn ? darkTheme : lightTheme}
-            language={language}
-            wrapLines={wrapLines}
-            lineProps={syntaxHighlighterLineProps}
-            PreTag={PreTag}
-        >
-            {text}
-        </SyntaxHighlighter>
+        <pre className="m-0">
+            <code
+                className={clsx('hljs', isDarkModeOn && 'hljs-dark')}
+                style={style}
+                dangerouslySetInnerHTML={{ __html: toHtml(highlighted) }}
+            />
+        </pre>
     )
 }
 

@@ -40,10 +40,6 @@ Rust services to manage a job queuing service backed by Postgres. Includes NodeJ
 
 A Rust re-implementation of the ScriptVM stack machine for evaluating compiled InsightsQL bytecode.
 
-### rusty-hook
-
-Rust based webhook management services. Includes `hook-api`, `hook-common`, `hook-janitor`, and `hook-worker`.
-
 ### common
 
 Miscellaneous internal Rust libraries reused by service implementations.

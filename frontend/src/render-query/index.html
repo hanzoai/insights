@@ -5,12 +5,12 @@
         {{ render_query_payload|json_script:"insights-render-query" }}
         <script nonce="{{ request.csp_nonce }}">
             try {
-                window.INSIGHTS_RENDER_QUERY_PAYLOAD = JSON.parse(
+                window.POSTFN_RENDER_QUERY_PAYLOAD = JSON.parse(
                     document.getElementById('insights-render-query').textContent
                 )
             } catch (e) {
                 console.error('Failed to parse render query payload:', e)
-                window.INSIGHTS_RENDER_QUERY_PAYLOAD = {}
+                window.POSTFN_RENDER_QUERY_PAYLOAD = {}
             }
         </script>
         {% include "head.html" %}
@@ -22,11 +22,15 @@
                 div.style.color = '#fef6f6'
                 div.style.background = '#920c0c'
                 div.style.padding = '5px 10px'
-                div.innerHTML = 'You are using a really old browser. Please upgrade to fully enjoy Hanzo Insights!'
+                div.innerHTML = 'You are using a really old browser. Please upgrade to fully enjoy Insights!'
                 document.body.prepend(div)
             }
             if (!window.process) {
-                window.process = { cwd: function () { return '' } }
+                window.process = {
+                    cwd: function () {
+                        return ''
+                    },
+                }
             }
         </script>
         <div id="root"></div>

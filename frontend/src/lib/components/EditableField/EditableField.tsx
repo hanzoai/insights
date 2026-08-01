@@ -12,7 +12,7 @@ import { Button } from 'lib/elements/Button'
 import { RawInputAutosize } from 'lib/elements/Input/RawInputAutosize'
 import { Markdown } from 'lib/elements/Markdown'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 
 import { AvailableFeature } from '~/types'
 
@@ -95,6 +95,24 @@ export function EditableField({
     useEffect(() => {
         setLocalTentativeValue(value)
     }, [value])
+
+    // Save pending changes on unmount (e.g. when a parent popover closes while editing)
+    const saveOnUnmountRef = useRef({ localTentativeValue, value, localIsEditing, onSave, saveOnBlur })
+    saveOnUnmountRef.current = { localTentativeValue, value, localIsEditing, onSave, saveOnBlur }
+    useEffect(() => {
+        return () => {
+            const {
+                localTentativeValue: v,
+                value: orig,
+                localIsEditing: editing,
+                onSave: save,
+                saveOnBlur: sob,
+            } = saveOnUnmountRef.current
+            if (sob && editing && v !== orig) {
+                save?.(v)
+            }
+        }
+    }, [])
 
     useEffect(() => {
         setLocalIsEditing(mode === 'edit')
@@ -275,7 +293,9 @@ export function EditableField({
                 ) : (
                     <>
                         {localTentativeValue && markdown ? (
-                            <Markdown lowKeyHeadings>{localTentativeValue}</Markdown>
+                            <div className={clsx(clickToEdit && 'cursor-text')} onClick={handleClick}>
+                                <Markdown lowKeyHeadings>{localTentativeValue}</Markdown>
+                            </div>
                         ) : (
                             <Tooltip
                                 title={isDisplayTooltipNeeded ? localTentativeValue : undefined}

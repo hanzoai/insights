@@ -5,7 +5,7 @@ set -o pipefail     # Exit if any command in a pipeline fails
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
 # --scope flag: run specific migration(s) only. Without --scope, runs all.
-# Usage: bin/migrate [--scope=postgres] [--scope=clickhouse] [--scope=async] ...
+# Usage: bin/migrate [--scope=postgres] [--scope=datastore] [--scope=async] ...
 SCOPES=()
 for arg in "$@"; do
     [[ "$arg" == --scope=* ]] && SCOPES+=("${arg#*=}")
@@ -31,17 +31,14 @@ if [ -d "$SCRIPT_DIR/../rust/bin" ] && [ "${DEPLOYMENT:-}" != "hobby" ]; then
             echo "Error in rust/bin/migrate-cyclotron, exiting."
             exit 1
         fi
-    fi
-    
-    if run_scope "cyclotron-shadow"; then
-        bash $SCRIPT_DIR/../rust/bin/migrate-cyclotron-shadow
+
+        bash $SCRIPT_DIR/../rust/bin/migrate-cyclotron-node
         if [ $? -ne 0 ]; then
-            echo "Error in rust/bin/migrate-cyclotron-shadow, exiting."
+            echo "Error in rust/bin/migrate-cyclotron-node, exiting."
             exit 1
         fi
     fi
-
-
+    
     if run_scope "behavioral-cohorts"; then
         echo "Running behavioral cohorts migrations via external non-django migrator..."
         bash $SCRIPT_DIR/../rust/bin/migrate-behavioral-cohorts
@@ -50,23 +47,32 @@ if [ -d "$SCRIPT_DIR/../rust/bin" ] && [ "${DEPLOYMENT:-}" != "hobby" ]; then
             exit 1
         fi
     fi
+
+    if run_scope "flags-read-store"; then
+        echo "Running flags read store migrations via external non-django migrator..."
+        bash $SCRIPT_DIR/../rust/bin/migrate-flags-read-store
+        if [ $? -ne 0 ]; then
+            echo "Error in rust/bin/migrate-flags-read-store, exiting."
+            exit 1
+        fi
+    fi
 fi
 
-if run_scope "clickhouse"; then RUN_CLICKHOUSE=1; else RUN_CLICKHOUSE=0; fi
+if run_scope "datastore"; then RUN_DATASTORE=1; else RUN_DATASTORE=0; fi
 if run_scope "postgres"; then RUN_POSTGRES=1; else RUN_POSTGRES=0; fi
 
-# Run ClickHouse in background only when both CH and Postgres run (original parallel behavior)
-if [ "$RUN_CLICKHOUSE" = "1" ] && [ "$RUN_POSTGRES" = "1" ]; then
-    trap 'rm -f "$CLICKHOUSE_STATUS" 2>/dev/null' EXIT
-    CLICKHOUSE_STATUS=$(mktemp)
-    echo "0" > $CLICKHOUSE_STATUS
+# Run Datastore in background only when both CH and Postgres run (original parallel behavior)
+if [ "$RUN_DATASTORE" = "1" ] && [ "$RUN_POSTGRES" = "1" ]; then
+    trap 'rm -f "$DATASTORE_STATUS" 2>/dev/null' EXIT
+    DATASTORE_STATUS=$(mktemp)
+    echo "0" > $DATASTORE_STATUS
     
     (
-        python manage.py migrate_clickhouse
+        python manage.py migrate_datastore
         CH_MIGRATE_STATUS=$?
         if [ $CH_MIGRATE_STATUS -ne 0 ]; then
-            echo "Error in migrate_clickhouse, setting error status."
-            echo "1" > $CLICKHOUSE_STATUS
+            echo "Error in migrate_datastore, setting error status."
+            echo "1" > $DATASTORE_STATUS
             exit $CH_MIGRATE_STATUS
         fi
         
@@ -74,20 +80,20 @@ if [ "$RUN_CLICKHOUSE" = "1" ] && [ "$RUN_POSTGRES" = "1" ]; then
         SYNC_STATUS=$?
         if [ $SYNC_STATUS -ne 0 ]; then
             echo "Error in sync_replicated_schema, setting error status."
-            echo "1" > $CLICKHOUSE_STATUS
+            echo "1" > $DATASTORE_STATUS
             exit $SYNC_STATUS
         fi
     ) &
-    CLICKHOUSE_PID=$!
-    elif [ "$RUN_CLICKHOUSE" = "1" ]; then
-    # ClickHouse only - run directly
-    python manage.py migrate_clickhouse || { echo "Error in migrate_clickhouse, exiting."; exit 1; }
+    DATASTORE_PID=$!
+    elif [ "$RUN_DATASTORE" = "1" ]; then
+    # Datastore only - run directly
+    python manage.py migrate_datastore || { echo "Error in migrate_datastore, exiting."; exit 1; }
     python manage.py sync_replicated_schema || { echo "Error in sync_replicated_schema, exiting."; exit 1; }
 fi
 
 if [ "$RUN_POSTGRES" = "1" ]; then
     # Run postgres migrations with retry logic
-    # If INSIGHTS_POSTGRES_DIRECT_HOST is set, use direct connection (bypasses PgBouncer)
+    # If POSTFN_POSTGRES_DIRECT_HOST is set, use direct connection (bypasses PgBouncer)
     # which allows lock_timeout to be set in Django database OPTIONS
     MIGRATE_MAX_RETRIES=${MIGRATE_MAX_RETRIES:-10}
     MIGRATE_RETRY_DELAY=${MIGRATE_RETRY_DELAY:-3}
@@ -100,7 +106,7 @@ if [ "$RUN_POSTGRES" = "1" ]; then
     # Build migrate command
     # --production skips local-dev features (orphan check, migration caching)
     # Use direct connection if available (bypasses PgBouncer for lock_timeout support)
-    if [ -n "$INSIGHTS_POSTGRES_DIRECT_HOST" ]; then
+    if [ -n "$POSTFN_POSTGRES_DIRECT_HOST" ]; then
         MIGRATE_CMD="python manage.py migrate --noinput --database=default_direct"
         echo "[migrate] Using direct database connection (lock_timeout enabled)"
     else
@@ -142,17 +148,27 @@ if [ "$RUN_POSTGRES" = "1" ]; then
     else
         python manage.py report_migration_metric --attempts=$MIGRATE_ATTEMPT --duration=$MIGRATE_DURATION || true
         echo "Error in postgres migrations, killing background process and exiting."
-        [ -n "$CLICKHOUSE_PID" ] && kill $CLICKHOUSE_PID 2>/dev/null || true
-        [ -n "$CLICKHOUSE_STATUS" ] && rm -f $CLICKHOUSE_STATUS
+        [ -n "$DATASTORE_PID" ] && kill $DATASTORE_PID 2>/dev/null || true
+        [ -n "$DATASTORE_STATUS" ] && rm -f $DATASTORE_STATUS
         exit 1
     fi
     
 fi
 
-# Persons migrations via Django management command.
-# Hobby: runs against default DB, skipping partitioning migrations.
-# Local dev (DEBUG=1): runs against persons_db_writer, creating the database
-# if needed and applying all migrations including partitioning.
+# Product database migrations via Django.
+# When product routes are configured, run each routed app's migrations against
+# its target writer database alias.
+if run_scope "postgres"; then
+    python manage.py migrate_product_databases
+    if [ $? -ne 0 ]; then
+        echo "Error in migrate_product_databases, exiting."
+        exit 1
+    fi
+fi
+
+# Persons migrations via Django management command (connects to PERSONS_DB_WRITER_URL).
+# Hobby: skips partitioning migrations (persons live in the main DB).
+# Local dev (DEBUG=1): creates the persons database if needed and applies all migrations.
 # Production: skipped — persons migrations are handled by the sqlx-migrate K8s job.
 if run_scope "persons"; then
     if [ "${DEPLOYMENT:-}" = "hobby" ]; then
@@ -164,7 +180,7 @@ if run_scope "persons"; then
         fi
     elif [ "${DEBUG:-0}" = "1" ]; then
         echo "Running persons migrations via Django management command..."
-        python manage.py apply_persons_migrations --database=persons_db_writer --ensure-database
+        python manage.py apply_persons_migrations --ensure-database
         if [ $? -ne 0 ]; then
             echo "Error in apply_persons_migrations, exiting."
             exit 1
@@ -172,39 +188,67 @@ if run_scope "persons"; then
     fi
 fi
 
-# Wait for background ClickHouse migrations before running async migrations
-# (async migrations query CH tables that may not exist until CH migrations complete)
-if [ -n "$CLICKHOUSE_PID" ]; then
-    wait $CLICKHOUSE_PID
-    CLICKHOUSE_WAIT_STATUS=$?
-
-    CH_STATUS=$(cat $CLICKHOUSE_STATUS)
-    rm -f $CLICKHOUSE_STATUS
-
-    if [ "$CH_STATUS" != "0" ] || [ $CLICKHOUSE_WAIT_STATUS -ne 0 ]; then
-        echo "Error in ClickHouse migrations, exiting."
-        exit 1
-    fi
-    unset CLICKHOUSE_PID
-fi
-
 if run_scope "async"; then
     # NOTE: we do not apply any non-noop migrations here. Rather these are run
-    # manually within the UI. See https://insights.hanzo.ai/docs/runbook/async-migrations
+    # manually within the UI. See https://hanzo.ai/docs/runbook/async-migrations
     # for details.
     python manage.py run_async_migrations --complete-noop-migrations
     if [ $? -ne 0 ]; then
-        echo "Error in run_async_migrations, exiting."
+        echo "Error in run_async_migrations, killing background process and exiting."
+        [ -n "$DATASTORE_PID" ] && kill $DATASTORE_PID 2>/dev/null || true
+        [ -n "$DATASTORE_STATUS" ] && rm -f $DATASTORE_STATUS
         exit 1
     fi
-
+    
     # NOTE: this check should not fail if a migration isn't complete but within the
     # given async migration insights version range, thus this should not block e.g.
     # k8s pod deployments.
     python manage.py run_async_migrations --check
     if [ $? -ne 0 ]; then
-        echo "Error in run_async_migrations --check, exiting."
+        echo "Error in run_async_migrations --check, killing background process and exiting."
+        [ -n "$DATASTORE_PID" ] && kill $DATASTORE_PID 2>/dev/null || true
+        [ -n "$DATASTORE_STATUS" ] && rm -f $DATASTORE_STATUS
         exit 1
+    fi
+fi
+
+# Wait for background Datastore migrations if running in parallel mode
+if [ -n "$DATASTORE_PID" ]; then
+    wait $DATASTORE_PID
+    DATASTORE_WAIT_STATUS=$?
+
+    CH_STATUS=$(cat $DATASTORE_STATUS)
+    rm -f $DATASTORE_STATUS
+
+    if [ "$CH_STATUS" != "0" ] || [ $DATASTORE_WAIT_STATUS -ne 0 ]; then
+        echo "Error in Datastore migrations, exiting."
+        exit 1
+    fi
+fi
+
+# OAuth applications task sandboxes mint their agent tokens under. Idempotent, and a no-op
+# in the production regions, so it is safe to run on every deploy.
+if run_scope "tasks-oauth"; then
+    if [ "${DEPLOYMENT:-}" != "hobby" ]; then
+        echo "Setting up task sandbox OAuth applications..."
+        python manage.py setup_tasks_oauth || { echo "Error in setup_tasks_oauth, exiting."; exit 1; }
+    fi
+fi
+
+# Temporal worker schedules. Skipped on hobby deploys (no Temporal cluster) and
+# on local dev (DEBUG=1, matching the persons-migration gate above).
+# Non-fatal: scheduling is reconciled idempotently on every deploy, so a
+# transient Temporal outage should not block the migrate job.
+if run_scope "temporal-schedules"; then
+    if [ "${DEPLOYMENT:-}" != "hobby" ] && [ "${DEBUG:-0}" != "1" ]; then
+        echo "Scheduling Temporal worker workflows..."
+        # timeout guards against an unreachable Temporal frontend: the client has
+        # no connect/RPC deadline of its own, so a network black-hole would hang
+        # the whole migrate job otherwise. 90s leaves room for Django startup on a
+        # cold container; reconciliation is idempotent so a killed run resumes next deploy.
+        if ! timeout 90 python manage.py schedule_temporal_workflows; then
+            echo "Warning: schedule_temporal_workflows failed, continuing."
+        fi
     fi
 fi
 

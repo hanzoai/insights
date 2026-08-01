@@ -6,7 +6,8 @@ from insights.cdp.templates.customerio.template_customerio import (
     template as template_customerio,
 )
 from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
-from insights.models.plugin import PluginConfig
+
+from products.cdp.backend.models.plugin import PluginConfig
 
 from common.scriptvm.python.utils import UncaughtScriptVMException
 

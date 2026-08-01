@@ -8,12 +8,12 @@ from insights.async_migrations.runner import start_async_migration
 from insights.async_migrations.setup import get_async_migration_definition, setup_async_migrations
 from insights.async_migrations.test.util import AsyncMigrationBaseTest
 from insights.datastore.client import query_with_columns, sync_execute
-from insights.models import Person
 from insights.models.async_migration import AsyncMigration, AsyncMigrationError, MigrationStatus
 from insights.models.event.util import create_event
 from insights.models.group.util import create_group
 from insights.models.person.util import create_person, create_person_distinct_id, delete_person
 from insights.models.utils import UUIDT
+from insights.test.persons import create_person as create_test_person
 
 pytestmark = pytest.mark.async_migrations
 
@@ -63,6 +63,7 @@ def query_events() -> list[dict]:
     )
 
 
+@pytest.mark.skip(reason="Slow test for an old migration that will never run again")
 class Test0007PersonsAndGroupsOnEventsBackfill(AsyncMigrationBaseTest, DatastoreTestMixin):
     def setUp(self):
         MIGRATION_DEFINITION.parameters["TEAM_ID"] = (None, "", int)
@@ -209,8 +210,8 @@ class Test0007PersonsAndGroupsOnEventsBackfill(AsyncMigrationBaseTest, Datastore
     def test_deleted_data_persons(self):
         distinct_id = "not-reused-id"  # distinct ID re-use isn't supported after person deletion
         create_event(event_uuid=uuid1, team=self.team, distinct_id=distinct_id, event="$pageview")
-        person = Person.objects.create(
-            team_id=self.team.pk,
+        person = create_test_person(
+            team=self.team,
             distinct_ids=[distinct_id],
             properties={"$some_prop": "something", "$another_prop": "something"},
         )

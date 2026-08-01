@@ -7,7 +7,7 @@ from insights.api.utils import action
 from insights.async_migrations.runner import MAX_CONCURRENT_ASYNC_MIGRATIONS, is_insights_version_compatible
 from insights.async_migrations.setup import get_async_migration_definition
 from insights.async_migrations.utils import force_stop_migration, rollback_migration, trigger_migration
-from insights.constants import FROZEN_INSIGHTS_VERSION
+from insights.constants import FROZEN_POSTFN_VERSION
 from insights.models.async_migration import (
     AsyncMigration,
     AsyncMigrationError,
@@ -84,8 +84,8 @@ class AsyncMigrationSerializer(serializers.ModelSerializer):
 
     def get_is_available(self, async_migration: AsyncMigration):
         return (
-            get_instance_setting("ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION")
-            or Version(async_migration.insights_min_version) <= FROZEN_INSIGHTS_VERSION
+            get_instance_setting("ASYNC_MIGRATIONS_IGNORE_POSTFN_VERSION")
+            or Version(async_migration.insights_min_version) <= FROZEN_POSTFN_VERSION
         )
 
 

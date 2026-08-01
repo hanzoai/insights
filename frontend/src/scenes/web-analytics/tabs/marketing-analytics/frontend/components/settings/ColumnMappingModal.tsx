@@ -5,7 +5,7 @@ import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Modal, Spinner } from '@hanzo/elements'
 
 import { InputSelect, InputSelectOption } from 'lib/elements/InputSelect/InputSelect'
-import { CURRENCY_SYMBOL_TO_NAME_MAP, IMPORTANT_CURRENCIES, OTHER_CURRENCIES } from 'lib/utils/geography/currency'
+import { CURRENCY_SYMBOL_TO_NAME_MAP, IMPORTANT_CURRENCIES, OTHER_CURRENCIES } from 'lib/utils/currency'
 
 import {
     MARKETING_ANALYTICS_SCHEMA,

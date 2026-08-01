@@ -6,14 +6,17 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.cdp.templates import INSIGHTS_FUNCTION_TEMPLATES
+from insights.cdp.templates import FN_FUNCTION_TEMPLATES
 from insights.cdp.templates.insights_function_template import sync_template_to_db
-from insights.models.insights_function_template import InsightsFunctionTemplate
-from insights.models.insights_functions.insights_function import InsightsFunctionType
 from insights.plugins.plugin_server_api import get_insights_function_templates
-from insights.temporal.data_imports.sources import SourceRegistry
-from insights.temporal.data_imports.sources.common.base import WebhookSource
-from insights.temporal.data_imports.sources.common.default_webhook_template import template as default_webhook_template
+
+from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunctionType
+from products.warehouse_sources.backend.facade.source_management import (
+    SourceRegistry,
+    WebhookSource,
+    template as default_webhook_template,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -23,6 +26,9 @@ TYPES_WITH_JAVASCRIPT_SOURCE = (InsightsFunctionType.SITE_DESTINATION, InsightsF
 TEST_INCLUDE_PYTHON_TEMPLATE_IDS = [
     "template-slack",
     "template-warehouse-source-stripe",
+    "template-warehouse-source-customer-io",
+    "template-warehouse-source-slack",
+    "template-warehouse-source-github",
     "template-warehouse-source-default",
 ]
 TEST_INCLUDE_NODEJS_TEMPLATE_IDS = [
@@ -64,8 +70,8 @@ class Command(BaseCommand):
         all_templates: list[dict] = []
         current_template_ids = set()
 
-        # Process templates from INSIGHTS_FUNCTION_TEMPLATES (Python templates)
-        for template_dc in INSIGHTS_FUNCTION_TEMPLATES:
+        # Process templates from FN_FUNCTION_TEMPLATES (Python templates)
+        for template_dc in FN_FUNCTION_TEMPLATES:
             if not self.should_include_python_template(template_dc):
                 continue
 
@@ -151,7 +157,7 @@ class Command(BaseCommand):
         duration = time.time() - start_time
         self.stdout.write(
             self.style.SUCCESS(
-                f"Sync completed in {duration:.2f}s. "
+                f"Script function template sync complete in {duration:.2f}s. "
                 f"Templates: {total_templates}, "
                 f"Created or updated: {updated_count}, "
                 f"Deleted: {deleted_count}, "

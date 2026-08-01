@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Create ClickUp tasks from event data',
     icon_url: '/static/services/clickup.svg',
     category: ['Productivity'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 let res := fetch(f'https://api.clickup.com/api/v2/list/{inputs.listId}/task', {
   'headers': {

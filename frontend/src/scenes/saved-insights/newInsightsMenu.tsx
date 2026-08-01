@@ -1,10 +1,9 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
-import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
+import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
+import { useShortcut } from 'lib/components/Shortcuts/useShortcut'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Button } from 'lib/elements/Button'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { INSIGHT_TYPE_URLS } from 'scenes/insights/utils'
@@ -20,7 +19,7 @@ function useInsightTypeShortcut(
     disabled: boolean = false
 ): void {
     const metadata = INSIGHT_TYPES_METADATA[type]
-    useAppShortcut({
+    useShortcut({
         name: `NewInsight${type}`,
         keybind: [keybind],
         intent: `New ${metadata.name}`,
@@ -38,7 +37,7 @@ function useInsightTypeShortcut(
 /** Registers keyboard shortcuts for creating each insight type. Render this in the SavedInsights scene. */
 export function NewInsightShortcuts(): null {
     const { featureFlags } = useValues(featureFlagLogic)
-    const scriptDisabled = !featureFlags[FEATURE_FLAGS.INSIGHTS_SCRIPT]
+    const hogDisabled = !featureFlags[FEATURE_FLAGS.HOG]
 
     useInsightTypeShortcut(InsightType.TRENDS, keyBinds.tab1, 10)
     useInsightTypeShortcut(InsightType.FUNNELS, keyBinds.tab2, 9)
@@ -47,44 +46,7 @@ export function NewInsightShortcuts(): null {
     useInsightTypeShortcut(InsightType.STICKINESS, keyBinds.tab5, 6)
     useInsightTypeShortcut(InsightType.LIFECYCLE, keyBinds.tab6, 5)
     useInsightTypeShortcut(InsightType.SQL, keyBinds.tab7, 4)
-    useInsightTypeShortcut(InsightType.SCRIPT, keyBinds.tab8, 3, scriptDisabled)
+    useInsightTypeShortcut(InsightType.HOG, keyBinds.tab8, 3, hogDisabled)
 
     return null
-}
-
-export function OverlayForNewInsightMenu({ dataAttr }: { dataAttr: string }): JSX.Element {
-    const { featureFlags } = useValues(featureFlagLogic)
-
-    const menuEntries = Object.entries(INSIGHT_TYPES_METADATA).filter(
-        ([insightType]) =>
-            insightType !== InsightType.JSON && (featureFlags[FEATURE_FLAGS.INSIGHTS_SCRIPT] || insightType !== InsightType.SCRIPT)
-    )
-
-    return (
-        <>
-            {menuEntries.map(
-                ([listedInsightType, listedInsightTypeMetadata]) =>
-                    listedInsightTypeMetadata.inMenu && (
-                        <Button
-                            key={listedInsightType}
-                            icon={listedInsightTypeMetadata.icon && <listedInsightTypeMetadata.icon />}
-                            to={INSIGHT_TYPE_URLS[listedInsightType as InsightType]}
-                            data-attr={dataAttr}
-                            data-attr-insight-type={listedInsightType}
-                            onClick={() => {
-                                eventUsageLogic.actions.reportSavedInsightNewInsightClicked(listedInsightType)
-                            }}
-                            fullWidth
-                        >
-                            <div className="flex flex-col text-sm py-1">
-                                <strong>{listedInsightTypeMetadata.name}</strong>
-                                <span className="text-xs font-sans font-normal">
-                                    {listedInsightTypeMetadata.description}
-                                </span>
-                            </div>
-                        </Button>
-                    )
-            )}
-        </>
-    )
 }

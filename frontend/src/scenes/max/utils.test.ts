@@ -1,3 +1,5 @@
+import type { BuiltLogic } from 'kea'
+
 import {
     AssistantMessage,
     AssistantMessageType,
@@ -5,90 +7,15 @@ import {
     RootAssistantMessage,
 } from '~/queries/schema/schema-assistant-messages'
 
-import { EnhancedToolCall } from './Thread'
+import { EnhancedToolCall } from './max-constants'
 import {
-    checkSuggestionRequiresUserInput,
-    formatSuggestion,
+    activeSceneLogicHasMaxContext,
+    findPendingClientToolCall,
     isMultiQuestionFormMessage,
-    stripSuggestionPlaceholders,
     threadEndsWithMultiQuestionForm,
 } from './utils'
 
 describe('max/utils', () => {
-    describe('checkSuggestionRequiresUserInput()', () => {
-        it('returns true for suggestions with angle brackets', () => {
-            expect(checkSuggestionRequiresUserInput('Show me <metric> over time')).toBe(true)
-            expect(checkSuggestionRequiresUserInput('Compare <event1> vs <event2>')).toBe(true)
-            expect(checkSuggestionRequiresUserInput('Filter by <property>')).toBe(true)
-        })
-
-        it('returns true for suggestions with ellipsis', () => {
-            expect(checkSuggestionRequiresUserInput('Show me trends for…')).toBe(true)
-            expect(checkSuggestionRequiresUserInput('Create a funnel…')).toBe(true)
-        })
-
-        it('returns true for suggestions with mixed placeholders', () => {
-            expect(checkSuggestionRequiresUserInput('Show <metric> trends for…')).toBe(true)
-            expect(checkSuggestionRequiresUserInput('Compare <event> over…')).toBe(true)
-        })
-
-        it('returns false for suggestions without placeholders', () => {
-            expect(checkSuggestionRequiresUserInput('Show me page views')).toBe(false)
-            expect(checkSuggestionRequiresUserInput('Create a simple funnel')).toBe(false)
-            expect(checkSuggestionRequiresUserInput('Display user retention')).toBe(false)
-        })
-
-        it('handles empty and edge cases', () => {
-            expect(checkSuggestionRequiresUserInput('')).toBe(false)
-            expect(checkSuggestionRequiresUserInput('No special characters')).toBe(false)
-            expect(checkSuggestionRequiresUserInput('Just some text')).toBe(false)
-        })
-    })
-
-    describe('stripSuggestionPlaceholders()', () => {
-        it('removes angle bracket placeholders', () => {
-            expect(stripSuggestionPlaceholders('Show me <metric> over time')).toBe('Show me  over time ')
-            expect(stripSuggestionPlaceholders('Filter by <property>')).toBe('Filter by ')
-        })
-
-        it('handles empty string', () => {
-            expect(stripSuggestionPlaceholders('')).toBe(' ')
-        })
-    })
-
-    describe('formatSuggestion()', () => {
-        it('removes angle brackets but keeps content', () => {
-            expect(formatSuggestion('Show me <metric> over time')).toBe('Show me metric over time')
-            expect(formatSuggestion('Compare <event1> vs <event2>')).toBe('Compare event1 vs event2')
-            expect(formatSuggestion('Filter by <property>')).toBe('Filter by property')
-        })
-
-        it('preserves ellipsis at the end', () => {
-            expect(formatSuggestion('Show me trends for…')).toBe('Show me trends for…')
-            expect(formatSuggestion('Create a funnel…')).toBe('Create a funnel…')
-        })
-
-        it('handles mixed placeholders', () => {
-            expect(formatSuggestion('Show <metric> trends for…')).toBe('Show metric trends for…')
-            expect(formatSuggestion('Compare <event> over…')).toBe('Compare event over…')
-        })
-
-        it('handles suggestions without placeholders', () => {
-            expect(formatSuggestion('Show me page views')).toBe('Show me page views')
-            expect(formatSuggestion('Create a simple funnel')).toBe('Create a simple funnel')
-        })
-
-        it('trims whitespace', () => {
-            expect(formatSuggestion('  Show me data  ')).toBe('Show me data')
-            expect(formatSuggestion('  Show <metric>  ')).toBe('Show metric')
-            expect(formatSuggestion('  Show data…  ')).toBe('Show data…')
-        })
-
-        it('handles empty string', () => {
-            expect(formatSuggestion('')).toBe('')
-        })
-    })
-
     describe('isMultiQuestionFormMessage()', () => {
         it('returns true for AssistantMessage with create_form tool call', () => {
             const message = {
@@ -290,6 +217,97 @@ describe('max/utils', () => {
                 },
             ] as unknown as RootAssistantMessage[]
             expect(threadEndsWithMultiQuestionForm(messages)).toBe(false)
+        })
+    })
+
+    describe('findPendingClientToolCall()', () => {
+        const clientToolNames = new Set(['my_client_tool'])
+
+        const humanMessage = (content: string): RootAssistantMessage =>
+            ({ type: AssistantMessageType.Human, content }) as unknown as RootAssistantMessage
+
+        const toolResultMessage = (toolCallId: string): RootAssistantMessage =>
+            ({
+                type: AssistantMessageType.ToolCall,
+                tool_call_id: toolCallId,
+                content: 'done',
+            }) as unknown as RootAssistantMessage
+
+        const assistantMessageWithCall = (id: string, name = 'my_client_tool'): RootAssistantMessage =>
+            ({
+                type: AssistantMessageType.Assistant,
+                content: '',
+                tool_calls: [{ id, name, args: { payload: 'data' } }],
+            }) as unknown as RootAssistantMessage
+
+        it('finds a dangling client tool call at the end of the thread', () => {
+            const pending = findPendingClientToolCall([assistantMessageWithCall('tc-1')], clientToolNames)
+
+            expect(pending).toEqual({
+                toolName: 'my_client_tool',
+                toolCallId: 'tc-1',
+                args: { payload: 'data' },
+            })
+        })
+
+        it('finds a dangling client tool call even when a sibling tool result lands after it', () => {
+            const messages = [
+                humanMessage('Set up a parser'),
+                assistantMessageWithCall('tc-1'),
+                toolResultMessage('tc-other'), // a parallel server-side tool finished after
+            ]
+
+            expect(findPendingClientToolCall(messages, clientToolNames)?.toolCallId).toBe('tc-1')
+        })
+
+        it('returns null when the client tool call already has a result message', () => {
+            const messages = [assistantMessageWithCall('tc-1'), toolResultMessage('tc-1')]
+
+            expect(findPendingClientToolCall(messages, clientToolNames)).toBeNull()
+        })
+
+        it('ignores dangling calls from previous turns', () => {
+            // An abandoned call followed by a new human message starts a fresh turn.
+            const messages = [
+                assistantMessageWithCall('tc-1'),
+                humanMessage('Never mind, do something else'),
+                { type: AssistantMessageType.Assistant, content: 'Sure!' } as unknown as RootAssistantMessage,
+            ]
+
+            expect(findPendingClientToolCall(messages, clientToolNames)).toBeNull()
+        })
+
+        it('returns null for tools that are not client-executed', () => {
+            const messages = [assistantMessageWithCall('tc-2', 'create_form')]
+
+            expect(findPendingClientToolCall(messages, clientToolNames)).toBeNull()
+        })
+
+        it('returns null for an empty thread or a thread ending with a human message', () => {
+            expect(findPendingClientToolCall([], clientToolNames)).toBeNull()
+            expect(findPendingClientToolCall([humanMessage('Hello')], clientToolNames)).toBeNull()
+        })
+    })
+
+    describe('activeSceneLogicHasMaxContext()', () => {
+        it('returns false for null or undefined scene logic', () => {
+            expect(activeSceneLogicHasMaxContext(null)).toBe(false)
+            expect(activeSceneLogicHasMaxContext(undefined)).toBe(false)
+        })
+
+        it.each([
+            { mounted: true, hasMaxContext: true, expected: true },
+            { mounted: true, hasMaxContext: false, expected: false },
+            // The crux of the fix: a built-but-unmounted scene logic must be rejected, since reading
+            // its selectors/values throws `[KEA] Can not find path` once its reducer path is gone.
+            { mounted: false, hasMaxContext: true, expected: false },
+            { mounted: false, hasMaxContext: false, expected: false },
+        ])('mounted=$mounted hasMaxContext=$hasMaxContext -> $expected', ({ mounted, hasMaxContext, expected }) => {
+            const logic = {
+                isMounted: () => mounted,
+                selectors: hasMaxContext ? { maxContext: () => [] } : {},
+            } as unknown as BuiltLogic
+            expect(activeSceneLogicHasMaxContext(logic)).toBe(expected)
         })
     })
 })

@@ -1,22 +1,15 @@
 # Dockerfile for local agent development - builds on top of sandbox-base
 # This image should be rebuilt when the local agent package changes
-# Set LOCAL_TWIG_MONOREPO_ROOT to the path to the twig monorepo to use this in DockerSandbox
+# Set LOCAL_POSTFN_CODE_MONOREPO_ROOT to the path to the Insights Desktop monorepo to use this in DockerSandbox
 
 FROM insights-sandbox-base
 
-COPY local-shared /local-shared
-COPY local-git /local-git
-COPY local-agent /local-agent
+COPY local-workspace /local-workspace
 
-# Pack shared first, then update git and agent dependencies to use the tarball
-# Git depends on shared, agent depends on both shared and git
-RUN cd /local-shared && pnpm pack && \
-    cd /local-git && \
-    sed -i 's/"@hanzo\/shared": "workspace:\*"/"@hanzo\/shared": "file:\/local-shared\/hanzo-shared-1.0.0.tgz"/' package.json && \
-    pnpm pack && \
-    cd /local-agent && \
-    sed -i 's/"@hanzo\/shared": "workspace:\*"/"@hanzo\/shared": "file:\/local-shared\/hanzo-shared-1.0.0.tgz"/' package.json && \
-    sed -i 's/"@twig\/git": "workspace:\*"/"@twig\/git": "file:\/local-git\/twig-git-1.0.0.tgz"/' package.json && \
-    pnpm pack && \
-    cd /scripts && pnpm install /local-agent/*.tgz && \
-    rm -rf /local-agent /local-shared /local-git
+RUN cd /local-workspace && \
+    pnpm install --filter @hanzo/agent... --ignore-scripts --frozen-lockfile && \
+    cd /local-workspace/packages/agent && \
+    pnpm pack --pack-destination /tmp && \
+    cd /scripts && \
+    pnpm install /tmp/insights-agent-*.tgz --config.dangerouslyAllowAllBuilds=true && \
+    rm -rf /tmp/insights-agent-*.tgz /local-workspace

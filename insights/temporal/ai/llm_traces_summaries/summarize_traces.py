@@ -17,6 +17,7 @@ from insights.sync import database_sync_to_async
 from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.client import async_connect
 
+from ee.hogai.llm_traces_summaries.summarize_traces import LLMTracesSummarizer
 
 logger = structlog.get_logger(__name__)
 

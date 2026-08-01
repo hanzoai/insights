@@ -13,7 +13,7 @@ export const insightsAppUrlParametersToEventProperties: LegacyTransformationPlug
         name: 'URL parameters to event properties',
         description: 'Converts URL query parameters to event properties',
         icon_url:
-            'https://raw.githubusercontent.com/hanzoai/insights-app-url-parameters-to-event-properties/main/logo.png',
+            'https://raw.githubusercontent.com/insights/insights-app-url-parameters-to-event-properties/main/logo.png',
         category: ['Transformation'],
         code_language: 'javascript',
         code: `return event`,
@@ -28,13 +28,22 @@ export const insightsAppUrlParametersToEventProperties: LegacyTransformationPlug
                     'Comma separated list of URL query parameters to capture. Leaving this blank will capture nothing.',
             },
             {
+                key: 'customNames',
+                templating: false,
+                label: 'Custom property names',
+                type: 'dictionary',
+                default: {},
+                description:
+                    "Capture URL parameters under custom property names. The key is the URL parameter and the value is the property name to store it as, e.g. key 'fid' with value 'follower_id' stores ?fid=123 as the property follower_id. Parameters listed here are captured even if they are not in 'URL query parameters to convert', and the prefix and suffix are not applied to them.",
+            },
+            {
                 key: 'prefix',
                 templating: false,
                 label: 'Prefix',
                 type: 'string',
                 default: '',
                 description:
-                    "Add a prefix to the property name e.g. set it to 'prefix_' to get followerId -> prefix_followerId",
+                    "Add a prefix to the property name e.g. set it to 'prefix_' to get followerId -> prefix_followerId. Not applied to parameters with a custom property name.",
             },
             {
                 key: 'suffix',
@@ -43,7 +52,7 @@ export const insightsAppUrlParametersToEventProperties: LegacyTransformationPlug
                 type: 'string',
                 default: '',
                 description:
-                    "Add a suffix to the property name e.g. set it to '_suffix' to get followerId -> followerId_suffix",
+                    "Add a suffix to the property name e.g. set it to '_suffix' to get followerId -> followerId_suffix. Not applied to parameters with a custom property name.",
             },
             {
                 key: 'ignoreCase',

@@ -139,7 +139,7 @@ On an Ubuntu server:
 
 ```bash
 # Download and run
-curl -L https://github.com/Hanzo Insights/insights/releases/download/hobby-latest/insights-hobby -o insights-hobby
+curl -L https://github.com/Insights/insights/releases/download/hobby-latest/insights-hobby -o insights-hobby
 chmod +x insights-hobby
 ./insights-hobby
 ```
@@ -147,14 +147,14 @@ chmod +x insights-hobby
 For CI/automated deployments:
 
 ```bash
-curl -L https://github.com/Hanzo Insights/insights/releases/download/hobby-latest/insights-hobby -o insights-hobby
+curl -L https://github.com/Insights/insights/releases/download/hobby-latest/insights-hobby -o insights-hobby
 chmod +x insights-hobby
 ./insights-hobby --ci --domain your-domain.com
 ```
 
 ## Release process
 
-The hobby installer binary is automatically built and released when changes are pushed to `main` in the `bin/hobby-installer/` directory.
+The hobby installer binary is automatically built and released when changes are pushed to `master` in the `bin/hobby-installer/` directory.
 
 The GitHub workflow (`.github/workflows/build-hobby-installer.yml`) does the following:
 
@@ -164,5 +164,5 @@ The GitHub workflow (`.github/workflows/build-hobby-installer.yml`) does the fol
 
 This means:
 
-- **Stable URL**: `https://github.com/Hanzo Insights/insights/releases/download/hobby-latest/insights-hobby` always points to the latest build
-- **Version history**: All previous builds are available at `https://github.com/Hanzo Insights/insights/releases?q=hobby-&expanded=true`
+- **Stable URL**: `https://github.com/Insights/insights/releases/download/hobby-latest/insights-hobby` always points to the latest build
+- **Version history**: All previous builds are available at `https://github.com/Insights/insights/releases?q=hobby-&expanded=true`

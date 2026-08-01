@@ -1,12 +1,20 @@
 import json
 from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 
 from freezegun import freeze_time
 from insights.test.base import APIBaseTest, QueryMatchingTest, snapshot_postgres_queries
+from unittest.mock import patch
 
-from insights.models import FeatureFlag, ScheduledChange
+from parameterized import parameterized
+
+from insights.models import Organization
 from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.team import Team
 from insights.tasks.process_scheduled_changes import process_scheduled_changes
+
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
+from products.feature_flags.backend.models.scheduled_change import ScheduledChange
 
 
 class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
@@ -47,6 +55,7 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
             "variant": None,
             "properties": [{"key": "$browser", "type": "person", "value": ["Chrome"], "operator": "exact"}],
             "rollout_percentage": 30,
+            "aggregation_group_type_index": None,
         }
 
         payload = {
@@ -97,6 +106,7 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
             "variant": None,
             "properties": [{"key": "$browser", "type": "person", "value": ["Chrome"], "operator": "exact"}],
             "rollout_percentage": 30,
+            "aggregation_group_type_index": None,
         }
 
         payload = {
@@ -176,6 +186,7 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
             "properties": [{"key": "$geoip_city_name", "value": ["Sydney"], "operator": "exact", "type": "person"}],
             "rollout_percentage": 50,
             "variant": None,
+            "aggregation_group_type_index": None,
         }
         change_past = ScheduledChange.objects.create(
             team=self.team,
@@ -204,6 +215,7 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
             "properties": [{"key": "$geoip_city_name", "value": ["New York"], "operator": "exact", "type": "person"}],
             "rollout_percentage": 75,
             "variant": None,
+            "aggregation_group_type_index": None,
         }
         change_due_now = ScheduledChange.objects.create(
             team=self.team,
@@ -243,7 +255,13 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
 
         # The changes due have been propagated in the correct order (oldest scheduled_at first)
         updated_flag = FeatureFlag.objects.get(key="flag-1")
-        self.assertEqual(updated_flag.filters["groups"], [change_past_condition, change_due_now_condition])
+        self.assertEqual(
+            updated_flag.filters["groups"],
+            [
+                change_past_condition,
+                change_due_now_condition,
+            ],
+        )
 
     def test_scheduled_changes_create_activity_log_with_trigger(self) -> None:
         """Test that scheduled changes create activity logs with trigger information while preserving user attribution"""
@@ -301,14 +319,15 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
 
         # Check that trigger information identifies this as a scheduled change
         self.assertIsNotNone(activity_log.detail)
-        trigger = activity_log.detail.get("trigger")
+        detail = cast(dict[str, Any], activity_log.detail)
+        trigger = detail.get("trigger")
         self.assertIsNotNone(trigger)
-        self.assertEqual(trigger["job_type"], "scheduled_change")
-        self.assertEqual(trigger["job_id"], str(scheduled_change.id))
+        trigger_data = cast(dict[str, Any], trigger)
+        self.assertEqual(trigger_data["job_type"], "scheduled_change")
+        self.assertEqual(trigger_data["job_id"], str(scheduled_change.id))
 
         # Verify the change details are correct
-        self.assertIsNotNone(activity_log.detail)
-        changes = activity_log.detail.get("changes", [])
+        changes = detail.get("changes", [])
         self.assertTrue(len(changes) > 0)
 
         # Find the change for the 'active' field
@@ -369,8 +388,6 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
 
     def test_recoverable_error_allows_retry(self) -> None:
         """Test that recoverable errors don't set executed_at, allowing retries"""
-        from unittest.mock import patch
-
         feature_flag = FeatureFlag.objects.create(
             name="Test Flag",
             key="test-recoverable-error",
@@ -390,13 +407,19 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
         )
 
         # Mock the dispatcher to raise a recoverable error (OperationalError)
-        with patch.object(FeatureFlag, "scheduled_changes_dispatcher") as mock_dispatcher:
+        with (
+            patch.object(FeatureFlag, "scheduled_changes_dispatcher") as mock_dispatcher,
+            patch("insights.tasks.process_scheduled_changes.capture_exception") as mock_capture,
+        ):
             from django.db import OperationalError
 
             mock_dispatcher.side_effect = OperationalError("Connection timeout")
 
             # Process the scheduled change - should fail but not set executed_at
             process_scheduled_changes()
+
+            # Recoverable errors are genuinely unexpected and must still reach error tracking
+            mock_capture.assert_called_once()
 
         # Refresh the scheduled change from database
         updated_scheduled_change = ScheduledChange.objects.get(id=scheduled_change.id)
@@ -417,8 +440,41 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
         self.assertEqual(failure_data["retry_count"], 1)
         self.assertEqual(failure_data["error_classification"], "recoverable")
 
-    def test_unrecoverable_error_prevents_retry(self) -> None:
-        """Test that unrecoverable errors set executed_at, preventing retries"""
+    @parameterized.expand(
+        [
+            # A payload missing required keys, rejected up front by the dispatcher. This payload
+            # was broken from the moment it was created, so it should still reach error tracking.
+            ("invalid_payload", False, {"invalid": "payload"}, "Invalid payload", True),
+            # ObjectDoesNotExist via model.objects.get(): the scenario the PR description is
+            # actually about, a scheduled change whose target flag was deleted after scheduling.
+            # This is expected drift, so it should not be reported to error tracking.
+            ("deleted_flag", True, {"operation": "update_status", "value": True}, "does not exist", False),
+            # A bare ValueError classified unrecoverable via isinstance alone (no matching
+            # error-message indicator). Like invalid_payload, the payload was broken at creation
+            # time (rollout percentages are self-contained in the payload), so it should still
+            # reach error tracking.
+            (
+                "invalid_variant_rollout",
+                False,
+                {
+                    "operation": "update_variants",
+                    "value": {"variants": [{"key": "control", "name": "Control", "rollout_percentage": 50}]},
+                },
+                "Invalid variant rollout percentages",
+                True,
+            ),
+        ]
+    )
+    def test_unrecoverable_error_prevents_retry(
+        self,
+        _name: str,
+        delete_flag_before_processing: bool,
+        payload: dict[str, Any],
+        expected_error_substring: str,
+        should_capture: bool,
+    ) -> None:
+        """Test that unrecoverable errors set executed_at, preventing retries, and that only the
+        orphaned-target case is suppressed from error tracking"""
         feature_flag = FeatureFlag.objects.create(
             name="Test Flag",
             key="test-unrecoverable-error",
@@ -428,18 +484,37 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
             created_by=self.user,
         )
 
-        # Create a scheduled change with invalid payload (unrecoverable error)
+        # Create the scheduled change while the flag still exists, so record_id points at a
+        # row that existed at creation time (mirrors the real orphaned-change case).
         scheduled_change = ScheduledChange.objects.create(
             team=self.team,
             record_id=feature_flag.id,
             model_name="FeatureFlag",
-            payload={"invalid": "payload"},  # This will cause ValidationError
+            payload=payload,
             scheduled_at=(datetime.now(UTC) - timedelta(seconds=30)),
             created_by=self.user,
         )
 
+        if delete_flag_before_processing:
+            feature_flag.delete()
+
         # Process the scheduled change - should fail and set executed_at
-        process_scheduled_changes()
+        with (
+            patch("insights.tasks.process_scheduled_changes.capture_exception") as mock_capture,
+            patch("insights.tasks.process_scheduled_changes.logger") as mock_logger,
+        ):
+            process_scheduled_changes()
+
+            if should_capture:
+                # A broken payload is a defect worth surfacing, not expected drift.
+                mock_capture.assert_called_once()
+                mock_logger.info.assert_not_called()
+            else:
+                # An orphaned target is expected and already handled, so it must not be
+                # reported to error tracking (it only adds noise), but it must still leave
+                # a log trail so the skip isn't silent.
+                mock_capture.assert_not_called()
+                mock_logger.info.assert_called_once()
 
         # Refresh the scheduled change from database
         updated_scheduled_change = ScheduledChange.objects.get(id=scheduled_change.id)
@@ -450,19 +525,16 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
         self.assertEqual(updated_scheduled_change.failure_count, 1)
 
         # Parse failure reason to verify it contains error details and retry info
-        self.assertIsNotNone(updated_scheduled_change.failure_reason)
         failure_reason = updated_scheduled_change.failure_reason
         assert failure_reason is not None  # For mypy type narrowing
         failure_data = json.loads(failure_reason)
-        self.assertEqual(failure_data["error"], "Invalid payload")
+        self.assertIn(expected_error_substring, failure_data["error"])
         self.assertFalse(failure_data["will_retry"])  # Should indicate won't retry
         self.assertEqual(failure_data["retry_count"], 1)
         self.assertEqual(failure_data["error_classification"], "unrecoverable")
 
     def test_max_retries_exceeded(self) -> None:
         """Test that changes exceeding max retries preserve actual error info"""
-        from unittest.mock import patch
-
         from insights.tasks.process_scheduled_changes import MAX_RETRY_ATTEMPTS
 
         feature_flag = FeatureFlag.objects.create(
@@ -486,13 +558,20 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
         )
 
         # Mock the dispatcher to raise a recoverable error that will hit the limit
-        with patch.object(FeatureFlag, "scheduled_changes_dispatcher") as mock_dispatcher:
+        with (
+            patch.object(FeatureFlag, "scheduled_changes_dispatcher") as mock_dispatcher,
+            patch("insights.tasks.process_scheduled_changes.capture_exception") as mock_capture,
+        ):
             from django.db import OperationalError
 
             mock_dispatcher.side_effect = OperationalError("Database connection lost")
 
             # Process the scheduled change - should hit max retry limit
             process_scheduled_changes()
+
+            # Retry-exhausted errors are still genuinely unexpected (recoverable), so they
+            # must keep reaching error tracking even on the final, non-retrying attempt
+            mock_capture.assert_called_once()
 
         # Refresh the scheduled change from database
         updated_scheduled_change = ScheduledChange.objects.get(id=scheduled_change.id)
@@ -625,6 +704,7 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
             "variant": None,
             "properties": [{"key": "$browser", "type": "person", "value": ["Chrome"], "operator": "exact"}],
             "rollout_percentage": 75,
+            "aggregation_group_type_index": None,
         }
 
         feature_flag = FeatureFlag.objects.create(
@@ -1365,3 +1445,269 @@ class TestProcessScheduledChanges(APIBaseTest, QueryMatchingTest):
         self.assertEqual(scheduled_change.scheduled_at, datetime(2025, 2, 28, 9, 0, tzinfo=UTC))
         feature_flag.refresh_from_db()
         self.assertEqual(feature_flag.active, False)
+
+    def test_scheduled_change_cannot_modify_another_teams_feature_flag(self) -> None:
+        """A scheduled change whose record_id points to a different team's flag must fail."""
+        other_org = Organization.objects.create(name="Other Org")
+        other_team = Team.objects.create(organization=other_org, name="Other Team")
+
+        victim_flag = FeatureFlag.objects.create(
+            name="Victim Flag",
+            key="victim-flag",
+            active=True,
+            filters={"groups": []},
+            team=other_team,
+            created_by=self.user,
+        )
+
+        # Simulate a scheduled change that targets a flag belonging to a different team
+        scheduled_change = ScheduledChange.objects.create(
+            team=self.team,
+            record_id=victim_flag.id,
+            model_name="FeatureFlag",
+            payload={"operation": "update_status", "value": False},
+            scheduled_at=(datetime.now(UTC) - timedelta(seconds=30)),
+            created_by=self.user,
+        )
+
+        process_scheduled_changes()
+
+        # The victim flag must remain unchanged
+        victim_flag.refresh_from_db()
+        self.assertTrue(victim_flag.active)
+
+        # The scheduled change should be permanently failed (unrecoverable, no retry)
+        scheduled_change.refresh_from_db()
+        self.assertIsNotNone(scheduled_change.executed_at)
+        self.assertIsNotNone(scheduled_change.failure_reason)
+        self.assertEqual(scheduled_change.failure_count, 1)
+
+        assert scheduled_change.failure_reason is not None
+        failure_data = json.loads(scheduled_change.failure_reason)
+        self.assertFalse(failure_data["will_retry"])
+        self.assertEqual(failure_data["error_classification"], "unrecoverable")
+
+    @freeze_time("2024-01-15T09:00:00Z")
+    def test_cron_recurring_schedule_executes_and_advances(self) -> None:
+        feature_flag = FeatureFlag.objects.create(
+            name="Cron Flag",
+            key="cron-flag",
+            active=False,
+            filters={"groups": []},
+            team=self.team,
+            created_by=self.user,
+        )
+
+        # "At 09:00 on weekdays" — current time is Monday 2024-01-15 09:00
+        scheduled_change = ScheduledChange.objects.create(
+            team=self.team,
+            record_id=feature_flag.id,
+            model_name="FeatureFlag",
+            payload={"operation": "update_status", "value": True},
+            scheduled_at=datetime(2024, 1, 15, 9, 0, tzinfo=UTC),
+            is_recurring=True,
+            cron_expression="0 9 * * 1-5",
+        )
+
+        process_scheduled_changes()
+
+        feature_flag.refresh_from_db()
+        self.assertTrue(feature_flag.active)
+
+        scheduled_change.refresh_from_db()
+        self.assertIsNone(scheduled_change.executed_at)
+        # Next weekday at 09:00 is Tuesday 2024-01-16
+        self.assertEqual(scheduled_change.scheduled_at, datetime(2024, 1, 16, 9, 0, tzinfo=UTC))
+
+    @freeze_time("2024-01-15T09:00:00Z")
+    def test_cron_recurring_schedule_paused_is_skipped(self) -> None:
+        feature_flag = FeatureFlag.objects.create(
+            name="Cron Paused Flag",
+            key="cron-paused-flag",
+            active=False,
+            filters={"groups": []},
+            team=self.team,
+            created_by=self.user,
+        )
+
+        ScheduledChange.objects.create(
+            team=self.team,
+            record_id=feature_flag.id,
+            model_name="FeatureFlag",
+            payload={"operation": "update_status", "value": True},
+            scheduled_at=datetime(2024, 1, 15, 9, 0, tzinfo=UTC),
+            is_recurring=False,
+            cron_expression="0 9 * * 1-5",
+        )
+
+        process_scheduled_changes()
+
+        feature_flag.refresh_from_db()
+        self.assertFalse(feature_flag.active)
+
+    @freeze_time("2024-01-19T09:00:00Z")
+    def test_cron_recurring_schedule_skips_missed_runs(self) -> None:
+        feature_flag = FeatureFlag.objects.create(
+            name="Cron Delayed Flag",
+            key="cron-delayed-flag",
+            active=False,
+            filters={"groups": []},
+            team=self.team,
+            created_by=self.user,
+        )
+
+        # Scheduled for Monday Jan 15, but processing happens Friday Jan 19
+        scheduled_change = ScheduledChange.objects.create(
+            team=self.team,
+            record_id=feature_flag.id,
+            model_name="FeatureFlag",
+            payload={"operation": "update_status", "value": True},
+            scheduled_at=datetime(2024, 1, 15, 9, 0, tzinfo=UTC),
+            is_recurring=True,
+            cron_expression="0 9 * * 1-5",
+        )
+
+        process_scheduled_changes()
+
+        scheduled_change.refresh_from_db()
+        self.assertIsNone(scheduled_change.executed_at)
+        # Should skip past Tue/Wed/Thu/Fri and land on Monday Jan 22
+        self.assertEqual(scheduled_change.scheduled_at, datetime(2024, 1, 22, 9, 0, tzinfo=UTC))
+
+    @freeze_time("2024-01-16T09:00:00Z")
+    def test_cron_recurring_schedule_respects_end_date(self) -> None:
+        feature_flag = FeatureFlag.objects.create(
+            name="Cron End Flag",
+            key="cron-end-flag",
+            active=False,
+            filters={"groups": []},
+            team=self.team,
+            created_by=self.user,
+        )
+
+        scheduled_change = ScheduledChange.objects.create(
+            team=self.team,
+            record_id=feature_flag.id,
+            model_name="FeatureFlag",
+            payload={"operation": "update_status", "value": True},
+            scheduled_at=datetime(2024, 1, 16, 9, 0, tzinfo=UTC),
+            is_recurring=True,
+            cron_expression="0 9 * * 1-5",
+            end_date=datetime(2024, 1, 16, 23, 59, tzinfo=UTC),
+        )
+
+        process_scheduled_changes()
+
+        feature_flag.refresh_from_db()
+        self.assertTrue(feature_flag.active)
+
+        scheduled_change.refresh_from_db()
+        # Next cron match (Jan 17) is past end_date's day, so schedule is completed
+        self.assertIsNotNone(scheduled_change.executed_at)
+
+    @parameterized.expand(
+        [
+            # West of UTC: 9am New York (EST, UTC-5) = 14:00 UTC; next weekday match stays
+            # at 14:00 UTC rather than drifting to 09:00 UTC.
+            (
+                "west_of_utc_new_york",
+                "2024-01-15T14:00:00Z",
+                datetime(2024, 1, 15, 14, 0, tzinfo=UTC),
+                "0 9 * * 1-5",
+                "America/New_York",
+                datetime(2024, 1, 16, 14, 0, tzinfo=UTC),
+            ),
+            # East of UTC: 9am Tokyo (JST, UTC+9) = 00:00 UTC.
+            (
+                "east_of_utc_tokyo",
+                "2024-01-15T00:00:00Z",
+                datetime(2024, 1, 15, 0, 0, tzinfo=UTC),
+                "0 9 * * 1-5",
+                "Asia/Tokyo",
+                datetime(2024, 1, 16, 0, 0, tzinfo=UTC),
+            ),
+            # Explicit UTC is the identity case — matches the pre-existing NULL semantics.
+            (
+                "explicit_utc",
+                "2024-01-15T09:00:00Z",
+                datetime(2024, 1, 15, 9, 0, tzinfo=UTC),
+                "0 9 * * 1-5",
+                "UTC",
+                datetime(2024, 1, 16, 9, 0, tzinfo=UTC),
+            ),
+            # Legacy rows with timezone=NULL keep firing at the wall-clock moment they
+            # always did (UTC interpretation) so no live schedule shifts silently.
+            (
+                "legacy_null_timezone",
+                "2024-01-15T09:00:00Z",
+                datetime(2024, 1, 15, 9, 0, tzinfo=UTC),
+                "0 9 * * 1-5",
+                None,
+                datetime(2024, 1, 16, 9, 0, tzinfo=UTC),
+            ),
+            # Unknown / typo'd timezone falls back to UTC rather than raising and stalling
+            # the schedule. Exercises the ZoneInfoNotFoundError branch.
+            (
+                "invalid_timezone_falls_back_to_utc",
+                "2024-01-15T09:00:00Z",
+                datetime(2024, 1, 15, 9, 0, tzinfo=UTC),
+                "0 9 * * 1-5",
+                "Invalid/Timezone",
+                datetime(2024, 1, 16, 9, 0, tzinfo=UTC),
+            ),
+            # US spring-forward: starting from 9am EST on Mar 9, catch-up past the Mar 10
+            # transition lands on 9am EDT on Mar 11 = 13:00 UTC (not the stored 14:00 UTC).
+            (
+                "spring_forward_dst_transition",
+                "2024-03-10T14:00:00Z",
+                datetime(2024, 3, 9, 14, 0, tzinfo=UTC),
+                "0 9 * * *",
+                "America/New_York",
+                datetime(2024, 3, 11, 13, 0, tzinfo=UTC),
+            ),
+            # US fall-back: starting from 9am EDT on Nov 2, catch-up past the Nov 3
+            # transition lands on 9am EST on Nov 4 = 14:00 UTC (not 13:00 UTC).
+            (
+                "fall_back_dst_transition",
+                "2024-11-04T13:30:00Z",
+                datetime(2024, 11, 2, 13, 0, tzinfo=UTC),
+                "0 9 * * *",
+                "America/New_York",
+                datetime(2024, 11, 4, 14, 0, tzinfo=UTC),
+            ),
+        ]
+    )
+    def test_cron_recurring_schedule_honors_stored_timezone(
+        self,
+        name: str,
+        frozen_now: str,
+        scheduled_at: datetime,
+        cron_expression: str,
+        tz: str | None,
+        expected_next: datetime,
+    ) -> None:
+        with freeze_time(frozen_now):
+            feature_flag = FeatureFlag.objects.create(
+                name=f"Flag {name}",
+                key=f"flag-{name.replace('_', '-')}",
+                active=False,
+                filters={"groups": []},
+                team=self.team,
+                created_by=self.user,
+            )
+
+            scheduled_change = ScheduledChange.objects.create(
+                team=self.team,
+                record_id=feature_flag.id,
+                model_name="FeatureFlag",
+                payload={"operation": "update_status", "value": True},
+                scheduled_at=scheduled_at,
+                is_recurring=True,
+                cron_expression=cron_expression,
+                timezone=tz,
+            )
+
+            process_scheduled_changes()
+
+            scheduled_change.refresh_from_db()
+            self.assertEqual(scheduled_change.scheduled_at, expected_next)

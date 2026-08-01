@@ -28,17 +28,15 @@ class GroupsQueryRunner(AnalyticsQueryRunner[GroupsQueryResponse]):
         if self.is_aggregation_query:
             # For aggregation queries, use select as-is (e.g., ['count(*)'])
             self.columns = self.query.select or []
+        elif self.query.select:
+            seen: set[str] = set()
+            self.columns = []
+            for col in self.query.select:
+                if col not in seen:
+                    seen.add(col)
+                    self.columns.append(col)
         else:
-            # IMPORTANT: group_name and key MUST always be the first two columns
-            # The frontend (crm/utils.tsx) depends on this ordering, specifically
-            # hardcoding that 'key' is at index 1 in the results array.
-            # See test_column_ordering_consistency for regression tests.
-            self.columns = [
-                "group_name",
-                "key",
-            ]
-            if self.query.select:
-                self.columns.extend([col for col in self.query.select if col not in self.columns])
+            self.columns = ["group_name"]
 
         self.paginator = InsightsQLHasMorePaginator.from_limit_context(
             limit_context=self.limit_context, limit=self.query.limit, offset=self.query.offset
@@ -105,10 +103,7 @@ class GroupsQueryRunner(AnalyticsQueryRunner[GroupsQueryResponse]):
                 if col.startswith("group_name"):
                     order_by.append(
                         ast.OrderExpr(
-                            expr=ast.Call(
-                                name="coalesce",
-                                args=[ast.Field(chain=["properties", "name"]), ast.Field(chain=["key"])],
-                            ),
+                            expr=self._display_name_expr(),
                             order="DESC" if "DESC" in col else "ASC",
                         )
                     )
@@ -120,26 +115,57 @@ class GroupsQueryRunner(AnalyticsQueryRunner[GroupsQueryResponse]):
                 order_by.append(similarity_order) if has_user_ordering else order_by.insert(0, similarity_order)
 
             return ast.SelectQuery(
-                select=[
-                    ast.Call(name="coalesce", args=[ast.Field(chain=["properties", "name"]), ast.Field(chain=["key"])]),
-                    *[parse_expr(col) for col in self.columns[1:]],
-                ],
+                select=[self._column_to_expr(col) for col in self.columns],
                 select_from=ast.JoinExpr(table=ast.Field(chain=["groups"])),
                 where=where,
                 order_by=order_by,
             )
+
+    def _display_name_expr(self) -> ast.Expr:
+        # Coerce both branches to String so a numeric `name` property type doesn't make
+        # coalesce resolve to Variant(Float64, String), which datastore_driver can't parse.
+        return ast.Call(
+            name="coalesce",
+            args=[
+                ast.Call(name="toString", args=[ast.Field(chain=["properties", "name"])]),
+                ast.Call(name="toString", args=[ast.Field(chain=["key"])]),
+            ],
+        )
+
+    def _column_to_expr(self, col: str) -> ast.Expr:
+        if col == "group_name":
+            return ast.Call(
+                name="tuple",
+                args=[
+                    self._display_name_expr(),
+                    ast.Call(name="toString", args=[ast.Field(chain=["key"])]),
+                ],
+            )
+        return parse_expr(col)
 
     def _calculate(self) -> GroupsQueryResponse:
         response = self.paginator.execute_insightsql_query(
             query_type="GroupsQuery",
             query=self.to_query(),
             team=self.team,
+            user=self.user,
             timings=self.timings,
             modifiers=self.modifiers,
             # :HACKY: insights/insightsql/transforms/property_types.py needs access to the group_id in order to know the property type
             context=InsightsQLContext(team_id=self.team.pk, globals={"group_id": self.query.group_type_index}),
         )
         results = response.results[: self.paginator.limit] if self.paginator.limit is not None else response.results
+
+        if "group_name" in self.columns:
+            column_index = self.columns.index("group_name")
+            results = [
+                [
+                    {"display_name": col[0], "key": str(col[1])} if index == column_index else col
+                    for index, col in enumerate(row)
+                ]
+                for row in results
+            ]
+
         return GroupsQueryResponse(
             kind="GroupsQuery",
             types=[t for _, t in response.types] if response.types else None,
@@ -153,9 +179,7 @@ class GroupsQueryRunner(AnalyticsQueryRunner[GroupsQueryResponse]):
         """
         When a search term exists, we want to rank the results by how close they are to it.
         """
-        display_name_expr = ast.Call(
-            name="coalesce", args=[ast.Field(chain=["properties", "name"]), ast.Field(chain=["key"])]
-        )
+        display_name_expr = self._display_name_expr()
 
         return ast.OrderExpr(
             expr=ast.Call(

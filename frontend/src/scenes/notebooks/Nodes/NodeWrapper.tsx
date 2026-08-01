@@ -1,42 +1,26 @@
-// sort-imports-ignore
-
-// KLUDGE: Do NOT remove the `sort-imports-ignore` comment. It's used to sort the imports.
-// Our KNOWN_NODES resolution will NOT work if the imports here are sorted in a different way.
-import {
-    Node,
-    NodeViewWrapper,
-    mergeAttributes,
-    ReactNodeViewRenderer,
-    NodeViewProps,
-    getExtensionField,
-} from '@tiptap/react'
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, type PointerEvent as ReactPointerEvent, useCallback, useRef } from 'react'
 import clsx from 'clsx'
-import { IconDragHandle, IconLink } from 'lib/elements/icons'
+import { IconLink } from 'lib/elements/icons'
 import { Button, Menu, MenuItems } from '@hanzo/elements'
 import './NodeWrapper.scss'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { notebookLogic } from '../Notebook/notebookLogic'
-import { hashCodeForString } from 'lib/utils'
+import { hashCodeForString } from 'lib/utils/strings'
 import { useInView } from 'react-intersection-observer'
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
 import { NotebookNodeLogicProps, notebookNodeLogic } from './notebookNodeLogic'
-import { insightsNodeInputRule, insightsNodePasteRule, useSyncedAttributes } from './utils'
 import { KNOWN_NODES } from '../utils'
 import { NotebookNodeTitle } from './components/NotebookNodeTitle'
 import { DuckSqlRunMenu } from './components/DuckSqlRunMenu'
-import { InsightsqlSqlRunMenu } from './components/InsightsqlSqlRunMenu'
+import { HogqlSqlRunMenu } from './components/HogqlSqlRunMenu'
 import { PythonRunMenu } from './components/PythonRunMenu'
-import { SlashCommandsPopover } from '../Notebook/SlashCommands'
-import insights from '@hanzo/insights'
 import { NotebookNodeContext } from './NotebookNodeContext'
-import { IconCollapse, IconCopy, IconEllipsis, IconExpand, IconPencil, IconPlus, IconX } from '@hanzo/icons'
+import { IconCollapse, IconCopy, IconEllipsis, IconExpand, IconPencil, IconX } from '@hanzo/icons'
 import {
     CreateInsightsWidgetNodeOptions,
     CustomNotebookNodeAttributes,
     NodeWrapperProps,
-    NotebookNodeProps,
     NotebookNodeResource,
     NotebookNodeType,
 } from '../types'
@@ -61,16 +45,14 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         expandOnClick = true,
         autoHideMetadata = false,
         minHeight,
-        getPos,
         attributes,
         updateAttributes,
         Settings = null,
     } = props
 
     const mountedNotebookLogic = useMountedLogic(notebookLogic)
-    const { isEditable, editingNodeIds, containerSize, notebook, mode } = useValues(mountedNotebookLogic)
+    const { isEditable, editingNodeIds, containerSize, notebook, isShared } = useValues(mountedNotebookLogic)
     const { unregisterNodeLogic, insertComment, selectComment } = useActions(notebookLogic)
-    const [slashCommandsPopoverVisible, setSlashCommandsPopoverVisible] = useState<boolean>(false)
 
     const logicProps: NotebookNodeLogicProps = {
         ...props,
@@ -82,7 +64,6 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
     const {
         resizeable,
         expanded,
-        actions,
         nodeId,
         pythonRunLoading,
         duckSqlRunLoading,
@@ -102,13 +83,11 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         setExpanded,
         deleteNode,
         toggleEditing,
-        insertOrSelectNextLine,
         toggleEditingTitle,
         copyToClipboard,
-        convertToBacklink,
         runPythonNodeWithMode,
         runDuckSqlNodeWithMode,
-        runInsightsqlSqlNodeWithMode,
+        runHogqlSqlNodeWithMode,
     } = useActions(nodeLogic)
 
     const { ref: inViewRef, inView } = useInView({ triggerOnce: true })
@@ -152,22 +131,49 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         window.addEventListener('mouseup', onResizedEnd)
     }, [nodeType, resizeable, updateAttributes])
 
-    const onActionsAreaClick = (): void => {
-        // Clicking in the area of the actions without selecting a specific action likely indicates the user wants to
-        // add new content below. If we are in editing mode, we should select the next line if there is one, otherwise
-        if (!slashCommandsPopoverVisible) {
-            insertOrSelectNextLine()
-        }
-    }
-
     const parsedHref = typeof href === 'function' ? href(attributes) : href
 
     // Element is resizable if resizable is set to true. If expandable is set to true then is is only resizable if expanded is true
     const isResizeable = resizeable && (!expandable || expanded)
-    const isDraggable = !!(isEditable && getPos)
+    const onResizeHandlePointerDown = useCallback(
+        (event: ReactPointerEvent<HTMLDivElement>): void => {
+            if (!isEditable || !isResizeable || !contentRef.current) {
+                return
+            }
+
+            event.preventDefault()
+            event.stopPropagation()
+
+            const element = contentRef.current
+            const startY = event.clientY
+            const startHeight = element.getBoundingClientRect().height
+            const parsedMinHeight = Number.parseFloat(window.getComputedStyle(element).minHeight)
+            const minResizeHeight = Number.isFinite(parsedMinHeight) ? parsedMinHeight : 0
+
+            const onPointerMove = (moveEvent: PointerEvent): void => {
+                moveEvent.preventDefault()
+                const nextHeight = Math.max(minResizeHeight, startHeight + moveEvent.clientY - startY)
+                element.style.height = `${Math.round(nextHeight)}px`
+            }
+
+            const onPointerUp = (): void => {
+                window.removeEventListener('pointermove', onPointerMove)
+                window.removeEventListener('pointerup', onPointerUp)
+
+                updateAttributes({
+                    height: element.clientHeight,
+                    ...(nodeType === NotebookNodeType.Python ? { autoHeight: false } : {}),
+                } as any)
+            }
+
+            window.addEventListener('pointermove', onPointerMove)
+            window.addEventListener('pointerup', onPointerUp)
+        },
+        [isEditable, isResizeable, nodeType, updateAttributes]
+    )
     const isPythonNode = nodeType === NotebookNodeType.Python
     const isDuckSqlNode = nodeType === NotebookNodeType.DuckSQL
-    const isInsightsqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
+    const isHogqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
     const runDisabledReason = !notebook ? 'Notebook not loaded' : undefined
     const pythonAttributes = attributes as {
         code?: string
@@ -224,7 +230,9 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
     const insightsqlSqlIsStale = insightsqlSqlHasExecution && !insightsqlSqlIsFresh
 
     const defaultMenuItems: MenuItems = [
-        !NON_COPYABLE_NODES.includes(nodeType)
+        // Copy round-trips the node attrs through HTML for paste into another notebook — doesn't
+        // make sense for an anonymous shared viewer who has no editor to paste into.
+        !NON_COPYABLE_NODES.includes(nodeType) && !isShared
             ? {
                   label: 'Copy',
                   onClick: () => copyToClipboard(),
@@ -242,13 +250,6 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                   },
               }
             : null,
-        isEditable && parsedHref
-            ? {
-                  label: 'Convert to inline link',
-                  onClick: () => convertToBacklink(parsedHref),
-                  sideIcon: <IconLink />,
-              }
-            : null,
         isEditable ? { label: 'Edit title', onClick: () => toggleEditingTitle(true) } : null,
         isEditable
             ? sourceComment
@@ -261,19 +262,16 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
     const menuItems = customMenuItems ?? defaultMenuItems
 
     const hasMenu = menuItems.some((x) => !!x)
-    const isInCanvas = mode === 'canvas'
 
     return (
         <NotebookNodeContext.Provider value={nodeLogic}>
             <BindLogic logic={notebookNodeLogic} props={logicProps}>
-                <NodeViewWrapper as="div">
+                <div>
                     <div
                         ref={setRefs}
                         className={clsx(nodeType, 'NotebookNode', {
                             'NotebookNode--auto-hide-metadata': autoHideMetadata,
-                            'NotebookNode--editable': getPos && isEditable,
                             'NotebookNode--selected': isEditable && selected,
-                            'NotebookNode--active': slashCommandsPopoverVisible,
                         })}
                     >
                         <div className="NotebookNode__box">
@@ -291,17 +289,19 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                     </>
                                 ) : (
                                     <>
-                                        <div className="NotebookNode__meta" data-drag-handle>
+                                        <div className="NotebookNode__meta">
                                             <div className="flex items-center flex-1 overflow-hidden">
-                                                {isDraggable && (
-                                                    <IconDragHandle className="cursor-move text-base shrink-0" />
-                                                )}
                                                 <NotebookNodeTitle />
                                             </div>
 
                                             <div className="flex deprecated-space-x-1">
-                                                {parsedHref && (
-                                                    <Button size="small" icon={<IconLink />} to={parsedHref} />
+                                                {parsedHref && !isShared && (
+                                                    <Button
+                                                        size="small"
+                                                        icon={<IconLink />}
+                                                        to={parsedHref}
+                                                        tooltip="Open linked resource"
+                                                    />
                                                 )}
 
                                                 {isPythonNode ? (
@@ -325,23 +325,29 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                         onRun={(mode) => void runDuckSqlNodeWithMode({ mode })}
                                                     />
                                                 ) : null}
-                                                {isInsightsqlSqlNode ? (
-                                                    <InsightsqlSqlRunMenu
+                                                {isHogqlSqlNode ? (
+                                                    <HogqlSqlRunMenu
                                                         isFresh={insightsqlSqlIsFresh}
                                                         isStale={insightsqlSqlIsStale}
                                                         loading={insightsqlSqlRunLoading}
                                                         queued={insightsqlSqlRunQueued}
                                                         disabledReason={runDisabledReason}
-                                                        onRun={(mode) => void runInsightsqlSqlNodeWithMode({ mode })}
+                                                        onRun={(mode) => void runHogqlSqlNodeWithMode({ mode })}
                                                     />
                                                 ) : null}
 
-                                                {(isEditable || isInCanvas) && Settings ? (
+                                                {isEditable && Settings ? (
                                                     <Button
                                                         onClick={() => toggleEditing()}
                                                         size="small"
                                                         icon={<IconPencil />}
                                                         active={editingNodeIds[nodeId]}
+                                                        tooltip={
+                                                            editingNodeIds[nodeId]
+                                                                ? 'Hide editor'
+                                                                : 'Show editor and settings'
+                                                        }
+                                                        data-attr="notebook-node-edit-settings"
                                                     />
                                                 ) : null}
 
@@ -350,18 +356,24 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                         onClick={() => setExpanded(!expanded)}
                                                         size="small"
                                                         icon={expanded ? <IconCollapse /> : <IconExpand />}
+                                                        tooltip={expanded ? 'Hide output' : 'Show output'}
                                                     />
                                                 )}
 
                                                 {hasMenu ? (
                                                     <Menu items={menuItems} placement="bottom-end">
-                                                        <Button icon={<IconEllipsis />} size="small" />
+                                                        <Button
+                                                            icon={<IconEllipsis />}
+                                                            size="small"
+                                                            tooltip="More actions"
+                                                        />
                                                     </Menu>
                                                 ) : null}
                                             </div>
                                         </div>
 
                                         {Settings &&
+                                        !isShared &&
                                         editingNodeIds[nodeId] &&
                                         (containerSize === 'small' || resolvedSettingsPlacement === 'inline') ? (
                                             <div className="NotebookNode__settings">
@@ -391,54 +403,21 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                     attributes={attributes}
                                                     updateAttributes={updateAttributes}
                                                 />
+                                                {isEditable && isResizeable ? (
+                                                    <div
+                                                        className="NotebookNode__resize-handle"
+                                                        aria-hidden="true"
+                                                        onPointerDown={onResizeHandlePointerDown}
+                                                    />
+                                                ) : null}
                                             </ErrorBoundary>
                                         </div>
                                     </>
                                 )}
                             </ErrorBoundary>
                         </div>
-                        <div
-                            className="NotebookNode__gap"
-                            // UX improvement so that the actions don't get in the way of the cursor
-                            onClick={() => onActionsAreaClick()}
-                        >
-                            {getPos && isEditable ? (
-                                <>
-                                    <SlashCommandsPopover
-                                        mode="add"
-                                        getPos={() => (getPos() ?? 0) + 1}
-                                        visible={slashCommandsPopoverVisible}
-                                        onClose={() => setSlashCommandsPopoverVisible(false)}
-                                    >
-                                        <Button
-                                            size="xsmall"
-                                            type="secondary"
-                                            icon={<IconPlus />}
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                setSlashCommandsPopoverVisible(true)
-                                            }}
-                                        />
-                                    </SlashCommandsPopover>
-                                    {actions.map((x, i) => (
-                                        <Button
-                                            key={i}
-                                            size="xsmall"
-                                            type="secondary"
-                                            icon={x.icon ?? <IconPlus />}
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                x.onClick()
-                                            }}
-                                        >
-                                            {x.text}
-                                        </Button>
-                                    ))}
-                                </>
-                            ) : null}
-                        </div>
                     </div>
-                </NodeViewWrapper>
+                </div>
             </BindLogic>
         </NotebookNodeContext.Provider>
     )
@@ -446,142 +425,15 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
 
 export const MemoizedNodeWrapper = memo(NodeWrapper) as typeof NodeWrapper
 
+/**
+ * Registers a notebook node component so the markdown notebook registry (KNOWN_NODES)
+ * can render it. The returned options are also the module's export for direct imports.
+ */
 export function createInsightsWidgetNode<T extends CustomNotebookNodeAttributes>(
     options: CreateInsightsWidgetNodeOptions<T>
-): Node {
-    const { Component, pasteOptions, inputOptions, attributes, serializedText, ...wrapperProps } = options
-
-    KNOWN_NODES[wrapperProps.nodeType] = options
-
-    // NOTE: We use NodeViewProps here as we convert them to NotebookNodeProps
-    const WrappedComponent = (props: NodeViewProps): JSX.Element => {
-        const [attributes, updateAttributes] = useSyncedAttributes<T>(props)
-
-        if (props.node.attrs.nodeId === null) {
-            // TODO only wrapped in setTimeout because of the flushSync bug
-            setTimeout(() => {
-                props.updateAttributes({
-                    nodeId: attributes.nodeId,
-                })
-            }, 0)
-        }
-
-        useEffect(() => {
-            if (props.node.attrs.nodeId === null) {
-                insights.capture('notebook node added', { node_type: props.node.type.name })
-            }
-            // oxlint-disable-next-line exhaustive-deps
-        }, [props.node.attrs.nodeId])
-
-        const nodeProps: NotebookNodeProps<T> & Omit<NodeViewProps, 'attributes' | 'updateAttributes'> = {
-            ...props,
-            attributes,
-            updateAttributes,
-        }
-
-        return <MemoizedNodeWrapper Component={Component} {...nodeProps} {...wrapperProps} />
-    }
-
-    return Node.create({
-        name: wrapperProps.nodeType,
-        group: 'block',
-        atom: true,
-        draggable: true,
-
-        serializedText: serializedText,
-
-        extendNodeSchema(extension) {
-            const context = {
-                name: extension.name,
-                options: extension.options,
-                storage: extension.storage,
-            }
-            return {
-                serializedText: getExtensionField(extension, 'serializedText', context),
-            }
-        },
-
-        addAttributes() {
-            const nodeAttributes = Object.fromEntries(
-                Object.entries(attributes as Record<string, any>).map(([name, config]) => {
-                    return [
-                        name,
-                        {
-                            ...config,
-                            parseHTML: (element: HTMLElement) => {
-                                const attribute = element.getAttribute(name)
-                                return attribute ? JSON.parse(atob(attribute)) : null
-                            },
-                        },
-                    ]
-                })
-            )
-
-            return {
-                height: {},
-                title: {},
-                nodeId: {
-                    default: null,
-                },
-                __init: { default: null },
-                children: {},
-                ...nodeAttributes,
-            }
-        },
-
-        parseHTML() {
-            return [
-                {
-                    tag: wrapperProps.nodeType,
-                },
-            ]
-        },
-
-        renderHTML({ HTMLAttributes }) {
-            // We want to stringify all object attributes so that we can use them in the serializedText
-            const sanitizedAttributes = Object.fromEntries(
-                Object.entries(HTMLAttributes).map(([key, value]) => {
-                    if (Array.isArray(value) || typeof value === 'object') {
-                        return [key, JSON.stringify(value)]
-                    }
-                    return [key, value]
-                })
-            )
-
-            // This method is primarily used by copy and paste so we can remove the nodeID, assuming we don't want duplicates
-            delete sanitizedAttributes['nodeId']
-
-            return [wrapperProps.nodeType, mergeAttributes(sanitizedAttributes)]
-        },
-
-        addNodeView() {
-            return ReactNodeViewRenderer(WrappedComponent)
-        },
-
-        addPasteRules() {
-            return pasteOptions
-                ? [
-                      insightsNodePasteRule({
-                          editor: this.editor,
-                          type: this.type,
-                          ...pasteOptions,
-                      }),
-                  ]
-                : []
-        },
-
-        addInputRules() {
-            return inputOptions
-                ? [
-                      insightsNodeInputRule({
-                          editor: this.editor,
-                          type: this.type,
-                          ...inputOptions,
-                      }),
-                  ]
-                : []
-        },
-    })
+): CreateInsightsWidgetNodeOptions<T> {
+    KNOWN_NODES[options.nodeType] = options
+    return options
 }
 
 export const NotebookNodeChildRenderer = ({

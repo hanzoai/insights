@@ -7,7 +7,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     id="template-notification-bar",
     name="Notification Bar",
     description="Show a notification bar for your users",
-    icon_url="",
+    icon_url="https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/list_hog_2e39ff51a8.png",
     category=["Custom", "Analytics"],
     code_language="javascript",
     code="""
@@ -92,7 +92,7 @@ function createShadowRoot(style) {
         {
             "key": "domains",
             "label": "Domains",
-            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,insights.hanzo.ai"',
+            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,app.hanzo.ai"',
             "type": "string",
             "default": "",
         },

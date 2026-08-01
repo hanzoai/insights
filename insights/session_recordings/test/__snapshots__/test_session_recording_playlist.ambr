@@ -12,9 +12,12 @@
          "insights_filesystem"."meta",
          "insights_filesystem"."created_at",
          "insights_filesystem"."created_by_id",
+         "insights_filesystem"."surface",
          "insights_filesystem"."project_id"
   FROM "insights_filesystem"
-  WHERE ("insights_filesystem"."ref" = '0001'
+  WHERE (("insights_filesystem"."surface" IS NULL
+          OR "insights_filesystem"."surface" = 'web')
+         AND "insights_filesystem"."ref" = '0001'
          AND "insights_filesystem"."team_id" = 99999
          AND "insights_filesystem"."type" = 'session_recording_playlist'
          AND NOT ("insights_filesystem"."shortcut"
@@ -34,9 +37,12 @@
          "insights_filesystem"."meta",
          "insights_filesystem"."created_at",
          "insights_filesystem"."created_by_id",
+         "insights_filesystem"."surface",
          "insights_filesystem"."project_id"
   FROM "insights_filesystem"
-  WHERE ("insights_filesystem"."ref" = '0001'
+  WHERE (("insights_filesystem"."surface" IS NULL
+          OR "insights_filesystem"."surface" = 'web')
+         AND "insights_filesystem"."ref" = '0001'
          AND "insights_filesystem"."team_id" = 99999
          AND "insights_filesystem"."type" = 'session_recording_playlist'
          AND NOT ("insights_filesystem"."shortcut"
@@ -44,19 +50,6 @@
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.10
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylist"
-  WHERE (NOT "insights_sessionrecordingplaylist"."deleted"
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND "insights_sessionrecordingplaylist"."type" = 'filters'
-         AND "insights_sessionrecordingplaylist"."team_id" = 99999
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND "insights_sessionrecordingplaylist"."type" = 'filters')
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.11
   '''
   SELECT "insights_sessionrecordingplaylist"."id",
          "insights_sessionrecordingplaylist"."short_id",
@@ -90,6 +83,8 @@
          "insights_team"."has_completed_onboarding_for",
          "insights_team"."onboarding_tasks",
          "insights_team"."ingested_event",
+         "insights_team"."ingested_production_event",
+         "insights_team"."ingested_production_event_last_checked_at",
          "insights_team"."person_processing_opt_out",
          "insights_team"."secret_api_token",
          "insights_team"."secret_api_token_backup",
@@ -103,9 +98,10 @@
          "insights_team"."session_recording_url_blocklist_config",
          "insights_team"."session_recording_event_trigger_config",
          "insights_team"."session_recording_trigger_match_type_config",
+         "insights_team"."session_recording_trigger_groups",
          "insights_team"."session_replay_config",
          "insights_team"."session_recording_retention_period",
-         "insights_team"."session_recording_encryption",
+         "insights_team"."event_retention_months",
          "insights_team"."conversations_enabled",
          "insights_team"."conversations_settings",
          "insights_team"."proactive_tasks_enabled",
@@ -121,6 +117,9 @@
          "insights_team"."autocapture_exceptions_opt_in",
          "insights_team"."autocapture_exceptions_errors_to_ignore",
          "insights_team"."logs_settings",
+         "insights_team"."llm_gateway_enabled_at",
+         "insights_team"."llm_gateway_revoked_at",
+         "insights_team"."llm_gateway_overspend_allowance_usd",
          "insights_team"."heatmaps_opt_in",
          "insights_team"."receive_org_level_activity_logs",
          "insights_team"."web_analytics_pre_aggregated_tables_enabled",
@@ -183,9 +182,9 @@
          "insights_user"."current_team_id",
          "insights_user"."email",
          "insights_user"."pending_email",
-         "insights_user"."temporary_token",
          "insights_user"."distinct_id",
          "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
          "insights_user"."requested_password_reset_at",
          "insights_user"."requested_2fa_reset_at",
          "insights_user"."has_seen_product_intro_for",
@@ -201,6 +200,14 @@
          "insights_user"."allow_sidebar_suggestions",
          "insights_user"."shortcut_position",
          "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
          "insights_user"."events_column_config",
          "insights_user"."email_opt_in",
          T4."id",
@@ -215,9 +222,9 @@
          T4."current_team_id",
          T4."email",
          T4."pending_email",
-         T4."temporary_token",
          T4."distinct_id",
          T4."is_email_verified",
+         T4."credentials_reviewed_at",
          T4."requested_password_reset_at",
          T4."requested_2fa_reset_at",
          T4."has_seen_product_intro_for",
@@ -233,6 +240,14 @@
          T4."allow_sidebar_suggestions",
          T4."shortcut_position",
          T4."passkeys_enabled_for_2fa",
+         T4."hide_mcp_hints",
+         T4."ui_configuration",
+         T4."onboarding_skipped_at",
+         T4."onboarding_skipped_reason",
+         T4."onboarding_skipped_organization_id",
+         T4."onboarding_delegated_to_invite_id",
+         T4."onboarding_delegated_to_organization_id",
+         T4."onboarding_delegation_accepted_at",
          T4."events_column_config",
          T4."email_opt_in"
   FROM "insights_sessionrecordingplaylist"
@@ -246,27 +261,43 @@
          AND NOT "insights_sessionrecordingplaylist"."deleted"
          AND NOT "insights_sessionrecordingplaylist"."deleted"
          AND "insights_sessionrecordingplaylist"."type" = 'filters')
-  ORDER BY "insights_sessionrecordingplaylist"."last_modified_at" DESC
+  ORDER BY "insights_sessionrecordingplaylist"."last_modified_at" DESC,
+           "insights_sessionrecordingplaylist"."id" ASC
   LIMIT 100
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.11
+  '''
+  SELECT "insights_sessionrecordingplaylistitem"."playlist_id" AS "playlist_id",
+         COUNT("insights_sessionrecordingplaylistitem"."id") AS "c"
+  FROM "insights_sessionrecordingplaylistitem"
+  INNER JOIN "insights_sessionrecordingplaylist" ON ("insights_sessionrecordingplaylistitem"."playlist_id" = "insights_sessionrecordingplaylist"."id")
+  WHERE ("insights_sessionrecordingplaylist"."team_id" = 99999
+         AND "insights_sessionrecordingplaylistitem"."playlist_id" IN (1,
+                                                                      2,
+                                                                      3,
+                                                                      4,
+                                                                      5 /* ... */)
+         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
+                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
+  GROUP BY 1
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.12
   '''
-  SELECT "insights_sessionrecordingplaylistitem"."session_id"
+  SELECT "insights_sessionrecordingplaylistitem"."playlist_id" AS "playlist_id",
+         "insights_sessionrecordingplaylistitem"."recording_id" AS "recording_id"
   FROM "insights_sessionrecordingplaylistitem"
-  WHERE "insights_sessionrecordingplaylistitem"."playlist_id" = 99999
+  INNER JOIN "insights_sessionrecordingplaylist" ON ("insights_sessionrecordingplaylistitem"."playlist_id" = "insights_sessionrecordingplaylist"."id")
+  WHERE ("insights_sessionrecordingplaylist"."team_id" = 99999
+         AND "insights_sessionrecordingplaylistitem"."playlist_id" IN (1,
+                                                                      2,
+                                                                      3,
+                                                                      4,
+                                                                      5 /* ... */))
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.13
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE ("insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
-                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.14
   '''
   SELECT "insights_user"."id",
          "insights_user"."password",
@@ -280,9 +311,9 @@
          "insights_user"."current_team_id",
          "insights_user"."email",
          "insights_user"."pending_email",
-         "insights_user"."temporary_token",
          "insights_user"."distinct_id",
          "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
          "insights_user"."requested_2fa_reset_at",
          "insights_user"."has_seen_product_intro_for",
          "insights_user"."strapi_id",
@@ -297,14 +328,22 @@
          "insights_user"."allow_sidebar_suggestions",
          "insights_user"."shortcut_position",
          "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
          "insights_user"."events_column_config",
          "insights_user"."email_opt_in"
   FROM "insights_user"
-  WHERE "insights_user"."id" = 99999
-  LIMIT 21
+  WHERE ("insights_user"."is_active"
+         AND "insights_user"."id" = 99999)
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.15
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.14
   '''
   SELECT "insights_organization"."id",
          "insights_organization"."name",
@@ -317,9 +356,14 @@
          "insights_organization"."session_cookie_age",
          "insights_organization"."is_member_join_email_enabled",
          "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
          "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
          "insights_organization"."allow_publicly_shared_resources",
          "insights_organization"."default_role_id",
          "insights_organization"."plugins_access_level",
@@ -327,6 +371,7 @@
          "insights_organization"."default_experiment_stats_method",
          "insights_organization"."default_anonymize_ips",
          "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
          "insights_organization"."customer_id",
          "insights_organization"."available_product_features",
          "insights_organization"."usage",
@@ -341,7 +386,7 @@
   LIMIT 21
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.16
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.15
   '''
   SELECT "insights_team"."id",
          "insights_team"."uuid",
@@ -359,6 +404,8 @@
          "insights_team"."has_completed_onboarding_for",
          "insights_team"."onboarding_tasks",
          "insights_team"."ingested_event",
+         "insights_team"."ingested_production_event",
+         "insights_team"."ingested_production_event_last_checked_at",
          "insights_team"."person_processing_opt_out",
          "insights_team"."secret_api_token",
          "insights_team"."secret_api_token_backup",
@@ -372,9 +419,10 @@
          "insights_team"."session_recording_url_blocklist_config",
          "insights_team"."session_recording_event_trigger_config",
          "insights_team"."session_recording_trigger_match_type_config",
+         "insights_team"."session_recording_trigger_groups",
          "insights_team"."session_replay_config",
          "insights_team"."session_recording_retention_period",
-         "insights_team"."session_recording_encryption",
+         "insights_team"."event_retention_months",
          "insights_team"."conversations_enabled",
          "insights_team"."conversations_settings",
          "insights_team"."proactive_tasks_enabled",
@@ -390,6 +438,9 @@
          "insights_team"."autocapture_exceptions_opt_in",
          "insights_team"."autocapture_exceptions_errors_to_ignore",
          "insights_team"."logs_settings",
+         "insights_team"."llm_gateway_enabled_at",
+         "insights_team"."llm_gateway_revoked_at",
+         "insights_team"."llm_gateway_overspend_allowance_usd",
          "insights_team"."heatmaps_opt_in",
          "insights_team"."receive_org_level_activity_logs",
          "insights_team"."web_analytics_pre_aggregated_tables_enabled",
@@ -426,26 +477,12 @@
          "insights_team"."external_data_workspace_id",
          "insights_team"."external_data_workspace_last_synced_at",
          "insights_team"."api_query_rate_limit",
-         "insights_team"."revenue_tracking_config",
          "insights_team"."drop_events_older_than",
          "insights_team"."base_currency",
          "insights_team"."experiment_recalculation_time",
          "insights_team"."default_experiment_confidence_level",
          "insights_team"."default_experiment_stats_method",
-         "insights_team"."business_model"
-  FROM "insights_team"
-  WHERE "insights_team"."id" = 99999
-  LIMIT 21
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.17
-  '''
-  SELECT "insights_organizationmembership"."id",
-         "insights_organizationmembership"."organization_id",
-         "insights_organizationmembership"."user_id",
-         "insights_organizationmembership"."level",
-         "insights_organizationmembership"."joined_at",
-         "insights_organizationmembership"."updated_at",
+         "insights_team"."business_model",
          "insights_organization"."id",
          "insights_organization"."name",
          "insights_organization"."slug",
@@ -457,9 +494,14 @@
          "insights_organization"."session_cookie_age",
          "insights_organization"."is_member_join_email_enabled",
          "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
          "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
          "insights_organization"."allow_publicly_shared_resources",
          "insights_organization"."default_role_id",
          "insights_organization"."plugins_access_level",
@@ -467,6 +509,58 @@
          "insights_organization"."default_experiment_stats_method",
          "insights_organization"."default_anonymize_ips",
          "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_team"
+  INNER JOIN "insights_organization" ON ("insights_team"."organization_id" = "insights_organization"."id")
+  WHERE "insights_team"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.16
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
          "insights_organization"."customer_id",
          "insights_organization"."available_product_features",
          "insights_organization"."usage",
@@ -483,7 +577,7 @@
   LIMIT 21
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.18
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.17
   '''
   SELECT "ee_accesscontrol"."id",
          "ee_accesscontrol"."team_id",
@@ -494,42 +588,20 @@
          "ee_accesscontrol"."role_id",
          "ee_accesscontrol"."created_by_id",
          "ee_accesscontrol"."created_at",
-         "ee_accesscontrol"."updated_at"
+         "ee_accesscontrol"."updated_at",
+         "insights_team"."organization_id" AS "_team_organization_id"
   FROM "ee_accesscontrol"
+  INNER JOIN "insights_team" ON ("ee_accesscontrol"."team_id" = "insights_team"."id")
   LEFT OUTER JOIN "insights_organizationmembership" ON ("ee_accesscontrol"."organization_member_id" = "insights_organizationmembership"."id")
   WHERE (("ee_accesscontrol"."organization_member_id" IS NULL
-          AND "ee_accesscontrol"."resource" = 'project'
-          AND "ee_accesscontrol"."resource_id" = '99999'
           AND "ee_accesscontrol"."role_id" IS NULL
           AND "ee_accesscontrol"."team_id" = 99999)
          OR ("insights_organizationmembership"."user_id" = 99999
-             AND "ee_accesscontrol"."resource" = 'project'
-             AND "ee_accesscontrol"."resource_id" = '99999'
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("ee_accesscontrol"."organization_member_id" IS NULL
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("insights_organizationmembership"."user_id" = 99999
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("ee_accesscontrol"."organization_member_id" IS NULL
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NOT NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("insights_organizationmembership"."user_id" = 99999
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NOT NULL
              AND "ee_accesscontrol"."role_id" IS NULL
              AND "ee_accesscontrol"."team_id" = 99999))
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.19
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.18
   '''
   SELECT "insights_organizationmembership"."id",
          "insights_organizationmembership"."organization_id",
@@ -537,6 +609,7 @@
          "insights_organizationmembership"."level",
          "insights_organizationmembership"."joined_at",
          "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
          "insights_organization"."id",
          "insights_organization"."name",
          "insights_organization"."slug",
@@ -548,9 +621,14 @@
          "insights_organization"."session_cookie_age",
          "insights_organization"."is_member_join_email_enabled",
          "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
          "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
          "insights_organization"."allow_publicly_shared_resources",
          "insights_organization"."default_role_id",
          "insights_organization"."plugins_access_level",
@@ -558,6 +636,7 @@
          "insights_organization"."default_experiment_stats_method",
          "insights_organization"."default_anonymize_ips",
          "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
          "insights_organization"."customer_id",
          "insights_organization"."available_product_features",
          "insights_organization"."usage",
@@ -570,6 +649,19 @@
   FROM "insights_organizationmembership"
   INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
   WHERE "insights_organizationmembership"."user_id" = 99999
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.19
+  '''
+  SELECT COUNT(*) AS "__count"
+  FROM "insights_sessionrecordingplaylist"
+  WHERE (NOT "insights_sessionrecordingplaylist"."deleted"
+         AND NOT "insights_sessionrecordingplaylist"."deleted"
+         AND "insights_sessionrecordingplaylist"."type" = 'collection'
+         AND "insights_sessionrecordingplaylist"."team_id" = 99999
+         AND NOT "insights_sessionrecordingplaylist"."deleted"
+         AND NOT "insights_sessionrecordingplaylist"."deleted"
+         AND "insights_sessionrecordingplaylist"."type" = 'collection')
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.2
@@ -585,9 +677,12 @@
          "insights_filesystem"."meta",
          "insights_filesystem"."created_at",
          "insights_filesystem"."created_by_id",
+         "insights_filesystem"."surface",
          "insights_filesystem"."project_id"
   FROM "insights_filesystem"
-  WHERE ("insights_filesystem"."ref" = '0001'
+  WHERE (("insights_filesystem"."surface" IS NULL
+          OR "insights_filesystem"."surface" = 'web')
+         AND "insights_filesystem"."ref" = '0001'
          AND "insights_filesystem"."team_id" = 99999
          AND "insights_filesystem"."type" = 'session_recording_playlist'
          AND NOT ("insights_filesystem"."shortcut"
@@ -595,32 +690,6 @@
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.20
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylist"
-  WHERE (NOT "insights_sessionrecordingplaylist"."deleted"
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND "insights_sessionrecordingplaylist"."type" = 'collection'
-         AND "insights_sessionrecordingplaylist"."team_id" = 99999
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND "insights_sessionrecordingplaylist"."type" = 'collection')
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.21
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylist"
-  WHERE (NOT "insights_sessionrecordingplaylist"."deleted"
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND "insights_sessionrecordingplaylist"."type" = 'collection'
-         AND "insights_sessionrecordingplaylist"."team_id" = 99999
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND "insights_sessionrecordingplaylist"."type" = 'collection')
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.22
   '''
   SELECT "insights_sessionrecordingplaylist"."id",
          "insights_sessionrecordingplaylist"."short_id",
@@ -654,6 +723,8 @@
          "insights_team"."has_completed_onboarding_for",
          "insights_team"."onboarding_tasks",
          "insights_team"."ingested_event",
+         "insights_team"."ingested_production_event",
+         "insights_team"."ingested_production_event_last_checked_at",
          "insights_team"."person_processing_opt_out",
          "insights_team"."secret_api_token",
          "insights_team"."secret_api_token_backup",
@@ -667,9 +738,10 @@
          "insights_team"."session_recording_url_blocklist_config",
          "insights_team"."session_recording_event_trigger_config",
          "insights_team"."session_recording_trigger_match_type_config",
+         "insights_team"."session_recording_trigger_groups",
          "insights_team"."session_replay_config",
          "insights_team"."session_recording_retention_period",
-         "insights_team"."session_recording_encryption",
+         "insights_team"."event_retention_months",
          "insights_team"."conversations_enabled",
          "insights_team"."conversations_settings",
          "insights_team"."proactive_tasks_enabled",
@@ -685,6 +757,9 @@
          "insights_team"."autocapture_exceptions_opt_in",
          "insights_team"."autocapture_exceptions_errors_to_ignore",
          "insights_team"."logs_settings",
+         "insights_team"."llm_gateway_enabled_at",
+         "insights_team"."llm_gateway_revoked_at",
+         "insights_team"."llm_gateway_overspend_allowance_usd",
          "insights_team"."heatmaps_opt_in",
          "insights_team"."receive_org_level_activity_logs",
          "insights_team"."web_analytics_pre_aggregated_tables_enabled",
@@ -747,9 +822,9 @@
          "insights_user"."current_team_id",
          "insights_user"."email",
          "insights_user"."pending_email",
-         "insights_user"."temporary_token",
          "insights_user"."distinct_id",
          "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
          "insights_user"."requested_password_reset_at",
          "insights_user"."requested_2fa_reset_at",
          "insights_user"."has_seen_product_intro_for",
@@ -765,6 +840,14 @@
          "insights_user"."allow_sidebar_suggestions",
          "insights_user"."shortcut_position",
          "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
          "insights_user"."events_column_config",
          "insights_user"."email_opt_in",
          T4."id",
@@ -779,9 +862,9 @@
          T4."current_team_id",
          T4."email",
          T4."pending_email",
-         T4."temporary_token",
          T4."distinct_id",
          T4."is_email_verified",
+         T4."credentials_reviewed_at",
          T4."requested_password_reset_at",
          T4."requested_2fa_reset_at",
          T4."has_seen_product_intro_for",
@@ -797,6 +880,14 @@
          T4."allow_sidebar_suggestions",
          T4."shortcut_position",
          T4."passkeys_enabled_for_2fa",
+         T4."hide_mcp_hints",
+         T4."ui_configuration",
+         T4."onboarding_skipped_at",
+         T4."onboarding_skipped_reason",
+         T4."onboarding_skipped_organization_id",
+         T4."onboarding_delegated_to_invite_id",
+         T4."onboarding_delegated_to_organization_id",
+         T4."onboarding_delegation_accepted_at",
          T4."events_column_config",
          T4."email_opt_in"
   FROM "insights_sessionrecordingplaylist"
@@ -810,11 +901,52 @@
          AND NOT "insights_sessionrecordingplaylist"."deleted"
          AND NOT "insights_sessionrecordingplaylist"."deleted"
          AND "insights_sessionrecordingplaylist"."type" = 'collection')
-  ORDER BY "insights_sessionrecordingplaylist"."last_modified_at" DESC
-  LIMIT 100
+  ORDER BY "insights_sessionrecordingplaylist"."last_modified_at" DESC,
+           "insights_sessionrecordingplaylist"."id" ASC
+  LIMIT 93
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.21
+  '''
+  SELECT "insights_sessionrecordingplaylistitem"."playlist_id" AS "playlist_id",
+         COUNT("insights_sessionrecordingplaylistitem"."id") AS "c"
+  FROM "insights_sessionrecordingplaylistitem"
+  INNER JOIN "insights_sessionrecordingplaylist" ON ("insights_sessionrecordingplaylistitem"."playlist_id" = "insights_sessionrecordingplaylist"."id")
+  WHERE ("insights_sessionrecordingplaylist"."team_id" = 99999
+         AND "insights_sessionrecordingplaylistitem"."playlist_id" IN (1,
+                                                                      2,
+                                                                      3,
+                                                                      4,
+                                                                      5 /* ... */)
+         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
+                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
+  GROUP BY 1
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.22
+  '''
+  SELECT "insights_sessionrecordingplaylistitem"."playlist_id" AS "playlist_id",
+         "insights_sessionrecordingplaylistitem"."recording_id" AS "recording_id"
+  FROM "insights_sessionrecordingplaylistitem"
+  INNER JOIN "insights_sessionrecordingplaylist" ON ("insights_sessionrecordingplaylistitem"."playlist_id" = "insights_sessionrecordingplaylist"."id")
+  WHERE ("insights_sessionrecordingplaylist"."team_id" = 99999
+         AND "insights_sessionrecordingplaylistitem"."playlist_id" IN (1,
+                                                                      2,
+                                                                      3,
+                                                                      4,
+                                                                      5 /* ... */))
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.23
+  '''
+  SELECT "insights_sessionrecordingviewed"."session_id" AS "session_id"
+  FROM "insights_sessionrecordingviewed"
+  WHERE ("insights_sessionrecordingviewed"."team_id" = 99999
+         AND "insights_sessionrecordingviewed"."user_id" = 99999
+         AND "insights_sessionrecordingviewed"."session_id" IN ('00000000-0000-0000-0000-000000000000'))
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.24
   '''
   SELECT COUNT(*) AS "__count"
   FROM "insights_sessionrecordingviewed"
@@ -822,11 +954,11 @@
          AND "insights_sessionrecordingviewed"."user_id" = 99999)
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.24
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.25
   '''
   SELECT COUNT(*)
   FROM
-    (SELECT DISTINCT "insights_comment"."item_id" AS "col1"
+    (SELECT DISTINCT "insights_comment"."item_id" AS "item_id"
      FROM "insights_comment"
      WHERE (NOT "insights_comment"."deleted"
             AND "insights_comment"."scope" = 'Replay'
@@ -834,22 +966,22 @@
             AND NOT ("insights_comment"."item_id" IS NULL))) subquery
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.25
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.26
   '''
   SELECT COUNT(*)
   FROM
-    (SELECT DISTINCT "insights_sharingconfiguration"."recording_id" AS "col1"
+    (SELECT DISTINCT "insights_sharingconfiguration"."recording_id" AS "recording__session_id"
      FROM "insights_sharingconfiguration"
      WHERE ("insights_sharingconfiguration"."enabled"
             AND "insights_sharingconfiguration"."team_id" = 99999
             AND NOT ("insights_sharingconfiguration"."recording_id" IS NULL))) subquery
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.26
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.27
   '''
   SELECT COUNT(*)
   FROM
-    (SELECT DISTINCT ("insights_exportedasset"."export_context" -> 'session_recording_id') AS "col1"
+    (SELECT DISTINCT ("insights_exportedasset"."export_context" -> 'session_recording_id') AS "export_context__session_recording_id"
      FROM "insights_exportedasset"
      WHERE (("insights_exportedasset"."expires_after" >= '2025-01-01 12:00:00+00:00'::timestamptz
              OR "insights_exportedasset"."expires_after" IS NULL)
@@ -860,10 +992,11 @@
                      AND "insights_exportedasset"."export_context" IS NOT NULL))) subquery
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.27
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.28
   '''
   SELECT "insights_datawarehousesavedquery"."created_by_id",
          "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."updated_at",
          "insights_datawarehousesavedquery"."deleted",
          "insights_datawarehousesavedquery"."deleted_at",
          "insights_datawarehousesavedquery"."id",
@@ -871,6 +1004,7 @@
          "insights_datawarehousesavedquery"."team_id",
          "insights_datawarehousesavedquery"."latest_error",
          "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."column_order",
          "insights_datawarehousesavedquery"."external_tables",
          "insights_datawarehousesavedquery"."query",
          "insights_datawarehousesavedquery"."status",
@@ -880,7 +1014,51 @@
          "insights_datawarehousesavedquery"."is_materialized",
          "insights_datawarehousesavedquery"."deleted_name",
          "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."folder_id",
          "insights_datawarehousesavedquery"."origin",
+         "insights_datawarehousesavedquery"."is_test",
+         "insights_datawarehousesavedquery"."expires_at",
+         "insights_datawarehousesavedquery"."semantic_enrichment_hash",
+         "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
+         "insights_user"."requested_password_reset_at",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in",
          "insights_datawarehousetable"."created_by_id",
          "insights_datawarehousetable"."created_at",
          "insights_datawarehousetable"."updated_at",
@@ -895,14 +1073,10 @@
          "insights_datawarehousetable"."credential_id",
          "insights_datawarehousetable"."external_data_source_id",
          "insights_datawarehousetable"."columns",
+         "insights_datawarehousetable"."column_order",
+         "insights_datawarehousetable"."options",
          "insights_datawarehousetable"."row_count",
          "insights_datawarehousetable"."size_in_s3_mib",
-         "insights_datawarehousecredential"."created_by_id",
-         "insights_datawarehousecredential"."created_at",
-         "insights_datawarehousecredential"."id",
-         "insights_datawarehousecredential"."access_key",
-         "insights_datawarehousecredential"."access_secret",
-         "insights_datawarehousecredential"."team_id",
          "insights_datawarehousemanagedviewset"."created_by_id",
          "insights_datawarehousemanagedviewset"."created_at",
          "insights_datawarehousemanagedviewset"."updated_at",
@@ -911,8 +1085,8 @@
          "insights_datawarehousemanagedviewset"."kind"
   FROM "insights_datawarehousesavedquery"
   LEFT OUTER JOIN "insights_datawarehousemanagedviewset" ON ("insights_datawarehousesavedquery"."managed_viewset_id" = "insights_datawarehousemanagedviewset"."id")
+  LEFT OUTER JOIN "insights_user" ON ("insights_datawarehousesavedquery"."created_by_id" = "insights_user"."id")
   LEFT OUTER JOIN "insights_datawarehousetable" ON ("insights_datawarehousesavedquery"."table_id" = "insights_datawarehousetable"."id")
-  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
   WHERE ("insights_datawarehousesavedquery"."team_id" = 99999
          AND NOT ("insights_datawarehousesavedquery"."deleted"
                   AND "insights_datawarehousesavedquery"."deleted" IS NOT NULL)
@@ -920,10 +1094,11 @@
   ORDER BY "insights_datawarehousesavedquery"."name" ASC
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.28
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.29
   '''
   SELECT "insights_datawarehousesavedquery"."created_by_id",
          "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."updated_at",
          "insights_datawarehousesavedquery"."deleted",
          "insights_datawarehousesavedquery"."deleted_at",
          "insights_datawarehousesavedquery"."id",
@@ -931,6 +1106,7 @@
          "insights_datawarehousesavedquery"."team_id",
          "insights_datawarehousesavedquery"."latest_error",
          "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."column_order",
          "insights_datawarehousesavedquery"."external_tables",
          "insights_datawarehousesavedquery"."query",
          "insights_datawarehousesavedquery"."status",
@@ -940,7 +1116,51 @@
          "insights_datawarehousesavedquery"."is_materialized",
          "insights_datawarehousesavedquery"."deleted_name",
          "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."folder_id",
          "insights_datawarehousesavedquery"."origin",
+         "insights_datawarehousesavedquery"."is_test",
+         "insights_datawarehousesavedquery"."expires_at",
+         "insights_datawarehousesavedquery"."semantic_enrichment_hash",
+         "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
+         "insights_user"."requested_password_reset_at",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in",
          "insights_datawarehousetable"."created_by_id",
          "insights_datawarehousetable"."created_at",
          "insights_datawarehousetable"."updated_at",
@@ -955,52 +1175,17 @@
          "insights_datawarehousetable"."credential_id",
          "insights_datawarehousetable"."external_data_source_id",
          "insights_datawarehousetable"."columns",
+         "insights_datawarehousetable"."column_order",
+         "insights_datawarehousetable"."options",
          "insights_datawarehousetable"."row_count",
-         "insights_datawarehousetable"."size_in_s3_mib",
-         "insights_datawarehousecredential"."created_by_id",
-         "insights_datawarehousecredential"."created_at",
-         "insights_datawarehousecredential"."id",
-         "insights_datawarehousecredential"."access_key",
-         "insights_datawarehousecredential"."access_secret",
-         "insights_datawarehousecredential"."team_id"
+         "insights_datawarehousetable"."size_in_s3_mib"
   FROM "insights_datawarehousesavedquery"
+  LEFT OUTER JOIN "insights_user" ON ("insights_datawarehousesavedquery"."created_by_id" = "insights_user"."id")
   LEFT OUTER JOIN "insights_datawarehousetable" ON ("insights_datawarehousesavedquery"."table_id" = "insights_datawarehousetable"."id")
-  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
   WHERE ("insights_datawarehousesavedquery"."team_id" = 99999
          AND "insights_datawarehousesavedquery"."origin" = 'endpoint'
          AND NOT ("insights_datawarehousesavedquery"."deleted"
                   AND "insights_datawarehousesavedquery"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.29
-  '''
-  SELECT "insights_externaldatasource"."created_by_id",
-         "insights_externaldatasource"."created_at",
-         "insights_externaldatasource"."updated_at",
-         "insights_externaldatasource"."deleted",
-         "insights_externaldatasource"."deleted_at",
-         "insights_externaldatasource"."id",
-         "insights_externaldatasource"."source_id",
-         "insights_externaldatasource"."connection_id",
-         "insights_externaldatasource"."destination_id",
-         "insights_externaldatasource"."team_id",
-         "insights_externaldatasource"."sync_frequency",
-         "insights_externaldatasource"."status",
-         "insights_externaldatasource"."source_type",
-         "insights_externaldatasource"."job_inputs",
-         "insights_externaldatasource"."are_tables_created",
-         "insights_externaldatasource"."prefix",
-         "insights_externaldatasource"."description",
-         "insights_externaldatasource"."revenue_analytics_enabled",
-         "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id",
-         "insights_externaldatasourcerevenueanalyticsconfig"."enabled",
-         "insights_externaldatasourcerevenueanalyticsconfig"."include_invoiceless_charges"
-  FROM "insights_externaldatasource"
-  LEFT OUTER JOIN "insights_externaldatasourcerevenueanalyticsconfig" ON ("insights_externaldatasource"."id" = "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id")
-  WHERE ("insights_externaldatasource"."source_type" IN ('Stripe')
-         AND "insights_externaldatasource"."team_id" = 99999
-         AND NOT ("insights_externaldatasource"."deleted"
-                  AND "insights_externaldatasource"."deleted" IS NOT NULL))
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.3
@@ -1017,9 +1202,9 @@
          "insights_user"."current_team_id",
          "insights_user"."email",
          "insights_user"."pending_email",
-         "insights_user"."temporary_token",
          "insights_user"."distinct_id",
          "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
          "insights_user"."requested_2fa_reset_at",
          "insights_user"."has_seen_product_intro_for",
          "insights_user"."strapi_id",
@@ -1034,14 +1219,60 @@
          "insights_user"."allow_sidebar_suggestions",
          "insights_user"."shortcut_position",
          "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
          "insights_user"."events_column_config",
          "insights_user"."email_opt_in"
   FROM "insights_user"
-  WHERE "insights_user"."id" = 99999
-  LIMIT 21
+  WHERE ("insights_user"."is_active"
+         AND "insights_user"."id" = 99999)
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.30
+  '''
+  SELECT "insights_externaldatasource"."created_by_id",
+         "insights_externaldatasource"."created_at",
+         "insights_externaldatasource"."updated_at",
+         "insights_externaldatasource"."deleted",
+         "insights_externaldatasource"."deleted_at",
+         "insights_externaldatasource"."id",
+         "insights_externaldatasource"."source_id",
+         "insights_externaldatasource"."connection_id",
+         "insights_externaldatasource"."destination_id",
+         "insights_externaldatasource"."team_id",
+         "insights_externaldatasource"."sync_frequency",
+         "insights_externaldatasource"."status",
+         "insights_externaldatasource"."source_type",
+         "insights_externaldatasource"."api_version",
+         "insights_externaldatasource"."job_inputs",
+         "insights_externaldatasource"."connection_metadata",
+         "insights_externaldatasource"."are_tables_created",
+         "insights_externaldatasource"."prefix",
+         "insights_externaldatasource"."description",
+         "insights_externaldatasource"."created_via",
+         "insights_externaldatasource"."access_method",
+         "insights_externaldatasource"."direct_query_enabled",
+         "insights_externaldatasource"."auto_sync_new_schemas",
+         "insights_externaldatasource"."auto_sync_schema_patterns",
+         "insights_externaldatasource"."revenue_analytics_enabled",
+         "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id",
+         "insights_externaldatasourcerevenueanalyticsconfig"."enabled",
+         "insights_externaldatasourcerevenueanalyticsconfig"."include_invoiceless_charges"
+  FROM "insights_externaldatasource"
+  LEFT OUTER JOIN "insights_externaldatasourcerevenueanalyticsconfig" ON ("insights_externaldatasource"."id" = "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id")
+  WHERE ("insights_externaldatasource"."source_type" IN ('Stripe')
+         AND "insights_externaldatasource"."team_id" = 99999
+         AND NOT ("insights_externaldatasource"."deleted"
+                  AND "insights_externaldatasource"."deleted" IS NOT NULL))
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.31
   '''
   SELECT "insights_datawarehousetable"."created_by_id",
          "insights_datawarehousetable"."created_at",
@@ -1057,41 +1288,64 @@
          "insights_datawarehousetable"."credential_id",
          "insights_datawarehousetable"."external_data_source_id",
          "insights_datawarehousetable"."columns",
+         "insights_datawarehousetable"."column_order",
+         "insights_datawarehousetable"."options",
          "insights_datawarehousetable"."row_count",
          "insights_datawarehousetable"."size_in_s3_mib",
-         "insights_datawarehousecredential"."created_by_id",
-         "insights_datawarehousecredential"."created_at",
-         "insights_datawarehousecredential"."id",
-         "insights_datawarehousecredential"."access_key",
-         "insights_datawarehousecredential"."access_secret",
-         "insights_datawarehousecredential"."team_id",
-         "insights_externaldatasource"."created_by_id",
-         "insights_externaldatasource"."created_at",
-         "insights_externaldatasource"."updated_at",
-         "insights_externaldatasource"."deleted",
-         "insights_externaldatasource"."deleted_at",
-         "insights_externaldatasource"."id",
-         "insights_externaldatasource"."source_id",
-         "insights_externaldatasource"."connection_id",
-         "insights_externaldatasource"."destination_id",
-         "insights_externaldatasource"."team_id",
-         "insights_externaldatasource"."sync_frequency",
-         "insights_externaldatasource"."status",
-         "insights_externaldatasource"."source_type",
-         "insights_externaldatasource"."job_inputs",
-         "insights_externaldatasource"."are_tables_created",
-         "insights_externaldatasource"."prefix",
-         "insights_externaldatasource"."description",
-         "insights_externaldatasource"."revenue_analytics_enabled"
+         "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
+         "insights_user"."requested_password_reset_at",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
   FROM "insights_datawarehousetable"
-  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
   LEFT OUTER JOIN "insights_externaldatasource" ON ("insights_datawarehousetable"."external_data_source_id" = "insights_externaldatasource"."id")
+  LEFT OUTER JOIN "insights_user" ON ("insights_datawarehousetable"."created_by_id" = "insights_user"."id")
   WHERE ("insights_datawarehousetable"."team_id" = 99999
          AND NOT ("insights_datawarehousetable"."deleted"
-                  AND "insights_datawarehousetable"."deleted" IS NOT NULL))
+                  AND "insights_datawarehousetable"."deleted" IS NOT NULL)
+         AND NOT ("insights_externaldatasource"."deleted"
+                  AND "insights_externaldatasource"."deleted" IS NOT NULL)
+         AND NOT ("insights_externaldatasource"."access_method" = 'direct'
+                  AND "insights_externaldatasource"."access_method" IS NOT NULL))
+  ORDER BY "insights_datawarehousetable"."created_at" DESC
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.31
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.32
   '''
   SELECT "insights_datawarehousejoin"."created_by_id",
          "insights_datawarehousejoin"."created_at",
@@ -1111,48 +1365,40 @@
                   AND "insights_datawarehousejoin"."deleted" IS NOT NULL))
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.32
-  '''
-  SELECT COUNT(*)
-  FROM
-    (SELECT DISTINCT "ee_single_session_summary"."session_id" AS "col1"
-     FROM "ee_single_session_summary"
-     WHERE "ee_single_session_summary"."team_id" = 99999) subquery
-  '''
-# ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.33
   '''
-  SELECT "insights_sessionrecordingplaylistitem"."session_id"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE "insights_sessionrecordingplaylistitem"."playlist_id" = 99999
+  SELECT "insights_propertydefinition"."id",
+         "insights_propertydefinition"."team_id",
+         "insights_propertydefinition"."project_id",
+         "insights_propertydefinition"."name",
+         "insights_propertydefinition"."is_numerical",
+         "insights_propertydefinition"."property_type",
+         "insights_propertydefinition"."type",
+         "insights_propertydefinition"."group_type_index",
+         "insights_propertydefinition"."warehouse_origin",
+         "insights_propertydefinition"."property_type_format",
+         "insights_propertydefinition"."volume_30_day",
+         "insights_propertydefinition"."query_usage_30_day"
+  FROM "insights_propertydefinition"
+  WHERE (COALESCE("insights_propertydefinition"."project_id", "insights_propertydefinition"."team_id") = 99999
+         AND "insights_propertydefinition"."name" IN ('$session_id')
+         AND "insights_propertydefinition"."type" IN (1,
+                                                     2,
+                                                     3,
+                                                     4,
+                                                     5 /* ... */))
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.34
   '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE ("insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
-                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
+  SELECT COUNT(*)
+  FROM
+    (SELECT DISTINCT "ee_single_session_summary"."session_id" AS "session_id"
+     FROM "ee_single_session_summary"
+     WHERE "ee_single_session_summary"."team_id" = 99999) subquery
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.35
-  '''
-  SELECT "insights_sessionrecordingplaylistitem"."session_id"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE "insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.36
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE ("insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
-                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.37
   '''
   SELECT "insights_user"."id",
          "insights_user"."password",
@@ -1166,9 +1412,9 @@
          "insights_user"."current_team_id",
          "insights_user"."email",
          "insights_user"."pending_email",
-         "insights_user"."temporary_token",
          "insights_user"."distinct_id",
          "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
          "insights_user"."requested_2fa_reset_at",
          "insights_user"."has_seen_product_intro_for",
          "insights_user"."strapi_id",
@@ -1183,14 +1429,22 @@
          "insights_user"."allow_sidebar_suggestions",
          "insights_user"."shortcut_position",
          "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
          "insights_user"."events_column_config",
          "insights_user"."email_opt_in"
   FROM "insights_user"
-  WHERE "insights_user"."id" = 99999
-  LIMIT 21
+  WHERE ("insights_user"."is_active"
+         AND "insights_user"."id" = 99999)
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.38
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.36
   '''
   SELECT "insights_organization"."id",
          "insights_organization"."name",
@@ -1203,9 +1457,14 @@
          "insights_organization"."session_cookie_age",
          "insights_organization"."is_member_join_email_enabled",
          "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
          "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
          "insights_organization"."allow_publicly_shared_resources",
          "insights_organization"."default_role_id",
          "insights_organization"."plugins_access_level",
@@ -1213,6 +1472,7 @@
          "insights_organization"."default_experiment_stats_method",
          "insights_organization"."default_anonymize_ips",
          "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
          "insights_organization"."customer_id",
          "insights_organization"."available_product_features",
          "insights_organization"."usage",
@@ -1227,7 +1487,7 @@
   LIMIT 21
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.39
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.37
   '''
   SELECT "insights_team"."id",
          "insights_team"."uuid",
@@ -1245,6 +1505,8 @@
          "insights_team"."has_completed_onboarding_for",
          "insights_team"."onboarding_tasks",
          "insights_team"."ingested_event",
+         "insights_team"."ingested_production_event",
+         "insights_team"."ingested_production_event_last_checked_at",
          "insights_team"."person_processing_opt_out",
          "insights_team"."secret_api_token",
          "insights_team"."secret_api_token_backup",
@@ -1258,9 +1520,10 @@
          "insights_team"."session_recording_url_blocklist_config",
          "insights_team"."session_recording_event_trigger_config",
          "insights_team"."session_recording_trigger_match_type_config",
+         "insights_team"."session_recording_trigger_groups",
          "insights_team"."session_replay_config",
          "insights_team"."session_recording_retention_period",
-         "insights_team"."session_recording_encryption",
+         "insights_team"."event_retention_months",
          "insights_team"."conversations_enabled",
          "insights_team"."conversations_settings",
          "insights_team"."proactive_tasks_enabled",
@@ -1276,6 +1539,9 @@
          "insights_team"."autocapture_exceptions_opt_in",
          "insights_team"."autocapture_exceptions_errors_to_ignore",
          "insights_team"."logs_settings",
+         "insights_team"."llm_gateway_enabled_at",
+         "insights_team"."llm_gateway_revoked_at",
+         "insights_team"."llm_gateway_overspend_allowance_usd",
          "insights_team"."heatmaps_opt_in",
          "insights_team"."receive_org_level_activity_logs",
          "insights_team"."web_analytics_pre_aggregated_tables_enabled",
@@ -1312,16 +1578,128 @@
          "insights_team"."external_data_workspace_id",
          "insights_team"."external_data_workspace_last_synced_at",
          "insights_team"."api_query_rate_limit",
-         "insights_team"."revenue_tracking_config",
          "insights_team"."drop_events_older_than",
          "insights_team"."base_currency",
          "insights_team"."experiment_recalculation_time",
          "insights_team"."default_experiment_confidence_level",
          "insights_team"."default_experiment_stats_method",
-         "insights_team"."business_model"
+         "insights_team"."business_model",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
   FROM "insights_team"
+  INNER JOIN "insights_organization" ON ("insights_team"."organization_id" = "insights_organization"."id")
   WHERE "insights_team"."id" = 99999
   LIMIT 21
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.38
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.39
+  '''
+  SELECT "ee_accesscontrol"."id",
+         "ee_accesscontrol"."team_id",
+         "ee_accesscontrol"."access_level",
+         "ee_accesscontrol"."resource",
+         "ee_accesscontrol"."resource_id",
+         "ee_accesscontrol"."organization_member_id",
+         "ee_accesscontrol"."role_id",
+         "ee_accesscontrol"."created_by_id",
+         "ee_accesscontrol"."created_at",
+         "ee_accesscontrol"."updated_at",
+         "insights_team"."organization_id" AS "_team_organization_id"
+  FROM "ee_accesscontrol"
+  INNER JOIN "insights_team" ON ("ee_accesscontrol"."team_id" = "insights_team"."id")
+  LEFT OUTER JOIN "insights_organizationmembership" ON ("ee_accesscontrol"."organization_member_id" = "insights_organizationmembership"."id")
+  WHERE (("ee_accesscontrol"."organization_member_id" IS NULL
+          AND "ee_accesscontrol"."role_id" IS NULL
+          AND "ee_accesscontrol"."team_id" = 99999)
+         OR ("insights_organizationmembership"."user_id" = 99999
+             AND "ee_accesscontrol"."role_id" IS NULL
+             AND "ee_accesscontrol"."team_id" = 99999))
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.4
@@ -1337,9 +1715,14 @@
          "insights_organization"."session_cookie_age",
          "insights_organization"."is_member_join_email_enabled",
          "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
          "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
          "insights_organization"."allow_publicly_shared_resources",
          "insights_organization"."default_role_id",
          "insights_organization"."plugins_access_level",
@@ -1347,6 +1730,7 @@
          "insights_organization"."default_experiment_stats_method",
          "insights_organization"."default_anonymize_ips",
          "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
          "insights_organization"."customer_id",
          "insights_organization"."available_product_features",
          "insights_organization"."usage",
@@ -1369,6 +1753,7 @@
          "insights_organizationmembership"."level",
          "insights_organizationmembership"."joined_at",
          "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
          "insights_organization"."id",
          "insights_organization"."name",
          "insights_organization"."slug",
@@ -1380,9 +1765,14 @@
          "insights_organization"."session_cookie_age",
          "insights_organization"."is_member_join_email_enabled",
          "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
          "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
          "insights_organization"."allow_publicly_shared_resources",
          "insights_organization"."default_role_id",
          "insights_organization"."plugins_access_level",
@@ -1390,97 +1780,7 @@
          "insights_organization"."default_experiment_stats_method",
          "insights_organization"."default_anonymize_ips",
          "insights_organization"."is_hipaa",
-         "insights_organization"."customer_id",
-         "insights_organization"."available_product_features",
-         "insights_organization"."usage",
-         "insights_organization"."never_drop_data",
-         "insights_organization"."customer_trust_scores",
-         "insights_organization"."setup_section_2_completed",
-         "insights_organization"."personalization",
-         "insights_organization"."domain_whitelist",
-         "insights_organization"."is_platform"
-  FROM "insights_organizationmembership"
-  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
-  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
-         AND "insights_organizationmembership"."user_id" = 99999)
-  LIMIT 21
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.41
-  '''
-  SELECT "ee_accesscontrol"."id",
-         "ee_accesscontrol"."team_id",
-         "ee_accesscontrol"."access_level",
-         "ee_accesscontrol"."resource",
-         "ee_accesscontrol"."resource_id",
-         "ee_accesscontrol"."organization_member_id",
-         "ee_accesscontrol"."role_id",
-         "ee_accesscontrol"."created_by_id",
-         "ee_accesscontrol"."created_at",
-         "ee_accesscontrol"."updated_at"
-  FROM "ee_accesscontrol"
-  LEFT OUTER JOIN "insights_organizationmembership" ON ("ee_accesscontrol"."organization_member_id" = "insights_organizationmembership"."id")
-  WHERE (("ee_accesscontrol"."organization_member_id" IS NULL
-          AND "ee_accesscontrol"."resource" = 'project'
-          AND "ee_accesscontrol"."resource_id" = '99999'
-          AND "ee_accesscontrol"."role_id" IS NULL
-          AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("insights_organizationmembership"."user_id" = 99999
-             AND "ee_accesscontrol"."resource" = 'project'
-             AND "ee_accesscontrol"."resource_id" = '99999'
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("ee_accesscontrol"."organization_member_id" IS NULL
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("insights_organizationmembership"."user_id" = 99999
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("ee_accesscontrol"."organization_member_id" IS NULL
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NOT NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("insights_organizationmembership"."user_id" = 99999
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NOT NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.42
-  '''
-  SELECT "insights_organizationmembership"."id",
-         "insights_organizationmembership"."organization_id",
-         "insights_organizationmembership"."user_id",
-         "insights_organizationmembership"."level",
-         "insights_organizationmembership"."joined_at",
-         "insights_organizationmembership"."updated_at",
-         "insights_organization"."id",
-         "insights_organization"."name",
-         "insights_organization"."slug",
-         "insights_organization"."logo_media_id",
-         "insights_organization"."created_at",
-         "insights_organization"."updated_at",
-         "insights_organization"."is_active",
-         "insights_organization"."is_not_active_reason",
-         "insights_organization"."session_cookie_age",
-         "insights_organization"."is_member_join_email_enabled",
-         "insights_organization"."is_ai_data_processing_approved",
-         "insights_organization"."enforce_2fa",
-         "insights_organization"."members_can_invite",
-         "insights_organization"."members_can_use_personal_api_keys",
-         "insights_organization"."allow_publicly_shared_resources",
-         "insights_organization"."default_role_id",
-         "insights_organization"."plugins_access_level",
-         "insights_organization"."for_internal_metrics",
-         "insights_organization"."default_experiment_stats_method",
-         "insights_organization"."default_anonymize_ips",
-         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
          "insights_organization"."customer_id",
          "insights_organization"."available_product_features",
          "insights_organization"."usage",
@@ -1495,7 +1795,7 @@
   WHERE "insights_organizationmembership"."user_id" = 99999
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.43
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.41
   '''
   SELECT COUNT(*) AS "__count"
   FROM "insights_sessionrecordingplaylist"
@@ -1506,18 +1806,7 @@
          AND NOT "insights_sessionrecordingplaylist"."deleted")
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.44
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylist"
-  WHERE (NOT "insights_sessionrecordingplaylist"."deleted"
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND "insights_sessionrecordingplaylist"."team_id" = 99999
-         AND NOT "insights_sessionrecordingplaylist"."deleted"
-         AND NOT "insights_sessionrecordingplaylist"."deleted")
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.45
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.42
   '''
   SELECT "insights_sessionrecordingplaylist"."id",
          "insights_sessionrecordingplaylist"."short_id",
@@ -1551,6 +1840,8 @@
          "insights_team"."has_completed_onboarding_for",
          "insights_team"."onboarding_tasks",
          "insights_team"."ingested_event",
+         "insights_team"."ingested_production_event",
+         "insights_team"."ingested_production_event_last_checked_at",
          "insights_team"."person_processing_opt_out",
          "insights_team"."secret_api_token",
          "insights_team"."secret_api_token_backup",
@@ -1564,9 +1855,10 @@
          "insights_team"."session_recording_url_blocklist_config",
          "insights_team"."session_recording_event_trigger_config",
          "insights_team"."session_recording_trigger_match_type_config",
+         "insights_team"."session_recording_trigger_groups",
          "insights_team"."session_replay_config",
          "insights_team"."session_recording_retention_period",
-         "insights_team"."session_recording_encryption",
+         "insights_team"."event_retention_months",
          "insights_team"."conversations_enabled",
          "insights_team"."conversations_settings",
          "insights_team"."proactive_tasks_enabled",
@@ -1582,6 +1874,9 @@
          "insights_team"."autocapture_exceptions_opt_in",
          "insights_team"."autocapture_exceptions_errors_to_ignore",
          "insights_team"."logs_settings",
+         "insights_team"."llm_gateway_enabled_at",
+         "insights_team"."llm_gateway_revoked_at",
+         "insights_team"."llm_gateway_overspend_allowance_usd",
          "insights_team"."heatmaps_opt_in",
          "insights_team"."receive_org_level_activity_logs",
          "insights_team"."web_analytics_pre_aggregated_tables_enabled",
@@ -1644,9 +1939,9 @@
          "insights_user"."current_team_id",
          "insights_user"."email",
          "insights_user"."pending_email",
-         "insights_user"."temporary_token",
          "insights_user"."distinct_id",
          "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
          "insights_user"."requested_password_reset_at",
          "insights_user"."requested_2fa_reset_at",
          "insights_user"."has_seen_product_intro_for",
@@ -1662,6 +1957,14 @@
          "insights_user"."allow_sidebar_suggestions",
          "insights_user"."shortcut_position",
          "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
          "insights_user"."events_column_config",
          "insights_user"."email_opt_in",
          T4."id",
@@ -1676,9 +1979,9 @@
          T4."current_team_id",
          T4."email",
          T4."pending_email",
-         T4."temporary_token",
          T4."distinct_id",
          T4."is_email_verified",
+         T4."credentials_reviewed_at",
          T4."requested_password_reset_at",
          T4."requested_2fa_reset_at",
          T4."has_seen_product_intro_for",
@@ -1694,6 +1997,14 @@
          T4."allow_sidebar_suggestions",
          T4."shortcut_position",
          T4."passkeys_enabled_for_2fa",
+         T4."hide_mcp_hints",
+         T4."ui_configuration",
+         T4."onboarding_skipped_at",
+         T4."onboarding_skipped_reason",
+         T4."onboarding_skipped_organization_id",
+         T4."onboarding_delegated_to_invite_id",
+         T4."onboarding_delegated_to_organization_id",
+         T4."onboarding_delegation_accepted_at",
          T4."events_column_config",
          T4."email_opt_in"
   FROM "insights_sessionrecordingplaylist"
@@ -1705,8 +2016,49 @@
          AND "insights_sessionrecordingplaylist"."team_id" = 99999
          AND NOT "insights_sessionrecordingplaylist"."deleted"
          AND NOT "insights_sessionrecordingplaylist"."deleted")
-  ORDER BY "insights_sessionrecordingplaylist"."last_modified_at" DESC
-  LIMIT 100
+  ORDER BY "insights_sessionrecordingplaylist"."last_modified_at" DESC,
+           "insights_sessionrecordingplaylist"."id" ASC
+  LIMIT 93
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.43
+  '''
+  SELECT "insights_sessionrecordingplaylistitem"."playlist_id" AS "playlist_id",
+         COUNT("insights_sessionrecordingplaylistitem"."id") AS "c"
+  FROM "insights_sessionrecordingplaylistitem"
+  INNER JOIN "insights_sessionrecordingplaylist" ON ("insights_sessionrecordingplaylistitem"."playlist_id" = "insights_sessionrecordingplaylist"."id")
+  WHERE ("insights_sessionrecordingplaylist"."team_id" = 99999
+         AND "insights_sessionrecordingplaylistitem"."playlist_id" IN (1,
+                                                                      2,
+                                                                      3,
+                                                                      4,
+                                                                      5 /* ... */)
+         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
+                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
+  GROUP BY 1
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.44
+  '''
+  SELECT "insights_sessionrecordingplaylistitem"."playlist_id" AS "playlist_id",
+         "insights_sessionrecordingplaylistitem"."recording_id" AS "recording_id"
+  FROM "insights_sessionrecordingplaylistitem"
+  INNER JOIN "insights_sessionrecordingplaylist" ON ("insights_sessionrecordingplaylistitem"."playlist_id" = "insights_sessionrecordingplaylist"."id")
+  WHERE ("insights_sessionrecordingplaylist"."team_id" = 99999
+         AND "insights_sessionrecordingplaylistitem"."playlist_id" IN (1,
+                                                                      2,
+                                                                      3,
+                                                                      4,
+                                                                      5 /* ... */))
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.45
+  '''
+  SELECT "insights_sessionrecordingviewed"."session_id" AS "session_id"
+  FROM "insights_sessionrecordingviewed"
+  WHERE ("insights_sessionrecordingviewed"."team_id" = 99999
+         AND "insights_sessionrecordingviewed"."user_id" = 99999
+         AND "insights_sessionrecordingviewed"."session_id" IN ('00000000-0000-0000-0000-000000000000'))
   '''
 # ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.46
@@ -1721,7 +2073,7 @@
   '''
   SELECT COUNT(*)
   FROM
-    (SELECT DISTINCT "insights_comment"."item_id" AS "col1"
+    (SELECT DISTINCT "insights_comment"."item_id" AS "item_id"
      FROM "insights_comment"
      WHERE (NOT "insights_comment"."deleted"
             AND "insights_comment"."scope" = 'Replay'
@@ -1733,7 +2085,7 @@
   '''
   SELECT COUNT(*)
   FROM
-    (SELECT DISTINCT "insights_sharingconfiguration"."recording_id" AS "col1"
+    (SELECT DISTINCT "insights_sharingconfiguration"."recording_id" AS "recording__session_id"
      FROM "insights_sharingconfiguration"
      WHERE ("insights_sharingconfiguration"."enabled"
             AND "insights_sharingconfiguration"."team_id" = 99999
@@ -1744,7 +2096,7 @@
   '''
   SELECT COUNT(*)
   FROM
-    (SELECT DISTINCT ("insights_exportedasset"."export_context" -> 'session_recording_id') AS "col1"
+    (SELECT DISTINCT ("insights_exportedasset"."export_context" -> 'session_recording_id') AS "export_context__session_recording_id"
      FROM "insights_exportedasset"
      WHERE (("insights_exportedasset"."expires_after" >= '2025-01-01 12:00:00+00:00'::timestamptz
              OR "insights_exportedasset"."expires_after" IS NULL)
@@ -1773,6 +2125,8 @@
          "insights_team"."has_completed_onboarding_for",
          "insights_team"."onboarding_tasks",
          "insights_team"."ingested_event",
+         "insights_team"."ingested_production_event",
+         "insights_team"."ingested_production_event_last_checked_at",
          "insights_team"."person_processing_opt_out",
          "insights_team"."secret_api_token",
          "insights_team"."secret_api_token_backup",
@@ -1786,9 +2140,10 @@
          "insights_team"."session_recording_url_blocklist_config",
          "insights_team"."session_recording_event_trigger_config",
          "insights_team"."session_recording_trigger_match_type_config",
+         "insights_team"."session_recording_trigger_groups",
          "insights_team"."session_replay_config",
          "insights_team"."session_recording_retention_period",
-         "insights_team"."session_recording_encryption",
+         "insights_team"."event_retention_months",
          "insights_team"."conversations_enabled",
          "insights_team"."conversations_settings",
          "insights_team"."proactive_tasks_enabled",
@@ -1804,6 +2159,9 @@
          "insights_team"."autocapture_exceptions_opt_in",
          "insights_team"."autocapture_exceptions_errors_to_ignore",
          "insights_team"."logs_settings",
+         "insights_team"."llm_gateway_enabled_at",
+         "insights_team"."llm_gateway_revoked_at",
+         "insights_team"."llm_gateway_overspend_allowance_usd",
          "insights_team"."heatmaps_opt_in",
          "insights_team"."receive_org_level_activity_logs",
          "insights_team"."web_analytics_pre_aggregated_tables_enabled",
@@ -1840,280 +2198,12 @@
          "insights_team"."external_data_workspace_id",
          "insights_team"."external_data_workspace_last_synced_at",
          "insights_team"."api_query_rate_limit",
-         "insights_team"."revenue_tracking_config",
          "insights_team"."drop_events_older_than",
          "insights_team"."base_currency",
          "insights_team"."experiment_recalculation_time",
          "insights_team"."default_experiment_confidence_level",
          "insights_team"."default_experiment_stats_method",
-         "insights_team"."business_model"
-  FROM "insights_team"
-  WHERE "insights_team"."id" = 99999
-  LIMIT 21
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.50
-  '''
-  SELECT "insights_datawarehousesavedquery"."created_by_id",
-         "insights_datawarehousesavedquery"."created_at",
-         "insights_datawarehousesavedquery"."deleted",
-         "insights_datawarehousesavedquery"."deleted_at",
-         "insights_datawarehousesavedquery"."id",
-         "insights_datawarehousesavedquery"."name",
-         "insights_datawarehousesavedquery"."team_id",
-         "insights_datawarehousesavedquery"."latest_error",
-         "insights_datawarehousesavedquery"."columns",
-         "insights_datawarehousesavedquery"."external_tables",
-         "insights_datawarehousesavedquery"."query",
-         "insights_datawarehousesavedquery"."status",
-         "insights_datawarehousesavedquery"."last_run_at",
-         "insights_datawarehousesavedquery"."sync_frequency_interval",
-         "insights_datawarehousesavedquery"."table_id",
-         "insights_datawarehousesavedquery"."is_materialized",
-         "insights_datawarehousesavedquery"."deleted_name",
-         "insights_datawarehousesavedquery"."managed_viewset_id",
-         "insights_datawarehousesavedquery"."origin",
-         "insights_datawarehousetable"."created_by_id",
-         "insights_datawarehousetable"."created_at",
-         "insights_datawarehousetable"."updated_at",
-         "insights_datawarehousetable"."deleted",
-         "insights_datawarehousetable"."deleted_at",
-         "insights_datawarehousetable"."id",
-         "insights_datawarehousetable"."name",
-         "insights_datawarehousetable"."format",
-         "insights_datawarehousetable"."team_id",
-         "insights_datawarehousetable"."url_pattern",
-         "insights_datawarehousetable"."queryable_folder",
-         "insights_datawarehousetable"."credential_id",
-         "insights_datawarehousetable"."external_data_source_id",
-         "insights_datawarehousetable"."columns",
-         "insights_datawarehousetable"."row_count",
-         "insights_datawarehousetable"."size_in_s3_mib",
-         "insights_datawarehousecredential"."created_by_id",
-         "insights_datawarehousecredential"."created_at",
-         "insights_datawarehousecredential"."id",
-         "insights_datawarehousecredential"."access_key",
-         "insights_datawarehousecredential"."access_secret",
-         "insights_datawarehousecredential"."team_id",
-         "insights_datawarehousemanagedviewset"."created_by_id",
-         "insights_datawarehousemanagedviewset"."created_at",
-         "insights_datawarehousemanagedviewset"."updated_at",
-         "insights_datawarehousemanagedviewset"."id",
-         "insights_datawarehousemanagedviewset"."team_id",
-         "insights_datawarehousemanagedviewset"."kind"
-  FROM "insights_datawarehousesavedquery"
-  LEFT OUTER JOIN "insights_datawarehousemanagedviewset" ON ("insights_datawarehousesavedquery"."managed_viewset_id" = "insights_datawarehousemanagedviewset"."id")
-  LEFT OUTER JOIN "insights_datawarehousetable" ON ("insights_datawarehousesavedquery"."table_id" = "insights_datawarehousetable"."id")
-  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
-  WHERE ("insights_datawarehousesavedquery"."team_id" = 99999
-         AND NOT ("insights_datawarehousesavedquery"."deleted"
-                  AND "insights_datawarehousesavedquery"."deleted" IS NOT NULL)
-         AND "insights_datawarehousesavedquery"."managed_viewset_id" IS NULL)
-  ORDER BY "insights_datawarehousesavedquery"."name" ASC
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.51
-  '''
-  SELECT "insights_datawarehousesavedquery"."created_by_id",
-         "insights_datawarehousesavedquery"."created_at",
-         "insights_datawarehousesavedquery"."deleted",
-         "insights_datawarehousesavedquery"."deleted_at",
-         "insights_datawarehousesavedquery"."id",
-         "insights_datawarehousesavedquery"."name",
-         "insights_datawarehousesavedquery"."team_id",
-         "insights_datawarehousesavedquery"."latest_error",
-         "insights_datawarehousesavedquery"."columns",
-         "insights_datawarehousesavedquery"."external_tables",
-         "insights_datawarehousesavedquery"."query",
-         "insights_datawarehousesavedquery"."status",
-         "insights_datawarehousesavedquery"."last_run_at",
-         "insights_datawarehousesavedquery"."sync_frequency_interval",
-         "insights_datawarehousesavedquery"."table_id",
-         "insights_datawarehousesavedquery"."is_materialized",
-         "insights_datawarehousesavedquery"."deleted_name",
-         "insights_datawarehousesavedquery"."managed_viewset_id",
-         "insights_datawarehousesavedquery"."origin",
-         "insights_datawarehousetable"."created_by_id",
-         "insights_datawarehousetable"."created_at",
-         "insights_datawarehousetable"."updated_at",
-         "insights_datawarehousetable"."deleted",
-         "insights_datawarehousetable"."deleted_at",
-         "insights_datawarehousetable"."id",
-         "insights_datawarehousetable"."name",
-         "insights_datawarehousetable"."format",
-         "insights_datawarehousetable"."team_id",
-         "insights_datawarehousetable"."url_pattern",
-         "insights_datawarehousetable"."queryable_folder",
-         "insights_datawarehousetable"."credential_id",
-         "insights_datawarehousetable"."external_data_source_id",
-         "insights_datawarehousetable"."columns",
-         "insights_datawarehousetable"."row_count",
-         "insights_datawarehousetable"."size_in_s3_mib",
-         "insights_datawarehousecredential"."created_by_id",
-         "insights_datawarehousecredential"."created_at",
-         "insights_datawarehousecredential"."id",
-         "insights_datawarehousecredential"."access_key",
-         "insights_datawarehousecredential"."access_secret",
-         "insights_datawarehousecredential"."team_id"
-  FROM "insights_datawarehousesavedquery"
-  LEFT OUTER JOIN "insights_datawarehousetable" ON ("insights_datawarehousesavedquery"."table_id" = "insights_datawarehousetable"."id")
-  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
-  WHERE ("insights_datawarehousesavedquery"."team_id" = 99999
-         AND "insights_datawarehousesavedquery"."origin" = 'endpoint'
-         AND NOT ("insights_datawarehousesavedquery"."deleted"
-                  AND "insights_datawarehousesavedquery"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.52
-  '''
-  SELECT "insights_externaldatasource"."created_by_id",
-         "insights_externaldatasource"."created_at",
-         "insights_externaldatasource"."updated_at",
-         "insights_externaldatasource"."deleted",
-         "insights_externaldatasource"."deleted_at",
-         "insights_externaldatasource"."id",
-         "insights_externaldatasource"."source_id",
-         "insights_externaldatasource"."connection_id",
-         "insights_externaldatasource"."destination_id",
-         "insights_externaldatasource"."team_id",
-         "insights_externaldatasource"."sync_frequency",
-         "insights_externaldatasource"."status",
-         "insights_externaldatasource"."source_type",
-         "insights_externaldatasource"."job_inputs",
-         "insights_externaldatasource"."are_tables_created",
-         "insights_externaldatasource"."prefix",
-         "insights_externaldatasource"."description",
-         "insights_externaldatasource"."revenue_analytics_enabled",
-         "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id",
-         "insights_externaldatasourcerevenueanalyticsconfig"."enabled",
-         "insights_externaldatasourcerevenueanalyticsconfig"."include_invoiceless_charges"
-  FROM "insights_externaldatasource"
-  LEFT OUTER JOIN "insights_externaldatasourcerevenueanalyticsconfig" ON ("insights_externaldatasource"."id" = "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id")
-  WHERE ("insights_externaldatasource"."source_type" IN ('Stripe')
-         AND "insights_externaldatasource"."team_id" = 99999
-         AND NOT ("insights_externaldatasource"."deleted"
-                  AND "insights_externaldatasource"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.53
-  '''
-  SELECT "insights_datawarehousetable"."created_by_id",
-         "insights_datawarehousetable"."created_at",
-         "insights_datawarehousetable"."updated_at",
-         "insights_datawarehousetable"."deleted",
-         "insights_datawarehousetable"."deleted_at",
-         "insights_datawarehousetable"."id",
-         "insights_datawarehousetable"."name",
-         "insights_datawarehousetable"."format",
-         "insights_datawarehousetable"."team_id",
-         "insights_datawarehousetable"."url_pattern",
-         "insights_datawarehousetable"."queryable_folder",
-         "insights_datawarehousetable"."credential_id",
-         "insights_datawarehousetable"."external_data_source_id",
-         "insights_datawarehousetable"."columns",
-         "insights_datawarehousetable"."row_count",
-         "insights_datawarehousetable"."size_in_s3_mib",
-         "insights_datawarehousecredential"."created_by_id",
-         "insights_datawarehousecredential"."created_at",
-         "insights_datawarehousecredential"."id",
-         "insights_datawarehousecredential"."access_key",
-         "insights_datawarehousecredential"."access_secret",
-         "insights_datawarehousecredential"."team_id",
-         "insights_externaldatasource"."created_by_id",
-         "insights_externaldatasource"."created_at",
-         "insights_externaldatasource"."updated_at",
-         "insights_externaldatasource"."deleted",
-         "insights_externaldatasource"."deleted_at",
-         "insights_externaldatasource"."id",
-         "insights_externaldatasource"."source_id",
-         "insights_externaldatasource"."connection_id",
-         "insights_externaldatasource"."destination_id",
-         "insights_externaldatasource"."team_id",
-         "insights_externaldatasource"."sync_frequency",
-         "insights_externaldatasource"."status",
-         "insights_externaldatasource"."source_type",
-         "insights_externaldatasource"."job_inputs",
-         "insights_externaldatasource"."are_tables_created",
-         "insights_externaldatasource"."prefix",
-         "insights_externaldatasource"."description",
-         "insights_externaldatasource"."revenue_analytics_enabled"
-  FROM "insights_datawarehousetable"
-  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
-  LEFT OUTER JOIN "insights_externaldatasource" ON ("insights_datawarehousetable"."external_data_source_id" = "insights_externaldatasource"."id")
-  WHERE ("insights_datawarehousetable"."team_id" = 99999
-         AND NOT ("insights_datawarehousetable"."deleted"
-                  AND "insights_datawarehousetable"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.54
-  '''
-  SELECT "insights_datawarehousejoin"."created_by_id",
-         "insights_datawarehousejoin"."created_at",
-         "insights_datawarehousejoin"."deleted",
-         "insights_datawarehousejoin"."deleted_at",
-         "insights_datawarehousejoin"."id",
-         "insights_datawarehousejoin"."team_id",
-         "insights_datawarehousejoin"."source_table_name",
-         "insights_datawarehousejoin"."source_table_key",
-         "insights_datawarehousejoin"."joining_table_name",
-         "insights_datawarehousejoin"."joining_table_key",
-         "insights_datawarehousejoin"."field_name",
-         "insights_datawarehousejoin"."configuration"
-  FROM "insights_datawarehousejoin"
-  WHERE ("insights_datawarehousejoin"."team_id" = 99999
-         AND NOT ("insights_datawarehousejoin"."deleted"
-                  AND "insights_datawarehousejoin"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.55
-  '''
-  SELECT COUNT(*)
-  FROM
-    (SELECT DISTINCT "ee_single_session_summary"."session_id" AS "col1"
-     FROM "ee_single_session_summary"
-     WHERE "ee_single_session_summary"."team_id" = 99999) subquery
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.56
-  '''
-  SELECT "insights_sessionrecordingplaylistitem"."session_id"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE "insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.57
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE ("insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
-                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.58
-  '''
-  SELECT "insights_sessionrecordingplaylistitem"."session_id"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE "insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.59
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE ("insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
-                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.6
-  '''
-  SELECT "insights_organizationmembership"."id",
-         "insights_organizationmembership"."organization_id",
-         "insights_organizationmembership"."user_id",
-         "insights_organizationmembership"."level",
-         "insights_organizationmembership"."joined_at",
-         "insights_organizationmembership"."updated_at",
+         "insights_team"."business_model",
          "insights_organization"."id",
          "insights_organization"."name",
          "insights_organization"."slug",
@@ -2125,9 +2215,14 @@
          "insights_organization"."session_cookie_age",
          "insights_organization"."is_member_join_email_enabled",
          "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
          "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
          "insights_organization"."allow_publicly_shared_resources",
          "insights_organization"."default_role_id",
          "insights_organization"."plugins_access_level",
@@ -2135,6 +2230,67 @@
          "insights_organization"."default_experiment_stats_method",
          "insights_organization"."default_anonymize_ips",
          "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_team"
+  INNER JOIN "insights_organization" ON ("insights_team"."organization_id" = "insights_organization"."id")
+  WHERE "insights_team"."id" = 99999
+  LIMIT 21
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.50
+  '''
+  SELECT COUNT(*)
+  FROM
+    (SELECT DISTINCT "ee_single_session_summary"."session_id" AS "session_id"
+     FROM "ee_single_session_summary"
+     WHERE "ee_single_session_summary"."team_id" = 99999) subquery
+  '''
+# ---
+# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.6
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
          "insights_organization"."customer_id",
          "insights_organization"."available_product_features",
          "insights_organization"."usage",
@@ -2151,40 +2307,6 @@
   LIMIT 21
   '''
 # ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.60
-  '''
-  SELECT "insights_sessionrecordingplaylistitem"."session_id"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE "insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.61
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE ("insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
-                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.62
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE ("insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
-                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
-  '''
-# ---
-# name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.63
-  '''
-  SELECT COUNT(*) AS "__count"
-  FROM "insights_sessionrecordingplaylistitem"
-  WHERE ("insights_sessionrecordingplaylistitem"."playlist_id" = 99999
-         AND NOT ("insights_sessionrecordingplaylistitem"."deleted"
-                  AND "insights_sessionrecordingplaylistitem"."deleted" IS NOT NULL))
-  '''
-# ---
 # name: TestSessionRecordingPlaylist.test_filters_playlist_by_type.7
   '''
   SELECT "ee_accesscontrol"."id",
@@ -2196,37 +2318,15 @@
          "ee_accesscontrol"."role_id",
          "ee_accesscontrol"."created_by_id",
          "ee_accesscontrol"."created_at",
-         "ee_accesscontrol"."updated_at"
+         "ee_accesscontrol"."updated_at",
+         "insights_team"."organization_id" AS "_team_organization_id"
   FROM "ee_accesscontrol"
+  INNER JOIN "insights_team" ON ("ee_accesscontrol"."team_id" = "insights_team"."id")
   LEFT OUTER JOIN "insights_organizationmembership" ON ("ee_accesscontrol"."organization_member_id" = "insights_organizationmembership"."id")
   WHERE (("ee_accesscontrol"."organization_member_id" IS NULL
-          AND "ee_accesscontrol"."resource" = 'project'
-          AND "ee_accesscontrol"."resource_id" = '99999'
           AND "ee_accesscontrol"."role_id" IS NULL
           AND "ee_accesscontrol"."team_id" = 99999)
          OR ("insights_organizationmembership"."user_id" = 99999
-             AND "ee_accesscontrol"."resource" = 'project'
-             AND "ee_accesscontrol"."resource_id" = '99999'
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("ee_accesscontrol"."organization_member_id" IS NULL
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("insights_organizationmembership"."user_id" = 99999
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("ee_accesscontrol"."organization_member_id" IS NULL
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NOT NULL
-             AND "ee_accesscontrol"."role_id" IS NULL
-             AND "ee_accesscontrol"."team_id" = 99999)
-         OR ("insights_organizationmembership"."user_id" = 99999
-             AND "ee_accesscontrol"."resource" = 'session_recording_playlist'
-             AND "ee_accesscontrol"."resource_id" IS NOT NULL
              AND "ee_accesscontrol"."role_id" IS NULL
              AND "ee_accesscontrol"."team_id" = 99999))
   '''
@@ -2239,6 +2339,7 @@
          "insights_organizationmembership"."level",
          "insights_organizationmembership"."joined_at",
          "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
          "insights_organization"."id",
          "insights_organization"."name",
          "insights_organization"."slug",
@@ -2250,9 +2351,14 @@
          "insights_organization"."session_cookie_age",
          "insights_organization"."is_member_join_email_enabled",
          "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
          "insights_organization"."enforce_2fa",
          "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
          "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
          "insights_organization"."allow_publicly_shared_resources",
          "insights_organization"."default_role_id",
          "insights_organization"."plugins_access_level",
@@ -2260,6 +2366,7 @@
          "insights_organization"."default_experiment_stats_method",
          "insights_organization"."default_anonymize_ips",
          "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
          "insights_organization"."customer_id",
          "insights_organization"."available_product_features",
          "insights_organization"."usage",

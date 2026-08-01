@@ -1,7 +1,7 @@
 import { IconClock } from '@hanzo/icons'
 
 import { Divider } from 'lib/elements/Divider'
-import { humanFriendlyDuration } from 'lib/utils'
+import { humanFriendlyDuration } from 'lib/utils/durations'
 import { InspectorListItemInactivity } from 'scenes/session-recordings/player/inspector/playerInspectorLogic'
 
 export function ItemInactivity({ item }: { item: InspectorListItemInactivity }): JSX.Element {

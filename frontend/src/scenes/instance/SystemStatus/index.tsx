@@ -6,11 +6,10 @@ import { IconInfo } from '@hanzo/icons'
 import { Banner, Link } from '@hanzo/elements'
 
 import { Tab, Tabs } from 'lib/elements/Tabs'
-import { Tag } from 'lib/elements/Tag/Tag'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { InternalMetricsTab } from 'scenes/instance/SystemStatus/InternalMetricsTab'
 import { OverviewTab } from 'scenes/instance/SystemStatus/OverviewTab'
+import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { userLogic } from 'scenes/userLogic'
 
@@ -56,14 +55,7 @@ export function SystemStatus(): JSX.Element {
             },
             {
                 key: 'settings',
-                label: (
-                    <>
-                        Settings{' '}
-                        <Tag type="warning" className="ml-1 uppercase">
-                            Beta
-                        </Tag>
-                    </>
-                ),
+                label: 'Settings',
                 content: <InstanceConfigTab />,
             },
             {

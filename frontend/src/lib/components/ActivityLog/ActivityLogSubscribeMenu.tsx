@@ -1,0 +1,82 @@
+import { combineUrl, router } from 'kea-router'
+
+import { IconBell } from '@hanzo/icons'
+import { Button, Menu } from '@hanzo/elements'
+
+import { MenuItems } from 'lib/elements/Menu/Menu'
+import { FN_FUNCTION_SUB_TEMPLATES } from 'scenes/insights-functions/sub-templates/sub-templates'
+import { urls } from 'scenes/urls'
+
+import { CyclotronJobFilterPropertyFilter } from '~/types'
+
+export interface ActivityLogSubscribeMenuProps {
+    properties: CyclotronJobFilterPropertyFilter[]
+    onNavigate?: () => void
+    tooltip?: string
+    disabledReason?: string
+    iconOnly?: boolean
+    'data-attr'?: string
+}
+
+export function ActivityLogSubscribeMenu({
+    properties,
+    onNavigate,
+    tooltip,
+    disabledReason,
+    iconOnly = false,
+    'data-attr': dataAttr,
+}: ActivityLogSubscribeMenuProps): JSX.Element {
+    const templateItems = FN_FUNCTION_SUB_TEMPLATES['activity-log'].map((subTemplate) => {
+        const filters = {
+            events: subTemplate.filters?.events || [{ id: '$activity_log_entry_created', type: 'events' as const }],
+            properties,
+        }
+        const configuration = { ...subTemplate, filters }
+        const url = combineUrl(urls.insightsFunctionNew(subTemplate.template_id), {}, { configuration }).url
+        return {
+            label: subTemplate.name || 'Subscribe',
+            onClick: () => {
+                onNavigate?.()
+                router.actions.push(url)
+            },
+        }
+    })
+
+    const items = [
+        { items: templateItems },
+        {
+            items: [
+                {
+                    label: 'View all notifications',
+                    onClick: () => {
+                        onNavigate?.()
+                        router.actions.push(urls.settings('environment-activity-logs', 'activity-log-notifications'))
+                    },
+                },
+            ],
+        },
+    ] as MenuItems
+
+    const trigger = (
+        <Button
+            size="small"
+            type="secondary"
+            icon={iconOnly ? undefined : <IconBell />}
+            tooltip={tooltip ?? 'Subscribe'}
+            disabledReason={disabledReason}
+            data-attr={dataAttr}
+        >
+            {iconOnly ? <IconBell /> : 'Subscribe'}
+        </Button>
+    )
+
+    if (disabledReason) {
+        return trigger
+    }
+
+    return (
+        <Menu placement="bottom-end" items={items}>
+            {trigger}
+        </Menu>
+    )
+}

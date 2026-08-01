@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Capture a Insights event to your account',
     icon_url: '/static/insights-icon.svg',
     category: ['Custom', 'Analytics'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 insightsCapture({
   'event': inputs.event,

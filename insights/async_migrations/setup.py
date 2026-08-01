@@ -2,11 +2,11 @@ from typing import Optional
 
 from django.core.exceptions import ImproperlyConfigured
 
-from datastore_orm.utils import import_submodules
+from infi.datastore_orm.utils import import_submodules
 from semantic_version.base import Version
 
 from insights.async_migrations.definition import AsyncMigrationDefinition
-from insights.constants import FROZEN_INSIGHTS_VERSION
+from insights.constants import FROZEN_POSTFN_VERSION
 from insights.models.async_migration import AsyncMigration, get_all_completed_async_migrations
 from insights.models.instance_setting import get_instance_setting
 from insights.settings import TEST
@@ -44,26 +44,16 @@ def setup_async_migrations(ignore_insights_version: bool = False):
     unapplied_migrations = set(ALL_ASYNC_MIGRATIONS.keys()) - applied_migrations
 
     for migration_name, migration in ALL_ASYNC_MIGRATIONS.items():
-        sm = setup_model(migration_name, migration)
-
-        # A migration that reports itself not required (fresh installs whose
-        # schema already matches the target) is completed eagerly instead of
-        # blocking boot — only genuinely-required ones gate the version check.
-        if migration_name in unapplied_migrations and not migration.is_required():
-            from insights.async_migrations.utils import complete_migration
-
-            complete_migration(sm, email=False)
-            applied_migrations.add(migration_name)
-            unapplied_migrations.discard(migration_name)
-            continue
+        setup_model(migration_name, migration)
 
         if (
             (not ignore_insights_version)
             and (migration_name in unapplied_migrations)
-            and (FROZEN_INSIGHTS_VERSION > Version(migration.insights_max_version))
+            and (FROZEN_POSTFN_VERSION > Version(migration.insights_max_version))
+            and migration.is_required()
         ):
             raise ImproperlyConfigured(
-                f"Migration {migration_name} is required for Insights versions above {FROZEN_INSIGHTS_VERSION}."
+                f"Migration {migration_name} is required for Insights versions above {FROZEN_POSTFN_VERSION}."
             )
 
     first_migration = _set_up_dependency_constants()

@@ -3,9 +3,6 @@ import { expectLogic } from 'kea-test-utils'
 
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
-import { FilterLogicalOperator } from '~/types'
-
-import { LogsViewerFilters } from 'products/logs/frontend/components/LogsViewer/config/types'
 
 import { logsSceneLogic } from './logsSceneLogic'
 
@@ -20,7 +17,7 @@ describe('logsSceneLogic', () => {
             },
         })
         initKeaTests()
-        logic = logsSceneLogic({ tabId: 'test-tab' })
+        logic = logsSceneLogic()
         logic.mount()
 
         await expectLogic(logic).toFinishAllListeners()
@@ -81,6 +78,32 @@ describe('logsSceneLogic', () => {
         })
 
         it.each([
+            ['a valid lens', 'patterns', 'patterns'],
+            ['an unrecognised lens falls back to the default', 'nonsense', 'logs'],
+        ])('applies viewMode from the URL: %s', async (_, urlValue, expected) => {
+            await expectLogic(logic, () => {
+                router.actions.push('/logs', { viewMode: urlValue })
+            }).toFinishAllListeners()
+
+            expect(logic.values.viewMode).toEqual(expected)
+        })
+
+        it('syncs lens switches back to the URL, dropping the param for the default lens', async () => {
+            // The round-trip contract for shareable lens links: switching to Patterns writes
+            // ?viewMode=patterns, and returning to Logs (the default) removes the param
+            // instead of pinning viewMode=logs into every copied URL.
+            await expectLogic(logic, () => {
+                logic.actions.setViewMode('patterns')
+            }).toFinishAllListeners()
+            expect(router.values.searchParams.viewMode).toEqual('patterns')
+
+            await expectLogic(logic, () => {
+                logic.actions.setViewMode('logs')
+            }).toFinishAllListeners()
+            expect(router.values.searchParams.viewMode).toBeUndefined()
+        })
+
+        it.each([
             ['completely invalid value', '["invalid-level"]', []],
             ['typo in valid level', '["debug123"]', []],
             ['mix of valid and invalid', '["error","not-a-level","warn"]', ['error', 'warn']],
@@ -92,153 +115,112 @@ describe('logsSceneLogic', () => {
 
             expect(logic.values.filters.severityLevels).toEqual(expected)
         })
+
+        it('parses a stringified filterGroup from the URL (e.g. a cross-product session link)', async () => {
+            const filterGroup = {
+                type: 'AND',
+                values: [{ type: 'OR', values: [{ key: 'insightsSessionId', value: ['sess-1'], operator: 'exact' }] }],
+            }
+            await expectLogic(logic, () => {
+                router.actions.push('/logs', { filterGroup: JSON.stringify(filterGroup) })
+            }).toFinishAllListeners()
+
+            expect(logic.values.filters.filterGroup).toEqual(filterGroup)
+        })
+
+        it('ignores a malformed filterGroup in the URL', async () => {
+            const before = logic.values.filters.filterGroup
+            await expectLogic(logic, () => {
+                router.actions.push('/logs', { filterGroup: '{not valid json' })
+            }).toFinishAllListeners()
+
+            expect(logic.values.filters.filterGroup).toEqual(before)
+        })
     })
 
-    describe('filter history', () => {
-        const createFilters = (searchTerm: string): LogsViewerFilters => ({
-            dateRange: { date_from: '-1h', date_to: null },
-            searchTerm,
-            severityLevels: [],
-            serviceNames: [],
-            filterGroup: { type: FilterLogicalOperator.And, values: [] },
+    describe('activeTab URL sync', () => {
+        it('defaults to viewer', () => {
+            expect(logic.values.activeTab).toEqual('viewer')
         })
 
-        beforeEach(async () => {
-            logic.actions.clearFilterHistory()
-            await expectLogic(logic).toFinishAllListeners()
+        it.each([
+            ['viewer', 'viewer'],
+            ['configuration', 'configuration'],
+        ])('parses valid activeTab "%s" from URL', async (urlValue, expected) => {
+            await expectLogic(logic, () => {
+                router.actions.push('/logs', { activeTab: urlValue })
+            }).toFinishAllListeners()
+
+            expect(logic.values.activeTab).toEqual(expected)
         })
 
-        describe('pushToFilterHistory', () => {
-            it('adds entry to empty history', async () => {
-                const filters = createFilters('test query')
+        it.each([
+            ['unknown string', 'invalid'],
+            ['array', ['viewer']],
+            ['object', { key: 'viewer' }],
+            ['number', 42],
+        ])('ignores invalid activeTab (%s)', async (_, urlValue) => {
+            await expectLogic(logic, () => {
+                router.actions.push('/logs', { activeTab: urlValue })
+            }).toFinishAllListeners()
 
-                await expectLogic(logic, () => {
-                    logic.actions.pushToFilterHistory(filters)
-                }).toMatchValues({
-                    filterHistory: [{ filters, timestamp: expect.any(Number) }],
-                })
-            })
-
-            it('prepends new entries to history', async () => {
-                const filters1 = createFilters('first')
-                const filters2 = createFilters('second')
-
-                logic.actions.pushToFilterHistory(filters1)
-                await expectLogic(logic).toFinishAllListeners()
-
-                await expectLogic(logic, () => {
-                    logic.actions.pushToFilterHistory(filters2)
-                }).toMatchValues({
-                    filterHistory: [
-                        { filters: filters2, timestamp: expect.any(Number) },
-                        { filters: filters1, timestamp: expect.any(Number) },
-                    ],
-                })
-            })
-
-            it('deduplicates consecutive identical filters', async () => {
-                const filters = createFilters('same query')
-
-                logic.actions.pushToFilterHistory(filters)
-                await expectLogic(logic).toFinishAllListeners()
-
-                await expectLogic(logic, () => {
-                    logic.actions.pushToFilterHistory(filters)
-                }).toMatchValues({
-                    filterHistory: [{ filters, timestamp: expect.any(Number) }],
-                })
-
-                expect(logic.values.filterHistory).toHaveLength(1)
-            })
-
-            it('limits history to 10 entries', async () => {
-                for (let i = 0; i < 15; i++) {
-                    logic.actions.pushToFilterHistory(createFilters(`query ${i}`))
-                }
-                await expectLogic(logic).toFinishAllListeners()
-
-                expect(logic.values.filterHistory).toHaveLength(10)
-                expect(logic.values.filterHistory[0].filters.searchTerm).toBe('query 14')
-                expect(logic.values.filterHistory[9].filters.searchTerm).toBe('query 5')
-            })
+            expect(logic.values.activeTab).toEqual('viewer')
         })
 
-        describe('clearFilterHistory', () => {
-            it('clears all history entries', async () => {
-                logic.actions.pushToFilterHistory(createFilters('query 1'))
-                logic.actions.pushToFilterHistory(createFilters('query 2'))
-                await expectLogic(logic).toFinishAllListeners()
+        it('syncs activeTab to URL on setActiveTab', async () => {
+            await expectLogic(logic, () => {
+                logic.actions.setActiveTab('configuration')
+            }).toFinishAllListeners()
 
-                expect(logic.values.filterHistory).toHaveLength(2)
-
-                await expectLogic(logic, () => {
-                    logic.actions.clearFilterHistory()
-                }).toMatchValues({
-                    filterHistory: [],
-                })
-            })
+            expect(logic.values.activeTab).toEqual('configuration')
+            expect(router.values.searchParams).toHaveProperty('activeTab', 'configuration')
         })
 
-        describe('restoreFiltersFromHistory', () => {
-            it('restores filters from history entry', async () => {
-                const filters = createFilters('restored query')
-                filters.severityLevels = ['error', 'warn']
+        it('removes activeTab from URL when set to default', async () => {
+            // First set to non-default
+            await expectLogic(logic, () => {
+                logic.actions.setActiveTab('configuration')
+            }).toFinishAllListeners()
 
-                logic.actions.pushToFilterHistory(filters)
-                await expectLogic(logic).toFinishAllListeners()
+            // Then set back to default
+            await expectLogic(logic, () => {
+                logic.actions.setActiveTab('viewer')
+            }).toFinishAllListeners()
 
-                await expectLogic(logic, () => {
-                    logic.actions.restoreFiltersFromHistory(0)
-                })
-                    .toDispatchActions(['restoreFiltersFromHistory', 'setFilters'])
-                    .toMatchValues({
-                        filters: expect.objectContaining({
-                            searchTerm: 'restored query',
-                            severityLevels: ['error', 'warn'],
-                        }),
-                    })
-            })
+            expect(logic.values.activeTab).toEqual('viewer')
+            expect(router.values.searchParams).not.toHaveProperty('activeTab')
+        })
+    })
 
-            it('does not push to history when restoring', async () => {
-                const filters1 = createFilters('first')
-                const filters2 = createFilters('second')
+    describe('facetNameSearch URL sync', () => {
+        it('parses facetNameSearch from URL', async () => {
+            await expectLogic(logic, () => {
+                router.actions.push('/logs', { facetNameSearch: 'namespace' })
+            }).toFinishAllListeners()
 
-                logic.actions.pushToFilterHistory(filters1)
-                logic.actions.pushToFilterHistory(filters2)
-                await expectLogic(logic).toFinishAllListeners()
-
-                const historyLengthBefore = logic.values.filterHistory.length
-
-                await expectLogic(logic, () => {
-                    logic.actions.restoreFiltersFromHistory(1)
-                }).toFinishAllListeners()
-
-                expect(logic.values.filterHistory).toHaveLength(historyLengthBefore)
-            })
-
-            it('does nothing for invalid index', async () => {
-                logic.actions.pushToFilterHistory(createFilters('test'))
-                await expectLogic(logic).toFinishAllListeners()
-
-                await expectLogic(logic, () => {
-                    logic.actions.restoreFiltersFromHistory(99)
-                })
-                    .toDispatchActions(['restoreFiltersFromHistory'])
-                    .toNotHaveDispatchedActions(['setFilters'])
-            })
+            expect(logic.values.facetNameSearch).toEqual('namespace')
         })
 
-        describe('hasFilterHistory selector', () => {
-            it('returns false when history is empty', () => {
-                expect(logic.values.hasFilterHistory).toBe(false)
-            })
+        it('syncs facetNameSearch to URL on setFacetNameSearch', async () => {
+            await expectLogic(logic, () => {
+                logic.actions.setFacetNameSearch('kube')
+            }).toFinishAllListeners()
 
-            it('returns true when history has entries', async () => {
-                logic.actions.pushToFilterHistory(createFilters('test'))
-                await expectLogic(logic).toFinishAllListeners()
+            expect(logic.values.facetNameSearch).toEqual('kube')
+            expect(router.values.searchParams).toHaveProperty('facetNameSearch', 'kube')
+        })
 
-                expect(logic.values.hasFilterHistory).toBe(true)
-            })
+        it('removes facetNameSearch from URL when cleared', async () => {
+            await expectLogic(logic, () => {
+                logic.actions.setFacetNameSearch('kube')
+            }).toFinishAllListeners()
+
+            await expectLogic(logic, () => {
+                logic.actions.setFacetNameSearch('')
+            }).toFinishAllListeners()
+
+            expect(logic.values.facetNameSearch).toEqual('')
+            expect(router.values.searchParams).not.toHaveProperty('facetNameSearch')
         })
     })
 })

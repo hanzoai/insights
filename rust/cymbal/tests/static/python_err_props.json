@@ -341,7 +341,7 @@
         },
         {
             "type": "MaxRetryError",
-            "value": "HTTPConnectionPool(host='clickhouse', port=8123): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fbdc0bef290>: Failed to establish a new connection: [Errno 111] Connection refused'))",
+            "value": "HTTPConnectionPool(host='datastore', port=8123): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fbdc0bef290>: Failed to establish a new connection: [Errno 111] Connection refused'))",
             "mechanism": {
                 "handled": true,
                 "type": "generic"
@@ -427,7 +427,7 @@
         },
         {
             "type": "ConnectionError",
-            "value": "HTTPConnectionPool(host='clickhouse', port=8123): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fbdc0bef290>: Failed to establish a new connection: [Errno 111] Connection refused'))",
+            "value": "HTTPConnectionPool(host='datastore', port=8123): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fbdc0bef290>: Failed to establish a new connection: [Errno 111] Connection refused'))",
             "mechanism": {
                 "handled": true,
                 "type": "generic"
@@ -540,24 +540,24 @@
                     },
                     {
                         "platform": "python",
-                        "filename": "insights/management/commands/migrate_clickhouse.py",
+                        "filename": "insights/management/commands/migrate_datastore.py",
                         "in_app": true,
                         "function": "handle"
                     },
                     {
                         "platform": "python",
-                        "filename": "insights/management/commands/migrate_clickhouse.py",
+                        "filename": "insights/management/commands/migrate_datastore.py",
                         "in_app": true,
                         "function": "migrate"
                     },
                     {
                         "platform": "python",
-                        "abs_path": "/python-runtime/infi/clickhouse_orm/database.py",
+                        "abs_path": "/python-runtime/infi/datastore_orm/database.py",
                         "context_line": "        self.db_exists = self._is_existing_database()",
-                        "filename": "/python-runtime/infi/clickhouse_orm/database.py",
+                        "filename": "/python-runtime/infi/datastore_orm/database.py",
                         "function": "__init__",
                         "lineno": 118,
-                        "module": "infi.clickhouse_orm.database",
+                        "module": "infi.datastore_orm.database",
                         "pre_context": [
                             "            self.request_session.auth = (username, password or '')",
                             "        self.log_statements = log_statements",
@@ -576,12 +576,12 @@
                     },
                     {
                         "platform": "python",
-                        "abs_path": "/python-runtime/infi/clickhouse_orm/database.py",
+                        "abs_path": "/python-runtime/infi/datastore_orm/database.py",
                         "context_line": "        r = self._send(\"SELECT count() FROM system.databases WHERE name = '%s'\" % self.db_name)",
-                        "filename": "/python-runtime/infi/clickhouse_orm/database.py",
+                        "filename": "/python-runtime/infi/datastore_orm/database.py",
                         "function": "_is_existing_database",
                         "lineno": 440,
-                        "module": "infi.clickhouse_orm.database",
+                        "module": "infi.datastore_orm.database",
                         "pre_context": [
                             "        # :TRICKY: Altinity cloud uses a non-numeric suffix for the version, which this removes.",
                             "        ver = re.sub(r\"[.\\D]+$\", '', ver)",
@@ -600,12 +600,12 @@
                     },
                     {
                         "platform": "python",
-                        "abs_path": "/python-runtime/infi/clickhouse_orm/database.py",
+                        "abs_path": "/python-runtime/infi/datastore_orm/database.py",
                         "context_line": "        r = self.request_session.post(self.db_url, params=params, data=data, stream=stream, timeout=self.timeout)",
-                        "filename": "/python-runtime/infi/clickhouse_orm/database.py",
+                        "filename": "/python-runtime/infi/datastore_orm/database.py",
                         "function": "_send",
                         "lineno": 391,
-                        "module": "infi.clickhouse_orm.database",
+                        "module": "infi.datastore_orm.database",
                         "pre_context": [
                             "        if isinstance(data, str):",
                             "            data = data.encode('utf-8')",

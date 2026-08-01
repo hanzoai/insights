@@ -3,15 +3,16 @@
 
 import glob
 import json
+from typing import Any
 
 from insights.insightsql import ast
 from insights.insightsql.compiler.bytecode import create_bytecode, parse_program
 
-source = "common/scriptvm/stl/src/*.iscript"
+source = "common/scriptvm/stl/src/*.script"
 target_ts = "common/scriptvm/typescript/src/stl/bytecode.ts"
 target_py = "common/scriptvm/python/stl/bytecode.py"
 
-bytecodes: dict[str, [list[str], list[any]]] = {}
+bytecodes: dict[str, tuple[list[str], list[Any]]] = {}
 
 for filename in glob.glob(source):
     with open(filename) as file:
@@ -23,7 +24,7 @@ for filename in glob.glob(source):
         if isinstance(declaration, ast.Function) and declaration.name == basename:
             found = True
             bytecode = create_bytecode(declaration.body, args=declaration.params).bytecode
-            bytecodes[basename] = [declaration.params, bytecode]
+            bytecodes[basename] = (declaration.params, bytecode)
     if not found:
         print(f"Error: no function called {basename} was found in {filename}!")  # noqa: T201
         exit(1)

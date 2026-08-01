@@ -1,12 +1,15 @@
 import { useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useMemo } from 'react'
 
 import { useMaxTool } from 'scenes/max/useMaxTool'
 
 import { iconForType } from '~/layout/panel-layout/ProjectTree/defaultTree'
 
+import { useAttachedContext } from 'products/insights_ai/frontend/api/logics'
+
 import { experimentLogic } from '../experimentLogic'
+import { isLaunched } from '../experimentsLogic'
 
 /**
  * Minimal context sent to the backend for session replay summarization.
@@ -31,9 +34,9 @@ export const useSessionReplaySummaryMaxTool = (): ReturnType<typeof useMaxTool> 
     const resultsCount = orderedPrimaryMetricsWithResults.length
     const shouldShowButton = useMemo(() => {
         const hasResults = resultsCount > 0
-        const hasStarted = !!experiment.start_date
+        const hasStarted = isLaunched(experiment)
         return hasResults && hasStarted
-    }, [resultsCount, experiment.start_date])
+    }, [resultsCount, experiment.status, experiment.start_date, experiment.end_date, experiment])
 
     const maxToolResult = useMaxTool({
         identifier: 'experiment_session_replays_summary',
@@ -43,7 +46,7 @@ export const useSessionReplaySummaryMaxTool = (): ReturnType<typeof useMaxTool> 
             icon: iconForType('session_replay'),
         },
         active: shouldShowButton,
-        initialMaxPrompt: `!Summarize session replays for experiment "${maxToolContext.experiment_name}"`,
+        initialMaxPrompt: `!Summarize session recordings for experiment "${maxToolContext.experiment_name}"`,
         callback(toolOutput) {
             if (toolOutput?.error) {
                 insights.captureException(
@@ -62,6 +65,12 @@ export const useSessionReplaySummaryMaxTool = (): ReturnType<typeof useMaxTool> 
             }
         },
     })
+
+    useAttachedContext(
+        shouldShowButton
+            ? [{ type: 'experiment', key: experiment.id, label: experiment.name || 'Unnamed experiment' }]
+            : null
+    )
 
     return maxToolResult
 }

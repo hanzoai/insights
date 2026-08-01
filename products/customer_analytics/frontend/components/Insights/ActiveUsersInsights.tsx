@@ -3,13 +3,12 @@ import { useValues } from 'kea'
 import { Banner, Button, Tooltip } from '@hanzo/elements'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { Query } from '~/queries/Query/Query'
 import { InsightVizNode, NodeKind } from '~/queries/schema/schema-general'
 import { ChartDisplayType, InsightLogicProps } from '~/types'
-
-import { revenueAnalyticsLogic } from 'products/revenue_analytics/frontend/revenueAnalyticsLogic'
 
 import { CUSTOMER_ANALYTICS_DATA_COLLECTION_NODE_ID, CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS } from '../../constants'
 import { InsightDefinition, customerAnalyticsSceneLogic } from '../../customerAnalyticsSceneLogic'
@@ -17,7 +16,7 @@ import { buildDashboardItemId, isPageviewWithoutFilters } from '../../utils'
 import { CustomerAnalyticsQueryCard } from '../CustomerAnalyticsQueryCard'
 
 export function ActiveUsersInsights(): JSX.Element {
-    const { activityEvent, activeUsersInsights, customerLabel, tabId } = useValues(customerAnalyticsSceneLogic)
+    const { activityEvent, activeUsersInsights, customerLabel } = useValues(customerAnalyticsSceneLogic)
 
     // Check if using pageview as default, with no properties filter
     const isOnlyPageview = isPageviewWithoutFilters(activityEvent)
@@ -42,9 +41,7 @@ export function ActiveUsersInsights(): JSX.Element {
             <h2 className="ml-1">Active {customerLabel.plural}</h2>
             <div className="grid grid-cols-[3fr_1fr] gap-2">
                 {activeUsersInsights.map((insight, index) => {
-                    return (
-                        <CustomerAnalyticsQueryCard key={index} insight={insight as InsightDefinition} tabId={tabId} />
-                    )
+                    return <CustomerAnalyticsQueryCard key={index} insight={insight as InsightDefinition} />
                 })}
             </div>
             <PowerUsersTable />
@@ -53,11 +50,12 @@ export function ActiveUsersInsights(): JSX.Element {
 }
 
 function PowerUsersTable(): JSX.Element {
-    const { businessType, customerLabel, dauSeries, selectedGroupType, tabId, filterTestAccounts } =
+    const { businessType, customerLabel, dauSeries, selectedGroupType, filterTestAccounts } =
         useValues(customerAnalyticsSceneLogic)
-    const { isRevenueAnalyticsEnabled, baseCurrency } = useValues(revenueAnalyticsLogic)
+    const { baseCurrency, currentTeam } = useValues(teamLogic)
+    const lastSeenEnabled = currentTeam?.extra_settings?.person_last_seen_at_enabled === true
     const revenueFieldsEnabled = useFeatureFlag('REVENUE_FIELDS_IN_POWER_USERS_TABLE')
-    const uniqueKey = `power-users-${tabId}`
+    const uniqueKey = 'power-users'
     const insightProps: InsightLogicProps<InsightVizNode> = {
         dataNodeCollectionId: CUSTOMER_ANALYTICS_DATA_COLLECTION_NODE_ID,
         dashboardItemId: buildDashboardItemId(uniqueKey),
@@ -66,7 +64,7 @@ function PowerUsersTable(): JSX.Element {
     const isB2c = businessType === 'b2c'
     const buttonTo = isB2c ? urls.persons() : urls.groups(selectedGroupType)
     const tooltip = isB2c ? 'Open people list' : `Open ${customerLabel.plural} list`
-    const revenueFields = isRevenueAnalyticsEnabled && revenueFieldsEnabled ? ['$virt_mrr', '$virt_revenue'] : []
+    const revenueFields = revenueFieldsEnabled ? ['$virt_mrr', '$virt_revenue'] : []
 
     const query = {
         kind: NodeKind.DataTableNode,
@@ -75,7 +73,12 @@ function PowerUsersTable(): JSX.Element {
         source: {
             kind: NodeKind.ActorsQuery,
             select: isB2c
-                ? ['person_display_name -- Person', 'event_count', ...revenueFields, 'last_seen']
+                ? [
+                      'person_display_name -- Person',
+                      'event_count',
+                      ...revenueFields,
+                      ...(lastSeenEnabled ? ['last_seen_at'] : []),
+                  ]
                 : ['group', 'event_count', ...revenueFields, 'last_seen'],
             source: {
                 kind: NodeKind.InsightActorsQuery,

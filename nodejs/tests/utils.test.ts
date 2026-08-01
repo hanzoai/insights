@@ -1,8 +1,7 @@
 import { randomBytes } from 'crypto'
 import { DateTime } from 'luxon'
 
-import { DatastoreTimestamp } from '../src/types'
-import { safeDatastoreString } from '../src/utils/db/utils'
+import { safeDatastoreString } from '~/common/utils/db/utils'
 import {
     UUID,
     UUID7,
@@ -18,7 +17,9 @@ import {
     sanitizeSqlIdentifier,
     stringify,
     uint32ArrayLEToBuffer,
-} from '../src/utils/utils'
+} from '~/common/utils/utils'
+
+import { DatastoreTimestamp } from '../src/types'
 
 // .zip in Base64: github repo insights/helloworldplugin
 const zip =

@@ -3,22 +3,24 @@ from insights.test.base import APIBaseTest, DatastoreTestMixin
 from insights.insightsql.parser import parse_select
 from insights.insightsql.query import execute_insightsql_query
 
-from insights.models import Cohort, Person
+from insights.test.persons import create_person
+
+from products.cohorts.backend.models.cohort import Cohort
 
 
 class TestCohortPeopleTable(DatastoreTestMixin, APIBaseTest):
     def test_select_star(self):
-        Person.objects.create(
+        create_person(
             team_id=self.team.pk,
             distinct_ids=["1"],
             properties={"$some_prop": "something", "$another_prop": "something1"},
         )
-        Person.objects.create(
+        create_person(
             team_id=self.team.pk,
             distinct_ids=["2"],
             properties={"$some_prop": "something", "$another_prop": "something2"},
         )
-        Person.objects.create(
+        create_person(
             team_id=self.team.pk,
             distinct_ids=["3"],
             properties={"$some_prop": "not something", "$another_prop": "something3"},
@@ -51,7 +53,7 @@ class TestCohortPeopleTable(DatastoreTestMixin, APIBaseTest):
         assert response.results[1][2] == "something2"
 
     def test_empty_version(self):
-        Person.objects.create(
+        create_person(
             team_id=self.team.pk,
             distinct_ids=["1"],
             properties={"$some_prop": "something", "$another_prop": "something1"},

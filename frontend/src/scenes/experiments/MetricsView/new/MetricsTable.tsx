@@ -1,5 +1,7 @@
 import { useActions, useValues } from 'kea'
 
+import { experimentsConfigLogic } from 'scenes/settings/environment/experimentsConfigLogic'
+
 import {
     ExperimentFunnelsQuery,
     ExperimentMetric,
@@ -9,10 +11,22 @@ import {
 import { ExperimentStatsMethod, InsightType } from '~/types'
 
 import { experimentLogic } from '../../experimentLogic'
+import { experimentMetricsLogic } from '../../experimentMetricsLogic'
+import { isLaunched } from '../../experimentsLogic'
+import { resolveSequentialEnabled } from '../../ExperimentView/sequential'
 import { type ExperimentVariantResult, getVariantInterval } from '../shared/utils'
+import { MAX_AXIS_RANGE } from './constants'
 import { MetricRowGroup } from './MetricRowGroup'
 import { TableHeader } from './TableHeader'
-import { MAX_AXIS_RANGE } from './constants'
+
+/**
+ * True when any metric in this section is still being recalculated. Curried by the section's metrics so
+ * each table judges only its own; exposures loading is the caller's concern.
+ */
+const sectionHasRecalculatingMetric =
+    (metrics: ExperimentMetric[]) =>
+    (recalculatingMetricUuids: string[]): boolean =>
+        metrics.some(({ uuid }) => !!uuid && recalculatingMetricUuids.includes(uuid))
 
 interface MetricsTableProps {
     metrics: ExperimentMetric[]
@@ -34,8 +48,22 @@ export function MetricsTable({
     showDetailsModal = true,
 }: MetricsTableProps): JSX.Element {
     const { experiment, exposuresLoading } = useValues(experimentLogic)
-    const { duplicateMetric, updateExperimentMetrics, updateMetricBreakdown, removeMetricBreakdown } =
-        useActions(experimentLogic)
+    const { recalculatingMetricUuids } = useValues(experimentMetricsLogic({ experiment }))
+    const { experimentsConfig } = useValues(experimentsConfigLogic)
+    const teamDefaultSequentialEnabled = experimentsConfig?.default_sequential_testing_enabled ?? false
+    const sequentialTestingEnabled = resolveSequentialEnabled(
+        experiment.stats_config?.frequentist,
+        teamDefaultSequentialEnabled
+    )
+    const {
+        duplicateMetric,
+        duplicateSharedMetricAsInlineMetric,
+        updateExperimentMetrics,
+        updateMetricBreakdown,
+        removeMetricBreakdown,
+        removeMetric,
+        removeSharedMetricFromExperiment,
+    } = useActions(experimentLogic)
 
     // Calculate shared axisRange across all metrics
     let hasBreakdowns = false
@@ -77,6 +105,10 @@ export function MetricsTable({
         )
     }
 
+    const hasColdMetric = isLaunched(experiment) && metrics.some((_, index) => !results[index] && !errors[index])
+    const sectionLoading =
+        sectionHasRecalculatingMetric(metrics)(recalculatingMetricUuids) || hasColdMetric || exposuresLoading
+
     return (
         <div className="w-full overflow-x-auto rounded-md border">
             <table className="w-full border-collapse text-sm">
@@ -92,6 +124,8 @@ export function MetricsTable({
                 <TableHeader
                     axisRange={axisRange}
                     statsMethod={experiment.stats_config?.method || ExperimentStatsMethod.Bayesian}
+                    sequentialTestingEnabled={sequentialTestingEnabled}
+                    loading={sectionLoading}
                 />
                 <tbody>
                     {metrics.map((metric, index) => {
@@ -99,7 +133,7 @@ export function MetricsTable({
                         const error = errors[index]
                         const metricIndex = metricIndexes[index]
 
-                        const isLoading = !result && !error && !!experiment.start_date
+                        const isLoading = !result && !error && isLaunched(experiment)
 
                         return (
                             <MetricRowGroup
@@ -122,6 +156,29 @@ export function MetricsTable({
                                     const newUuid = crypto.randomUUID()
                                     duplicateMetric({ uuid: metric.uuid, isSecondary, newUuid })
                                     updateExperimentMetrics()
+                                }}
+                                onDuplicateAsSingleUseMetric={() => {
+                                    if (!metric.isSharedMetric || !metric.sharedMetricId || !experiment) {
+                                        return
+                                    }
+
+                                    const newUuid = crypto.randomUUID()
+                                    duplicateSharedMetricAsInlineMetric({
+                                        sharedMetricId: metric.sharedMetricId,
+                                        isSecondary,
+                                        newUuid,
+                                    })
+                                    updateExperimentMetrics()
+                                }}
+                                onDeleteMetric={() => {
+                                    if (metric.isSharedMetric && metric.sharedMetricId) {
+                                        removeSharedMetricFromExperiment(metric.sharedMetricId)
+                                        return
+                                    }
+                                    if (!metric.uuid) {
+                                        return
+                                    }
+                                    removeMetric(metric.uuid, isSecondary ? 'secondary' : 'primary')
                                 }}
                                 onBreakdownChange={(breakdown) => {
                                     if (!metric.uuid) {

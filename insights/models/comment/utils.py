@@ -13,6 +13,20 @@ if TYPE_CHECKING:
 
 logger = structlog.get_logger(__name__)
 
+SCOPE_TO_SOURCE_TYPE: dict[str, str] = {
+    "Replay": "replay",
+    "Notebook": "notebook",
+    "Insight": "insight",
+    "FeatureFlag": "feature_flag",
+    "Dashboard": "dashboard",
+    "Survey": "survey",
+    "Experiment": "experiment",
+    "ErrorTracking": "error_tracking",
+    # Unlike the PascalCase model-name scopes above, ticket comments are written with the literal
+    # "conversations_ticket" scope (see products/conversations). This must match that literal.
+    "conversations_ticket": "ticket",
+}
+
 SCOPE_TO_PATH_MAPPING: dict[str, str] = {
     "Replay": "/replay/{item_id}",
     "Notebook": "/notebooks/{item_id}",
@@ -21,6 +35,8 @@ SCOPE_TO_PATH_MAPPING: dict[str, str] = {
     "Dashboard": "/dashboard/{item_id}",
     "Survey": "/surveys/{item_id}",
     "Experiment": "/experiments/{item_id}",
+    # See note above: ticket comments use the "conversations_ticket" scope literal, not "Ticket".
+    "conversations_ticket": "/support/tickets/{item_id}",
 }
 
 
@@ -122,4 +138,50 @@ def produce_discussion_mention_events(
             )
     except Exception as e:
         logger.exception("Failed to produce discussion mention events", error=e)
+        capture_exception(e)
+
+
+def send_mention_notifications(
+    comment: "Comment",
+    mentioned_user_ids: list[int],
+    slug: str,
+) -> None:
+    try:
+        from products.notifications.backend.facade.api import (
+            NotificationData,
+            NotificationType,
+            SourceType,
+            TargetType,
+            create_notification,
+        )
+        from products.notifications.backend.facade.enums import NotificationOnlyResourceType
+
+        commenter = comment.created_by
+        if not commenter:
+            return
+
+        comment_content = extract_plain_text_from_rich_content(comment.rich_content) or comment.content
+        body = comment_content[:200] if comment_content else ""
+
+        for user_id in mentioned_user_ids:
+            if user_id == commenter.id:
+                continue
+            create_notification(
+                NotificationData(
+                    team_id=comment.team_id,
+                    notification_type=NotificationType.COMMENT_MENTION,
+                    title=f"@{commenter.first_name or commenter.email} mentioned you",
+                    body=body,
+                    target_type=TargetType.USER,
+                    target_id=str(user_id),
+                    resource_type=NotificationOnlyResourceType.COMMENT,
+                    resource_id=str(comment.id),
+                    source_type=SourceType(scope_type)
+                    if (scope_type := SCOPE_TO_SOURCE_TYPE.get(comment.scope))
+                    else None,
+                    source_id=comment.item_id,
+                )
+            )
+    except Exception as e:
+        logger.exception("Failed to send mention notifications", error=e)
         capture_exception(e)

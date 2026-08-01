@@ -5,7 +5,7 @@ This test validates that the trends query and actors query handle
 null/empty/missing property values consistently, ensuring that events
 with these property states are correctly counted and returned.
 
-Regression test for: https://github.com/Hanzo Insights/insights/issues/40577
+Regression test for: https://github.com/Insights/insights/issues/40577
 """
 
 from freezegun import freeze_time
@@ -24,8 +24,8 @@ from insights.schema import (
 )
 
 from insights.insightsql_queries.actors_query_runner import ActorsQueryRunner
-from insights.insightsql_queries.insights.trends.breakdown import BREAKDOWN_NULL_STRING_LABEL
 from insights.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
+from insights.insightsql_queries.insights.utils.breakdowns import BREAKDOWN_NULL_STRING_LABEL
 
 
 @override_settings(IN_UNIT_TESTING=True)

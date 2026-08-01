@@ -50,9 +50,10 @@ function useSetupWithUrlCapture(options: { userInsightCount?: number; variant?: 
 
     useMocks({
         get: {
-            '/api/environments/:team_id/insights/': (req) => {
-                capturedUrls.push(req.url)
-                if (req.url.searchParams.get('user') === 'true') {
+            '/api/environments/:team_id/insights/': ({ request }) => {
+                const url = new URL(request.url)
+                capturedUrls.push(url)
+                if (url.searchParams.get('user') === 'true') {
                     return [200, { count: userInsightCount, results: [] }]
                 }
                 return [200, { count: 0, results: [] }]
@@ -60,7 +61,7 @@ function useSetupWithUrlCapture(options: { userInsightCount?: number; variant?: 
         },
     })
     initKeaTests()
-    window.INSIGHTS_APP_CONTEXT!.current_user = MOCK_DEFAULT_USER
+    window.POSTFN_APP_CONTEXT!.current_user = MOCK_DEFAULT_USER
     if (variant) {
         enableVariant(variant)
     }
@@ -182,18 +183,19 @@ describe('addSavedInsightsModalLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/insights/': (req) => {
-                        if (req.url.searchParams.get('user') === 'true') {
+                    '/api/environments/:team_id/insights/': ({ request }) => {
+                        const url = new URL(request.url)
+                        if (url.searchParams.get('user') === 'true') {
                             return [200, { count: 0, results: [] }]
                         }
-                        const search = req.url.searchParams.get('search') ?? ''
+                        const search = url.searchParams.get('search') ?? ''
                         const results = [createInsight(1, search || 'default'), createInsight(2, search || 'default')]
                         return [200, { count: results.length, results }]
                     },
                 },
             })
             initKeaTests()
-            window.INSIGHTS_APP_CONTEXT!.current_user = MOCK_DEFAULT_USER
+            window.POSTFN_APP_CONTEXT!.current_user = MOCK_DEFAULT_USER
             logic = addSavedInsightsModalLogic()
             logic.mount()
         })
@@ -207,11 +209,12 @@ describe('addSavedInsightsModalLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/environments/:team_id/insights/': (req) => {
-                        if (req.url.searchParams.get('user') === 'true') {
+                    '/api/environments/:team_id/insights/': ({ request }) => {
+                        const url = new URL(request.url)
+                        if (url.searchParams.get('user') === 'true') {
                             return [200, { count: 0, results: [] }]
                         }
-                        const search = req.url.searchParams.get('search')
+                        const search = url.searchParams.get('search')
                         const label = search || 'unfiltered'
                         return [200, { count: 1, results: [createInsight(1, label)] }]
                     },

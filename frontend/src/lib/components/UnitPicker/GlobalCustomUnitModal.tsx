@@ -5,7 +5,7 @@ import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'
 import { Input } from 'lib/elements/Input/Input'
 import { Modal } from 'lib/elements/Modal'
-import { capitalizeFirstLetter } from 'lib/utils'
+import { capitalizeFirstLetter } from 'lib/utils/strings'
 
 import { unitPickerModalLogic } from './unitPickerModalLogic'
 

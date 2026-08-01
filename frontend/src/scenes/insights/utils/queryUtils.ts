@@ -1,7 +1,19 @@
-import { objectCleanWithEmpty, objectsEqual, removeUndefinedAndNull } from 'lib/utils'
+import { objectCleanWithEmpty, objectsEqual, removeUndefinedAndNull } from 'lib/utils/objects'
 import { isValidRE2 } from 'lib/utils/regexp'
+import { isFunnelWithEnoughSteps, isFunnelWithIncompleteDataWarehouseStep } from 'scenes/funnels/funnelUtils'
 
-import { DataNode, InsightQueryNode, Node } from '~/queries/schema/schema-general'
+import { Variable } from '~/queries/nodes/DataVisualization/types'
+import { nodeKindToInsightType } from '~/queries/nodes/InsightQuery/utils/queryNodeToFilter'
+import { getDefaultQuery } from '~/queries/nodes/InsightViz/utils'
+import {
+    DataNode,
+    InsightsQLVariable,
+    InsightQueryNode,
+    InsightVizNode,
+    Node,
+    ProductAnalyticsInsightQueryNode,
+    TrendsQuery,
+} from '~/queries/schema/schema-general'
 import {
     filterForQuery,
     filterKeyForQuery,
@@ -9,10 +21,14 @@ import {
     isEventsNode,
     isFunnelsQuery,
     isInsightsQLQuery,
+    isLifecycleQuery,
     isInsightQueryNode,
     isInsightQueryWithDisplay,
     isInsightQueryWithSeries,
     isInsightVizNode,
+    isPathsQuery,
+    isRetentionQuery,
+    isStickinessQuery,
     isTrendsQuery,
     isWebAnalyticsInsightQuery,
 } from '~/queries/utils'
@@ -36,6 +52,43 @@ export const getVariablesFromQuery = (query: string): string[] => {
     }
 
     return results
+}
+
+export const filterVariablesReferencedInQuery = <T extends { code_name: string }>(
+    query: string | null | undefined,
+    variables: T[]
+): T[] => {
+    const queryCodeNames = new Set(getVariablesFromQuery(query ?? ''))
+
+    return variables.filter((variable) => queryCodeNames.has(variable.code_name))
+}
+
+export const syncSelectedVariablesToQuery = (
+    query: string | null | undefined,
+    variables: Pick<Variable, 'id' | 'code_name'>[],
+    selectedVariables: InsightsQLVariable[]
+): InsightsQLVariable[] => {
+    const queryCodeNames = Array.from(new Set(getVariablesFromQuery(query ?? '')))
+    const queryCodeNamesSet = new Set(queryCodeNames)
+    const variablesByCodeName = new Map(variables.map((variable) => [variable.code_name, variable]))
+
+    const syncedVariables = selectedVariables.filter((variable) => queryCodeNamesSet.has(variable.code_name))
+    const selectedVariableIds = new Set(syncedVariables.map((variable) => variable.variableId))
+
+    queryCodeNames.forEach((codeName) => {
+        const variable = variablesByCodeName.get(codeName)
+
+        if (!variable || selectedVariableIds.has(variable.id)) {
+            return
+        }
+
+        syncedVariables.push({
+            variableId: variable.id,
+            code_name: variable.code_name,
+        })
+    })
+
+    return syncedVariables
 }
 
 export const compareQuery = (a: Node, b: Node, opts?: CompareQueryOpts): boolean => {
@@ -91,6 +144,53 @@ export const compareDataNodeQuery = (a: Node, b: Node, opts?: CompareQueryOpts):
     return objectsEqual(objectCleanWithEmpty(a as any), objectCleanWithEmpty(b as any))
 }
 
+/**
+ * Whether an unsaved query is worth persisting as a browser draft (and later resurfacing as an
+ * "unsaved insight" on the saved insights page).
+ *
+ * Skips queries that only differ from their type's default in cosmetic ways (date range, interval,
+ * test account toggle, display options), and query kinds that `queryChanged` treats as changed by
+ * construction (web analytics tiles, kinds without a product analytics default) — for those,
+ * merely opening the editor would persist a draft the user never edited.
+ */
+export const isDraftQueryWorthSaving = (query: Node, filterTestAccountsDefault: boolean): boolean => {
+    if (!isInsightVizNode(query)) {
+        // Tables and SQL drafts have no cheap default to compare against
+        return true
+    }
+    if (isWebAnalyticsInsightQuery(query.source) || !(query.source.kind in nodeKindToInsightType)) {
+        return false
+    }
+    const source = query.source as ProductAnalyticsInsightQueryNode
+    let defaultQuery: Node
+    try {
+        defaultQuery = getDefaultQuery(nodeKindToInsightType[source.kind], filterTestAccountsDefault)
+    } catch {
+        return true
+    }
+    if (!isInsightVizNode(defaultQuery)) {
+        return true
+    }
+    // Overlay the draft's cosmetic fields onto the default: if that alone makes the two equal,
+    // nothing worth resurfacing was edited. `tags` is query log metadata the editor attaches on
+    // scene init (see `withDefaultProductAnalyticsTags`), never a user edit, so it's overlaid too.
+    const draftSource = source as Record<string, any>
+    const overlaidSource: Record<string, any> = { ...defaultQuery.source }
+    for (const key of ['dateRange', 'interval', 'filterTestAccounts', 'tags']) {
+        if (key in draftSource) {
+            overlaidSource[key] = draftSource[key]
+        } else {
+            delete overlaidSource[key]
+        }
+    }
+    const filterKey = filterKeyForQuery(source)
+    if (draftSource[filterKey]?.display) {
+        overlaidSource[filterKey] = { ...overlaidSource[filterKey], display: draftSource[filterKey].display }
+    }
+    const overlaidDefault: InsightVizNode = { ...defaultQuery, source: overlaidSource as InsightQueryNode }
+    return !compareQuery(overlaidDefault, query, { ignoreVisualizationOnlyChanges: true })
+}
+
 export const hasInvalidRegexFilter = (obj: unknown): boolean => {
     if (Array.isArray(obj)) {
         return obj.some(hasInvalidRegexFilter)
@@ -112,10 +212,16 @@ export const hasInvalidRegexFilter = (obj: unknown): boolean => {
     return false
 }
 
+export const isBoxPlotMissingProperty = (series: TrendsQuery['series'] | null | undefined): boolean =>
+    !series?.length || series.some((s) => !s?.math_property)
+
 export const validateQuery = (q: DataNode): boolean => {
     if (isFunnelsQuery(q)) {
-        // funnels require at least two steps
-        return q.series.length >= 2
+        return isFunnelWithEnoughSteps(q.series) && !isFunnelWithIncompleteDataWarehouseStep(q.series)
+    }
+
+    if (isTrendsQuery(q) && q.trendsFilter?.display === ChartDisplayType.BoxPlot) {
+        return !isBoxPlotMissingProperty(q.series)
     }
     if (hasInvalidRegexFilter(q)) {
         return false
@@ -123,13 +229,18 @@ export const validateQuery = (q: DataNode): boolean => {
     return true
 }
 
+// keep in sync with insights/schema_helpers.py `grouped_chart_display_types` method
 const groupedChartDisplayTypes: Record<ChartDisplayType, ChartDisplayType> = {
+    [ChartDisplayType.Auto]: ChartDisplayType.Auto,
+
     // time series
     [ChartDisplayType.ActionsLineGraph]: ChartDisplayType.ActionsLineGraph,
+    [ChartDisplayType.ActionsAreaGraph]: ChartDisplayType.ActionsLineGraph,
     [ChartDisplayType.ActionsBar]: ChartDisplayType.ActionsLineGraph,
     [ChartDisplayType.ActionsUnstackedBar]: ChartDisplayType.ActionsLineGraph,
-    [ChartDisplayType.ActionsAreaGraph]: ChartDisplayType.ActionsLineGraph,
     [ChartDisplayType.ActionsStackedBar]: ChartDisplayType.ActionsLineGraph,
+    [ChartDisplayType.TwoDimensionalHeatmap]: ChartDisplayType.ActionsLineGraph,
+    [ChartDisplayType.Metric]: ChartDisplayType.ActionsLineGraph,
 
     // cumulative time series
     [ChartDisplayType.ActionsLineGraphCumulative]: ChartDisplayType.ActionsLineGraphCumulative,
@@ -139,10 +250,18 @@ const groupedChartDisplayTypes: Record<ChartDisplayType, ChartDisplayType> = {
     [ChartDisplayType.ActionsBarValue]: ChartDisplayType.ActionsBarValue,
     [ChartDisplayType.ActionsPie]: ChartDisplayType.ActionsBarValue,
     [ChartDisplayType.ActionsTable]: ChartDisplayType.ActionsBarValue,
-    [ChartDisplayType.WorldMap]: ChartDisplayType.ActionsBarValue,
-    [ChartDisplayType.CalendarHeatmap]: ChartDisplayType.ActionsBarValue,
 
-    [ChartDisplayType.TwoDimensionalHeatmap]: ChartDisplayType.TwoDimensionalHeatmap,
+    // separate: different breakdown limit (250)
+    [ChartDisplayType.WorldMap]: ChartDisplayType.WorldMap,
+
+    // separate runner
+    [ChartDisplayType.CalendarHeatmap]: ChartDisplayType.CalendarHeatmap,
+
+    // separate runner
+    [ChartDisplayType.BoxPlot]: ChartDisplayType.BoxPlot,
+
+    // separate runner — only the two range endpoints, cached on its own key
+    [ChartDisplayType.SlopeGraph]: ChartDisplayType.SlopeGraph,
 }
 
 /** clean insight queries so that we can check for semantic equality with a deep equality check */
@@ -166,16 +285,18 @@ export const cleanInsightQuery = (query: InsightQueryNode, opts?: CompareQueryOp
     if (opts?.ignoreVisualizationOnlyChanges && !isWebAnalyticsInsightQuery(cleanedQuery)) {
         // Keep this in sync with insights/schema_helpers.py `serialize_query` method
         const insightFilter = filterForQuery(cleanedQuery)
-        const insightFilterKey = filterKeyForQuery(cleanedQuery)
-        cleanedQuery[insightFilterKey] = {
+        const sanitizedInsightFilter = {
             ...insightFilter,
             showLegend: undefined,
             showPercentStackView: undefined,
+            stackBreakdownValues: undefined,
             showValuesOnSeries: undefined,
             aggregationAxisFormat: undefined,
             aggregationAxisPrefix: undefined,
             aggregationAxisPostfix: undefined,
             decimalPlaces: undefined,
+            xAxisLabel: undefined,
+            yAxisLabel: undefined,
             layout: undefined,
             toggledLifecycles: undefined,
             showLabelsOnSeries: undefined,
@@ -195,17 +316,43 @@ export const cleanInsightQuery = (query: InsightQueryNode, opts?: CompareQueryOp
             movingAverageIntervals: undefined,
             stacked: undefined,
             detailedResultsAggregationType: undefined,
+            excludeBoxPlotOutliers: undefined,
+            showAnnotations: undefined,
             showFullUrls: undefined,
             selectedInterval: undefined,
             funnelStepReference: undefined,
             breakdownSorting: undefined,
+            dataColorTheme: undefined,
+            legendPosition: undefined,
+            chartStyle: undefined,
         }
 
-        cleanedQuery.dataColorTheme = undefined
-
-        if (isInsightQueryWithDisplay(cleanedQuery)) {
-            cleanedQuery[insightFilterKey].display =
-                groupedChartDisplayTypes[cleanedQuery[insightFilterKey].display || ChartDisplayType.ActionsLineGraph]
+        if (isTrendsQuery(cleanedQuery)) {
+            cleanedQuery.trendsFilter = sanitizedInsightFilter
+            if (isInsightQueryWithDisplay(cleanedQuery)) {
+                cleanedQuery.trendsFilter.display =
+                    groupedChartDisplayTypes[cleanedQuery.trendsFilter?.display || ChartDisplayType.ActionsLineGraph]
+            }
+        } else if (isFunnelsQuery(cleanedQuery)) {
+            cleanedQuery.funnelsFilter = sanitizedInsightFilter
+        } else if (isRetentionQuery(cleanedQuery)) {
+            cleanedQuery.retentionFilter = sanitizedInsightFilter
+            if (isInsightQueryWithDisplay(cleanedQuery)) {
+                cleanedQuery.retentionFilter.display =
+                    groupedChartDisplayTypes[cleanedQuery.retentionFilter?.display || ChartDisplayType.ActionsLineGraph]
+            }
+        } else if (isPathsQuery(cleanedQuery)) {
+            cleanedQuery.pathsFilter = sanitizedInsightFilter
+        } else if (isStickinessQuery(cleanedQuery)) {
+            cleanedQuery.stickinessFilter = sanitizedInsightFilter
+            if (isInsightQueryWithDisplay(cleanedQuery)) {
+                cleanedQuery.stickinessFilter.display =
+                    groupedChartDisplayTypes[
+                        cleanedQuery.stickinessFilter?.display || ChartDisplayType.ActionsLineGraph
+                    ]
+            }
+        } else if (isLifecycleQuery(cleanedQuery)) {
+            cleanedQuery.lifecycleFilter = sanitizedInsightFilter
         }
     }
 

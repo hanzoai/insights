@@ -4,14 +4,15 @@
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
     "dependencies": {
+        "@hanzo/quill-charts": "workspace:*",
         "kea": "catalog:",
         "kea-forms": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/icons": "*",
-        "@storybook/react": "*",
+        "@hanzo/icons": "catalog:",
+        "@storybook/react": "catalog:",
         "@types/react": "*",
         "clsx": "*",
         "react": "*"

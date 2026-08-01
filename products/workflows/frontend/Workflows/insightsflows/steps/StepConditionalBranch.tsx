@@ -10,10 +10,10 @@ import { Input } from 'lib/elements/Input'
 import { Label } from 'lib/elements/Label'
 
 import { InsightsFlowPropertyFilters } from '../filters/InsightsFlowFilters'
-import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
+import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
 import { InsightsFlow, InsightsFlowAction } from '../types'
 import { StepSchemaErrors } from './components/StepSchemaErrors'
-import { useDebouncedNameInputs } from './utils'
+import { getBranchRemovalDisabledReason, removeBranchEdge, useDebouncedNameInputs } from './utils'
 
 export function StepConditionalBranchConfiguration({
     node,
@@ -21,19 +21,16 @@ export function StepConditionalBranchConfiguration({
     node: Node<Extract<InsightsFlowAction, { type: 'conditional_branch' }>>
 }): JSX.Element {
     const action = node.data
-    const { conditions } = action.config
+    const conditions = action.config.conditions ?? []
 
-    const { edgesByActionId, selectedNodeCanBeDeleted } = useValues(insightsFlowEditorLogic)
-    const { setWorkflowAction, setWorkflowActionEdges } = useActions(insightsFlowEditorLogic)
+    const { edgesByActionId } = useValues(hogFlowEditorLogic)
+    const { setWorkflowAction, setWorkflowActionEdges } = useActions(hogFlowEditorLogic)
 
     const nodeEdges = edgesByActionId[action.id] ?? []
 
     const setConditions = (
         conditions: Extract<InsightsFlowAction, { type: 'conditional_branch' }>['config']['conditions']
     ): void => {
-        // TODO: Find all related edges. We can only delete those that are the same as the continue edge.
-        // All others should be disabled for deletion until the subbranch is removed
-
         // For condition modifiers we need to setup the branches as well
         setWorkflowAction(action.id, {
             ...action,
@@ -58,8 +55,9 @@ export function StepConditionalBranchConfiguration({
         return [branchEdges.sort((a, b) => (a.index ?? 0) - (b.index ?? 0)), nonBranchEdges]
     }, [nodeEdges, action.id])
 
+    const continueEdge = nodeEdges.find((edge) => edge.type === 'continue' && edge.from === action.id)
+
     const addCondition = (): void => {
-        const continueEdge = nodeEdges.find((edge) => edge.type === 'continue' && edge.from === action.id)
         if (!continueEdge) {
             throw new Error('Continue edge not found')
         }
@@ -78,12 +76,9 @@ export function StepConditionalBranchConfiguration({
     }
 
     const removeCondition = (index: number): void => {
-        // Branch edges are pre-sorted
-        // We just need to remove the edge and re-assign the indexes
-        const newBranchEdges = branchEdges.filter((_, i) => i !== index).map((edge, i) => ({ ...edge, index: i }))
         setConditions(conditions.filter((_, i) => i !== index))
         // Branch edges come first as they are sorted to show on the left
-        setWorkflowActionEdges(action.id, [...newBranchEdges, ...nonBranchEdges])
+        setWorkflowActionEdges(action.id, [...removeBranchEdge(branchEdges, index), ...nonBranchEdges])
     }
 
     return (
@@ -97,7 +92,7 @@ export function StepConditionalBranchConfiguration({
                             size="xsmall"
                             icon={<IconX />}
                             onClick={() => removeCondition(index)}
-                            disabledReason={selectedNodeCanBeDeleted ? undefined : 'Clean up branching steps first'}
+                            disabledReason={getBranchRemovalDisabledReason(branchEdges, index, edgesByActionId)}
                         />
                     </div>
 
@@ -125,7 +120,7 @@ export function StepConditionalBranchConfiguration({
                 </div>
             ))}
 
-            <Button type="secondary" icon={<IconPlus />} onClick={() => addCondition()}>
+            <Button type="secondary" icon={<IconPlus />} onClick={() => addCondition()} className="mt-2">
                 Add condition
             </Button>
         </>

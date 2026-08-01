@@ -1,15 +1,22 @@
 {
     "name": "@hanzo/products-user-interviews",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+    },
     "dependencies": {
         "kea": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
-        "@hanzo/insights": "catalog:"
+        "insights-js": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/icons": "*",
+        "@hanzo/brand": "catalog:",
+        "@hanzo/icons": "catalog:",
+        "@storybook/react": "catalog:",
         "@types/react": "*",
         "clsx": "*",
-        "react": "*"
+        "jest": "*",
+        "react": "*",
+        "typescript": "catalog:*"
     }
 }

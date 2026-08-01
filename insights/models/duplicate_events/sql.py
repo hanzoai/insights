@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from insights.datastore.cluster import ON_CLUSTER_CLAUSE
 from insights.datastore.indexes import index_by_kafka_timestamp
 from insights.datastore.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION, kafka_engine
 from insights.datastore.table_engines import Distributed, MergeTreeEngine
@@ -67,7 +68,7 @@ def DUPLICATE_EVENTS_TABLE_SQL():
         + """
     PARTITION BY toYYYYMMDD(inserted_at)
     ORDER BY (team_id, distinct_id, event, inserted_at)
-    TTL toDateTime(inserted_at) + INTERVAL 7 DAY DELETE
+    TTL inserted_at + INTERVAL 7 DAY DELETE
     SETTINGS index_granularity = 512
     """
     ).format(
@@ -148,4 +149,4 @@ def DROP_DUPLICATE_EVENTS_MV_SQL():
 
 
 def TRUNCATE_DUPLICATE_EVENTS_TABLE_SQL():
-    return f"TRUNCATE TABLE IF EXISTS {DUPLICATE_EVENTS_TABLE} ON CLUSTER '{settings.DATASTORE_CLUSTER}'"
+    return f"TRUNCATE TABLE IF EXISTS {DUPLICATE_EVENTS_TABLE} {ON_CLUSTER_CLAUSE()}"

@@ -50,11 +50,14 @@ cd /home/user/insights
 uv sync --python /tmp/python-install/python/bin/python3
 source .venv/bin/activate
 
-# Run a specific test
+# Run a specific test (if insightscli is available)
+insightscli test path/to/test.py::TestClass::test_method -v
+
+# Or use pytest directly
 pytest path/to/test.py::TestClass::test_method -v
 
 # Run all tests in a directory
-pytest insights/insightsql/test/ -v
+insightscli test insights/insightsql/test/ -v
 ```
 
 ## Docker Services
@@ -77,7 +80,7 @@ echo "127.0.0.1 kafka datastore datastore-coordinator objectstorage" | sudo tee 
 
 ## Environment Variables
 
-Tests require environment variables defined in [`.github/workflows/ci-backend.yml`](.github/workflows/ci-backend.yml) (see the `env:` section at the top of the file). You can also copy `.env.example` to `.env` for local development defaults.
+Tests require environment variables defined in [`.github/workflows/ci-backend.yml`](../../../.github/workflows/ci-backend.yml) (see the `env:` section at the top of the file). You can also copy `.env.example` to `.env` for local development defaults.
 
 ## Additional Setup
 
@@ -113,7 +116,7 @@ Default ignores: `--ignore=insights/user_scripts --ignore=services/llm-gateway -
 
 ## Debugging Installation Issues
 
-If you encounter issues with the test setup, refer to [`.github/workflows/ci-backend.yml`](.github/workflows/ci-backend.yml) for the authoritative CI configuration. This file shows:
+If you encounter issues with the test setup, refer to [`.github/workflows/ci-backend.yml`](../../../.github/workflows/ci-backend.yml) for the authoritative CI configuration. This file shows:
 
 - Exact Python version used in CI
 - System dependencies installed

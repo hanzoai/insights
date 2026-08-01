@@ -1,14 +1,13 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 import { useCallback, useMemo } from 'react'
 
 import { IconArrowRight, IconWrench } from '@hanzo/icons'
 import { Select, SelectSection, Tag } from '@hanzo/elements'
 
+import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { identifierToHuman } from 'lib/utils'
-import { Scene } from 'scenes/sceneTypes'
-import { sceneConfigurations } from 'scenes/scenes'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { AgentMode } from '~/queries/schema/schema-assistant-messages'
 import { ConversationType } from '~/types'
@@ -17,7 +16,6 @@ import {
     MODE_DEFINITIONS,
     SPECIAL_MODES,
     SpecialMode,
-    TOOL_DEFINITIONS,
     ToolDefinition,
     getDefaultTools,
     getToolsForMode,
@@ -47,6 +45,11 @@ function buildModeTooltip(description: string, tools: ToolDefinition[]): JSX.Ele
                                                 BETA
                                             </Tag>
                                         )}
+                                        {tool.alpha && (
+                                            <Tag size="small" type="danger" className="ml-1 not-italic">
+                                                ALPHA
+                                            </Tag>
+                                        )}
                                     </strong>
                                     {tool.description?.replace(tool.name, '')}
                                 </span>
@@ -60,24 +63,13 @@ function buildModeTooltip(description: string, tools: ToolDefinition[]): JSX.Ele
 }
 
 function buildGeneralTooltip(description: string, defaultTools: ToolDefinition[]): JSX.Element {
-    // Group tools by their product (Scene), excluding some scenes
-    const excludedScenes = [Scene.Insight, Scene.SQLEditor, Scene.Replay]
-    const toolsByProduct = Object.values(TOOL_DEFINITIONS).reduce(
-        (acc, tool) => {
-            if (!tool.product || excludedScenes.includes(tool.product)) {
-                return acc
-            }
-            if (!acc[tool.product]) {
-                acc[tool.product] = []
-            }
-            acc[tool.product]!.push(tool)
-            return acc
-        },
-        {} as Partial<Record<Scene, ToolDefinition[]>>
-    )
+    const modeEntries = Object.entries(MODE_DEFINITIONS) as [
+        AgentMode,
+        (typeof MODE_DEFINITIONS)[keyof typeof MODE_DEFINITIONS],
+    ][]
 
     return (
-        <div className="max-h-[calc(100vh - (var(--spacing) * 5))] overflow-y-auto show-scrollbar-on-hover flex flex-col gap-1.5">
+        <div className="max-w-sm flex flex-col gap-1.5">
             <div>{description}</div>
             {defaultTools.length > 0 && (
                 <div>
@@ -88,51 +80,30 @@ function buildGeneralTooltip(description: string, defaultTools: ToolDefinition[]
                                 <span className="flex text-base text-success shrink-0 ml-1 mr-2 h-[1.25em]">
                                     {tool.icon || <IconWrench />}
                                 </span>
-                                <span>
-                                    <strong className="italic">
-                                        {tool.name}
-                                        {tool.beta && (
-                                            <Tag size="small" type="warning" className="ml-1 not-italic">
-                                                BETA
-                                            </Tag>
-                                        )}
-                                    </strong>
-                                    {tool.description?.replace(tool.name, '')}
-                                </span>
+                                <span>{tool.name}</span>
                             </li>
                         ))}
                     </ul>
                 </div>
             )}
-            {Object.keys(toolsByProduct).length > 0 && (
+            {modeEntries.length > 0 && (
                 <div>
-                    <div className="font-semibold mb-0.5">Contextual tools:</div>
+                    <div className="font-semibold mb-0.5">Mode-specific tools:</div>
                     <ul className="space-y-0.5 text-sm *:flex *:items-start">
-                        {Object.entries(toolsByProduct).map(([product, tools]) => (
-                            <li key={product}>
-                                <IconArrowRight className="text-base text-secondary shrink-0 ml-1 mr-2 h-[1.25em]" />
-                                <span>
-                                    <em>
-                                        In {sceneConfigurations[product as Scene]?.name || identifierToHuman(product)}
-                                        :{' '}
-                                    </em>
-                                    {tools.map((tool, index) => (
-                                        <span key={tool.name}>
-                                            <strong className="italic">
-                                                {tool.name}
-                                                {tool.beta && (
-                                                    <Tag size="small" type="warning" className="ml-1 not-italic">
-                                                        BETA
-                                                    </Tag>
-                                                )}
-                                            </strong>
-                                            {tool.description?.replace(tool.name, '')}
-                                            {index < tools.length - 1 && <>; </>}
-                                        </span>
-                                    ))}
-                                </span>
-                            </li>
-                        ))}
+                        {modeEntries.map(([mode, def]) => {
+                            const tools = getToolsForMode(mode)
+                            if (tools.length === 0) {
+                                return null
+                            }
+                            return (
+                                <li key={mode}>
+                                    <IconArrowRight className="text-base text-secondary shrink-0 ml-1 mr-2 h-[1.25em]" />
+                                    <span>
+                                        <em>{def.name}:</em> {tools.map((tool) => tool.name).join(', ')}
+                                    </span>
+                                </li>
+                            )
+                        })}
                     </ul>
                 </div>
             )}
@@ -143,28 +114,22 @@ function buildGeneralTooltip(description: string, defaultTools: ToolDefinition[]
 interface GetModeOptionsParams {
     planModeEnabled: boolean
     researchEnabled: boolean
-    webSearchEnabled: boolean
-    errorTrackingModeEnabled: boolean
-    surveyModeEnabled: boolean
+    featureFlags: Record<string, boolean | string>
     hasExistingMessages: boolean
-    flagsModeEnabled: boolean
 }
 
 function getModeOptions({
     planModeEnabled,
     researchEnabled,
-    webSearchEnabled,
-    errorTrackingModeEnabled,
-    surveyModeEnabled,
+    featureFlags,
     hasExistingMessages,
-    flagsModeEnabled,
 }: GetModeOptionsParams): SelectSection<ModeValue>[] {
     const specialOptions = [
         {
             value: null as ModeValue,
             label: SPECIAL_MODES.auto.name as string | JSX.Element,
             icon: SPECIAL_MODES.auto.icon,
-            tooltip: buildModeTooltip(SPECIAL_MODES.auto.description, getDefaultTools({ webSearchEnabled })),
+            tooltip: buildModeTooltip(SPECIAL_MODES.auto.description, getDefaultTools()),
         },
     ]
     if (planModeEnabled) {
@@ -181,7 +146,7 @@ function getModeOptions({
                 </span>
             ),
             icon: SPECIAL_MODES.plan.icon,
-            tooltip: buildModeTooltip(SPECIAL_MODES.plan.description, getDefaultTools({ webSearchEnabled })),
+            tooltip: buildModeTooltip(SPECIAL_MODES.plan.description, getDefaultTools()),
         })
     }
 
@@ -203,14 +168,8 @@ function getModeOptions({
         })
     }
 
-    const modeEntries = Object.entries(MODE_DEFINITIONS).filter(([mode]) => {
-        if (mode === AgentMode.ErrorTracking && !errorTrackingModeEnabled) {
-            return false
-        }
-        if (mode === AgentMode.Survey && !surveyModeEnabled) {
-            return false
-        }
-        if (mode === AgentMode.Flags && !flagsModeEnabled) {
+    const modeEntries = Object.entries(MODE_DEFINITIONS).filter(([_, def]) => {
+        if (def.flag && !featureFlags[FEATURE_FLAGS[def.flag]]) {
             return false
         }
         return true
@@ -221,16 +180,24 @@ function getModeOptions({
         {
             options: modeEntries.map(([mode, def]) => ({
                 value: mode as AgentMode,
-                label: def.beta ? (
-                    <span className="flex items-center gap-1">
-                        {def.name}
-                        <Tag size="small" type="warning">
-                            BETA
-                        </Tag>
-                    </span>
-                ) : (
-                    def.name
-                ),
+                label:
+                    def.beta || def.alpha ? (
+                        <span className="flex items-center gap-1">
+                            {def.name}
+                            {def.beta && (
+                                <Tag size="small" type="warning">
+                                    BETA
+                                </Tag>
+                            )}
+                            {def.alpha && (
+                                <Tag size="small" type="danger">
+                                    ALPHA
+                                </Tag>
+                            )}
+                        </span>
+                    ) : (
+                        def.name
+                    ),
                 icon: def.icon,
                 tooltip: buildModeTooltip(def.description, getToolsForMode(mode as AgentMode)),
             })),
@@ -241,12 +208,9 @@ function getModeOptions({
 export function ModeSelector(): JSX.Element | null {
     const { agentMode, contextDisabledReason, conversation, threadMessageCount } = useValues(maxThreadLogic)
     const { setAgentMode } = useActions(maxThreadLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
     const researchEnabled = useFeatureFlag('MAX_DEEP_RESEARCH')
     const planModeEnabled = useFeatureFlag('PHAI_PLAN_MODE')
-    const webSearchEnabled = useFeatureFlag('PHAI_WEB_SEARCH')
-    const errorTrackingModeEnabled = useFeatureFlag('PHAI_ERROR_TRACKING_MODE')
-    const surveyModeEnabled = useFeatureFlag('PHAI_SURVEY_MODE')
-    const flagsModeEnabled = useFeatureFlag('INSIGHTS_AI_FLAGS_MODE')
 
     const hasExistingMessages = threadMessageCount > 0
     const modeOptions = useMemo(
@@ -254,22 +218,10 @@ export function ModeSelector(): JSX.Element | null {
             getModeOptions({
                 planModeEnabled,
                 researchEnabled,
-                webSearchEnabled,
-                errorTrackingModeEnabled,
-                flagsModeEnabled,
-                surveyModeEnabled,
+                featureFlags,
                 hasExistingMessages,
             }),
-        [
-            planModeEnabled,
-            researchEnabled,
-            webSearchEnabled,
-            errorTrackingModeEnabled,
-            surveyModeEnabled,
-            hasExistingMessages,
-            flagsModeEnabled,
-            surveyModeEnabled,
-        ]
+        [planModeEnabled, researchEnabled, featureFlags, hasExistingMessages]
     )
 
     const handleChange = useCallback(
@@ -299,7 +251,7 @@ export function ModeSelector(): JSX.Element | null {
             }
             tooltip={buildGeneralTooltip(
                 'Select a mode to focus Insights AI on a specific product or task. Each mode unlocks specialized capabilities, tools, and expertise.',
-                getDefaultTools({ webSearchEnabled })
+                getDefaultTools()
             )}
             dropdownPlacement="top-start"
             dropdownMatchSelectWidth={false}

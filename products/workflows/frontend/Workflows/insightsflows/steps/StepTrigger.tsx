@@ -1,42 +1,41 @@
 import { Node } from '@xyflow/react'
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import { useMemo, useState } from 'react'
 
 import {
     IconBolt,
     IconButton,
     IconClock,
+    IconInfo,
     IconLeave,
     IconPeople,
-    IconPlusSmall,
     IconTarget,
+    IconWarning,
     IconWebhooks,
 } from '@hanzo/icons'
 import {
     Button,
-    CalendarSelectInput,
-    Checkbox,
     Collapse,
     Divider,
+    Dropdown,
+    Input,
     Label,
     Select,
-    Tag,
     Spinner,
     Tooltip,
-    toast,
 } from '@hanzo/elements'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { FEATURE_FLAGS } from 'lib/constants'
-import { dayjs } from 'lib/dayjs'
+import { IconAdsClick } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
 import { Radio } from 'lib/elements/Radio'
-import { IconAdsClick } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { humanFriendlyNumber } from 'lib/utils'
 import { publicWebhooksHostOrigin } from 'lib/utils/apiHost'
+import { createFuse } from 'lib/utils/fuseSearch'
+import { humanFriendlyNumber } from 'lib/utils/numbers'
+import { COHORTS_ONLY_SUPPORT_IN_PICKER_PROPS } from 'scenes/feature-flags/cohortPickerProps'
 import { TestAccountFilter } from 'scenes/insights/filters/TestAccountFilter/TestAccountFilter'
 
 import { PropertyFilterType } from '~/types'
@@ -45,11 +44,13 @@ import { PropertyFilterType } from '~/types'
 import 'products/workflows/frontend/Workflows/insightsflows/registry/triggers'
 
 import { workflowLogic } from '../../workflowLogic'
-import { InsightsFlowEventFilters } from '../filters/InsightsFlowFilters'
-import { getRegisteredTriggerTypes } from '../registry/triggers/triggerTypeRegistry'
+import { InsightsFlowEventFilters, WORKFLOW_OPERATOR_ALLOWLIST } from '../filters/InsightsFlowFilters'
+import { TriggerFrequencyOption, getRegisteredTriggerTypes } from '../registry/triggers/triggerTypeRegistry'
 import { InsightsFlowAction } from '../types'
-import { batchTriggerLogic } from './batchTriggerLogic'
+import { batchTriggerLogic, getAudienceDedupeKey } from './batchTriggerLogic'
 import { InsightsFlowFunctionConfiguration } from './components/InsightsFlowFunctionConfiguration'
+import { RecurringSchedulePicker } from './components/RecurringSchedulePicker'
+import { ScheduleStatusBadge } from './components/ScheduleStatusBadge'
 
 type TriggerAction = Extract<InsightsFlowAction, { type: 'trigger' }>
 type EventTriggerConfig = {
@@ -62,6 +63,15 @@ type EventTriggerConfig = {
     }
 }
 
+type TriggerOptionItem = {
+    label: string
+    description: string
+    value: string
+    icon: JSX.Element
+    group?: string
+    tag?: JSX.Element
+}
+
 function getTriggerDisplayType(type: string, config: any): string {
     if (type !== 'event') {
         return type
@@ -70,8 +80,131 @@ function getTriggerDisplayType(type: string, config: any): string {
     return match ? match.value : type
 }
 
+function TriggerTypeDropdown({
+    items,
+    selectedItem,
+    onSelect,
+}: {
+    items: TriggerOptionItem[]
+    selectedItem: TriggerOptionItem | undefined
+    onSelect: (value: string) => void
+}): JSX.Element {
+    const [popoverOpen, setPopoverOpen] = useState(false)
+    const [search, setSearch] = useState('')
+
+    const filteredItems = useMemo(() => {
+        if (!search) {
+            return items
+        }
+        const fuse = createFuse(items, { keys: ['label', 'description'], threshold: 0.3 })
+        return fuse.search(search).map((result) => result.item)
+    }, [items, search])
+
+    // Group items for display
+    const ungrouped = filteredItems.filter((item) => !item.group)
+    const grouped: Record<string, TriggerOptionItem[]> = {}
+    for (const item of filteredItems) {
+        if (item.group) {
+            if (!grouped[item.group]) {
+                grouped[item.group] = []
+            }
+            grouped[item.group].push(item)
+        }
+    }
+
+    return (
+        <Dropdown
+            closeOnClickInside={false}
+            visible={popoverOpen}
+            onClickOutside={() => {
+                setPopoverOpen(false)
+                setSearch('')
+            }}
+            placement="bottom-start"
+            matchWidth
+            overlay={
+                <div className="flex flex-col max-h-120 flex-1 overflow-hidden gap-1">
+                    <Input placeholder="Search..." value={search} onChange={setSearch} autoFocus />
+                    <ul className="overflow-y-auto flex-1">
+                        {ungrouped.map((item) => (
+                            <TriggerTypeDropdownItem
+                                key={item.value}
+                                item={item}
+                                selected={item.value === selectedItem?.value}
+                                onSelect={() => {
+                                    onSelect(item.value)
+                                    setPopoverOpen(false)
+                                    setSearch('')
+                                }}
+                            />
+                        ))}
+                        {Object.entries(grouped).map(([group, groupItems]) => (
+                            <li key={group}>
+                                <div className="text-xs font-semibold text-muted px-2 pt-2 pb-1">{group}</div>
+                                <ul>
+                                    {groupItems.map((item) => (
+                                        <TriggerTypeDropdownItem
+                                            key={item.value}
+                                            item={item}
+                                            selected={item.value === selectedItem?.value}
+                                            onSelect={() => {
+                                                onSelect(item.value)
+                                                setPopoverOpen(false)
+                                                setSearch('')
+                                            }}
+                                        />
+                                    ))}
+                                </ul>
+                            </li>
+                        ))}
+                        {filteredItems.length === 0 && (
+                            <li className="text-muted text-sm px-2 py-4 text-center">No matching trigger types</li>
+                        )}
+                    </ul>
+                </div>
+            }
+        >
+            <Button type="secondary" fullWidth onClick={() => setPopoverOpen(!popoverOpen)}>
+                {selectedItem ? (
+                    <span className="flex items-center gap-2">
+                        {selectedItem.icon}
+                        <span>{selectedItem.label}</span>
+                        {selectedItem.tag}
+                    </span>
+                ) : (
+                    'Select trigger type'
+                )}
+            </Button>
+        </Dropdown>
+    )
+}
+
+function TriggerTypeDropdownItem({
+    item,
+    selected,
+    onSelect,
+}: {
+    item: TriggerOptionItem
+    selected: boolean
+    onSelect: () => void
+}): JSX.Element {
+    return (
+        <li>
+            <Button fullWidth active={selected} onClick={onSelect} icon={item.icon}>
+                <div className="flex flex-col my-1">
+                    <div className="flex items-baseline font-semibold">
+                        <span>{item.label}</span>
+                        {item.tag}
+                    </div>
+                    <p className="text-xs text-muted">{item.description}</p>
+                </div>
+            </Button>
+        </li>
+    )
+}
+
 export function StepTriggerConfiguration({ node }: { node: Node<TriggerAction> }): JSX.Element {
-    const { setWorkflowActionConfig } = useActions(workflowLogic)
+    const { setWorkflowActionConfig, setWorkflowValue } = useActions(workflowLogic)
     const { actionValidationErrorsById } = useValues(workflowLogic)
     const { featureFlags } = useValues(featureFlagLogic)
 
@@ -79,94 +212,113 @@ export function StepTriggerConfiguration({ node }: { node: Node<TriggerAction> }
     const displayType = getTriggerDisplayType(type, node.data.config)
     const validationResult = actionValidationErrorsById[node.id]
 
-    const triggerOptions = [
-        {
-            label: 'Event',
-            value: 'event',
-            icon: <IconBolt />,
-            labelInMenu: (
-                <div className="flex flex-col my-1">
-                    <div className="font-semibold">Event</div>
-                    <p className="text-xs text-muted">
-                        Trigger your workflow based on incoming realtime Insights events
-                    </p>
-                </div>
-            ),
-        },
-        {
-            label: 'Webhook',
-            value: 'webhook',
-            icon: <IconWebhooks />,
-            labelInMenu: (
-                <div className="flex flex-col my-1">
-                    <div className="font-semibold">Webhook</div>
-                    <p className="text-xs text-muted">Trigger your workflow using an incoming HTTP webhook</p>
-                </div>
-            ),
-        },
-        {
-            label: 'Manual',
-            value: 'manual',
-            icon: <IconButton />,
-            labelInMenu: (
-                <div className="flex flex-col my-1">
-                    <div className="font-semibold">Manual</div>
-                    <p className="text-xs text-muted">Trigger your workflow manually... with a button!</p>
-                </div>
-            ),
-        },
-        {
-            label: 'Schedule',
-            value: 'schedule',
-            icon: <IconClock />,
-            labelInMenu: (
-                <div className="flex flex-col my-1">
-                    <div className="font-semibold">Schedule</div>
-                    <p className="text-xs text-muted">Schedule your workflow to run at a specific time in the future</p>
-                </div>
-            ),
-        },
-        {
-            label: 'Tracking pixel',
-            value: 'tracking_pixel',
-            icon: <IconAdsClick />,
-            labelInMenu: (
-                <div className="flex flex-col my-1">
-                    <div className="font-semibold">Tracking pixel</div>
-                    <p className="text-xs text-muted">Trigger your workflow using a 1x1 tracking pixel</p>
-                </div>
-            ),
-        },
-    ]
+    const allTriggerItems = useMemo(() => {
+        const items: TriggerOptionItem[] = [
+            {
+                label: 'Event',
+                description: 'Trigger your workflow based on incoming realtime Insights events',
+                value: 'event',
+                icon: <IconBolt />,
+            },
+            {
+                label: 'Webhook',
+                description: 'Trigger your workflow using an incoming HTTP webhook',
+                value: 'webhook',
+                icon: <IconWebhooks />,
+            },
+            ...(type === 'manual'
+                ? [
+                      {
+                          label: 'Manual',
+                          description: 'Trigger your workflow manually... with a button!',
+                          value: 'manual',
+                          icon: <IconButton />,
+                      },
+                  ]
+                : []),
+            // The generic "schedule" trigger is hidden from new workflows. It's only offered when the
+            // current trigger is already a schedule, so existing workflows still render and can be
+            // switched to a different trigger type without crashing.
+            ...(type === 'schedule'
+                ? [
+                      {
+                          label: 'Schedule',
+                          description: 'Run your workflow on a schedule',
+                          value: 'schedule',
+                          icon: <IconClock />,
+                      },
+                  ]
+                : []),
+            {
+                label: 'Tracking pixel',
+                description: 'Trigger your workflow using a 1x1 tracking pixel',
+                value: 'tracking_pixel',
+                icon: <IconAdsClick />,
+            },
+            {
+                label: 'Batch',
+                description: 'Trigger your workflow to run for each person in an audience you define.',
+                value: 'batch',
+                icon: <IconPeople />,
+            },
+            ...getRegisteredTriggerTypes()
+                .filter((t) => !t.featureFlag || featureFlags[t.featureFlag])
+                .map((t) => ({
+                    label: t.label,
+                    description: t.description,
+                    value: t.value,
+                    icon: t.icon,
+                    group: t.group,
+                })),
+        ]
+        return items
+    }, [type, featureFlags])
 
-    if (featureFlags[FEATURE_FLAGS.WORKFLOWS_BATCH_TRIGGERS]) {
-        triggerOptions.splice(4, 0, {
-            label: 'Batch',
-            value: 'batch',
-            icon: <IconPeople />,
-            labelInMenu: (
-                <div className="flex flex-col my-1">
-                    <div className="font-semibold">Batch</div>
-                    <p className="text-xs text-muted">
-                        Trigger or schedule your workflow to run for each person in a group you define.
-                    </p>
-                </div>
-            ),
-        })
-    }
+    const selectedItem = allTriggerItems.find((item) => item.value === displayType)
 
-    for (const t of getRegisteredTriggerTypes()) {
-        if (!t.featureFlag || featureFlags[t.featureFlag]) {
-            triggerOptions.push({
-                label: t.label,
-                value: t.value,
-                icon: t.icon,
-                labelInMenu: (
-                    <div className="flex flex-col my-1">
-                        <div className="font-semibold">{t.label}</div>
-                        <p className="text-xs text-muted">{t.description}</p>
-                    </div>
-                ),
+    // Registered trigger types (e.g. data warehouse) can own non-event configs, so resolve the
+    // matching definition regardless of config.type and render its ConfigComponent below.
+    const registeredMatch = getRegisteredTriggerTypes().find((t) => t.matchConfig?.(node.data.config))
+
+    const handleSelect = (value: string): void => {
+        // The frequency hash lives on the workflow, not the trigger config, and hashes are
+        // trigger-specific ({person.id} vs event-keyed) — a stale one silently disables masking.
+        if (value !== displayType) {
+            setWorkflowValue('trigger_masking', null)
+        }
+        const registered = getRegisteredTriggerTypes().find((t) => t.value === value)
+        if (registered) {
+            setWorkflowActionConfig(node.id, registered.buildConfig())
+        } else if (value === 'event') {
+            setWorkflowActionConfig(node.id, { type: 'event', filters: {} })
+        } else if (value === 'webhook') {
+            setWorkflowActionConfig(node.id, {
+                type: 'webhook',
+                template_id: 'template-source-webhook',
+                inputs: {},
+            })
+        } else if (value === 'manual') {
+            setWorkflowActionConfig(node.id, {
+                type: 'manual',
+                template_id: 'template-source-webhook',
+                inputs: {
+                    event: { order: 0, value: '$workflow_triggered' },
+                    distinct_id: { order: 1, value: '{request.body.user_id}' },
+                    method: { order: 2, value: 'POST' },
+                },
+            })
+        } else if (value === 'schedule') {
+            setWorkflowActionConfig(node.id, { type: 'schedule' })
+        } else if (value === 'batch') {
+            setWorkflowActionConfig(node.id, {
+                type: 'batch',
+                filters: { properties: [] },
+            })
+        } else if (value === 'tracking_pixel') {
+            setWorkflowActionConfig(node.id, {
+                type: 'tracking_pixel',
+                template_id: 'template-source-webhook-pixel',
+                inputs: {},
             })
         }
     }
@@ -178,74 +330,41 @@ export function StepTriggerConfiguration({ node }: { node: Node<TriggerAction> }
                 <span className="text-md font-semibold">Trigger type</span>
             </span>
             <span>What causes this workflow to begin?</span>
-            <Field.Pure error={validationResult?.errors?.type}>
-                <Select
-                    options={triggerOptions}
-                    value={displayType}
-                    placeholder="Select trigger type"
-                    onChange={(value) => {
-                        const registered = getRegisteredTriggerTypes().find((t) => t.value === value)
-                        if (registered) {
-                            setWorkflowActionConfig(node.id, registered.buildConfig())
-                        } else if (value === 'event') {
-                            setWorkflowActionConfig(node.id, { type: 'event', filters: {} })
-                        } else if (value === 'webhook') {
-                            setWorkflowActionConfig(node.id, {
-                                type: 'webhook',
-                                template_id: 'template-source-webhook',
-                                inputs: {},
-                            })
-                        } else if (value === 'manual') {
-                            setWorkflowActionConfig(node.id, {
-                                type: 'manual',
-                                template_id: 'template-source-webhook',
-                                inputs: {
-                                    event: { order: 0, value: '$workflow_triggered' },
-                                    distinct_id: { order: 1, value: '{request.body.user_id}' },
-                                    method: { order: 2, value: 'POST' },
-                                },
-                            })
-                        } else if (value === 'schedule') {
-                            setWorkflowActionConfig(node.id, {
-                                type: 'schedule',
-                                template_id: 'template-source-webhook',
-                                inputs: {
-                                    event: { order: 0, value: '$workflow_triggered' },
-                                    distinct_id: { order: 1, value: '{request.body.user_id}' },
-                                    method: { order: 2, value: 'POST' },
-                                },
-                                scheduled_at: undefined,
-                            })
-                        } else if (value === 'batch') {
-                            setWorkflowActionConfig(node.id, {
-                                type: 'batch',
-                                filters: { properties: [] },
-                                scheduled_at: undefined,
-                            })
-                        } else if (value === 'tracking_pixel') {
-                            setWorkflowActionConfig(node.id, {
-                                type: 'tracking_pixel',
-                                template_id: 'template-source-webhook-pixel',
-                                inputs: {},
-                            })
-                        }
-                    }}
-                />
-            </Field.Pure>
-            {node.data.config.type === 'event' ? (
-                (() => {
-                    const match = getRegisteredTriggerTypes().find((t) => t.matchConfig?.(node.data.config))
-                    if (match?.ConfigComponent) {
-                        return <match.ConfigComponent node={node} />
-                    }
-                    return <StepTriggerConfigurationEvents action={node.data} config={node.data.config} />
-                })()
+            <div className="flex items-center gap-2">
+                <Field.Pure error={validationResult?.errors?.type}>
+                    <TriggerTypeDropdown items={allTriggerItems} selectedItem={selectedItem} onSelect={handleSelect} />
+                </Field.Pure>
+                {type === 'schedule' && <ScheduleStatusBadge />}
+            </div>
+            {registeredMatch?.ConfigComponent ? (
+                <>
+                    <registeredMatch.ConfigComponent node={node} />
+                    {registeredMatch.frequencyOptions ? (
+                        <>
+                            <Divider />
+                            <FrequencySection
+                                options={registeredMatch.frequencyOptions}
+                                description={registeredMatch.frequencyDescription}
+                            />
+                        </>
+                    ) : null}
+                </>
+            ) : node.data.config.type === 'event' ? (
+                <StepTriggerConfigurationEvents action={node.data} config={node.data.config} />
             ) : node.data.config.type === 'webhook' ? (
                 <StepTriggerConfigurationWebhook action={node.data} config={node.data.config} />
             ) : node.data.config.type === 'manual' ? (
                 <StepTriggerConfigurationManual />
             ) : node.data.config.type === 'schedule' ? (
-                <StepTriggerConfigurationSchedule action={node.data} config={node.data.config} />
+                <div className="flex flex-col gap-2 w-full">
+                    <p className="text-xs text-muted mb-0">
+                        Schedule triggers run without a person or event. If your workflow needs to target specific
+                        users, use a batch trigger instead.
+                    </p>
+                    <Field.Pure error={validationResult?.errors?.schedule}>
+                        <RecurringSchedulePicker />
+                    </Field.Pure>
+                </div>
             ) : node.data.config.type === 'batch' ? (
                 <StepTriggerConfigurationBatch action={node.data} config={node.data.config} />
             ) : node.data.config.type === 'tracking_pixel' ? (
@@ -363,6 +482,7 @@ function StepTriggerConfigurationWebhook({
                     })
                 }
                 errors={validationResult?.errors}
+                warnings={validationResult?.warnings}
             />
         </div>
     )
@@ -384,76 +504,68 @@ function StepTriggerConfigurationManual(): JSX.Element {
     )
 }
 
-function StepTriggerConfigurationSchedule({
-    action,
-    config,
-}: {
-    action: Extract<InsightsFlowAction, { type: 'trigger' }>
-    config: Extract<InsightsFlowAction['config'], { type: 'schedule' }>
-}): JSX.Element {
-    const { setWorkflowActionConfig } = useActions(workflowLogic)
-    const { actionValidationErrorsById } = useValues(workflowLogic)
-    const validationResult = actionValidationErrorsById[action.id]
-
-    const scheduledDateTime = config.scheduled_at ? dayjs(config.scheduled_at) : null
-
-    return (
-        <>
-            <div className="flex flex-col gap-2">
-                <p className="mb-0">Schedule this workflow to run at a specific time in the future.</p>
-                <Field.Pure label="Scheduled time" error={validationResult?.errors?.scheduled_at}>
-                    <div className="flex flex-col gap-2">
-                        <CalendarSelectInput
-                            value={scheduledDateTime}
-                            onChange={(date) => {
-                                setWorkflowActionConfig(action.id, {
-                                    type: 'schedule',
-                                    template_id: config.template_id,
-                                    template_uuid: config.template_uuid,
-                                    inputs: config.inputs,
-                                    scheduled_at: date ? date.toISOString() : undefined,
-                                })
-                            }}
-                            granularity="minute"
-                            selectionPeriod="upcoming"
-                            showTimeToggle={false}
-                        />
-                        {scheduledDateTime && (
-                            <div className="text-xs text-muted">
-                                Timezone: {dayjs.tz.guess()} • Scheduled for:{' '}
-                                {scheduledDateTime.format('MMMM D, YYYY [at] h:mm A')}
-                            </div>
-                        )}
-                    </div>
-                </Field.Pure>
-            </div>
-        </>
-    )
-}
-
 function StepTriggerAffectedUsers({ actionId, filters }: { actionId: string; filters: any }): JSX.Element | null {
-    const logic = batchTriggerLogic({ id: actionId, filters })
-    const { blastRadiusLoading, blastRadius } = useValues(logic)
+    const { workflow } = useValues(workflowLogic)
+    const dedupeKey = getAudienceDedupeKey(workflow)
+    const logic = batchTriggerLogic({ id: actionId, filters, dedupeKey })
+    const { blastRadiusLoading, blastRadius, blastRadiusError } = useValues(logic)
 
     if (blastRadiusLoading) {
-        return <Spinner />
+        return <Spinner className="mt-1" />
+    }
+
+    if (blastRadiusError) {
+        return (
+            <div className="text-warning text-xs flex items-start gap-1 mt-1">
+                <IconWarning className="text-base shrink-0 mt-0.5" />
+                <div>
+                    <div className="font-semibold">
+                        Couldn't validate audience size — this batch will likely fail to run.
+                    </div>
+                    <div>
+                        Your filters could not be evaluated against the audience. Review and adjust them before saving,
+                        otherwise the batch is likely to error when it executes.
+                    </div>
+                    <div className="mt-1 text-muted">Details: {blastRadiusError}</div>
+                </div>
+            </div>
+        )
     }
 
     if (!blastRadius) {
         return null
     }
 
-    const { users_affected, total_users } = blastRadius
+    const { affected, total, limit } = blastRadius
 
-    if (users_affected != null && total_users != null) {
+    if (affected != null && total != null) {
+        const exceeded = limit != null && affected > limit
         return (
             <div className="text-muted">
-                approximately {humanFriendlyNumber(users_affected)} of {humanFriendlyNumber(total_users)} persons.
+                <div className={exceeded ? 'text-danger font-semibold' : 'text-muted'}>
+                    approximately {humanFriendlyNumber(affected)} of {humanFriendlyNumber(total)} persons.
+                </div>
+                {exceeded && limit != null && (
+                    <div className="text-danger text-xs">
+                        Batch size exceeds the limit of {humanFriendlyNumber(limit)} users. Add filters to narrow your
+                        audience. This limit will be loosened in the future.
+                    </div>
+                )}
             </div>
         )
     }
 
     return null
+}
+
+function BatchScheduleSection(): JSX.Element {
+    return (
+        <>
+            <Divider />
+            <Label showOptional>Schedule</Label>
+            <RecurringSchedulePicker />
+        </>
+    )
 }
 
 function StepTriggerConfigurationBatch({
@@ -464,14 +576,10 @@ function StepTriggerConfigurationBatch({
     config: Extract<InsightsFlowAction['config'], { type: 'batch' }>
 }): JSX.Element {
     const { partialSetWorkflowActionConfig } = useActions(workflowLogic)
-    const { actionValidationErrorsById } = useValues(workflowLogic)
-    const validationResult = actionValidationErrorsById[action.id]
-
-    const scheduledDateTime = config.scheduled_at ? dayjs(config.scheduled_at) : null
 
     return (
-        <div className="flex flex-col gap-2 my-2">
-            <div className="flex gap-1">
+        <div className="flex flex-col gap-2 my-2 w-full">
+            <div>
                 <span className="font-semibold">This batch will include</span>{' '}
                 <StepTriggerAffectedUsers actionId={action.id} filters={config.filters} />
             </div>
@@ -483,7 +591,7 @@ function StepTriggerConfigurationBatch({
                     orFiltering
                     sendAllKeyUpdates
                     allowRelativeDateOptions
-                    exactMatchFeatureFlagCohortOperators
+                    {...COHORTS_ONLY_SUPPORT_IN_PICKER_PROPS}
                     hideBehavioralCohorts
                     logicalRowDivider
                     onChange={(properties) =>
@@ -496,7 +604,6 @@ function StepTriggerConfigurationBatch({
                     taxonomicGroupTypes={[
                         TaxonomicFilterGroupType.PersonProperties,
                         TaxonomicFilterGroupType.Cohorts,
-                        TaxonomicFilterGroupType.FeatureFlags,
                         TaxonomicFilterGroupType.Metadata,
                     ]}
                     taxonomicFilterOptionsFromProp={{
@@ -505,43 +612,11 @@ function StepTriggerConfigurationBatch({
                         ],
                     }}
                     hasRowOperator={false}
+                    operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
                 />
             </div>
-            <Divider />
-            <div className="flex gap-2">
-                <span className="font-semibold">Schedule for later?</span>
-                <Checkbox
-                    checked={Boolean(config.scheduled_at)}
-                    onChange={(checked) =>
-                        partialSetWorkflowActionConfig(action.id, {
-                            scheduled_at: checked ? dayjs().add(5, 'minutes').toISOString() : undefined,
-                        })
-                    }
-                />
-            </div>
-            {config.scheduled_at && (
-                <Field.Pure label="Scheduled time" error={validationResult?.errors?.scheduled_at}>
-                    <div className="flex flex-col gap-2">
-                        <CalendarSelectInput
-                            value={scheduledDateTime}
-                            onChange={(date) => {
-                                partialSetWorkflowActionConfig(action.id, {
-                                    scheduled_at: date ? date.toISOString() : undefined,
-                                })
-                            }}
-                            granularity="minute"
-                            selectionPeriod="upcoming"
-                            showTimeToggle={false}
-                        />
-                        {scheduledDateTime && (
-                            <div className="text-xs text-muted">
-                                Timezone: {dayjs.tz.guess()} • Scheduled for:{' '}
-                                {scheduledDateTime.format('MMMM D, YYYY [at] h:mm A')}
-                            </div>
-                        )}
-                    </div>
-                </Field.Pure>
-            )}
+
+            <BatchScheduleSection />
         </div>
     )
 }
@@ -619,14 +694,19 @@ function StepTriggerConfigurationTrackingPixel({
                     })
                 }
                 errors={validationResult?.errors}
+                warnings={validationResult?.warnings}
             />
         </>
     )
 }
 
-const FREQUENCY_OPTIONS = [
+const MASKING_HASH_PER_PERSON_PER_DAY = "{concat(toString(person.id), '-', formatDateTime(now(), '%Y-%m-%d'))}"
+const CALENDAR_DAY_TTL = 24 * 60 * 60
+
+const FREQUENCY_OPTIONS: TriggerFrequencyOption[] = [
     { value: null, label: 'Every time the trigger fires' },
     { value: '{person.id}', label: 'One time' },
+    { value: MASKING_HASH_PER_PERSON_PER_DAY, label: 'Once per calendar day', fixedTtl: CALENDAR_DAY_TTL },
 ]
 
 const TTL_OPTIONS = [
@@ -662,9 +742,17 @@ function TTLSelect({
     )
 }
 
-function FrequencySection(): JSX.Element {
+function FrequencySection({
+    options = FREQUENCY_OPTIONS,
+    description = 'Limit how often users can enter this workflow',
+}: {
+    options?: TriggerFrequencyOption[]
+    description?: string
+}): JSX.Element {
     const { setWorkflowValue } = useActions(workflowLogic)
     const { workflow } = useValues(workflowLogic)
+
+    const selectedOption = options.find((option) => option.value === (workflow.trigger_masking?.hash ?? null))
 
     return (
         <div className="flex flex-col w-full py-2">
@@ -672,26 +760,27 @@ function FrequencySection(): JSX.Element {
                 <IconClock className="text-lg" />
                 <span className="text-md font-semibold">Frequency</span>
             </span>
-            <p>Limit how often users can enter this workflow</p>
+            <p>{description}</p>
 
             <Field.Pure>
                 <div className="flex flex-wrap gap-1 items-center">
                     <Select
-                        options={FREQUENCY_OPTIONS}
+                        options={options.map(({ value, label }) => ({ value, label }))}
                         value={workflow.trigger_masking?.hash ?? null}
-                        onChange={(val) =>
+                        onChange={(val) => {
+                            const option = options.find((candidate) => candidate.value === val)
                             setWorkflowValue(
                                 'trigger_masking',
                                 val
                                     ? {
                                           hash: val,
-                                          ttl: workflow.trigger_masking?.ttl ?? 60 * 30,
+                                          ttl: option?.fixedTtl ?? workflow.trigger_masking?.ttl ?? 60 * 30,
                                       }
                                     : null
                             )
-                        }
+                        }}
                     />
-                    {workflow.trigger_masking?.hash ? (
+                    {workflow.trigger_masking?.hash && !selectedOption?.fixedTtl ? (
                         <TTLSelect
                             value={workflow.trigger_masking.ttl}
                             onChange={(val) =>
@@ -709,72 +798,55 @@ function ConversionGoalSection(): JSX.Element {
     const { setWorkflowValue } = useActions(workflowLogic)
     const { workflow } = useValues(workflowLogic)
 
+    const conversionEventFilters = workflow.conversion?.events?.[0]?.filters ?? {}
+
     return (
         <div className="flex flex-col py-2 w-full">
-            <span className="flex gap-1">
+            <span className="flex gap-1 items-center">
                 <IconTarget className="text-lg" />
                 <span className="text-md font-semibold">Conversion goal (optional)</span>
+                <Tooltip title="When a conversion goal is set, each conversion is sent as a billable $workflows_conversion event (with the workflow id and conversion type). You can build insights and cohorts from it, and it counts toward your event usage.">
+                    <IconInfo className="text-secondary" />
+                </Tooltip>
             </span>
-            <p>Define what a user must do to be considered converted.</p>
+            <p>
+                Define what a user must do to be considered converted. All conditions must be met for the user to be
+                considered converted.
+            </p>
 
-            <div className="flex gap-1 max-w-240">
-                <div className="flex flex-col flex-2 gap-4">
-                    <Field.Pure label="Detect conversion from property changes">
-                        <PropertyFilters
-                            buttonText="Add property conversion"
-                            propertyFilters={workflow.conversion?.filters ?? []}
-                            taxonomicGroupTypes={[
-                                TaxonomicFilterGroupType.PersonProperties,
-                                TaxonomicFilterGroupType.Cohorts,
-                                TaxonomicFilterGroupType.InsightsQLExpression,
-                            ]}
-                            onChange={(filters) => setWorkflowValue('conversion', { ...workflow.conversion, filters })}
-                            pageKey="workflow-conversion-properties"
-                            hideBehavioralCohorts
-                        />
-                    </Field.Pure>
-                    <div className="flex flex-col gap-1">
-                        <Label>
-                            Detect conversion from events
-                            <Tag>Coming soon</Tag>
-                        </Label>
-                        <Button
-                            type="secondary"
-                            size="small"
-                            icon={<IconPlusSmall />}
-                            onClick={() => {
-                                insights.capture('workflows workflow event conversion clicked')
-                                toast.info('Event targeting coming soon!')
-                            }}
-                        >
-                            Add event conversion
-                        </Button>
-                    </div>
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1 items-start">
+                    <Label>Detect conversion from property changes</Label>
+                    <PropertyFilters
+                        buttonText="Add property conversion"
+                        buttonClassName="grow-0"
+                        propertyFilters={workflow.conversion?.filters ?? []}
+                        taxonomicGroupTypes={[
+                            TaxonomicFilterGroupType.PersonProperties,
+                            TaxonomicFilterGroupType.InsightsQLExpression,
+                        ]}
+                        onChange={(filters) => setWorkflowValue('conversion', { ...workflow.conversion, filters })}
+                        pageKey="workflow-conversion-properties"
+                        hideBehavioralCohorts
+                        operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
+                        logicalRowDivider
+                    />
                 </div>
-                <Divider vertical />
-                <div className="flex-1">
-                    <Field.Pure
-                        label="Conversion window"
-                        info="How long after entering the workflow should we check for conversion? After this window, users will be considered for conversion."
-                    >
-                        <Select
-                            value={workflow.conversion?.window_minutes}
-                            onChange={(value) =>
-                                setWorkflowValue('conversion', {
-                                    ...workflow.conversion,
-                                    window_minutes: value,
-                                })
-                            }
-                            placeholder="No conversion window"
-                            allowClear
-                            options={[
-                                { value: 24 * 60 * 60, label: '24 hours' },
-                                { value: 7 * 24 * 60 * 60, label: '7 days' },
-                                { value: 14 * 24 * 60 * 60, label: '14 days' },
-                                { value: 30 * 24 * 60 * 60, label: '30 days' },
-                            ]}
-                        />
-                    </Field.Pure>
+
+                <div className="flex flex-col gap-1 items-start w-full">
+                    <Label>Detect conversion from events</Label>
+                    <InsightsFlowEventFilters
+                        filtersKey="workflow-conversion-events"
+                        filters={conversionEventFilters}
+                        setFilters={(newFilters) =>
+                            setWorkflowValue('conversion', {
+                                ...workflow.conversion,
+                                events: newFilters ? [{ filters: newFilters }] : undefined,
+                            })
+                        }
+                        typeKey="workflow-conversion-event"
+                        buttonCopy="Add event"
+                    />
                 </div>
             </div>
         </div>

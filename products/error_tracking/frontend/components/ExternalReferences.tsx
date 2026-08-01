@@ -1,16 +1,14 @@
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
-import { useFeatureFlagEnabled } from '@hanzo/insights/react'
-import { useMemo } from 'react'
+import insights from 'insights-js'
 
 import { IconPlus } from '@hanzo/icons'
 import { Dialog, Input, TextArea, Link } from '@hanzo/elements'
 
-import { FEATURE_FLAGS } from 'lib/constants'
+import { ErrorTrackingFingerprint } from 'lib/components/Errors/types'
 import { GitHubRepositorySelectField } from 'lib/integrations/GitHubIntegrationHelpers'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { JiraProjectSelectField } from 'lib/integrations/JiraIntegrationHelpers'
 import { LinearTeamSelectField } from 'lib/integrations/LinearIntegrationHelpers'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { ICONS } from 'lib/integrations/utils'
 import { Field } from 'lib/elements/Field'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
@@ -22,6 +20,7 @@ import {
     DropdownMenuTrigger,
 } from 'lib/ui/DropdownMenu/DropdownMenu'
 import { WrappingLoadingSkeleton } from 'lib/ui/WrappingLoadingSkeleton/WrappingLoadingSkeleton'
+import { addProjectIdIfMissing } from 'lib/utils/kea-router'
 import { urls } from 'scenes/urls'
 
 import { ErrorTrackingExternalReference, ErrorTrackingRelationalIssue } from '~/queries/schema/schema-general'
@@ -29,23 +28,33 @@ import { IntegrationKind, IntegrationType } from '~/types'
 
 import { errorTrackingIssueSceneLogic } from '../scenes/ErrorTrackingIssueScene/errorTrackingIssueSceneLogic'
 
-const BASE_ERROR_TRACKING_INTEGRATIONS: IntegrationKind[] = ['linear', 'github', 'gitlab']
+const ERROR_TRACKING_INTEGRATIONS = ['linear', 'github', 'gitlab', 'jira'] as const satisfies readonly IntegrationKind[]
 
 type onSubmitFormType = (integrationId: number, config: Record<string, string>) => void
+type ErrorTrackingIntegrationKind = (typeof ERROR_TRACKING_INTEGRATIONS)[number]
+type ErrorTrackingIntegration = IntegrationType & { kind: ErrorTrackingIntegrationKind }
+
+const POSTFN_HTML_LINE_BREAKS = '\n<br/>\n<br/>\n'
+
+const EXTERNAL_REFERENCE_FORM_BUILDERS: Record<
+    ErrorTrackingIntegrationKind,
+    (
+        issue: ErrorTrackingRelationalIssue,
+        issueUrl: string,
+        integration: ErrorTrackingIntegration,
+        onSubmit: onSubmitFormType
+    ) => void
+> = {
+    github: createGitHubIssueForm,
+    gitlab: createGitLabIssueForm,
+    linear: createLinearIssueForm,
+    jira: createJiraIssueForm,
+}
 
 export const ExternalReferences = (): JSX.Element | null => {
-    const { issue, issueLoading } = useValues(errorTrackingIssueSceneLogic)
+    const { issue, issueLoading, issueFingerprints } = useValues(errorTrackingIssueSceneLogic)
     const { createExternalReference } = useActions(errorTrackingIssueSceneLogic)
     const { getIntegrationsByKind, integrationsLoading } = useValues(integrationsLogic)
-    const jiraIntegrationEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.ERROR_TRACKING_JIRA_INTEGRATION)
-
-    const enabledIntegrationKinds = useMemo<IntegrationKind[]>(() => {
-        const kinds = [...BASE_ERROR_TRACKING_INTEGRATIONS]
-        if (jiraIntegrationEnabled) {
-            kinds.push('jira')
-        }
-        return kinds
-    }, [jiraIntegrationEnabled])
 
     if (!issue || integrationsLoading) {
         return (
@@ -57,19 +66,20 @@ export const ExternalReferences = (): JSX.Element | null => {
         )
     }
 
-    const errorTrackingIntegrations = getIntegrationsByKind(enabledIntegrationKinds)
+    const errorTrackingIntegrations = getIntegrationsByKind([...ERROR_TRACKING_INTEGRATIONS])
     const externalReferences = issue.external_issues ?? []
     const creatingIssue = issue && issueLoading
 
     const onClickCreateIssue = (integration: IntegrationType): void => {
-        if (integration.kind === 'github') {
-            createGitHubIssueForm(issue, integration, createExternalReference)
-        } else if (integration.kind === 'gitlab') {
-            createGitLabIssueForm(issue, integration, createExternalReference)
-        } else if (integration.kind === 'linear') {
-            createLinearIssueForm(issue, integration, createExternalReference)
-        } else if (integration.kind === 'jira') {
-            createJiraIssueForm(issue, integration, createExternalReference)
+        const buildForm = EXTERNAL_REFERENCE_FORM_BUILDERS[integration.kind as ErrorTrackingIntegrationKind]
+
+        if (buildForm) {
+            buildForm(
+                issue,
+                getIssueUrl(issueFingerprints),
+                integration as ErrorTrackingIntegration,
+                createExternalReference
+            )
         }
     }
 
@@ -134,7 +144,7 @@ export const ExternalReferences = (): JSX.Element | null => {
 function SetupIntegrationsButton(): JSX.Element {
     return (
         <Link
-            to={urls.errorTrackingConfiguration({ tab: 'error-tracking-integrations' })}
+            to={urls.settings('environment-error-tracking', 'error-tracking-integrations')}
             buttonProps={{ variant: 'panel', fullWidth: true, menuItem: true }}
             tooltip="Go to integrations configuration"
             target="_blank"
@@ -144,20 +154,37 @@ function SetupIntegrationsButton(): JSX.Element {
     )
 }
 
-const createGitHubIssueForm = (
-    issue: ErrorTrackingRelationalIssue,
-    integration: IntegrationType,
-    onSubmit: onSubmitFormType
-): void => {
-    const insightsUrl = window.location.origin + window.location.pathname
-    const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${insightsUrl}`
+// Link through the fingerprint redirect page when possible — it resolves to whatever issue the
+// fingerprint belongs to at click time, so external issue links survive merges. Fingerprints are
+// listed oldest-first; the oldest one is the stable, canonical one for an issue.
+function getIssueUrl(fingerprints: ErrorTrackingFingerprint[]): string {
+    const canonicalFingerprint = fingerprints[0]?.fingerprint
+    if (canonicalFingerprint) {
+        return `${window.location.origin}${addProjectIdIfMissing(urls.errorTrackingFingerprint(canonicalFingerprint))}`
+    }
+    return `${window.location.origin}${window.location.pathname}`
+}
 
+function getIssueMarkdownBody(issue: ErrorTrackingRelationalIssue, issueUrl: string): string {
+    return `${issue.description ?? ''}${POSTFN_HTML_LINE_BREAKS}**Insights issue:** ${issueUrl}`
+}
+
+function getIssuePlaintextBody(issue: ErrorTrackingRelationalIssue, issueUrl: string): string {
+    return `${issue.description ?? ''}\n\nInsights issue: ${issueUrl}`
+}
+
+function createGitHubIssueForm(
+    issue: ErrorTrackingRelationalIssue,
+    issueUrl: string,
+    integration: ErrorTrackingIntegration,
+    onSubmit: onSubmitFormType
+): void {
     Dialog.openForm({
         title: 'Create GitHub issue',
         shouldAwaitSubmit: true,
         initialValues: {
             title: issue.name,
-            body: body,
+            body: getIssueMarkdownBody(issue, issueUrl),
             integrationId: integration.id,
             repositories: [],
         },
@@ -183,20 +210,18 @@ const createGitHubIssueForm = (
     })
 }
 
-const createGitLabIssueForm = (
+function createGitLabIssueForm(
     issue: ErrorTrackingRelationalIssue,
-    integration: IntegrationType,
+    issueUrl: string,
+    integration: ErrorTrackingIntegration,
     onSubmit: onSubmitFormType
-): void => {
-    const insightsUrl = window.location.origin + window.location.pathname
-    const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${insightsUrl}`
-
+): void {
     Dialog.openForm({
         title: 'Create GitLab issue',
         shouldAwaitSubmit: true,
         initialValues: {
             title: issue.name,
-            body: body,
+            body: getIssueMarkdownBody(issue, issueUrl),
             integrationId: integration.id,
         },
         content: (
@@ -218,11 +243,12 @@ const createGitLabIssueForm = (
     })
 }
 
-const createLinearIssueForm = (
+function createLinearIssueForm(
     issue: ErrorTrackingRelationalIssue,
-    integration: IntegrationType,
+    _issueUrl: string,
+    integration: ErrorTrackingIntegration,
     onSubmit: onSubmitFormType
-): void => {
+): void {
     Dialog.openForm({
         title: 'Create Linear issue',
         shouldAwaitSubmit: true,
@@ -253,20 +279,18 @@ const createLinearIssueForm = (
     })
 }
 
-const createJiraIssueForm = (
+function createJiraIssueForm(
     issue: ErrorTrackingRelationalIssue,
-    integration: IntegrationType,
+    issueUrl: string,
+    integration: ErrorTrackingIntegration,
     onSubmit: onSubmitFormType
-): void => {
-    const insightsUrl = window.location.origin + window.location.pathname
-    const description = issue.description + '\n\n' + `Insights issue: ${insightsUrl}`
-
+): void {
     Dialog.openForm({
         title: 'Create Jira issue',
         shouldAwaitSubmit: true,
         initialValues: {
             title: issue.name,
-            description: description,
+            description: getIssuePlaintextBody(issue, issueUrl),
             integrationId: integration.id,
             projectKeys: [],
         },

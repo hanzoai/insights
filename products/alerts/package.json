@@ -1,0 +1,30 @@
+{
+    "name": "@hanzo/products-alerts",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+    },
+    "dependencies": {
+        "kea": "catalog:",
+        "kea-forms": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:",
+        "kea-subscriptions": "catalog:",
+        "insights-js": "catalog:"
+    },
+    "devDependencies": {
+        "@storybook/react": "catalog:",
+        "@testing-library/react": "*",
+        "kea-test-utils": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/brand": "catalog:",
+        "@hanzo/icons": "catalog:",
+        "@hanzo/elements": "*",
+        "@types/react": "*",
+        "chartjs-plugin-annotation": "*",
+        "fast-equals": "catalog:",
+        "react": "*",
+        "typescript": "catalog:*",
+        "zod": "*"
+    }
+}

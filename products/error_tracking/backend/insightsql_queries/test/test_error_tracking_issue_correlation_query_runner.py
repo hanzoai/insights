@@ -9,6 +9,17 @@ from products.error_tracking.backend.insightsql_queries.error_tracking_issue_cor
 
 
 class TestErrorTrackingIssueCorrelationQueryRunner(DatastoreTestMixin, APIBaseTest):
+    @classmethod
+    def setUpClass(cls):
+        # Materialize $exception_issue_id so the rendered SQL deterministically uses the
+        # materialized column (as in production) regardless of test execution order, rather
+        # than depending on another test having materialized it first on the shared table.
+        from ee.datastore.materialized_columns.columns import get_materialized_columns, materialize
+
+        if ("$exception_issue_id", "properties") not in get_materialized_columns("events"):
+            materialize("events", "$exception_issue_id", is_nullable=True)
+        super().setUpClass()
+
     def _calculate(
         self,
     ):

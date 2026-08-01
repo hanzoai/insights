@@ -1,17 +1,20 @@
 import { useActions, useValues } from 'kea'
 
+import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
 import { Skeleton } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { SetupTaskId } from 'lib/components/ProductSetup'
-import { MicrophoneMascot } from 'lib/components/mascots'
 import { EmailIntegrationsList } from 'lib/integrations/EmailIntegrationsList'
 import { IntegrationsList } from 'lib/integrations/IntegrationsList'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 
 import { ChannelSetupModal } from './ChannelSetupModal'
 
-const MESSAGING_CHANNEL_TYPES = ['email', 'slack', 'twilio'] as const
+const MascotReporter = pngHoggie(reporterPng)
+
+const MESSAGING_CHANNEL_TYPES = ['email', 'slack', 'twilio', 'firebase', 'apns'] as const
 export type ChannelType = (typeof MESSAGING_CHANNEL_TYPES)[number]
 
 export function MessageChannels(): JSX.Element {
@@ -37,7 +40,7 @@ export function MessageChannels(): JSX.Element {
                 }}
             />
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4" data-attr="message-channels">
                 {integrationsLoading && !integrations?.length && (
                     <>
                         <Skeleton className="h-20" />
@@ -52,7 +55,7 @@ export function MessageChannels(): JSX.Element {
                         description="Set up messaging channels to automatically send emails, SMS, or Slack notifications triggered by user actions and events."
                         docsURL="https://hanzo.ai/docs/workflows/configure-channels"
                         action={() => openSetupModal(undefined, 'email')}
-                        customInsights={MicrophoneMascot}
+                        customHog={MascotReporter}
                         isEmpty
                     />
                 )}

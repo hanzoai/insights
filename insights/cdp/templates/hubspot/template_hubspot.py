@@ -12,7 +12,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Creates a new contact in Hubspot whenever an event is triggered.",
     icon_url="/static/services/hubspot.png",
     category=["CRM", "Customer Success"],
-    code_language="fn",
+    code_language="script",
     code="""
 let properties := {
     'email': inputs.email
@@ -107,7 +107,7 @@ template_event: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send events to Hubspot.",
     icon_url="/static/services/hubspot.png",
     category=["CRM", "Customer Success"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.email)) {
     print('`email` input is empty. Not sending event.')
@@ -365,12 +365,12 @@ if (res.status >= 400) {
 
 
 class TemplateHubspotMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/hubspot-plugin"
+    plugin_url = "https://github.com/Insights/hubspot-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         # Must reauthenticate with HubSpot
@@ -388,7 +388,7 @@ class TemplateHubspotMigrator(InsightsFunctionTemplateMigrator):
             "secret": True,
             "required": True,
         }
-        hf["fn"] = hf["fn"].replace("inputs.oauth.access_token", "inputs.access_token")
+        hf["script"] = hf["script"].replace("inputs.oauth.access_token", "inputs.access_token")
 
         hf["inputs"] = {
             "access_token": {"value": hubspotAccessToken},

@@ -1,91 +1,46 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconCode, IconDatabase, IconEllipsis, IconRefresh, IconWarning } from '@hanzo/icons'
-import { Button, Menu, Link } from '@hanzo/elements'
+import { IconBell, IconCheck, IconEllipsis, IconRefresh, IconSparkles, IconSupport } from '@hanzo/icons'
+import { Banner, Button, Menu } from '@hanzo/elements'
 
+import { supportLogic } from 'lib/components/Support/supportLogic'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { humanFriendlyDuration } from 'lib/utils/durations'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
+import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
+import { SidePanelTab } from '~/types'
 
 import { HealthIssueList } from './components/HealthIssueList'
 import { HealthIssueSummaryCards } from './components/HealthIssueSummaryCards'
+import { PlatformStatusBanner } from './components/PlatformStatusBanner'
 import { healthSceneLogic } from './healthSceneLogic'
+import { buildHealthOverviewPrompt, HEALTH_OVERVIEW_QUESTIONS } from './healthUtils'
 
-const HealthCard = ({
-    title,
-    description,
-    icon,
-    to,
-}: {
-    title: string
-    description: string
-    icon: React.ReactNode
-    to: string
-}): JSX.Element => {
-    return (
-        <Link
-            to={to}
-            className="flex flex-col gap-4 justify-between border border-primary bg-surface-primary rounded p-8 transition-colors cursor-pointer h-full shadow hover:border-accent"
-        >
-            <div className="size-8 flex items-center justify-center text-primary">{icon}</div>
-            <div>
-                <h3 className="text-sm font-semibold line-clamp-2 flex-1 mb-0">{title}</h3>
-                <p className="text-sm text-text-tertiary mb-0">{description}</p>
-            </div>
-        </Link>
-    )
-}
-
-const DetailedViewCards = (): JSX.Element => {
-    const { featureFlags } = useValues(featureFlagLogic)
-    const pipelineStatusEnabled = !!featureFlags[FEATURE_FLAGS.PIPELINE_STATUS_PAGE]
-
-    return (
-        <div className="grid grid-cols-1 @2xl/main-content:grid-cols-3 gap-4 max-w-3xl">
-            <HealthCard
-                title="Ingestion warnings"
-                description="Click to view"
-                icon={<IconWarning className="size-6" />}
-                to={urls.ingestionWarnings()}
-            />
-            <HealthCard
-                title="SDK health"
-                description="Click to view"
-                icon={<IconCode className="size-6" />}
-                to={urls.sdkDoctor()}
-            />
-            {pipelineStatusEnabled && (
-                <HealthCard
-                    title="Pipelines status"
-                    description="Click to view"
-                    icon={<IconDatabase className="size-6" />}
-                    to={urls.pipelineStatus()}
-                />
-            )}
-        </div>
-    )
-}
-
-const LegacyHealthScene = (): JSX.Element => {
-    return (
-        <SceneContent>
-            <SceneTitleSection
-                name="Health"
-                description="See an at-a-glance view of the health of your project."
-                resourceType={{ type: 'health' }}
-            />
-            <DetailedViewCards />
-        </SceneContent>
-    )
-}
-
-const UnifiedHealthScene = (): JSX.Element => {
-    const { showDismissed, healthIssuesLoading } = useValues(healthSceneLogic)
+export const HealthScene = (): JSX.Element => {
+    const { showDismissed, healthIssuesLoading, isRefreshInFlight, nextRefreshAvailableAt, issues } =
+        useValues(healthSceneLogic)
     const { refreshHealthData, setShowDismissed } = useActions(healthSceneLogic)
+    const { openSupportForm } = useActions(supportLogic)
+    const { openSidePanel } = useActions(sidePanelStateLogic)
+    const { featureFlags } = useValues(featureFlagLogic)
+
+    const askAiEnabled = !!featureFlags[FEATURE_FLAGS.HEALTH_ASK_AI]
+
+    const now = Date.now()
+    const inCooldown = nextRefreshAvailableAt !== null && nextRefreshAvailableAt > now
+    const cooldownLabel = inCooldown
+        ? `Refresh available in ${humanFriendlyDuration(Math.ceil((nextRefreshAvailableAt! - now) / 1000), {
+              maxUnits: 2,
+          })}`
+        : undefined
+    const refreshTooltip = isRefreshInFlight
+        ? 'Refreshing health checks...'
+        : (cooldownLabel ?? 'Re-run all health checks for this project')
 
     return (
         <SceneContent>
@@ -95,11 +50,49 @@ const UnifiedHealthScene = (): JSX.Element => {
                 <p className="text-sm mb-0">See an at-a-glance view of the health of your project.</p>
                 <div className="flex items-center gap-1">
                     <Button
+                        icon={<IconBell />}
+                        type="secondary"
+                        size="small"
+                        to={urls.healthAlerts()}
+                        tooltip="Subscribe to alerts when any health check fires"
+                    >
+                        Alerts
+                    </Button>
+
+                    {askAiEnabled && (
+                        <Menu
+                            items={HEALTH_OVERVIEW_QUESTIONS.map((question) => ({
+                                label: question,
+                                onClick: () =>
+                                    openSidePanel(SidePanelTab.Max, `!${buildHealthOverviewPrompt(issues, question)}`),
+                            }))}
+                            placement="bottom-end"
+                        >
+                            <Button
+                                icon={<IconSparkles />}
+                                type="secondary"
+                                size="small"
+                                tooltip="Ask Insights AI about your health issues"
+                            >
+                                Ask Insights AI
+                            </Button>
+                        </Menu>
+                    )}
+                    <Button
+                        icon={<IconSupport />}
+                        type="secondary"
+                        size="small"
+                        onClick={() => openSupportForm({ kind: 'support', target_area: 'health_overview' })}
+                    >
+                        Get help from our team
+                    </Button>
+                    <Button
                         icon={<IconRefresh />}
                         type="tertiary"
                         size="small"
-                        tooltip="Refresh"
-                        loading={healthIssuesLoading}
+                        tooltip={refreshTooltip}
+                        loading={isRefreshInFlight || healthIssuesLoading}
+                        disabledReason={cooldownLabel}
                         onClick={() => refreshHealthData()}
                     />
                     <Menu
@@ -117,17 +110,21 @@ const UnifiedHealthScene = (): JSX.Element => {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-6 max-w-5xl">
+            <div className="flex flex-col gap-6">
+                <Banner
+                    type="info"
+                    className="mb-2"
+                    dismissKey="unified-health-page-feedback-banner"
+                    action={{ children: 'Send feedback', id: 'unified-health-page-feedback-button' }}
+                >
+                    We'd love your feedback on the new Health page. Let us know what's working and what could be better!
+                </Banner>
+                <PlatformStatusBanner />
                 <HealthIssueSummaryCards />
                 <HealthIssueList />
             </div>
         </SceneContent>
     )
-}
-
-export const HealthScene = (): JSX.Element => {
-    const { unifiedHealthPageEnabled } = useValues(healthSceneLogic)
-    return unifiedHealthPageEnabled ? <UnifiedHealthScene /> : <LegacyHealthScene />
 }
 
 export const scene: SceneExport = {

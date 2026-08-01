@@ -1,8 +1,9 @@
 from insights.test.base import BaseTest
 
-from insights.models import Cohort
-from insights.models.cohort.validation import CohortTypeValidationSerializer
 from insights.models.property import BehavioralPropertyType, Property, PropertyGroup, PropertyOperatorType
+
+from products.cohorts.backend.models.cohort import Cohort
+from products.cohorts.backend.models.validation import CohortTypeValidationSerializer
 
 
 class TestCohortTypeValidationSerializer(BaseTest):

@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -34,7 +34,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Initialize the Insights client with your project API key and host from your project settings:
+                        Initialize the Insights client with your project token and host from your project settings:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -45,7 +45,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                     from insights import Insights
 
                                     insights = Insights(
-                                        project_api_key='<ph_project_api_key>',
+                                        project_api_key='<ph_project_token>',
                                         host='<ph_client_api_host>'
                                     )
                                 `,

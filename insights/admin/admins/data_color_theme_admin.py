@@ -5,6 +5,7 @@ from django.utils.html import format_html
 from insights.models import DataColorTheme
 
 
+@admin.register(DataColorTheme)
 class DataColorThemeAdmin(admin.ModelAdmin):
     list_display = (
         "id",

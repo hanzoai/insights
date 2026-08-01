@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send SMS alerts via Kudosity when Insights events or metrics cross thresholds. Ideal for operational monitoring, on-call notifications, and business metric tracking.",
     icon_url="/static/services/kudosity.png",
     category=["SMS & Push Notifications", "Monitoring & Alerts"],
-    code_language="fn",
+    code_language="script",
     code="""
 // Validate required fields
 if (empty(inputs.recipient)) {

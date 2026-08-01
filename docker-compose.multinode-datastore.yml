@@ -1,0 +1,156 @@
+#
+# Multi-node Datastore smoke-test stack.
+#
+# Boots one Datastore server per logical cluster (data + ai_events + aux + ops + sessions + logs)
+# so migration runs can be verified against a topology that resembles production.
+# Opt-in only: not used by `bin/start` or any of the default dev/CI flows.
+# Driven by `tools/infra-scripts/datastore-multinode/multinode-migration-smoke`
+# and `tools/infra-scripts/datastore-multinode/start-multinode-datastore`.
+#
+# Each Datastore extends the base service and mounts a per-role config file from
+# docker/datastore/config.d/multinode/. Ports are offset to avoid clashing with a
+# single-node `datastore` container that may be running on 9000/8123.
+#
+# A distinct compose project name keeps volumes / networks separate from
+# `bin/start` (which uses the default `insights` project), so Zookeeper/Kafka
+# state from a previous dev run can't leak DDL queue entries that reference
+# the old single-node `datastore:9000` host.
+#
+
+name: insights-multinode-smoke
+
+services:
+    zookeeper:
+        extends:
+            file: docker-compose.base.yml
+            service: zookeeper
+
+    kafka:
+        extends:
+            file: docker-compose.base.yml
+            service: kafka
+        depends_on:
+            - zookeeper
+
+    db:
+        extends:
+            file: docker-compose.base.yml
+            service: db
+        ports:
+            - '5432:5432'
+
+    redis7:
+        extends:
+            file: docker-compose.base.yml
+            service: redis7
+        ports:
+            - '6379:6379'
+
+    datastore-data: &datastore-multinode
+        extends:
+            file: docker-compose.base.yml
+            service: datastore
+        hostname: datastore-data
+        environment:
+            DATASTORE_SKIP_USER_SETUP: 1
+            KAFKA_HOSTS: 'kafka:9092'
+        volumes:
+            - ./insights/idl:/idl
+            - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/multinode/data_node.xml:/etc/datastore-server/config.d/default.xml
+            - ./docker/datastore/config.d/dev-memory.xml:/etc/datastore-server/config.d/dev-memory.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
+            - ./insights/user_scripts:/var/lib/datastore/user_scripts
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        depends_on:
+            - kafka
+            - zookeeper
+        ports:
+            - '8123:8123'
+            - '9000:9000'
+
+    datastore-ai-events:
+        <<: *datastore-multinode
+        hostname: datastore-ai-events
+        volumes:
+            - ./insights/idl:/idl
+            - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/multinode/ai_events_node.xml:/etc/datastore-server/config.d/default.xml
+            - ./docker/datastore/config.d/dev-memory.xml:/etc/datastore-server/config.d/dev-memory.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
+            - ./insights/user_scripts:/var/lib/datastore/user_scripts
+        ports:
+            - '8124:8123'
+            - '9100:9000'
+
+    datastore-aux:
+        <<: *datastore-multinode
+        hostname: datastore-aux
+        volumes:
+            - ./insights/idl:/idl
+            - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/multinode/aux_node.xml:/etc/datastore-server/config.d/default.xml
+            - ./docker/datastore/config.d/dev-memory.xml:/etc/datastore-server/config.d/dev-memory.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
+            - ./insights/user_scripts:/var/lib/datastore/user_scripts
+        ports:
+            - '8125:8123'
+            - '9200:9000'
+
+    datastore-ops:
+        <<: *datastore-multinode
+        hostname: datastore-ops
+        volumes:
+            - ./insights/idl:/idl
+            - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/multinode/ops_node.xml:/etc/datastore-server/config.d/default.xml
+            - ./docker/datastore/config.d/dev-memory.xml:/etc/datastore-server/config.d/dev-memory.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
+            - ./insights/user_scripts:/var/lib/datastore/user_scripts
+        ports:
+            - '8126:8123'
+            - '9300:9000'
+
+    datastore-sessions:
+        <<: *datastore-multinode
+        hostname: datastore-sessions
+        volumes:
+            - ./insights/idl:/idl
+            - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/multinode/sessions_node.xml:/etc/datastore-server/config.d/default.xml
+            - ./docker/datastore/config.d/dev-memory.xml:/etc/datastore-server/config.d/dev-memory.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
+            - ./insights/user_scripts:/var/lib/datastore/user_scripts
+        ports:
+            - '8127:8123'
+            - '9400:9000'
+
+    datastore-logs:
+        <<: *datastore-multinode
+        hostname: datastore-logs
+        volumes:
+            - ./insights/idl:/idl
+            - ./docker/datastore/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./docker/datastore/config.xml:/etc/datastore-server/config.xml
+            - ./docker/datastore/config.d/multinode/logs_node.xml:/etc/datastore-server/config.d/default.xml
+            - ./docker/datastore/config.d/dev-memory.xml:/etc/datastore-server/config.d/dev-memory.xml
+            - ./docker/datastore/users-dev.xml:/etc/datastore-server/users.xml
+            - ./docker/datastore/user_defined_function.xml:/etc/datastore-server/user_defined_function.xml
+            - ./insights/user_scripts:/var/lib/datastore/user_scripts
+        ports:
+            - '8128:8123'
+            - '9500:9000'
+
+volumes:
+    redpanda-data:

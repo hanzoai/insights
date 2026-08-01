@@ -1,7 +1,5 @@
-import { SurveyQuestionType } from '@hanzo/insights'
-
 import { EventsNode } from '~/queries/schema/schema-general'
-import { SurveyMatchType } from '~/types'
+import { SurveyMatchType, SurveyQuestionType } from '~/types'
 
 import { SURVEY_CREATED_SOURCE, defaultSurveyAppearance } from '../constants'
 import { toSurveyEvent } from '../utils/opportunityDetection'
@@ -80,8 +78,8 @@ export const buildLogicProps = (context: QuickSurveyContext): Omit<QuickSurveyFo
                 defaults: {
                     questionType: SurveyQuestionType.Link,
                     name: `Announcement (${randomId})`,
-                    question: 'Custom mode is now available!',
-                    description: 'Try out the latest features.',
+                    question: 'Script mode is now available!',
+                    description: 'You can never have too many mascots.',
                     buttonText: 'Check it out 👉',
                 },
             }

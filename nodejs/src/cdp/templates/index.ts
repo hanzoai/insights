@@ -2,30 +2,42 @@ import { DESTINATION_PLUGINS, TRANSFORMATION_PLUGINS } from '../legacy-plugins'
 import { SEGMENT_DESTINATIONS } from '../segment/segment-templates'
 import { InsightsFunctionTemplate, NativeTemplate } from '../types'
 import { template as accoilTemplate } from './_destinations/accoil/accoil.template'
+import { template as appcuesTemplate } from './_destinations/appcues/appcues.template'
 import { template as clickupTemplate } from './_destinations/clickup/clickup.template'
+import { template as closeTemplate } from './_destinations/close/close.template'
 import { allComingSoonTemplates } from './_destinations/coming-soon/coming-soon-destinations.template'
 import { template as emailTemplate } from './_destinations/email/email.template'
-import { template as firebasePushTemplate } from './_destinations/firebase_push/firebase_push.template'
 import { template as githubTemplate } from './_destinations/github/github.template'
 import { template as gitlabTemplate } from './_destinations/gitlab/gitlab.template'
 import { template as googleTagManagerTemplate } from './_destinations/google-tag-manager/google-tag-manager.template'
 import { template as googleAdsTemplate } from './_destinations/google_ads/google.template'
 import { template as googleSheetsTemplate } from './_destinations/google_sheets/google_sheets.template'
 import { template as hubspotCompanyTemplate } from './_destinations/hubspot/hubspot.template'
+import { template as klimeTemplate } from './_destinations/klime/klime.template'
 import { template as linearTemplate } from './_destinations/linear/linear.template'
 import { template as linkedinAdsTemplate } from './_destinations/linkedin_ads/linkedin.template'
+import { template as microsoftAdsTemplate } from './_destinations/microsoft_ads/microsoft.template'
 import { template as nativeWebhookTemplate } from './_destinations/native_webhook/webhook.template'
 import { template as insightsCaptureTemplate } from './_destinations/insights_capture/insights-capture.template'
 import { template as insightsGroupIdentifyTemplate } from './_destinations/insights_capture/insights-group-identify.template'
 import { template as insightsUpdatePersonPropertiesTemplate } from './_destinations/insights_capture/insights-update-person-properties.template'
 import { template as insightsGetTicketTemplate } from './_destinations/insights_conversations/insights-get-ticket.template'
 import { template as insightsUpdateTicketTemplate } from './_destinations/insights_conversations/insights-update-ticket.template'
-import { template as insightsSetCustomflowVariableTemplate } from './_destinations/insights_workflows/insights-set-variable.template'
+import { template as insightsCreateAccountTemplate } from './_destinations/insights_customer_analytics/insights-create-account.template'
+import { template as insightsGetAccountTemplate } from './_destinations/insights_customer_analytics/insights-get-account.template'
+import { template as insightsTagAccountTemplate } from './_destinations/insights_customer_analytics/insights-tag-account.template'
+import { template as insightsUpdateAccountPropertyTemplate } from './_destinations/insights_customer_analytics/insights-update-account-property.template'
+import { template as insightsUpdateAccountRelationshipsTemplate } from './_destinations/insights_customer_analytics/insights-update-account-relationships.template'
+import { template as insightsUpdateAccountTemplate } from './_destinations/insights_customer_analytics/insights-update-account.template'
+import { template as insightsSetHogflowVariableTemplate } from './_destinations/insights_workflows/insights-set-variable.template'
+import { template as pushTemplate } from './_destinations/push/push.template'
 import { template as redditAdsTemplate } from './_destinations/reddit_ads/reddit.template'
 import { template as snapchatAdsTemplate } from './_destinations/snapchat_ads/snapchat.template'
 import { template as tiktokAdsTemplate } from './_destinations/tiktok_ads/tiktok.template'
 import { template as twilioTemplate } from './_destinations/twilio/twilio.template'
+import { template as unifyTemplate } from './_destinations/unify/unify.template'
 import { template as webhookTemplate } from './_destinations/webhook/webhook.template'
+import { template as whatsappTemplate } from './_destinations/whatsapp/whatsapp.template'
 import { template as pixelTemplate } from './_sources/pixel/pixel.template'
 import { template as stripeWebhookTemplate } from './_sources/stripe/stripe_webhook.template'
 import { template as vercelLogDrainTemplate } from './_sources/vercel/vercel_log_drain.template'
@@ -41,10 +53,14 @@ import { template as piiHashingTemplate } from './_transformations/pii-hashing/p
 import { template as removeNullPropertiesTemplate } from './_transformations/remove-null-properties/remove-null-properties.template'
 import { template as urlMaskingTemplate } from './_transformations/url-masking/url-masking.template'
 import { template as urlNormalizationTemplate } from './_transformations/url-normalization/url-normalization.template'
+import { template as logDefaultTemplate } from './_transformations_log/default/default.template'
+import { template as logDropBySeverityTemplate } from './_transformations_log/drop-by-severity/drop-by-severity.template'
+import { template as logPiiScrubTemplate } from './_transformations_log/pii-scrub/pii-scrub.template'
+import { template as logRedactAttributesTemplate } from './_transformations_log/redact-attributes/redact-attributes.template'
 
-export const INSIGHTS_FUNCTION_TEMPLATES_COMING_SOON: InsightsFunctionTemplate[] = allComingSoonTemplates
+export const FN_FUNCTION_TEMPLATES_COMING_SOON: InsightsFunctionTemplate[] = allComingSoonTemplates
 
-export const INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS: InsightsFunctionTemplate[] = [
+export const FN_FUNCTION_TEMPLATES_DESTINATIONS: InsightsFunctionTemplate[] = [
     webhookTemplate,
     tiktokAdsTemplate,
     snapchatAdsTemplate,
@@ -53,24 +69,36 @@ export const INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS: InsightsFunctionTemplate[
     gitlabTemplate,
     googleAdsTemplate,
     linkedinAdsTemplate,
+    microsoftAdsTemplate,
     redditAdsTemplate,
     twilioTemplate,
+    whatsappTemplate,
     googleSheetsTemplate,
     googleTagManagerTemplate,
     emailTemplate,
-    firebasePushTemplate,
+    pushTemplate,
     clickupTemplate,
     insightsCaptureTemplate,
     insightsGroupIdentifyTemplate,
     insightsUpdatePersonPropertiesTemplate,
-    insightsSetCustomflowVariableTemplate,
+    insightsSetHogflowVariableTemplate,
     insightsGetTicketTemplate,
     insightsUpdateTicketTemplate,
+    insightsCreateAccountTemplate,
+    insightsGetAccountTemplate,
+    insightsTagAccountTemplate,
+    insightsUpdateAccountRelationshipsTemplate,
+    insightsUpdateAccountTemplate,
+    insightsUpdateAccountPropertyTemplate,
     hubspotCompanyTemplate,
     accoilTemplate,
+    appcuesTemplate,
+    klimeTemplate,
+    unifyTemplate,
+    closeTemplate,
 ]
 
-export const INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS: InsightsFunctionTemplate[] = [
+export const FN_FUNCTION_TEMPLATES_TRANSFORMATIONS: InsightsFunctionTemplate[] = [
     defaultTransformationTemplate,
     geoipTemplate,
     ipAnonymizationTemplate,
@@ -84,7 +112,14 @@ export const INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS: InsightsFunctionTempla
     urlNormalizationTemplate,
 ]
 
-export const NATIVE_INSIGHTS_FUNCTIONS: (InsightsFunctionTemplate & NativeTemplate)[] = [nativeWebhookTemplate].map((plugin) => ({
+export const FN_FUNCTION_TEMPLATES_TRANSFORMATIONS_LOG: InsightsFunctionTemplate[] = [
+    logDefaultTemplate,
+    logPiiScrubTemplate,
+    logDropBySeverityTemplate,
+    logRedactAttributesTemplate,
+]
+
+export const NATIVE_FN_FUNCTIONS: (InsightsFunctionTemplate & NativeTemplate)[] = [nativeWebhookTemplate].map((plugin) => ({
     ...plugin,
     code_language: 'javascript',
     code: 'return event;',
@@ -100,26 +135,26 @@ export const NATIVE_INSIGHTS_FUNCTIONS: (InsightsFunctionTemplate & NativeTempla
     ],
 }))
 
-export const INSIGHTS_FUNCTION_TEMPLATES_SOURCES: InsightsFunctionTemplate[] = [
+export const FN_FUNCTION_TEMPLATES_SOURCES: InsightsFunctionTemplate[] = [
     incomingWebhookTemplate,
     stripeWebhookTemplate,
     vercelLogDrainTemplate,
     pixelTemplate,
 ]
 
-export const INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED: InsightsFunctionTemplate[] = DESTINATION_PLUGINS.map(
+export const FN_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED: InsightsFunctionTemplate[] = DESTINATION_PLUGINS.map(
     (x) => x.template
 )
 
-export const INSIGHTS_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS: InsightsFunctionTemplate[] = SEGMENT_DESTINATIONS.map(
+export const FN_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS: InsightsFunctionTemplate[] = SEGMENT_DESTINATIONS.map(
     (x) => x.template
 )
 
-export const INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED: InsightsFunctionTemplate[] = TRANSFORMATION_PLUGINS.map(
+export const FN_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED: InsightsFunctionTemplate[] = TRANSFORMATION_PLUGINS.map(
     (x) => x.template
 )
 
-export const NATIVE_INSIGHTS_FUNCTIONS_BY_ID = NATIVE_INSIGHTS_FUNCTIONS.reduce(
+export const NATIVE_FN_FUNCTIONS_BY_ID = NATIVE_FN_FUNCTIONS.reduce(
     (acc, plugin) => {
         acc[plugin.id] = plugin
         return acc
@@ -127,13 +162,14 @@ export const NATIVE_INSIGHTS_FUNCTIONS_BY_ID = NATIVE_INSIGHTS_FUNCTIONS.reduce(
     {} as Record<string, NativeTemplate>
 )
 
-export const INSIGHTS_FUNCTION_TEMPLATES: InsightsFunctionTemplate[] = [
-    ...INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS,
-    ...INSIGHTS_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS,
-    ...INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED,
-    ...INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS,
-    ...INSIGHTS_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
-    ...INSIGHTS_FUNCTION_TEMPLATES_SOURCES,
-    ...INSIGHTS_FUNCTION_TEMPLATES_COMING_SOON,
-    ...NATIVE_INSIGHTS_FUNCTIONS,
+export const FN_FUNCTION_TEMPLATES: InsightsFunctionTemplate[] = [
+    ...FN_FUNCTION_TEMPLATES_DESTINATIONS,
+    ...FN_FUNCTION_TEMPLATES_SEGMENT_DESTINATIONS,
+    ...FN_FUNCTION_TEMPLATES_DESTINATIONS_DEPRECATED,
+    ...FN_FUNCTION_TEMPLATES_TRANSFORMATIONS,
+    ...FN_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
+    ...FN_FUNCTION_TEMPLATES_TRANSFORMATIONS_LOG,
+    ...FN_FUNCTION_TEMPLATES_SOURCES,
+    ...FN_FUNCTION_TEMPLATES_COMING_SOON,
+    ...NATIVE_FN_FUNCTIONS,
 ]

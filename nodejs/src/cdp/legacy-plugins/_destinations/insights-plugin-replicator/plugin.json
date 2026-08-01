@@ -1,6 +1,6 @@
 {
     "name": "Replicator",
-    "url": "https://github.com/hanzoai/insights-plugin-replicator",
+    "url": "https://github.com/Insights/insights-plugin-replicator",
     "description": "Replicate Insights event stream in another Insights instance",
     "main": "index.ts",
     "config": [
@@ -14,7 +14,7 @@
         {
             "key": "project_api_key",
             "hint": "Grab it from e.g. https://insights.yourcompany.com/project/settings",
-            "name": "Project API Key",
+            "name": "Project token",
             "type": "string",
             "required": true
         },

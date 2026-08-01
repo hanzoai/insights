@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -20,7 +20,7 @@ export const getElixirSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 code: dedent`
                                 def deps do
                                     [
-                                        {:insights, "~> 2.2.0"}
+                                        {:insights, "~> 2.0"}
                                     ]
                                 end
                             `,
@@ -43,8 +43,8 @@ export const getElixirSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 file: 'config/config.exs',
                                 code: dedent`
                                 config :insights,
-                                    api_url: "<ph_client_api_host>",
-                                    api_key: "<ph_project_api_key>"
+                                    api_host: "<ph_client_api_host>",
+                                    api_key: "<ph_project_token>"
                             `,
                             },
                         ]}

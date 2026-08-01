@@ -4,9 +4,9 @@ import { Button } from '@hanzo/elements'
 
 import { CyclotronJobFiltersType, InsightsFunctionSubTemplateIdType, InsightsFunctionTypeType } from '~/types'
 
-import { INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES } from '../sub-templates/sub-templates'
-import { InsightsFunctionTemplateList } from './InsightsFunctionTemplateList'
+import { FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES } from '../sub-templates/sub-templates'
 import { InsightsFunctionList } from './InsightsFunctionsList'
+import { InsightsFunctionTemplateList } from './InsightsFunctionTemplateList'
 
 export type LinkedInsightsFunctionsProps = {
     type: InsightsFunctionTypeType
@@ -18,10 +18,10 @@ export type LinkedInsightsFunctionsProps = {
     queryParams?: Record<string, string>
 }
 
-const getFiltersFromSubTemplateId = (
+export const getFiltersFromSubTemplateId = (
     subTemplateId: InsightsFunctionSubTemplateIdType
 ): CyclotronJobFiltersType | undefined => {
-    const commonProperties = INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[subTemplateId]
+    const commonProperties = FN_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[subTemplateId]
     return commonProperties.filters ?? undefined
 }
 
@@ -44,13 +44,14 @@ export function LinkedInsightsFunctions({
     const templateType = type === 'internal_destination' ? 'destination' : type
 
     const getConfigurationOverrides = (
-        subTemplateId?: InsightsFunctionSubTemplateIdType
-    ): CyclotronJobFiltersType | undefined => {
+        subTemplateId: InsightsFunctionSubTemplateIdType | undefined
+    ): { filters: CyclotronJobFiltersType } | undefined => {
         if (forceFilterGroups && forceFilterGroups.length > 0) {
-            return forceFilterGroups[0]
+            return { filters: forceFilterGroups[0] }
         }
         if (subTemplateId) {
-            return getFiltersFromSubTemplateId(subTemplateId)
+            const filters = getFiltersFromSubTemplateId(subTemplateId)
+            return filters ? { filters } : undefined
         }
         return undefined
     }
@@ -80,6 +81,7 @@ export function LinkedInsightsFunctions({
             key={logicKey}
             forceFilterGroups={insightsFunctionFilterList}
             type={type}
+            returnTo={queryParams?.returnTo}
             hideFeedback={hideFeedback}
             emptyText={emptyText}
             extraControls={

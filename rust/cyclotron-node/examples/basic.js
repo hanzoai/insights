@@ -12,7 +12,7 @@ const JOB_STATES = Object.freeze({
 
 const AVAILABLE_WORKERS = Object.freeze({
     FETCH: 'fetch',
-    HOG: 'iql',
+    HOG: 'script',
 })
 
 async function main() {

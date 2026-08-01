@@ -18,7 +18,7 @@ import {
 } from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
-import { isEmail } from 'lib/utils'
+import { isEmail } from 'lib/utils/url'
 import { InsightsFunctionTestEditor } from 'scenes/insights-functions/configuration/InsightsFunctionTest'
 import { LogsViewerTable } from 'scenes/insights-functions/logs/LogsViewer'
 import { asDisplay } from 'scenes/persons/person-utils'
@@ -27,13 +27,13 @@ import { PersonType } from '~/types'
 
 import { renderWorkflowLogMessage } from '../../../logs/log-utils'
 import { TRIGGER_NODE_ID, workflowLogic } from '../../../workflowLogic'
-import { insightsFlowEditorLogic } from '../../insightsFlowEditorLogic'
-import { insightsFlowEditorNotificationTestLogic } from './insightsFlowEditorNotificationTestLogic'
-import { reorderGlobalsForEmailAction } from './insightsFlowEditorNotificationTestLogic'
+import { hogFlowEditorLogic } from '../../hogFlowEditorLogic'
+import { hogFlowEditorNotificationTestLogic } from './hogFlowEditorNotificationTestLogic'
+import { reorderGlobalsForEmailAction } from './hogFlowEditorNotificationTestLogic'
 
 export function EmailActionTestContent(): JSX.Element | null {
-    const { workflow, selectedNode } = useValues(insightsFlowEditorLogic)
-    const { setSelectedNodeId } = useActions(insightsFlowEditorLogic)
+    const { workflow, selectedNode } = useValues(hogFlowEditorLogic)
+    const { setSelectedNodeId } = useActions(hogFlowEditorLogic)
     const { logicProps } = useValues(workflowLogic)
 
     const {
@@ -51,7 +51,7 @@ export function EmailActionTestContent(): JSX.Element | null {
         sampleGlobalsLoading,
         sampleGlobalsError,
         emailAddressOverride,
-    } = useValues(insightsFlowEditorNotificationTestLogic(logicProps))
+    } = useValues(hogFlowEditorNotificationTestLogic(logicProps))
     const {
         submitTestInvocation,
         setTestResult,
@@ -61,7 +61,7 @@ export function EmailActionTestContent(): JSX.Element | null {
         loadSamplePersonByDistinctId,
         setEmailAddressOverride,
         setSampleGlobals,
-    } = useActions(insightsFlowEditorNotificationTestLogic(logicProps))
+    } = useActions(hogFlowEditorNotificationTestLogic(logicProps))
 
     const emailInput = emailAddressOverride || sampleGlobals?.person?.properties?.email || ''
 
@@ -99,7 +99,7 @@ export function EmailActionTestContent(): JSX.Element | null {
 
     return (
         <Form
-            logic={insightsFlowEditorNotificationTestLogic}
+            logic={hogFlowEditorNotificationTestLogic}
             props={logicProps}
             formKey="testInvocation"
             enableFormOnSubmit

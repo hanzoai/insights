@@ -13,10 +13,11 @@ import {
 } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
+import { MemberSelect } from 'lib/components/MemberSelect'
 import { TZLabel } from 'lib/components/TZLabel'
 import { IconArrowUp } from 'lib/elements/icons'
-import { isObject } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
+import { isObject } from 'lib/utils/guards'
 import { urls } from 'scenes/urls'
 
 import {
@@ -30,6 +31,8 @@ import {
 
 import { sessionRecordingSavedFiltersLogic } from '../filters/sessionRecordingSavedFiltersLogic'
 import { playlistFiltersLogic } from '../playlist/playlistFiltersLogic'
+import { stripSessionIds } from '../playlist/playlistUtils'
+import { asUniversalFilters } from '../playlist/sessionRecordingsPlaylistLogic'
 import { SavedFiltersEmptyState, SavedFiltersLoadingState } from './SavedFiltersStates'
 
 export function isPlaylistRecordingsCounts(x: unknown): x is PlaylistRecordingsCounts {
@@ -129,11 +132,13 @@ export function SavedFilters({
     )
     const { setActiveFilterTab } = useActions(playlistFiltersLogic)
 
-    if (savedFiltersLoading && !filters.search) {
+    const hasActiveFilters = !!filters.search || (!!filters.createdBy && filters.createdBy !== 'All users')
+
+    if (savedFiltersLoading && !hasActiveFilters) {
         return <SavedFiltersLoadingState />
     }
 
-    if (savedFilters.results?.length === 0 && !filters.search) {
+    if (savedFilters.results?.length === 0 && !hasActiveFilters) {
         return <SavedFiltersEmptyState />
     }
 
@@ -149,11 +154,16 @@ export function SavedFilters({
                     <>
                         <div
                             onClick={() => {
-                                if (filter && filter.filters) {
-                                    setFilters(filter.filters)
-                                    setActiveFilterTab('filters')
-                                    setAppliedSavedFilter(filter)
+                                if (!filter) {
+                                    return
                                 }
+                                const universalFilters = asUniversalFilters(filter.filters)
+                                if (!universalFilters) {
+                                    return
+                                }
+                                setFilters(stripSessionIds(universalFilters))
+                                setActiveFilterTab('filters')
+                                setAppliedSavedFilter(filter)
                             }}
                             className="cursor-pointer text-current hover:text-accent"
                         >
@@ -218,15 +228,21 @@ export function SavedFilters({
 
     return (
         <>
-            <Input
-                fullWidth
-                className="mb-2"
-                type="search"
-                placeholder="Search for saved filters"
-                onChange={(value) => setSavedPlaylistsFilters({ search: value || undefined })}
-                value={filters.search || ''}
-                stopPropagation={true}
-            />
+            <div className="flex items-center gap-2 mb-2">
+                <Input
+                    fullWidth
+                    type="search"
+                    placeholder="Search for saved filters"
+                    onChange={(value) => setSavedPlaylistsFilters({ search: value || undefined })}
+                    value={filters.search || ''}
+                    stopPropagation={true}
+                />
+                <MemberSelect
+                    defaultLabel="Any user"
+                    value={filters.createdBy && filters.createdBy !== 'All users' ? filters.createdBy : null}
+                    onChange={(user) => setSavedPlaylistsFilters({ createdBy: user?.id ?? 'All users' })}
+                />
+            </div>
             <Table
                 dataSource={savedFilters.results}
                 columns={columns}

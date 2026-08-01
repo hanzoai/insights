@@ -4,17 +4,34 @@ This module contains unit tests covering activities, workflows, and helper funct
 
 ## Testing BigQuery batch exports
 
-BigQuery batch exports can be tested against a real BigQuery instance, but doing so requires additional setup. For this reason, these tests are skipped unless an environment variable pointing to a BigQuery credentials file (`GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/project-credentials.json`) is set.
+BigQuery batch exports can be tested against a real BigQuery instance, but doing so requires additional setup. BigQuery currently supports multiple authentication mechanisms:
+
+1. Authenticating directly with a JSON key file
+2. Using an integration populated with a JSON key file
+3. Using an integration without any keys to impersonate the account using our own credentials
+
+All tests still require a JSON key file for setup so, regardless of which authentication method is being tested, all these tests are skipped unless an environment variable pointing to a BigQuery credentials file (`GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/project-credentials.json`) is set.
+
+Additionally, any tests that are specific to the 3rd authentication method in the list (impersonation) require AWS credentials to be available to `boto3`, and the following settings to be configured:
+
+- `BATCH_EXPORT_BIGQUERY_SERVICE_ACCOUNT`
+- `BATCH_EXPORT_BIGQUERY_STS_AUDIENCE_FIELD`
+
+For Insights employees, development values for these settings are available in the Insights password manager.
 
 > [!WARNING]
 > Since BigQuery batch export tests require additional setup, we skip them by default and will not be ran by automated CI pipelines. Please ensure these tests pass when making changes that affect BigQuery batch exports.
 
-To enable testing for BigQuery batch exports, we require:
+When starting from scratch, to enable testing for BigQuery batch exports, we require:
 
-1. A BigQuery project and dataset
-2. A BigQuery ServiceAccount with access to said project and dataset. See the [BigQuery batch export documentation](https://hanzo.ai/docs/cdp/batch-exports/bigquery#setting-up-bigquery-access) on detailed steps to setup a ServiceAccount.
+1. A BigQuery project
+2. A Google Cloud service account with BigQuery access in said project. See the [BigQuery batch export documentation](https://hanzo.ai/docs/cdp/batch-exports/bigquery#setting-up-bigquery-access) on detailed steps to setup a service account.
+3. A [JSON key file](https://cloud.google.com/iam/docs/keys-create-delete#creating) for the service account, saved to a local file.
+4. If testing impersonation:
+   - Another Google Cloud service account that can be used to impersonate the service account from the previous step is required.
+   - A workload identity federation provider and pool setup to grant access to this other service account.
 
-Then, a [key](https://cloud.google.com/iam/docs/keys-create-delete#creating) can be created for the BigQuery ServiceAccount and saved to a local file. For Insights employees, this file should already be available under the Insights password manager.
+For Insights employees, all of this is already setup for you. You can obtain a JSON key file, and the necessary values for the settings detailed above from the Insights password manager.
 
 Tests for BigQuery batch exports can be then run from the root of the `insights` repo:
 
@@ -54,9 +71,9 @@ DEBUG=1 AWS_ACCESS_KEY_ID="AAAA" AWS_SECRET_ACCESS_KEY="BBBB" AWS_REGION="region
 
 ## Testing S3 batch exports
 
-S3 batch exports are tested against a MinIO bucket available in the local development stack. However there are also unit tests that specifically target an S3 bucket (like `test_s3_export_workflow_with_s3_bucket`) and a Google Cloud Storage (GCS) bucket.
+S3 batch exports are tested against a MinIO bucket available in the local development stack. However there are also unit tests that specifically target an S3 bucket (like `test_s3_export_workflow_with_s3_bucket`), tests that target a Google Cloud Storage (GCS) bucket, and tests that run against a playground AWS account.
 
-If no environment variables are defined, then just the tests targeting MinIO will be run (the tests targeting S3/GCS will be skipped).
+If no environment variables are defined and no AWS credentials are present, then just the tests targeting MinIO will be run (the tests targeting S3/GCS will be skipped).
 
 ### Using an S3 bucket
 
@@ -98,6 +115,17 @@ DEBUG=1 GCS_TEST_BUCKET='your-test-bucket' AWS_ACCESS_KEY_ID="AAAA" AWS_SECRET_A
 ```
 
 Replace the environment variables with the values obtained from the setup steps.
+
+### Using an AWS playground account
+
+Tests in `test_activity_with_role_assumption` require an AWS playground account to run. The good news is that once we are logged in to the AWS playground account, no additional setup is required. The test suite is configured to setup every AWS resource required.
+
+Any AWS account can be a playground account, but the account used must allow chained role assumption (or rather, not block it).
+
+> [!NOTE]
+> For Insights employees, an AWS playground account is available for you.
+
+After acquiring an AWS account, simply log in to it and run the tests like normal. No special environment variables are required. Tests clean-up after themselves once done.
 
 ## Testing Snowflake batch exports
 
@@ -176,3 +204,34 @@ DEBUG=1 AZURE_STORAGE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountN
     AZURE_TEST_CONTAINER='<CONTAINER_NAME>' \
     pytest products/batch_exports/backend/tests/temporal/destinations/azure_blob/test_workflow_with_azure_account.py -v
 ```
+
+## Testing File Download batch exports
+
+File download batch exports are tested against a real AWS account. A real account is required as the batch export is essentially a wrapper around an S3 batch export, and we already have tests for S3 batch exports to ensure they work with and without an AWS account. The only parts that are left outside of the S3 batch export interact with AWS directly: Generating temporary credentials and checking S3 bucket status.
+
+Insights has AWS playground accounts that we can leverage for our tests:
+
+1. Obtain an AWS playground account by following [this runbook](https://runbooks.hanzo.ai/aws/aws-playground)
+2. Configure your environment with the AWS playground's admin credentials. I recommend setting up SSO in your `~/.aws/config` so that credentials are automatically refreshed, logging in with SSO using `aws sso login --profile {profile_name}`, and then setting `AWS_PROFILE={profile_name}` in your environment before running the tests. Here is an example on how to configure this using `playground` as the `{profile_name}`), replace the variables with the details in the playground login page:
+
+   ```ini
+   [sso-session sso-playground]
+   sso_start_url = {SSO URL from playground account}
+   sso_region = {SSO region from playground account}
+   sso_registration_scopes = sso:account:access
+
+   [profile playground]
+   sso_session = sso-playground
+   sso_account_id = {Playground account ID}
+   sso_role_name = {Insights Admin role}
+   region = us-east-1
+   ```
+
+3. Verify you did everything correctly by calling `aws sts get-caller-identity --profile {profile_name}`
+4. Run the tests:
+
+   ```bash
+   AWS_PROFILE={profile_name} DEBUG=1 pytest products/batch_exports/backend/tests/temporal/destinations/file_download/ -v
+   ```
+
+The tests fixtures will setup the necessary role and bucket for the tests to run, and also clean it up after the test is done.

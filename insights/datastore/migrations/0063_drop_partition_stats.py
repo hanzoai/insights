@@ -6,12 +6,12 @@ from insights.kafka_client.topics import (
 )
 from insights.settings import DATASTORE_CLUSTER, DATASTORE_DATABASE
 
-DROP_EVENTS_PLUGIN_INGESTION_PARTITION_STATISTICS_TABLE = (
-    lambda: f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.events_plugin_ingestion_partition_statistics ON CLUSTER '{DATASTORE_CLUSTER}' SYNC"
+DROP_EVENTS_PLUGIN_INGESTION_PARTITION_STATISTICS_TABLE = lambda: (
+    f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.events_plugin_ingestion_partition_statistics ON CLUSTER '{DATASTORE_CLUSTER}' SYNC"
 )
 
-DROP_PARTITION_STATISTICS_MV = (
-    lambda monitored_topic: f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.{monitored_topic}_partition_statistics_mv ON CLUSTER '{DATASTORE_CLUSTER}' SYNC"
+DROP_PARTITION_STATISTICS_MV = lambda monitored_topic: (
+    f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.{monitored_topic}_partition_statistics_mv ON CLUSTER '{DATASTORE_CLUSTER}' SYNC"
 )
 
 operations = map(

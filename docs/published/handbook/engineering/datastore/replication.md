@@ -14,7 +14,7 @@ This document provides information on:
 ## Setting up replicated tables
 
 A great guide on setting up replicated tables on a pre-existing cluster can be found in
-[Datastore documentation](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication/).
+[Datastore documentation](https://datastore.com/docs/en/engines/table-engines/mergetree-family/replication/).
 
 Some important highlights are:
 
@@ -49,11 +49,11 @@ Note that resharding large tables is currently a relatively painful and bespoke 
 
 ### Monitoring replication
 
-When doing larger cluster operations, it's often important to keep an eye on replication. The [`system.replication_queue`](https://clickhouse.com/docs/en/operations/system-tables/replication_queue) and [`system.replicated_fetches`](https://clickhouse.com/docs/en/operations/system-tables/replicated_fetches) tables can provide at-a-glance overview of what the system is doing.
+When doing larger cluster operations, it's often important to keep an eye on replication. The [`system.replication_queue`](https://datastore.com/docs/en/operations/system-tables/replication_queue) and [`system.replicated_fetches`](https://datastore.com/docs/en/operations/system-tables/replicated_fetches) tables can provide at-a-glance overview of what the system is doing.
 
 ## `Distributed` table engine
 
-[`Distributed` table engine](https://clickhouse.com/docs/en/engines/table-engines/special/distributed/) tables
+[`Distributed` table engine](https://datastore.com/docs/en/engines/table-engines/special/distributed/) tables
 are used to query and write to sharded tables. Note that Distributed engine tables do not store any data on their own
 but rather always fan out to `ReplicatedMergeTree` tables on the cluster.
 
@@ -134,7 +134,7 @@ SELECT hostName(), sum(metric_value) FROM distributed_sensor_values GROUP BY hos
 -- └──────────────┴───────────────────┘
 ```
 
-[`hostName` is a datastore helper function](https://clickhouse.com/docs/en/sql-reference/functions/other-functions/#hostname) which
+[`hostName` is a datastore helper function](https://datastore.com/docs/en/sql-reference/functions/other-functions/#hostname) which
 returns the hostname query is executed on.
 
 In this case `datastore01` was the coordinator node. It:
@@ -224,7 +224,7 @@ In this case coordinator needs to receive a lot of data from the other shards to
 
 This query is expensive in terms of the amount of data that needs to be transferred over the network.
 
-One thing that makes this query more efficient is `uniqState`, which is a [aggregate function combinator](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/combinators/#-state). It's useful since rather needing to send over all the events, the coordinator can send back an optimized bitmap-like structure that the coordinator can combine with its own results.
+One thing that makes this query more efficient is `uniqState`, which is a [aggregate function combinator](https://datastore.com/docs/en/sql-reference/aggregate-functions/combinators/#-state). It's useful since rather needing to send over all the events, the coordinator can send back an optimized bitmap-like structure that the coordinator can combine with its own results.
 
 <details><summary>Click to see full `EXPLAIN` plan</summary>
 
@@ -280,7 +280,7 @@ Header: site_id UInt32
 #### Improving this query
 
 This query can be made faster by setting the
-[`distributed_group_by_no_merge`](https://clickhouse.com/docs/en/operations/settings/settings/#distributed-group-by-no-merge)
+[`distributed_group_by_no_merge`](https://datastore.com/docs/en/operations/settings/settings/#distributed-group-by-no-merge)
 setting, like so:
 
 ```sql runInInsights=false
@@ -355,12 +355,12 @@ Header: site_id UInt32
 
 ### Query settings
 
-Some noteworthy [query settings](https://clickhouse.com/docs/en/operations/settings/settings/) which affect the behavior of distributed queries are:
+Some noteworthy [query settings](https://datastore.com/docs/en/operations/settings/settings/) which affect the behavior of distributed queries are:
 
-- [distributed_group_by_no_merge](https://clickhouse.com/docs/en/operations/settings/settings/#distributed-group-by-no-merge)
-- [distributed_push_down_limit](https://clickhouse.com/docs/en/operations/settings/settings/#distributed-push-down-limit)
-- [optimize_distributed_group_by_sharding_key](https://clickhouse.com/docs/en/operations/settings/settings/#optimize-distributed-group-by-sharding-key)
-- [prefer_localhost_replica](https://clickhouse.com/docs/en/operations/settings/settings/#settings-prefer-localhost-replica)
+- [distributed_group_by_no_merge](https://datastore.com/docs/en/operations/settings/settings/#distributed-group-by-no-merge)
+- [distributed_push_down_limit](https://datastore.com/docs/en/operations/settings/settings/#distributed-push-down-limit)
+- [optimize_distributed_group_by_sharding_key](https://datastore.com/docs/en/operations/settings/settings/#optimize-distributed-group-by-sharding-key)
+- [prefer_localhost_replica](https://datastore.com/docs/en/operations/settings/settings/#settings-prefer-localhost-replica)
 
 Many of these unlock potential optimizations by streaming less data over the network, but require data to be sharded correctly to work.
 
@@ -377,12 +377,12 @@ FROM clusterAllReplicas('my_cluster', 'system', 'metrics')
 
 More documentation on this can be found at:
 
-- [cluster, clusterAllReplicas Datastore docs](https://clickhouse.com/docs/en/sql-reference/table-functions/cluster/)
-- [Other Functions Datastore docs](https://clickhouse.com/docs/en/sql-reference/functions/other-functions/)
+- [cluster, clusterAllReplicas Datastore docs](https://datastore.com/docs/en/sql-reference/table-functions/cluster/)
+- [Other Functions Datastore docs](https://datastore.com/docs/en/sql-reference/functions/other-functions/)
 
 ## Further reading
 
-- [Data Replication Datastore docs](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication/)
+- [Data Replication Datastore docs](https://datastore.com/docs/en/engines/table-engines/mergetree-family/replication/)
 - [Strength in Numbers: Introduction to Datastore Cluster Performance](https://altinity.com/presentations/strength-in-numbers-introduction-to-datastore-cluster-performance)
 - [Engines](https://kb.altinity.com/engines/)
 - [ZooKeeper schema](https://kb.altinity.com/altinity-kb-setup-and-maintenance/altinity-kb-zookeeper/zookeeper-schema/)

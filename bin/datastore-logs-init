@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# temporary script to init logs clickhouse schema before we've got migrations setup properly
+# temporary script to init logs datastore schema before we've got migrations setup properly
 bin/wait-for-docker
 
-cat bin/clickhouse-logs.sql | docker-compose exec -T clickhouse clickhouse-client
+cat bin/datastore-logs.sql | docker-compose exec -T datastore datastore-client

@@ -1,10 +1,10 @@
-import { useActions, useValues } from 'kea'
+import { BindLogic, useActions, useValues } from 'kea'
 
 import { IconFlag } from '@hanzo/icons'
 import { Banner, Button, Modal, Table, TableColumns, Tag } from '@hanzo/elements'
 
-import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
+import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
 
 import { groupsModel } from '~/models/groupsModel'
 import { FeatureFlagGroupType } from '~/types'
@@ -64,12 +64,14 @@ export function ReleaseConditionsModal(): JSX.Element {
                     changes will affect your experiment.
                 </Banner>
 
-                <FeatureFlagReleaseConditions
-                    id={`${experiment.feature_flag?.id}`}
-                    filters={featureFlag?.filters ?? []}
-                    onChange={setFeatureFlagFilters}
-                    nonEmptyFeatureFlagVariants={nonEmptyVariants}
-                />
+                <BindLogic logic={featureFlagLogic} props={{ id: experiment.feature_flag?.id ?? null }}>
+                    <FeatureFlagReleaseConditions
+                        id={`${experiment.feature_flag?.id}`}
+                        filters={featureFlag?.filters ?? []}
+                        onChange={setFeatureFlagFilters}
+                        nonEmptyFeatureFlagVariants={nonEmptyVariants}
+                    />
+                </BindLogic>
             </div>
         </Modal>
     )

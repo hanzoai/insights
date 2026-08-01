@@ -2,30 +2,29 @@ import logging
 from functools import cache
 from typing import Optional
 
-from datastore_driver.errors import ServerException
-from datastore_orm import migrations
+from infi.datastore_orm import migrations
 
 from insights import settings
-from insights.datastore.client.connection import NodeRole
-from insights.datastore.cluster import Query, get_cluster
-from insights.settings.data_stores import DATASTORE_MIGRATIONS_CLUSTER, DATASTORE_MIGRATIONS_HOST
+from insights.datastore.client.connection import DATA_NODE_ROLES, SINGLE_SHARD_DATA_NODE_ROLES, NodeRole
+from insights.datastore.cluster import DatastoreCluster, Query, get_cluster
+from insights.settings.data_stores import (
+    DATASTORE_CLUSTER,
+    DATASTORE_MIGRATIONS_CLUSTER,
+    DATASTORE_MIGRATIONS_HOST,
+    DATASTORE_SATELLITE_CLUSTERS,
+)
 
 logger = logging.getLogger("migrations")
 
-# Datastore error codes that are safe to ignore during migrations.
-# These cover idempotent DDL operations (e.g., ADD INDEX when index already exists)
-# and version-compatibility issues with non-essential features.
-_IDEMPOTENT_CH_ERROR_CODES = {
-    36,   # TABLE_ALREADY_EXISTS (CREATE TABLE IF NOT EXISTS in ON CLUSTER)
-    44,   # ILLEGAL_COLUMN (column/index already exists)
-    60,   # UNKNOWN_TABLE (table doesn't exist — OK for DROP IF EXISTS)
-    80,   # INCORRECT_DATA (vector_similarity index arg mismatch across versions — non-essential)
-}
-
 
 @cache
-def get_migrations_cluster():
-    return get_cluster(host=DATASTORE_MIGRATIONS_HOST, cluster=DATASTORE_MIGRATIONS_CLUSTER)
+def get_migrations_cluster() -> DatastoreCluster:
+    return get_cluster(
+        host=DATASTORE_MIGRATIONS_HOST,
+        cluster=DATASTORE_MIGRATIONS_CLUSTER,
+        data_cluster=DATASTORE_CLUSTER,
+        satellite_clusters=DATASTORE_SATELLITE_CLUSTERS or None,
+    )
 
 
 def run_sql_with_exceptions(
@@ -47,7 +46,7 @@ def run_sql_with_exceptions(
         The SQL query to be executed.
     node_roles: List of roles to execute the migration on, optional (default is NodeRole.DATA if not specified)
         Specifies which type of node the query should target during execution.
-        In general, run everything on NodeRole.DATA and NodeRole.COORDINATOR except changes to sharded tables / writable distributed tables.
+        In general, run everything on NodeRole.DATA except changes to sharded tables / writable distributed tables.
     sharded: bool, optional (default is False)
         Indicates if the migration is on a sharded table
     is_alter_on_replicated_table: bool, optional (default is False)
@@ -68,48 +67,43 @@ def run_sql_with_exceptions(
     if node_roles and not isinstance(node_roles, list):
         node_roles = [node_roles]
 
-    node_roles = node_roles or [NodeRole.DATA]
+    node_roles_list: list[NodeRole] = node_roles if isinstance(node_roles, list) else [NodeRole.DATA]
 
     # Store original node_roles for validation purposes before debug override
-    original_node_roles = node_roles
+    original_node_roles = node_roles_list
 
-    if settings.E2E_TESTING or settings.DEBUG or not settings.CLOUD_DEPLOYMENT:
+    if (settings.E2E_TESTING or settings.DEBUG or not settings.CLOUD_DEPLOYMENT) and not settings.MULTINODE_DATASTORE:
         # In E2E tests, debug mode and hobby deployments, we run migrations on ALL nodes
-        # because we don't have different Datastore topologies yet in Docker
-        node_roles = [NodeRole.ALL]
+        # because we don't have different Datastore topologies yet in Docker.
+        # MULTINODE_DATASTORE opts back into role-based routing so the smoke-test
+        # stack can verify migrations actually land on the correct cluster.
+        node_roles_list = [NodeRole.ALL]
 
     def run_migration():
         cluster = get_migrations_cluster()
 
         query = Query(sql)
 
-        try:
-            if sharded and is_alter_on_replicated_table:
-                assert (NodeRole.DATA in node_roles and len(node_roles) == 1) or (
-                    settings.E2E_TESTING or settings.DEBUG or not settings.CLOUD_DEPLOYMENT
-                ), "When running migrations on sharded tables, the node_role must be NodeRole.DATA"
-                return cluster.map_one_host_per_shard(query).result()
-            elif is_alter_on_replicated_table:
-                logger.info("       Running ALTER on replicated table on just one host")
-                return cluster.any_host_by_roles(query, node_roles=node_roles).result()
-            else:
-                return cluster.map_hosts_by_roles(query, node_roles=node_roles).result()
-        except ServerException as e:
-            if e.code in _IDEMPOTENT_CH_ERROR_CODES:
-                logger.info("       Ignoring idempotent DDL error (code %d): %s", e.code, e.message)
-                return None
-            raise
-        except ExceptionGroup as eg:
-            # cluster .result() wraps errors in ExceptionGroup — check if ALL are idempotent
-            non_idempotent = []
-            for exc in eg.exceptions:
-                if isinstance(exc, ServerException) and exc.code in _IDEMPOTENT_CH_ERROR_CODES:
-                    logger.info("       Ignoring idempotent DDL error (code %d): %s", exc.code, exc.message)
-                else:
-                    non_idempotent.append(exc)
-            if non_idempotent:
-                raise ExceptionGroup(eg.message, non_idempotent) from eg
-            return None
+        if sharded and is_alter_on_replicated_table:
+            is_local_or_test = (
+                settings.E2E_TESTING or settings.DEBUG or not settings.CLOUD_DEPLOYMENT
+            ) and not settings.MULTINODE_DATASTORE
+            single_role = node_roles_list[0] if len(node_roles_list) == 1 else None
+            assert is_local_or_test or (single_role is not None and single_role in DATA_NODE_ROLES), (
+                "When running migrations on sharded tables, node_roles must be exactly one of "
+                f"{sorted(r.name for r in DATA_NODE_ROLES)}"
+            )
+            # Satellite clusters are single-shard and live in __extra_hosts, which
+            # map_one_host_per_shard cannot reach; any_host_by_roles can.
+            if not is_local_or_test and single_role in SINGLE_SHARD_DATA_NODE_ROLES:
+                logger.info("       Running ALTER on sharded replicated table on one host of role %s", single_role)
+                return cluster.any_host_by_roles(query, node_roles=node_roles_list).result()
+            return cluster.map_one_host_per_shard(query).result()
+        elif is_alter_on_replicated_table:
+            logger.info("       Running ALTER on replicated table on just one host")
+            return cluster.any_host_by_roles(query, node_roles=node_roles_list).result()
+        else:
+            return cluster.map_hosts_by_roles(query, node_roles=node_roles_list).result()
 
     operation = migrations.RunPython(lambda _: run_migration())
 
@@ -117,6 +111,9 @@ def run_sql_with_exceptions(
     # Use original_node_roles (before debug override) for validation purposes
     operation._sql = sql
     operation._node_roles = original_node_roles
+    # node_roles_list reflects the debug/hobby override (e.g. collapsed to NodeRole.ALL),
+    # i.e. the roles this migration actually targets under the current settings.
+    operation._effective_node_roles = node_roles_list
     operation._sharded = sharded
     operation._is_alter_on_replicated_table = is_alter_on_replicated_table
 

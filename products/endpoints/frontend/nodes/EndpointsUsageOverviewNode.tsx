@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { Skeleton } from '@hanzo/elements'
 
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
-import { humanFriendlyDuration, humanFriendlyNumber, humanizeBytes } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'
+import { humanFriendlyDuration } from 'lib/utils/durations'
+import { humanFriendlyNumber, humanizeBytes } from 'lib/utils/numbers'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import {

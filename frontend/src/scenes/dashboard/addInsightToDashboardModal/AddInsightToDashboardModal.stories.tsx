@@ -1,13 +1,15 @@
-import { Meta, StoryFn } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { BindLogic } from 'kea'
 
 import { mswDecorator } from '~/mocks/browser'
 
+import __dashboard1 from '../__mocks__/dashboard1.json'
+import __dashboards from '../__mocks__/dashboards.json'
 import { addInsightToDashboardLogic } from '../addInsightToDashboardModalLogic'
 import { dashboardLogic } from '../dashboardLogic'
 import { AddInsightToDashboardModal } from './AddInsightToDashboardModal'
 
-const dashboardRaw = require('../__mocks__/dashboard1.json')
+const dashboardRaw = __dashboard1 as any
 
 const dashboard = {
     ...dashboardRaw,
@@ -42,13 +44,13 @@ const mockInsightsList = {
 
 const DASHBOARD_ID = 1
 
-const meta: Meta<typeof AddInsightToDashboardModal> = {
+const meta: Meta = {
     component: AddInsightToDashboardModal,
     title: 'Scenes-App/Dashboards/Add Insight to Dashboard Modal',
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/dashboards/': require('../__mocks__/dashboards.json'),
+                '/api/environments/:team_id/dashboards/': __dashboards as any,
                 [`/api/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
                 '/api/environments/:team_id/insights/': mockInsightsList,
             },
@@ -61,10 +63,12 @@ const meta: Meta<typeof AddInsightToDashboardModal> = {
         layout: 'fullscreen',
         viewMode: 'story',
         mockDate: '2023-02-01',
-        testOptions: { waitForSelector: '.Modal' },
+        testOptions: { waitForSelector: '.Modal', viewport: { width: 1300, height: 2000 } },
     },
 }
 export default meta
+
+type Story = StoryObj<{}>
 
 function ModalStory({ showMore = false }: { showMore?: boolean }): JSX.Element {
     addInsightToDashboardLogic.mount()
@@ -80,20 +84,26 @@ function ModalStory({ showMore = false }: { showMore?: boolean }): JSX.Element {
     )
 }
 
-export const Default: StoryFn = () => <ModalStory />
+export const Default: Story = {
+    render: () => <ModalStory />,
+}
 
-export const WithMoreInsightTypes: StoryFn = () => <ModalStory showMore />
+export const WithMoreInsightTypes: Story = {
+    render: () => <ModalStory showMore />,
+}
 
-export const Empty: StoryFn = () => <ModalStory />
-Empty.decorators = [
-    mswDecorator({
-        get: {
-            '/api/environments/:team_id/dashboards/': require('../__mocks__/dashboards.json'),
-            [`/api/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
-            '/api/environments/:team_id/insights/': { results: [], count: 0, next: null, previous: null },
-        },
-        post: {
-            '/api/environments/:team_id/insights/cancel/': [201],
-        },
-    }),
-]
+export const Empty: Story = {
+    render: () => <ModalStory />,
+    decorators: [
+        mswDecorator({
+            get: {
+                '/api/environments/:team_id/dashboards/': __dashboards as any,
+                [`/api/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
+                '/api/environments/:team_id/insights/': { results: [], count: 0, next: null, previous: null },
+            },
+            post: {
+                '/api/environments/:team_id/insights/cancel/': [201],
+            },
+        }),
+    ],
+}

@@ -1,12 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
-import { useState } from 'react'
+import insights from 'insights-js'
+import { useMemo, useState } from 'react'
 
 import { IconFilter, IconGlobe, IconPhone, IconPlus } from '@hanzo/icons'
 import { Banner, Button, Divider, Input, Select, Popover, Tooltip } from '@hanzo/elements'
 
-import { baseModifier } from 'lib/components/AppShortcuts/shortcuts'
-import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
 import { AuthorizedUrlListType, authorizedUrlListLogic } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { CompareFilter } from 'lib/components/CompareFilter/CompareFilter'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
@@ -18,32 +17,40 @@ import {
     isEventPersonOrSessionPropertyFilter,
     isWebAnalyticsPropertyFilter,
 } from 'lib/components/PropertyFilters/utils'
+import { baseModifier } from 'lib/components/Shortcuts/shortcuts'
+import { useShortcut } from 'lib/components/Shortcuts/useShortcut'
+import { SuppressTaxonomicMenuToggle } from 'lib/components/TaxonomicPopover/TaxonomicMenuToggle'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Field } from 'lib/elements/Field'
-import { SegmentedSelect } from 'lib/elements/SegmentedSelect'
 import { IconLink, IconMonitor, IconWithCount } from 'lib/elements/icons/icons'
+import { Field } from 'lib/elements/Field'
+import { InputSelect, InputSelectOption } from 'lib/elements/InputSelect'
+import { SegmentedSelect } from 'lib/elements/SegmentedSelect'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
-import MaxTool from 'scenes/max/MaxTool'
+import { COUNTRY_CODE_TO_LONG_NAME, countryCodeToFlag } from 'lib/utils/country'
+import { useMaxTool } from 'scenes/max/useMaxTool'
 import { Scene } from 'scenes/sceneTypes'
 
 import { ReloadAll } from '~/queries/nodes/DataNode/Reload'
-import { PropertyFilterType, PropertyMathType } from '~/types'
+import { AnyPropertyFilter, PropertyFilterType, PropertyMathType, PropertyOperator } from '~/types'
 
+import { useAttachedContext, useMcpToolApplyBack } from 'products/insights_ai/frontend/api/logics'
+import type { AttachedContextItem } from 'products/insights_ai/frontend/api/types'
+
+import { INITIAL_DATE_FROM, INITIAL_DATE_TO, ProductTab, faviconUrl } from './common'
+import { webAnalyticsDateMapping } from './constants'
 import { PathCleaningToggle } from './PathCleaningToggle'
 import { TableSortingIndicator } from './TableSortingIndicator'
 import { FilterPresetsDropdown } from './WebAnalyticsFilterPresets'
+import { webAnalyticsFilterPresetsLogic } from './webAnalyticsFilterPresetsLogic'
 import { WebAnalyticsFiltersV2MigrationBanner } from './WebAnalyticsFiltersV2MigrationBanner'
+import { webAnalyticsLogic } from './webAnalyticsLogic'
 import { WebConversionGoal } from './WebConversionGoal'
 import {
     WEB_ANALYTICS_PROPERTY_ALLOW_LIST,
     WebPropertyFilters,
     getWebAnalyticsTaxonomicGroupTypes,
 } from './WebPropertyFilters'
-import { ProductTab, faviconUrl } from './common'
-import { webAnalyticsDateMapping } from './constants'
-import { webAnalyticsFilterPresetsLogic } from './webAnalyticsFilterPresetsLogic'
-import { webAnalyticsLogic } from './webAnalyticsLogic'
 
 const CondensedWebAnalyticsFilterBar = ({ tabs }: { tabs: JSX.Element }): JSX.Element => {
     const {
@@ -98,11 +105,15 @@ export const WebAnalyticsFilters = ({ tabs }: { tabs: JSX.Element }): JSX.Elemen
     const { featureFlags } = useValues(featureFlagLogic)
 
     if (featureFlags[FEATURE_FLAGS.WEB_ANALYTICS_FILTERS_V2] || featureFlags[FEATURE_FLAGS.CONDENSED_FILTER_BAR]) {
-        return <CondensedWebAnalyticsFilterBar tabs={tabs} />
+        return (
+            <SuppressTaxonomicMenuToggle>
+                <CondensedWebAnalyticsFilterBar tabs={tabs} />
+            </SuppressTaxonomicMenuToggle>
+        )
     }
 
     return (
-        <>
+        <SuppressTaxonomicMenuToggle>
             <IncompatibleFiltersWarning />
 
             <div data-attr="web-analytics-filters">
@@ -144,8 +155,19 @@ export const WebAnalyticsFilters = ({ tabs }: { tabs: JSX.Element }): JSX.Elemen
                     }
                 />
             </div>
-        </>
+        </SuppressTaxonomicMenuToggle>
     )
+}
+
+// Static instruction rendered into the trusted context block — never interpolate user or ingested data.
+const WEB_QUERY_TOOLS_CONTEXT_ITEM: AttachedContextItem = {
+    type: 'instructions',
+    hidden: true,
+    value:
+        'The user has the web analytics page open. When you call query-web-overview or query-web-stats, the filters ' +
+        'from your query (date range, property filters, comparison, path cleaning, test-account filtering, conversion ' +
+        'goal) are also applied to the page, so the user sees the results both in this chat and on screen. Only ' +
+        'filters are updated on the page — breakdown and table options are not.',
 }
 
 const WebAnalyticsAIFilters = ({ children }: { children: JSX.Element }): JSX.Element => {
@@ -155,53 +177,109 @@ const WebAnalyticsAIFilters = ({ children }: { children: JSX.Element }): JSX.Ele
         isPathCleaningEnabled,
         compareFilter,
     } = useValues(webAnalyticsLogic)
-    const { setDates, setWebAnalyticsFilters, setIsPathCleaningEnabled, setCompareFilter } =
-        useActions(webAnalyticsLogic)
+    const {
+        setDates,
+        setWebAnalyticsFilters,
+        setIsPathCleaningEnabled,
+        setCompareFilter,
+        setShouldFilterTestAccounts,
+        setConversionGoal,
+    } = useActions(webAnalyticsLogic)
 
-    return (
-        <MaxTool
-            identifier="filter_web_analytics"
-            context={{
-                current_filters: {
-                    date_from: dateFrom,
-                    date_to: dateTo,
-                    properties: rawWebAnalyticsFilters,
-                    doPathCleaning: isPathCleaningEnabled,
-                    compareFilter: compareFilter,
-                },
-            }}
-            contextDescription={{
-                text: 'Current filters',
-                icon: <IconFilter />,
-            }}
-            callback={(toolOutput: Record<string, any>) => {
-                if (toolOutput.properties !== undefined) {
-                    const flattenedProperties = convertPropertyGroupToProperties(toolOutput.properties)
-                    setWebAnalyticsFilters(flattenedProperties?.filter(isEventPersonOrSessionPropertyFilter) ?? [])
-                }
-                if (toolOutput.date_from !== undefined && toolOutput.date_to !== undefined) {
-                    setDates(toolOutput.date_from, toolOutput.date_to)
-                }
-                if (toolOutput.doPathCleaning !== undefined) {
-                    setIsPathCleaningEnabled(toolOutput.doPathCleaning)
-                }
-                if (toolOutput.compareFilter !== undefined) {
-                    setCompareFilter(toolOutput.compareFilter)
-                }
-            }}
-            initialMaxPrompt="Filter web analytics data for "
-            suggestions={[
-                'Show mobile traffic from last 30 days for the US',
-                'Filter only sessions greater than 2 minutes coming from organic search',
-                "Don't include direct traffic and show data for the last 7 days",
-            ]}
-        >
-            {children}
-        </MaxTool>
-    )
+    useAttachedContext([
+        {
+            type: 'web_analytics_filters',
+            value: JSON.stringify({
+                date_from: dateFrom,
+                date_to: dateTo,
+                properties: rawWebAnalyticsFilters,
+                doPathCleaning: isPathCleaningEnabled,
+                compareFilter,
+            }),
+            label: 'Current filters',
+        },
+        WEB_QUERY_TOOLS_CONTEXT_ITEM,
+    ])
+
+    // Legacy MaxTool (langgraph) output: top-level date_from/date_to and possibly grouped properties.
+    const applyFilters = (toolOutput: Record<string, any>): void => {
+        if (toolOutput.properties !== undefined) {
+            const flattenedProperties = convertPropertyGroupToProperties(toolOutput.properties)
+            setWebAnalyticsFilters(flattenedProperties?.filter(isEventPersonOrSessionPropertyFilter) ?? [])
+        }
+        if (toolOutput.date_from !== undefined && toolOutput.date_to !== undefined) {
+            setDates(toolOutput.date_from, toolOutput.date_to)
+        }
+        if (toolOutput.doPathCleaning !== undefined) {
+            setIsPathCleaningEnabled(toolOutput.doPathCleaning)
+        }
+        if (toolOutput.compareFilter !== undefined) {
+            setCompareFilter(toolOutput.compareFilter)
+        }
+    }
+
+    // The headless query tools' call input mirrored onto the open page. The input is a complete query:
+    // every field is applied, with omitted fields set to the query schema's defaults so the page shows
+    // the same results the tool returned. The args are raw agent-sent JSON (never zod-validated), so
+    // fields are coerced and the property-filter type/operator defaults are stamped back on. Stats-only
+    // presentation fields (breakdownBy, includeBounceRate, limit, ...) are per-tile options with no
+    // page-level setter.
+    const applyWebQueryInput = (input: Record<string, any>): void => {
+        const props = (Array.isArray(input.properties) ? input.properties : []).map((f: Record<string, any>) => ({
+            ...f,
+            type: f.type || PropertyFilterType.Event,
+            ...(f.operator || f.type === PropertyFilterType.Cohort ? {} : { operator: PropertyOperator.Exact }),
+        })) as AnyPropertyFilter[]
+        setWebAnalyticsFilters(props.filter(isWebAnalyticsPropertyFilter))
+        setDates(input.dateRange?.date_from ?? INITIAL_DATE_FROM, input.dateRange?.date_to ?? INITIAL_DATE_TO)
+        setIsPathCleaningEnabled(!!input.doPathCleaning)
+        setCompareFilter(input.compareFilter ?? { compare: false })
+        setShouldFilterTestAccounts(!!input.filterTestAccounts)
+        setConversionGoal(input.conversionGoal ?? null)
+    }
+
+    useMcpToolApplyBack({
+        tools: ['query-web-overview', 'query-web-stats'],
+        targetKey: 'web-analytics-filters',
+        onApply: (_event, { innerInput }) => {
+            if (!innerInput) {
+                return
+            }
+            applyWebQueryInput(innerInput)
+        },
+    })
+
+    // Register the tool so Insights AI can still drive web analytics filters, but render no button:
+    // the deprecated floating MaxTool "+" cluttered the filter bar. The scene's other tools
+    // (web_analytics_doctor, assess_heatmap, summarize_website_interactions) also register hook-only.
+    useMaxTool({
+        identifier: 'filter_web_analytics',
+        context: {
+            current_filters: {
+                date_from: dateFrom,
+                date_to: dateTo,
+                properties: rawWebAnalyticsFilters,
+                doPathCleaning: isPathCleaningEnabled,
+                compareFilter: compareFilter,
+            },
+        },
+        contextDescription: {
+            text: 'Current filters',
+            icon: <IconFilter />,
+        },
+        callback: applyFilters,
+        initialMaxPrompt: 'Filter web analytics data for ',
+        suggestions: [
+            'Show mobile traffic from last 30 days for the US',
+            'Filter only sessions greater than 2 minutes coming from organic search',
+            "Don't include direct traffic and show data for the last 7 days",
+        ],
+    })
+
+    return children
 }
 
-const WebAnalyticsDomainSelector = (): JSX.Element => {
+export const WebAnalyticsDomainSelector = (): JSX.Element => {
     const { validatedDomainFilter, hasHostFilter, authorizedDomains, showProposedURLForm } =
         useValues(webAnalyticsLogic)
     const { setDomainFilter } = useActions(webAnalyticsLogic)
@@ -263,13 +341,113 @@ const WebAnalyticsDomainSelector = (): JSX.Element => {
     )
 }
 
+const DEVICE_TYPE_SELECT_OPTIONS = [
+    {
+        value: 'Desktop' as const,
+        label: (
+            <div>
+                <IconMonitor className="mx-1" /> Desktop
+            </div>
+        ),
+        tooltip: 'Desktop devices include laptops and desktops.',
+    },
+    {
+        value: 'Mobile' as const,
+        label: (
+            <div>
+                <IconPhone className="mx-1" /> Mobile
+            </div>
+        ),
+        tooltip: 'Mobile devices include smartphones and tablets.',
+    },
+]
+
+export const WebAnalyticsLiveDeviceToggle = ({ fullWidth = false }: { fullWidth?: boolean } = {}): JSX.Element => {
+    const { deviceTypeFilter } = useValues(webAnalyticsLogic)
+    const { setDeviceTypeFilter } = useActions(webAnalyticsLogic)
+
+    return (
+        <Select
+            fullWidth={fullWidth}
+            size="small"
+            value={deviceTypeFilter ?? undefined}
+            allowClear={true}
+            placeholder="All devices"
+            onChange={(value) => setDeviceTypeFilter(value ?? null)}
+            options={DEVICE_TYPE_SELECT_OPTIONS}
+        />
+    )
+}
+
+export const WebAnalyticsLiveCountrySelector = (): JSX.Element => {
+    const { countryFilter } = useValues(webAnalyticsLogic)
+    const { setCountryFilter } = useActions(webAnalyticsLogic)
+
+    const options = useMemo<InputSelectOption<string>[]>(
+        () =>
+            Object.entries(COUNTRY_CODE_TO_LONG_NAME)
+                .map(([code, name]) => ({
+                    key: code,
+                    label: `${countryCodeToFlag(code)}  ${name}`,
+                    labelComponent: (
+                        <span>
+                            <span aria-hidden className="mr-2">
+                                {countryCodeToFlag(code)}
+                            </span>
+                            {name}
+                        </span>
+                    ),
+                }))
+                .sort((a, b) => a.label.localeCompare(b.label)),
+        []
+    )
+
+    return (
+        <InputSelect<string>
+            mode="single"
+            size="small"
+            value={countryFilter ? [countryFilter] : []}
+            options={options}
+            placeholder="All countries"
+            onChange={(values) => setCountryFilter(values[0] ?? null)}
+            virtualized
+        />
+    )
+}
+
+export const WebAnalyticsLiveReferrerSelector = ({ suggestions = [] }: { suggestions?: string[] }): JSX.Element => {
+    const { referrerFilter } = useValues(webAnalyticsLogic)
+    const { setReferrerFilter } = useActions(webAnalyticsLogic)
+
+    const options = useMemo<InputSelectOption<string>[]>(
+        () =>
+            // Skip the synthetic '$direct' bucket — it's a display-only label, not a real referrer value.
+            suggestions
+                .filter((domain) => domain && domain !== '$direct')
+                .map((domain) => ({ key: domain, label: domain })),
+        [suggestions]
+    )
+
+    return (
+        <InputSelect<string>
+            mode="single"
+            size="small"
+            value={referrerFilter ? [referrerFilter] : []}
+            options={options}
+            allowCustomValues
+            placeholder="All referrers"
+            onChange={(values) => setReferrerFilter(values[0] ?? null)}
+        />
+    )
+}
+
 const WebAnalyticsDeviceToggle = (): JSX.Element => {
     const { deviceTypeFilter } = useValues(webAnalyticsLogic)
     const { setDeviceTypeFilter } = useActions(webAnalyticsLogic)
     const { featureFlags } = useValues(featureFlagLogic)
 
     // Device toggle shortcuts (Web Analytics-specific)
-    useAppShortcut({
+    useShortcut({
         name: 'WebAnalyticsDesktop',
         keybind: [[...baseModifier, 'p']],
         intent: 'Filter desktop devices',
@@ -277,7 +455,7 @@ const WebAnalyticsDeviceToggle = (): JSX.Element => {
         callback: () => setDeviceTypeFilter(deviceTypeFilter === 'Desktop' ? null : 'Desktop'),
         scope: Scene.WebAnalytics,
     })
-    useAppShortcut({
+    useShortcut({
         name: 'WebAnalyticsMobile',
         keybind: [[...baseModifier, 'm']],
         intent: 'Filter mobile devices',
@@ -293,26 +471,7 @@ const WebAnalyticsDeviceToggle = (): JSX.Element => {
                 value={deviceTypeFilter ?? undefined}
                 allowClear={true}
                 onChange={(value) => setDeviceTypeFilter(value !== deviceTypeFilter ? value : null)}
-                options={[
-                    {
-                        value: 'Desktop',
-                        label: (
-                            <div>
-                                <IconMonitor className="mx-1" /> Desktop
-                            </div>
-                        ),
-                        tooltip: 'Desktop devices include laptops and desktops.',
-                    },
-                    {
-                        value: 'Mobile',
-                        label: (
-                            <div>
-                                <IconPhone className="mx-1" /> Mobile
-                            </div>
-                        ),
-                        tooltip: 'Mobile devices include smartphones and tablets.',
-                    },
-                ]}
+                options={DEVICE_TYPE_SELECT_OPTIONS}
             />
         )
     }
@@ -389,6 +548,7 @@ const ShareButton = (): JSX.Element => {
         }
 
         void copyToClipboard(url.toString(), 'link')
+        insights.capture('web analytics share link copied', { source: 'filters_button' })
     }
 
     return (
@@ -412,7 +572,7 @@ function FiltersPopover(): JSX.Element {
     const { featureFlags } = useValues(featureFlagLogic)
 
     // Toggle filters shortcut
-    useAppShortcut({
+    useShortcut({
         name: 'WebAnalyticsFilters',
         keybind: [[...baseModifier, 'f']],
         intent: 'Toggle filters',

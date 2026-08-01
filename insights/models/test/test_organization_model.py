@@ -9,11 +9,14 @@ from django.utils import timezone
 
 from parameterized import parameterized
 
-from insights.models import Organization, OrganizationInvite, Plugin
+from insights.models import Organization, OrganizationInvite
 from insights.models.organization import OrganizationMembership
 from insights.plugins.test.mock import mocked_plugin_requests_get
 from insights.plugins.test.plugin_archives import HELLO_WORLD_PLUGIN_GITHUB_ZIP
 
+from products.cdp.backend.models.plugin import Plugin
+
+from ee.billing.quota_limiting import QuotaResource
 
 
 class TestOrganization(BaseTest):
@@ -34,10 +37,10 @@ class TestOrganization(BaseTest):
         self.assertEqual(self.organization.invites.count(), 2)
         self.assertEqual(self.organization.active_invites.count(), 1)
 
-    @mock.patch("requests.get", side_effect=mocked_plugin_requests_get)
+    @mock.patch("insights.plugins.utils.requests.get", side_effect=mocked_plugin_requests_get)
     def test_plugins_are_preinstalled_on_self_hosted(self, mock_get):
         with self.is_cloud(False):
-            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Hanzo Insights/helloworldplugin/"]):
+            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Insights/helloworldplugin/"]):
                 new_org, _, _ = Organization.objects.bootstrap(
                     self.user,
                     plugins_access_level=Organization.PluginsAccessLevel.INSTALL,
@@ -50,14 +53,14 @@ class TestOrganization(BaseTest):
         )
         self.assertEqual(mock_get.call_count, 2)
         mock_get.assert_any_call(
-            f"https://github.com/Hanzo Insights/helloworldplugin/archive/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}.zip",
+            f"https://github.com/Insights/helloworldplugin/archive/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}.zip",
             headers={},
         )
 
-    @mock.patch("requests.get", side_effect=mocked_plugin_requests_get)
+    @mock.patch("insights.plugins.utils.requests.get", side_effect=mocked_plugin_requests_get)
     def test_plugins_are_not_preinstalled_on_cloud(self, mock_get):
         with self.is_cloud(True):
-            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Hanzo Insights/helloworldplugin/"]):
+            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Insights/helloworldplugin/"]):
                 new_org, _, _ = Organization.objects.bootstrap(
                     self.user,
                     plugins_access_level=Organization.PluginsAccessLevel.INSTALL,
@@ -98,6 +101,22 @@ class TestOrganization(BaseTest):
             )
             self.assertFalse(explicit_org.default_anonymize_ips)
 
+    @parameterized.expand(
+        [
+            ("eu_defaults_to_opted_out", "EU", None, False),
+            ("us_defaults_to_opted_in", "US", None, True),
+            ("unset_deployment_defaults_to_opted_in", None, None, True),
+            ("explicit_value_overrides_eu_default", "EU", True, True),
+        ]
+    )
+    def test_default_is_ai_training_opted_in_based_on_deployment(
+        self, _name, cloud_deployment, explicit_value, expected
+    ):
+        with self.settings(CLOUD_DEPLOYMENT=cloud_deployment):
+            extra_kwargs = {} if explicit_value is None else {"is_ai_training_opted_in": explicit_value}
+            org, _, _ = Organization.objects.bootstrap(self.user, name=_name, **extra_kwargs)
+            self.assertEqual(org.is_ai_training_opted_in, expected)
+
     def test_update_available_product_features_ignored_if_usage_info_exists(self):
         with self.is_cloud(False):
             new_org, _, _ = Organization.objects.bootstrap(self.user)
@@ -113,6 +132,31 @@ class TestOrganization(BaseTest):
                 {"key": "test1", "name": "test1"},
                 {"key": "test2", "name": "test2"},
             ]
+
+    @parameterized.expand(
+        [
+            ("no_features", None, "free"),
+            ("empty_features", [], "free"),
+            ("unknown_feature_treated_as_paid", [{"key": "made_up_feature"}], "paid"),
+            ("scale_feature_present", [{"key": "recordings_file_export"}], "paid"),
+            ("multiple_scale_features", [{"key": "zapier"}, {"key": "group_analytics"}], "paid"),
+            (
+                "enterprise_only_feature_present",
+                [{"key": "recordings_file_export"}, {"key": "role_based_access"}],
+                "enterprise",
+            ),
+            ("access_control_flags_enterprise", [{"key": "access_control"}], "enterprise"),
+            ("saml_flags_enterprise", [{"key": "saml"}], "enterprise"),
+            ("scim_flags_enterprise", [{"key": "scim"}], "enterprise"),
+            ("sso_enforcement_flags_enterprise", [{"key": "sso_enforcement"}], "enterprise"),
+            ("role_based_access_flags_enterprise", [{"key": "role_based_access"}], "enterprise"),
+            ("malformed_entries_ignored", [None, {}, {"key": None}], "free"),
+        ]
+    )
+    def test_get_plan_tier(self, _name, available_product_features, expected_tier):
+        self.organization.available_product_features = available_product_features
+        self.organization.save()
+        self.assertEqual(self.organization.get_plan_tier(), expected_tier)
 
     def test_session_age_caching(self):
         # Test caching when session_cookie_age is set
@@ -329,6 +373,52 @@ class TestOrganization(BaseTest):
         team_tokens = mock_remove_limited.call_args[0][1]
         self.assertIn(self.team.api_token, team_tokens)
 
+    @parameterized.expand(
+        [
+            ("limit_recordings_dispatches", "limit", QuotaResource.RECORDINGS, True),
+            ("limit_events_no_dispatch", "limit", QuotaResource.EVENTS, False),
+            ("unlimit_recordings_dispatches", "unlimit", QuotaResource.RECORDINGS, True),
+            ("unlimit_events_no_dispatch", "unlimit", QuotaResource.EVENTS, False),
+        ]
+    )
+    @patch("insights.tasks.remote_config.update_team_remote_config")
+    @patch("ee.billing.quota_limiting.remove_limited_team_tokens")
+    @patch("ee.billing.quota_limiting.add_limited_team_tokens")
+    def test_admin_hook_dispatches_recordings_remote_config_sync(
+        self,
+        _name,
+        action,
+        resource,
+        expect_dispatch,
+        mock_add_limited,
+        mock_remove_limited,
+        mock_update_remote_config,
+    ):
+        second_team = self.organization.teams.create(name="Second Team", api_token="second_token")
+        self.organization.usage = {
+            "period": ["2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z"],
+            # Carries `quota_limited_until` so `unlimit_product` exercises its usage-field write path.
+            # Harmless for `limit_product_until_end_of_billing_cycle`, which overwrites it.
+            resource.value: {"usage": 500, "limit": 1000, "quota_limited_until": 1234567890},
+        }
+        self.organization.save()
+
+        if action == "limit":
+            self.organization.limit_product_until_end_of_billing_cycle(resource)
+        else:
+            self.organization.unlimit_product(resource)
+
+        if expect_dispatch:
+            dispatched_team_ids = {
+                call.kwargs["args"][0] for call in mock_update_remote_config.apply_async.call_args_list
+            }
+            self.assertEqual(dispatched_team_ids, {self.team.id, second_team.id})
+            for call in mock_update_remote_config.apply_async.call_args_list:
+                self.assertEqual(call.kwargs.get("countdown"), 35)
+                self.assertEqual(call.kwargs.get("kwargs"), {"bypass_recordings_quota_cache": True})
+        else:
+            mock_update_remote_config.apply_async.assert_not_called()
+
     @patch("ee.billing.quota_limiting.get_client")
     def test_get_limited_products_no_teams(self, mock_get_client):
         self.organization.teams.all().delete()
@@ -368,6 +458,7 @@ class TestOrganization(BaseTest):
 
     @patch("ee.billing.quota_limiting.get_client")
     def test_get_limited_products_with_redis_limits(self, mock_get_client):
+        from ee.billing.quota_limiting import QuotaResource
 
         future_timestamp = (timezone.now() + timedelta(days=1)).timestamp()
 
@@ -398,6 +489,7 @@ class TestOrganization(BaseTest):
 
     @patch("ee.billing.quota_limiting.get_client")
     def test_get_limited_products_redis_vs_usage_mismatch(self, mock_get_client):
+        from ee.billing.quota_limiting import QuotaResource
 
         future_timestamp = (timezone.now() + timedelta(days=1)).timestamp()
 
@@ -426,6 +518,7 @@ class TestOrganization(BaseTest):
 
     @patch("ee.billing.quota_limiting.get_client")
     def test_get_limited_products_multiple_teams(self, mock_get_client):
+        from ee.billing.quota_limiting import QuotaResource
 
         second_team = self.organization.teams.create(name="Second Team", api_token="second_token")
 

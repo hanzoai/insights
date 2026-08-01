@@ -9,7 +9,7 @@
             {
                 "key": "analytics_database",
                 "metric": "Analytics database in use",
-                "value": "ClickHouse"
+                "value": "Datastore"
             },
             {
                 "key": "plugin_sever_alive",
@@ -37,38 +37,38 @@
                 "value": true
             },
             {
-                "key": "clickhouse_alive",
-                "metric": "Clickhouse database alive",
+                "key": "datastore_alive",
+                "metric": "Datastore database alive",
                 "value": true
             },
             {
-                "key": "clickhouse_event_count",
-                "metric": "Events in ClickHouse",
+                "key": "datastore_event_count",
+                "metric": "Events in Datastore",
                 "value": 175843
             },
             {
-                "key": "clickhouse_event_count_last_month",
+                "key": "datastore_event_count_last_month",
                 "metric": "Events recorded last month",
                 "value": 904
             },
             {
-                "key": "clickhouse_event_count_month_to_date",
+                "key": "datastore_event_count_month_to_date",
                 "metric": "Events recorded month to date",
                 "value": 173420
             },
             {
-                "key": "clickhouse_disk_0_free_space",
-                "metric": "Clickhouse disk free space",
+                "key": "datastore_disk_0_free_space",
+                "metric": "Datastore disk free space",
                 "value": "28.79 GiB"
             },
             {
-                "key": "clickhouse_disk_0_total_space",
-                "metric": "Clickhouse disk total space",
+                "key": "datastore_disk_0_total_space",
+                "metric": "Datastore disk total space",
                 "value": "58.42 GiB"
             },
             {
-                "key": "clickhouse_table_sizes",
-                "metric": "Clickhouse table sizes",
+                "key": "datastore_table_sizes",
+                "metric": "Datastore table sizes",
                 "value": "",
                 "subrows": {
                     "columns": ["Table", "Size", "Rows"],
@@ -85,14 +85,14 @@
                         ["person_distinct_id", "1.55 MiB", 40539],
                         ["plugin_log_entries", "7.64 KiB", 94],
                         ["session_recording_events", "9.91 KiB", 62],
-                        ["infi_clickhouse_orm_migrations", "1.58 KiB", 46],
+                        ["infi_datastore_orm_migrations", "1.58 KiB", 46],
                         ["groups", "5.25 KiB", 22]
                     ]
                 }
             },
             {
-                "key": "clickhouse_system_metrics",
-                "metric": "Clickhouse system metrics",
+                "key": "datastore_system_metrics",
+                "metric": "Datastore system metrics",
                 "value": "",
                 "subrows": {
                     "columns": ["Metric", "Value", "Description"],
@@ -477,7 +477,7 @@
                         [
                             "NetworkReceive",
                             0,
-                            "Number of threads receiving data from network. Only ClickHouse-related network interaction is included, not by 3rd party libraries."
+                            "Number of threads receiving data from network. Only Datastore-related network interaction is included, not by 3rd party libraries."
                         ],
                         ["NetworkReceiveBytes_eth0", 20222],
                         ["NetworkReceiveBytes_ip6tnl0", 0],
@@ -494,7 +494,7 @@
                         [
                             "NetworkSend",
                             0,
-                            "Number of threads sending data to network. Only ClickHouse-related network interaction is included, not by 3rd party libraries."
+                            "Number of threads sending data to network. Only Datastore-related network interaction is included, not by 3rd party libraries."
                         ],
                         ["NetworkSendBytes_eth0", 6902],
                         ["NetworkSendBytes_ip6tnl0", 0],

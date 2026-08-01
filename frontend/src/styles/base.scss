@@ -241,30 +241,26 @@
     --color-white: #fff;
 
     // Primitive neutral cool colors
-    --color-neutral-cool-50: hsl(0deg 0% 95%);
-    --color-neutral-cool-75: hsl(0deg 0% 92.5%);
-    --color-neutral-cool-100: hsl(0deg 0% 90%);
-    --color-neutral-cool-150: hsl(0deg 0% 85%);
-    --color-neutral-cool-200: hsl(0deg 0% 80%);
-    --color-neutral-cool-250: hsl(0deg 0% 75%);
-    --color-neutral-cool-300: hsl(0deg 0% 70%);
-    --color-neutral-cool-350: hsl(0deg 0% 65%);
-    --color-neutral-cool-400: hsl(0deg 0% 60%);
-    --color-neutral-cool-450: hsl(0deg 0% 55%);
-    --color-neutral-cool-500: hsl(0deg 0% 50%);
-    --color-neutral-cool-550: hsl(0deg 0% 45%);
-    --color-neutral-cool-600: hsl(0deg 0% 40%);
-    --color-neutral-cool-650: hsl(0deg 0% 35%);
-    --color-neutral-cool-700: hsl(0deg 0% 30%);
-    --color-neutral-cool-750: hsl(0deg 0% 25%);
-    --color-neutral-cool-800: hsl(0deg 0% 20%);
-    // #212121, the raised step. This is the scene canvas (canvasBackground scenes
-    // resolve --scene-layout-background to surface-primary), the popover and the
-    // border, so moving it moves the whole raised layer at once -- one value, not
-    // four call sites. 15% sat a shade too hot against the #000 ground.
-    --color-neutral-cool-850: #212121;
-    --color-neutral-cool-900: hsl(0deg 0% 10%);
-    --color-neutral-cool-950: hsl(0deg 0% 8%);
+    --color-neutral-cool-50: hsl(240deg 8% 95%);
+    --color-neutral-cool-75: hsl(236deg 8% 92.5%);
+    --color-neutral-cool-100: hsl(232deg 8% 90%);
+    --color-neutral-cool-150: hsl(232.5deg 8% 85%);
+    --color-neutral-cool-200: hsl(233deg 8% 80%);
+    --color-neutral-cool-250: hsl(231.5deg 8% 75%);
+    --color-neutral-cool-300: hsl(230deg 8% 70%);
+    --color-neutral-cool-350: hsl(230.5deg 8% 65%);
+    --color-neutral-cool-400: hsl(231deg 8% 60%);
+    --color-neutral-cool-450: hsl(231deg 8% 55%);
+    --color-neutral-cool-500: hsl(231deg 8% 50%);
+    --color-neutral-cool-550: hsl(230.5deg 8% 45%);
+    --color-neutral-cool-600: hsl(230deg 8% 40%);
+    --color-neutral-cool-650: hsl(230deg 8% 35%);
+    --color-neutral-cool-700: hsl(230deg 8% 30%);
+    --color-neutral-cool-750: hsl(235deg 8% 25%);
+    --color-neutral-cool-800: hsl(230deg 8% 20%);
+    --color-neutral-cool-850: hsl(235deg 8% 15%);
+    --color-neutral-cool-900: hsl(240deg 8% 10%);
+    --color-neutral-cool-950: hsl(240deg 8% 8%);
 
     // Primitive neutral colors
     --color-neutral-50: hsl(0deg 0% 95%);
@@ -287,30 +283,31 @@
     --color-neutral-900: hsl(0deg 0% 10%);
     --color-neutral-950: hsl(0deg 0% 5%);
 
-    // Hanzo 3000 (neutral greys) — replaced warm Insights yellows with pure neutral scale
-    --color-insights-3000-25: hsl(0deg 0% 96.5%);
-    --color-insights-3000-50: hsl(0deg 0% 95%);
-    --color-insights-3000-100: hsl(0deg 0% 93%);
-    --color-insights-3000-150: hsl(0deg 0% 89%);
-    --color-insights-3000-200: hsl(0deg 0% 85%);
-    --color-insights-3000-250: hsl(0deg 0% 80%);
-    --color-insights-3000-300: hsl(0deg 0% 76%);
-    --color-insights-3000-350: hsl(0deg 0% 71%);
-    --color-insights-3000-400: hsl(0deg 0% 65%);
-    --color-insights-3000-450: hsl(0deg 0% 60%);
-    --color-insights-3000-500: hsl(0deg 0% 55%);
+    // Insights 3000 (yellow-greys) colors
+    --color-insights-3000-25: hsl(75deg 14% 96.5%);
+    --color-insights-3000-50: hsl(75deg 14% 95%);
+    --color-insights-3000-100: hsl(70deg 16% 93%);
+    --color-insights-3000-150: hsl(77deg 13% 89%);
+    --color-insights-3000-200: hsl(78deg 13% 85%);
+    --color-insights-3000-250: hsl(67deg 8% 80%);
+    --color-insights-3000-300: hsl(72deg 8% 76%);
+    --color-insights-3000-350: hsl(70deg 8% 71%);
+    --color-insights-3000-400: hsl(69deg 8% 65%);
+    --color-insights-3000-450: hsl(67deg 8% 60%);
+    --color-insights-3000-500: hsl(67deg 8% 55%);
 
-    // Hanzo brand colors (monochrome)
+    // Insights brand colors
+    // Split into hue, saturation, lightness to make it easier to change the brand colors
     // //////////////////////////////////////////////////////////
-    --color-insights-brand-orange-hue: 0;
-    --color-insights-brand-orange-saturation: 0%;
-    --color-insights-brand-orange-lightness: 20%;
-    --color-insights-brand-blue-hue: 0;
-    --color-insights-brand-blue-saturation: 0%;
+    --color-insights-brand-orange-hue: 19;
+    --color-insights-brand-orange-saturation: 100%;
+    --color-insights-brand-orange-lightness: 48%;
+    --color-insights-brand-blue-hue: 228;
+    --color-insights-brand-blue-saturation: 100%;
     --color-insights-brand-blue-lightness: 56%;
-    --color-insights-brand-yellow-hue: 0;
-    --color-insights-brand-yellow-saturation: 0%;
-    --color-insights-brand-yellow-lightness: 80%;
+    --color-insights-brand-yellow-hue: 43;
+    --color-insights-brand-yellow-saturation: 94%;
+    --color-insights-brand-yellow-lightness: 57%;
 
     // Product specific colors
     --color-product-data-pipeline-light: rgb(46 162 211);
@@ -338,7 +335,15 @@
     --color-product-llm-datasets-light: rgb(124 58 237);
     --color-product-llm-evaluations-light: rgb(167 139 250);
     --color-product-llm-prompts-light: rgb(196 181 253);
+    --color-product-ai-gateway-light: rgb(99 102 241);
+    --color-product-ai-gateway-dark: rgb(129 140 248);
+    --color-product-mcp-analytics-light: rgb(205 48 180);
+    --color-product-mcp-analytics-dark: rgb(229 105 205);
     --color-product-links-light: rgb(143 7 255);
+    --color-product-tracing-light: rgb(6 182 212);
+    --color-product-tracing-dark: rgb(34 211 238);
+    --color-product-metrics-light: rgb(234 88 12);
+    --color-product-metrics-dark: rgb(251 146 60);
     --color-product-revenue-analytics-light: rgb(52 175 102);
     --color-product-revenue-analytics-dark: rgb(54 196 111);
     --color-product-user-interviews-light: rgb(0 140 255);
@@ -347,18 +352,6 @@
     --color-product-early-access-features-dark: rgb(53 213 189);
     --color-product-support-light: rgb(243 84 84);
     --color-product-support-dark: rgb(247 165 1);
-
-    // Insight colors
-    --color-insight-funnel-light: rgb(47 128 250);
-    --color-insight-trends-light: rgb(247 165 1);
-    --color-insight-user-paths-light: rgb(30 179 152);
-    --color-user-paths-dark: rgb(41 219 187);
-    --color-insight-retention-light: rgb(243 84 84);
-    --color-insight-stickiness-light: rgb(247 165 1);
-    --color-insight-lifecycle-light: rgb(48 171 198);
-    --color-insight-calendar-heatmap-light: rgb(12 39 146);
-    --color-insight-calendar-heatmap-dark: rgb(61 91 215);
-    --color-insight-sql-light: rgb(245 78 0);
 
     // Generic brand color assignments
     // Change these to change the brand colors
@@ -371,7 +364,7 @@
     --color-brand-secondary-lightness: var(--color-insights-brand-blue-lightness);
 
     // AI
-    --color-ai: oklch(0.67 0 0);
+    --color-ai: oklch(0.59 0.27 303.09deg);
 
     // Accent colors (accents can be changed to change the brand colors)
     // Used for interactive elements and highlights, inputs, toggles, charts, etc.
@@ -563,109 +556,93 @@
     --breakpoint-xl: 1200px;
     --breakpoint-xxl: 1600px;
 
-    // Brand colors (Hanzo monochrome)
+    // Brand colors
     // //////////////////////////////////////////////////////////
-    --brand-blue: #555;
-    --brand-red: #333;
-    --brand-yellow: #888888;
+    --brand-blue: #1d4aff;
+    --brand-red: #f54e00;
+    --brand-yellow: #f9bd2b;
     --brand-key: #000;
 
     // Shadows
     // //////////////////////////////////////////////////////////
-    // FLAT. `0 3px 0 <border>` is a hard offset shadow with no blur — it reads
-    // as a raised, embossed 3D slab, which is the upstream look, not ours. Our
-    // controls are flat surfaces separated by a hairline border and radius.
-    --shadow-elevation-3000: none;
+    --shadow-elevation-3000: 0 3px 0 var(--border-3000-light);
 
     // Non-color vars
-    //
-    // RADIUS IS THE @hanzo/brand v2 REGISTER: card 8 / control 10 / panel 12.
-    // The upstream 6px (0.375rem) is what made this app read blocky next to the
-    // rest of the product — same monochrome palette, same type, squarer corners
-    // on every button, input, card and menu.
-    //
-    // These are the DECLARED brand values, not corners measured off a screenshot:
-    // a design system is only one system if every surface reads the same register.
-    // (This supersedes the hand-measured 9px, which matched no declared token.)
-    //
-    // One token decides each tier. `--button-radius` resolves to `--radius`
-    // (Button.scss), so pointing that at the control radius rounds every
-    // button from here — nothing needs a per-component override.
-    --radius-sm: 0.375rem; // 6px — inner/nested elements, one step down
-    --radius: 0.625rem; // 10px — controls: buttons, inputs, selects
-    --radius-base: var(--radius);
-    --radius-card: 0.5rem; // 8px — cards and surfaces
-    --radius-lg: 0.75rem; // 12px — panels, modals, popovers
+    --radius: 0.375rem; // Increased from Tailwind's default of 0.25rem
+    --radius-sm: 0.25rem; // Increased from Tailwind's default of 0.125rem
+    --radius-base: var(--radius); // Increased from Tailwind's default of 0.25rem
+    --radius-lg: 0.625rem; // Increased from Tailwind's default of 0.5rem
     --radius-full: 9999px;
     --modal-shadow-elevation: 0px 16px 16px -16px rgb(0 0 0 / 35%);
     --opacity-disabled: 0.65;
     --font-medium: 500;
     --font-semibold: 600;
     --font-sans:
-        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
-        helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        'Emoji Flags Polyfill', 'RoundHog', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
+        'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-title:
-        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+        'Emoji Flags Polyfill', 'RoundHog', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
         'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-button:
-        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
-        helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        'Emoji Flags Polyfill', 'RoundHog', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
+        'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-mono:
-        'Emoji Flags Polyfill', 'Geist Mono', ui-monospace, 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono',
+        'Emoji Flags Polyfill', ui-monospace, 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono',
         monospace;
 
     // Dashboard item colors
-    --blue: #8a8a8a;
-    --purple: #b5b5b5;
+    --blue: #597dce;
+    --purple: #c278cf;
     --green: var(--success);
     --black: var(--text-3000);
 
     // Data colors (e.g. insight series). Note: colors.ts relies on these values being hexadecimal
-    --data-color-1: #3d3d3d;
-    --data-color-1-hover: #2e2e2e;
-    --data-color-2: #ccc;
-    --data-color-3: #666;
-    --data-color-4: #a3a3a3;
-    --data-color-5: #4f4f4f;
-    --data-color-6: #b8b8b8;
-    --data-color-7: #7a7a7a;
-    --data-color-8: #8f8f8f;
-    --data-color-9: #474747;
-    --data-color-10: #c2c2c2;
-    --data-color-11: #5c5c5c;
-    --data-color-12: #999;
-    --data-color-13: #707070;
-    --data-color-14: #adadad;
-    --data-color-15: #858585;
+    --data-color-1: #1d4aff;
+    --data-color-1-hover: #1a3cf6;
+    --data-color-2: #621da6;
+    --data-color-3: #42827e;
+    --data-color-4: #ce0e74;
+    --data-color-5: #f14f58;
+    --data-color-6: #7c440e;
+    --data-color-7: #529a0a;
+    --data-color-8: #0476fb;
+    --data-color-9: #fe729e;
+    --data-color-10: #35416b;
+    --data-color-11: #41cbc4;
+    --data-color-12: #b64b02;
+    --data-color-13: #e4a604;
+    --data-color-14: #a56eff;
+    --data-color-15: #30d5c8;
 
     // Lifecycle series (compiled)
-    --color-lifecycle-new: #3d3d3d;
-    --color-lifecycle-returning: #7a7a7a;
-    --color-lifecycle-resurrecting: #a3a3a3;
-    --color-lifecycle-dormant: #ccc;
-    --color-lifecycle-new-hover: #262626;
-    --color-lifecycle-returning-hover: #5c5c5c;
-    --color-lifecycle-resurrecting-hover: #858585;
-    --color-lifecycle-dormant-hover: #adadad;
+    --color-lifecycle-new: #1d4aff;
+    --color-lifecycle-returning: #388600;
+    --color-lifecycle-resurrecting: #a56eff;
+    --color-lifecycle-dormant: #db3707;
+    --color-lifecycle-new-hover: #0024b6;
+    --color-lifecycle-returning-hover: #254d08;
+    --color-lifecycle-resurrecting-hover: #6608ff;
+    --color-lifecycle-dormant-hover: #781e04;
 
     // Revenue analytics MRR series (compiled)
-    --color-revenue-analytics-new: #3d3d3d;
-    --color-revenue-analytics-expansion: #7a7a7a;
-    --color-revenue-analytics-contraction: #a3a3a3;
-    --color-revenue-analytics-churn: #ccc;
-    --color-revenue-analytics-new-hover: #262626;
-    --color-revenue-analytics-expansion-hover: #5c5c5c;
-    --color-revenue-analytics-contraction-hover: #858585;
-    --color-revenue-analytics-churn-hover: #adadad;
+    --color-revenue-analytics-new: #388600;
+    --color-revenue-analytics-expansion: #1d4aff;
+    --color-revenue-analytics-contraction: #ffa500;
+    --color-revenue-analytics-churn: #db3707;
+    --color-revenue-analytics-new-hover: #254d08;
+    --color-revenue-analytics-expansion-hover: #0024b6;
+    --color-revenue-analytics-contraction-hover: #a26c07;
+    --color-revenue-analytics-churn-hover: #781e04;
 
     // Z-indexes
     --z-bottom-notice: 1450;
     --z-shortcut-menu: 1400;
     --z-force-modal-above-popovers: 1350;
-    --z-tooltip: 1300;
+    --z-tooltip: 99999;
     --z-definition-popover: 1250;
     --z-popover: 1200;
     --z-graph-tooltip: 1150;
+    --z-chart-tooltip: calc(var(--z-modal) - 50);
 
     // 1161 and 1162 are reserved to be set from code
     // 1166 through 1169 are reserved to be set from code
@@ -680,15 +657,16 @@
     --z-notifications-popover: 800; // below the TZ aware popover but over the main-nav
     --z-scene-layout-content-panel: 770;
     --z-scene-layout-content-panel-under: 769;
-    --z-layout-panel: 760;
-    --z-layout-panel-under: 759;
+    --z-layout-panel: 761;
+    --z-layout-panel-under: 760;
+    --z-layout-panel-over-nav: 759; // mobile dim sitting above the nav (756), below the panel (761)
     --z-layout-navbar-over: 757;
     --z-layout-navbar: 756;
     --z-layout-navbar-under: 755;
     --z-main-nav: 750;
     --z-resizer: 701;
-    --z-sidebar: 700;
-    --z-activation-sidebar: 650;
+    --z-lemon-sidebar: 700;
+    --z-lemon-activation-sidebar: 650;
     --z-mobile-nav-overlay: 600;
     --z-top-navigation: 550;
     --z-top-navigation-under: 549;
@@ -717,9 +695,6 @@
     --toastify-color-warning: var(--warning);
     --toastify-color-error: var(--danger);
     --toastify-color-progress-info: var(--toastify-color-info);
-    // react-toastify ships a purple default for these two; override both.
-    --toastify-color-progress-dark: var(--color-neutral-cool-300);
-    --toastify-color-progress-light: var(--color-neutral-cool-600);
     --toastify-color-progress-success: var(--toastify-color-success);
     --toastify-color-progress-warning: var(--toastify-color-warning);
     --toastify-color-progress-error: var(--toastify-color-error);
@@ -731,38 +706,38 @@
 
     // In-app prompts
     --in-app-prompts-width: 26rem;
-    --lettermark-1-bg: #e5e5e5;
-    --lettermark-1-text: #404040;
-    --lettermark-2-bg: #404040;
-    --lettermark-2-text: #e5e5e5;
-    --lettermark-3-bg: #ccc;
-    --lettermark-3-text: #333;
-    --lettermark-4-bg: #595959;
-    --lettermark-4-text: #f0f0f0;
-    --lettermark-5-bg: #b8b8b8;
-    --lettermark-5-text: #2e2e2e;
-    --lettermark-6-bg: #737373;
-    --lettermark-6-text: #f5f5f5;
-    --lettermark-7-bg: #a3a3a3;
-    --lettermark-7-text: #262626;
-    --lettermark-8-bg: #8c8c8c;
-    --lettermark-8-text: #f5f5f5;
-    --lettermark-9-bg: #dedede;
-    --lettermark-9-text: #3d3d3d;
-    --lettermark-10-bg: #4a4a4a;
-    --lettermark-10-text: #e0e0e0;
-    --lettermark-11-bg: #c4c4c4;
-    --lettermark-11-text: #303030;
-    --lettermark-12-bg: #666;
-    --lettermark-12-text: #ededed;
-    --lettermark-13-bg: #b0b0b0;
-    --lettermark-13-text: #2a2a2a;
-    --lettermark-14-bg: #7d7d7d;
-    --lettermark-14-text: #f2f2f2;
-    --lettermark-15-bg: #9a9a9a;
-    --lettermark-15-text: #242424;
-    --lettermark-16-bg: #545454;
-    --lettermark-16-text: #e8e8e8;
+    --lettermark-1-bg: #dcb1e3;
+    --lettermark-1-text: #572e5e;
+    --lettermark-2-bg: #ffc4b2;
+    --lettermark-2-text: #3e5891;
+    --lettermark-3-bg: #b1985d;
+    --lettermark-3-text: #3e5891;
+    --lettermark-4-bg: #3e5891;
+    --lettermark-4-text: #ffc4b2;
+    --lettermark-5-bg: #8da9e7;
+    --lettermark-5-text: #572e5e;
+    --lettermark-6-bg: #572e5e;
+    --lettermark-6-text: #dcb1e3;
+    --lettermark-7-bg: #ffc035;
+    --lettermark-7-text: #35416b;
+    --lettermark-8-bg: #ff906e;
+    --lettermark-8-text: #2a3d65;
+    --lettermark-9-bg: #5dd4db;
+    --lettermark-9-text: #1a4a4d;
+    --lettermark-10-bg: #c8e65c;
+    --lettermark-10-text: #3d4a1a;
+    --lettermark-11-bg: #e85da4;
+    --lettermark-11-text: #4a1a35;
+    --lettermark-12-bg: #e85c5c;
+    --lettermark-12-text: #4a1a1a;
+    --lettermark-13-bg: #3d7a5a;
+    --lettermark-13-text: #c8f0dc;
+    --lettermark-14-bg: #6b5bd4;
+    --lettermark-14-text: #e0ddf5;
+    --lettermark-15-bg: #98e8c8;
+    --lettermark-15-text: #1a4a3d;
+    --lettermark-16-bg: #8c3d5a;
+    --lettermark-16-text: #f0d0dc;
 
     // Modals
     --modal-backdrop-blur: 5px; // Half the value in Figma as blur is calculated differently there it seems
@@ -776,22 +751,22 @@
 
     // Deprecated colors
     // Vars
-    --danger-highlight: rgb(38 38 38 / 10%);
-    --danger-lighter: #b0b0b0;
-    --danger-light: #4a4a4a;
-    --danger: #262626;
-    --danger-dark: #171717;
-    --warning-highlight: rgb(115 115 115 / 10%);
-    --warning: #737373;
-    --warning-dark: #525252;
-    --highlight: #8a8a8a;
-    --success-highlight: rgb(163 163 163 / 10%);
-    --success-light: #c4c4c4;
-    --success: #a3a3a3;
-    --success-dark: #7d7d7d;
+    --danger-highlight: rgb(219 55 7 / 10%);
+    --danger-lighter: #ffa599;
+    --danger-light: #df4b20;
+    --danger: #db3707;
+    --danger-dark: #992705;
+    --warning-highlight: rgb(247 165 1 / 10%);
+    --warning: #f7a501;
+    --warning-dark: #e09423;
+    --highlight: #e49f2c;
+    --success-highlight: rgb(56 134 0 / 10%);
+    --success-light: #5f9d32;
+    --success: #388600;
+    --success-dark: #245700;
     --muted: #5f5f5f;
-    --muted-alt: #7c7c7c;
-    --mark: hsl(0deg 0% 86% / 80%);
+    --muted-alt: #747ea1;
+    --mark: hsl(42deg 93% 86% / 80%);
     --white: #fff;
     --side: #fafaf9;
     --mid: #f2f2f2;
@@ -803,70 +778,62 @@
     --color-text-secondary-3000-light: rgb(17 17 17 / 70%);
     --muted-3000-light: rgb(17 17 17 / 60%);
     --trace-3000-light: rgb(17 17 17 / 25%);
-    --primary-3000-light: #111111;
-    --primary-highlight-light: rgb(17 17 17 / 10%);
-    --primary-3000-hover-light: #333;
-    --primary-3000-active-light: #000000;
-    --secondary-3000-light: rgb(200 200 200 / 60%);
-    --secondary-3000-hover-light: #ccc;
-    --color-accent-3000-light: #ebebeb;
-    --color-bg-3000-light: #f5f5f5;
-    --border-3000-light: #e0e0e0;
-    --border-bold-3000-light: #c0c0c0;
-    --glass-bg-3000-light: #e5e5e5b3;
-    --glass-border-3000-light: #e5e5e5;
-    --link-3000-light: #333;
-    --primary-3000-frame-bg-light: #333;
+    --primary-3000-light: #f54e01;
+    --primary-highlight-light: rgb(245 78 1 / 10%);
+    --primary-3000-hover-light: #f54e01;
+    --primary-3000-active-light: #f54e01;
+    --secondary-3000-light: rgb(207 209 194 / 60%);
+    --secondary-3000-hover-light: #cfd1c2;
+    --color-accent-3000-light: #eeefe9;
+    --color-bg-3000-light: #f3f4ef;
+    --border-3000-light: #dadbd2;
+    --border-bold-3000-light: #c1c2b9;
+    --glass-bg-3000-light: #e4e5deb3;
+    --glass-border-3000-light: #e4e5de;
+    --link-3000-light: #f54e00;
+    --primary-3000-frame-bg-light: #eb9d2a;
     --primary-3000-button-bg-light: #fff;
-    --primary-3000-button-border-light: #888888;
-    --primary-3000-button-border-hover-light: #555;
-    --secondary-3000-frame-bg-light: #e0e0e0;
-    --secondary-3000-button-bg-light: #f5f5f5;
+    --primary-3000-button-border-light: #b17816;
+    --primary-3000-button-border-hover-light: #8e5b03;
+    --secondary-3000-frame-bg-light: #e1dddd;
+    --secondary-3000-button-bg-light: #f3f4ef;
     --secondary-3000-button-border-light: #ccc;
     --secondary-3000-button-border-hover-light: #aaa;
-    --danger-3000-frame-bg-light: #33380;
-    --danger-3000-button-border-light: #333;
-    --danger-3000-button-border-hover-light: #333;
-    // Flat in both themes — see --shadow-elevation-3000 above.
-    --shadow-elevation-3000-light: none;
-    --shadow-elevation-3000-dark: none;
+    --danger-3000-frame-bg-light: #f54e0080;
+    --danger-3000-button-border-light: #e96b30;
+    --danger-3000-button-border-hover-light: #f54e00;
+    --shadow-elevation-3000-light: 0 3px 0 var(--border-3000-light);
+    --shadow-elevation-3000-dark: 0 3px 0 var(--border-3000-dark);
     --text-3000-dark: #fff;
     --color-text-secondary-3000-dark: rgb(255 255 255 / 70%);
     --muted-3000-dark: rgb(255 255 255 / 50%);
     --trace-3000-dark: rgb(255 255 255 / 25%);
-    --primary-3000-dark: #ffffff;
-    --primary-highlight-dark: rgb(255 255 255 / 10%);
-    --primary-3000-hover-dark: #e0e0e0;
-    --primary-3000-active-dark: #c0c0c0;
-    --primary-alt-highlight-light: #e5e5e5;
-    --secondary-3000-dark: #1f1f1f;
-    --secondary-3000-hover-dark: #5d5d5d;
-    --color-accent-3000-dark: #0d0d0d;
-    // True black ground, per the brand register — panels layer up from it
-    // (#0d0d0d raised, #171717 controls) rather than the app sitting on grey.
-    --color-bg-3000-dark: #000;
-    --border-3000-dark: #373737;
+    --primary-3000-dark: #f7a503;
+    --primary-highlight-dark: rgb(247 165 3 / 10%);
+    --primary-3000-hover-dark: #f7a503;
+    --primary-3000-active-dark: #f7a503;
+    --primary-alt-highlight-light: #e5e7e0;
+    --secondary-3000-dark: #1d1f27;
+    --secondary-3000-hover-dark: #575d77;
+    --color-accent-3000-dark: #21242b;
+    --color-bg-3000-dark: #1d1f27;
+    --border-3000-dark: #35373e;
     --border-bold-3000-dark: #3f4046;
-    --glass-bg-3000-dark: #212121e6; // monochrome: was #24262a99, a blue cast
+    --glass-bg-3000-dark: #24262a99;
     --glass-border-3000-dark: var(--border-3000-dark);
-    --link-3000-dark: #ffffff;
-    // The primary action is WHITE — the one high-contrast surface in a black UI.
-    // It was `var(--color-accent)`, a 20%-lightness grey, under a label that
-    // resolves to --text-3000-light (near-black): dark-on-dark, which is why the
-    // Save button read as a muddy slab. White ground + the dark label is the
-    // intended pairing. The accent stays reserved for links/active/focus.
-    --primary-3000-frame-bg-dark: #ffffff;
-    --primary-3000-button-bg-dark: #ffffff;
-    --primary-3000-button-border-dark: #ffffff;
-    --primary-3000-button-border-hover-dark: #e0e0e0;
+    --link-3000-dark: #f1a82c;
+    --primary-3000-frame-bg-dark: #926826;
+    --primary-3000-button-bg-dark: var(--color-accent);
+    --primary-3000-button-border-dark: #b17816;
+    --primary-3000-button-border-hover-dark: #8e5b03;
     --primary-alt-highlight-dark: #232429;
     --secondary-3000-frame-bg-dark: #323232;
-    --secondary-3000-button-bg-dark: #1f1f1f;
+    --secondary-3000-button-bg-dark: #1d1f27;
     --secondary-3000-button-border-dark: #4a4c52;
     --secondary-3000-button-border-hover-dark: #5e6064;
-    --danger-3000-frame-bg-dark: #33380;
-    --danger-3000-button-border-dark: #666;
-    --danger-3000-button-border-hover-dark: #333;
+    --danger-3000-frame-bg-dark: #f54e0080;
+    --danger-3000-button-border-dark: #c44003;
+    --danger-3000-button-border-hover-dark: #f54e00;
 
     // Light mode
     --text-3000: var(--text-3000-light);
@@ -914,7 +881,7 @@
     --color-brand-primary-lightness: var(--color-insights-brand-yellow-lightness);
 
     // AI colors (dark mode)
-    --color-ai: oklch(0.69 0 0);
+    --color-ai: oklch(0.69 0.29 341.57deg);
 
     // Accent colors (dark mode)
     // //////////////////////////////////////////////////////////
@@ -980,23 +947,10 @@
 
     // Backgrounds (dark mode)
     // //////////////////////////////////////////////////////////
-    // #000, not the 8%-lightness neutral — the app ground is true black and
-    // every surface above it layers up. Same value as --color-bg-3000-dark.
-    --color-bg-primary: #000;
-    // The RAISED content panel — the one surface the eye reads as "the page".
-    // #262626, a step ABOVE the #212121 it sits on, which is itself a step above
-    // the black ground. It was pinned straight to neutral-cool-850 (#212121), so
-    // the panel and the surface beneath it were the same value and the panel had
-    // no edge: the ladder existed in the tokens but not on screen.
-    --color-bg-surface-primary: #262626;
-    --color-bg-surface-secondary: var(--color-neutral-cool-850);
-    // TRUE BLACK, not the 8% neutral. tertiary is the CHROME layer -- the left nav
-    // and the shell behind the tab strip both carry bg-surface-tertiary -- and chrome
-    // sits AT the ground, not above it. At 8% it read as a grey slab framing the app,
-    // which inverted the ladder the comment above already states: ground is black and
-    // every surface layers UP from it. Content (surface-primary, 15%) is the raised
-    // one and stays lighter, which is the contrast that makes it read as a panel.
-    --color-bg-surface-tertiary: #000;
+    --color-bg-primary: var(--color-neutral-cool-950);
+    --color-bg-surface-primary: var(--color-neutral-cool-850);
+    --color-bg-surface-secondary: var(--color-neutral-cool-900);
+    --color-bg-surface-tertiary: var(--color-neutral-cool-950);
     --color-bg-surface-tooltip: var(--color-neutral-100);
     --color-bg-surface-tooltip-inverse: var(--color-neutral-950);
     --color-bg-surface-popover: var(--color-neutral-cool-850);
@@ -1037,11 +991,7 @@
     --color-bg-fill-button-tertiary-hover-inverse: var(--color-bg-fill-highlight-inverse-75);
     --color-bg-fill-button-tertiary-active: var(--color-bg-fill-highlight-50);
     --color-bg-fill-button-tertiary-active-inverse: var(--color-bg-fill-highlight-inverse-50);
-    // No fill. The org dropdown and the user chip are the same KIND of control --
-    // an identity affordance in the chrome -- and only the org one carried a 10%
-    // white wash, so two controls inches apart read as different components.
-    // Transparent at rest; the hover/active steps below still give it feedback.
-    --color-bg-fill-button-panel: transparent;
+    --color-bg-fill-button-panel: var(--color-bg-fill-highlight-100);
     --color-bg-fill-button-panel-hover: var(--color-bg-fill-highlight-150);
     --color-bg-fill-button-panel-active: var(--color-bg-fill-highlight-100);
     --color-bg-fill-input: var(--color-neutral-cool-850);
@@ -1058,17 +1008,6 @@
     --color-text-secondary-inverse: var(--color-neutral-650);
     --color-text-secondary: var(--color-neutral-350);
     --color-text-tertiary: var(--color-neutral-400);
-    // Dimming is not symmetric between themes. On white, 0.65 opacity moves text
-    // TOWARD the background and still reads. On black it moves toward the
-    // background too — but the text started closer to it, so a disabled control
-    // stops being readable rather than looking unavailable. The onboarding
-    // "Next" button was the visible case: legible enough to click for, not
-    // legible enough to read.
-    //
-    // 0.8 still reads as unavailable next to a full-strength control while
-    // leaving the label legible. Disabled means "you cannot use this", never
-    // "you cannot see this".
-    --opacity-disabled: 0.8;
     --color-text-success: var(--color-green-400);
     --color-text-warning: var(--color-yellow-400);
     --color-text-error: var(--color-red-400);
@@ -1076,11 +1015,7 @@
     // Borders (dark mode)
     // Borders for surfaces/fills
     // //////////////////////////////////////////////////////////
-    // 15%, not 20%. On a #000 ground a 20% hairline is the brightest thing in a
-    // quiet UI -- every table row, card and input is outlined in it, so the eye
-    // reads the grid instead of the data. 15% sits just above the raised surface
-    // it separates, which is all a border on black has to do.
-    --color-border-primary: var(--color-neutral-cool-850);
+    --color-border-primary: var(--color-neutral-cool-800);
     --color-border-secondary: var(--color-neutral-cool-600);
     --color-border-info: var(--color-blue-900);
     --color-border-warning: var(--color-yellow-900);
@@ -1114,17 +1049,12 @@
     --color-accent-3000: var(--color-accent-3000-dark);
     --color-bg-3000: var(--color-bg-3000-dark);
     --border-3000: var(--border-3000-dark);
-    --border-light-opaque: #202020;
+    --border-light-opaque: #1e2028;
     --border-bold-3000: var(--border-bold-3000-dark);
     --glass-bg-3000: var(--glass-bg-3000-dark);
     --glass-border-3000: var(--glass-border-3000-dark);
     --color-bg-light: var(--color-accent-3000);
-    // The rows sit ON the panel, so they are the next step UP: #2e2e2e above the
-    // panel's #262626, above #212121, above the black ground. It read #232429 —
-    // DARKER than the panel it sits on, which inverted the ladder and made the
-    // table look sunken into the page. That value was also blue (B 0x29 against
-    // R 0x23); the chrome is monochrome.
-    --color-bg-table: #2e2e2e;
+    --color-bg-table: #232429;
     --brand-key: #fff; // In dark mode the black in Insights's logo is replaced with white for proper contrast
     --link: var(--link-3000-dark);
     --shadow-elevation-3000: var(--shadow-elevation-3000-dark);
@@ -1141,12 +1071,40 @@
     --danger-3000-button-border: var(--danger-3000-button-border-dark);
     --danger-3000-button-border-hover: var(--danger-3000-button-border-hover-dark);
     --tooltip-bg: var(--tooltip-bg-dark);
-    --data-color-2: #ccc;
-    --data-color-3: #666;
-    --data-color-4: #a3a3a3;
-    --data-color-5: #4f4f4f;
-    --data-color-6: #b8b8b8;
-    --data-color-10: #c2c2c2;
+    --data-color-2: #7f26d9;
+    --data-color-3: #3e7a76;
+    --data-color-4: #bf0d6c;
+    --data-color-5: #f0474f;
+    --data-color-6: #b36114;
+    --data-color-10: #6576b3;
+
+    // Rainbow brand gradient (dark mode) — lighter shades so the gradient stays
+    // readable inside toasts and command blocks. See light-mode definition below.
+    --rainbow-gradient: linear-gradient(
+        90deg,
+        #5b8def 0%,
+        #7aa6ff 24%,
+        #ff7a59 47%,
+        #ffa170 66%,
+        #ffc55c 83%,
+        #5b8def 100%
+    );
+}
+
+// Restore a real default border color (Tailwind v4 preflight resets it to currentColor).
+// Kept in @layer components — one layer above preflight's @layer base — so it wins by layer
+// order rather than source order. Source order is unreliable: vite 8's rolldown CSS pipeline
+// can emit preflight after this rule, and inside the toolbar's shadow root there is no <html>
+// to raise specificity against. Layer order holds in both places, so a bare `*` still yields
+// to component and utility borders (higher layers / unlayered) as before.
+@layer components {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-border-primary, currentColor);
+    }
 }
 
 @layer base {
@@ -1156,14 +1114,6 @@
 
     // allowing @import to be first
     /* stylelint-disable-next-line order/order */
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        border-color: var(--color-border-primary, currentColor);
-    }
-
     .rendering-pixelated {
         image-rendering: pixelated;
     }
@@ -1189,6 +1139,17 @@
     button:focus-visible,
     [data-highlighted]:not(:hover) {
         outline: 2px solid var(--color-accent);
+    }
+
+    /* Radix menus highlight items on pointer-move; only show the outline for
+       keyboard focus, and render it inset so the container's rounded
+       overflow:hidden mask can't clip the corners */
+    .primitive-menu-content [data-highlighted]:not(:focus-visible) {
+        outline: none;
+    }
+
+    .primitive-menu-content [data-highlighted]:focus-visible {
+        outline-offset: -2px;
     }
 
     .input-like {
@@ -1613,20 +1574,6 @@
 
     html {
         text-size-adjust: 100%;
-
-        // Paint black BEFORE the bundle runs. useThemedHtml sets
-        // document.body[theme] from a React hook, so until that fires the page
-        // shows the UA default -- white -- and dark-mode users get a flash of it
-        // on every load. The theme is a stored preference the server does not
-        // know at first byte, so the honest fix is to make the FIRST paint the
-        // dark ground and let light mode override once the theme resolves.
-        background: #000;
-    }
-
-    // Light mode wins the moment the attribute lands.
-    body[theme='light'],
-    body[theme='light'] ~ * {
-        background: var(--color-bg-primary);
     }
 
     input::placeholder,
@@ -1678,6 +1625,49 @@
             animation-fill-mode: forwards !important;
             animation-duration: 0ms !important;
             animation-iteration-count: 1 !important;
+        }
+
+        // The animation-duration:0ms + forwards override above is meant to snap every
+        // animation to its final keyframe, but headless Chromium in CI handles a
+        // zero-duration animation's fill inconsistently and can paint the 0% keyframe
+        // instead. For entrance animations whose final layout exists ONLY via the
+        // forwards fill, that doesn't just dim the element — it collapses it (faded-in
+        // content stays invisible; width-expanded markers stay at width 0 and pile up at
+        // the bar's left edge). Pin the end state directly for those components; as
+        // !important author rules these override the animation regardless of how the
+        // frame settles.
+        .fade-component-container {
+            // Fade animates opacity 0 -> 1.
+            opacity: 1 !important;
+        }
+
+        .BillingGaugeItem {
+            // BillingGaugeItem animates width 0 -> --billing-gauge-item-width, which
+            // positions its marker/label along the gauge bar.
+            width: var(--billing-gauge-item-width) !important;
+        }
+
+        // Entrance animations with an opacity:0 base that fade in via forwards fill.
+        .InsightQuickStart__card,
+        .QuestionInput__SuggestionsList,
+        .QuestionInput__QuestionSuggestion,
+        // insights-js survey preview (`ph-survey-fade-in`)
+        .survey-form,
+        .thank-you-message {
+            opacity: 1 !important;
+        }
+
+        // react-toastify zooms the toast icon in via `Toastify__zoomIn` (opacity 0 + scale(0.3)
+        // -> 1); the 0% keyframe leaves it invisible and shrunk, so pin both end values.
+        .Toastify__toast-icon {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        // Hide hogfetti (JS-driven confetti animation) — Math.random + requestAnimationFrame
+        // makes it inherently non-deterministic, CSS animation overrides don't help
+        .Hogfetti {
+            display: none !important;
         }
 
         // Hide some parts of the UI that were causing flakiness
@@ -1782,6 +1772,38 @@
         display: flex;
         flex-direction: column;
         gap: 1px;
+    }
+
+    // Safe-triangle hover cone for vertical menubars.
+    // An invisible triangle tracks the cursor and extends toward the popup,
+    // preventing accidental sibling menu activation while traveling to the open popup.
+    // The vertex follows --cone-x / --cone-y set by JS on mousemove.
+    .menubar-hover-cone {
+        overflow: visible;
+
+        // Active trigger sits above the cone so it keeps its hover state
+        [data-popup-open] {
+            position: relative;
+            z-index: 20;
+        }
+    }
+
+    .menubar-hover-cone-overlay {
+        position: absolute;
+        inset: -3rem -8px -3rem 0;
+        z-index: 10;
+
+        // Offset --cone-y by 3rem to compensate for the element extending above the container
+        clip-path: polygon(var(--cone-x, 50%) calc(var(--cone-y, 50%) + 3rem), 100% 0%, 100% 100%);
+        pointer-events: none;
+    }
+
+    .menubar-hover-cone:has([data-popup-open]) > .menubar-hover-cone-overlay {
+        pointer-events: auto;
+
+        &.debug {
+            background-color: rgb(255 255 255 / 50%);
+        }
     }
 
     .animate-mark {
@@ -1948,91 +1970,9 @@
         outline-offset: 2px;
     }
 
-    .animate-logomark-jump {
-        --logomark-jump-height-base: 12px;
-        --logomark-jump-magnitude: 1; // Overidden in code when someone wants a bigger jump
-        --logomark-airtime: 0.4s; // Sync with LOGOMARK_AIRTIME_MS in Intro.tsx
-
-        svg {
-            overflow: visible;
-
-            // Animate each child with a staggered delay
-            > * {
-                // Times 25 because the actual animation is 4% of the keyframes (so 1/25)
-                animation: Logomark__jump calc(var(--logomark-airtime) * 25) cubic-bezier(0.6, 0, 0.2, 0.8) infinite;
-            }
-
-            // Delay one after the other to create a nice jump effect
-            // Delay in reverse order because we want the head to jump first (it's last on SVG)
-            @for $i from 1 through 4 {
-                > *:nth-child(#{$i}) {
-                    // Dividing by 15 just because it feels good
-                    animation-delay: calc(
-                        var(--logomark-airtime) / 15 / calc(sqrt(var(--logomark-jump-magnitude))) * (4 - ($i - 1))
-                    );
-                }
-            }
-        }
-
-        @keyframes Logomark__jump {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            2% {
-                transform: translateY(calc(var(--logomark-jump-height-base) * var(--logomark-jump-magnitude) * -1));
-            }
-
-            4% {
-                // Only 4% so that this repeats every now and then nicely
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes Logomark__jump-continuous {
-            0%,
-            44%,
-            100% {
-                transform: translateY(0);
-            }
-
-            22% {
-                transform: translateY(calc(var(--logomark-jump-height-base) * var(--logomark-jump-magnitude) * -1));
-            }
-        }
-
-        /* stylelint-disable-next-line order/order */
-        &-continuous {
-            @extend .animate-logomark-jump;
-
-            /* stylelint-disable-next-line order/order */
-            svg > * {
-                animation-name: Logomark__jump-continuous;
-                animation-duration: 0.9s;
-            }
-        }
-    }
-
     /* stylelint-disable-next-line order/order */
     .animate-fade-in {
         animation: fade-in 0.4s ease-out forwards;
-    }
-
-    /* Overlay fade in/out transitions */
-    .overlay-fade {
-        opacity: 1;
-        transition: opacity 0.2s ease-out;
-
-        /* Exit animation - opacity controlled by utility class */
-        &.opacity-0 {
-            opacity: 0;
-        }
-
-        /* Entry animation - fade in from 0 */
-        @starting-style {
-            opacity: 0;
-        }
     }
 
     /* stylelint-disable-next-line keyframes-name-pattern */
@@ -2100,5 +2040,68 @@
         outline: 3px solid var(--color-accent);
         outline-offset: 2px;
         box-shadow: 0 0 24px 8px var(--color-accent);
+    }
+}
+
+// Rainbow brand gradient — animated horizontal scroll of Insights brand colors.
+// Apply via `background-image: var(--rainbow-gradient)` or via the helper
+// classes below. The text variants use `background-clip: text` so the gradient
+// fills the glyphs; `*-fading` additionally plays a one-shot fade-in on mount,
+// useful for elements that swap content via a key change.
+// Dark mode override lives in the consolidated `[theme='dark']` block above.
+:root {
+    --rainbow-gradient: linear-gradient(
+        90deg,
+        #0143cb 0%,
+        #2b6ff4 24%,
+        #d23401 47%,
+        #ff651f 66%,
+        #fba000 83%,
+        #0143cb 100%
+    );
+
+    // Deliberately gentle so the scroll reads as a slow shimmer, not a strobe.
+    --rainbow-scroll-duration: 6s;
+}
+
+.rainbow-text,
+.rainbow-text-fading {
+    color: transparent;
+    background-image: var(--rainbow-gradient);
+    background-clip: text;
+    background-size: 200% 100%;
+}
+
+.rainbow-text.rainbow-text-animating {
+    animation: rainbow-scroll var(--rainbow-scroll-duration) linear infinite;
+}
+
+.rainbow-text-fading.rainbow-text-animating {
+    animation:
+        rainbow-scroll var(--rainbow-scroll-duration) linear infinite,
+        rainbow-fade-in 300ms ease-out;
+}
+
+/* stylelint-disable-next-line keyframes-name-pattern */
+@keyframes rainbow-scroll {
+    0% {
+        background-position-x: 0%;
+    }
+
+    100% {
+        background-position-x: 200%;
+    }
+}
+
+/* stylelint-disable-next-line keyframes-name-pattern */
+@keyframes rainbow-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(2px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

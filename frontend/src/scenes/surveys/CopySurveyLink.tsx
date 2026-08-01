@@ -4,7 +4,7 @@ import { Button } from '@hanzo/elements'
 import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
-function getSurveyUrl(surveyId: string): string {
+export function getSurveyUrl(surveyId: string): string {
     const url = new URL(window.location.origin)
     url.pathname = `/external_surveys/${surveyId}`
     return url.toString()

@@ -4,7 +4,7 @@ import { IconCheckCircle, IconCopy, IconInfo, IconWarning } from '@hanzo/icons'
 import { Button, Modal, Switch, Tooltip, toast } from '@hanzo/elements'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
-import { twoFactorLogic } from 'scenes/authentication/twoFactorLogic'
+import { twoFactorLogic } from 'scenes/authentication/two-factor-setup/twoFactorLogic'
 import { membersLogic } from 'scenes/organization/membersLogic'
 import { userLogic } from 'scenes/userLogic'
 

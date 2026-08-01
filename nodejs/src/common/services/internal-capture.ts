@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon'
 import { Counter } from 'prom-client'
 
-import { PluginsServerConfig } from '~/types'
-import { logger } from '~/utils/logger'
-import { FetchResponse, internalFetch } from '~/utils/request'
+import { CommonConfig } from '~/common/config'
+import { logger } from '~/common/utils/logger'
+import { FetchResponse, internalFetch } from '~/common/utils/request'
 
 const internalCaptureCounter = new Counter({
     name: 'internal_capture_events',
@@ -29,7 +29,7 @@ type CapturePayloadFormat = {
 }
 
 export class InternalCaptureService {
-    constructor(private config: Pick<PluginsServerConfig, 'CAPTURE_INTERNAL_URL'>) {}
+    constructor(private config: Pick<CommonConfig, 'CAPTURE_INTERNAL_URL'>) {}
 
     private prepareEvent(event: InternalCaptureEvent): CapturePayloadFormat {
         const properties = { ...(event.properties ?? {}), capture_internal: true }

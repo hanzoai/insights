@@ -1,13 +1,17 @@
 import json
-from typing import Union
+from datetime import UTC, datetime, timedelta
+from typing import Optional, Union
 
+from django.conf import settings
+
+import jwt
 import requests
 import structlog
 
-from insights import iam
 from insights.models.utils import UUIDT
 from insights.redis import get_client
-from insights.settings import CDP_API_URL, PLUGINS_RELOAD_REDIS_URL
+from insights.security.outbound_proxy import internal_requests
+from insights.settings import CDP_API_URL, INTERNAL_API_SECRET, PLUGINS_RELOAD_REDIS_URL
 
 logger = structlog.get_logger(__name__)
 
@@ -15,9 +19,7 @@ logger = structlog.get_logger(__name__)
 
 
 def get_internal_api_headers() -> dict[str, str]:
-    """This deployment's IAM identity. The CDP API reads the org off the signed
-    claim in here, so an unauthenticated call is refused rather than served."""
-    return iam.authorization()
+    return {"x-internal-api-secret": INTERNAL_API_SECRET} if INTERNAL_API_SECRET else {}
 
 
 def publish_message(channel: str, payload: Union[dict, str]):
@@ -41,13 +43,13 @@ def drop_action_on_workers(team_id: int, action_id: int):
 
 
 def reload_insights_functions_on_workers(team_id: int, insights_function_ids: list[str]):
-    logger.info(f"Reloading custom functions {insights_function_ids} on workers")
+    logger.info(f"Reloading script functions {insights_function_ids} on workers")
     publish_message("reload-insights-functions", {"teamId": team_id, "insightsFunctionIds": insights_function_ids})
 
 
-def reload_insights_flows_on_workers(team_id: int, insights_flow_ids: list[str]):
-    logger.info(f"Reloading insights flows {insights_flow_ids} on workers")
-    publish_message("reload-insights-flows", {"teamId": team_id, "insightsFlowIds": insights_flow_ids})
+def reload_hog_flows_on_workers(team_id: int, hog_flow_ids: list[str]):
+    logger.info(f"Reloading script flows {hog_flow_ids} on workers")
+    publish_message("reload-script-flows", {"teamId": team_id, "hogFlowIds": hog_flow_ids})
 
 
 def reload_evaluations_on_workers(team_id: int, evaluation_ids: list[str]):
@@ -55,8 +57,18 @@ def reload_evaluations_on_workers(team_id: int, evaluation_ids: list[str]):
     publish_message("reload-evaluations", {"teamId": team_id, "evaluationIds": evaluation_ids})
 
 
+def reload_taggers_on_workers(team_id: int, tagger_ids: list[str]):
+    logger.info(f"Reloading taggers {tagger_ids} on workers")
+    publish_message("reload-taggers", {"teamId": team_id, "taggerIds": tagger_ids})
+
+
+def reload_provider_keys_on_workers(team_id: int, provider_key_ids: list[str]):
+    logger.info(f"Reloading provider keys {provider_key_ids} on workers")
+    publish_message("reload-provider-keys", {"teamId": team_id, "providerKeyIds": provider_key_ids})
+
+
 def reload_all_insights_functions_on_workers():
-    logger.info(f"Reloading all custom functions on workers")
+    logger.info(f"Reloading all script functions on workers")
     publish_message("reload-all-insights-functions", {})
 
 
@@ -70,33 +82,98 @@ def populate_plugin_capabilities_on_workers(plugin_id: str):
     publish_message("populate-plugin-capabilities", {"pluginId": plugin_id})
 
 
-def create_script_invocation_test(team_id: int, insights_function_id: str, payload: dict) -> requests.Response:
-    logger.info(f"Creating script invocation test for custom function {insights_function_id} on workers")
-    return requests.post(
+def create_hog_invocation_test(team_id: int, insights_function_id: str, payload: dict) -> requests.Response:
+    logger.info(f"Creating script invocation test for script function {insights_function_id} on workers")
+    return internal_requests.post(
         CDP_API_URL + f"/api/projects/{team_id}/insights_functions/{insights_function_id}/invocations",
         json=payload,
         headers=get_internal_api_headers(),
     )
 
 
-def create_insights_flow_invocation_test(team_id: int, insights_flow_id: str, payload: dict) -> requests.Response:
-    logger.info(f"Creating insights flow invocation test for flow {insights_flow_id} on workers")
-    return requests.post(
-        CDP_API_URL + f"/api/projects/{team_id}/insights_flows/{insights_flow_id}/invocations",
+def create_hog_flow_invocation_test(team_id: int, hog_flow_id: str, payload: dict) -> requests.Response:
+    logger.info(f"Creating script flow invocation test for script flow {hog_flow_id} on workers")
+    return internal_requests.post(
+        CDP_API_URL + f"/api/projects/{team_id}/hog_flows/{hog_flow_id}/invocations",
         json=payload,
         headers=get_internal_api_headers(),
     )
 
 
+def create_hog_flow_scheduled_invocation(
+    team_id: int, hog_flow_id: str, variables: dict[str, object]
+) -> requests.Response:
+    logger.info(f"Creating scheduled script flow invocation for script flow {hog_flow_id} on workers")
+    return internal_requests.post(
+        CDP_API_URL + f"/api/projects/{team_id}/hog_flows/{hog_flow_id}/scheduled_invocations",
+        json={"variables": variables},
+        headers=get_internal_api_headers(),
+    )
+
+
+def get_hog_flow_in_flight_count(team_id: int, hog_flow_id: str) -> requests.Response:
+    # The count scans every in-flight row for the flow, which can be slow on a very large flow with
+    # a cold visibility map. The timeout keeps a slow scan from pinning the calling request thread —
+    # callers already treat any failure as "count unavailable" and render the impact without it.
+    return internal_requests.get(
+        CDP_API_URL + f"/api/projects/{team_id}/hog_flows/{hog_flow_id}/in_flight_count",
+        headers=get_internal_api_headers(),
+        timeout=10,
+    )
+
+
+def _mint_reschedule_parked_jwt(team_id: int, hog_flow_id: str) -> str:
+    """Short-lived scoped JWT for one reschedule_parked call — a leaked token can only sweep this
+    one team + workflow. Signed with the dedicated key (never INTERNAL_API_SECRET / SECRET_KEY /
+    JWT_SIGNING_KEY, per .agents/security.md); raises when unprovisioned so the sweep fails closed.
+    Verified in the plugin server's CdpApi.postInsightsFlowRescheduleParked."""
+    secrets = settings.WORKFLOWS_RESCHEDULE_JWT_SECRETS
+    if not secrets:
+        raise RuntimeError("WORKFLOWS_RESCHEDULE_JWT_SECRET is not configured — cannot call reschedule_parked")
+    return jwt.encode(
+        {
+            "team_id": team_id,
+            "hog_flow_id": hog_flow_id,
+            "aud": "insights:workflows:reschedule_parked",
+            "exp": datetime.now(tz=UTC) + timedelta(minutes=2),
+        },
+        secrets[0],
+        algorithm="HS256",
+    )
+
+
+def reschedule_hog_flow_parked_jobs(
+    team_id: int,
+    hog_flow_id: str,
+    action_ids: list[str],
+    sweep_floor: Optional[str] = None,
+    sweep_until: Optional[str] = None,
+) -> requests.Response:
+    """One slice of the timing-edit reschedule sweep. Callers loop, threading the returned
+    sweep_floor/sweep_until into follow-up slices, until the response says done. The timeout keeps
+    a hung plugin server from pinning the calling Celery worker; the caller's retry/backoff owns
+    recovery. Sized above the endpoint's worst-case slice (chunk sleeps + chunked UPDATEs)."""
+    payload: dict = {"action_ids": action_ids}
+    if sweep_floor and sweep_until:
+        payload["sweep_floor"] = sweep_floor
+        payload["sweep_until"] = sweep_until
+    return internal_requests.post(
+        CDP_API_URL + f"/api/projects/{team_id}/hog_flows/{hog_flow_id}/reschedule_parked",
+        json=payload,
+        headers={"Authorization": f"Bearer {_mint_reschedule_parked_jwt(team_id, hog_flow_id)}"},
+        timeout=30,
+    )
+
+
 def get_insights_function_status(team_id: int, insights_function_id: UUIDT) -> requests.Response:
-    return requests.get(
+    return internal_requests.get(
         CDP_API_URL + f"/api/projects/{team_id}/insights_functions/{insights_function_id}/status",
         headers=get_internal_api_headers(),
     )
 
 
 def patch_insights_function_status(team_id: int, insights_function_id: UUIDT, state: int) -> requests.Response:
-    return requests.patch(
+    return internal_requests.patch(
         CDP_API_URL + f"/api/projects/{team_id}/insights_functions/{insights_function_id}/status",
         json={"state": state},
         headers=get_internal_api_headers(),
@@ -105,7 +182,7 @@ def patch_insights_function_status(team_id: int, insights_function_id: UUIDT, st
 
 def generate_messaging_preferences_token(team_id: int, identifier: str) -> str:
     payload = {"team_id": team_id, "identifier": identifier}
-    response = requests.post(
+    response = internal_requests.post(
         CDP_API_URL + "/api/messaging/generate_preferences_token",
         json=payload,
         headers=get_internal_api_headers(),
@@ -116,27 +193,61 @@ def generate_messaging_preferences_token(team_id: int, identifier: str) -> str:
 
 
 def validate_messaging_preferences_token(token: str) -> requests.Response:
-    return requests.get(
+    return internal_requests.get(
         CDP_API_URL + f"/api/messaging/validate_preferences_token/{token}",
         headers=get_internal_api_headers(),
     )
 
 
 def get_insights_function_templates() -> requests.Response:
-    return requests.get(
+    return internal_requests.get(
         CDP_API_URL + "/api/insights_function_templates",
         headers=get_internal_api_headers(),
     )
 
 
-def create_batch_insights_flow_job_invocation(
-    team_id: int, insights_flow_id: UUIDT, batch_job_id: UUIDT
+def create_batch_hog_flow_job_invocation(
+    team_id: int,
+    hog_flow_id: UUIDT,
+    batch_job_id: UUIDT,
+    max_audience_size: int | None = None,
+    filters: dict | None = None,
 ) -> requests.Response:
-    return requests.post(
-        CDP_API_URL + f"/api/projects/{team_id}/insights_flows/{insights_flow_id}/batch_invocations/{batch_job_id}",
+    return internal_requests.post(
+        CDP_API_URL + f"/api/projects/{team_id}/hog_flows/{hog_flow_id}/batch_invocations/{batch_job_id}",
+        json={"max_audience_size": max_audience_size, "filters": filters},
+        headers=get_internal_api_headers(),
+    )
+
+
+def rerun_hog_invocations(
+    team_id: int,
+    function_kind: str,
+    function_id: str,
+    payload: dict,
+) -> requests.Response:
+    """
+    Trigger a rerun of past script function / script flow invocations.
+
+    `payload` is one of:
+      - {"invocation_ids": ["uuid", ...]}                   -> rerun these specific runs
+      - {"filter": {"window_start": "...", "window_end": "...", "status": [...], ...}}
+
+    The Node side (`nodejs/src/cdp/rerun`) reads the matching rows from
+    `hog_invocation_results`, rehydrates the invocation from the stored
+    `invocation_globals`, and re-enqueues onto cyclotron with `is_retry=1`.
+    """
+    logger.info(
+        "Triggering rerun of script invocations",
+        function_kind=function_kind,
+        function_id=function_id,
+    )
+    return internal_requests.post(
+        CDP_API_URL + f"/api/projects/{team_id}/{function_kind}s/{function_id}/rerun",
+        json=payload,
         headers=get_internal_api_headers(),
     )
 
 
 def get_plugin_server_status() -> requests.Response:
-    return requests.get(CDP_API_URL + f"/_health")
+    return internal_requests.get(CDP_API_URL + f"/_health")

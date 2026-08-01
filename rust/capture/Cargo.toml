@@ -4,11 +4,16 @@ version = "0.1.0"
 edition = "2021"
 publish = false
 
+[features]
+test-utils = []
+
 [lints]
 workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
+arc-swap = { workspace = true }
+async-compression = { workspace = true }
 async-trait = { workspace = true }
 axum = { workspace = true }
 axum-client-ip = { workspace = true }
@@ -16,11 +21,16 @@ base64 = { workspace = true }
 bytes = { workspace = true }
 envconfig = { workspace = true }
 flate2 = { workspace = true }
-health = { path = "../common/health" }
+hex = "0.4"
+http-body-util = { workspace = true }
+lifecycle = { path = "../common/lifecycle" }
 hyper = { workspace = true }
 hyper-util = { workspace = true }
 common-alloc = { path = "../common/alloc" }
+common-compression = { path = "../common/compression" }
 common-continuous-profiling = { path = "../common/continuous_profiling" }
+common-ingestion-warnings = { path = "../common/ingestion_warnings" }
+common-kafka = { path = "../common/kafka" }
 common-redis = { path = "../common/redis" }
 common-types = { path = "../common/types" }
 limiters = { path = "../common/limiters" }
@@ -28,13 +38,14 @@ metrics = { workspace = true }
 metrics-exporter-prometheus = { workspace = true }
 opentelemetry = { workspace = true }
 opentelemetry-otlp = { workspace = true }
+opentelemetry-proto = { workspace = true }
 opentelemetry_sdk = { workspace = true }
+prost = { workspace = true }
 rand = { workspace = true }
 rdkafka = { workspace = true }
 redis = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-serde-pickle = { version = "1.1.1" }
 serde_urlencoded = { workspace = true }
 thiserror = { workspace = true }
 time = { workspace = true }
@@ -50,19 +61,26 @@ aws-config = { workspace = true }
 aws-sdk-s3 = { workspace = true }
 chrono = { workspace = true }
 lz-str = { workspace = true }
+lz4 = { workspace = true }
 multer = "3.0"
 futures = { workspace = true }
 sha2 = { workspace = true }
+hmac = { workspace = true }
 
 [dev-dependencies]
+capture = { path = ".", features = ["test-utils"] }
 assert-json-diff = { workspace = true }
+brotli = "8"
+zstd = "0.13"
 common-continuous-profiling = { path = "../common/continuous_profiling" }
 anyhow = { workspace = true }
-axum-test-helper = { git = "https://github.com/hanzoai/axum-test-helper.git" }
+axum-test-helper = { git = "https://github.com/insights/axum-test-helper.git" }
 futures = { workspace = true }
 httparse = "1.8"
+metrics-util = { workspace = true }
 once_cell = { workspace = true }
 rand = { workspace = true }
+rstest = "0.26"
 rdkafka = { workspace = true }
 reqwest = { workspace = true, features = ["multipart"] }
 serde_json = { workspace = true }

@@ -2,6 +2,7 @@ import re
 import json
 import math
 import time
+import random
 import datetime
 import dataclasses
 from collections.abc import Callable
@@ -9,15 +10,15 @@ from typing import TYPE_CHECKING, Any, Optional
 
 import pytz
 
-from ..objects import is_iql_callable, is_iql_closure, is_iql_error, new_iql_error, to_iql_interval
-from ..utils import get_nested_value, like
+from ..objects import is_hog_callable, is_hog_closure, is_hog_error, new_hog_error, to_hog_interval
+from ..utils import ScriptVMException, _require_string, get_nested_value, like
 from .crypto import md5, sha256, sha256HmacChain
 from .date import (
     formatDateTime,
     fromUnixTimestamp,
     fromUnixTimestampMilli,
-    is_iql_date,
-    is_iql_datetime,
+    is_hog_date,
+    is_hog_datetime,
     now,
     toDate,
     toDateTime,
@@ -26,7 +27,7 @@ from .date import (
     toUnixTimestampMilli,
 )
 from .ip import isIPAddressInRange
-from .print import print_iql_string_output
+from .print import print_hog_string_output
 
 if TYPE_CHECKING:
     from insights.models import Team
@@ -37,20 +38,23 @@ class STLFunction:
     fn: Callable[[list[Any], Optional["Team"], list[str] | None, float], Any]
     minArgs: Optional[int] = None
     maxArgs: Optional[int] = None
+    # Blocks the thread on time or I/O the VM's cooperative timeout can't interrupt, so callers
+    # that run untrusted Script on a request thread (e.g. InsightsQL placeholders) must refuse it.
+    is_blocking: bool = False
 
 
 def toString(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
-    if isinstance(args[0], dict) and is_iql_datetime(args[0]):
+    if isinstance(args[0], dict) and is_hog_datetime(args[0]):
         dt = datetime.datetime.fromtimestamp(args[0]["dt"], pytz.timezone(args[0]["zone"] or "UTC"))
         if args[0]["zone"] == "UTC":
             return dt.isoformat("T", "milliseconds").replace("+00:00", "") + "Z"
         return dt.isoformat("T", "milliseconds")
-    elif isinstance(args[0], dict) and is_iql_date(args[0]):
+    elif isinstance(args[0], dict) and is_hog_date(args[0]):
         year = args[0]["year"]
         month = args[0]["month"]
         day = args[0]["day"]
         return f"{year}-{month:02d}-{day:02d}"
-    elif isinstance(args[0], dict) and is_iql_error(args[0]):
+    elif isinstance(args[0], dict) and is_hog_error(args[0]):
         return (
             f"{args[0]['name']}({toString(args[0]['message'], team, stdout, timeout)}"
             + (f", {toString(args[0]['payload'], team, stdout, timeout)}" if "payload" in args[0] else "")
@@ -68,9 +72,9 @@ def toString(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]
 
 def toInt(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
     try:
-        if is_iql_datetime(args[0]):
+        if is_hog_datetime(args[0]):
             return int(args[0]["dt"])
-        elif is_iql_date(args[0]):
+        elif is_hog_date(args[0]):
             return (
                 datetime.datetime(args[0]["year"], args[0]["month"], args[0]["day"]) - datetime.datetime(1970, 1, 1)
             ).days
@@ -81,9 +85,9 @@ def toInt(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], 
 
 def toFloat(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
     try:
-        if is_iql_datetime(args[0]):
+        if is_hog_datetime(args[0]):
             return float(args[0]["dt"])
-        elif is_iql_date(args[0]):
+        elif is_hog_date(args[0]):
             return float(
                 (
                     datetime.datetime(args[0]["year"], args[0]["month"], args[0]["day"]) - datetime.datetime(1970, 1, 1)
@@ -108,14 +112,21 @@ def empty(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], 
     return not bool(args[0])
 
 
+def length(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
+    if args[0] is None:
+        raise ScriptVMException("Can not call length on null")
+    return len(args[0])
+
+
 def sleep(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
-    time.sleep(args[0])
+    # Clamp to the VM's remaining budget (`timeout`) so a script can't pin the thread past its cap.
+    time.sleep(max(0.0, min(args[0], timeout)))
     return None
 
 
 def print(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
     if stdout is not None:
-        value = " ".join(map(print_iql_string_output, args))
+        value = " ".join(map(print_hog_string_output, args))
         stdout.append(value)
     return
 
@@ -138,15 +149,15 @@ def jsonStringify(args: list[Any], team: Optional["Team"], stdout: Optional[list
 
     def json_safe(obj):
         if isinstance(obj, dict) or isinstance(obj, list) or isinstance(obj, tuple):
-            if id(obj) in marked and not is_iql_callable(obj) and not is_iql_closure(obj):
+            if id(obj) in marked and not is_hog_callable(obj) and not is_hog_closure(obj):
                 return None
             else:
                 marked.add(id(obj))
                 try:
                     if isinstance(obj, dict):
-                        if is_iql_callable(obj):
+                        if is_hog_callable(obj):
                             return f"fn<{obj['name']}({obj['argCount']})>"
-                        if is_iql_closure(obj):
+                        if is_hog_closure(obj):
                             return f"fn<{obj['callable']['name']}({obj['callable']['argCount']})>"
                         return {json_safe(k): json_safe(v) for k, v in obj.items()}
                     elif isinstance(obj, list):
@@ -259,6 +270,27 @@ def decodeURLComponent(args: list[Any], team: Optional["Team"], stdout: Optional
     return urllib.parse.unquote(args[0])
 
 
+def tryDecodeURLComponent(
+    args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float
+) -> Optional[str]:
+    import re
+    import urllib.parse
+
+    s = args[0]
+    if not s:
+        return s
+
+    # JavaScript's decodeURIComponent throws on invalid percent-encoding
+    # Python's unquote is lenient, so check for % not followed by 2 hex digits
+    if re.search(r"%(?![0-9A-Fa-f]{2})", s):
+        return None
+
+    try:
+        return urllib.parse.unquote(s)
+    except Exception:
+        return None
+
+
 def trim(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> str:
     char = str(args[1]) if len(args) > 1 and isinstance(args[1], str) else None
     if len(args) > 1:
@@ -304,6 +336,10 @@ def generateUUIDv4(args: list[Any], team: Optional["Team"], stdout: Optional[lis
     import uuid
 
     return str(uuid.uuid4())
+
+
+def randomFloat(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> float:
+    return random.random()
 
 
 def keys(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> list:
@@ -398,13 +434,13 @@ def _formatDateTime(args: list[Any], team: Optional["Team"], stdout: Optional[li
 def _typeof(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> str:
     if args[0] is None:
         return "null"
-    elif is_iql_datetime(args[0]):
+    elif is_hog_datetime(args[0]):
         return "datetime"
-    elif is_iql_date(args[0]):
+    elif is_hog_date(args[0]):
         return "date"
-    elif is_iql_error(args[0]):
+    elif is_hog_error(args[0]):
         return "error"
-    elif is_iql_callable(args[0]) or is_iql_closure(args[0]):
+    elif is_hog_callable(args[0]) or is_hog_closure(args[0]):
         return "function"
     elif isinstance(args[0], list):
         return "array"
@@ -425,12 +461,12 @@ def _typeof(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]]
 
 def apply_interval_to_datetime(dt: dict, interval: dict) -> dict:
     # interval["unit"] in {"day", "hour", "minute", "month"}
-    if not (is_iql_date(dt) or is_iql_datetime(dt)):
-        raise ValueError("Expected a IQLDate or IQLDateTime")
+    if not (is_hog_date(dt) or is_hog_datetime(dt)):
+        raise ValueError("Expected a HogDate or HogDateTime")
 
-    zone = dt["zone"] if is_iql_datetime(dt) else "UTC"
-    if is_iql_datetime(dt):
-        base_dt = datetime.datetime.utcfromtimestamp(dt["dt"])
+    zone = dt["zone"] if is_hog_datetime(dt) else "UTC"
+    if is_hog_datetime(dt):
+        base_dt = datetime.datetime.fromtimestamp(dt["dt"], datetime.UTC).replace(tzinfo=None)
         base_dt = pytz.timezone(zone).localize(base_dt)
     else:
         base_dt = datetime.datetime(dt["year"], dt["month"], dt["day"], tzinfo=pytz.timezone(zone))
@@ -469,16 +505,16 @@ def apply_interval_to_datetime(dt: dict, interval: dict) -> dict:
     else:
         raise ValueError(f"Unknown interval unit {unit}")
 
-    if is_iql_date(dt):
+    if is_hog_date(dt):
         return {
-            "__iqlDate__": True,
+            "__hogDate__": True,
             "year": base_dt.year,
             "month": base_dt.month,
             "day": base_dt.day,
         }
     else:
         return {
-            "__iqlDateTime__": True,
+            "__hogDateTime__": True,
             "dt": base_dt.timestamp(),
             "zone": zone,
         }
@@ -504,7 +540,7 @@ def date_add(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]
     else:
         raise ValueError(f"Unsupported interval unit: {unit}")
 
-    interval = to_iql_interval(amount, unit)
+    interval = to_hog_interval(amount, unit)
     return apply_interval_to_datetime(dt, interval)
 
 
@@ -516,10 +552,12 @@ def date_diff(args: list[Any], team: Optional["Team"], stdout: Optional[list[str
 
     # Convert start/end to aware datetimes
     def to_dt(obj):
-        if is_iql_datetime(obj):
+        if is_hog_datetime(obj):
             z = obj["zone"]
-            return pytz.timezone(z).localize(datetime.datetime.utcfromtimestamp(obj["dt"]))
-        elif is_iql_date(obj):
+            return pytz.timezone(z).localize(
+                datetime.datetime.fromtimestamp(obj["dt"], datetime.UTC).replace(tzinfo=None)
+            )
+        elif is_hog_date(obj):
             return pytz.UTC.localize(datetime.datetime(obj["year"], obj["month"], obj["day"]))
         else:
             # try parse string
@@ -554,11 +592,11 @@ def date_trunc(args: list[Any], team: Optional["Team"], stdout: Optional[list[st
     unit = args[0]
     dt = args[1]
 
-    if not is_iql_datetime(dt):
+    if not is_hog_datetime(dt):
         raise ValueError("Expected a DateTime for dateTrunc")
 
     zone = dt["zone"]
-    base_dt = datetime.datetime.utcfromtimestamp(dt["dt"])
+    base_dt = datetime.datetime.fromtimestamp(dt["dt"], datetime.UTC).replace(tzinfo=None)
     base_dt = pytz.timezone(zone).localize(base_dt)
 
     if unit == "year":
@@ -577,7 +615,7 @@ def date_trunc(args: list[Any], team: Optional["Team"], stdout: Optional[list[st
         raise ValueError(f"Unsupported unit for dateTrunc: {unit}")
 
     return {
-        "__iqlDateTime__": True,
+        "__hogDateTime__": True,
         "dt": truncated.timestamp(),
         "zone": zone,
     }
@@ -679,10 +717,12 @@ def extract(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]]
     val = args[1]
 
     def to_dt(obj):
-        if is_iql_datetime(obj):
+        if is_hog_datetime(obj):
             z = obj["zone"]
-            return pytz.timezone(z).localize(datetime.datetime.utcfromtimestamp(obj["dt"]))
-        elif is_iql_date(obj):
+            return pytz.timezone(z).localize(
+                datetime.datetime.fromtimestamp(obj["dt"], datetime.UTC).replace(tzinfo=None)
+            )
+        elif is_hog_date(obj):
             return pytz.UTC.localize(datetime.datetime(obj["year"], obj["month"], obj["day"]))
         else:
             d = datetime.datetime.fromisoformat(obj)
@@ -729,24 +769,24 @@ def substring(args: list[Any], team: Optional["Team"], stdout: Optional[list[str
 
 
 def addDays(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    interval = to_iql_interval(args[1], "day")
+    interval = to_hog_interval(args[1], "day")
     return apply_interval_to_datetime(args[0], interval)
 
 
 def toIntervalDay(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    return to_iql_interval(args[0], "day")
+    return to_hog_interval(args[0], "day")
 
 
 def toIntervalHour(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    return to_iql_interval(args[0], "hour")
+    return to_hog_interval(args[0], "hour")
 
 
 def toIntervalMinute(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    return to_iql_interval(args[0], "minute")
+    return to_hog_interval(args[0], "minute")
 
 
 def toIntervalMonth(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    return to_iql_interval(args[0], "month")
+    return to_hog_interval(args[0], "month")
 
 
 def toYear(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
@@ -759,8 +799,8 @@ def toMonth_fn(args: list[Any], team: Optional["Team"], stdout: Optional[list[st
 
 def trunc_to_unit(dt: dict, unit: str, team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> dict:
     # helper for toStartOfDay, etc.
-    if not is_iql_datetime(dt):
-        if is_iql_date(dt):
+    if not is_hog_datetime(dt):
+        if is_hog_date(dt):
             dt = toDateTime(f"{dt['year']:04d}-{dt['month']:02d}-{dt['day']:02d}")
         else:
             raise ValueError("Expected a Date or DateTime")
@@ -782,19 +822,19 @@ def toStartOfMonth(args: list[Any], team: Optional["Team"], stdout: Optional[lis
 
 def toStartOfWeek(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
     dt = args[0]
-    if not is_iql_datetime(dt):
-        if is_iql_date(dt):
+    if not is_hog_datetime(dt):
+        if is_hog_date(dt):
             dt = toDateTime(f"{dt['year']}-{dt['month']:02d}-{dt['day']:02d}")
         else:
             raise ValueError("Expected a Date or DateTime")
-    base_dt = datetime.datetime.utcfromtimestamp(dt["dt"])
+    base_dt = datetime.datetime.fromtimestamp(dt["dt"], datetime.UTC).replace(tzinfo=None)
     zone = dt["zone"]
     base_dt = pytz.timezone(zone).localize(base_dt)
     weekday = base_dt.isoweekday()  # Monday=1, Sunday=7
     start_of_week = base_dt - datetime.timedelta(days=weekday - 1)
     start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
     return {
-        "__iqlDateTime__": True,
+        "__hogDateTime__": True,
         "dt": start_of_week.timestamp(),
         "zone": zone,
     }
@@ -809,7 +849,7 @@ def toYYYYMM(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]
 def today(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
     now_dt = datetime.datetime.now(tz=pytz.UTC)
     return {
-        "__iqlDate__": True,
+        "__hogDate__": True,
         "year": now_dt.year,
         "month": now_dt.month,
         "day": now_dt.day,
@@ -824,6 +864,22 @@ def range_fn(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]
         return list(range(args[0], args[1]))
     else:
         raise ValueError("range function supports 1 or 2 arguments only")
+
+
+def JSONExtractGeneric(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
+    if len(args) < 2:
+        return None
+    obj = args[0]
+    try:
+        if isinstance(obj, str):
+            obj = json.loads(obj)
+    except json.JSONDecodeError:
+        return None
+    # Last argument is the return type (Datastore convention), which we ignore.
+    # Arguments between first and last are path components.
+    path = args[1:-1] if len(args) > 2 else []
+    val = get_nested_value(obj, path, True)
+    return val
 
 
 def JSONExtractArrayRaw(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
@@ -890,28 +946,55 @@ def multiSearchAnyCaseInsensitive(args: list[Any], team, stdout, timeout):
     return int(any(str(needle).lower() in haystack for needle in needles))
 
 
+def extractRegex(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> str:
+    """
+    Extract substring matching a regex pattern.
+    Matches Datastore extract(haystack, pattern) behavior:
+    - Returns first capture group if pattern has groups
+    - Returns whole match if no capture groups
+    - Returns empty string if no match
+    """
+    if args[0] is None or args[1] is None:
+        return ""
+    haystack = str(args[0])
+    pattern = str(args[1])
+    try:
+        match = re.search(pattern, haystack)
+        if not match:
+            return ""
+        if match.lastindex and match.lastindex >= 1:
+            return match.group(1) or ""
+        return match.group(0) or ""
+    except re.error:
+        return ""
+
+
+def match(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> bool:
+    if args[1] is None or args[0] is None:
+        return False
+    input_string = _require_string(args[0], "input", "match")
+    pattern = _require_string(args[1], "pattern", "match")
+    try:
+        return re.search(pattern, input_string) is not None
+    except re.error as e:
+        raise ScriptVMException(f"Invalid regex pattern: {e}") from e
+
+
 STL: dict[str, STLFunction] = {
     "concat": STLFunction(
         fn=lambda args, team, stdout, timeout: "".join(
-            [print_iql_string_output(arg) if arg is not None else "" for arg in args]
+            [print_hog_string_output(arg) if arg is not None else "" for arg in args]
         ),
         minArgs=1,
         maxArgs=None,
     ),
-    "match": STLFunction(
-        fn=lambda args, team, stdout, timeout: False
-        if args[1] is None or args[0] is None
-        else bool(re.search(re.compile(args[1]), args[0])),
-        minArgs=2,
-        maxArgs=2,
-    ),
+    "match": STLFunction(fn=match, minArgs=2, maxArgs=2),
+    "extractRegex": STLFunction(fn=extractRegex, minArgs=2, maxArgs=2),
     "like": STLFunction(fn=lambda args, team, stdout, timeout: like(args[0], args[1]), minArgs=2, maxArgs=2),
-    "ilike": STLFunction(
-        fn=lambda args, team, stdout, timeout: like(args[0], args[1], re.IGNORECASE), minArgs=2, maxArgs=2
-    ),
+    "ilike": STLFunction(fn=lambda args, team, stdout, timeout: like(args[0], args[1], True), minArgs=2, maxArgs=2),
     "notLike": STLFunction(fn=lambda args, team, stdout, timeout: not like(args[0], args[1]), minArgs=2, maxArgs=2),
     "notILike": STLFunction(
-        fn=lambda args, team, stdout, timeout: not like(args[0], args[1], re.IGNORECASE), minArgs=2, maxArgs=2
+        fn=lambda args, team, stdout, timeout: not like(args[0], args[1], True), minArgs=2, maxArgs=2
     ),
     "toString": STLFunction(fn=toString, minArgs=1, maxArgs=1),
     "toUUID": STLFunction(fn=toString, minArgs=1, maxArgs=1),
@@ -920,7 +1003,7 @@ STL: dict[str, STLFunction] = {
     "ifNull": STLFunction(fn=ifNull, minArgs=2, maxArgs=2),
     "isNull": STLFunction(fn=lambda args, team, stdout, timeout: args[0] is None, minArgs=1, maxArgs=1),
     "isNotNull": STLFunction(fn=lambda args, team, stdout, timeout: args[0] is not None, minArgs=1, maxArgs=1),
-    "length": STLFunction(fn=lambda args, team, stdout, timeout: len(args[0]), minArgs=1, maxArgs=1),
+    "length": STLFunction(fn=length, minArgs=1, maxArgs=1),
     "empty": STLFunction(fn=empty, minArgs=1, maxArgs=1),
     "notEmpty": STLFunction(
         fn=lambda args, team, stdout, timeout: not empty(args, team, stdout, timeout), minArgs=1, maxArgs=1
@@ -942,6 +1025,7 @@ STL: dict[str, STLFunction] = {
     "base64Decode": STLFunction(fn=base64Decode, minArgs=1, maxArgs=1),
     "encodeURLComponent": STLFunction(fn=encodeURLComponent, minArgs=1, maxArgs=1),
     "decodeURLComponent": STLFunction(fn=decodeURLComponent, minArgs=1, maxArgs=1),
+    "tryDecodeURLComponent": STLFunction(fn=tryDecodeURLComponent, minArgs=1, maxArgs=1),
     "replaceOne": STLFunction(
         fn=lambda args, team, stdout, timeout: args[0].replace(args[1], args[2], 1), minArgs=3, maxArgs=3
     ),
@@ -949,16 +1033,18 @@ STL: dict[str, STLFunction] = {
         fn=lambda args, team, stdout, timeout: args[0].replace(args[1], args[2]), minArgs=3, maxArgs=3
     ),
     "position": STLFunction(
-        fn=lambda args, team, stdout, timeout: (args[0].index(str(args[1])) + 1)
-        if isinstance(args[0], str) and str(args[1]) in args[0]
-        else 0,
+        fn=lambda args, team, stdout, timeout: (
+            (args[0].index(str(args[1])) + 1) if isinstance(args[0], str) and str(args[1]) in args[0] else 0
+        ),
         minArgs=2,
         maxArgs=2,
     ),
     "positionCaseInsensitive": STLFunction(
-        fn=lambda args, team, stdout, timeout: (args[0].lower().index(str(args[1]).lower()) + 1)
-        if isinstance(args[0], str) and str(args[1]).lower() in args[0].lower()
-        else 0,
+        fn=lambda args, team, stdout, timeout: (
+            (args[0].lower().index(str(args[1]).lower()) + 1)
+            if isinstance(args[0], str) and str(args[1]).lower() in args[0].lower()
+            else 0
+        ),
         minArgs=2,
         maxArgs=2,
     ),
@@ -967,6 +1053,7 @@ STL: dict[str, STLFunction] = {
     "trimRight": STLFunction(fn=trimRight, minArgs=1, maxArgs=2),
     "splitByString": STLFunction(fn=splitByString, minArgs=2, maxArgs=3),
     "generateUUIDv4": STLFunction(fn=generateUUIDv4, minArgs=0, maxArgs=0),
+    "randomFloat": STLFunction(fn=randomFloat, minArgs=0, maxArgs=0),
     "sha256Hex": STLFunction(fn=lambda args, team, stdout, timeout: sha256(args[0]), minArgs=1, maxArgs=1),
     "sha256": STLFunction(
         fn=lambda args, team, stdout, timeout: sha256(args[0], args[1] if len(args) > 1 else "hex"),
@@ -993,9 +1080,9 @@ STL: dict[str, STLFunction] = {
     "keys": STLFunction(fn=keys, minArgs=1, maxArgs=1),
     "values": STLFunction(fn=values, minArgs=1, maxArgs=1),
     "indexOf": STLFunction(
-        fn=lambda args, team, stdout, timeout: (args[0].index(args[1]) + 1)
-        if isinstance(args[0], list) and args[1] in args[0]
-        else 0,
+        fn=lambda args, team, stdout, timeout: (
+            (args[0].index(args[1]) + 1) if isinstance(args[0], list) and args[1] in args[0] else 0
+        ),
         minArgs=2,
         maxArgs=2,
     ),
@@ -1029,31 +1116,32 @@ STL: dict[str, STLFunction] = {
     "toDate": STLFunction(fn=lambda args, team, stdout, timeout: toDate(args[0]), minArgs=1, maxArgs=1),
     "toDateTime": STLFunction(fn=lambda args, team, stdout, timeout: toDateTime(args[0]), minArgs=1, maxArgs=2),
     "formatDateTime": STLFunction(fn=_formatDateTime, minArgs=2, maxArgs=3),
-    "IQLError": STLFunction(
-        fn=lambda args, team, stdout, timeout: new_iql_error(args[0], args[1], args[2] if len(args) > 2 else None),
+    "HogError": STLFunction(
+        fn=lambda args, team, stdout, timeout: new_hog_error(args[0], args[1], args[2] if len(args) > 2 else None),
         minArgs=1,
         maxArgs=3,
     ),
     "Error": STLFunction(
-        fn=lambda args, team, stdout, timeout: new_iql_error(
+        fn=lambda args, team, stdout, timeout: new_hog_error(
             "Error", args[0] if len(args) > 0 else None, args[1] if len(args) > 1 else None
         ),
         minArgs=0,
         maxArgs=2,
     ),
     "RetryError": STLFunction(
-        fn=lambda args, team, stdout, timeout: new_iql_error("RetryError", args[0], args[1] if len(args) > 1 else None),
+        fn=lambda args, team, stdout, timeout: new_hog_error("RetryError", args[0], args[1] if len(args) > 1 else None),
         minArgs=0,
         maxArgs=2,
     ),
     "NotImplementedError": STLFunction(
-        fn=lambda args, team, stdout, timeout: new_iql_error(
+        fn=lambda args, team, stdout, timeout: new_hog_error(
             "NotImplementedError", args[0], args[1] if len(args) > 1 else None
         ),
         minArgs=0,
         maxArgs=2,
     ),
     "typeof": STLFunction(fn=_typeof, minArgs=1, maxArgs=1),
+    "JSONExtract": STLFunction(fn=JSONExtractGeneric, minArgs=2),
     "JSONExtractArrayRaw": STLFunction(fn=JSONExtractArrayRaw, minArgs=1),
     "JSONExtractFloat": STLFunction(fn=JSONExtractFloat, minArgs=1),
     "JSONExtractInt": STLFunction(fn=JSONExtractInt, minArgs=1),
@@ -1099,11 +1187,13 @@ STL: dict[str, STLFunction] = {
     "toYear": STLFunction(fn=toYear, minArgs=1, maxArgs=1),
     "today": STLFunction(fn=today, minArgs=0, maxArgs=0),
     # only in python, async function in nodejs
-    "sleep": STLFunction(fn=sleep, minArgs=1, maxArgs=1),
-    "run": STLFunction(fn=run, minArgs=1, maxArgs=1),
+    "sleep": STLFunction(fn=sleep, minArgs=1, maxArgs=1, is_blocking=True),
+    "run": STLFunction(fn=run, minArgs=1, maxArgs=1, is_blocking=True),
     "multiSearchAnyCaseInsensitive": STLFunction(
         fn=multiSearchAnyCaseInsensitive,
         minArgs=2,
         maxArgs=2,
     ),
 }
+
+BLOCKING_FUNCTIONS: frozenset[str] = frozenset(name for name, spec in STL.items() if spec.is_blocking)

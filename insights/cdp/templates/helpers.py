@@ -6,13 +6,12 @@ from typing import Any, Optional, cast
 from insights.test.base import APIBaseTest, BaseTest
 from unittest.mock import MagicMock, patch
 
-import STPyV8
-
 from insights.cdp.site_functions import get_transpiled_function
 from insights.cdp.templates.insights_function_template import InsightsFunctionTemplateDC, sync_template_to_db
-from insights.cdp.validation import compile_script
-from insights.models import InsightsFunction
+from insights.cdp.validation import compile_hog
 from insights.models.utils import uuid7
+
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
 from common.scriptvm.python.execute import execute_bytecode
 from common.scriptvm.python.stl import now
@@ -57,18 +56,19 @@ def mock_transpile(code: str, type: str = "site") -> str:
     return code
 
 
-# TODO this test class only tests part of the template. The custom code is tested, the default mappings are not
+# TODO this test class only tests part of the template. The script code is tested, the default mappings are not
 class BaseInsightsFunctionTemplateTest(BaseTest):
     template: InsightsFunctionTemplateDC
-    compiled_iql: Any
+    compiled_hog: Any
     mock_fetch = MagicMock()
     mock_print = MagicMock()
     mock_insights_capture = MagicMock()
+    mock_produce_to_warehouse_webhooks = MagicMock()
     fetch_responses: dict[str, dict[Any, Any]] = {}
 
     def setUp(self):
         super().setUp()
-        self.compiled_iql = compile_script(self.template.code, self.template.type)
+        self.compiled_hog = compile_hog(self.template.code, self.template.type)
 
         self.mock_print = MagicMock(side_effect=lambda *args: print("[DEBUG InsightsFunctionPrint]", *args))  # noqa: T201
         # Side effect - log the fetch call and return  with sensible output
@@ -78,6 +78,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
         self.mock_insights_capture = MagicMock(
             side_effect=lambda *args: print("[DEBUG InsightsFunctionInsightsCapture]", *args)  # noqa: T201
         )
+        self.mock_produce_to_warehouse_webhooks = MagicMock(side_effect=lambda *args: args[0] if args else None)
 
     def mock_fetch_response(self, url, *args):
         return self.fetch_responses.get(url, {"status": 200, "body": {}})
@@ -94,7 +95,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
         # Return a simple array which is easier to debug
         return [call.args for call in self.mock_insights_capture.mock_calls]
 
-    def createIQLGlobals(self, globals=None) -> dict:
+    def createHogGlobals(self, globals=None) -> dict:
         # Return an object simulating the
         data = {
             "event": {
@@ -107,7 +108,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
                 "elements_chain": "",
             },
             "person": {"id": "person-id", "properties": {"email": "example@hanzo.ai"}},
-            "source": {"url": "https://insights.hanzo.ai/insights_functions/1234"},
+            "source": {"url": "https://us.hanzo.ai/insights_functions/1234"},
         }
 
         if globals:
@@ -122,7 +123,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
         self.mock_fetch.reset_mock()
         self.mock_print.reset_mock()
         # Create the globals object
-        globals = self.createIQLGlobals(globals)
+        globals = self.createHogGlobals(globals)
         globals["inputs"] = inputs
 
         # Run the function
@@ -131,13 +132,14 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
             "fetch": self.mock_fetch,
             "print": self.mock_print,
             "insightsCapture": self.mock_insights_capture,
+            "produceToWarehouseWebhooks": self.mock_produce_to_warehouse_webhooks,
         }
 
         if functions:
             final_functions.update(functions)
 
         return execute_bytecode(
-            self.compiled_iql,
+            self.compiled_hog,
             globals,
             functions=final_functions,
         )
@@ -157,7 +159,9 @@ class BaseSiteDestinationFunctionTest(APIBaseTest):
 
         # Mock the plugin server status endpoint to avoid connection errors
         # Patch where it's used (in insights_function.py) not where it's defined
-        self.mock_get_status = patch("insights.models.insights_functions.insights_function.get_insights_function_status").start()
+        self.mock_get_status = patch(
+            "products.cdp.backend.models.insights_functions.insights_function.get_insights_function_status"
+        ).start()
         self.mock_get_status.return_value = MagicMock(status_code=200, json=lambda: {"state": "idle", "tokens": 0})
         self.addCleanup(self.mock_get_status.stop)
 
@@ -239,6 +243,8 @@ class BaseSiteDestinationFunctionTest(APIBaseTest):
 
             processEvent(globals, insights);;
             """
+
+        import STPyV8
 
         with STPyV8.JSContext() as ctxt:
             ctxt.eval(js)

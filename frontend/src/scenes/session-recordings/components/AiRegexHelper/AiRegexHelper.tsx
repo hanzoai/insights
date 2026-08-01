@@ -1,14 +1,14 @@
 /**
- * @fileoverview A component that helps you to generate regex for your settings using AI
+ * @fileoverview A component that helps you to generate regex for your settings using Max AI
  */
 import { useActions, useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
 
 import { IconAI, IconCopy, IconPlus } from '@hanzo/icons'
 import { Banner, Button, Modal, TextArea } from '@hanzo/elements'
 
-import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
+import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 
 import { aiRegexHelperLogic } from './aiRegexHelperLogic'
@@ -31,16 +31,16 @@ export function AiRegexHelper({ onApply }: AiRegexHelperProps): JSX.Element {
           ? dataProcessingApprovalDisabledReason || 'You must accept the data processing agreement to use AI features'
           : isLoading
             ? 'Generating...'
-            : !input.length
+            : !input.trim().length
               ? 'Provide a prompt first'
               : null
 
     return (
         <>
-            <Modal isOpen={isOpen} onClose={onClose} title="AI Regex Helper">
+            <Modal isOpen={isOpen} onClose={onClose} title="Max AI Regex Helper">
                 Explain your regex in natural language:
                 <TextArea
-                    placeholder="I want a regex that covers all urls that include 'insights.hanzo.ai/auth/*'"
+                    placeholder="I want a regex that covers all urls that include 'app.hanzo.ai/auth/*'"
                     className="w-full my-2"
                     maxRows={4}
                     minRows={2}

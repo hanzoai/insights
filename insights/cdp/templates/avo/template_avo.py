@@ -14,7 +14,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send events to Avo",
     icon_url="/static/services/avo.png",
     category=["Analytics"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.apiKey) or empty(inputs.environment)) {
     print('API Key and environment has to be set. Skipping...')
@@ -135,12 +135,12 @@ fetch('https://api.avo.app/inspector/insights/v1/track', {
 
 
 class TemplateAvoMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Hanzo Insights/insights-avo-plugin"
+    plugin_url = "https://github.com/Insights/insights-avo-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["fn"] = hf["code"]
+        hf["script"] = hf["code"]
         del hf["code"]
 
         apiKey = obj.config.get("avoApiKey", "")

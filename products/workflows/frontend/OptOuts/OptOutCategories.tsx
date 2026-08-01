@@ -1,19 +1,21 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
+import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
 import { IconDownload, IconPlus } from '@hanzo/icons'
 import { Button, Collapse, Dialog, Skeleton, Tag } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { BuilderMascot3 } from 'lib/components/mascots'
 import { More } from 'lib/elements/Button/More'
 import { Divider } from 'lib/elements/Divider'
 
-import { CustomerIOImportModal } from './CustomerIOImportModal'
-import { NewCategoryModal } from './NewCategoryModal'
-import { OptOutList } from './OptOutList'
 import { customerIOImportLogic } from './customerIOImportLogic'
+import { NewCategoryModal } from './NewCategoryModal'
 import { optOutCategoriesLogic } from './optOutCategoriesLogic'
+import { OptOutList } from './OptOutList'
+
+const MascotConstruction2 = pngHoggie(construction2Png)
 
 interface MessageCategory {
     id: string
@@ -28,7 +30,6 @@ export function OptOutCategories(): JSX.Element {
     const { categories, categoriesLoading, isNewCategoryModalOpen } = useValues(optOutCategoriesLogic)
     const { loadCategories, deleteCategory, closeNewCategoryModal, openNewCategoryModal } =
         useActions(optOutCategoriesLogic)
-    const { isImportModalOpen } = useValues(customerIOImportLogic)
     const { openImportModal } = useActions(customerIOImportLogic)
     const [editingCategory, setEditingCategory] = useState<MessageCategory | null>(null)
 
@@ -114,7 +115,7 @@ export function OptOutCategories(): JSX.Element {
                             )}
                         </div>
                         <div>
-                            <h4 className="font-medium mb-2">Opt-out list</h4>
+                            <h4 className="font-medium mb-4">Opt-out list</h4>
                             {category.category_type === 'marketing' ? (
                                 <OptOutList category={category} />
                             ) : (
@@ -153,7 +154,7 @@ export function OptOutCategories(): JSX.Element {
                                     </Button>
                                 </>
                             }
-                            customInsights={BuilderMascot3}
+                            customHog={MascotConstruction2}
                             isEmpty
                         />
                     )}
@@ -168,8 +169,6 @@ export function OptOutCategories(): JSX.Element {
                 }}
                 category={editingCategory}
             />
-
-            {isImportModalOpen && <CustomerIOImportModal />}
         </>
     )
 }

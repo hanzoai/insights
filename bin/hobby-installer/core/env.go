@@ -33,12 +33,12 @@ func NewEnvConfig(domain, version string) (*EnvConfig, error) {
 
 	registryURL := os.Getenv("REGISTRY_URL")
 	if registryURL == "" {
-		registryURL = "hanzoai/insights"
+		registryURL = "insights/insights"
 	}
 
 	tlsBlock := os.Getenv("TLS_BLOCK")
 
-	nodeTag := os.Getenv("INSIGHTS_NODE_TAG")
+	nodeTag := os.Getenv("POSTFN_NODE_TAG")
 	if nodeTag == "" {
 		nodeTag = "latest"
 	}
@@ -56,15 +56,15 @@ func NewEnvConfig(domain, version string) (*EnvConfig, error) {
 }
 
 func (c *EnvConfig) WriteEnvFile() error {
-	content := fmt.Sprintf(`INSIGHTS_SECRET=%s
+	content := fmt.Sprintf(`POSTFN_SECRET=%s
 ENCRYPTION_SALT_KEYS=%s
 DOMAIN=%s
 TLS_BLOCK=%s
 REGISTRY_URL=%s
 CADDY_TLS_BLOCK=%s
 CADDY_HOST="%s, http://, https://"
-INSIGHTS_APP_TAG=%s
-INSIGHTS_NODE_TAG=%s
+POSTFN_APP_TAG=%s
+POSTFN_NODE_TAG=%s
 SESSION_RECORDING_V2_METADATA_SWITCHOVER=%s
 `,
 		c.InsightsSecret,
@@ -85,13 +85,13 @@ SESSION_RECORDING_V2_METADATA_SWITCHOVER=%s
 func LoadExistingEnv() map[string]string {
 	values := make(map[string]string)
 	keys := []string{
-		"INSIGHTS_SECRET",
+		"POSTFN_SECRET",
 		"ENCRYPTION_SALT_KEYS",
 		"DOMAIN",
 		"TLS_BLOCK",
 		"REGISTRY_URL",
-		"INSIGHTS_APP_TAG",
-		"INSIGHTS_NODE_TAG",
+		"POSTFN_APP_TAG",
+		"POSTFN_NODE_TAG",
 		"SESSION_RECORDING_V2_METADATA_SWITCHOVER",
 		"SESSION_RECORDING_STORAGE_MIGRATED_TO_SEAWEEDFS",
 	}
@@ -103,6 +103,27 @@ func LoadExistingEnv() map[string]string {
 	}
 
 	return values
+}
+
+func UpdateEnvValue(key, value string) error {
+	data, err := os.ReadFile(".env")
+	if err != nil {
+		return err
+	}
+	lines := strings.Split(string(data), "\n")
+	prefix := key + "="
+	found := false
+	for i, line := range lines {
+		if strings.HasPrefix(line, prefix) {
+			lines[i] = prefix + value
+			found = true
+			break
+		}
+	}
+	if !found {
+		lines = append(lines, prefix+value)
+	}
+	return os.WriteFile(".env", []byte(strings.Join(lines, "\n")), 0600)
 }
 
 func UpdateEnvForUpgrade(version string) error {
@@ -120,6 +141,12 @@ func UpdateEnvForUpgrade(version string) error {
 
 	if existing["SESSION_RECORDING_V2_METADATA_SWITCHOVER"] == "" {
 		if err := AppendToEnv("SESSION_RECORDING_V2_METADATA_SWITCHOVER", time.Now().Format(time.RFC3339)); err != nil {
+			return err
+		}
+	}
+
+	if version != "" {
+		if err := UpdateEnvValue("POSTFN_APP_TAG", version); err != nil {
 			return err
 		}
 	}
@@ -176,7 +203,7 @@ func FixEnvQuoting() error {
 }
 
 func ValidateEnvForUpgrade() error {
-	required := []string{"INSIGHTS_SECRET", "DOMAIN"}
+	required := []string{"POSTFN_SECRET", "DOMAIN"}
 	for _, key := range required {
 		if ReadEnvValue(key) == "" {
 			return fmt.Errorf("missing required env var: %s", key)

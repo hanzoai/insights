@@ -1,6 +1,6 @@
-from insights.schema import DatabaseSchemaManagedViewTableKind
-
 from insights.insightsql.database.models import DateTimeDatabaseField, StringDatabaseField
+
+from insights.schema_enums import DatabaseSchemaManagedViewTableKind
 
 from ._definitions import BASE_CURRENCY_FIELDS, FieldsDict, Schema
 

@@ -8,7 +8,15 @@ from django.conf import settings
 from parameterized import parameterized
 from rest_framework import status
 
+from insights.models import User
+from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.comment import Comment
 from insights.models.comment.utils import build_comment_item_url, extract_plain_text_from_rich_content
+
+from products.conversations.backend.models import Ticket
+from products.conversations.backend.models.constants import Channel, Status
+
+from ee.models.rbac.access_control import AccessControl
 
 
 class TestComments(APIBaseTest, QueryMatchingTest):
@@ -64,6 +72,9 @@ class TestComments(APIBaseTest, QueryMatchingTest):
             "item_context": None,
             "scope": "Notebook",
             "source_comment": None,
+            "is_task": False,
+            "completed_at": None,
+            "completed_by": None,
         }
 
     def test_updates_content_and_increments_version(self) -> None:
@@ -92,6 +103,9 @@ class TestComments(APIBaseTest, QueryMatchingTest):
             "item_context": None,
             "scope": "Notebook",
             "source_comment": None,
+            "is_task": False,
+            "completed_at": None,
+            "completed_by": None,
         }
 
     def test_empty_comments_list(self) -> None:
@@ -563,6 +577,178 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
+class TestCommentsTicketAccessControl(APIBaseTest):
+    """conversations_ticket comments are ticket messages read/written through this generic
+    endpoint by the Support UI (not TicketViewSet) — object-level ticket RBAC must be
+    enforced here too, or a denied member can read/write a ticket's messages directly."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.organization.available_product_features = [{"key": "access_control", "name": "Access control"}]
+        self.organization.save()
+        self.member = User.objects.create_and_join(self.organization, "ticket-member@hanzo.ai", "password")
+        self.client.force_login(self.member)
+        self.ticket = Ticket.objects.create_with_number(
+            team=self.team,
+            channel_source=Channel.WIDGET,
+            widget_session_id="acl-session",
+            distinct_id="acl-user",
+            status=Status.OPEN,
+        )
+        AccessControl.objects.create(
+            resource="ticket",
+            resource_id=str(self.ticket.id),
+            organization_member=self.member.organization_memberships.get(organization=self.organization),
+            team=self.team,
+            access_level="none",
+        )
+        Comment.objects.create(
+            team=self.team,
+            scope="conversations_ticket",
+            item_id=str(self.ticket.id),
+            content="a private message",
+        )
+
+    def test_denied_member_cannot_list_ticket_messages(self) -> None:
+        response = self.client.get(
+            f"/api/projects/{self.team.id}/comments?scope=conversations_ticket&item_id={self.ticket.id}"
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["results"] == []
+
+    def test_denied_member_cannot_create_ticket_message(self) -> None:
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/comments",
+            {
+                "content": "sneaking in a reply",
+                "scope": "conversations_ticket",
+                "item_id": str(self.ticket.id),
+                "item_context": {"author_type": "support", "is_private": False},
+            },
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert not Comment.objects.filter(item_id=str(self.ticket.id), content="sneaking in a reply").exists()
+
+    def test_viewer_can_list_but_not_create_ticket_message(self) -> None:
+        AccessControl.objects.filter(resource_id=str(self.ticket.id)).update(access_level="viewer")
+
+        list_response = self.client.get(
+            f"/api/projects/{self.team.id}/comments?scope=conversations_ticket&item_id={self.ticket.id}"
+        )
+        assert len(list_response.json()["results"]) == 1
+
+        create_response = self.client.post(
+            f"/api/projects/{self.team.id}/comments",
+            {
+                "content": "viewer trying to reply",
+                "scope": "conversations_ticket",
+                "item_id": str(self.ticket.id),
+                "item_context": {"author_type": "support", "is_private": False},
+            },
+        )
+        assert create_response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_editor_can_list_and_create_ticket_message(self) -> None:
+        AccessControl.objects.filter(resource_id=str(self.ticket.id)).update(access_level="editor")
+
+        create_response = self.client.post(
+            f"/api/projects/{self.team.id}/comments",
+            {
+                "content": "editor reply",
+                "scope": "conversations_ticket",
+                "item_id": str(self.ticket.id),
+                "item_context": {"author_type": "support", "is_private": False},
+            },
+        )
+        assert create_response.status_code == status.HTTP_201_CREATED
+
+    def test_creator_downgraded_to_viewer_cannot_edit_own_ticket_message(self) -> None:
+        AccessControl.objects.filter(resource_id=str(self.ticket.id)).update(access_level="editor")
+        own_message = Comment.objects.create(
+            team=self.team,
+            created_by=self.member,
+            scope="conversations_ticket",
+            item_id=str(self.ticket.id),
+            content="my reply",
+        )
+        AccessControl.objects.filter(resource_id=str(self.ticket.id)).update(access_level="viewer")
+
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/comments/{own_message.id}?scope=conversations_ticket",
+            {"content": "edited after being downgraded"},
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        own_message.refresh_from_db()
+        assert own_message.content == "my reply"
+
+    def test_cannot_rescope_existing_comment_into_denied_ticket(self) -> None:
+        own_comment = Comment.objects.create(
+            team=self.team,
+            created_by=self.member,
+            scope="Notebook",
+            item_id="1",
+            content="a notebook comment",
+        )
+
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/comments/{own_comment.id}",
+            {"scope": "conversations_ticket", "item_id": str(self.ticket.id)},
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        own_comment.refresh_from_db()
+        assert own_comment.scope == "Notebook"
+
+    def _deny_ticket_resource(self) -> None:
+        AccessControl.objects.filter(resource_id=str(self.ticket.id)).delete()
+        AccessControl.objects.create(
+            resource="ticket",
+            resource_id=None,
+            organization_member=self.member.organization_memberships.get(organization=self.organization),
+            team=self.team,
+            access_level="none",
+        )
+
+    def test_member_denied_ticket_resource_cannot_list_messages_across_tickets(self) -> None:
+        self._deny_ticket_resource()
+
+        response = self.client.get(f"/api/projects/{self.team.id}/comments?scope=conversations_ticket")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["results"] == []
+
+    def test_member_denied_ticket_resource_still_lists_messages_of_specifically_granted_ticket(self) -> None:
+        self._deny_ticket_resource()
+        AccessControl.objects.create(
+            resource="ticket",
+            resource_id=str(self.ticket.id),
+            organization_member=self.member.organization_memberships.get(organization=self.organization),
+            team=self.team,
+            access_level="viewer",
+        )
+
+        response = self.client.get(f"/api/projects/{self.team.id}/comments?scope=conversations_ticket")
+
+        assert [result["content"] for result in response.json()["results"]] == ["a private message"]
+
+    def test_viewer_cannot_complete_ticket_task(self) -> None:
+        AccessControl.objects.filter(resource_id=str(self.ticket.id)).update(access_level="viewer")
+        task = Comment.objects.create(
+            team=self.team,
+            created_by=self.member,
+            scope="conversations_ticket",
+            item_id=str(self.ticket.id),
+            content="a ticket task",
+            is_task=True,
+        )
+
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/comments/{task.id}/complete?scope=conversations_ticket",
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        task.refresh_from_db()
+        assert task.completed_at is None
+
+
 class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
     @mock.patch("insights.models.comment.utils.produce_internal_event")
     @mock.patch("insights.tasks.email.send_discussions_mentioned.delay")
@@ -621,6 +807,28 @@ class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
         assert mock_produce_event.called
         event = mock_produce_event.call_args.kwargs["event"]
         assert event.event == "$discussion_mention_created"
+
+    @mock.patch("insights.models.comment.utils.produce_internal_event")
+    @mock.patch("insights.tasks.email.send_discussions_mentioned.delay")
+    def test_cross_organization_mentions_are_filtered_out(
+        self, mock_send_email: mock.MagicMock, mock_produce_event: mock.MagicMock
+    ) -> None:
+        from insights.models import Organization, User
+
+        other_org = Organization.objects.create(name="Other Org")
+        other_user = User.objects.create_and_join(other_org, "outsider@other.com", None, first_name="Outsider")
+
+        self.client.post(
+            f"/api/projects/{self.team.id}/comments",
+            {
+                "content": "Mentioning external user",
+                "scope": "Notebook",
+                "mentions": [other_user.id],
+            },
+        )
+
+        mock_send_email.assert_not_called()
+        mock_produce_event.assert_not_called()
 
     @mock.patch("insights.models.comment.utils.produce_internal_event")
     @mock.patch("insights.tasks.email.send_discussions_mentioned.delay")
@@ -735,3 +943,195 @@ class TestCommentHelperFunctions(APIBaseTest):
     def test_extract_plain_text_from_rich_content(self, name: str, rich_content: dict | None, expected: str) -> None:
         result = extract_plain_text_from_rich_content(rich_content)
         assert result == expected
+
+
+class TestCommentTasks(APIBaseTest, QueryMatchingTest):
+    def _create_task(self, data: dict | None = None) -> Any:
+        payload = {"content": "fix the empty-state copy", "scope": "Replay", "is_task": True}
+        if data:
+            payload.update(data)
+        return self.client.post(f"/api/projects/{self.team.id}/comments", payload).json()
+
+    def test_creates_task_successfully(self) -> None:
+        response = self._create_task()
+        assert response["is_task"] is True
+        assert response["completed_at"] is None
+        assert response["completed_by"] is None
+
+    def test_default_is_task_is_false(self) -> None:
+        response = self.client.post(
+            f"/api/projects/{self.team.id}/comments",
+            {"content": "regular comment", "scope": "Notebook"},
+        ).json()
+        assert response["is_task"] is False
+
+    @parameterized.expand(
+        [
+            (
+                "reply_cannot_be_task",
+                lambda self: {
+                    "content": "reply",
+                    "scope": "Replay",
+                    "is_task": True,
+                    "source_comment": self._create_task()["id"],
+                },
+                "Replies cannot be tasks.",
+            ),
+            (
+                "emoji_reaction_cannot_be_task",
+                lambda _self: {
+                    "content": "👍",
+                    "scope": "Replay",
+                    "is_task": True,
+                    "item_context": {"is_emoji": True},
+                },
+                "Emoji reactions cannot be tasks.",
+            ),
+        ]
+    )
+    def test_invalid_task_creation(self, _name: str, payload_fn: Any, expected_detail: str) -> None:
+        payload = payload_fn(self)
+        response = self.client.post(f"/api/projects/{self.team.id}/comments", payload, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["detail"] == expected_detail
+
+    def test_is_task_immutable_after_creation(self) -> None:
+        task = self._create_task()
+
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/comments/{task['id']}",
+            {"is_task": False},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["detail"] == "Cannot change task state after creation."
+
+        # Same value is a no-op and should be accepted
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/comments/{task['id']}",
+            {"is_task": True, "content": "edited"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["is_task"] is True
+
+    def test_complete_and_reopen_roundtrip(self) -> None:
+        task = self._create_task()
+
+        complete_response = self.client.post(f"/api/projects/{self.team.id}/comments/{task['id']}/complete")
+        assert complete_response.status_code == status.HTTP_200_OK
+        assert complete_response.json()["completed_at"] is not None
+        assert complete_response.json()["completed_by"]["id"] == self.user.id
+
+        # Already complete -> 400
+        repeat = self.client.post(f"/api/projects/{self.team.id}/comments/{task['id']}/complete")
+        assert repeat.status_code == status.HTTP_400_BAD_REQUEST
+        assert repeat.json()["detail"] == "Task is already complete"
+
+        reopen_response = self.client.post(f"/api/projects/{self.team.id}/comments/{task['id']}/reopen")
+        assert reopen_response.status_code == status.HTTP_200_OK
+        assert reopen_response.json()["completed_at"] is None
+        assert reopen_response.json()["completed_by"] is None
+
+        # Already open -> 400
+        repeat = self.client.post(f"/api/projects/{self.team.id}/comments/{task['id']}/reopen")
+        assert repeat.status_code == status.HTTP_400_BAD_REQUEST
+        assert repeat.json()["detail"] == "Task is already open"
+
+    @parameterized.expand(
+        [
+            ("complete_endpoint", "complete"),
+            ("reopen_endpoint", "reopen"),
+        ]
+    )
+    def test_state_endpoints_reject_non_tasks(self, _name: str, endpoint: str) -> None:
+        comment = self.client.post(
+            f"/api/projects/{self.team.id}/comments",
+            {"content": "regular", "scope": "Notebook"},
+        ).json()
+
+        response = self.client.post(f"/api/projects/{self.team.id}/comments/{comment['id']}/{endpoint}")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_complete_writes_activity_log_entry(self) -> None:
+        recording_id = "01964c81-1234-5678-90ab-cdef01234567"
+        task = self._create_task({"item_id": recording_id})
+        self.client.post(f"/api/projects/{self.team.id}/comments/{task['id']}/complete")
+        self.client.post(f"/api/projects/{self.team.id}/comments/{task['id']}/reopen")
+
+        activities = list(
+            ActivityLog.objects.filter(
+                team_id=self.team.id,
+                item_id=recording_id,
+                activity__in=["completed task", "reopened task"],
+            ).order_by("created_at")
+        )
+        assert [a.activity for a in activities] == ["completed task", "reopened task"]
+        assert all(a.scope == "Replay" for a in activities)
+
+    @parameterized.expand(
+        [
+            ("complete_endpoint_404", "complete"),
+            ("reopen_endpoint_404", "reopen"),
+        ]
+    )
+    def test_state_endpoints_404_on_soft_deleted_task(self, _name: str, endpoint: str) -> None:
+        task = self._create_task()
+        self.client.patch(f"/api/projects/{self.team.id}/comments/{task['id']}", {"deleted": True})
+
+        response = self.client.post(f"/api/projects/{self.team.id}/comments/{task['id']}/{endpoint}")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    @parameterized.expand(
+        [
+            ("null_on_task_rejected", True, status.HTTP_400_BAD_REQUEST),
+            ("null_on_comment_rejected", False, status.HTTP_400_BAD_REQUEST),
+        ]
+    )
+    def test_patch_is_task_null_is_rejected(self, _name: str, create_as_task: bool, expected_status: int) -> None:
+        if create_as_task:
+            comment_id = self._create_task()["id"]
+        else:
+            comment_id = self.client.post(
+                f"/api/projects/{self.team.id}/comments",
+                {"content": "regular", "scope": "Notebook"},
+            ).json()["id"]
+
+        response = self.client.patch(
+            f"/api/projects/{self.team.id}/comments/{comment_id}",
+            {"is_task": None},
+            format="json",
+        )
+        assert response.status_code == expected_status
+
+    def test_legacy_null_is_task_rows_serialize_as_false(self) -> None:
+        # Simulate a row written before this feature shipped, with is_task=None.
+        legacy = Comment.objects.create(team=self.team, scope="Notebook", content="legacy", created_by=self.user)
+        Comment.objects.filter(id=legacy.id).update(is_task=None)
+
+        response = self.client.get(f"/api/projects/{self.team.id}/comments/{legacy.id}")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["is_task"] is False
+
+    @parameterized.expand(
+        [
+            ("kind_any", "kind=any", 3),
+            ("kind_comment", "kind=comment", 1),
+            ("kind_task", "kind=task", 2),
+            ("kind_task_open", "kind=task&completed=open", 1),
+            ("kind_task_completed", "kind=task&completed=completed", 1),
+            ("completed_open_without_kind_ignored", "completed=open", 3),
+            ("completed_completed_without_kind_ignored", "completed=completed", 3),
+        ]
+    )
+    def test_kind_and_completed_filters(self, _name: str, query: str, expected_count: int) -> None:
+        # 1 plain comment, 1 open task, 1 completed task
+        self._create_task({"content": "open task"})
+        completed_task = self._create_task({"content": "completed task"})
+        self.client.post(f"/api/projects/{self.team.id}/comments/{completed_task['id']}/complete")
+        self.client.post(
+            f"/api/projects/{self.team.id}/comments",
+            {"content": "regular", "scope": "Notebook"},
+        )
+
+        response = self.client.get(f"/api/projects/{self.team.id}/comments?{query}")
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == expected_count

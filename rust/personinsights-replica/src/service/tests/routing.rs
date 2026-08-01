@@ -24,31 +24,33 @@
 
 use std::sync::Arc;
 
-use personinsights_proto::personinsights::replica::v1::person_insights_replica_server::PersonInsightsReplica;
+use personinsights_proto::personinsights::replica::v1::person_hog_replica_server::PersonHogReplica;
 use personinsights_proto::personinsights::types::v1::{
-    CheckCohortMembershipRequest, GetDistinctIdsForPersonRequest, GetDistinctIdsForPersonsRequest,
-    GetGroupRequest, GetGroupTypeMappingsByProjectIdRequest,
+    CheckCohortMembershipRequest, CountCohortMembersRequest, GetDistinctIdsForPersonRequest,
+    GetDistinctIdsForPersonsRequest, GetGroupRequest, GetGroupTypeMappingsByProjectIdRequest,
     GetGroupTypeMappingsByProjectIdsRequest, GetGroupTypeMappingsByTeamIdRequest,
     GetGroupTypeMappingsByTeamIdsRequest, GetGroupsBatchRequest, GetGroupsRequest,
     GetHashKeyOverrideContextRequest, GetPersonByDistinctIdRequest, GetPersonByUuidRequest,
     GetPersonRequest, GetPersonsByDistinctIdsInTeamRequest, GetPersonsByDistinctIdsRequest,
-    GetPersonsByUuidsRequest, GetPersonsRequest, TeamDistinctId,
+    GetPersonsByUuidsRequest, GetPersonsRequest, ListCohortMemberIdsRequest, TeamDistinctId,
 };
 use tonic::Request;
 
 use super::mocks::{ConsistencyTrackingStorage, SuccessStorage};
-use crate::service::PersonInsightsReplicaService;
+use crate::service::PersonHogReplicaService;
 use crate::storage;
 
 fn strong_consistency() -> Option<personinsights_proto::personinsights::types::v1::ReadOptions> {
     Some(personinsights_proto::personinsights::types::v1::ReadOptions {
         consistency: personinsights_proto::personinsights::types::v1::ConsistencyLevel::Strong.into(),
+        ..Default::default()
     })
 }
 
 fn eventual_consistency() -> Option<personinsights_proto::personinsights::types::v1::ReadOptions> {
     Some(personinsights_proto::personinsights::types::v1::ReadOptions {
         consistency: personinsights_proto::personinsights::types::v1::ConsistencyLevel::Eventual.into(),
+        ..Default::default()
     })
 }
 
@@ -58,7 +60,7 @@ fn eventual_consistency() -> Option<personinsights_proto::personinsights::types:
 
 #[tokio::test]
 async fn test_get_person_rejects_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_person(Request::new(GetPersonRequest {
@@ -75,7 +77,7 @@ async fn test_get_person_rejects_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_person_accepts_eventual_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_person(Request::new(GetPersonRequest {
@@ -90,7 +92,7 @@ async fn test_get_person_accepts_eventual_consistency() {
 
 #[tokio::test]
 async fn test_get_person_accepts_unspecified_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_person(Request::new(GetPersonRequest {
@@ -105,7 +107,7 @@ async fn test_get_person_accepts_unspecified_consistency() {
 
 #[tokio::test]
 async fn test_get_persons_rejects_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_persons(Request::new(GetPersonsRequest {
@@ -121,7 +123,7 @@ async fn test_get_persons_rejects_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_person_by_uuid_rejects_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_person_by_uuid(Request::new(GetPersonByUuidRequest {
@@ -137,7 +139,7 @@ async fn test_get_person_by_uuid_rejects_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_persons_by_uuids_rejects_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_persons_by_uuids(Request::new(GetPersonsByUuidsRequest {
@@ -153,7 +155,7 @@ async fn test_get_persons_by_uuids_rejects_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_person_by_distinct_id_rejects_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_person_by_distinct_id(Request::new(GetPersonByDistinctIdRequest {
@@ -169,7 +171,7 @@ async fn test_get_person_by_distinct_id_rejects_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_persons_by_distinct_ids_in_team_rejects_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_persons_by_distinct_ids_in_team(Request::new(GetPersonsByDistinctIdsInTeamRequest {
@@ -185,7 +187,7 @@ async fn test_get_persons_by_distinct_ids_in_team_rejects_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_persons_by_distinct_ids_rejects_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_persons_by_distinct_ids(Request::new(GetPersonsByDistinctIdsRequest {
@@ -207,7 +209,7 @@ async fn test_get_persons_by_distinct_ids_rejects_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_group_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_group(Request::new(GetGroupRequest {
@@ -223,7 +225,7 @@ async fn test_get_group_accepts_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_group_accepts_eventual_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_group(Request::new(GetGroupRequest {
@@ -239,7 +241,7 @@ async fn test_get_group_accepts_eventual_consistency() {
 
 #[tokio::test]
 async fn test_get_groups_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_groups(Request::new(GetGroupsRequest {
@@ -254,7 +256,7 @@ async fn test_get_groups_accepts_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_groups_batch_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_groups_batch(Request::new(GetGroupsBatchRequest {
@@ -268,7 +270,7 @@ async fn test_get_groups_batch_accepts_strong_consistency() {
 
 #[tokio::test]
 async fn test_check_cohort_membership_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .check_cohort_membership(Request::new(CheckCohortMembershipRequest {
@@ -283,13 +285,14 @@ async fn test_check_cohort_membership_accepts_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_distinct_ids_for_person_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_distinct_ids_for_person(Request::new(GetDistinctIdsForPersonRequest {
             team_id: 1,
             person_id: 1,
             read_options: strong_consistency(),
+            limit: None,
         }))
         .await;
 
@@ -298,13 +301,14 @@ async fn test_get_distinct_ids_for_person_accepts_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_distinct_ids_for_persons_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_distinct_ids_for_persons(Request::new(GetDistinctIdsForPersonsRequest {
             team_id: 1,
             person_ids: vec![1],
             read_options: strong_consistency(),
+            limit_per_person: None,
         }))
         .await;
 
@@ -313,7 +317,7 @@ async fn test_get_distinct_ids_for_persons_accepts_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_group_type_mappings_by_team_id_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_group_type_mappings_by_team_id(Request::new(GetGroupTypeMappingsByTeamIdRequest {
@@ -327,7 +331,7 @@ async fn test_get_group_type_mappings_by_team_id_accepts_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_group_type_mappings_by_team_ids_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_group_type_mappings_by_team_ids(Request::new(GetGroupTypeMappingsByTeamIdsRequest {
@@ -341,7 +345,7 @@ async fn test_get_group_type_mappings_by_team_ids_accepts_strong_consistency() {
 
 #[tokio::test]
 async fn test_get_group_type_mappings_by_project_id_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_group_type_mappings_by_project_id(Request::new(
@@ -357,7 +361,7 @@ async fn test_get_group_type_mappings_by_project_id_accepts_strong_consistency()
 
 #[tokio::test]
 async fn test_get_group_type_mappings_by_project_ids_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_group_type_mappings_by_project_ids(Request::new(
@@ -385,7 +389,7 @@ async fn test_get_group_type_mappings_by_project_ids_accepts_strong_consistency(
 
 #[tokio::test]
 async fn test_get_hash_key_override_context_without_person_check_accepts_strong_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_hash_key_override_context(Request::new(GetHashKeyOverrideContextRequest {
@@ -407,7 +411,7 @@ async fn test_get_hash_key_override_context_with_person_check_accepts_strong_con
     // Note: When personinsights-leader is implemented, strong consistency for person data will
     // require routing to the leader service. This test documents the current behavior where
     // we query the primary database directly as an interim solution.
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_hash_key_override_context(Request::new(GetHashKeyOverrideContextRequest {
@@ -423,7 +427,7 @@ async fn test_get_hash_key_override_context_with_person_check_accepts_strong_con
 
 #[tokio::test]
 async fn test_get_hash_key_override_context_with_person_check_accepts_eventual_consistency() {
-    let service = PersonInsightsReplicaService::new(Arc::new(SuccessStorage));
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
 
     let result = service
         .get_hash_key_override_context(Request::new(GetHashKeyOverrideContextRequest {
@@ -452,13 +456,14 @@ async fn test_get_hash_key_override_context_with_person_check_accepts_eventual_c
 #[tokio::test]
 async fn test_get_distinct_ids_for_person_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_distinct_ids_for_person(Request::new(GetDistinctIdsForPersonRequest {
             team_id: 1,
             person_id: 1,
             read_options: strong_consistency(),
+            limit: None,
         }))
         .await
         .expect("RPC should succeed");
@@ -472,13 +477,14 @@ async fn test_get_distinct_ids_for_person_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_get_distinct_ids_for_person_routes_eventual_to_replica() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_distinct_ids_for_person(Request::new(GetDistinctIdsForPersonRequest {
             team_id: 1,
             person_id: 1,
             read_options: eventual_consistency(),
+            limit: None,
         }))
         .await
         .expect("RPC should succeed");
@@ -492,13 +498,14 @@ async fn test_get_distinct_ids_for_person_routes_eventual_to_replica() {
 #[tokio::test]
 async fn test_get_distinct_ids_for_person_routes_unspecified_to_replica() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_distinct_ids_for_person(Request::new(GetDistinctIdsForPersonRequest {
             team_id: 1,
             person_id: 1,
             read_options: None,
+            limit: None,
         }))
         .await
         .expect("RPC should succeed");
@@ -512,13 +519,14 @@ async fn test_get_distinct_ids_for_person_routes_unspecified_to_replica() {
 #[tokio::test]
 async fn test_get_distinct_ids_for_persons_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_distinct_ids_for_persons(Request::new(GetDistinctIdsForPersonsRequest {
             team_id: 1,
             person_ids: vec![1],
             read_options: strong_consistency(),
+            limit_per_person: None,
         }))
         .await
         .expect("RPC should succeed");
@@ -536,7 +544,7 @@ async fn test_get_distinct_ids_for_persons_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_check_cohort_membership_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .check_cohort_membership(Request::new(CheckCohortMembershipRequest {
@@ -556,13 +564,193 @@ async fn test_check_cohort_membership_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_check_cohort_membership_routes_eventual_to_replica() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .check_cohort_membership(Request::new(CheckCohortMembershipRequest {
             person_id: 1,
             cohort_ids: vec![1],
             read_options: eventual_consistency(),
+        }))
+        .await
+        .expect("RPC should succeed");
+
+    assert_eq!(
+        tracking_storage.last_consistency(),
+        Some(storage::postgres::ConsistencyLevel::Eventual)
+    );
+}
+
+#[tokio::test]
+async fn test_count_cohort_members_accepts_strong_consistency() {
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
+
+    let result = service
+        .count_cohort_members(Request::new(CountCohortMembersRequest {
+            cohort_ids: vec![1],
+            read_options: strong_consistency(),
+        }))
+        .await;
+
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+async fn test_count_cohort_members_accepts_eventual_consistency() {
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
+
+    let result = service
+        .count_cohort_members(Request::new(CountCohortMembersRequest {
+            cohort_ids: vec![1],
+            read_options: eventual_consistency(),
+        }))
+        .await;
+
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+async fn test_count_cohort_members_routes_strong_to_primary() {
+    let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
+
+    service
+        .count_cohort_members(Request::new(CountCohortMembersRequest {
+            cohort_ids: vec![1],
+            read_options: strong_consistency(),
+        }))
+        .await
+        .expect("RPC should succeed");
+
+    assert_eq!(
+        tracking_storage.last_consistency(),
+        Some(storage::postgres::ConsistencyLevel::Strong)
+    );
+}
+
+#[tokio::test]
+async fn test_count_cohort_members_routes_eventual_to_replica() {
+    let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
+
+    service
+        .count_cohort_members(Request::new(CountCohortMembersRequest {
+            cohort_ids: vec![1],
+            read_options: eventual_consistency(),
+        }))
+        .await
+        .expect("RPC should succeed");
+
+    assert_eq!(
+        tracking_storage.last_consistency(),
+        Some(storage::postgres::ConsistencyLevel::Eventual)
+    );
+}
+
+#[tokio::test]
+async fn test_count_cohort_members_routes_unspecified_to_replica() {
+    let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
+
+    service
+        .count_cohort_members(Request::new(CountCohortMembersRequest {
+            cohort_ids: vec![1],
+            read_options: None,
+        }))
+        .await
+        .expect("RPC should succeed");
+
+    assert_eq!(
+        tracking_storage.last_consistency(),
+        Some(storage::postgres::ConsistencyLevel::Eventual)
+    );
+}
+
+#[tokio::test]
+async fn test_list_cohort_member_ids_accepts_strong_consistency() {
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
+
+    let result = service
+        .list_cohort_member_ids(Request::new(ListCohortMemberIdsRequest {
+            cohort_id: 1,
+            cursor: 0,
+            limit: 100,
+            read_options: strong_consistency(),
+        }))
+        .await;
+
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+async fn test_list_cohort_member_ids_accepts_eventual_consistency() {
+    let service = PersonHogReplicaService::new(Arc::new(SuccessStorage));
+
+    let result = service
+        .list_cohort_member_ids(Request::new(ListCohortMemberIdsRequest {
+            cohort_id: 1,
+            cursor: 0,
+            limit: 100,
+            read_options: eventual_consistency(),
+        }))
+        .await;
+
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+async fn test_list_cohort_member_ids_routes_strong_to_primary() {
+    let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
+
+    service
+        .list_cohort_member_ids(Request::new(ListCohortMemberIdsRequest {
+            cohort_id: 1,
+            cursor: 0,
+            limit: 100,
+            read_options: strong_consistency(),
+        }))
+        .await
+        .expect("RPC should succeed");
+
+    assert_eq!(
+        tracking_storage.last_consistency(),
+        Some(storage::postgres::ConsistencyLevel::Strong)
+    );
+}
+
+#[tokio::test]
+async fn test_list_cohort_member_ids_routes_eventual_to_replica() {
+    let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
+
+    service
+        .list_cohort_member_ids(Request::new(ListCohortMemberIdsRequest {
+            cohort_id: 1,
+            cursor: 0,
+            limit: 100,
+            read_options: eventual_consistency(),
+        }))
+        .await
+        .expect("RPC should succeed");
+
+    assert_eq!(
+        tracking_storage.last_consistency(),
+        Some(storage::postgres::ConsistencyLevel::Eventual)
+    );
+}
+
+#[tokio::test]
+async fn test_list_cohort_member_ids_routes_unspecified_to_replica() {
+    let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
+
+    service
+        .list_cohort_member_ids(Request::new(ListCohortMemberIdsRequest {
+            cohort_id: 1,
+            cursor: 0,
+            limit: 100,
+            read_options: None,
         }))
         .await
         .expect("RPC should succeed");
@@ -580,7 +768,7 @@ async fn test_check_cohort_membership_routes_eventual_to_replica() {
 #[tokio::test]
 async fn test_get_group_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_group(Request::new(GetGroupRequest {
@@ -601,7 +789,7 @@ async fn test_get_group_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_get_group_routes_eventual_to_replica() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_group(Request::new(GetGroupRequest {
@@ -622,7 +810,7 @@ async fn test_get_group_routes_eventual_to_replica() {
 #[tokio::test]
 async fn test_get_groups_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_groups(Request::new(GetGroupsRequest {
@@ -642,7 +830,7 @@ async fn test_get_groups_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_get_groups_batch_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_groups_batch(Request::new(GetGroupsBatchRequest {
@@ -661,7 +849,7 @@ async fn test_get_groups_batch_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_get_group_type_mappings_by_team_id_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_group_type_mappings_by_team_id(Request::new(GetGroupTypeMappingsByTeamIdRequest {
@@ -680,7 +868,7 @@ async fn test_get_group_type_mappings_by_team_id_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_get_group_type_mappings_by_team_ids_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_group_type_mappings_by_team_ids(Request::new(GetGroupTypeMappingsByTeamIdsRequest {
@@ -699,7 +887,7 @@ async fn test_get_group_type_mappings_by_team_ids_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_get_group_type_mappings_by_project_id_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_group_type_mappings_by_project_id(Request::new(
@@ -720,7 +908,7 @@ async fn test_get_group_type_mappings_by_project_id_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_get_group_type_mappings_by_project_ids_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_group_type_mappings_by_project_ids(Request::new(
@@ -745,7 +933,7 @@ async fn test_get_group_type_mappings_by_project_ids_routes_strong_to_primary() 
 #[tokio::test]
 async fn test_get_hash_key_override_context_routes_strong_to_primary() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_hash_key_override_context(Request::new(GetHashKeyOverrideContextRequest {
@@ -766,7 +954,7 @@ async fn test_get_hash_key_override_context_routes_strong_to_primary() {
 #[tokio::test]
 async fn test_get_hash_key_override_context_routes_eventual_to_replica() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_hash_key_override_context(Request::new(GetHashKeyOverrideContextRequest {
@@ -787,7 +975,7 @@ async fn test_get_hash_key_override_context_routes_eventual_to_replica() {
 #[tokio::test]
 async fn test_get_hash_key_override_context_routes_unspecified_to_replica() {
     let tracking_storage = Arc::new(ConsistencyTrackingStorage::new());
-    let service = PersonInsightsReplicaService::new(tracking_storage.clone());
+    let service = PersonHogReplicaService::new(tracking_storage.clone());
 
     service
         .get_hash_key_override_context(Request::new(GetHashKeyOverrideContextRequest {

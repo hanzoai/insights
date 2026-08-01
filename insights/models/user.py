@@ -1,32 +1,42 @@
 from collections.abc import Callable
 from functools import cached_property
-from typing import Any, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, NoReturn, Optional, TypedDict, cast
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.management.base import CommandError
 from django.db import models, transaction
-from django.utils import timezone
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
+from django_deprecate_fields import deprecate_field
 from rest_framework.exceptions import ValidationError
 
 from insights.cloud_utils import get_cached_instance_license, is_cloud
 from insights.constants import AvailableFeature
 from insights.exceptions_capture import capture_exception
-from insights.helpers.email_utils import EmailNormalizer
+from insights.helpers.email_utils import EmailLookupHandler, EmailNormalizer
 from insights.models.activity_logging.model_activity import ModelActivityMixin
 from insights.settings import INSTANCE_TAG, SITE_URL
 from insights.utils import get_instance_realm
 
 from .organization import Organization, OrganizationMembership
-from .personal_api_key import PersonalAPIKey, hash_key_value
 from .team import Team
 from .utils import UUIDTClassicModel, generate_random_token, sane_repr
+
+if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import RelatedManager
+
+    from social_django.models import UserSocialAuth
 
 
 class Notifications(TypedDict, total=False):
     plugin_disabled: bool
     error_tracking_issue_assigned: bool
     error_tracking_weekly_digest: bool
+    error_tracking_weekly_digest_project_enabled: dict[
+        str, Any
+    ]  # Maps team_id (str) to enabled status (True = included). None/missing = not configured (auto-select on first digest).
     discussions_mentioned: bool
     project_weekly_digest_disabled: dict[str, Any]  # Maps project ID to disabled status, str is the team_id as a string
     all_weekly_digest_disabled: bool
@@ -35,18 +45,33 @@ class Notifications(TypedDict, total=False):
     )
     project_api_key_exposed: bool
     materialized_view_sync_failed: bool
+    web_analytics_weekly_digest: bool
+    web_analytics_weekly_digest_project_enabled: dict[str, bool]
+    organization_member_join_email_disabled: dict[
+        str, bool
+    ]  # Maps organization ID (str) to disabled status (True = do not email when a new member joins)
+    realtime_notifications_disabled: dict[
+        str, dict[str, bool]
+    ]  # Maps notification_type (str) to {team_id (str) -> disabled (True = muted)}. Absence = enabled (opt-out default).
+    pipeline_notifications_disabled: dict[
+        str, bool
+    ]  # Maps pipeline ID (e.g. "insights_function:<uuid>", "plugin_config:<id>", "batch_export:<uuid>") to disabled status (True = do not email for this pipeline)
 
 
 NOTIFICATION_DEFAULTS: Notifications = {
-    "plugin_disabled": True,  # Catch all for any Pipeline destination issue (plugins, custom functions, batch exports)
+    "plugin_disabled": True,  # Catch all for any Pipeline destination issue (plugins, script functions, batch exports)
     "error_tracking_issue_assigned": True,  # Error tracking issue assignment
     "error_tracking_weekly_digest": True,  # Error tracking weekly digest enabled by default
     "discussions_mentioned": True,  # Mentions in comments enabled by default
     "project_weekly_digest_disabled": {},  # Empty dict by default - no projects disabled
     "all_weekly_digest_disabled": False,  # Weekly digests enabled by default
     "data_pipeline_error_threshold": 0.01,  # Default: notify when failure rate exceeds 1%
-    "project_api_key_exposed": True,  # Project API key exposure alerts enabled by default
+    "project_api_key_exposed": True,  # Private project API key (secure API key) exposure alerts enabled by default
     "materialized_view_sync_failed": False,  # Materialized view failure disabled by default
+    "web_analytics_weekly_digest": True,  # Web analytics weekly digest enabled by default
+    "organization_member_join_email_disabled": {},  # No per-org opt-out until user configures
+    "realtime_notifications_disabled": {},  # No opt-outs by default
+    "pipeline_notifications_disabled": {},  # No per-pipeline opt-out until user configures
 }
 
 # We don't need the following attributes in most cases, so we defer them by default
@@ -70,9 +95,15 @@ class UserManager(BaseUserManager):
     def get_queryset(self):
         return super().get_queryset().defer(*DEFERED_ATTRS)
 
-    model: type["User"]
-
     use_in_migrations = True
+
+    def get_by_natural_key(self, username: str | None) -> "User":  # type: ignore[override]
+        # Case-insensitive lookup, ModelBackend.authenticate calls this method,
+        # is_active filtering happens later in ModelBackend.user_can_authenticate, so we don't filter on it here.
+        user = EmailLookupHandler.get_user_by_email(username, is_active=None) if username else None
+        if user is None:
+            raise User.DoesNotExist("User with that email does not exist.")
+        return user
 
     def create_user(self, email: str, password: Optional[str], first_name: str, **extra_fields) -> "User":
         """Create and save a User with the given email and password."""
@@ -80,12 +111,29 @@ class UserManager(BaseUserManager):
             raise ValueError("Email must be provided!")
         email = EmailNormalizer.normalize(email)
         extra_fields.setdefault("distinct_id", generate_random_token())
-        user = self.model(email=email, first_name=first_name, **extra_fields)
+        extra_fields.setdefault("ui_configuration", default_ui_configuration_for_new_users())
+        user = cast("User", self.model(email=email, first_name=first_name, **extra_fields))
         if password is not None:
             # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password (validation happens at serializer/view layer before reaching this method)
             user.set_password(password)
         user.save()
         return user
+
+    def create_superuser(self, *args: Any, **kwargs: Any) -> NoReturn:
+        # Insights has no superuser concept — the `is_superuser` field was removed in 2020 (PR #2026)
+        # and `User.is_superuser` is now a read-only alias for `is_staff`. Django's `createsuperuser`
+        # command calls this method, so we shadow it here to fail with guidance instead of a confusing
+        # `AttributeError`. (We can't override the command itself: `django.contrib.auth` is listed
+        # before `insights` in INSTALLED_APPS, so its `createsuperuser` always wins resolution.)
+        raise CommandError(
+            "Insights doesn't support `createsuperuser`. There's no superuser concept here — "
+            "`is_superuser` is a read-only alias for `is_staff`.\n\n"
+            "To set up a local admin instead:\n\n"
+            "  • Demo environment:  python manage.py generate_demo_data\n"
+            "  • Existing account:  sign up in the web app, then grant staff access:\n"
+            '      python manage.py shell -c "from insights.models import User; '
+            "u = User.objects.get(email='you@example.com'); u.is_staff = True; u.save()\""
+        )
 
     def bootstrap(
         self,
@@ -134,23 +182,25 @@ class UserManager(BaseUserManager):
             user.join(organization=organization, level=level)
             return user
 
-    def get_from_personal_api_key(self, key_value: str) -> Optional["User"]:
-        try:
-            personal_api_key: PersonalAPIKey = (
-                PersonalAPIKey.objects.select_related("user")
-                .filter(user__is_active=True)
-                .get(secure_value=hash_key_value(key_value))
-            )
-        except PersonalAPIKey.DoesNotExist:
-            return None
-        else:
-            personal_api_key.last_used_at = timezone.now()
-            personal_api_key.save()
-            return personal_api_key.user
-
 
 def events_column_config_default() -> dict[str, Any]:
     return {"active": "DEFAULT"}
+
+
+# New users start with a slimmer sidebar. Existing users keep ui_configuration NULL, which the
+# frontend resolves as "everything shown" (their pre-customization experience). Absent keys also
+# mean "shown", so this only lists the elements hidden by default for new accounts. The shape must
+# stay valid against the UserUIConfiguration schema (see frontend/src/queries/schema/schema-general.ts).
+def default_ui_configuration_for_new_users() -> dict[str, Any]:
+    return {
+        "version": 1,
+        "sidebar": {
+            "items": {
+                "files": {"visible": False},
+                "starred": {"visible": False},
+            },
+        },
+    }
 
 
 class ThemeMode(models.TextChoices):
@@ -165,9 +215,16 @@ class ShortcutPosition(models.TextChoices):
     HIDDEN = "hidden", "Hidden"
 
 
-class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
+class OnboardingSkippedReason(models.TextChoices):
+    DELEGATED = "delegated", "Delegated to teammate"
+    LATER = "later", "Skipped for later"
+    OTHER = "other", "Other"
+    PROVISIONED = "provisioned", "Account provisioned by a partner"
+
+
+class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):  # type: ignore[django-manager-missing]
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS: list[str] = []
+    REQUIRED_FIELDS = []
 
     DISABLED = "disabled"
     TOOLBAR = "toolbar"
@@ -182,9 +239,9 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
     current_team = models.ForeignKey("insights.Team", models.SET_NULL, null=True, related_name="teams_currently+")
     email = models.EmailField(_("email address"), unique=True)
     pending_email = models.EmailField(_("pending email address awaiting verification"), null=True, blank=True)
-    temporary_token = models.CharField(max_length=200, null=True, blank=True, unique=True)
     distinct_id = models.CharField(max_length=200, null=True, blank=True, unique=True)
     is_email_verified = models.BooleanField(null=True, blank=True)
+    credentials_reviewed_at = models.DateTimeField(null=True, blank=True)
     requested_password_reset_at = models.DateTimeField(null=True, blank=True)
     requested_2fa_reset_at = models.DateTimeField(null=True, blank=True)
     has_seen_product_intro_for = models.JSONField(null=True, blank=True)
@@ -197,7 +254,7 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
     role_at_organization = models.CharField(max_length=64, choices=ROLE_CHOICES, null=True, blank=True)
     # Preferences / configuration options
 
-    theme_mode = models.CharField(max_length=20, null=True, blank=True, choices=ThemeMode.choices)
+    theme_mode = models.CharField(max_length=20, null=True, blank=True, choices=ThemeMode)
     # These override the notification settings
     partial_notification_settings = models.JSONField(null=True, blank=True)
     anonymize_data = models.BooleanField(default=False, null=True, blank=True)
@@ -206,7 +263,7 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
     mascot_config = models.JSONField(null=True, blank=True)
     allow_sidebar_suggestions = models.BooleanField(default=True, null=True, blank=True)
     shortcut_position = models.CharField(
-        max_length=20, null=True, blank=True, choices=ShortcutPosition.choices, default=ShortcutPosition.ABOVE
+        max_length=20, null=True, blank=True, choices=ShortcutPosition, default=ShortcutPosition.ABOVE
     )
     passkeys_enabled_for_2fa = models.BooleanField(
         default=False,
@@ -214,53 +271,178 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
         blank=True,
         help_text="Whether passkeys are enabled for 2FA authentication. Users can disable this to use only TOTP for 2FA while keeping passkeys for login.",
     )
+    hide_mcp_hints = models.BooleanField(
+        default=False,
+        db_default=False,
+        null=False,
+        blank=False,
+        help_text="When true, the user has opted out of in-app hints promoting the Insights MCP integration after taking actions.",
+    )
+    # No field default on purpose: existing rows must stay NULL so long-time users keep seeing
+    # everything. New accounts get default_ui_configuration_for_new_users() via UserManager.create_user.
+    ui_configuration = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Per-user UI customization (currently sidebar element visibility), shaped like the "
+        "UserUIConfiguration schema. NULL means the user has no customization and every element shows.",
+    )
+
+    # Onboarding exit tracking. Set when the user explicitly leaves the onboarding flow (skip or delegate).
+    ONBOARDING_SKIPPED_REASONS = OnboardingSkippedReason.choices
+    onboarding_skipped_at = models.DateTimeField(null=True, blank=True)
+    onboarding_skipped_reason = models.CharField(
+        max_length=32, null=True, blank=True, choices=ONBOARDING_SKIPPED_REASONS
+    )
+    # Scopes the skip to a specific organization so a user who skips onboarding in Org A
+    # still sees onboarding when they switch to Org B. Read by `isOnboardingRedirectSuppressed`
+    # on the frontend, which only suppresses the redirect when this matches the current org.
+    onboarding_skipped_organization_id = models.UUIDField(null=True, blank=True)
+    # Index is created out-of-band via `CREATE INDEX CONCURRENTLY` in a follow-up migration —
+    # see 1138_onboarding_delegated_to_invite_index. `db_index=False` keeps Django's base AddField
+    # from emitting a blocking CREATE INDEX on insights_user during deploy.
+    onboarding_delegated_to_invite = models.ForeignKey(
+        "insights.OrganizationInvite",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="delegating_users",
+        db_index=False,
+    )
+    # Denormalized org id: filled when the delegation invite is created so that `/api/users/@me/`
+    # doesn't need an extra DB query per page load just to surface which org the delegation is scoped to.
+    # Not a ForeignKey to avoid extra ALTER TABLE lock overhead on insights_user. Dangling rows on
+    # Organization deletion are tolerated — frontend compares this against current org.id and
+    # treats a no-match the same as "no delegation"; consistency is restored the next time the
+    # delegation state transitions (accept/cancel/expire).
+    onboarding_delegated_to_organization_id = models.UUIDField(null=True, blank=True)
+    onboarding_delegation_accepted_at = models.DateTimeField(null=True, blank=True)
 
     # DEPRECATED
     events_column_config = models.JSONField(default=events_column_config_default)
     # DEPRECATED - Most emails are done via 3rd parties and we use their opt/in out tooling
     email_opt_in = models.BooleanField(default=False, null=True, blank=True)
+    # DEPRECATED - Replaced by toolbar OAuth flow. Kept for schema compatibility only;
+    # we never drop columns to avoid failures during rolling deploys.
+    temporary_token = deprecate_field(models.CharField(max_length=200, null=True, blank=True, unique=True))
 
     # Remove unused attributes from `AbstractUser`
-    username = None
+    username = cast(Any, None)
 
-    objects: UserManager = UserManager()
+    objects: UserManager = UserManager()  # type: ignore[assignment,misc]
+
+    # Reverse relation from social_django.UserSocialAuth.user (related_name="social_auth"); not a DB column.
+    if TYPE_CHECKING:
+        social_auth: RelatedManager[UserSocialAuth]
+
+    # Snapshot of is_active at load time, used by signal handlers to detect changes.
+    # Set in from_db(); not a model field.
+    _original_is_active: bool
 
     @classmethod
     def from_db(cls, db, field_names, values):
-        """
-        Track the original is_active value when loading from the database.
-
-        This allows signal handlers to detect when is_active actually changes,
-        avoiding unnecessary cache warming on unrelated user saves. The
-        _original_is_active attribute is compared against the current is_active
-        value in the user_saved signal handler.
-        """
         instance = super().from_db(db, field_names, values)
         instance._original_is_active = instance.is_active
         return instance
 
-    def refresh_from_db(self, using=None, fields=None, from_queryset=None):
-        """
-        Update _original_is_active when refreshing from the database.
-
-        This ensures the tracking stays accurate after explicit refresh calls.
-        The from_queryset parameter is accepted for django-stubs compatibility
-        but not passed to super() since Django 4.2 doesn't support it yet.
-        """
-        super().refresh_from_db(using=using, fields=fields)
-        if fields is None or "is_active" in fields:
-            self._original_is_active = self.is_active
-
     @property
-    def is_superuser(self) -> bool:
+    def is_superuser(self) -> bool:  # type: ignore[override]
         return self.is_staff
 
     @cached_property
     def teams(self):
         """
-        All teams the user has access to on any organization.
+        All teams the user has access to on any organization, taking into account project based permissioning
         """
         teams = Team.objects.filter(organization__members=self)
+        org_available_product_features = (
+            Organization.objects.filter(members=self).values_list("available_product_features", flat=True).first()
+        )
+        if org_available_product_features and len(org_available_product_features) > 0:
+            org_available_product_feature_keys = [feature["key"] for feature in org_available_product_features]
+            if AvailableFeature.ACCESS_CONTROL in org_available_product_feature_keys:
+                try:
+                    from ee.models.rbac.access_control import AccessControl
+                except ImportError:
+                    pass
+                else:
+                    # Get organization memberships for this user to check access levels
+                    org_memberships = OrganizationMembership.objects.filter(user=self).select_related("organization")
+
+                    # Get teams that are private (have access_level="none" restrictions)
+                    private_team_ids = set(
+                        AccessControl.objects.filter(
+                            resource="project", access_level="none", organization_member=None, role=None
+                        ).values_list("team_id", flat=True)
+                    )
+
+                    # Get teams where user has explicit access
+                    accessible_private_team_ids = set(
+                        AccessControl.objects.filter(
+                            resource="project",
+                            access_level__in=["member", "admin"],
+                            organization_member__in=[membership.id for membership in org_memberships],
+                        ).values_list("team_id", flat=True)
+                    )
+
+                    # Get teams where user has role-based access. Only honored when the
+                    # org has ROLE_BASED_ACCESS — same gate as the UI's "Roles" block on
+                    # the project access settings page (and as resource-level role overrides).
+                    role_based_access_supported = (
+                        AvailableFeature.ROLE_BASED_ACCESS in org_available_product_feature_keys
+                    )
+                    if role_based_access_supported:
+                        try:
+                            from ee.models.rbac.role import RoleMembership
+
+                            user_roles = RoleMembership.objects.filter(
+                                user=self, organization_member__in=[membership.id for membership in org_memberships]
+                            ).values_list("role_id", flat=True)
+
+                            role_accessible_team_ids = set(
+                                AccessControl.objects.filter(
+                                    resource="project", access_level__in=["member", "admin"], role__in=user_roles
+                                ).values_list("team_id", flat=True)
+                            )
+                        except ImportError:
+                            role_accessible_team_ids = set()
+                    else:
+                        role_accessible_team_ids = set()
+
+                    # Get organizations where user is admin or owner (have implicit access to all teams)
+                    organizations_where_user_is_admin = OrganizationMembership.objects.filter(
+                        user=self, level__gte=OrganizationMembership.Level.ADMIN
+                    ).values_list("organization_id", flat=True)
+
+                    # Filter teams to include:
+                    # - Teams that are not private (not in private_team_ids) OR
+                    # - Teams where user has explicit access OR
+                    # - Teams where user has role-based access OR
+                    # - Teams in organizations where user is admin/owner
+                    accessible_team_ids = accessible_private_team_ids | role_accessible_team_ids
+
+                    # Build the list of all accessible team IDs
+                    all_accessible_team_ids: set[int] = set()
+
+                    # Add teams from organizations where user is admin
+                    admin_teams = Team.objects.filter(
+                        organization__pk__in=organizations_where_user_is_admin, organization__members=self
+                    ).values_list("pk", flat=True)
+                    all_accessible_team_ids.update(admin_teams)
+
+                    # Add teams that are not private
+                    non_private_teams = (
+                        Team.objects.filter(organization__members=self)
+                        .exclude(pk__in=private_team_ids)
+                        .values_list("pk", flat=True)
+                    )
+                    all_accessible_team_ids.update(non_private_teams)
+
+                    # Add teams with explicit access
+                    all_accessible_team_ids.update(accessible_team_ids)
+
+                    # Apply the final filter
+                    teams = teams.filter(pk__in=all_accessible_team_ids)
+
         return teams.order_by("id")
 
     @cached_property
@@ -281,6 +463,61 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
                 self.save(update_fields=["current_team"])
         return self.current_team
 
+    def get_github_login(self) -> str | None:
+        """Resolve this user's GitHub login.
+
+        Precedence:
+        1. `UserIntegration` (kind=github) — user's own GitHub integration
+        2. `UserSocialAuth` (provider=github) — OAuth login linkage when no GitHub user integration exists
+        3. Team-level `Integration` (kind=github) `connecting_user_github_login` — identity stored on the
+           team's GitHub integration (e.g. captured at install). Still a supported integration path,
+           lowest precedence as an identity fallback when (1)/(2) do not yield a GitHub username.
+        """
+        from insights.models.user_integration import UserGitHubIntegration
+
+        prefetched_user_integrations = getattr(self, "_prefetched_github_user_integrations", None)
+        if prefetched_user_integrations is not None:
+            user_integrations = prefetched_user_integrations
+        else:
+            user_integrations = self.integrations.filter(kind="github")[:1]
+
+        for user_integration in user_integrations:
+            login = UserGitHubIntegration(user_integration).github_login
+            if login:
+                return login
+
+        for sa in self.social_auth.all():
+            if sa.provider != "github":
+                continue
+            login_val = getattr(sa, "_prefetched_github_login", None)
+            if login_val:
+                return str(login_val)
+            if isinstance(sa.extra_data, dict):
+                login = sa.extra_data.get("login")
+                if login:
+                    return str(login)
+
+        # Team-level GitHub integration: connecting_user_github_login from install / configuration.
+        prefetched_integrations = getattr(self, "_prefetched_github_integrations", None)
+        if prefetched_integrations is not None:
+            for integration in prefetched_integrations:
+                login = (integration.config or {}).get("connecting_user_github_login")
+                if login:
+                    return str(login)
+        else:
+            team_github_integration = (
+                self.integration_set.filter(kind="github")
+                .exclude(config__connecting_user_github_login=None)
+                .only("config")
+                .first()
+            )
+            if team_github_integration and isinstance(team_github_integration.config, dict):
+                login_val = team_github_integration.config.get("connecting_user_github_login")
+                if login_val:
+                    return str(login_val)
+
+        return None
+
     def join(
         self,
         *,
@@ -291,7 +528,7 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
             membership = OrganizationMembership.objects.create(user=self, organization=organization, level=level)
 
             self.current_organization = organization
-            if not organization.is_feature_available(AvailableFeature.ADVANCED_PERMISSIONS):
+            if not organization.is_feature_available(AvailableFeature.ACCESS_CONTROL):
                 # If project access control is NOT applicable, simply prefer open projects just in case
                 self.current_team = organization.teams.order_by("id").first()
             else:
@@ -306,24 +543,32 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
             self.save()
 
         # Auto-assign default role if configured
-        if organization.default_role_id_legacy:
+        if organization.default_role_id:
             try:
+                from ee.models import RoleMembership
 
                 RoleMembership.objects.create(
-                    role_id=organization.default_role_id_legacy, user=self, organization_member=membership
+                    role_id=organization.default_role_id, user=self, organization_member=membership
                 )
             except Exception as e:
                 capture_exception(
                     e,
                     {
                         "organization_id": organization.id,
-                        "role_id": organization.default_role_id_legacy,
+                        "role_id": organization.default_role_id,
                         "context": "default_role_assignment",
                         "tag": "platform-features",
                     },
                 )
 
-        self.update_billing_organization_users(organization)
+        # After role assignment, so role-granted project access is included. Covers joins
+        # that don't go through an invite (e.g. domain/SSO auto-join).
+        from insights.models.file_system.user_product_list import (  # noqa: PLC0415 - avoids a circular import
+            add_default_products_for_accessible_teams,
+        )
+
+        add_default_products_for_accessible_teams(self, organization)
+
         return membership
 
     @property
@@ -332,6 +577,11 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
             **NOTIFICATION_DEFAULTS,
             **(self.partial_notification_settings if self.partial_notification_settings else {}),
         }
+
+    def should_send_organization_member_join_email(self, organization_id: str) -> bool:
+        """Whether to email this user when someone joins the given organization (default: True)."""
+        disabled = self.notification_settings.get("organization_member_join_email_disabled") or {}
+        return not bool(disabled.get(str(organization_id), False))
 
     def leave(self, *, organization: Organization) -> None:
         membership: OrganizationMembership = OrganizationMembership.objects.get(user=self, organization=organization)
@@ -346,10 +596,12 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
                 )
                 self.team = self.current_team  # Update cached property
                 self.save()
-        self.update_billing_organization_users(organization)
 
     def update_billing_organization_users(self, organization: Organization) -> None:
-        pass
+        from ee.billing.billing_manager import BillingManager  # avoid circular import
+
+        if is_cloud() and get_cached_instance_license() is not None:
+            BillingManager(get_cached_instance_license(), self).update_billing_organization_users(organization)
 
     def get_analytics_metadata(self):
         team_member_count_all: int = (
@@ -397,3 +649,44 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
         }
 
     __repr__ = sane_repr("email", "first_name", "distinct_id")
+
+
+@receiver(pre_save, sender=User)
+def _revoke_sessions_on_user_deactivation(sender: type[User], instance: User, **kwargs: object) -> None:
+    """Revoke all of a user's login sessions when they are deactivated (is_active True→False).
+
+    A pre_save signal catches every deactivation path (Django admin, SCIM, ORM). The is_active
+    short-circuit keeps the extra query off the hot path — it only runs when saving an
+    already-inactive instance, never for active users.
+    """
+    if instance._state.adding or instance.is_active:
+        return
+    was_active = sender.objects.filter(pk=instance.pk).values_list("is_active", flat=True).first()
+    if was_active:
+        from insights.session.activity import revoke_other_sessions  # noqa: PLC0415 — avoids a circular import
+
+        revoke_other_sessions(instance, keep_session_key=None)
+
+
+@receiver(pre_save, sender=User)
+def _pause_loops_on_user_deactivation(sender: type[User], instance: User, **kwargs: object) -> None:
+    """Pause every loop owned by a user when they are deactivated (is_active True->False).
+
+    Loops execute as their owner for GitHub authorship and MCP identity (see
+    products/tasks/docs/LOOPS.md "Lifecycle and reconciliation"); deactivation is often the
+    security response and must not leave a loop still scheduled, or a sandbox still running,
+    under that owner's identity. Deferred to `transaction.on_commit` since pausing a loop's
+    Temporal schedule is an irreversible external side effect.
+    """
+    if instance._state.adding or instance.is_active:
+        return
+    was_active = sender.objects.filter(pk=instance.pk).values_list("is_active", flat=True).first()
+    if not was_active:
+        return
+
+    from products.tasks.backend.facade.loops import (  # noqa: PLC0415 (keeps loops/Temporal deps off the User model import path)
+        pause_loops_for_deactivated_user,
+    )
+
+    user_id = instance.pk
+    transaction.on_commit(lambda: pause_loops_for_deactivated_user(user_id))

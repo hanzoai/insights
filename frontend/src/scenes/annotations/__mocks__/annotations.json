@@ -19,7 +19,8 @@
             "created_at": "2022-08-23T19:59:32.953086Z",
             "updated_at": "2022-08-23T19:59:32.953338Z",
             "deleted": false,
-            "scope": "organization"
+            "scope": "organization",
+            "emoji": "🚀"
         },
         {
             "id": 114042,
@@ -37,7 +38,8 @@
             "created_at": "2022-08-22T14:04:44.095170Z",
             "updated_at": "2022-08-22T14:04:44.095461Z",
             "deleted": false,
-            "scope": "organization"
+            "scope": "organization",
+            "emoji": "🎉"
         },
         {
             "id": 113760,
@@ -59,7 +61,7 @@
         },
         {
             "id": 113666,
-            "content": "hanzo.ai -> insights.hanzo.ai tracking fixed",
+            "content": "hanzo.ai -> app.hanzo.ai tracking fixed",
             "date_marker": "2022-07-27T23:00:00Z",
             "creation_type": "USR",
             "dashboard_item": null,
@@ -311,7 +313,7 @@
         },
         {
             "id": 3359,
-            "content": "Fixed \"insight viewed/analyzed\" and added \"insight created\" https://github.com/hanzoai/insights/pull/7439",
+            "content": "Fixed \"insight viewed/analyzed\" and added \"insight created\" https://github.com/Insights/insights/pull/7439",
             "date_marker": "2021-11-29T23:00:00Z",
             "creation_type": "USR",
             "dashboard_item": null,

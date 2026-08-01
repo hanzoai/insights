@@ -1,84 +1,114 @@
 import './Dashboard.scss'
 
-import clsx from 'clsx'
 import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
-
-import { Button } from '@hanzo/elements'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { NotFound } from 'lib/components/NotFound'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { cn } from 'lib/utils/css-classes'
-import { DashboardEditBar } from 'scenes/dashboard/DashboardEditBar'
+import { DashboardFilterBar } from 'scenes/dashboard/DashboardFilters'
 import { DashboardItems } from 'scenes/dashboard/DashboardItems'
-import { DashboardReloadAction, LastRefreshText } from 'scenes/dashboard/DashboardReloadAction'
 import { DashboardLogicProps, dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 import { dataThemeLogic } from 'scenes/dataThemeLogic'
 import { InsightErrorState } from 'scenes/insights/EmptyStates'
 import { SceneExport } from 'scenes/sceneTypes'
-import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneStickyBar } from '~/layout/scenes/components/SceneStickyBar'
 import { ProductKey } from '~/queries/schema/schema-general'
-import { DashboardMode, DashboardPlacement, DashboardType, DataColorThemeModel, QueryBasedInsightModel } from '~/types'
+import { DashboardPlacement, DashboardType, DataColorThemeModel, QueryBasedInsightModel } from '~/types'
+
+import { useAttachedContext } from 'products/insights_ai/frontend/api/logics'
 
 import { teamLogic } from '../teamLogic'
-import { DashboardHeader } from './DashboardHeader'
-import { DashboardOverridesBanner } from './DashboardOverridesBanner'
-import { EmptyDashboardComponent } from './EmptyDashboardComponent'
 import { AddInsightToDashboardModal } from './addInsightToDashboardModal/AddInsightToDashboardModal'
 import { addInsightToDashboardLogic } from './addInsightToDashboardModalLogic'
+import { DashboardHeader } from './DashboardHeader'
+import { DashboardOverridesBanner } from './DashboardOverridesBanner'
+import { DashboardPublicAccessBanner } from './DashboardPublicAccessBanner'
+import { dashboardSubscribeNudgeLogic } from './dashboardSubscribeNudgeLogic'
+import { DashboardZoomControl } from './DashboardZoomControl'
+import { EmptyDashboardComponent } from './EmptyDashboardComponent'
+
+// Mount-only: runs the subscribe-nudge eligibility machinery for this dashboard; renders nothing.
+function DashboardSubscribeNudgeTrigger({ dashboardId }: { dashboardId: number }): null {
+    useMountedLogic(dashboardSubscribeNudgeLogic({ dashboardId }))
+    return null
+}
 
 interface DashboardProps {
     id?: string
     dashboard?: DashboardType<QueryBasedInsightModel>
     placement?: DashboardPlacement
     themes?: DataColorThemeModel[]
+    /** When set, the "Edit dashboard" menu item links to the dashboard editor with a back button pointing here. */
+    backTo?: { url: string; name: string }
+    showCreateAnomalyAlertButton?: boolean
+}
+
+const parseDashboardId = (id: string | undefined): number => (typeof id === 'string' ? parseInt(id, 10) : NaN)
+
+// Wrapper needed because SceneComponent<DashboardLogicProps> requires the component to accept
+// DashboardLogicProps, but DashboardScene takes { backTo? } (logic props are bound separately).
+function DashboardSceneWrapper(): JSX.Element {
+    return <DashboardScene />
 }
 
 export const scene: SceneExport<DashboardLogicProps> = {
-    component: DashboardScene,
+    component: DashboardSceneWrapper,
     logic: dashboardLogic,
-    paramsToProps: ({ params: { id, placement } }) => ({
-        id: parseInt(id as string),
-        placement,
-    }),
+    paramsToProps: ({ params: { id, placement } }) => ({ id: parseDashboardId(id), placement }),
     productKey: ProductKey.PRODUCT_ANALYTICS,
 }
 
-export function Dashboard({ id, dashboard, placement, themes }: DashboardProps): JSX.Element {
+export function Dashboard({
+    id,
+    dashboard,
+    placement,
+    themes,
+    backTo,
+    showCreateAnomalyAlertButton,
+}: DashboardProps): JSX.Element {
     useMountedLogic(dataThemeLogic({ themes }))
 
     return (
-        <BindLogic logic={dashboardLogic} props={{ id: parseInt(id as string), placement, dashboard }}>
-            <DashboardScene />
+        <BindLogic logic={dashboardLogic} props={{ id: parseDashboardId(id), placement, dashboard }}>
+            <DashboardScene backTo={backTo} showCreateAnomalyAlertButton={showCreateAnomalyAlertButton} />
         </BindLogic>
     )
 }
 
-function DashboardScene(): JSX.Element {
+function DashboardScene({
+    backTo,
+    showCreateAnomalyAlertButton,
+}: {
+    backTo?: { url: string; name: string }
+    showCreateAnomalyAlertButton?: boolean
+}): JSX.Element {
     const {
         placement,
         dashboard,
         canEditDashboard,
         tiles,
         itemsLoading,
-        dashboardMode,
+        layoutEditMode,
         dashboardFailedToLoad,
         accessDeniedToDashboard,
-        hasVariables,
     } = useValues(dashboardLogic)
+    const { layoutZoom } = useValues(dashboardLogic)
     const { currentTeamId } = useValues(teamLogic)
+    const { reportDashboardViewed, abortAnyRunningQuery, setLayoutZoom } = useActions(dashboardLogic)
     const { addInsightToDashboardModalVisible } = useValues(addInsightToDashboardLogic)
-    const { reportDashboardViewed, abortAnyRunningQuery } = useActions(dashboardLogic)
+
+    useAttachedContext(
+        dashboard ? [{ type: 'dashboard', key: dashboard.id, label: dashboard.name ?? undefined }] : null
+    )
 
     useFileSystemLogView({
         type: 'dashboard',
         ref: dashboard?.id,
         enabled: Boolean(currentTeamId && dashboard?.id && !dashboardFailedToLoad && !accessDeniedToDashboard),
-        deps: [currentTeamId, dashboard?.id, dashboardFailedToLoad, accessDeniedToDashboard],
     })
 
     useOnMountEffect(() => {
@@ -99,7 +129,11 @@ function DashboardScene(): JSX.Element {
     return (
         <SceneContent className={cn('dashboard')}>
             {placement == DashboardPlacement.Dashboard && <DashboardHeader />}
+            {placement == DashboardPlacement.Dashboard && !!dashboard?.id && (
+                <DashboardSubscribeNudgeTrigger dashboardId={dashboard.id} />
+            )}
             {canEditDashboard && addInsightToDashboardModalVisible && <AddInsightToDashboardModal />}
+            <DashboardPublicAccessBanner dashboard={dashboard} placement={placement} />
 
             {dashboardFailedToLoad ? (
                 <InsightErrorState title="There was an error loading this dashboard" />
@@ -113,47 +147,20 @@ function DashboardScene(): JSX.Element {
                 >
                     <DashboardOverridesBanner />
 
-                    <SceneStickyBar showBorderBottom={false}>
-                        <div className="flex gap-2 justify-between">
-                            {![
-                                DashboardPlacement.Public,
-                                DashboardPlacement.Export,
-                                DashboardPlacement.FeatureFlag,
-                                DashboardPlacement.Group,
+                    <SceneStickyBar showBorderBottom={false} className="flex gap-2 space-y-0">
+                        <DashboardFilterBar backTo={backTo} />
+                        {layoutEditMode &&
+                            canEditDashboard &&
+                            [
+                                DashboardPlacement.Dashboard,
+                                DashboardPlacement.ProjectHomepage,
                                 DashboardPlacement.Builtin,
-                            ].includes(placement) &&
-                                dashboard && <DashboardEditBar />}
-                            {[DashboardPlacement.FeatureFlag, DashboardPlacement.Group].includes(placement) &&
-                                dashboard?.id && (
-                                    <Button type="secondary" size="small" to={urls.dashboard(dashboard.id)}>
-                                        {placement === DashboardPlacement.Group
-                                            ? 'Edit dashboard template'
-                                            : 'Edit dashboard'}
-                                    </Button>
-                                )}
-                            {![DashboardPlacement.Export, DashboardPlacement.Builtin].includes(placement) && (
-                                <div
-                                    className={clsx('flex shrink-0 deprecated-space-x-4 dashoard-items-actions', {
-                                        'mt-7': hasVariables,
-                                    })}
-                                >
-                                    <div
-                                        className={`left-item ${
-                                            placement === DashboardPlacement.Public ? 'text-right' : ''
-                                        }`}
-                                    >
-                                        {[DashboardPlacement.Public].includes(placement) ? (
-                                            <LastRefreshText />
-                                        ) : !(dashboardMode === DashboardMode.Edit) ? (
-                                            <DashboardReloadAction />
-                                        ) : null}
-                                    </div>
-                                </div>
+                            ].includes(placement) && (
+                                <DashboardZoomControl layoutZoom={layoutZoom} setLayoutZoom={setLayoutZoom} />
                             )}
-                        </div>
                     </SceneStickyBar>
 
-                    <DashboardItems />
+                    <DashboardItems showCreateAnomalyAlertButton={showCreateAnomalyAlertButton} />
                 </div>
             )}
         </SceneContent>

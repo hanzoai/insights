@@ -1,2 +1,2 @@
-export type { LinkProps } from './Link'
-export { Link } from './Link'
+export type { LinkPrimitiveProps, LinkProps, InsightsComDocsURL } from './Link'
+export { Link, LinkPrimitive } from './Link'

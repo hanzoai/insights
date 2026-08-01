@@ -2,6 +2,7 @@ import re
 from typing import NamedTuple
 
 import structlog
+import hanzo_insights
 
 from insights.schema import (
     ActionsNode,
@@ -19,16 +20,37 @@ from insights.schema import (
 from insights.insightsql import ast
 from insights.insightsql.property import action_to_expr
 
-from insights.models import Action, Team
+from insights.models import Team
 from insights.types import AnyPropertyFilter
 
+from products.actions.backend.models.action import Action
+
 logger = structlog.get_logger(__name__)
+
+ANONYMOUS_USER_COHORT_FIX_FLAG = "anonymous-user-session-replay-filtering-fix"
+
+
+def is_anonymous_cohort_fix_enabled(team: Team) -> bool:
+    """Gate for the PoE-mode cohort-vs-anonymous-user rewrite.
+
+    When on, cohort filters skip CohortPropertyGroupsSubQuery and are instead handled
+    by ReplayFiltersEventsSubQuery, which routes NOT IN filters through the existing
+    _negative_blocklist_query path so anonymous events (no person mapping) aren't
+    wrongly excluded.
+    """
+    try:
+        return bool(hanzo_insights.feature_enabled(ANONYMOUS_USER_COHORT_FIX_FLAG, str(team.pk)))
+    except Exception:
+        return False
+
 
 NEGATIVE_OPERATORS = [
     PropertyOperator.IS_NOT_SET,
     PropertyOperator.IS_NOT,
     PropertyOperator.NOT_REGEX,
     PropertyOperator.NOT_ICONTAINS,
+    PropertyOperator.NOT_STARTS_WITH,
+    PropertyOperator.NOT_ENDS_WITH,
     # PropertyOperator.NOT_BETWEEN, # in the schema but not used anywhere
     # PropertyOperator.NOT_IN,  # COHORT operator we don't need to handle it explicitly
 ]
@@ -39,6 +61,8 @@ INVERSE_OPERATOR_FOR = {
     PropertyOperator.NOT_IN: PropertyOperator.IN_,
     PropertyOperator.NOT_REGEX: PropertyOperator.REGEX,
     PropertyOperator.NOT_ICONTAINS: PropertyOperator.ICONTAINS,
+    PropertyOperator.NOT_STARTS_WITH: PropertyOperator.STARTS_WITH,
+    PropertyOperator.NOT_ENDS_WITH: PropertyOperator.ENDS_WITH,
     PropertyOperator.NOT_BETWEEN: PropertyOperator.BETWEEN,
 }
 
@@ -63,6 +87,17 @@ def is_group_property(p: AnyPropertyFilter) -> bool:
 def is_cohort_property(p: AnyPropertyFilter) -> bool:
     p_type = getattr(p, "type", None)
     return bool(p_type and "cohort" in p_type)
+
+
+def is_session_property(p: AnyPropertyFilter) -> bool:
+    p_type = getattr(p, "type", None)
+    p_key = getattr(p, "key", "")
+    return p_type == "session" or (p_type == "insightsql" and "session.properties" in p_key)
+
+
+def is_recording_property(p: AnyPropertyFilter) -> bool:
+    p_type = getattr(p, "type", None)
+    return p_type == "recording"
 
 
 def expand_test_account_filters(team: Team) -> list[AnyPropertyFilter]:
@@ -96,7 +131,14 @@ class SessionRecordingQueryResult(NamedTuple):
 class UnexpectedQueryProperties(Exception):
     def __init__(self, remaining_properties: list[AnyPropertyFilter] | None):
         self.remaining_properties = remaining_properties
-        super().__init__(f"Unexpected properties in query: {remaining_properties}")
+        # Drop the raw value from each filter so that user-supplied data (e.g. a domain or URL)
+        # doesn't end up in the exception message — otherwise every distinct value produces a
+        # brand-new error-tracking fingerprint.
+        summary = [
+            {"type": getattr(p, "type", None), "key": getattr(p, "key", None), "operator": getattr(p, "operator", None)}
+            for p in (remaining_properties or [])
+        ]
+        super().__init__(f"Unexpected properties in query: {summary}")
 
 
 def _strip_person_and_event_and_cohort_properties(
@@ -112,6 +154,8 @@ def _strip_person_and_event_and_cohort_properties(
         and not is_person_property(p)
         and not is_group_property(p)
         and not is_cohort_property(p)
+        and not is_session_property(p)
+        and not is_recording_property(p)
     ]
 
     return properties_to_keep

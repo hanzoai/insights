@@ -5,7 +5,7 @@ set -e
 SKIP_COMPILEDJS_FILES=("")
 
 # Files on which we only want to run Node.js tests
-ONLY_NODEJS_FILES=("sql.iql")
+ONLY_NODEJS_FILES=("sql.script")
 
 # Navigate to the script's directory
 cd "$(dirname "$0")"
@@ -21,7 +21,7 @@ cd ../..
 # Function to compute the basename for a given file
 get_basename() {
     local file="$1"
-    local base="${file%.iql}"
+    local base="${file%.script}"
     base="${base##*/}"
     echo "common/scriptvm/__tests__/__snapshots__/$base"
 }
@@ -57,7 +57,7 @@ if [ "$#" -eq 1 ]; then
     rm -f "$basename.stdout.nodejs" "$basename.stdout.python" "$basename.stdout.compiledjs"
 else
     shopt -s nullglob
-    test_files=(common/scriptvm/__tests__/*.iql)
+    test_files=(common/scriptvm/__tests__/*.script)
     shopt -u nullglob
 
     if [ ${#test_files[@]} -eq 0 ]; then
@@ -77,11 +77,11 @@ for file in "${test_files[@]}"; do
     basename=$(get_basename "$file")
     filename=$(basename "$file")
 
-    # Compile to .iqle
-    ./bin/iqle "$file" "$basename.iqle"
+    # Compile to .hoge
+    ./bin/hoge "$file" "$basename.hoge"
 
     # Always run Node.js test
-    ./bin/iql --nodejs "$basename.iqle" > "$basename.stdout.nodejs"
+    ./bin/script --nodejs "$basename.hoge" > "$basename.stdout.nodejs"
 
     # If this file is in ONLY_NODEJS_FILES, skip python + compiledjs
     if is_in_array "$filename" "${ONLY_NODEJS_FILES[@]}"; then
@@ -91,7 +91,7 @@ for file in "${test_files[@]}"; do
     fi
 
     # Otherwise, run Python
-    ./bin/iql --python "$basename.iqle" > "$basename.stdout.python"
+    ./bin/script --python "$basename.hoge" > "$basename.stdout.python"
 
     # Check if compiledjs is skipped
     if is_in_array "$filename" "${SKIP_COMPILEDJS_FILES[@]}"; then
@@ -109,7 +109,7 @@ for file in "${test_files[@]}"; do
     else
         # Run compiledjs
         set +e
-        ./bin/iqle "$file" "$basename.js"
+        ./bin/hoge "$file" "$basename.js"
         node "$basename.js" > "$basename.stdout.compiledjs" 2>&1
         set -e
 

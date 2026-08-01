@@ -3,12 +3,11 @@ import { useActions, useValues } from 'kea'
 import { IconPlus } from '@hanzo/icons'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Input } from 'lib/elements/Input'
 import { Link } from 'lib/elements/Link'
 import { Spinner } from 'lib/elements/Spinner'
-import { IconOpenInNew } from 'lib/elements/icons'
-import { urls } from 'scenes/urls'
 
 import { ActionsEditingToolbarMenu } from '~/toolbar/actions/ActionsEditingToolbarMenu'
 import { ActionsListView } from '~/toolbar/actions/ActionsListView'
@@ -16,6 +15,7 @@ import { actionsLogic } from '~/toolbar/actions/actionsLogic'
 import { actionsTabLogic } from '~/toolbar/actions/actionsTabLogic'
 import { ToolbarMenu } from '~/toolbar/bar/ToolbarMenu'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
+import { urls } from '~/toolbar/urls'
 import { joinWithUiHost } from '~/toolbar/utils'
 
 const ActionsListToolbarMenu = (): JSX.Element => {

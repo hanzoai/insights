@@ -1,11 +1,9 @@
 import { useValues } from 'kea'
 
-import { Banner } from '@hanzo/elements'
+import { Banner, Collapse } from '@hanzo/elements'
 
-import { cn } from 'lib/utils/css-classes'
 import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
 
-import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { ActionType } from '~/types'
 
 import { actionEditLogic } from '../logics/actionEditLogic'
@@ -21,36 +19,54 @@ const Functions = ({ action }: { action: ActionType }): JSX.Element => {
         actionEditLogic({ id: action?.id, action })
     )
     return (
-        <SceneSection
-            className={cn('@container my-4 deprecated-space-y-2')}
-            title="Connected destinations"
-            description="Actions can be used as filters for destinations such as Slack or Webhook delivery"
-        >
-            {showCohortDisablesFunctionsWarning ? (
-                <Banner type="error">Adding a cohort filter will disable all connected destinations!</Banner>
-            ) : null}
-
-            <LinkedInsightsFunctions
-                type="destination"
-                forceFilterGroups={[
-                    {
-                        actions: [
-                            {
-                                id: `${action.id}`,
-                                name: action.name,
-                                type: 'actions',
-                            },
-                        ],
+        <Collapse
+            defaultActiveKey="connected-destinations"
+            panels={[
+                {
+                    key: 'connected-destinations',
+                    header: {
+                        children: (
+                            <div className="py-1">
+                                <div className="font-semibold">Connected destinations</div>
+                                <div className="text-secondary text-sm font-normal">
+                                    Actions can be used as filters for destinations such as Slack or Webhook delivery
+                                </div>
+                            </div>
+                        ),
                     },
-                ]}
-                newDisabledReason={
-                    hasCohortFilters
-                        ? "Action with cohort filters can't be used in realtime destinations"
-                        : actionChanged
-                          ? 'Please first save the action to create a destination'
-                          : undefined
-                }
-            />
-        </SceneSection>
+                    content: (
+                        <div className="@container deprecated-space-y-2">
+                            {showCohortDisablesFunctionsWarning ? (
+                                <Banner type="error">
+                                    Adding a cohort filter will disable all connected destinations!
+                                </Banner>
+                            ) : null}
+
+                            <LinkedInsightsFunctions
+                                type="destination"
+                                forceFilterGroups={[
+                                    {
+                                        actions: [
+                                            {
+                                                id: `${action.id}`,
+                                                name: action.name,
+                                                type: 'actions',
+                                            },
+                                        ],
+                                    },
+                                ]}
+                                newDisabledReason={
+                                    hasCohortFilters
+                                        ? "Action with cohort filters can't be used in realtime destinations"
+                                        : actionChanged
+                                          ? 'Please first save the action to create a destination'
+                                          : undefined
+                                }
+                            />
+                        </div>
+                    ),
+                },
+            ]}
+        />
     )
 }

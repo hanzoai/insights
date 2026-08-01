@@ -1,28 +1,16 @@
 import { useActions, useValues } from 'kea'
 
 import { IconFilter } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Divider,
-    Table,
-    Tag,
-    TagType,
-    Spinner,
-} from '@hanzo/elements'
+import { Button, Checkbox, Divider, Table, Tag, Link, Spinner } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
+import { NODE_TYPE_TAG_SETTINGS } from 'scenes/models/nodeDetailConstants'
+import { urls } from 'scenes/urls'
 
 import { DataModelingNode, DataModelingNodeType } from '~/types'
 
 import { dataModelingLogic } from '../dataModelingLogic'
 import { PAGE_SIZE } from './constants'
-
-const NODE_TYPE_TAG_SETTINGS: Record<DataModelingNodeType, { label: string; type: TagType }> = {
-    table: { label: 'Table', type: 'default' },
-    view: { label: 'View', type: 'primary' },
-    matview: { label: 'Materialized view', type: 'success' },
-}
 
 function NodeDependencyCount({ count, loading }: { count?: number; loading?: boolean }): JSX.Element {
     if (loading || count === undefined) {
@@ -60,14 +48,17 @@ export function TableView(): JSX.Element {
     }
     return (
         <Table
-            className="h-[calc(100vh-17rem)] overflow-y-auto"
             dataSource={visibleNodes}
             loading={nodesLoading}
             columns={[
                 {
                     title: 'Name',
                     key: 'name',
-                    render: (_, node: DataModelingNode) => <span className="font-bold text-primary">{node.name}</span>,
+                    render: (_, node: DataModelingNode) => (
+                        <Link to={node.type === 'endpoint' ? urls.endpoint(node.name) : urls.nodeDetail(node.id)}>
+                            <span className="font-bold text-primary">{node.name}</span>
+                        </Link>
+                    ),
                 },
                 {
                     title: 'Type',
@@ -103,7 +94,9 @@ export function TableView(): JSX.Element {
                 {
                     title: 'DAG',
                     key: 'dag_id',
-                    render: (_, node: DataModelingNode) => <span className="text-muted">{node.dag_id}</span>,
+                    render: (_, node: DataModelingNode) => (
+                        <span className="text-muted">{node.dag_name ?? node.dag}</span>
+                    ),
                     moreIcon: <IconFilter className="w-4 h-4" />,
                     moreFilterCount: filterDagIds.length,
                     more: (

@@ -6,6 +6,9 @@ from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
+from ee.hogai.chat_agent.schema_generator.parsers import PydanticOutputParserException
+from ee.hogai.llm import MaxChatOpenAI
+from ee.hogai.tool import MaxTool
 
 
 class CreateTemplateArgs(BaseModel):
@@ -47,7 +50,7 @@ The JSON object should have the following keys: "name", "description", and "cont
 The "content" field should be a JSON object with two keys: "email" and "templating".
 The "email" field should be a JSON object with "html", "text", "design", and "subject" keys.
 The "design" object should use Unlayer's JSON format to represent the email's visual structure. Make sure this is a valid Unlayer JSON structure.
-The "templating" field should usually be set to "fn".
+The "templating" field should usually be set to "script".
 Return ONLY the JSON object. Do not add any other text or explanation.
 """
         user_content = f"Create a template for these instructions: {instructions}"

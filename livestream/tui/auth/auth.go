@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/pkg/browser"
-	"github.com/hanzoai/insights/livestream/tui/config"
+	"github.com/insights/insights/livestream/tui/config"
 )
 
 type Options struct {
@@ -18,7 +18,7 @@ type Options struct {
 func Authenticate(opts Options) (*config.Credentials, error) {
 	host := opts.Host
 	if host == "" {
-		host = "https://insights.hanzo.ai"
+		host = "https://app.hanzo.ai"
 	}
 
 	// Priority 1: direct token flag

@@ -1,6 +1,9 @@
+import { MOCK_TEAM_ID } from 'lib/api.mock'
+
 import { expectLogic, partial } from 'kea-test-utils'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
+import { teamLogic } from 'scenes/teamLogic'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { dataTableLogic } from '~/queries/nodes/DataTable/dataTableLogic'
@@ -298,6 +301,133 @@ describe('dataTableLogic', () => {
                 showOpenEditorButton: false,
             }),
         })
+    })
+
+    it.each([
+        {
+            timezone: 'US/Pacific',
+            // 2022-12-24T05:00Z = Dec 23 21:00 PST; 2022-12-24T10:00Z = Dec 24 02:00 PST
+            timestamps: ['2022-12-24T10:00:00.000000Z', '2022-12-24T05:00:00.000000Z'],
+            expectedLabel: 'December 23, 2022',
+        },
+        {
+            timezone: 'Asia/Tokyo',
+            // 2022-12-24T15:00Z = Dec 25 00:00 JST; 2022-12-24T14:00Z = Dec 24 23:00 JST
+            timestamps: ['2022-12-24T15:00:00.000000Z', '2022-12-24T14:00:00.000000Z'],
+            expectedLabel: 'December 24, 2022',
+        },
+    ])('groups date headers by project timezone ($timezone)', async ({ timezone, timestamps, expectedLabel }) => {
+        teamLogic.mount()
+        teamLogic.actions.loadCurrentTeamSuccess({ id: MOCK_TEAM_ID, timezone } as any)
+
+        const commonResult = {
+            uuid: '01853a90-ba94-0000-8776-e8df5617c3ec',
+            event: 'test event',
+            properties: {},
+            team_id: 1,
+            distinct_id: '123',
+        }
+        const results = timestamps.map((ts) => [{ ...commonResult, timestamp: ts }, 'test event', ts])
+        ;(performQuery as any).mockResolvedValueOnce({
+            columns: ['*', 'event', 'timestamp'],
+            types: [
+                "Tuple(UUID, String, String, DateTime64(6, 'UTC'), Int64, String, String, DateTime64(6, 'UTC'), UUID, DateTime64(3), String)",
+                'String',
+                "DateTime64(6, 'UTC')",
+            ],
+            results,
+            hasMore: false,
+        })
+        logic = dataTableLogic({
+            dataKey: testUniqueKey,
+            vizKey: testUniqueKey,
+            query: {
+                kind: NodeKind.DataTableNode,
+                source: {
+                    kind: NodeKind.EventsQuery,
+                    select: ['*', 'event', 'timestamp'],
+                },
+            },
+        })
+        logic.mount()
+
+        await expectLogic(logic)
+            .toMatchValues({ responseLoading: true })
+            .delay(0)
+            .toMatchValues({ responseLoading: false })
+
+        await expectLogic(logic).toMatchValues({
+            dataTableRows: [{ result: results[0] }, { label: expectedLabel }, { result: results[1] }],
+        })
+    })
+
+    it('keeps the dataTableRows reference stable when a reload returns deep-equal results', async () => {
+        // A poll or reload reparses JSON, so a byte-identical response still arrives as all-new
+        // object identities. Without result equality on dataTableRows every row's memoized
+        // TableRow re-renders per cycle — the detached-DOM churn this selector exists to prevent.
+        const makeResults = (eventName: string = 'pageview'): any[][] => [
+            [
+                {
+                    uuid: '01853a90-ba94-0000-8776-e8df5617c3ec',
+                    event: eventName,
+                    properties: {},
+                    team_id: 1,
+                    distinct_id: '123',
+                    timestamp: '2022-12-24T17:00:41.165000Z',
+                },
+                eventName,
+                '2022-12-24T17:00:41.165000Z',
+            ],
+            [
+                {
+                    uuid: '01853a90-ba94-0000-8776-e8df5617c3ed',
+                    event: eventName,
+                    properties: {},
+                    team_id: 1,
+                    distinct_id: '123',
+                    timestamp: '2022-12-24T16:00:41.165000Z',
+                },
+                eventName,
+                '2022-12-24T16:00:41.165000Z',
+            ],
+        ]
+        const responseFor = (results: any[][]): Record<string, any> => ({
+            columns: ['*', 'event', 'timestamp'],
+            types: [
+                "Tuple(UUID, String, String, DateTime64(6, 'UTC'), Int64, String, String, DateTime64(6, 'UTC'), UUID, DateTime64(3), String)",
+                'String',
+                "DateTime64(6, 'UTC')",
+            ],
+            results,
+            hasMore: false,
+        })
+
+        ;(performQuery as any).mockResolvedValueOnce(responseFor(makeResults()))
+        const dataTableQuery = getDataTableQuery()
+        logic = dataTableLogic({
+            dataKey: testUniqueKey,
+            vizKey: testUniqueKey,
+            query: dataTableQuery,
+        })
+        logic.mount()
+        await expectLogic(logic).delay(0).toMatchValues({ responseLoading: false })
+        const initialRows = logic.values.dataTableRows
+        expect(initialRows).toHaveLength(2)
+
+        const builtDataNodeLogic = dataNodeLogic({ key: testUniqueKey, query: dataTableQuery.source })
+        ;(performQuery as any).mockResolvedValueOnce(responseFor(makeResults()))
+        builtDataNodeLogic.actions.loadData('force_blocking')
+        await expectLogic(builtDataNodeLogic).delay(0).toMatchValues({ responseLoading: false })
+
+        expect(logic.values.dataTableRows).toBe(initialRows)
+
+        // The counter-case: a genuinely changed response must produce fresh rows, or tables go stale.
+        ;(performQuery as any).mockResolvedValueOnce(responseFor(makeResults('autocapture')))
+        builtDataNodeLogic.actions.loadData('force_blocking')
+        await expectLogic(builtDataNodeLogic).delay(0).toMatchValues({ responseLoading: false })
+
+        expect(logic.values.dataTableRows).not.toBe(initialRows)
+        expect((logic.values.dataTableRows?.[0]?.result as any[])[1]).toEqual('autocapture')
     })
 
     it('shows results even when columns in query do not match columns in response', async () => {

@@ -183,14 +183,14 @@ export const replayTemplates: ReplayTemplateType[] = [
     },
     {
         key: 'person-property',
-        name: 'User property',
+        name: 'Person property',
         description: 'Watch all replays for users with a specific property, like a specific email address.',
         variables: [
             {
                 type: 'person-property',
-                name: 'User property',
+                name: 'Person property',
                 key: 'person-property',
-                description: 'The user property that you want to observe.',
+                description: 'The person property that you want to observe.',
             },
         ],
         categories: ['More'],

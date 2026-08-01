@@ -1,5 +1,5 @@
 import { BindLogic, useActions, useValues } from 'kea'
-import { router } from 'kea-router'
+import { combineUrl, router } from 'kea-router'
 import { useCallback, useMemo } from 'react'
 
 import { IconBell } from '@hanzo/icons'
@@ -8,6 +8,7 @@ import {
     Button,
     Checkbox,
     Input,
+    Select,
     Table,
     TableColumn,
     Tag,
@@ -20,17 +21,17 @@ import { MemberSelect } from 'lib/components/MemberSelect'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { More } from 'lib/elements/Button/More'
 import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { createdByColumn, updatedAtColumn } from 'lib/elements/Table/columnUtils'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { updatedAtColumn } from 'lib/elements/Table/columnUtils'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { urls } from 'scenes/urls'
 
 import { InsightsFunctionConfigurationContextId, InsightsFunctionType } from '~/types'
 
 import { InsightsFunctionIcon } from '../configuration/InsightsFunctionIcon'
-import { humanizeInsightsFunctionType } from '../insights-function-utils'
+import { humanizeInsightsFunctionType } from '../script-function-utils'
 import { InsightsFunctionStatusIndicator } from '../misc/InsightsFunctionStatusIndicator'
 import { eventToInsightsFunctionContextId } from '../sub-templates/sub-templates'
+import { DELIVERY_TYPE_FILTER_OPTIONS, DeliveryTypeTag } from './DeliveryTypeTag'
 import { InsightsFunctionOrderModal } from './InsightsFunctionOrderModal'
 import { insightsFunctionRequestModalLogic } from './insightsFunctionRequestModalLogic'
 import { InsightsFunctionListLogicProps, insightsFunctionsListLogic } from './insightsFunctionsListLogic'
@@ -51,6 +52,11 @@ const INTERNAL_DESTINATION_CONTEXT: Partial<
         url: urls.errorTrackingConfiguration() + '#selectedSetting=error-tracking-alerting',
     },
     'insight-alerts': { label: 'Insight alerts' },
+    'experiment-alerts': { label: 'Experiment alerts' },
+    'health-alerts': {
+        label: 'Health alerts',
+        url: urls.healthAlerts(),
+    },
 }
 
 function NotificationContextTag({ insightsFunction }: { insightsFunction: InsightsFunctionType }): JSX.Element | null {
@@ -90,25 +96,34 @@ function NotificationContextTag({ insightsFunction }: { insightsFunction: Insigh
     )
 }
 
-const urlForInsightsFunction = (insightsFunction: InsightsFunctionType): string => {
+// `returnTo` only applies to the canonical script-function path; legacy plugin and
+// batch-export scenes don't read it.
+export const urlForInsightsFunction = (insightsFunction: InsightsFunctionType, returnTo?: string): string => {
     if (insightsFunction.id.startsWith('plugin-')) {
         return urls.legacyPlugin(insightsFunction.id.replace('plugin-', ''))
     }
     if (insightsFunction.id.startsWith('batch-export-')) {
         return urls.batchExport(insightsFunction.id.replace('batch-export-', ''))
     }
-    return urls.insightsFunction(insightsFunction.id)
+    const path = urls.insightsFunction(insightsFunction.id)
+    return returnTo ? combineUrl(path, { returnTo }).url : path
 }
 
 export function InsightsFunctionList({
     extraControls,
     hideFeedback = false,
     emptyText,
+    onDeleteInsightsFunction,
+    onEditInsightsFunction,
+    returnTo,
     ...props
 }: InsightsFunctionListLogicProps & {
     extraControls?: JSX.Element
     hideFeedback?: boolean
     emptyText?: string
+    onDeleteInsightsFunction?: (insightsFunction: InsightsFunctionType) => void
+    onEditInsightsFunction?: (insightsFunction: InsightsFunctionType) => void
+    returnTo?: string
 }): JSX.Element {
     const { loading, filteredInsightsFunctions, filters, insightsFunctions, hiddenInsightsFunctions } = useValues(
         insightsFunctionsListLogic(props)
@@ -141,13 +156,15 @@ export function InsightsFunctionList({
             {
                 title: 'Name',
                 sticky: true,
-                sorter: true,
+                sorter: (a, b) =>
+                    (a.name ?? '').localeCompare(b.name ?? '', undefined, { sensitivity: 'base', numeric: true }),
                 key: 'name',
                 dataIndex: 'name',
                 render: (_, insightsFunction) => {
                     return (
                         <TableLink
-                            to={urlForInsightsFunction(insightsFunction)}
+                            to={urlForInsightsFunction(insightsFunction, returnTo)}
+                            onClick={onEditInsightsFunction ? () => onEditInsightsFunction(insightsFunction) : undefined}
                             title={
                                 <>
                                     <Tooltip title="Click to update configuration, view metrics, and more">
@@ -163,21 +180,7 @@ export function InsightsFunctionList({
                     )
                 },
             },
-            {
-                title: 'Created by',
-                width: 0,
-                render: (_, insightsFunction) => {
-                    if (!insightsFunction.created_by) {
-                        return <span className="text-muted">Unknown</span>
-                    }
-                    return (
-                        <div className="flex items-center gap-2">
-                            <ProfilePicture user={insightsFunction.created_by} size="sm" />
-                            <span>{insightsFunction.created_by.first_name || insightsFunction.created_by.email}</span>
-                        </div>
-                    )
-                },
-            },
+            createdByColumn() as TableColumn<InsightsFunctionType, any>,
 
             updatedAtColumn() as TableColumn<InsightsFunctionType, any>,
             {
@@ -215,7 +218,12 @@ export function InsightsFunctionList({
                                 forceParams={{
                                     appSource: 'insights_function',
                                     appSourceId: insightsFunction.id,
-                                    metricKind: ['success', 'failure'],
+                                    // Log transformations report drops and budget skips under
+                                    // metric_kind 'other' — without it their sparkline reads as idle.
+                                    metricKind:
+                                        insightsFunction.type === 'transformation_log'
+                                            ? ['success', 'failure', 'other']
+                                            : ['success', 'failure'],
                                     breakdownBy: 'metric_kind',
                                     interval: 'day',
                                     dateFrom: '-7d',
@@ -247,7 +255,7 @@ export function InsightsFunctionList({
                                                   // TRICKY: Hack for now to just link out to the full view
                                                   {
                                                       label: 'View & configure',
-                                                      to: urlForInsightsFunction(insightsFunction),
+                                                      to: urlForInsightsFunction(insightsFunction, returnTo),
                                                   },
                                               ]
                                             : [
@@ -258,7 +266,10 @@ export function InsightsFunctionList({
                                                   {
                                                       label: 'Delete',
                                                       status: 'danger' as const, // for typechecker happiness
-                                                      onClick: () => deleteInsightsFunction(insightsFunction),
+                                                      onClick: () => {
+                                                          onDeleteInsightsFunction?.(insightsFunction)
+                                                          deleteInsightsFunction(insightsFunction)
+                                                      },
                                                   },
                                               ]
                                     }
@@ -270,7 +281,19 @@ export function InsightsFunctionList({
             },
         ]
 
-        if (props.type === 'transformation') {
+        if (props.type === 'destination') {
+            // insert after the Name column
+            columns.splice(2, 0, {
+                title: 'Type',
+                key: 'deliveryType',
+                width: 0,
+                render: function RenderDeliveryType(_, insightsFunction) {
+                    return <DeliveryTypeTag item={insightsFunction} />
+                },
+            })
+        }
+
+        if (props.type === 'transformation' || props.type === 'transformation_log') {
             // insert it in the second column
             columns.splice(1, 0, {
                 title: 'Prio',
@@ -292,7 +315,16 @@ export function InsightsFunctionList({
         }
 
         return columns
-    }, [props.type, humanizedType, toggleEnabled, deleteInsightsFunction, isManualFunction]) // oxlint-disable-line react-hooks/exhaustive-deps
+    }, [
+        props.type,
+        humanizedType,
+        toggleEnabled,
+        deleteInsightsFunction,
+        isManualFunction,
+        onDeleteInsightsFunction,
+        onEditInsightsFunction,
+        returnTo,
+    ]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="flex flex-col gap-4">
@@ -316,6 +348,14 @@ export function InsightsFunctionList({
                         onChange={(user) => setFilters({ createdBy: user?.uuid || null })}
                     />
                 </div>
+                {props.type === 'destination' && (
+                    <Select
+                        size="small"
+                        value={filters.deliveryType ?? null}
+                        onChange={(value) => setFilters({ deliveryType: value ?? undefined })}
+                        options={DELIVERY_TYPE_FILTER_OPTIONS}
+                    />
+                )}
                 <Checkbox
                     label="Show paused"
                     bordered
@@ -332,6 +372,7 @@ export function InsightsFunctionList({
                     size="small"
                     loading={loading}
                     columns={columns}
+                    pagination={{ pageSize: 30 }}
                     emptyState={
                         insightsFunctions.length === 0 && !loading ? (
                             (emptyText ?? `No ${humanizedType}s found`)

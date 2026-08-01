@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 
 import { Card, Skeleton } from '@hanzo/elements'
 
-import { humanFriendlyDuration } from 'lib/utils'
+import { humanFriendlyDuration } from 'lib/utils/durations'
 
 import { sessionProfileLogic } from '../sessionProfileLogic'
 

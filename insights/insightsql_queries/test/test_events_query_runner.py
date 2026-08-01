@@ -12,11 +12,14 @@ from insights.test.base import (
     snapshot_datastore_queries,
 )
 
+from parameterized import parameterized
+
 from insights.schema import (
     CachedEventsQueryResponse,
     EventMetadataPropertyFilter,
     EventPropertyFilter,
     EventsQuery,
+    EventsQueryActionStep,
     PropertyOperator,
 )
 
@@ -24,17 +27,23 @@ from insights.insightsql import ast
 from insights.insightsql.ast import CompareOperationOp
 
 from insights.insightsql_queries.events_query_runner import EventsQueryRunner
-from insights.models import Element, Person, Team
-from insights.models.organization import Organization
+from insights.models import Element, Organization, OrganizationMembership, PropertyDefinition, Team
+from insights.models.person.util import get_person_by_distinct_id
+
+from products.access_control.backend.models.property_access_control import PropertyAccessControl
+from products.access_control.backend.property_access_control import PropertyAccessLevel
 
 
 class TestEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
-    def _create_events(self, data: list[tuple[str, str, Any]], event="$pageview"):
+    def _create_events(self, data: list[tuple], event="$pageview"):
         person_result = []
         distinct_ids_handled = set()
-        for distinct_id, timestamp, event_properties in data:
+        for row in data:
+            distinct_id, timestamp, event_properties = row[0], row[1], row[2]
+            # Optional 4th element pins the event uuid so cursor-pagination SQL stays deterministic.
+            event_uuid = row[3] if len(row) > 3 else None
             with freeze_time(timestamp):
                 if distinct_id not in distinct_ids_handled:
                     person_result.append(
@@ -47,13 +56,16 @@ class TestEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
                         )
                     )
                     distinct_ids_handled.add(distinct_id)
-                _create_event(
-                    team=self.team,
-                    event=event,
-                    distinct_id=distinct_id,
-                    timestamp=timestamp,
-                    properties=event_properties,
-                )
+                create_kwargs: dict[str, Any] = {
+                    "team": self.team,
+                    "event": event,
+                    "distinct_id": distinct_id,
+                    "timestamp": timestamp,
+                    "properties": event_properties,
+                }
+                if event_uuid is not None:
+                    create_kwargs["event_uuid"] = event_uuid
+                _create_event(**create_kwargs)
         return person_result
 
     def _create_boolean_field_test_events(self):
@@ -100,7 +112,7 @@ class TestEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
             return results
 
     def test_is_not_set_boolean(self):
-        # see https://github.com/Hanzo Insights/insights/issues/18030
+        # see https://github.com/Insights/insights/issues/18030
         self._create_boolean_field_test_events()
         results = self._run_boolean_field_query(
             EventPropertyFilter(
@@ -127,14 +139,41 @@ class TestEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
 
         self.assertEqual({"p_true", "p_false"}, {row[0]["distinct_id"] for row in results})
 
+    def test_star_select_tolerates_non_string_session_id(self):
+        # Malformed SDK payloads can send $session_id as a dict/list/number. The session-recording
+        # batch check used to `set.add(session_id)` it, raising `TypeError: unhashable type` and 500ing
+        # the whole explore query. A valid string session must still be processed; bad ones are skipped.
+        self._create_events(
+            data=[
+                ("good", "2020-01-11T12:00:01Z", {"$session_id": "0190-good-session"}),
+                ("dict", "2020-01-11T12:00:02Z", {"$session_id": {"bytes": {"0": 1}}}),
+                ("list", "2020-01-11T12:00:03Z", {"$session_id": [1, 2, 3]}),
+                ("int", "2020-01-11T12:00:04Z", {"$session_id": 12345}),
+            ]
+        )
+        flush_persons_and_events()
+
+        with freeze_time("2020-01-11T12:01:00"):
+            query = EventsQuery(kind="EventsQuery", after="-24h", orderBy=["timestamp ASC"], select=["*"])
+            response = EventsQueryRunner(query=query, team=self.team).run()
+
+        assert isinstance(response, CachedEventsQueryResponse)
+        by_distinct_id = {row[0]["distinct_id"]: row[0]["properties"] for row in response.results}
+        assert set(by_distinct_id) == {"good", "dict", "list", "int"}
+        # String session id is checked for a recording (none exists, so False); non-string ones are skipped.
+        assert by_distinct_id["good"]["$has_recording"] is False
+        for distinct_id in ("dict", "list", "int"):
+            assert "$has_recording" not in by_distinct_id[distinct_id]
+
     def test_person_id_expands_to_distinct_ids(self):
         _create_person(
             team_id=self.team.pk,
             distinct_ids=["id1", "id2"],
         )
         flush_persons_and_events()
-        person = Person.objects.filter(team_id=self.team.pk).first()
-        query = EventsQuery(kind="EventsQuery", select=["*"], personId=str(person.pk), orderBy=[])  # type: ignore
+        person = get_person_by_distinct_id(self.team.pk, "id1")
+        assert person is not None
+        query = EventsQuery(kind="EventsQuery", select=["*"], personId=str(person.pk), orderBy=[])
 
         # matching team
         query_ast = EventsQueryRunner(query=query, team=self.team).to_query()
@@ -156,7 +195,7 @@ class TestEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
             {
                 "key": "email",
                 "type": "person",
-                "value": "insights.com",
+                "value": "hanzo.ai",
                 "operator": "not_icontains",
             }
         ]
@@ -716,6 +755,55 @@ class TestEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
         display_names = [row[1]["display_name"] for row in response.results]
         assert set(display_names) == {"id_email", "id_anon"}
 
+    @parameterized.expand(
+        [
+            (
+                "empty_first_prop_falls_through",
+                ["name", "email"],
+                {"name": "", "email": "user@email.com"},
+                "user@email.com",
+            ),
+            ("all_props_empty_falls_back_to_distinct_id", ["name", "email"], {"name": "", "email": ""}, "id_email"),
+            (
+                "non_empty_value_still_wins",
+                ["name", "email"],
+                {"name": "Test User", "email": "user@email.com"},
+                "Test User",
+            ),
+        ]
+    )
+    def test_person_display_name_field_empty_string_fallthrough(
+        self, _name, display_name_properties, person_properties, expected_display_name
+    ):
+        # An empty-string property should fall through to the next configured property,
+        # the same way a missing property does.
+        _create_person(
+            team_id=self.team.pk,
+            distinct_ids=["id_email"],
+            properties=person_properties,
+        )
+        _create_event(
+            team=self.team,
+            event="$pageview",
+            distinct_id="id_email",
+            properties={},
+        )
+        flush_persons_and_events()
+
+        self.team.person_display_name_properties = display_name_properties
+        self.team.save()
+        self.team.refresh_from_db()
+        query = EventsQuery(
+            kind="EventsQuery",
+            select=["event", "person_display_name -- Person"],
+            orderBy=["timestamp ASC"],
+        )
+        runner = EventsQueryRunner(query=query, team=self.team)
+        response = runner.run()
+        assert isinstance(response, CachedEventsQueryResponse)
+        display_names = [row[1]["display_name"] for row in response.results]
+        assert set(display_names) == {expected_display_name}
+
     def test_person_display_name_field_with_spaces_in_property_name(self):
         _create_person(
             team_id=self.team.pk,
@@ -839,7 +927,6 @@ class TestEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
                 ("p1", "2020-01-11T12:00:05Z", {"idx": 5}),
             ]
         )
-        flush_persons_and_events()
 
         all_results = []
         for offset in (0, 2, 4):
@@ -861,3 +948,468 @@ class TestEventsQueryRunner(DatastoreTestMixin, APIBaseTest):
 
         actual_indices = [row[0] for row in all_results]
         self.assertEqual(actual_indices, ["1", "2", "3", "4", "5"])
+
+    def test_cursor_pagination_sets_before(self):
+        query = EventsQuery(
+            kind="EventsQuery",
+            select=["*"],
+            orderBy=["timestamp DESC"],
+            limit=10,
+        )
+        runner = EventsQueryRunner(query=query, team=self.team)
+        runner.apply_pagination_cursor("2020-01-11T12:00:00+00:00")
+
+        self.assertEqual(runner.query.before, "2020-01-11T12:00:00+00:00")
+
+    def test_cursor_pagination_sets_after(self):
+        query = EventsQuery(
+            kind="EventsQuery",
+            select=["*"],
+            orderBy=["timestamp ASC"],
+            limit=10,
+        )
+        runner = EventsQueryRunner(query=query, team=self.team)
+        runner.apply_pagination_cursor("2020-01-11T12:00:00+00:00")
+
+        self.assertEqual(runner.query.after, "2020-01-11T12:00:00+00:00")
+
+    @also_test_with_different_timezones
+    @snapshot_datastore_queries
+    def test_cursor_pagination_multi_page_desc(self):
+        self._create_events(
+            data=[
+                ("p1", "2020-01-11T12:00:05Z", {"idx": "5"}, "00000000-0000-0000-0000-000000000005"),
+                ("p1", "2020-01-11T12:00:04Z", {"idx": "4"}, "00000000-0000-0000-0000-000000000004"),
+                ("p1", "2020-01-11T12:00:03Z", {"idx": "3"}, "00000000-0000-0000-0000-000000000003"),
+                ("p1", "2020-01-11T12:00:02Z", {"idx": "2"}, "00000000-0000-0000-0000-000000000002"),
+                ("p1", "2020-01-11T12:00:01Z", {"idx": "1"}, "00000000-0000-0000-0000-000000000001"),
+            ]
+        )
+
+        all_results = []
+        cursor = None
+        for _ in range(3):
+            with freeze_time("2020-01-12"):
+                query = EventsQuery(
+                    kind="EventsQuery",
+                    select=["properties.idx", "timestamp"],
+                    after="2020-01-10",
+                    orderBy=["timestamp DESC"],
+                    limit=2,
+                )
+                runner = EventsQueryRunner(query=query, team=self.team)
+                if cursor:
+                    runner.apply_pagination_cursor(cursor)
+                response = runner.run()
+
+            assert isinstance(response, CachedEventsQueryResponse)
+            all_results.extend(response.results)
+
+            if response.nextCursor:
+                cursor = response.nextCursor
+            else:
+                break
+
+        actual_indices = [row[0] for row in all_results]
+        self.assertEqual(actual_indices, ["5", "4", "3", "2", "1"])
+
+    @also_test_with_different_timezones
+    @snapshot_datastore_queries
+    def test_cursor_pagination_multi_page_asc(self):
+        self._create_events(
+            data=[
+                ("p1", "2020-01-11T12:00:01Z", {"idx": "1"}, "00000000-0000-0000-0000-000000000001"),
+                ("p1", "2020-01-11T12:00:02Z", {"idx": "2"}, "00000000-0000-0000-0000-000000000002"),
+                ("p1", "2020-01-11T12:00:03Z", {"idx": "3"}, "00000000-0000-0000-0000-000000000003"),
+                ("p1", "2020-01-11T12:00:04Z", {"idx": "4"}, "00000000-0000-0000-0000-000000000004"),
+                ("p1", "2020-01-11T12:00:05Z", {"idx": "5"}, "00000000-0000-0000-0000-000000000005"),
+            ]
+        )
+
+        all_results = []
+        cursor = None
+        for _ in range(3):
+            with freeze_time("2020-01-12"):
+                query = EventsQuery(
+                    kind="EventsQuery",
+                    select=["properties.idx", "timestamp"],
+                    after="2020-01-10",
+                    orderBy=["timestamp ASC"],
+                    limit=2,
+                )
+                runner = EventsQueryRunner(query=query, team=self.team)
+                if cursor:
+                    runner.apply_pagination_cursor(cursor)
+                response = runner.run()
+
+            assert isinstance(response, CachedEventsQueryResponse)
+            all_results.extend(response.results)
+
+            if response.nextCursor:
+                cursor = response.nextCursor
+            else:
+                break
+
+        actual_indices = [row[0] for row in all_results]
+        self.assertEqual(actual_indices, ["1", "2", "3", "4", "5"])
+
+    @also_test_with_different_timezones
+    @snapshot_datastore_queries
+    def test_cursor_not_returned_for_non_timestamp_order(self):
+        self._create_events(
+            data=[
+                ("p1", "2020-01-11T12:00:01Z", {"idx": "1"}),
+                ("p1", "2020-01-11T12:00:02Z", {"idx": "2"}),
+                ("p1", "2020-01-11T12:00:03Z", {"idx": "3"}),
+            ]
+        )
+
+        with freeze_time("2020-01-12"):
+            query = EventsQuery(
+                kind="EventsQuery",
+                select=["event", "timestamp"],
+                after="2020-01-10",
+                orderBy=["event ASC"],
+                limit=2,
+            )
+            runner = EventsQueryRunner(query=query, team=self.team)
+            response = runner.run()
+
+        assert isinstance(response, CachedEventsQueryResponse)
+        self.assertIsNone(response.nextCursor)
+
+    @also_test_with_different_timezones
+    @snapshot_datastore_queries
+    def test_cursor_not_returned_for_aggregation_query(self):
+        self._create_events(
+            data=[
+                ("p1", "2020-01-11T12:00:01Z", {}),
+                ("p2", "2020-01-11T12:00:02Z", {}),
+            ]
+        )
+
+        with freeze_time("2020-01-12"):
+            query = EventsQuery(
+                kind="EventsQuery",
+                select=["count()", "timestamp"],
+                after="2020-01-10",
+                limit=2,
+            )
+            runner = EventsQueryRunner(query=query, team=self.team)
+            response = runner.run()
+
+        assert isinstance(response, CachedEventsQueryResponse)
+        self.assertIsNone(response.nextCursor)
+
+    @also_test_with_different_timezones
+    @snapshot_datastore_queries
+    def test_cursor_with_star_select(self):
+        self._create_events(
+            data=[
+                ("p1", "2020-01-11T12:00:03Z", {}),
+                ("p1", "2020-01-11T12:00:02Z", {}),
+                ("p1", "2020-01-11T12:00:01Z", {}),
+            ]
+        )
+
+        with freeze_time("2020-01-12"):
+            query = EventsQuery(
+                kind="EventsQuery",
+                select=["*"],
+                after="2020-01-10",
+                orderBy=["timestamp DESC"],
+                limit=2,
+            )
+            runner = EventsQueryRunner(query=query, team=self.team)
+            response = runner.run()
+
+        assert isinstance(response, CachedEventsQueryResponse)
+        assert response.nextCursor is not None
+        cursor_timestamp = response.nextCursor.split("|")[0]
+        self.assertEqual(datetime.fromisoformat(cursor_timestamp), datetime.fromisoformat("2020-01-11T12:00:02Z"))
+
+    def test_cursor_pagination_advances_through_identical_timestamps(self):
+        # Bulk imports (e.g. Amplitude) land many events on the same second. An exclusive
+        # `timestamp <` cursor drops every tied event past the page limit; the uuid tiebreaker
+        # must page through all of them exactly once.
+        shared_timestamp = "2020-01-11T12:00:00Z"
+        self._create_events(
+            data=[
+                ("p1", shared_timestamp, {"idx": str(i)}, f"00000000-0000-0000-0000-00000000000{i}")
+                for i in range(1, 6)
+            ]
+        )
+
+        all_indices: list[str] = []
+        cursor = None
+        for _ in range(5):
+            with freeze_time("2020-01-12"):
+                query = EventsQuery(
+                    kind="EventsQuery",
+                    select=["uuid", "properties.idx", "timestamp"],
+                    after="2020-01-10",
+                    orderBy=["timestamp DESC"],
+                    limit=2,
+                )
+                runner = EventsQueryRunner(query=query, team=self.team)
+                if cursor:
+                    runner.apply_pagination_cursor(cursor)
+                response = runner.run()
+
+            assert isinstance(response, CachedEventsQueryResponse)
+            all_indices.extend(row[1] for row in response.results)
+
+            if response.nextCursor:
+                cursor = response.nextCursor
+            else:
+                break
+
+        self.assertEqual(sorted(all_indices), ["1", "2", "3", "4", "5"])
+
+    def test_action_steps_filters_events(self):
+        self._create_events(
+            data=[
+                ("p1", "2020-01-11T12:00:01Z", {"$current_url": "https://example.com/page"}),
+            ],
+            event="$pageview",
+        )
+        self._create_events(
+            data=[
+                ("p2", "2020-01-11T12:00:02Z", {}),
+            ],
+            event="custom_event",
+        )
+
+        with freeze_time("2020-01-12"):
+            query = EventsQuery(
+                kind="EventsQuery",
+                select=["*"],
+                after="2020-01-10",
+                actionSteps=[EventsQueryActionStep(event="$pageview")],
+            )
+            runner = EventsQueryRunner(query=query, team=self.team)
+            response = runner.run()
+
+        assert isinstance(response, CachedEventsQueryResponse)
+        self.assertEqual(len(response.results), 1)
+        self.assertEqual(response.results[0][0]["event"], "$pageview")
+
+    def _enable_property_access_control(self) -> None:
+        from insights.constants import AvailableFeature
+
+        self.organization.available_product_features = [
+            {"name": AvailableFeature.PROPERTY_ACCESS_CONTROL, "key": AvailableFeature.PROPERTY_ACCESS_CONTROL}
+        ]
+        self.organization.save()
+
+    @freeze_time("2020-01-11T12:00:05Z")
+    def test_restricted_person_properties_stripped_from_person_column(self):
+        from insights.models import PropertyDefinition
+
+        from products.access_control.backend.models.property_access_control import PropertyAccessControl
+        from products.access_control.backend.property_access_control import PropertyAccessLevel
+
+        self._enable_property_access_control()
+
+        _create_person(
+            team_id=self.team.pk,
+            distinct_ids=["p1"],
+            properties={"email": "secret@example.com", "name": "Test User"},
+        )
+        _create_event(
+            team=self.team,
+            event="$pageview",
+            distinct_id="p1",
+            timestamp="2020-01-11T12:00:01Z",
+            properties={"$browser": "Chrome"},
+        )
+        flush_persons_and_events()
+
+        # restrict "email" person property
+        prop_def = PropertyDefinition.objects.create(
+            team=self.team,
+            name="email",
+            type=PropertyDefinition.Type.PERSON,
+        )
+        PropertyAccessControl.objects.create(
+            team=self.team,
+            property_definition=prop_def,
+            access_level=PropertyAccessLevel.NONE.value,
+        )
+
+        query = EventsQuery(select=["person"], after="2020-01-10")
+        runner = EventsQueryRunner(query=query, team=self.team, user=self.user)
+        response = runner.run()
+
+        assert isinstance(response, CachedEventsQueryResponse)
+        assert len(response.results) > 0
+        person_data = response.results[0][0]
+        assert "email" not in person_data["properties"]
+        assert "name" in person_data["properties"]
+
+    @freeze_time("2020-01-11T12:00:05Z")
+    def test_restricted_event_property_in_select_raises_error(self):
+        from insights.insightsql.errors import ResolutionError
+
+        from insights.models import PropertyDefinition
+
+        from products.access_control.backend.models.property_access_control import PropertyAccessControl
+        from products.access_control.backend.property_access_control import PropertyAccessLevel
+
+        self._enable_property_access_control()
+
+        _create_event(
+            team=self.team,
+            event="$pageview",
+            distinct_id="p1",
+            timestamp="2020-01-11T12:00:01Z",
+            properties={"secret_field": "hidden"},
+        )
+        flush_persons_and_events()
+
+        prop_def = PropertyDefinition.objects.create(
+            team=self.team,
+            name="secret_field",
+            type=PropertyDefinition.Type.EVENT,
+        )
+        PropertyAccessControl.objects.create(
+            team=self.team,
+            property_definition=prop_def,
+            access_level=PropertyAccessLevel.NONE.value,
+        )
+
+        query = EventsQuery(select=["properties.secret_field"], after="2020-01-10")
+        runner = EventsQueryRunner(query=query, team=self.team, user=self.user)
+        with self.assertRaises(ResolutionError):
+            runner.run()
+
+    @freeze_time("2020-01-11T12:00:05Z")
+    def test_users_with_different_restrictions_get_different_cache_keys(self):
+        self._enable_property_access_control()
+
+        # create a second user in the same org
+        other_user = self._create_user("other@hanzo.ai")
+        OrganizationMembership.objects.get(user=other_user, organization=self.organization)
+
+        _create_event(
+            team=self.team,
+            event="$pageview",
+            distinct_id="p1",
+            timestamp="2020-01-11T12:00:01Z",
+            properties={"secret_field": "hidden", "public_field": "visible"},
+        )
+        flush_persons_and_events()
+
+        prop_def = PropertyDefinition.objects.create(
+            team=self.team,
+            name="secret_field",
+            type=PropertyDefinition.Type.EVENT,
+        )
+        # default: no access
+        PropertyAccessControl.objects.create(
+            team=self.team,
+            property_definition=prop_def,
+            access_level=PropertyAccessLevel.NONE.value,
+        )
+        # self.user gets read_write override
+        PropertyAccessControl.objects.create(
+            team=self.team,
+            property_definition=prop_def,
+            access_level=PropertyAccessLevel.READ_WRITE.value,
+            organization_member=self.organization_membership,
+        )
+
+        query = EventsQuery(select=["event", "properties.public_field"], after="2020-01-10")
+
+        # the unrestricted user and the restricted user should get different cache keys
+        runner_unrestricted = EventsQueryRunner(query=query, team=self.team, user=self.user)
+        runner_restricted = EventsQueryRunner(query=query, team=self.team, user=other_user)
+
+        key_unrestricted = runner_unrestricted.get_cache_key()
+        key_restricted = runner_restricted.get_cache_key()
+
+        assert key_unrestricted != key_restricted, (
+            "Users with different property access restrictions must get different cache keys"
+        )
+
+    @freeze_time("2020-01-11T12:00:05Z")
+    def test_users_without_restrictions_share_cache_key(self):
+        # no property access control rules — both users should share the same cache key
+        other_user = self._create_user("other@hanzo.ai")
+
+        _create_event(
+            team=self.team,
+            event="$pageview",
+            distinct_id="p1",
+            timestamp="2020-01-11T12:00:01Z",
+        )
+        flush_persons_and_events()
+
+        query = EventsQuery(select=["event"], after="2020-01-10")
+
+        runner_a = EventsQueryRunner(query=query, team=self.team, user=self.user)
+        runner_b = EventsQueryRunner(query=query, team=self.team, user=other_user)
+
+        assert runner_a.get_cache_key() == runner_b.get_cache_key(), (
+            "Users without property access restrictions should share the same cache key"
+        )
+
+    @freeze_time("2020-01-11T12:00:05Z")
+    def test_cached_results_not_served_across_restriction_boundaries(self):
+        from insights.models import PropertyDefinition
+
+        from products.access_control.backend.models.property_access_control import PropertyAccessControl
+        from products.access_control.backend.property_access_control import PropertyAccessLevel
+
+        self._enable_property_access_control()
+
+        other_user = self._create_user("other@hanzo.ai")
+
+        _create_person(
+            team_id=self.team.pk,
+            distinct_ids=["p1"],
+            properties={"email": "secret@example.com", "name": "Test User"},
+        )
+        _create_event(
+            team=self.team,
+            event="$pageview",
+            distinct_id="p1",
+            timestamp="2020-01-11T12:00:01Z",
+            properties={"public_field": "visible"},
+        )
+        flush_persons_and_events()
+
+        prop_def = PropertyDefinition.objects.create(
+            team=self.team,
+            name="email",
+            type=PropertyDefinition.Type.PERSON,
+        )
+        # default: no access
+        PropertyAccessControl.objects.create(
+            team=self.team,
+            property_definition=prop_def,
+            access_level=PropertyAccessLevel.NONE.value,
+        )
+        # self.user gets read_write override
+        PropertyAccessControl.objects.create(
+            team=self.team,
+            property_definition=prop_def,
+            access_level=PropertyAccessLevel.READ_WRITE.value,
+            organization_member=self.organization_membership,
+        )
+
+        query = EventsQuery(select=["person"], after="2020-01-10")
+
+        # run as unrestricted user first — results get cached
+        runner_unrestricted = EventsQueryRunner(query=query, team=self.team, user=self.user)
+        response_unrestricted = runner_unrestricted.run()
+        assert isinstance(response_unrestricted, CachedEventsQueryResponse)
+        person_unrestricted = response_unrestricted.results[0][0]
+        assert "email" in person_unrestricted["properties"]
+
+        # run as restricted user — should NOT get the cached unrestricted results
+        runner_restricted = EventsQueryRunner(query=query, team=self.team, user=other_user)
+        response_restricted = runner_restricted.run()
+        assert isinstance(response_restricted, CachedEventsQueryResponse)
+        person_restricted = response_restricted.results[0][0]
+        assert "email" not in person_restricted["properties"]

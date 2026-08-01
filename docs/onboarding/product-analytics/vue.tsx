@@ -1,6 +1,7 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
+import { SDK_DEFAULTS_DATE } from './_snippets/sdkDefaults'
 
 export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
     const { CodeBlock, Markdown, CalloutBox, dedent, snippets } = ctx
@@ -60,12 +61,12 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'javascript',
                                 file: 'src/composables/useInsights.js',
                                 code: dedent`
-                                    import insights from '@hanzo/insights'
+                                    import insights from 'insights-js'
 
                                     export function useInsights() {
-                                      insights.init('<ph_project_api_key>', {
+                                      insights.init('<ph_project_token>', {
                                         api_host: '<ph_client_api_host>',
-                                        defaults: '2026-01-30'
+                                        defaults: '${SDK_DEFAULTS_DATE}'
                                       })
 
                                       return { insights }

@@ -1,11 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { InputSelect, Select } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
+import { Button, InputSelect, Select } from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FilterBar } from 'lib/components/FilterBar'
 import { dayjs } from 'lib/dayjs'
-import { formatDateRange } from 'lib/utils'
+import { formatDateRange } from 'lib/utils/datetime'
 
 import { EndpointsUsageBreakdown } from '~/queries/schema/schema-general'
 import { IntervalType } from '~/types'
@@ -51,16 +52,16 @@ const endpointsUsageDateMapping: DateMappingOption[] = [
         defaultInterval: 'day',
     },
     {
-        key: 'Year to date',
+        key: 'This year',
         values: ['yStart'],
         getFormattedDate: (date: dayjs.Dayjs): string => formatDateRange(date.startOf('y'), date.endOf('d')),
         defaultInterval: 'day',
     },
 ]
 
-const EndpointNameFilter = ({ tabId }: { tabId: string }): JSX.Element => {
-    const { endpointNames, endpointNamesLoading, endpointFilter } = useValues(endpointsUsageLogic({ tabId }))
-    const { setEndpointFilter } = useActions(endpointsUsageLogic({ tabId }))
+const EndpointNameFilter = (): JSX.Element => {
+    const { endpointNames, endpointNamesLoading, endpointFilter } = useValues(endpointsUsageLogic)
+    const { setEndpointFilter } = useActions(endpointsUsageLogic)
 
     const options = endpointNames.map((name: string) => ({
         key: name,
@@ -90,9 +91,9 @@ const EndpointNameFilter = ({ tabId }: { tabId: string }): JSX.Element => {
     )
 }
 
-const MaterializationTypeFilter = ({ tabId }: { tabId: string }): JSX.Element => {
-    const { materializationType } = useValues(endpointsUsageLogic({ tabId }))
-    const { setMaterializationType } = useActions(endpointsUsageLogic({ tabId }))
+const MaterializationTypeFilter = (): JSX.Element => {
+    const { materializationType } = useValues(endpointsUsageLogic)
+    const { setMaterializationType } = useActions(endpointsUsageLogic)
 
     return (
         <Select
@@ -110,9 +111,9 @@ const MaterializationTypeFilter = ({ tabId }: { tabId: string }): JSX.Element =>
     )
 }
 
-const IntervalFilter = ({ tabId }: { tabId: string }): JSX.Element => {
-    const { interval } = useValues(endpointsUsageLogic({ tabId }))
-    const { setInterval } = useActions(endpointsUsageLogic({ tabId }))
+const IntervalFilter = (): JSX.Element => {
+    const { interval } = useValues(endpointsUsageLogic)
+    const { setInterval } = useActions(endpointsUsageLogic)
 
     return (
         <Select
@@ -131,9 +132,9 @@ const IntervalFilter = ({ tabId }: { tabId: string }): JSX.Element => {
     )
 }
 
-const BreakdownFilter = ({ tabId }: { tabId: string }): JSX.Element => {
-    const { breakdownBy } = useValues(endpointsUsageLogic({ tabId }))
-    const { setBreakdownBy } = useActions(endpointsUsageLogic({ tabId }))
+const BreakdownFilter = (): JSX.Element => {
+    const { breakdownBy } = useValues(endpointsUsageLogic)
+    const { setBreakdownBy } = useActions(endpointsUsageLogic)
 
     return (
         <Select
@@ -143,7 +144,7 @@ const BreakdownFilter = ({ tabId }: { tabId: string }): JSX.Element => {
                 { value: null, label: 'No breakdown' },
                 { value: EndpointsUsageBreakdown.Endpoint, label: 'By endpoint' },
                 { value: EndpointsUsageBreakdown.MaterializationType, label: 'By execution type' },
-                { value: EndpointsUsageBreakdown.ApiKey, label: 'By API key' },
+                { value: EndpointsUsageBreakdown.ApiKey, label: 'By personal API key' },
                 { value: EndpointsUsageBreakdown.Status, label: 'By status' },
             ]}
             data-attr="breakdown-filter"
@@ -153,9 +154,32 @@ const BreakdownFilter = ({ tabId }: { tabId: string }): JSX.Element => {
     )
 }
 
-export const EndpointsUsageFilters = ({ tabId }: { tabId: string }): JSX.Element => {
-    const { dateFilter } = useValues(endpointsUsageLogic({ tabId }))
-    const { setDates } = useActions(endpointsUsageLogic({ tabId }))
+const RefreshButton = (): JSX.Element => {
+    const { canRefresh } = useValues(endpointsUsageLogic)
+    const { refresh } = useActions(endpointsUsageLogic)
+
+    return (
+        <Button
+            icon={<IconRefresh />}
+            size="small"
+            type="secondary"
+            tooltip="Refresh usage data."
+            disabledReason={
+                !canRefresh
+                    ? 'You can refresh once every 15 minutes. Note that it is not realtime, and may be delayed a few minutes.'
+                    : undefined
+            }
+            onClick={refresh}
+            aria-label="Refresh usage data"
+        >
+            Refresh
+        </Button>
+    )
+}
+
+export const EndpointsUsageFilters = (): JSX.Element => {
+    const { dateFilter } = useValues(endpointsUsageLogic)
+    const { setDates } = useActions(endpointsUsageLogic)
 
     return (
         <FilterBar
@@ -169,14 +193,15 @@ export const EndpointsUsageFilters = ({ tabId }: { tabId: string }): JSX.Element
                         forceGranularity="day"
                         dateOptions={endpointsUsageDateMapping}
                     />
-                    <EndpointNameFilter tabId={tabId} />
+                    <EndpointNameFilter />
                 </>
             }
             right={
                 <>
-                    <MaterializationTypeFilter tabId={tabId} />
-                    <IntervalFilter tabId={tabId} />
-                    <BreakdownFilter tabId={tabId} />
+                    <RefreshButton />
+                    <MaterializationTypeFilter />
+                    <IntervalFilter />
+                    <BreakdownFilter />
                 </>
             }
         />

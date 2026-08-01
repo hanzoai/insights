@@ -119,7 +119,7 @@ function createShadow(style?: string): ShadowRoot {
             "key": "domains",
             "type": "string",
             "label": "Domains",
-            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,insights.hanzo.ai"',
+            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,app.hanzo.ai"',
             "default": "",
         },
         {

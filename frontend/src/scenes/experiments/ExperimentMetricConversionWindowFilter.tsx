@@ -1,7 +1,7 @@
 import { Input } from 'lib/elements/Input'
 import { Radio } from 'lib/elements/Radio'
 import { Select, SelectOption } from 'lib/elements/Select'
-import { capitalizeFirstLetter, pluralize } from 'lib/utils'
+import { capitalizeFirstLetter, pluralize } from 'lib/utils/strings'
 import { TIME_INTERVAL_BOUNDS } from 'scenes/funnels/funnelUtils'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
@@ -68,27 +68,26 @@ export function ExperimentMetricConversionWindowFilter({
                 />
                 {metric.conversion_window_unit !== undefined && (
                     <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-2">
-                            <Input
-                                type="number"
-                                className="max-w-20"
-                                fullWidth={false}
-                                min={intervalBounds[0]}
-                                max={intervalBounds[1]}
-                                value={metric.conversion_window || 1}
-                                onChange={(value) => {
-                                    handleSetMetric({ ...metric, conversion_window: value || undefined })
-                                }}
-                            />
-                            <Select
-                                dropdownMatchSelectWidth={false}
-                                value={metric.conversion_window_unit}
-                                onChange={(value) =>
-                                    handleSetMetric({ ...metric, conversion_window_unit: value || undefined })
-                                }
-                                options={options}
-                            />
-                        </div>
+                        <Input
+                            type="number"
+                            className="max-w-20"
+                            fullWidth={false}
+                            min={intervalBounds[0]}
+                            max={intervalBounds[1]}
+                            // NaN renders as empty and keeps the input controlled; undefined would not
+                            value={metric.conversion_window ?? NaN}
+                            onChange={(value) => {
+                                handleSetMetric({ ...metric, conversion_window: value || undefined })
+                            }}
+                        />
+                        <Select
+                            dropdownMatchSelectWidth={false}
+                            value={metric.conversion_window_unit}
+                            onChange={(value) =>
+                                handleSetMetric({ ...metric, conversion_window_unit: value || undefined })
+                            }
+                            options={options}
+                        />
                     </div>
                 )}
             </div>

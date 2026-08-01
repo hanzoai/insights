@@ -4,7 +4,7 @@ import { IconSearch } from '@hanzo/icons'
 import { Button, Checkbox, Input, Snack, Table } from '@hanzo/elements'
 
 import { LOGS_PORTION_LIMIT } from 'lib/constants'
-import { pluralize } from 'lib/utils'
+import { pluralize } from 'lib/utils/strings'
 
 import { ALL_LOG_LEVELS, PipelineNodeLogsLogicProps, pipelineNodeLogsLogic } from './pipelineNodeLogsLogic'
 

@@ -51,7 +51,7 @@ def SHARDED_PREAGGREGATION_RESULTS_TABLE_SQL():
         + """
 PARTITION BY toYYYYMM(time_window_start)
 ORDER BY (team_id, job_id, time_window_start, breakdown_value)
-TTL toDateTime(expires_at)
+TTL expires_at
 SETTINGS index_granularity=8192
 """
     ).format(

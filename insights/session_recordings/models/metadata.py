@@ -1,9 +1,12 @@
-import dataclasses
 from datetime import datetime
 from typing import Literal, Optional, TypedDict, Union
 
 SnapshotData = dict
 WindowId = Optional[str]
+
+# A session counts as ongoing when replay data for it was last ingested within this window.
+# Shared so the listing query and the single-recording metadata query agree on "ongoing".
+ONGOING_SESSION_WINDOW_MINUTES = 5
 
 
 class RecordingSegment(TypedDict):
@@ -39,17 +42,6 @@ class DecompressedRecordingData(TypedDict):
     snapshot_data_by_window_id: dict[WindowId, list[Union[SnapshotData, SessionRecordingEventSummary]]]
 
 
-@dataclasses.dataclass(frozen=True)
-class RecordingBlockListing:
-    start_time: datetime
-    block_first_timestamps: list[datetime]
-    block_last_timestamps: list[datetime]
-    block_urls: list[str]
-
-    def is_empty(self) -> bool:
-        return not self.block_urls
-
-
 class RecordingMetadata(TypedDict):
     distinct_id: str
     start_time: datetime
@@ -71,6 +63,7 @@ class RecordingMetadata(TypedDict):
     retention_period_days: Optional[int]
     expiry_time: datetime
     recording_ttl: int
+    ongoing: bool
 
 
 class RecordingMatchingEvents(TypedDict):

@@ -1,16 +1,18 @@
 import { useValues } from 'kea'
-import insights from '@hanzo/insights'
+import insights from 'insights-js'
+
+import { buildJsHtmlSnippet, SnippetOption } from '@hanzo/shared-onboarding/product-analytics'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
-import { apiHostOrigin } from 'lib/utils/apiHost'
+import { preflightLogic } from 'lib/logic/preflightLogic'
 import { domainFor, proxyLogic } from 'scenes/settings/environment/proxyLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
 
-function snippetFunctions(arrayJs = '/static/array.js'): string {
+function getInsightsMethods(): string[] {
     const methods: string[] = []
     const insightsPrototype = Object.getPrototypeOf(insights)
     for (const key of Object.getOwnPropertyNames(insightsPrototype)) {
@@ -22,78 +24,67 @@ function snippetFunctions(arrayJs = '/static/array.js'): string {
             methods.push(key)
         }
     }
-    const snippetMethods = methods.join(' ')
-
-    return `!function(t,e){var o,n,p,r;e.__SV||(window.insights && window.insights.__loaded)||(window.insights=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host+"${arrayJs}",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="insights",u.people=u.people||[],u.toString=function(t){var e="insights";return"insights"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="${snippetMethods}".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.insights||[]);`
+    return methods
 }
 
-type SnippetOption = {
-    content: string
-    enabled: boolean
-    comment?: string
+export interface JsSnippetConfig {
+    projectToken: string
+    methods: string[]
+    options: Record<string, SnippetOption>
 }
 
-export function useJsSnippet(indent = 0, arrayJs?: string, scriptAttributes?: string): string {
+export function useJsSnippetConfig(): JsSnippetConfig {
     const { currentTeam } = useValues(teamLogic)
     const { featureFlags } = useValues(featureFlagLogic)
+    const { preflight } = useValues(preflightLogic)
 
     const { proxyRecords } = useValues(proxyLogic)
     const proxyRecord = proxyRecords[0]
 
     const isPersonProfilesDisabled = featureFlags[FEATURE_FLAGS.PERSONLESS_EVENTS_NOT_SUPPORTED]
 
-    const options: Record<string, SnippetOption> = {
-        api_host: {
-            content: domainFor(proxyRecord),
-            comment: proxyRecord ? 'your managed reverse proxy domain' : undefined,
-            enabled: true,
-        },
-        ui_host: {
-            content: apiHostOrigin(),
-            comment: "necessary because you're using a proxy, this way links will point back to Insights properly",
-            enabled: !!proxyRecord,
-        },
-        defaults: {
-            content: SDK_DEFAULTS_DATE,
-            enabled: true,
-        },
-        person_profiles: {
-            content: 'identified_only',
-            comment: "or 'always' to create profiles for anonymous users as well",
-            enabled: !isPersonProfilesDisabled,
+    return {
+        projectToken: currentTeam?.api_token ?? '',
+        methods: getInsightsMethods(),
+        options: {
+            api_host: {
+                content: domainFor(proxyRecord),
+                comment: proxyRecord ? 'your managed reverse proxy domain' : undefined,
+                enabled: true,
+            },
+            ui_host: {
+                content: preflight?.site_url || window.location.origin,
+                comment: "necessary because you're using a proxy, this way links will point back to Insights properly",
+                enabled: !!proxyRecord,
+            },
+            defaults: {
+                content: SDK_DEFAULTS_DATE,
+                enabled: true,
+            },
+            person_profiles: {
+                content: 'identified_only',
+                comment: "or 'always' to create profiles for anonymous users as well",
+                enabled: !isPersonProfilesDisabled,
+            },
         },
     }
+}
 
-    const scriptTag = scriptAttributes ? `<script ${scriptAttributes}>` : '<script>'
+export function useJsSnippet(indent = 0, arrayJs?: string, scriptAttributes?: string): string {
+    const { projectToken, methods, options } = useJsSnippetConfig()
 
-    return [
-        scriptTag,
-        `    ${snippetFunctions(arrayJs)}`,
-        `    insights.init('${currentTeam?.api_token}', {`,
-        ...Object.entries(options)
-            .map(([key, value]) => {
-                if (value.enabled) {
-                    return `        ${key}: '${value.content}',${value.comment ? ` // ${value.comment}` : ''}`
-                }
-            })
-            .filter(Boolean),
-        `    })`,
-        '</script>',
-    ]
-        .map((x) => ' '.repeat(indent) + x)
-        .join('\n')
+    return buildJsHtmlSnippet({
+        projectToken,
+        methods,
+        options,
+        indent,
+        arrayJs,
+        scriptAttributes,
+    })
 }
 
 export function JSSnippet(): JSX.Element {
     const snippet = useJsSnippet()
-
-    return <CodeSnippet language={Language.HTML}>{snippet}</CodeSnippet>
-}
-
-export function JSSnippetV2(): JSX.Element {
-    const { currentTeam } = useValues(teamLogic)
-
-    const snippet = useJsSnippet(0, `/array/${currentTeam?.api_token}/array.js`)
 
     return <CodeSnippet language={Language.HTML}>{snippet}</CodeSnippet>
 }

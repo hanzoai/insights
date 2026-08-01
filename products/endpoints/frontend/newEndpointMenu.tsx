@@ -4,8 +4,10 @@ import { router } from 'kea-router'
 import { IconGraph, IconServer } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 
-import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
+import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { urls } from 'scenes/urls'
+
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 import { insightPickerEndpointModalLogic } from './insightPickerEndpointModalLogic'
 
@@ -25,7 +27,7 @@ export function OverlayForNewEndpointMenu(): JSX.Element {
             icon: IconServer,
             name: 'SQL-based endpoint',
             description: 'Create an endpoint from a query in the SQL editor.',
-            onClick: () => router.actions.push(urls.sqlEditor({ outputTab: OutputTab.Endpoint })),
+            onClick: () => router.actions.push(urls.sqlEditor({ source: 'endpoint' })),
             dataAttr: 'new-endpoint-overlay-insightsql',
         },
         {
@@ -40,19 +42,24 @@ export function OverlayForNewEndpointMenu(): JSX.Element {
     return (
         <>
             {options.map((option) => (
-                <Button
+                <AccessControlAction
                     key={option.name}
-                    icon={<option.icon />}
-                    onClick={option.onClick}
-                    data-attr={option.dataAttr}
-                    data-attr-endpoint-type={option.name}
-                    fullWidth
+                    resourceType={AccessControlResourceType.Endpoint}
+                    minAccessLevel={AccessControlLevel.Editor}
                 >
-                    <div className="flex flex-col text-sm py-1">
-                        <strong>{option.name}</strong>
-                        <span className="text-xs font-sans font-normal">{option.description}</span>
-                    </div>
-                </Button>
+                    <Button
+                        icon={<option.icon />}
+                        onClick={option.onClick}
+                        data-attr={option.dataAttr}
+                        data-attr-endpoint-type={option.name}
+                        fullWidth
+                    >
+                        <div className="flex flex-col text-sm py-1">
+                            <strong>{option.name}</strong>
+                            <span className="text-xs font-sans font-normal">{option.description}</span>
+                        </div>
+                    </Button>
+                </AccessControlAction>
             ))}
         </>
     )

@@ -11,13 +11,13 @@ from structlog.contextvars import bind_contextvars
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
-from insights.batch_exports.service import BatchExportField, BatchExportInsertInputs, HttpBatchExportInputs
-from insights.models import BatchExportRun
 from insights.sync import database_sync_to_async
 from insights.temporal.common.base import InsightsWorkflow
 from insights.temporal.common.datastore import get_client
 from insights.temporal.common.logger import get_logger
 
+from products.batch_exports.backend.models.batch_export import BatchExportRun
+from products.batch_exports.backend.service import BatchExportField, BatchExportInsertInputs, HttpBatchExportInputs
 from products.batch_exports.backend.temporal.batch_exports import (
     FinishBatchExportRunInputs,
     StartBatchExportRunInputs,
@@ -294,7 +294,7 @@ async def insert_into_http_activity(inputs: HttpInsertInputs) -> BatchExportResu
 
                 activity.heartbeat(last_uploaded_timestamp)
 
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(trust_env=True) as session:
                 for record_batch in record_iterator:
                     for row in record_batch.select(columns).to_pylist():
                         # Format result row as Insights event, write JSON to the batch file.
@@ -354,7 +354,9 @@ class HttpBatchExportWorkflow(InsightsWorkflow):
         """Workflow implementation to export data to an HTTP Endpoint."""
         is_backfill = inputs.get_is_backfill()
         is_earliest_backfill = inputs.get_is_earliest_backfill()
-        data_interval_start, data_interval_end = get_data_interval(inputs.interval, inputs.data_interval_end)
+        data_interval_start, data_interval_end = get_data_interval(
+            inputs.interval, inputs.data_interval_end, inputs.timezone
+        )
         should_backfill_from_beginning = is_backfill and is_earliest_backfill
 
         start_batch_export_run_inputs = StartBatchExportRunInputs(

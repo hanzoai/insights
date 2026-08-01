@@ -1,6 +1,6 @@
 import datetime
 from datetime import timedelta
-from typing import Optional
+from typing import Any, Optional
 
 from freezegun import freeze_time
 from insights.test.base import APIBaseTest, DatastoreTestMixin, snapshot_datastore_queries
@@ -11,10 +11,11 @@ from django.utils import timezone
 from insights.schema import GroupPropertyFilter, GroupsQuery, PropertyOperator
 
 from insights.insightsql_queries.groups.groups_query_runner import GroupsQueryRunner
-from insights.models import GroupTypeMapping
 from insights.models.group.util import create_group, raw_create_group_ch
-from insights.models.property_definition import PropertyDefinition, PropertyType
+from insights.test.persons import create_group_type_mapping, update_group
 from insights.test.test_utils import create_group_type_mapping_without_created_at
+
+from products.event_definitions.backend.models.property_definition import PropertyDefinition, PropertyType
 
 
 @override_settings(IN_UNIT_TESTING=True)
@@ -62,15 +63,49 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
             group_type_index=0,
             limit=10,
             offset=0,
+            orderBy=["key"],
         )
         query_runner = GroupsQueryRunner(query=query, team=self.team)
         result = query_runner.calculate()
 
         self.assertEqual(len(result.results), 3)
-        self.assertEqual(result.columns, ["group_name", "key"])
-        self.assertEqual(result.results[0][0], "org0.inc")
-        self.assertEqual(result.results[1][0], "org1.inc")
-        self.assertEqual(result.results[2][0], "org2.inc")
+        self.assertEqual(result.columns, ["group_name"])
+        self.assertEqual(result.results[0][0], {"display_name": "org0.inc", "key": "org0"})
+        self.assertEqual(result.results[1][0], {"display_name": "org1.inc", "key": "org1"})
+        self.assertEqual(result.results[2][0], {"display_name": "org2.inc", "key": "org2"})
+
+    @freeze_time("2025-01-01")
+    def test_groups_query_runner_with_numeric_name_property(self):
+        # Regression: a numeric `name` property type made coalesce(properties.name, key)
+        # resolve to Variant(Float64, String), which datastore_driver can't deserialize.
+        create_group_type_mapping_without_created_at(
+            team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
+        )
+        PropertyDefinition.objects.create(
+            team=self.team,
+            name="name",
+            property_type=PropertyType.Numeric,
+            is_numerical=True,
+            type=PropertyDefinition.Type.GROUP,
+            group_type_index=0,
+        )
+        for i in range(3):
+            create_group(
+                team_id=self.team.pk,
+                group_type_index=0,
+                group_key=f"org{i}",
+                properties={"name": i * 10},
+            )
+
+        query = GroupsQuery(group_type_index=0, limit=10, offset=0, orderBy=["key"])
+        query_runner = GroupsQueryRunner(query=query, team=self.team)
+        result = query_runner.calculate()
+
+        self.assertEqual(len(result.results), 3)
+        self.assertEqual(result.columns, ["group_name"])
+        self.assertEqual(result.results[0][0], {"display_name": "0", "key": "org0"})
+        self.assertEqual(result.results[1][0], {"display_name": "10", "key": "org1"})
+        self.assertEqual(result.results[2][0], {"display_name": "20", "key": "org2"})
 
     @freeze_time("2025-01-01")
     @snapshot_datastore_queries
@@ -80,14 +115,15 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
             group_type_index=0,
             limit=10,
             offset=2,
+            orderBy=["key"],
         )
 
         query_runner = GroupsQueryRunner(query=query, team=self.team)
         result = query_runner.calculate()
 
         self.assertEqual(len(result.results), 1)
-        self.assertEqual(result.columns, ["group_name", "key"])
-        self.assertEqual(result.results[0][0], "org2.inc")
+        self.assertEqual(result.columns, ["group_name"])
+        self.assertEqual(result.results[0][0], {"display_name": "org2.inc", "key": "org2"})
 
     @freeze_time("2025-01-01")
     @snapshot_datastore_queries
@@ -97,7 +133,8 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
             group_type_index=0,
             limit=10,
             offset=0,
-            select=["properties.arr"],
+            select=["group_name", "key", "properties.arr"],
+            orderBy=["key"],
         )
 
         query_runner = GroupsQueryRunner(query=query, team=self.team)
@@ -105,7 +142,8 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
 
         self.assertEqual(len(result.results), 3)
         self.assertEqual(result.columns, ["group_name", "key", "properties.arr"])
-        self.assertEqual(result.results[0][0], "org0.inc")
+        self.assertEqual(result.results[0][0], {"display_name": "org0.inc", "key": "org0"})
+        self.assertEqual(result.results[0][1], "org0")
         self.assertEqual(result.results[0][2], 150)
         self.assertEqual(result.results[1][2], 0)
         self.assertEqual(result.results[2][2], 300)
@@ -125,13 +163,13 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
         result = query_runner.calculate()
 
         self.assertEqual(len(result.results), 1)
-        self.assertEqual(result.columns, ["group_name", "key"])
-        self.assertEqual(result.results[0][0], "org2.inc")
+        self.assertEqual(result.columns, ["group_name"])
+        self.assertEqual(result.results[0][0], {"display_name": "org2.inc", "key": "org2"})
 
     @freeze_time("2025-01-01")
     @snapshot_datastore_queries
     def test_search_ranking(self):
-        GroupTypeMapping.objects.create(
+        create_group_type_mapping(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
         )
         test_groups = [
@@ -161,23 +199,18 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
         result = query_runner.calculate()
 
         self.assertEqual(len(result.results), len(test_groups), "Should match all groups")
-        self.assertEqual(result.columns, ["group_name", "key"])
-        self.assertEqual(result.results[0][0], "test")
-        self.assertEqual(result.results[0][1], "exact")
-        self.assertEqual(result.results[1][0], "testable")
-        self.assertEqual(result.results[1][1], "prefix2")
-        self.assertEqual(result.results[2][0], "testing")
-        self.assertEqual(result.results[2][1], "prefix")
-        self.assertEqual(result.results[3][0], "best_test_ever")
-        self.assertEqual(result.results[3][1], "contains2")
-        self.assertEqual(result.results[4][0], "my_test_group")
-        self.assertEqual(result.results[4][1], "contains")
+        self.assertEqual(result.columns, ["group_name"])
+        self.assertEqual(result.results[0][0], {"display_name": "test", "key": "exact"})
+        self.assertEqual(result.results[1][0], {"display_name": "testable", "key": "prefix2"})
+        self.assertEqual(result.results[2][0], {"display_name": "testing", "key": "prefix"})
+        self.assertEqual(result.results[3][0], {"display_name": "best_test_ever", "key": "contains2"})
+        self.assertEqual(result.results[4][0], {"display_name": "my_test_group", "key": "contains"})
 
     @freeze_time("2025-01-01")
     @snapshot_datastore_queries
     def test_search_ranking_with_key_fallback(self):
         """Test search ranking when groups don't have name property and fall back to key"""
-        GroupTypeMapping.objects.create(
+        create_group_type_mapping(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
         )
         test_groups = [
@@ -205,15 +238,15 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
         result = query_runner.calculate()
 
         self.assertEqual(len(result.results), len(test_groups), "Should match all groups")
-        self.assertEqual(result.results[0][1], "api", "Exact match ranked first")
-        self.assertEqual(result.results[1][1], "api_v2", "Prefix match ranked second")
-        self.assertEqual(result.results[2][1], "legacy_api", "Contains match ranked last")
+        self.assertEqual(result.results[0][0]["key"], "api", "Exact match ranked first")
+        self.assertEqual(result.results[1][0]["key"], "api_v2", "Prefix match ranked second")
+        self.assertEqual(result.results[2][0]["key"], "legacy_api", "Contains match ranked last")
 
     @freeze_time("2025-01-01")
     @snapshot_datastore_queries
     def test_search_ordering_with_user_orderby(self):
         """Test that similarity ordering comes after user-specified orderBy, not after default created_at DESC"""
-        GroupTypeMapping.objects.create(
+        create_group_type_mapping(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
         )
         test_groups = [
@@ -234,18 +267,20 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
             limit=10,
             offset=0,
             search="test",
-            select=["properties.arr"],
+            select=["group_name", "key", "properties.arr"],
             orderBy=["properties.arr DESC"],  # User-specified ordering
         )
 
         query_runner = GroupsQueryRunner(query=query, team=self.team)
         result = query_runner.calculate()
         self.assertEqual(len(result.results), len(test_groups), "Should match all groups")
-        self.assertEqual(result.results[0][0], "my_test_group", "Contains match ranked first, highest arr")
+        self.assertEqual(
+            result.results[0][0]["display_name"], "my_test_group", "Contains match ranked first, highest arr"
+        )
         self.assertEqual(result.results[0][2], "300")
-        self.assertEqual(result.results[1][0], "test", "Exact match ranked second, mid arr")
+        self.assertEqual(result.results[1][0]["display_name"], "test", "Exact match ranked second, mid arr")
         self.assertEqual(result.results[1][2], "200")
-        self.assertEqual(result.results[2][0], "testing", "Prefix match ranked last, lowest arr")
+        self.assertEqual(result.results[2][0]["display_name"], "testing", "Prefix match ranked last, lowest arr")
         self.assertEqual(result.results[2][2], "100")
 
     @freeze_time("2025-01-01")
@@ -258,7 +293,7 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
             group_type_index=0,
             limit=10,
             offset=0,
-            select=["properties.arr"],
+            select=["group_name", "key", "properties.arr"],
             orderBy=["properties.arr DESC"],
         )
 
@@ -276,7 +311,7 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
             group_type_index=0,
             limit=10,
             offset=0,
-            select=["properties.arr"],
+            select=["group_name", "key", "properties.arr"],
             orderBy=["properties.arr"],
         )
 
@@ -301,10 +336,10 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
         result = query_runner.calculate()
 
         self.assertEqual(len(result.results), 3)
-        self.assertEqual(result.columns, ["group_name", "key"])
-        self.assertEqual(result.results[0][0], "org2.inc")
-        self.assertEqual(result.results[1][0], "org1.inc")
-        self.assertEqual(result.results[2][0], "org0.inc")
+        self.assertEqual(result.columns, ["group_name"])
+        self.assertEqual(result.results[0][0], {"display_name": "org2.inc", "key": "org2"})
+        self.assertEqual(result.results[1][0], {"display_name": "org1.inc", "key": "org1"})
+        self.assertEqual(result.results[2][0], {"display_name": "org0.inc", "key": "org0"})
 
     @freeze_time("2025-01-01")
     @snapshot_datastore_queries
@@ -330,8 +365,8 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
         result = query_runner.calculate()
 
         self.assertEqual(len(result.results), 1)
-        self.assertEqual(result.columns, ["group_name", "key"])
-        self.assertEqual(result.results[0][0], "org0.inc")
+        self.assertEqual(result.columns, ["group_name"])
+        self.assertEqual(result.results[0][0], {"display_name": "org0.inc", "key": "org0"})
 
     @freeze_time("2025-01-01")
     @snapshot_datastore_queries
@@ -351,13 +386,15 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
                     group_type_index=0,
                 )
             ],
-            select=["properties.arr"],
+            select=["group_name", "key", "properties.arr"],
         )
         query_runner = GroupsQueryRunner(query=query, team=self.team)
         result = query_runner.calculate()
 
         self.assertEqual(len(result.results), 2)
         self.assertEqual(result.columns, ["group_name", "key", "properties.arr"])
+        self.assertEqual(result.results[0][0], {"display_name": "org0.inc", "key": "org0"})
+        self.assertEqual(result.results[0][1], "org0")
         self.assertEqual(result.results[0][2], 150)
         self.assertEqual(result.results[1][2], 300)
 
@@ -385,7 +422,7 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
         )
         # Saving in Postgres won't update Datastore
         group.group_properties["arr"] = 200
-        group.save()
+        update_group(group)
         # ... so we need to update Datastore too.
         raw_create_group_ch(
             team_id=self.team.pk,
@@ -408,14 +445,15 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
                     value="org0.inc",
                 )
             ],
-            select=["properties.arr"],
+            select=["group_name", "key", "properties.arr"],
         )
         query_runner = GroupsQueryRunner(query=query, team=self.team)
         result = query_runner.calculate()
 
         self.assertEqual(len(result.results), 1)
         self.assertEqual(result.columns, ["group_name", "key", "properties.arr"])
-        self.assertEqual(result.results[0][0], "org0.inc")
+        self.assertEqual(result.results[0][0], {"display_name": "org0.inc", "key": "org0"})
+        self.assertEqual(result.results[0][1], "org0")
         self.assertEqual(result.results[0][2], 200)
 
     @snapshot_datastore_queries
@@ -430,24 +468,18 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
             group_type_index=0,
             limit=10,
             offset=0,
-            select=['properties."prop with whitespace"'],
+            select=["group_name", "key", 'properties."prop with whitespace"'],
         )
 
         query_runner = GroupsQueryRunner(query=query, team=self.team)
         result = query_runner.calculate()
 
         group = result.results[0]
-        self.assertEqual(group[0], "myorg.inc")
+        self.assertEqual(group[0], {"display_name": "myorg.inc", "key": "myorg"})
         self.assertEqual(group[1], "myorg")
         self.assertEqual(group[2], "true")
 
-    def test_column_ordering_consistency(self):
-        """Test that group_name and key are ALWAYS the first two columns in results.
-
-        IMPORTANT: The frontend (crm/utils.tsx) depends on this ordering,
-        specifically hardcoding that 'key' is at index 1. This test ensures
-        that contract is maintained regardless of select parameter ordering.
-        """
+    def test_column_ordering_respects_user_select(self):
         create_group_type_mapping_without_created_at(
             team=self.team, project_id=self.team.project_id, group_type="organization", group_type_index=0
         )
@@ -468,76 +500,48 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
             properties={"name": "Test Organization", "priority": 100, "status": "active"},
         )
 
-        test_cases: list[tuple[str, Optional[list[str]], list[str], dict[int, str | int]]] = [
+        test_cases: list[tuple[str, Optional[list[str]], list[str], dict[int, Any]]] = [
             (
                 "Default (no select specified)",
                 None,
-                ["group_name", "key"],
-                {
-                    0: "Test Organization",  # group_name
-                    1: "test_org",  # key
-                },
+                ["group_name"],
+                {0: {"display_name": "Test Organization", "key": "test_org"}},
             ),
             (
-                "Select with properties before group_name/key",
+                "Properties before group_name/key",
                 ["properties.priority", "properties.status", "group_name", "key"],
-                ["group_name", "key", "properties.priority", "properties.status"],
-                {
-                    0: "Test Organization",  # group_name
-                    1: "test_org",  # key
-                    2: 100,  # priority
-                    3: "active",  # status
-                },
+                ["properties.priority", "properties.status", "group_name", "key"],
+                {0: 100, 1: "active", 2: {"display_name": "Test Organization", "key": "test_org"}, 3: "test_org"},
             ),
             (
-                "Select with only additional properties (no explicit group_name/key)",
+                "Only properties (no group_name/key)",
                 ["properties.status", "properties.priority"],
-                ["group_name", "key", "properties.status", "properties.priority"],
-                {
-                    0: "Test Organization",  # group_name
-                    1: "test_org",  # key
-                    2: "active",  # status
-                    3: 100,  # priority
-                },
+                ["properties.status", "properties.priority"],
+                {0: "active", 1: 100},
             ),
             (
-                "Select with properties interspersed with group_name/key",
+                "Interspersed ordering",
                 ["properties.status", "key", "properties.priority", "group_name"],
-                ["group_name", "key", "properties.status", "properties.priority"],
-                {
-                    0: "Test Organization",  # group_name
-                    1: "test_org",  # key
-                    2: "active",  # status
-                    3: 100,  # priority
-                },
+                ["properties.status", "key", "properties.priority", "group_name"],
+                {0: "active", 1: "test_org", 2: 100, 3: {"display_name": "Test Organization", "key": "test_org"}},
             ),
             (
-                "Select with duplicate group_name and key",
+                "Duplicates are removed",
                 ["group_name", "key", "properties.status", "group_name", "key"],
                 ["group_name", "key", "properties.status"],
-                {
-                    0: "Test Organization",  # group_name
-                    1: "test_org",  # key
-                    2: "active",  # status
-                },
+                {0: {"display_name": "Test Organization", "key": "test_org"}, 1: "test_org", 2: "active"},
             ),
             (
-                "Select with only key specified",
+                "Only key",
                 ["key"],
-                ["group_name", "key"],
-                {
-                    0: "Test Organization",  # group_name
-                    1: "test_org",  # key
-                },
+                ["key"],
+                {0: "test_org"},
             ),
             (
-                "Select with only group_name specified",
+                "Only group_name",
                 ["group_name"],
-                ["group_name", "key"],
-                {
-                    0: "Test Organization",  # group_name
-                    1: "test_org",  # key
-                },
+                ["group_name"],
+                {0: {"display_name": "Test Organization", "key": "test_org"}},
             ),
         ]
 
@@ -551,8 +555,6 @@ class TestGroupsQueryRunner(DatastoreTestMixin, APIBaseTest):
                 )
                 result = GroupsQueryRunner(query=query, team=self.team).calculate()
 
-                self.assertEqual(result.columns[0], "group_name", "First column must always be group_name")
-                self.assertEqual(result.columns[1], "key", "Second column must always be key")
                 self.assertEqual(result.columns, expected_columns)
 
                 for index, expected_value in expected_values.items():

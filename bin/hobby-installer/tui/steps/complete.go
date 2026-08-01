@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/hanzoai/insights/bin/hobby-installer/ui"
+	"github.com/insights/insights/bin/hobby-installer/ui"
 )
 
 type CompleteModel struct {

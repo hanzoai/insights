@@ -1,14 +1,21 @@
 import { useActions, useValues } from 'kea'
 
+import * as construction2 from '@hanzo/brand/hoggies/png/construction-2'
+import * as magnifyingGlass from '@hanzo/brand/hoggies/png/magnifying-glass-1'
 import { IconOpenSidebar, IconPlus, IconX } from '@hanzo/icons'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { Button } from 'lib/elements/Button'
 import { cn } from 'lib/utils/css-classes'
 import { userLogic } from 'scenes/userLogic'
 
 import { ProductKey } from '~/queries/schema/schema-general'
 
-import { BuilderMascot3, DetectiveMascot } from '../mascots'
+import { MCPUseCaseCard } from '../MCPHint/MCPUseCaseCard'
+import type { SurfaceKey } from '../MCPHint/prompts'
+
+const MascotConstruction2 = pngHoggie(construction2)
+const MascotMagnifyingGlass = pngHoggie(magnifyingGlass)
 
 /**
  * A component to introduce new users to a product, and to show something
@@ -24,6 +31,8 @@ export type ProductIntroductionProps = {
     /** The name of the thing that they will create, e.g. "cohort" */
     thingName: string
     description: string
+    /** Overrides the default "Your team is already using {productName}..." copy shown when `isEmpty` is false. */
+    secondaryDescription?: string
     /** If you want to override the title, defaults to "Create your first *thing*" */
     titleOverride?: string
     /** If we should show the empty state */
@@ -34,23 +43,61 @@ export type ProductIntroductionProps = {
     /** If you want to provide a custom action button instead of using the default one */
     actionElementOverride?: JSX.Element
     docsURL?: string
-    customInsights?: React.ComponentType<{ className?: string }>
+    customHog?: React.ComponentType<{ className?: string }>
     className?: string
+    /**
+     * Default hides the script below `md`. Use `responsive` to keep the script visible on small screens with a vertical
+     * layout (script above copy), switching to the horizontal layout from `md` up (or from `main-content` width when
+     * `useMainContentContainerQueries` is set). Use `vertical` for always-stacked script-above-copy (e.g. narrow dashboard tiles).
+     */
+    hogLayout?: 'default' | 'responsive' | 'vertical'
+    /**
+     * When set with `hogLayout="responsive"`, use the `main-content` container (see Navigation) instead of the
+     * viewport for breakpoints so layout responds when the side panel narrows the main column.
+     */
+    useMainContentContainerQueries?: boolean
+    /**
+     * Optional classes for the copy + actions column (script + this column are siblings). Default `max-w-140`; override
+     * for wide empty states (e.g. template grids). Passed through `cn` with tailwind-merge so `max-w-*` replaces default.
+     */
+    contentClassName?: string
+    /**
+     * When set, renders an MCP use-case card below the actions, promoting the same product via Insights MCP from
+     * the user's IDE. Auto-hides if the user has opted out of MCP hints.
+     */
+    mcpSurfaceKey?: SurfaceKey
 }
 
+/**
+ * @deprecated Use {@link ProductEmptyState} instead: declare {@link SceneExport.emptyState} on the
+ * scene's {@link SceneExport} (see {@link ../ProductEmptyState | ProductEmptyState} and the
+ * `building-product-empty-states` skill).
+ *
+ * {@link ProductEmptyState} covers both of this component's jobs -
+ * "product not installed" via real data detection and "no entities yet" via an
+ * entity-count status - with a local-only skip instead of {@link UserType.has_seen_product_intro_for}.
+ * Don't add new call sites; existing ones should migrate product by product.
+ *
+ * The Growth team is responsible for migrating all call sites to {@link ProductEmptyState}.
+ */
 export const ProductIntroduction = ({
     productName,
     productKey,
     thingName,
     description,
+    secondaryDescription,
     titleOverride,
     isEmpty,
     action,
     disabledReason,
     actionElementOverride,
     docsURL,
-    customInsights: CustomInsights,
+    customHog: CustomHog,
     className,
+    hogLayout = 'default',
+    useMainContentContainerQueries = false,
+    contentClassName,
+    mcpSurfaceKey,
 }: ProductIntroductionProps): JSX.Element | null => {
     const { updateHasSeenProductIntroFor } = useActions(userLogic)
     const { user } = useValues(userLogic)
@@ -65,6 +112,11 @@ export const ProductIntroduction = ({
     }
 
     const actionable = action || actionElementOverride
+    const isVerticalHogLayout = hogLayout === 'vertical'
+    const isResponsiveHogLayout = hogLayout === 'responsive'
+
+    const HogComponent = CustomHog ? CustomHog : actionable ? MascotConstruction2 : MascotMagnifyingGlass
+
     return (
         <div
             className={cn(
@@ -74,7 +126,7 @@ export const ProductIntroduction = ({
             data-attr={`product-introduction-${thingName}`}
         >
             {!isEmpty && (
-                <div className="flex justify-end -mb-6 -mt-2 -mr-2">
+                <div className="flex justify-end -mb-6 -mt-2 -mr-2 relative z-10">
                     <div>
                         <Button
                             icon={<IconX />}
@@ -86,19 +138,53 @@ export const ProductIntroduction = ({
                     </div>
                 </div>
             )}
-            <div className="flex items-center gap-8 w-full justify-center">
-                <div>
-                    <div className="w-40 lg:w-50 mx-auto mb-4 hidden md:block">
-                        {CustomInsights ? (
-                            <CustomInsights className="w-full h-full" />
-                        ) : actionable ? (
-                            <BuilderMascot3 className="w-full h-full" />
-                        ) : (
-                            <DetectiveMascot className="w-full h-full" />
+            <div
+                className={cn(
+                    'flex w-full justify-center',
+                    isVerticalHogLayout
+                        ? 'flex-col items-center gap-6'
+                        : isResponsiveHogLayout
+                          ? useMainContentContainerQueries
+                              ? 'flex-col @min-[48rem]/main-content:flex-row items-center gap-6 @min-[48rem]/main-content:gap-8'
+                              : 'flex-col md:flex-row items-center gap-6 md:gap-8'
+                          : 'flex-row items-center gap-8'
+                )}
+            >
+                <div
+                    className={cn(
+                        isVerticalHogLayout && 'w-full flex justify-center',
+                        isResponsiveHogLayout &&
+                            (useMainContentContainerQueries
+                                ? 'w-full @min-[48rem]/main-content:w-auto flex justify-center'
+                                : 'w-full md:w-auto flex justify-center')
+                    )}
+                >
+                    <div
+                        className={cn(
+                            'mx-auto',
+                            isVerticalHogLayout
+                                ? 'block w-56 sm:w-60 lg:w-70 mb-4'
+                                : isResponsiveHogLayout
+                                  ? useMainContentContainerQueries
+                                      ? 'block w-56 sm:w-60 lg:w-70 mb-4 @min-[48rem]/main-content:mb-0'
+                                      : 'block w-56 sm:w-60 lg:w-70 mb-4 md:mb-0'
+                                  : 'w-60 lg:w-70 mb-4 hidden md:block'
                         )}
+                    >
+                        <HogComponent className="w-full h-full" />
                     </div>
                 </div>
-                <div className="flex-shrink max-w-140">
+                <div
+                    className={cn(
+                        'flex-shrink max-w-140',
+                        isVerticalHogLayout && 'w-full text-center',
+                        isResponsiveHogLayout &&
+                            (useMainContentContainerQueries
+                                ? 'w-full text-center @min-[48rem]/main-content:text-left'
+                                : 'w-full text-center md:text-left'),
+                        contentClassName
+                    )}
+                >
                     <h2>
                         {!isEmpty
                             ? `Welcome to ${productName}!`
@@ -111,11 +197,24 @@ export const ProductIntroduction = ({
                     <p className="ml-0">{description}</p>
                     {!isEmpty && (
                         <p className="ml-0">
-                            Your team is already using {productName}. You can take a look at what they're doing, or get
-                            started yourself.
+                            {secondaryDescription ?? (
+                                <>
+                                    Your team is already using {productName}. You can take a look at what they're doing,
+                                    or get started yourself.
+                                </>
+                            )}
                         </p>
                     )}
-                    <div className="flex items-center gap-x-4 gap-y-2 mt-6 flex-wrap">
+                    <div
+                        className={cn(
+                            'flex items-center gap-x-4 gap-y-2 mt-6 flex-wrap',
+                            isVerticalHogLayout && 'justify-center',
+                            isResponsiveHogLayout &&
+                                (useMainContentContainerQueries
+                                    ? 'justify-center @min-[48rem]/main-content:justify-start'
+                                    : 'justify-center md:justify-start')
+                        )}
+                    >
                         {action ? (
                             <Button
                                 type="primary"
@@ -144,6 +243,7 @@ export const ProductIntroduction = ({
                             </Button>
                         )}
                     </div>
+                    {mcpSurfaceKey && <MCPUseCaseCard surfaceKey={mcpSurfaceKey} className="max-w-140" />}
                 </div>
             </div>
         </div>

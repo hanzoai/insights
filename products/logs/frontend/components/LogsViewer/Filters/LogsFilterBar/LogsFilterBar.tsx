@@ -1,13 +1,9 @@
-import './LogsFilterBar.scss'
-
 import { BindLogic, useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconMinusSquare, IconPlusSquare, IconRefresh } from '@hanzo/icons'
+import { IconRefresh } from '@hanzo/icons'
 import { Button, Dropdown } from '@hanzo/elements'
 
-import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
-import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { InfiniteSelectResults } from 'lib/components/TaxonomicFilter/InfiniteSelectResults'
 import { TaxonomicFilterSearchInput } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { taxonomicFilterLogic } from 'lib/components/TaxonomicFilter/taxonomicFilterLogic'
@@ -16,10 +12,7 @@ import UniversalFilters from 'lib/components/UniversalFilters/UniversalFilters'
 import { universalFiltersLogic } from 'lib/components/UniversalFilters/universalFiltersLogic'
 import { isUniversalGroupFilterLike } from 'lib/components/UniversalFilters/utils'
 import { dayjs } from 'lib/dayjs'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { IconPauseCircle, IconPlayCircle } from 'lib/elements/icons'
-import { Scene } from 'scenes/sceneTypes'
 
 import {
     AnyPropertyFilter,
@@ -29,14 +22,10 @@ import {
     UniversalFiltersGroup,
 } from '~/types'
 
-import { logsViewerFiltersLogic } from 'products/logs/frontend/components/LogsViewer/Filters/logsViewerFiltersLogic'
 import { logsViewerDataLogic } from 'products/logs/frontend/components/LogsViewer/data/logsViewerDataLogic'
+import { logsViewerFiltersLogic } from 'products/logs/frontend/components/LogsViewer/Filters/logsViewerFiltersLogic'
 
-import { DateRangeFilter } from '../DateRangeFilter'
-import { FilterHistoryDropdown } from '../FilterHistoryDropdown'
 import { LogsDateRangePicker } from '../LogsDateRangePicker/LogsDateRangePicker'
-import { ServiceFilter } from '../ServiceFilter'
-import { SeverityLevelsFilter } from '../SeverityLevelsFilter'
 
 const taxonomicFilterLogicKey = 'logs'
 const taxonomicGroupTypes = [
@@ -45,92 +34,47 @@ const taxonomicGroupTypes = [
     TaxonomicFilterGroupType.LogAttributes,
 ]
 
-export const LogsFilterBar = (): JSX.Element => {
-    const newLogsDateRangePicker = useFeatureFlag('NEW_LOGS_DATE_RANGE_PICKER')
-    const { logsLoading, liveTailRunning, liveTailDisabledReason } = useValues(logsViewerDataLogic)
-    const { runQuery, setLiveTailRunning } = useActions(logsViewerDataLogic)
-    const { zoomDateRange } = useActions(logsViewerFiltersLogic)
-    const { filters } = useValues(logsViewerFiltersLogic)
+/**
+ * Time range, zoom and refresh — the always-relevant "execute the query" controls of the query bar.
+ * Live tail lives in the results bar instead (LogsViewerToolbar): it's the one streaming control we
+ * deliberately place with the Logs-only tools so it hides cleanly with that cluster in Patterns mode,
+ * rather than collapsing in this top bar and shifting its layout.
+ */
+export const LogsQueryControls = (): JSX.Element => {
+    const { logsLoading, liveTailRunning } = useValues(logsViewerDataLogic)
+    const { runQuery } = useActions(logsViewerDataLogic)
     const { setDateRange } = useActions(logsViewerFiltersLogic)
+    const { filters } = useValues(logsViewerFiltersLogic)
     const { dateRange } = filters
 
     return (
-        <LogsFilterGroup>
-            <div className="flex flex-col gap-2 w-full bg-primary">
-                <div className="flex gap-2 flex-wrap w-full justify-between">
-                    <div className="flex shrink-0 flex-1 gap-1.5">
-                        <SeverityLevelsFilter />
-                        <ServiceFilter />
-                        <div className="min-w-[300px] max-w-[350px] w-full">
-                            <LogsFilterSearch />
-                        </div>
-                        <FilterHistoryDropdown />
-                    </div>
-                    <div className="flex shrink-0 gap-1.5">
-                        <div className="LogsDateButtonGroup">
-                            <Button
-                                size="small"
-                                icon={<IconMinusSquare />}
-                                type="secondary"
-                                tooltip="Zoom out"
-                                onClick={() => zoomDateRange(2)}
-                            />
+        <div className="flex shrink-0 gap-1.5">
+            <LogsDateRangePicker dateRange={dateRange} setDateRange={setDateRange} />
 
-                            {!newLogsDateRangePicker && <DateRangeFilter />}
-                            {newLogsDateRangePicker && (
-                                <LogsDateRangePicker dateRange={dateRange} setDateRange={setDateRange} />
-                            )}
-
-                            <Button
-                                size="small"
-                                icon={<IconPlusSquare />}
-                                type="secondary"
-                                tooltip="Zoom in"
-                                onClick={() => zoomDateRange(0.5)}
-                            />
-                        </div>
-
-                        <Button
-                            size="small"
-                            icon={<IconRefresh />}
-                            type="secondary"
-                            onClick={() => runQuery()}
-                            loading={logsLoading || liveTailRunning}
-                            disabledReason={liveTailRunning ? 'Disable live tail to manually refresh' : undefined}
-                        />
-                        <AppShortcut
-                            name="LogsLiveTail"
-                            keybind={[keyBinds.edit]}
-                            intent={liveTailRunning ? 'Stop live tail' : 'Start live tail'}
-                            interaction="click"
-                            scope={Scene.Logs}
-                        >
-                            <Button
-                                size="small"
-                                type={liveTailRunning ? 'primary' : 'secondary'}
-                                icon={liveTailRunning ? <IconPauseCircle /> : <IconPlayCircle />}
-                                onClick={() => setLiveTailRunning(!liveTailRunning)}
-                                disabledReason={liveTailRunning ? undefined : liveTailDisabledReason}
-                            >
-                                Live tail
-                            </Button>
-                        </AppShortcut>
-                    </div>
-                </div>
-                <LogsAppliedFilters />
-            </div>
-        </LogsFilterGroup>
+            <Button
+                size="small"
+                icon={<IconRefresh />}
+                type="secondary"
+                onClick={() => runQuery()}
+                loading={logsLoading || liveTailRunning}
+                disabledReason={liveTailRunning ? 'Disable live tail to manually refresh' : undefined}
+            />
+        </div>
     )
 }
 
-const LogsFilterGroup = ({ children }: { children: React.ReactNode }): JSX.Element => {
-    const { filters, id, utcDateRange } = useValues(logsViewerFiltersLogic)
+export const LogsFilterGroup = ({ children }: { children: React.ReactNode }): JSX.Element => {
+    const { filters, id, utcDateRange, queryFilterGroup } = useValues(logsViewerFiltersLogic)
     const { filterGroup, serviceNames } = filters
     const { setFilterGroup } = useActions(logsViewerFiltersLogic)
 
+    // Taxonomic value suggestions should respect any active scope (e.g. the person-tab
+    // distinct_id pin), so pass the combined query view rather than the user-editable
+    // filterGroup. The UniversalFilters `group` prop stays on the editable filterGroup
+    // so chips reflect what the user can actually edit.
     const endpointFilters = {
         dateRange: { ...utcDateRange, date_to: utcDateRange.date_to ?? dayjs().toISOString() },
-        filterGroup,
+        filterGroup: queryFilterGroup,
         serviceNames,
     }
 
@@ -149,9 +93,9 @@ const LogsFilterGroup = ({ children }: { children: React.ReactNode }): JSX.Eleme
     )
 }
 
-const LogsFilterSearch = (): JSX.Element => {
+export const LogsFilterSearch = (): JSX.Element => {
     const [visible, setVisible] = useState<boolean>(false)
-    const { utcDateRange, filters: logsFilters } = useValues(logsViewerFiltersLogic)
+    const { utcDateRange, filters: logsFilters, queryFilterGroup } = useValues(logsViewerFiltersLogic)
     const { addGroupFilter, setGroupValues } = useActions(universalFiltersLogic)
     const { filterGroup } = useValues(universalFiltersLogic)
 
@@ -168,12 +112,12 @@ const LogsFilterSearch = (): JSX.Element => {
         taxonomicGroupTypes,
         endpointFilters: {
             dateRange: { ...utcDateRange, date_to: utcDateRange.date_to ?? dayjs().toISOString() },
-            filterGroup: logsFilters.filterGroup,
+            filterGroup: queryFilterGroup,
             serviceNames: logsFilters.serviceNames,
         },
-        onChange: (taxonomicGroup, value, item, originalQuery) => {
+        onChange: (taxonomicGroup, value, item) => {
             if (item.value === undefined) {
-                addGroupFilter(taxonomicGroup, value, item, originalQuery)
+                addGroupFilter(taxonomicGroup, value, item)
                 setVisible(false)
                 return
             }
@@ -202,7 +146,6 @@ const LogsFilterSearch = (): JSX.Element => {
                             focusInput={() => searchInputRef.current?.focus()}
                             taxonomicFilterLogicProps={taxonomicFilterLogicProps}
                             popupAnchorElement={floatingRef.current}
-                            useVerticalLayout={true}
                         />
                     </div>
                 }
@@ -212,7 +155,6 @@ const LogsFilterSearch = (): JSX.Element => {
                 onClickOutside={() => onClose()}
             >
                 <TaxonomicFilterSearchInput
-                    docLink="https://hanzo.ai/docs/logs/search"
                     onClick={() => setVisible(true)}
                     searchInputRef={searchInputRef}
                     onClose={() => onClose()}
@@ -253,7 +195,7 @@ const FilterGroupValues = ({ allowInitiallyOpen }: { allowInitiallyOpen: boolean
     )
 }
 
-const LogsAppliedFilters = (): JSX.Element | null => {
+export const LogsAppliedFilters = (): JSX.Element | null => {
     const { filterGroup } = useValues(universalFiltersLogic)
     const [allowInitiallyOpen, setAllowInitiallyOpen] = useState<boolean>(false)
 

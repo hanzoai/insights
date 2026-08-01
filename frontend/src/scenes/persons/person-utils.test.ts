@@ -1,9 +1,62 @@
-import { uuid } from 'lib/utils'
+import { uuid } from 'lib/utils/dom'
 import { urls } from 'scenes/urls'
 
 import { PersonType } from '~/types'
 
-import { asDisplay, asLink, getPersonColorIndex } from './person-utils'
+import {
+    asDisplay,
+    asLink,
+    coercePropertyValue,
+    getPersonColorIndex,
+    parsePersonFromInsightsQLRow,
+    pickBestPersonDistinctId,
+    scoreDistinctId,
+} from './person-utils'
+
+describe('coercePropertyValue', () => {
+    it.each<{ input: Parameters<typeof coercePropertyValue>[0]; expected: ReturnType<typeof coercePropertyValue> }>([
+        // numeric strings
+        { input: '42', expected: 42 },
+        { input: '3.14', expected: 3.14 },
+        { input: '-1', expected: -1 },
+        { input: '0', expected: 0 },
+        { input: '1e5', expected: 100000 },
+
+        // empty string passes through unchanged
+        { input: '', expected: '' },
+
+        // Infinity passes through as string (JSON.stringify(Infinity) === "null")
+        { input: 'Infinity', expected: 'Infinity' },
+        { input: '-Infinity', expected: '-Infinity' },
+
+        // boolean strings (case-insensitive)
+        { input: 'true', expected: true },
+        { input: 'TRUE', expected: true },
+        { input: 'True', expected: true },
+        { input: 'false', expected: false },
+        { input: 'FALSE', expected: false },
+
+        // null string
+        { input: 'null', expected: null },
+        { input: 'NULL', expected: null },
+
+        // NaN stays as string
+        { input: 'NaN', expected: 'NaN' },
+
+        // regular strings pass through
+        { input: 'hello', expected: 'hello' },
+        { input: 'user@example.com', expected: 'user@example.com' },
+        { input: ' true', expected: ' true' },
+
+        // non-string types pass through
+        { input: true, expected: true },
+        { input: false, expected: false },
+        { input: null, expected: null },
+        { input: 123, expected: 123 },
+    ])('coerces $input to $expected', ({ input, expected }) => {
+        expect(coercePropertyValue(input)).toBe(expected)
+    })
+})
 
 describe('the person header', () => {
     describe('linking to a person', () => {
@@ -24,14 +77,24 @@ describe('the person header', () => {
                 expectedLink: urls.personByDistinctId('a+dicey/@!'),
                 name: 'with no ids',
             },
+            {
+                // Anonymous ID first, identified ID second — the link should use the identified one
+                distinctIds: ['03b16e4c0b14ef-00000000000000-1633685d-13c680-17878af3ba9d1c', 'user@example.com'],
+                expectedLink: urls.personByDistinctId('user@example.com'),
+                name: 'preferring an identified ID over an anonymous one',
+            },
         ]
 
         it.each(personLinksTestCases.map((testCase) => [testCase.name, testCase]))(
             'returns a link %s',
             (_, testCase) => {
-                expect(asLink({ distinct_ids: testCase.distinctIds })).toEqual(testCase.expectedLink)
+                expect(asLink({ distinct_ids: testCase.distinctIds, properties: {} })).toEqual(testCase.expectedLink)
             }
         )
+
+        it('returns undefined for a person without a profile', () => {
+            expect(asLink({ distinct_ids: ['a uuid'] })).toBeUndefined()
+        })
     })
 
     const displayTestCases = [
@@ -180,5 +243,87 @@ describe('the person header', () => {
             const uniqueIndices = new Set([index1, index2, index3])
             expect(uniqueIndices.size).toBe(3)
         })
+    })
+})
+
+describe('parsePersonFromInsightsQLRow', () => {
+    it('parses a complete row into a PersonType', () => {
+        const row = ['uuid-1', ['did-1', 'did-2'], '{"email":"a@b.com"}', true, '2024-01-01', '2024-06-01']
+        const person = parsePersonFromInsightsQLRow(row)
+        expect(person).toEqual({
+            id: 'uuid-1',
+            uuid: 'uuid-1',
+            distinct_ids: ['did-1', 'did-2'],
+            properties: { email: 'a@b.com' },
+            is_identified: true,
+            created_at: '2024-01-01',
+            last_seen_at: '2024-06-01',
+        })
+    })
+
+    it('handles empty/null properties gracefully', () => {
+        const row = ['uuid-1', [], '', false, null, null]
+        const person = parsePersonFromInsightsQLRow(row)
+        expect(person.properties).toEqual({})
+        expect(person.is_identified).toBe(false)
+    })
+
+    it('handles malformed JSON properties gracefully', () => {
+        const row = ['uuid-1', [], '{not valid json', false, null, null]
+        const person = parsePersonFromInsightsQLRow(row)
+        expect(person.properties).toEqual({})
+    })
+})
+
+describe('scoreDistinctId', () => {
+    it.each([
+        { id: 'user@example.com', expected: 2, label: 'email gets highest score' },
+        { id: 'juliatusk@gmail.com', expected: 2, label: 'gmail email gets highest score' },
+        {
+            id: '03b16e4c0b14ef-00000000000000-1633685d-13c680-17878af3ba9d1c',
+            expected: 0,
+            label: 'insights-js anon ID gets lowest score',
+        },
+        { id: 'user123', expected: 1, label: 'custom ID gets middle score' },
+        { id: 'my-custom-id', expected: 1, label: 'hyphenated custom ID gets middle score' },
+        {
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            expected: 1,
+            label: 'standard UUID (36 chars) gets middle score',
+        },
+    ])('$label: $id → $expected', ({ id, expected }) => {
+        expect(scoreDistinctId(id)).toBe(expected)
+    })
+})
+
+describe('pickBestPersonDistinctId', () => {
+    const anonId = '03b16e4c0b14ef-00000000000000-1633685d-13c680-17878af3ba9d1c'
+    it.each([
+        { distinctIds: undefined, expected: undefined, label: 'undefined returns undefined' },
+        { distinctIds: [], expected: undefined, label: 'empty array returns undefined' },
+        { distinctIds: ['only-one'], expected: 'only-one', label: 'single ID is returned as-is' },
+        {
+            distinctIds: [anonId, 'user@example.com'],
+            expected: 'user@example.com',
+            label: 'prefers an email over an anonymous ID regardless of position',
+        },
+        {
+            distinctIds: [anonId, 'custom-123'],
+            expected: 'custom-123',
+            label: 'prefers a custom ID over an anonymous ID',
+        },
+        {
+            distinctIds: ['custom-123', anonId, 'user@example.com'],
+            expected: 'user@example.com',
+            label: 'prefers an email over both custom and anonymous IDs',
+        },
+    ])('$label', ({ distinctIds, expected }) => {
+        expect(pickBestPersonDistinctId(distinctIds)).toBe(expected)
+    })
+
+    it('does not mutate the input array', () => {
+        const distinctIds = [anonId, 'user@example.com']
+        pickBestPersonDistinctId(distinctIds)
+        expect(distinctIds).toEqual([anonId, 'user@example.com'])
     })
 })

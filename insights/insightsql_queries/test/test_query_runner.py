@@ -1,28 +1,38 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal, Optional
 from zoneinfo import ZoneInfo
 
+import pytest
 from freezegun import freeze_time
 from insights.test.base import BaseTest
 from unittest import mock
 
+from django.conf import settings
 from django.core.cache import cache
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 from parameterized import parameterized
 from pydantic import BaseModel
+from rest_framework.exceptions import ValidationError
 
 from insights.schema import (
     BounceRatePageViewMode,
     CacheMissResponse,
     CurrencyCode,
+    DataTableNode,
+    DataVisualizationNode,
     EventsNode,
     InsightsQLQuery,
     InsightsQLQueryModifiers,
     InCohortVia,
+    InlineCohortCalculation,
+    InsightVizNode,
     IntervalType,
     MaterializationMode,
     PersonsArgMaxVersion,
     PersonsOnEventsMode,
+    QueryLogTags,
     SessionsV2JoinMode,
     SessionTableVersion,
     TestBasicQueryResponse as TheTestBasicQueryResponse,
@@ -30,15 +40,48 @@ from insights.schema import (
     TrendsQuery,
 )
 
+from insights.insightsql import ast
 from insights.insightsql.constants import LimitContext
+from insights.insightsql.database.database import Database
+from insights.insightsql.errors import QueryError, ResolutionError
 
+from insights.datastore.client.limit import ConcurrencyLimitExceeded
+from insights.constants import AvailableFeature
+from insights.errors import ExposedCHQueryError
+from insights.exceptions import DatastoreQueryMemoryLimitExceeded, DatastoreQuerySizeExceeded, DatastoreQueryTimeOut
+from insights.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
 from insights.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
-from insights.insightsql_queries.query_runner import ExecutionMode, QueryRunner
+from insights.insightsql_queries.query_failure_handling import classify_failure
+from insights.insightsql_queries.query_runner import (
+    SHARED_FORCE_BLOCKING_STALENESS_WINDOW,
+    AnalyticsQueryRunner,
+    ExecutionMode,
+    QueryRunner,
+    QueryRunnerWithInsightsQLContext,
+    get_query_runner,
+    shared_insights_execution_mode,
+)
 from insights.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.models.organization import OrganizationMembership
 from insights.models.team.team import Team, WeekStartDay
+from insights.query_cache.failures import (
+    BASE_BACKOFF,
+    BUDGET_EXTENDED,
+    BUDGET_INTERACTIVE,
+    KIND_POLICIES,
+    QUERY_FAILURE_CACHING_FLAG,
+    QueryFailureCache,
+)
+from insights.rbac.user_access_control import UserAccessControl, UserAccessControlError
 
-from products.customer_analytics.backend.constants import DEFAULT_ACTIVITY_EVENT
-from products.revenue_analytics.backend.insightsql_queries.test.data.structure import REVENUE_ANALYTICS_CONFIG_SAMPLE_EVENT
+try:
+    from ee.models.rbac.access_control import AccessControl
+except ImportError:
+    pass
+from insights.slo.types import SloOutcome
+
+from products.customer_analytics.backend.facade.constants import DEFAULT_ACTIVITY_EVENT
+from products.revenue_analytics.backend.views.test.data.structure import REVENUE_ANALYTICS_CONFIG_SAMPLE_EVENT
 
 MARKETING_ANALYTICS_SOURCES_MAP_SAMPLE = {
     "01977f7b-7f29-0000-a028-7275d1a767a4": {
@@ -57,6 +100,38 @@ class TheTestQuery(BaseModel):
     kind: Literal["TestQuery"] = "TestQuery"
     some_attr: str
     other_attr: Optional[list[Any]] = []
+    tags: QueryLogTags | None = None
+
+
+def setup_test_query_runner_class(base: type[QueryRunner] = QueryRunner):
+    """Setup required methods and attributes of the abstract base class."""
+
+    class TestQueryRunner(base):  # type: ignore[misc, valid-type]
+        query: TheTestQuery
+        cached_response: TheTestCachedBasicQueryResponse
+
+        def _calculate(self):
+            return TheTestBasicQueryResponse(
+                results=[
+                    ["row", 1, 2, 3],
+                    (i for i in range(10)),  # Test support of cache.set with iterators
+                ]
+            )
+
+        def _refresh_frequency(self) -> timedelta:
+            return timedelta(minutes=4)
+
+        def _is_stale(self, last_refresh: Optional[datetime], lazy: bool = False, *args, **kwargs) -> bool:
+            if not last_refresh:
+                raise ValueError("Cached results require a last_refresh")
+
+            if lazy:
+                return last_refresh + timedelta(days=1) <= datetime.now(tz=ZoneInfo("UTC"))
+            return last_refresh + timedelta(minutes=10) <= datetime.now(tz=ZoneInfo("UTC"))
+
+    TestQueryRunner.__abstractmethods__ = frozenset()
+
+    return TestQueryRunner
 
 
 class TestQueryRunner(BaseTest):
@@ -66,35 +141,57 @@ class TestQueryRunner(BaseTest):
         super().tearDown()
         cache.clear()
 
-    def setup_test_query_runner_class(self):
-        """Setup required methods and attributes of the abstract base class."""
+    def setup_test_query_runner_class(self, base: type[QueryRunner] = QueryRunner):
+        return setup_test_query_runner_class(base)
 
-        class TestQueryRunner(QueryRunner):
-            query: TheTestQuery
-            cached_response: TheTestCachedBasicQueryResponse
+    def test_sync_warning_attach_preserves_other_warning_kinds(self):
+        # The accumulator attach replaces the response's warnings with the collected sync warnings.
+        # Access control warnings ride the same shared field and were silently dropped whenever a
+        # sync warning was present.
+        from insights.schema import AccessControlFilterWarning, DataWarehouseSyncWarning
 
-            def calculate(self):
-                return TheTestBasicQueryResponse(
-                    results=[
-                        ["row", 1, 2, 3],
-                        (i for i in range(10)),  # Test support of cache.set with iterators
-                    ]
-                )
+        from insights.insightsql.warehouse_warnings import record_warnings
 
-            def _refresh_frequency(self) -> timedelta:
-                return timedelta(minutes=4)
+        TestQueryRunner = self.setup_test_query_runner_class()
+        sync_warning = DataWarehouseSyncWarning(
+            table_name="paid_bills",
+            schema_name="paid_bills",
+            source_type="Stripe",
+            status="Failed",
+            message="sync failed",
+        )
+        ac_warning = AccessControlFilterWarning(
+            resources=["insight"], message="Results may exclude insights you don't have access to"
+        )
 
-            def _is_stale(self, last_refresh: Optional[datetime], lazy: bool = False, *args, **kwargs) -> bool:
-                if not last_refresh:
-                    raise ValueError("Cached results require a last_refresh")
+        def calculate_with_warnings(_self):
+            record_warnings([sync_warning])
+            response = TheTestBasicQueryResponse(results=[])
+            response.warnings = [ac_warning]
+            return response
 
-                if lazy:
-                    return last_refresh + timedelta(days=1) <= datetime.now(tz=ZoneInfo("UTC"))
-                return last_refresh + timedelta(minutes=10) <= datetime.now(tz=ZoneInfo("UTC"))
+        runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team)
+        with mock.patch.object(TestQueryRunner, "_calculate", autospec=True, side_effect=calculate_with_warnings):
+            response = runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
 
-        TestQueryRunner.__abstractmethods__ = frozenset()
+        warnings = [w if isinstance(w, dict) else w.model_dump() for w in response.warnings or []]
+        assert any(w.get("table_name") == "paid_bills" for w in warnings)
+        assert any(w.get("resources") == ["insight"] for w in warnings)
 
-        return TestQueryRunner
+    def test_calculate_runs_validators_before_calculation(self):
+        TestQueryRunner = self.setup_test_query_runner_class()
+        validation_rule = mock.MagicMock()
+        validation_rule.validate.side_effect = ValidationError("Validation failed")
+        TestQueryRunner.validators = lambda self: (validation_rule,)
+        runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team)
+
+        with mock.patch.object(TestQueryRunner, "_calculate", autospec=True) as mock_calculate:
+            with self.assertRaises(ValidationError) as context:
+                runner.calculate()
+
+        self.assertIn("Validation failed", str(context.exception))
+        validation_rule.validate.assert_called_once_with(runner.validation_context)
+        mock_calculate.assert_not_called()
 
     def test_init_with_query_instance(self):
         TestQueryRunner = self.setup_test_query_runner_class()
@@ -109,6 +206,45 @@ class TestQueryRunner(BaseTest):
         runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team)
 
         self.assertEqual(runner.query, TheTestQuery(some_attr="bla"))
+
+    @parameterized.expand(
+        [
+            [
+                DataVisualizationNode(source=InsightsQLQuery(query="SELECT 1")),
+                InsightsQLQuery(query="SELECT 1"),
+            ],
+            [
+                {"kind": "DataVisualizationNode", "source": {"kind": "InsightsQLQuery", "query": "SELECT 1"}},
+                InsightsQLQuery(query="SELECT 1"),
+            ],
+            [
+                DataTableNode(source=InsightsQLQuery(query="SELECT 2")),
+                InsightsQLQuery(query="SELECT 2"),
+            ],
+            [
+                {"kind": "DataTableNode", "source": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
+                InsightsQLQuery(query="SELECT 2"),
+            ],
+            [
+                InsightVizNode(source=TrendsQuery(series=[EventsNode(event="$pageview")])),
+                TrendsQuery(series=[EventsNode(event="$pageview")]),
+            ],
+            [
+                {
+                    "kind": "InsightVizNode",
+                    "source": {
+                        "kind": "TrendsQuery",
+                        "series": [{"kind": "EventsNode", "event": "$pageview"}],
+                    },
+                },
+                TrendsQuery(series=[EventsNode(event="$pageview")]),
+            ],
+        ]
+    )
+    def test_get_query_runner_uses_source_query_for_wrappers(self, query, expected_source_query):
+        runner = get_query_runner(query=query, team=self.team)
+
+        self.assertEqual(runner.query, expected_source_query)
 
     def test_cache_payload(self):
         TestQueryRunner = self.setup_test_query_runner_class()
@@ -140,11 +276,14 @@ class TestQueryRunner(BaseTest):
                 "bounceRatePageViewMode": BounceRatePageViewMode.COUNT_PAGEVIEWS,
                 "convertToProjectTimezone": True,
                 "inCohortVia": InCohortVia.AUTO,
+                "inlineCohortCalculation": InlineCohortCalculation.AUTO,
                 "materializationMode": MaterializationMode.LEGACY_NULL_AS_NULL,
                 "optimizeJoinedFilters": False,
-                "optimizeProjections": False,
+                "optimizeProjections": True,
                 "personsArgMaxVersion": PersonsArgMaxVersion.AUTO,
                 "personsOnEventsMode": PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_JOINED,
+                "sessionIdPushdown": False,
+                "sessionPropertyPreAggregation": False,
                 "sessionTableVersion": SessionTableVersion.AUTO,
                 "sessionsV2JoinMode": SessionsV2JoinMode.UUID,
                 "useMaterializedViews": True,
@@ -157,6 +296,7 @@ class TestQueryRunner(BaseTest):
                     "campaign_name_mappings": {},
                     "custom_source_mappings": {},
                     "campaign_field_preferences": {},
+                    "costs_dedup_v2": False,
                     "sources_map": {
                         "01977f7b-7f29-0000-a028-7275d1a767a4": {
                             "cost": "cost",
@@ -226,12 +366,12 @@ class TestQueryRunner(BaseTest):
         runner = TestQueryRunner(query={"some_attr": "bla"}, team=team)
 
         cache_key = runner.get_cache_key()
-        assert cache_key == "cache_42_d68402e95878ead60a4807e978507a742edf81e4631a074eef9522805a8ca577"
+        assert cache_key == "cache_42_c034c5f92d23cb2399f6c087694175b7e6950739ea60b0ec7cf2665d2ae82d50"
 
     def test_cache_key_runner_subclass(self):
         TestQueryRunner = self.setup_test_query_runner_class()
 
-        class TestSubclassQueryRunner(TestQueryRunner):
+        class TestSubclassQueryRunner(TestQueryRunner):  # type: ignore[misc, valid-type]
             pass
 
         # set the pk directly as it affects the hash in the _cache_key call
@@ -240,7 +380,7 @@ class TestQueryRunner(BaseTest):
         runner = TestSubclassQueryRunner(query={"some_attr": "bla"}, team=team)
 
         cache_key = runner.get_cache_key()
-        assert cache_key == "cache_42_4bf69109c1bad5426b0bf38d932fad258696bf2fd7896316939274a337a2a850"
+        assert cache_key == "cache_42_916dab3186430d61979f436fca08d88c23559c270894cf8c96a19e2c18a8ae4f"
 
     def test_cache_key_different_timezone(self):
         TestQueryRunner = self.setup_test_query_runner_class()
@@ -251,7 +391,13 @@ class TestQueryRunner(BaseTest):
         runner = TestQueryRunner(query={"some_attr": "bla"}, team=team)
 
         cache_key = runner.get_cache_key()
-        assert cache_key == "cache_42_dcce3a4bced9b8188b8e72ca3b1e94445e369e41c08bc2391f3b1ecae42ee1db"
+        assert cache_key == "cache_42_032f9a7be3ea1fc4451f1e5a77841bb79f9b9ef65ad949f251ee0e68e8ee5fb0"
+
+    def test_cache_payload_omits_object_restrictions_when_unrestricted(self):
+        TestQueryRunner = self.setup_test_query_runner_class()
+        runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team, user=self.user)
+
+        assert "restricted_objects" not in runner.get_cache_payload()
 
     @mock.patch("django.db.transaction.on_commit")
     def test_cache_response(self, mock_on_commit):
@@ -354,10 +500,65 @@ class TestQueryRunner(BaseTest):
             self.assertEqual(response.last_refresh.isoformat(), "2023-02-04T13:37:42+00:00")
             mock_on_commit.assert_called_once()
 
+    @parameterized.expand(
+        [
+            # The override replaces the subclass staleness policy in both directions: a runner
+            # that considers a young cache stale must still serve it within the window, and a
+            # runner that pins a long freshness must still recompute past the window.
+            ("subclass_stale_within_window_serves_cache", True, timedelta(minutes=11), True),
+            ("subclass_fresh_past_window_recomputes", False, timedelta(minutes=31), False),
+        ]
+    )
+    def test_cache_age_override_governs_staleness_over_subclass_policy(
+        self,
+        _name: str,
+        subclass_says_stale: bool,
+        cache_age: timedelta,
+        expected_is_cached: bool,
+    ):
+        base = self.setup_test_query_runner_class()
+
+        class OpinionatedQueryRunner(base):  # type: ignore[misc, valid-type]
+            def _is_stale(self, last_refresh: Optional[datetime], lazy: bool = False) -> bool:
+                return subclass_says_stale
+
+            def cache_target_age(self, last_refresh: Optional[datetime], lazy: bool = False) -> Optional[datetime]:
+                return last_refresh + timedelta(hours=24) if last_refresh else None
+
+        start = datetime(2023, 2, 4, 13, 37, 42, tzinfo=UTC)
+        with freeze_time(start):
+            OpinionatedQueryRunner(query={"some_attr": "bla"}, team=self.team).run(
+                execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE
+            )
+
+        with freeze_time(start + cache_age):
+            response = OpinionatedQueryRunner(query={"some_attr": "bla"}, team=self.team).run(
+                execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE,
+                cache_age_seconds=1800,
+            )
+        self.assertEqual(response.is_cached, expected_is_cached)
+
+    def test_cache_age_override_not_persisted_on_cache_write(self):
+        TestQueryRunner = self.setup_test_query_runner_class()
+        runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team)
+
+        with freeze_time(datetime(2023, 2, 4, 13, 37, 42, tzinfo=UTC)):
+            response = runner.run(
+                execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS,
+                cache_age_seconds=999,
+            )
+
+        # The override governs this request's staleness decision only; the target age written
+        # to the cache (served to authenticated viewers and driving cache warming) must stay
+        # the runner's default.
+        self.assertNotEqual(response.cache_target_age, response.last_refresh + timedelta(seconds=999))
+        self.assertEqual(response.cache_target_age, runner.cache_target_age(response.last_refresh))
+
     def test_modifier_passthrough(self):
         try:
             from insights.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
 
+            from ee.datastore.materialized_columns.analyze import materialize
 
             materialize("events", "$browser")
         except ModuleNotFoundError:
@@ -372,7 +573,12 @@ class TestQueryRunner(BaseTest):
         )
         response = runner.calculate()
         assert response.datastore is not None
-        assert "events.`mat_$browser" in response.datastore
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            assert "events_json AS events" in response.datastore
+            assert "events.properties.`$browser`" in response.datastore
+            assert "events.`mat_$browser" not in response.datastore
+        else:
+            assert "events.`mat_$browser" in response.datastore
 
         runner = InsightsQLQueryRunner(
             query=InsightsQLQuery(query="select properties.$browser from events"),
@@ -383,17 +589,20 @@ class TestQueryRunner(BaseTest):
         assert response.datastore is not None
         assert "events.`mat_$browser" not in response.datastore
 
-    @mock.patch("insights.insightsql_queries.query_runner.get_query_cache_manager")
-    def test_schema_change_triggers_recalculation(self, mock_get_cache_manager):
+    @mock.patch("insights.insightsql_queries.query_runner.QueryCache")
+    def test_schema_change_triggers_recalculation(self, mock_query_cache_cls):
         TestQueryRunner = self.setup_test_query_runner_class()
         mock_cache_manager = mock.MagicMock()
         mock_cache_manager.cache_key = "test_cache_key"
-        mock_cache_manager.get_cache_data.return_value = {
+        mock_entry = mock.MagicMock()
+        mock_entry.as_full_response.return_value = {
             "is_cached": True,
             "invalid_field": "this will cause validation to fail",
             # Missing all the actual required fields like results, last_refresh, etc.
         }
-        mock_get_cache_manager.return_value = mock_cache_manager
+        mock_cache_manager.lookup.return_value.entry = mock_entry
+        mock_cache_manager.lookup.return_value.failure = None
+        mock_query_cache_cls.return_value = mock_cache_manager
         runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team)
 
         with freeze_time(datetime(2023, 2, 4, 13, 37, 42)):
@@ -402,8 +611,285 @@ class TestQueryRunner(BaseTest):
             self.assertIsInstance(response, TheTestCachedBasicQueryResponse)
             self.assertEqual(response.is_cached, False, "Should get a fresh response, not a cached one")
             self.assertEqual(response.last_refresh.isoformat(), "2023-02-04T13:37:42+00:00")
-            mock_cache_manager.get_cache_data.assert_called_once()
-            mock_cache_manager.set_cache_data.assert_called_once()
+            mock_cache_manager.lookup.assert_called_once()
+            mock_cache_manager.store_result.assert_called_once()
+
+    @parameterized.expand(
+        [
+            ("success", None, None, 1, 0),
+            ("error_result", "error", None, 1, 0),
+            ("exception", "raise", ValueError, 0, 1),
+        ]
+    )
+    def test_query_execution_metrics(self, _name, calculate_mode, expected_exception, success_delta, failure_delta):
+        from insights.datastore.query_tagging import reset_query_tags
+        from insights.insightsql_queries.query_runner import QUERY_EXECUTION_DURATION, QUERY_EXECUTION_TOTAL
+
+        # Sibling tests in this class invoke real InsightsQL runners that flip
+        # `contains_user_insightsql` on the ContextVar; reset so we observe "false".
+        reset_query_tags()
+
+        TestQueryRunner = self.setup_test_query_runner_class()
+        if calculate_mode == "error":
+            TestQueryRunner.calculate = lambda self: TheTestBasicQueryResponse(results=[], error="Some error occurred")
+        elif calculate_mode == "raise":
+
+            def calculate_raises(self):
+                raise ValueError("Query execution failed")
+
+            TestQueryRunner.calculate = calculate_raises
+        runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team)
+
+        before_success = QUERY_EXECUTION_TOTAL.labels(
+            query_type="TestQuery", category="success", error_type="none", contains_user_insightsql="false"
+        )._value.get()
+        before_failure = QUERY_EXECUTION_TOTAL.labels(
+            query_type="TestQuery", category="error", error_type="ValueError", contains_user_insightsql="false"
+        )._value.get()
+        before_duration_sum = QUERY_EXECUTION_DURATION.labels(query_type="TestQuery")._sum.get()
+
+        if expected_exception:
+            with pytest.raises(expected_exception):
+                runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+        else:
+            runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+
+        assert (
+            QUERY_EXECUTION_TOTAL.labels(
+                query_type="TestQuery", category="success", error_type="none", contains_user_insightsql="false"
+            )._value.get()
+            - before_success
+            == success_delta
+        )
+        assert (
+            QUERY_EXECUTION_TOTAL.labels(
+                query_type="TestQuery", category="error", error_type="ValueError", contains_user_insightsql="false"
+            )._value.get()
+            - before_failure
+            == failure_delta
+        )
+        assert QUERY_EXECUTION_DURATION.labels(query_type="TestQuery")._sum.get() > before_duration_sum
+
+    @parameterized.expand([("success_path", None), ("error_path", ValueError)])
+    def test_query_execution_metric_labels_with_contains_user_insightsql(
+        self, _name: str, expected_exception: Optional[type[Exception]]
+    ) -> None:
+        # Verifies the `contains_user_insightsql` label flows from the canonical
+        # `QueryTags.contains_user_insightsql` tag (set by `tag_contains_user_insightsql()`
+        # at InsightsQL parse sites) rather than being recomputed schema-side.
+        from insights.datastore.query_tagging import reset_query_tags, tag_contains_user_insightsql
+        from insights.insightsql_queries.query_runner import QUERY_EXECUTION_TOTAL
+
+        TestQueryRunner = self.setup_test_query_runner_class()
+
+        if expected_exception is None:
+
+            def calculate_tags(self: Any) -> Any:
+                tag_contains_user_insightsql()
+                return TheTestBasicQueryResponse(results=[])
+
+            TestQueryRunner.calculate = calculate_tags
+            label_kwargs = {
+                "query_type": "TestQuery",
+                "category": "success",
+                "error_type": "none",
+                "contains_user_insightsql": "true",
+            }
+        else:
+
+            def calculate_tags_then_raise(self: Any) -> Any:
+                tag_contains_user_insightsql()
+                raise ValueError("boom")
+
+            TestQueryRunner.calculate = calculate_tags_then_raise
+            label_kwargs = {
+                "query_type": "TestQuery",
+                "category": "error",
+                "error_type": "ValueError",
+                "contains_user_insightsql": "true",
+            }
+
+        runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team)
+        # ContextVar persists across tests; reset both before (so we observe a real
+        # transition false→true via calculate) and after (so siblings don't see "true").
+        reset_query_tags()
+        before = QUERY_EXECUTION_TOTAL.labels(**label_kwargs)._value.get()
+
+        try:
+            if expected_exception:
+                with pytest.raises(expected_exception):
+                    runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+            else:
+                runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+
+            assert QUERY_EXECUTION_TOTAL.labels(**label_kwargs)._value.get() - before == 1
+        finally:
+            reset_query_tags()
+
+    @parameterized.expand(
+        [
+            (
+                "user_access_control_error",
+                lambda: UserAccessControlError("query", "viewer", None),
+                SloOutcome.SUCCESS,
+                "user_error",
+                False,
+            ),
+            ("concurrency_limit_exceeded", ConcurrencyLimitExceeded, SloOutcome.SUCCESS, "rate_limited", False),
+            (
+                "user_insightsql_query_error",
+                lambda: QueryError("Can't select a table when a column is expected: postgres_waitlist_entries"),
+                SloOutcome.SUCCESS,
+                "user_error",
+                False,
+            ),
+            (
+                # Datastore-raised user-safe error (code 60 = UNKNOWN_TABLE), e.g. a query
+                # referencing a deleted warehouse table — must not reach error tracking.
+                "user_facing_ch_query_error",
+                lambda: ExposedCHQueryError("Unknown table ae_event_people", code=60),
+                SloOutcome.SUCCESS,
+                "user_error",
+                False,
+            ),
+            (
+                # Internal (non-exposed) InsightsQL errors are server faults and must stay captured.
+                "internal_insightsql_resolution_error",
+                lambda: ResolutionError("Unable to resolve field: ae_event_people"),
+                SloOutcome.FAILURE,
+                "error",
+                True,
+            ),
+            ("unclassified_value_error", ValueError, SloOutcome.FAILURE, "error", True),
+        ]
+    )
+    def test_run_classifies_slo_error_at_except_boundary(
+        self, _name, exception_factory, expected_outcome, expected_error_category, expected_captured
+    ):
+        TestQueryRunner = self.setup_test_query_runner_class()
+        raised_exc = exception_factory()
+
+        def calculate_raises(self):
+            raise raised_exc
+
+        TestQueryRunner.calculate = calculate_raises
+        runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team)
+
+        with (
+            mock.patch("insights.slo.context.emit_slo_completed") as mock_emit_slo_completed,
+            mock.patch("insights.insightsql_queries.query_runner.capture_exception") as mock_capture_exception,
+        ):
+            with pytest.raises(type(raised_exc)):
+                runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+
+        mock_emit_slo_completed.assert_called_once()
+        completed_kwargs = mock_emit_slo_completed.call_args.kwargs
+        assert completed_kwargs["properties"].outcome == expected_outcome
+        assert completed_kwargs["extra_properties"]["error_category"] == expected_error_category
+
+        # User-input errors (SUCCESS outcome) must not be captured to error tracking; only FAILURE
+        # outcomes are. This is what keeps benign InsightsQL query errors out of error tracking.
+        captured = any(call.args and call.args[0] is raised_exc for call in mock_capture_exception.call_args_list)
+        assert captured == expected_captured
+
+    def test_query_execution_metrics_not_recorded_on_cache_hit(self):
+        from insights.datastore.query_tagging import reset_query_tags
+        from insights.insightsql_queries.query_runner import QUERY_EXECUTION_DURATION, QUERY_EXECUTION_TOTAL
+
+        # Sibling tests may have flipped `contains_user_insightsql` on the ContextVar.
+        reset_query_tags()
+
+        TestQueryRunner = self.setup_test_query_runner_class()
+        runner = TestQueryRunner(query={"some_attr": "bla"}, team=self.team)
+
+        with freeze_time(datetime(2023, 2, 4, 13, 37, 42)):
+            runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+
+        before_success = QUERY_EXECUTION_TOTAL.labels(
+            query_type="TestQuery", category="success", error_type="none", contains_user_insightsql="false"
+        )._value.get()
+        before_failure = QUERY_EXECUTION_TOTAL.labels(
+            query_type="TestQuery", category="error", error_type="ValueError", contains_user_insightsql="false"
+        )._value.get()
+        before_duration_sum = QUERY_EXECUTION_DURATION.labels(query_type="TestQuery")._sum.get()
+
+        # Cache is fresh (< 10 min old), so this hits the cache without recalculating
+        with freeze_time(datetime(2023, 2, 4, 13, 38, 0)):
+            runner.run(execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE)
+
+        assert (
+            QUERY_EXECUTION_TOTAL.labels(
+                query_type="TestQuery", category="success", error_type="none", contains_user_insightsql="false"
+            )._value.get()
+            == before_success
+        )
+        assert (
+            QUERY_EXECUTION_TOTAL.labels(
+                query_type="TestQuery", category="error", error_type="ValueError", contains_user_insightsql="false"
+            )._value.get()
+            == before_failure
+        )
+        assert QUERY_EXECUTION_DURATION.labels(query_type="TestQuery")._sum.get() == before_duration_sum
+
+    @parameterized.expand(
+        [
+            ("success", None, None, 1, 0),
+            ("error_result", "error", None, 1, 0),
+            ("exception", "raise", ValueError, 0, 1),
+        ]
+    )
+    def test_survey_query_execution_metrics(
+        self, _name, calculate_mode, expected_exception, success_delta, failure_delta
+    ):
+        from insights.insightsql_queries.query_runner import SURVEY_QUERY_EXECUTION_DURATION, SURVEY_QUERY_EXECUTION_TOTAL
+
+        TestQueryRunner = self.setup_test_query_runner_class()
+        query_labels = {
+            "query_type": "TestQuery",
+            "query_name": "test_query_name",
+        }
+        if calculate_mode == "error":
+            TestQueryRunner.calculate = lambda self: TheTestBasicQueryResponse(results=[], error="Some error occurred")
+        elif calculate_mode == "raise":
+
+            def calculate_raises(self):
+                raise ValueError("Query execution failed")
+
+            TestQueryRunner.calculate = calculate_raises
+
+        runner = TestQueryRunner(
+            query={
+                "some_attr": "bla",
+                "tags": {"productKey": "surveys", "scene": "TestScene", "name": "test_query_name"},
+            },
+            team=self.team,
+        )
+
+        before_success = SURVEY_QUERY_EXECUTION_TOTAL.labels(
+            **query_labels, category="success", error_type="none"
+        )._value.get()
+        before_failure = SURVEY_QUERY_EXECUTION_TOTAL.labels(
+            **query_labels, category="error", error_type="ValueError"
+        )._value.get()
+        before_duration_sum = SURVEY_QUERY_EXECUTION_DURATION.labels(**query_labels)._sum.get()
+
+        if expected_exception:
+            with pytest.raises(expected_exception):
+                runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+        else:
+            runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+
+        assert (
+            SURVEY_QUERY_EXECUTION_TOTAL.labels(**query_labels, category="success", error_type="none")._value.get()
+            - before_success
+            == success_delta
+        )
+        assert (
+            SURVEY_QUERY_EXECUTION_TOTAL.labels(**query_labels, category="error", error_type="ValueError")._value.get()
+            - before_failure
+            == failure_delta
+        )
+        assert SURVEY_QUERY_EXECUTION_DURATION.labels(**query_labels)._sum.get() > before_duration_sum
 
 
 class TestSeriesCustomNameCaching(BaseTest):
@@ -515,6 +1001,20 @@ class TestApplySeriesCustomNames(BaseTest):
                 [{"action": {"order": 0, "custom_name": None}, "data": [1]}],
             ),
             (
+                # Guards the Greptile P1: a `name`-based rename (set via query editor / API, not the
+                # modal) must survive cache normalization, not revert to the raw event name.
+                "applies_name_based_rename_from_cache",
+                TrendsQuery(series=[EventsNode(event="$pageview", name="Renamed")]),
+                [{"action": {"order": 0, "name": "$pageview", "custom_name": None}, "data": [1]}],
+                [{"action": {"order": 0, "name": "$pageview", "custom_name": "Renamed"}, "data": [1]}],
+            ),
+            (
+                "name_echoing_the_event_is_not_a_rename",
+                TrendsQuery(series=[EventsNode(event="$pageview", name="$pageview")]),
+                [{"action": {"order": 0, "name": "$pageview", "custom_name": None}, "data": [1]}],
+                [{"action": {"order": 0, "name": "$pageview", "custom_name": None}, "data": [1]}],
+            ),
+            (
                 "skips_results_without_action",
                 TrendsQuery(series=[EventsNode(event="$pageview", custom_name="Name")]),
                 [{"action": None, "data": [1]}, {"data": [2]}],
@@ -535,8 +1035,6 @@ class TestApplySeriesCustomNames(BaseTest):
         cached_results: list[dict],
         expected_results: list[dict],
     ):
-        from datetime import UTC
-
         from insights.schema import CachedTrendsQueryResponse
 
         runner = TrendsQueryRunner(query=query, team=self.team)
@@ -613,8 +1111,6 @@ class TestApplySeriesCustomNames(BaseTest):
         expected_results: list,
         expect_modified: bool,
     ):
-        from datetime import UTC
-
         from insights.schema import CachedFunnelsQueryResponse, FunnelsQuery
 
         from insights.insightsql_queries.insights.funnels.funnels_query_runner import FunnelsQueryRunner
@@ -665,11 +1161,11 @@ class TestApplySeriesCustomNames(BaseTest):
         expected_results: list,
         expect_modified: bool,
     ):
-        from datetime import UTC
-
         from insights.schema import CachedStickinessQueryResponse, StickinessQuery
 
-        from insights.insightsql_queries.insights.stickiness_query_runner import StickinessQueryRunner
+        from products.product_analytics.backend.insightsql_queries.stickiness.stickiness_query_runner import (
+            StickinessQueryRunner,
+        )
 
         query = StickinessQuery(
             series=[
@@ -730,11 +1226,9 @@ class TestApplySeriesCustomNames(BaseTest):
         expected_results: list,
         expect_modified: bool,
     ):
-        from datetime import UTC
-
         from insights.schema import CachedLifecycleQueryResponse, LifecycleQuery
 
-        from insights.insightsql_queries.insights.lifecycle_query_runner import LifecycleQueryRunner
+        from insights.insightsql_queries.insights.lifecycle.lifecycle_query_runner import LifecycleQueryRunner
 
         query = LifecycleQuery(
             series=[
@@ -805,8 +1299,6 @@ class TestApplySeriesCustomNames(BaseTest):
         cached_results: list[dict],
         expect_modified: bool,
     ):
-        from datetime import UTC
-
         from insights.schema import CachedTrendsQueryResponse
 
         runner = TrendsQueryRunner(query=query, team=self.team)
@@ -823,3 +1315,577 @@ class TestApplySeriesCustomNames(BaseTest):
         _, was_modified = runner.apply_series_custom_names(cached_response)
 
         self.assertEqual(was_modified, expect_modified)
+
+
+class TestSharedInsightsExecutionMode(BaseTest):
+    @parameterized.expand(
+        [
+            # name, execution_mode, expected_mode, expected_cache_age_seconds
+            (
+                "force_blocking_downgrades_with_staleness_window_threshold",
+                ExecutionMode.CALCULATE_BLOCKING_ALWAYS,
+                ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE,
+                int(SHARED_FORCE_BLOCKING_STALENESS_WINDOW.total_seconds()),
+            ),
+            (
+                "cache_only_remaps_to_extended_async",
+                ExecutionMode.CACHE_ONLY_NEVER_CALCULATE,
+                ExecutionMode.EXTENDED_CACHE_CALCULATE_ASYNC_IF_STALE,
+                None,
+            ),
+            (
+                "recent_cache_async_passes_through",
+                ExecutionMode.RECENT_CACHE_CALCULATE_ASYNC_IF_STALE,
+                ExecutionMode.RECENT_CACHE_CALCULATE_ASYNC_IF_STALE,
+                None,
+            ),
+            (
+                "blocking_if_stale_passes_through",
+                # Used by the shared-notebook inline query payload builder. Must pass through so
+                # cold-cache loads block and return real results — falling back to async would
+                # ship a CacheMissResponse to the frontend, which renders the "unsupported node"
+                # placeholder until a later reload picks up the warmed cache.
+                ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE,
+                ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE,
+                None,
+            ),
+        ]
+    )
+    def test_shared_insights_execution_mode(
+        self,
+        _name: str,
+        execution_mode: ExecutionMode,
+        expected_mode: ExecutionMode,
+        expected_cache_age_seconds: int | None,
+    ) -> None:
+        result_mode, cache_age_seconds = shared_insights_execution_mode(execution_mode)
+        self.assertEqual(result_mode, expected_mode)
+        self.assertEqual(cache_age_seconds, expected_cache_age_seconds)
+
+
+@pytest.mark.ee
+class TestQueryRunnerAccessControlFingerprint(BaseTest):
+    """The InsightsQL cache key must partition on object- and resource-level access control, otherwise
+    two users with different visibility could share a cached (filtered) result."""
+
+    def setUp(self):
+        super().setUp()
+        self.organization.available_product_features = [
+            {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL},
+            {"key": AvailableFeature.ROLE_BASED_ACCESS, "name": AvailableFeature.ROLE_BASED_ACCESS},
+        ]
+        self.organization.save()
+        # Object/resource AC only applies to non-admins.
+        self.organization_membership.level = OrganizationMembership.Level.MEMBER
+        self.organization_membership.save()
+
+    def tearDown(self):
+        super().tearDown()
+        cache.clear()
+
+    RUNNER_BASES = [("analytics", AnalyticsQueryRunner), ("ctx", QueryRunnerWithInsightsQLContext)]
+
+    def _runner(self, user, base=QueryRunnerWithInsightsQLContext, queried_resources=None):
+        # `queried_resources` is the result we want the fingerprint to compute; pick a query that
+        # produces it: an unparseable query reads as None (fail closed), "select 1" reads no AC table.
+        query = InsightsQLQuery(query="select from from" if queried_resources is None else "select 1")
+
+        class _Runner(base):  # type: ignore[valid-type, misc]  # base is a runtime-parameterized class
+            query: InsightsQLQuery
+            cached_response: TheTestCachedBasicQueryResponse
+
+            def _calculate(self):
+                return TheTestBasicQueryResponse(results=[])
+
+            def to_query(self) -> ast.SelectQuery:
+                return ast.SelectQuery(select=[])
+
+            def _refresh_frequency(self) -> timedelta:
+                return timedelta(minutes=4)
+
+            def _is_stale(self, last_refresh, lazy: bool = False, *args, **kwargs) -> bool:
+                return False
+
+        return _Runner(query=query, team=self.team, user=user)
+
+    def _ac(self, resource, resource_id=None, access_level="none", organization_member=None):
+        ac, _ = AccessControl.objects.get_or_create(
+            team=self.team, resource=resource, resource_id=resource_id, organization_member=organization_member
+        )
+        ac.access_level = access_level
+        ac.save()
+        return ac
+
+    @parameterized.expand(RUNNER_BASES)
+    def test_resource_grant_changes_cache_key(self, _name, base):
+        self._ac(resource="notebook", access_level="none")
+        key_denied = self._runner(self.user, base).get_cache_key()
+
+        self._ac(resource="notebook", access_level="editor")
+        key_granted = self._runner(self.user, base).get_cache_key()
+
+        assert key_denied != key_granted
+
+    @parameterized.expand(RUNNER_BASES)
+    def test_fingerprint_covers_scopes_outside_the_legacy_resource_list(self, _name, base):
+        # System tables declare access_scopes (e.g. batch_export, alert, annotation) that the old
+        # hand-maintained blocked_resources tuple missed - a deny removed the table from the schema
+        # but left the cache key unchanged. blocked_resources is now derived from the actual rows,
+        # so any denied scope must show up in the fingerprint.
+        scopes = {"batch_export", "alert", "annotation"}
+        for scope in scopes:
+            self._ac(resource=scope, access_level="none")
+        restricted = set(self._runner(self.user, base).get_cache_payload().get("restricted_resources") or [])
+        assert scopes <= restricted
+
+    @parameterized.expand(RUNNER_BASES)
+    def test_object_grant_changes_cache_key(self, _name, base):
+        from products.notebooks.backend.models import Notebook
+
+        # Resource-level access granted so we isolate the object-level effect.
+        self._ac(resource="notebook", access_level="editor")
+        notebook = Notebook.objects.create(team=self.team, created_by=self.user, title="N")
+
+        blocking_ac = self._ac(
+            resource="notebook",
+            resource_id=str(notebook.id),
+            access_level="none",
+            organization_member=self.organization_membership,
+        )
+        runner = self._runner(self.user, base)
+        assert "restricted_objects" in runner.get_cache_payload()
+        key_blocked = runner.get_cache_key()
+
+        blocking_ac.delete()
+        key_unblocked = self._runner(self.user, base).get_cache_key()
+
+        assert key_blocked != key_unblocked
+
+    @parameterized.expand(RUNNER_BASES)
+    def test_admin_has_no_restrictions_but_userless_fails_closed(self, _name, base):
+        self._ac(resource="notebook", access_level="none")
+
+        # Org admin bypasses object/resource AC - no restriction keys, so they share the
+        # unrestricted cache partition.
+        self.organization_membership.level = OrganizationMembership.Level.ADMIN
+        self.organization_membership.save()
+        admin_payload = self._runner(self.user, base).get_cache_payload()
+        assert "restricted_objects" not in admin_payload
+        assert "restricted_resources" not in admin_payload
+
+        # Userless runs fail-closed (see no system.* tables), so they must partition separately
+        # from the admin's unrestricted result.
+        no_user_payload = self._runner(None, base).get_cache_payload()
+        assert no_user_payload["restricted_resources"] == ["*"]
+        assert self._runner(None, base).get_cache_key() != self._runner(self.user, base).get_cache_key()
+
+    def test_insightsql_query_runner_partitions_cache_on_access_control(self):
+        # Raw InsightsQL is the only way to reach access-controlled system.* tables.
+        query = {"kind": "InsightsQLQuery", "query": "select * from system.notebooks"}
+
+        self._ac(resource="notebook", access_level="none")
+        denied_runner = InsightsQLQueryRunner(query=query, team=self.team, user=self.user)
+        assert "notebook" in (denied_runner.get_cache_payload().get("restricted_resources") or [])
+        key_denied = denied_runner.get_cache_key()
+
+        self._ac(resource="notebook", access_level="editor")
+        key_granted = InsightsQLQueryRunner(query=query, team=self.team, user=self.user).get_cache_key()
+
+        assert key_denied != key_granted
+
+    @parameterized.expand(RUNNER_BASES)
+    def test_query_reading_no_access_controlled_tables_shares_cache(self, _name, base):
+        # A query that reads no access-controlled table is principal-independent: a denied user, a
+        # granted user, and userless cache warming must all land in the same (unpartitioned) entry.
+        self._ac(resource="notebook", access_level="none")
+        payload = self._runner(self.user, base, queried_resources=set()).get_cache_payload()
+        assert "restricted_resources" not in payload
+        assert "restricted_objects" not in payload
+
+        shared_key = self._runner(self.user, base, queried_resources=set()).get_cache_key()
+        assert self._runner(None, base, queried_resources=set()).get_cache_key() == shared_key
+
+    def test_no_access_controlled_tables_skips_the_preload(self):
+        # The point of the branch: a query that reads no access-controlled table must not even
+        # load access control
+        self._ac(resource="notebook", access_level="none")
+        runner = self._runner(self.user, AnalyticsQueryRunner, queried_resources=set())
+        with CaptureQueriesContext(connection) as ctx:
+            runner.get_cache_key()
+        ac_queries = [q["sql"] for q in ctx.captured_queries if "ee_accesscontrol" in q["sql"]]
+        assert ac_queries == [], ac_queries
+
+    def test_insightsql_fingerprint_partitions_only_on_queried_tables(self):
+        # Two denied resources, but the query only reads notebooks - so only that scope partitions.
+        self._ac(resource="notebook", access_level="none")
+        self._ac(resource="survey", access_level="none")
+        query = {"kind": "InsightsQLQuery", "query": "select * from system.notebooks"}
+        runner = InsightsQLQueryRunner(query=query, team=self.team, user=self.user)
+
+        restricted = set(runner.get_cache_payload().get("restricted_resources") or [])
+        assert "notebook" in restricted  # queried and denied
+        assert "survey" not in restricted  # denied but not read by the query
+
+    def test_resource_deny_on_parent_partitions_inherited_child_table(self):
+        # system.accounts uses the "account" scope, which inherits from "customer_analytics".
+        # A deny on the parent must still partition a query that reads the child table - otherwise the
+        # schema filter denies it but the cache key doesn't, and a denied user gets a cached result.
+        self._ac(resource="customer_analytics", access_level="none")
+        query = {"kind": "InsightsQLQuery", "query": "select * from system.accounts"}
+        runner = InsightsQLQueryRunner(query=query, team=self.team, user=self.user)
+
+        restricted = set(runner.get_cache_payload().get("restricted_resources") or [])
+        assert "account" in restricted  # denied via the inherited parent customer_analytics
+
+    def test_querying_access_controlled_tables_issues_one_preload(self):
+        # has_resource_access (incl. the inheritance recursion account -> customer_analytics) resolves
+        # against the in-memory preload, so reading several access-controlled tables still issues exactly
+        # one ee_accesscontrol query - no per-scope N+1.
+        self._ac(resource="customer_analytics", access_level="none")
+        self._ac(resource="notebook", access_level="none")
+        query = {"kind": "InsightsQLQuery", "query": "select * from system.accounts, system.notebooks, system.surveys"}
+        runner = InsightsQLQueryRunner(query=query, team=self.team, user=self.user)
+
+        with CaptureQueriesContext(connection) as ctx:
+            runner.get_cache_key()
+
+        ac_queries = [q["sql"] for q in ctx.captured_queries if "ee_accesscontrol" in q["sql"]]
+        assert len(ac_queries) == 1, ac_queries
+
+    def test_object_level_deny_on_queried_resource_partitions_cache(self):
+        from products.notebooks.backend.models import Notebook
+
+        # Resource-level access granted so we isolate the object-level effect.
+        self._ac(resource="notebook", access_level="editor")
+        notebook = Notebook.objects.create(team=self.team, created_by=self.user, title="N")
+        query = {"kind": "InsightsQLQuery", "query": "select * from system.notebooks"}
+        key_unblocked = InsightsQLQueryRunner(query=query, team=self.team, user=self.user).get_cache_key()
+
+        # Deny this specific notebook object - the query reads notebooks, so it must partition.
+        self._ac(
+            resource="notebook",
+            resource_id=str(notebook.id),
+            access_level="none",
+            organization_member=self.organization_membership,
+        )
+        runner = InsightsQLQueryRunner(query=query, team=self.team, user=self.user)
+        assert runner.get_cache_payload().get("restricted_objects", {}).get("notebook") == [str(notebook.id)]
+        assert runner.get_cache_key() != key_unblocked
+
+    def test_object_level_deny_on_unqueried_resource_is_ignored(self):
+        from products.notebooks.backend.models import Notebook
+
+        # Deny a specific notebook object, but the query reads surveys - the deny is irrelevant.
+        self._ac(resource="notebook", access_level="editor")
+        notebook = Notebook.objects.create(team=self.team, created_by=self.user, title="N")
+        self._ac(
+            resource="notebook",
+            resource_id=str(notebook.id),
+            access_level="none",
+            organization_member=self.organization_membership,
+        )
+
+        query = {"kind": "InsightsQLQuery", "query": "select * from system.surveys"}
+        payload = InsightsQLQueryRunner(query=query, team=self.team, user=self.user).get_cache_payload()
+        assert "restricted_objects" not in payload  # notebook object deny doesn't touch a surveys query
+
+    def test_run_recomputes_fingerprint_when_user_changes(self):
+        # run(user=...) swaps the user after construction; the snapshot must rebuild for the new user.
+        other_user = self._create_user("other@hanzo.ai")
+        other_membership = other_user.organization_memberships.get(organization=self.organization)
+        self._ac(resource="notebook", access_level="none")
+        # Personal grant for other_user only - the two users must land in different cache partitions.
+        self._ac(resource="notebook", access_level="editor", organization_member=other_membership)
+
+        runner = self._runner(self.user, AnalyticsQueryRunner)
+        key_restricted = runner.get_cache_key()
+
+        runner.user = other_user
+        runner._on_user_changed()
+        key_granted = runner.get_cache_key()
+
+        assert key_restricted != key_granted
+
+    def test_fingerprint_and_schema_filter_share_one_instance(self):
+        # The ctx runner's fingerprint reuses the instance create_for preloaded on the database, so
+        # the cache key and schema filtering resolve from the same rows (no drift).
+        runner = self._runner(self.user)
+        assert runner.database.user_access_control is runner.user_access_control
+
+    def test_cache_payload_preloads_access_controls_once(self):
+        # The memoized snapshot means both fingerprint helpers + repeated calls share one preload.
+        self._ac(resource="notebook", access_level="none")
+        runner = self._runner(self.user, AnalyticsQueryRunner)
+
+        with CaptureQueriesContext(connection) as ctx:
+            runner.get_cache_key()
+            runner.get_cache_key()
+
+        ac_queries = [q["sql"] for q in ctx.captured_queries if "ee_accesscontrol" in q["sql"]]
+        assert len(ac_queries) == 1, ac_queries
+
+    def test_run_issues_bounded_access_control_queries(self):
+        """End-to-end: building the database (schema filtering) plus computing the cache key issues
+        exactly two access-control queries - one for property-level AC and one shared bulk fetch for
+        resource/object AC - regardless of how many resources/objects/system tables exist. Schema
+        filtering must reuse the fingerprint's UserAccessControl, not issue its own ee_accesscontrol
+        query."""
+        from products.access_control.backend.property_access_control import restriction_cache_scope
+
+        self.organization.available_product_features = [
+            {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL},
+            {"key": AvailableFeature.ROLE_BASED_ACCESS, "name": AvailableFeature.ROLE_BASED_ACCESS},
+            {"key": AvailableFeature.PROPERTY_ACCESS_CONTROL, "name": AvailableFeature.PROPERTY_ACCESS_CONTROL},
+        ]
+        self.organization.save()
+        self._ac(resource="notebook", access_level="none")
+
+        with (
+            restriction_cache_scope(),
+            CaptureQueriesContext(connection) as ctx,
+        ):
+            runner = self._runner(self.user)
+            runner.get_cache_key()
+
+        # Guard against a false pass: prove schema filtering actually ran and consulted access control
+        # (it removed the notebook-scoped system table for this denied user). Without this, a single
+        # ee_accesscontrol query could come from the fingerprint alone and the "shared fetch" claim
+        # would be untested.
+        assert "system.notebooks" in runner.database._denied_tables
+
+        sqls = [q["sql"] for q in ctx.captured_queries]
+        resource_object_ac = [s for s in sqls if "ee_accesscontrol" in s]
+        property_ac = [s for s in sqls if "access_control_propertyaccesscontrol" in s]
+
+        # One shared bulk fetch for resource/object AC (schema filtering + fingerprint), one for property AC.
+        assert len(resource_object_ac) == 1, resource_object_ac
+        assert len(property_ac) == 1, property_ac
+
+    def test_create_for_reuses_preloaded_user_access_control(self):
+        # InsightsQLQueryRunner (a base AnalyticsQueryRunner) builds its database lazily inside
+        # execute_insightsql_query, so it can't share via self.database like the ctx runner does. Instead
+        # it hands its warm fingerprint snapshot to create_for, which must reuse it rather than issue
+        # a second ee_accesscontrol fetch. This is the base-runner equivalent of the ctx-runner budget
+        # asserted in test_run_issues_bounded_access_control_queries.
+        self._ac(resource="notebook", access_level="none")
+        user_access_control = UserAccessControl(user=self.user, team=self.team)
+        # Warm the snapshot - the single bulk fetch the fingerprint already paid for.
+        _ = user_access_control.blocked_resources
+
+        with CaptureQueriesContext(connection) as ctx:
+            database = Database.create_for(team=self.team, user=self.user, user_access_control=user_access_control)
+
+        # Same object reused, table still denied, and no second ee_accesscontrol fetch.
+        assert database.user_access_control is user_access_control
+        assert "system.notebooks" in database._denied_tables
+        ac_queries = [q["sql"] for q in ctx.captured_queries if "ee_accesscontrol" in q["sql"]]
+        assert ac_queries == [], ac_queries
+
+    def test_unentitled_org_skips_access_control_fingerprint(self):
+        # Without the ACCESS_CONTROL entitlement no user can be restricted, so computing the cache key
+        # must not issue the access-control read
+        self.organization.available_product_features = []
+        self.organization.save()
+
+        runner = self._runner(self.user, base=AnalyticsQueryRunner)
+        with CaptureQueriesContext(connection) as ctx:
+            runner.get_cache_key()
+
+        ac_queries = [q["sql"] for q in ctx.captured_queries if "ee_accesscontrol" in q["sql"]]
+        assert ac_queries == [], ac_queries
+
+        # Entitlement is read off the team's org, so the gate must short-circuit without building
+        # user_access_control (whose membership/preload reads are what we're avoiding per query).
+        assert runner._user_access_control is None
+
+
+def _failure_caching_flag(key: str, *args: Any, **kwargs: Any) -> bool:
+    return key == QUERY_FAILURE_CACHING_FLAG
+
+
+def _per_query_memory_error() -> DatastoreQueryMemoryLimitExceeded:
+    error = DatastoreQueryMemoryLimitExceeded()
+    error.is_per_query_limit = True
+    return error
+
+
+class TestQueryFailureCaching(BaseTest):
+    def tearDown(self):
+        super().tearDown()
+        cache.clear()
+
+    def _open_breaker(self, runner_class, runner, error: Optional[Exception] = None) -> mock.MagicMock:
+        error = error or DatastoreQueryTimeOut()
+        kind = classify_failure(error)
+        assert kind is not None
+        threshold = KIND_POLICIES[kind].open_threshold
+        patcher = mock.patch.object(runner_class, "_calculate", autospec=True, side_effect=error)
+        mock_calculate = patcher.start()
+        self.addCleanup(patcher.stop)
+        for _ in range(threshold):
+            with self.assertRaises(type(error)):
+                runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+        assert mock_calculate.call_count == threshold
+        return mock_calculate
+
+    def test_open_breaker_serves_remembered_error_without_calculating(self):
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team)
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            mock_calculate = self._open_breaker(runner_class, runner)
+
+            with self.assertRaises(DatastoreQueryTimeOut) as ctx:
+                runner.run(execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE)
+            assert mock_calculate.call_count == KIND_POLICIES["timeout"].open_threshold
+            assert getattr(ctx.exception, "served_from_query_failure_cache", False)
+            assert ctx.exception.status_code == 504
+
+    def test_open_breaker_raises_even_with_stale_cache(self):
+        # Stale data is deliberately not served to mask a failing query.
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team)
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            with freeze_time("2026-01-01T00:00:00Z") as frozen:
+                runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)  # seed the cache
+                frozen.tick(timedelta(minutes=15))  # past the harness's 10-minute staleness window
+
+                mock_calculate = self._open_breaker(runner_class, runner)
+                with self.assertRaises(DatastoreQueryTimeOut) as ctx:
+                    runner.run(execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE)
+                assert mock_calculate.call_count == KIND_POLICIES["timeout"].open_threshold
+                assert getattr(ctx.exception, "served_from_query_failure_cache", False)
+
+    @parameterized.expand(
+        [
+            ("memory_limit", _per_query_memory_error),
+            ("query_size", DatastoreQuerySizeExceeded),
+        ]
+    )
+    def test_deterministic_kinds_open_on_first_failure(self, _name, make_error):
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team)
+        error = make_error()
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            mock_calculate = self._open_breaker(runner_class, runner, error=error)
+            assert mock_calculate.call_count == 1
+
+            with self.assertRaises(type(error)) as ctx:
+                runner.run(execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE)
+            assert mock_calculate.call_count == 1
+            assert getattr(ctx.exception, "served_from_query_failure_cache", False)
+
+    def test_forced_blocking_run_respects_open_breaker(self):
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team)
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            mock_calculate = self._open_breaker(runner_class, runner)
+
+            with self.assertRaises(DatastoreQueryTimeOut) as ctx:
+                runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+            assert mock_calculate.call_count == KIND_POLICIES["timeout"].open_threshold
+            assert getattr(ctx.exception, "served_from_query_failure_cache", False)
+
+    def test_forced_async_dispatch_respects_open_breaker(self):
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team)
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            self._open_breaker(runner_class, runner, error=_per_query_memory_error())
+
+            with mock.patch.object(runner_class, "enqueue_async_calculation", autospec=True) as mock_enqueue:
+                with self.assertRaises(DatastoreQueryMemoryLimitExceeded) as ctx:
+                    runner.run(execution_mode=ExecutionMode.CALCULATE_ASYNC_ALWAYS)
+            mock_enqueue.assert_not_called()
+            assert getattr(ctx.exception, "served_from_query_failure_cache", False)
+
+    def test_successful_run_after_backoff_closes_the_breaker(self):
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team)
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            with freeze_time("2026-01-01T00:00:00Z") as frozen:
+                with mock.patch.object(
+                    runner_class, "_calculate", autospec=True, side_effect=DatastoreQueryTimeOut()
+                ) as mock_calculate:
+                    for _ in range(KIND_POLICIES["timeout"].open_threshold):
+                        with self.assertRaises(DatastoreQueryTimeOut):
+                            runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+                assert QueryFailureCache(runner.get_cache_key()).get_open() is not None
+
+                # while open, even a forced refresh is refused without touching Datastore
+                with self.assertRaises(DatastoreQueryTimeOut):
+                    runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+                assert mock_calculate.call_count == KIND_POLICIES["timeout"].open_threshold
+
+                # once the backoff elapses, the next run executes (the real harness _calculate),
+                # succeeds, and closes the breaker
+                frozen.tick(BASE_BACKOFF + timedelta(seconds=1))
+                runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+                assert QueryFailureCache(runner.get_cache_key()).get_open() is None
+
+    def test_extended_budget_run_ignores_interactive_breaker(self):
+        # The async worker executes with CALCULATE_BLOCKING_ALWAYS under a 10x execution budget,
+        # so a breaker opened by interactive timeouts must not stop it.
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team, limit_context=LimitContext.QUERY_ASYNC)
+        failure_cache = QueryFailureCache(runner.get_cache_key())
+        for _ in range(KIND_POLICIES["timeout"].open_threshold):
+            failure_cache.record_failure("timeout", "timed out", budget=BUDGET_INTERACTIVE)
+        assert failure_cache.get_open() is not None
+
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            response = runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+        assert response.is_cached is False
+        assert failure_cache.get_open() is None  # the success closed the breaker
+
+    def test_extended_budget_run_blocked_by_extended_breaker(self):
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team, limit_context=LimitContext.QUERY_ASYNC)
+        failure_cache = QueryFailureCache(runner.get_cache_key())
+        for _ in range(KIND_POLICIES["timeout"].open_threshold):
+            failure_cache.record_failure("timeout", "timed out", budget=BUDGET_EXTENDED)
+        assert failure_cache.get_open() is not None
+
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            with self.assertRaises(DatastoreQueryTimeOut) as ctx:
+                runner.run(execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
+        assert getattr(ctx.exception, "served_from_query_failure_cache", False)
+
+    def test_no_behavior_change_when_flag_disabled(self):
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team)
+        with mock.patch.object(
+            runner_class, "_calculate", autospec=True, side_effect=DatastoreQueryTimeOut()
+        ) as mock_calculate:
+            for _ in range(KIND_POLICIES["timeout"].open_threshold + 2):
+                with self.assertRaises(DatastoreQueryTimeOut) as ctx:
+                    runner.run(execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE)
+                assert not getattr(ctx.exception, "served_from_query_failure_cache", False)
+            assert mock_calculate.call_count == KIND_POLICIES["timeout"].open_threshold + 2
+
+    def test_interactive_timeout_breaker_spares_extended_budget(self):
+        # Interactive attempts run with a 10x smaller execution budget than the async worker, so
+        # a breaker opened by sync timeouts must still let async recalculation be enqueued.
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team)
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            self._open_breaker(runner_class, runner)
+
+            with mock.patch.object(
+                runner_class, "enqueue_async_calculation", autospec=True, return_value=None
+            ) as mock_enqueue:
+                response = runner.run(execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_ASYNC_IF_STALE)
+            mock_enqueue.assert_called_once()
+            assert isinstance(response, CacheMissResponse)
+
+    def test_memory_limit_breaker_forbids_extended_budget(self):
+        # Memory-limit failures don't depend on the execution-time budget, so the breaker covers
+        # the async path too.
+        runner_class = setup_test_query_runner_class()
+        runner = runner_class(query={"some_attr": "bla"}, team=self.team)
+        with mock.patch("hanzo_insights.feature_enabled", side_effect=_failure_caching_flag):
+            self._open_breaker(runner_class, runner, error=_per_query_memory_error())
+
+            with mock.patch.object(runner_class, "enqueue_async_calculation", autospec=True) as mock_enqueue:
+                with self.assertRaises(DatastoreQueryMemoryLimitExceeded) as ctx:
+                    runner.run(execution_mode=ExecutionMode.RECENT_CACHE_CALCULATE_ASYNC_IF_STALE)
+            mock_enqueue.assert_not_called()
+            assert getattr(ctx.exception, "served_from_query_failure_cache", False)

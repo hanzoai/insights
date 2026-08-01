@@ -1,0 +1,132 @@
+import { expectLogic } from 'kea-test-utils'
+
+import { urls } from 'scenes/urls'
+
+import { initKeaTests } from '~/test/init'
+
+import { externalDataSourcesConnectionsList } from 'products/warehouse_sources/frontend/generated/api'
+
+import {
+    connectionSelectorLogic,
+    getConnectionSelectorValue,
+    LOADING_CONNECTIONS,
+    POSTFN_WAREHOUSE,
+} from './connectionSelectorLogic'
+
+jest.mock('products/warehouse_sources/frontend/generated/api', () => ({
+    externalDataSourcesConnectionsList: jest.fn(),
+}))
+
+const mockConnectionsList = externalDataSourcesConnectionsList as jest.Mock
+
+describe('connectionSelectorLogic', () => {
+    let logic: ReturnType<typeof connectionSelectorLogic.build>
+
+    beforeEach(() => {
+        initKeaTests()
+        mockConnectionsList.mockReset().mockResolvedValue([
+            {
+                id: 'conn-123',
+                prefix: 'warehouse',
+                engine: 'postgres',
+                source_type: 'Postgres',
+                access_method: 'direct',
+                supports_insightsql: true,
+            },
+            {
+                id: 'conn-456',
+                prefix: 'prod',
+                engine: null,
+                source_type: 'MySQL',
+                access_method: 'warehouse',
+                supports_insightsql: true,
+            },
+        ])
+    })
+
+    afterEach(() => {
+        logic?.unmount()
+    })
+
+    it('does not fetch on mount — embedded editors mount this logic without the selector', async () => {
+        logic = connectionSelectorLogic()
+        logic.mount()
+
+        await expectLogic(logic).toFinishAllListeners()
+
+        expect(mockConnectionsList).not.toHaveBeenCalled()
+    })
+
+    it('loads connection options when the selector requests them', async () => {
+        logic = connectionSelectorLogic()
+        logic.mount()
+        logic.actions.maybeLoadConnectionOptions()
+
+        await expectLogic(logic).toFinishAllListeners()
+
+        expect(mockConnectionsList).toHaveBeenCalledTimes(1)
+        expect(logic.values.connectionSelectOptions[0].options).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ value: POSTFN_WAREHOUSE }),
+                expect.objectContaining({
+                    value: 'conn-123',
+                    label: 'warehouse (Postgres)',
+                    managementUrl: urls.dataWarehouseSource('managed-conn-123'),
+                }),
+                // Synced source: no detected engine — label derives from source_type + synced marker
+                expect.objectContaining({
+                    value: 'conn-456',
+                    label: 'prod (MySQL · synced)',
+                    managementUrl: urls.dataWarehouseSource('managed-conn-456'),
+                }),
+            ])
+        )
+        expect(logic.values.connectionSelectOptions[1].options).toEqual(
+            expect.arrayContaining([expect.not.objectContaining({ managementUrl: expect.anything() })])
+        )
+    })
+
+    // Pins the label the ManagedWarehouseConnection story relies on — it's long enough to need
+    // truncating in the sidebar, which is the regression that story guards (support ticket 65030).
+    it('labels a managed warehouse with its prefix and engine', async () => {
+        mockConnectionsList.mockResolvedValue([
+            {
+                id: 'conn-duck',
+                prefix: 'managed_warehouse',
+                engine: 'duckdb',
+                source_type: 'ManagedWarehouse',
+                access_method: 'direct',
+                supports_insightsql: true,
+            },
+        ])
+        logic = connectionSelectorLogic()
+        logic.mount()
+        logic.actions.maybeLoadConnectionOptions()
+
+        await expectLogic(logic).toFinishAllListeners()
+
+        expect(logic.values.connectionSelectOptions[0].options).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ value: 'conn-duck', label: 'managed_warehouse (DuckDB)' }),
+            ])
+        )
+    })
+
+    it('derives the selected connection value from sql editor state', async () => {
+        expect(getConnectionSelectorValue(null, true, undefined)).toEqual(LOADING_CONNECTIONS)
+        expect(
+            getConnectionSelectorValue(
+                [{ id: 'conn-123', prefix: 'warehouse', engine: 'postgres' }] as any,
+                false,
+                'conn-123'
+            )
+        ).toEqual('conn-123')
+        expect(
+            getConnectionSelectorValue(
+                [{ id: 'conn-123', prefix: 'warehouse', engine: 'postgres' }] as any,
+                false,
+                'missing'
+            )
+        ).toEqual(POSTFN_WAREHOUSE)
+    })
+})

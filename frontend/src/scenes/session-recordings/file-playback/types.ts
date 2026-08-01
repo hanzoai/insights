@@ -1,4 +1,4 @@
-import { eventWithTime } from '@hanzo/rrweb-types'
+import { eventWithTime } from 'insights-js/rrweb-types'
 
 import { PersonType, RecordingSnapshot, SessionRecordingType } from '~/types'
 

@@ -8,11 +8,18 @@ from temporalio.testing import ActivityEnvironment
 from insights.models import Integration, OAuthApplication, Organization, OrganizationMembership, Team, User
 from insights.temporal.common.logger import configure_logger
 
+from products.tasks.backend.logic.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate
 from products.tasks.backend.models import SandboxSnapshot, Task, TaskRun
-from products.tasks.backend.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate
 from products.tasks.backend.temporal.create_snapshot.activities.get_snapshot_context import SnapshotContext
 from products.tasks.backend.temporal.oauth import ARRAY_APP_CLIENT_ID_DEV
 from products.tasks.backend.temporal.process_task.activities.get_task_processing_context import TaskProcessingContext
+
+
+def _runs_on_internal_pr() -> bool:
+    value = os.getenv("RUNS_ON_INTERNAL_PR")
+    if value is None:
+        return True
+    return value.lower() in {"1", "true"}
 
 
 @pytest.fixture
@@ -22,15 +29,26 @@ def activity_environment():
 
 
 @pytest.fixture(autouse=True)
-def array_oauth_app():
-    """Create the Array OAuth application for tests."""
+def insights_code_oauth_app(request):
+    """Create the Array OAuth application for DB-backed tests.
+
+    Skipped for tests without a `django_db` marker — those can't touch the
+    ORM, so seeding the OAuth row would just raise.
+    """
+    has_db = "django_db" in {m.name for m in request.node.iter_markers()}
+    if not has_db:
+        yield None
+        return
+
+    if not _runs_on_internal_pr():
+        pytest.skip("Skipping test that requires internal secrets on external PRs")
     app, _ = OAuthApplication.objects.get_or_create(
         client_id=ARRAY_APP_CLIENT_ID_DEV,
         defaults={
             "name": "Array Test App",
             "client_type": OAuthApplication.CLIENT_PUBLIC,
             "authorization_grant_type": OAuthApplication.GRANT_AUTHORIZATION_CODE,
-            "redirect_uris": "https://insights.hanzo.ai/callback",
+            "redirect_uris": "https://app.hanzo.ai/callback",
             "algorithm": "RS256",
         },
     )
@@ -109,7 +127,7 @@ def test_task(team, user, github_integration):
         description="This is a test task for testing temporal activities",
         origin_product=Task.OriginProduct.USER_CREATED,
         github_integration=github_integration,
-        repository="hanzoai/insights-js",
+        repository="insights/insights-js",
     )
 
     yield task
@@ -138,9 +156,12 @@ def task_context(test_task, test_task_run) -> TaskProcessingContext:
         task_id=str(test_task.id),
         run_id=str(test_task_run.id),
         team_id=test_task.team_id,
+        team_uuid=str(test_task.team.uuid),
+        organization_id=str(test_task.team.organization_id),
         github_integration_id=test_task.github_integration_id,
         repository=test_task.repository,
         distinct_id=test_task.created_by.distinct_id or "test-distinct-id",
+        task_created_by_id=test_task.created_by_id,
     )
 
 
@@ -149,7 +170,7 @@ def snapshot_context(github_integration, team) -> SnapshotContext:
     """Create a SnapshotContext for testing."""
     return SnapshotContext(
         github_integration_id=github_integration.id,
-        repository="hanzoai/insights-js",
+        repository="insights/insights-js",
         team_id=team.id,
     )
 
@@ -164,21 +185,21 @@ def get_or_create_test_snapshots(github_integration):
     """Idempotently create or retrieve real snapshots for test repositories.
 
     Returns a dict with keys:
-    - "single": snapshot with just hanzoai/insights-js
-    - "multi": snapshot with both hanzoai/insights-js and insights/hanzo.ai
+    - "single": snapshot with just insights/insights-js
+    - "multi": snapshot with both insights/insights-js and insights/hanzo.ai
     """
     if not os.environ.get("MODAL_TOKEN_ID") or not os.environ.get("MODAL_TOKEN_SECRET"):
         pytest.skip("MODAL_TOKEN_ID and MODAL_TOKEN_SECRET environment variables not set")
 
     existing_single = SandboxSnapshot.objects.filter(
         integration=github_integration,
-        repos=["hanzoai/insights-js"],
+        repos=["insights/insights-js"],
         status=SandboxSnapshot.Status.COMPLETE,
     ).first()
 
     existing_multi = SandboxSnapshot.objects.filter(
         integration=github_integration,
-        repos__contains=["hanzoai/insights-js", "insights/hanzo.ai"],
+        repos__contains=["insights/insights-js", "insights/hanzo.ai"],
         status=SandboxSnapshot.Status.COMPLETE,
     ).first()
 
@@ -197,12 +218,12 @@ def get_or_create_test_snapshots(github_integration):
         sandbox = Sandbox.create(config)
 
         if not existing_single:
-            clone_result = sandbox.clone_repository("hanzoai/insights-js", github_token="")
+            clone_result = sandbox.clone_repository("insights/insights-js", github_token="")
             if clone_result.exit_code == 0:
                 single_snapshot_id = sandbox.create_snapshot()
                 single_snapshot = SandboxSnapshot.objects.create(
                     integration=github_integration,
-                    repos=["hanzoai/insights-js"],
+                    repos=["insights/insights-js"],
                     external_id=single_snapshot_id,
                     status=SandboxSnapshot.Status.COMPLETE,
                 )
@@ -216,7 +237,7 @@ def get_or_create_test_snapshots(github_integration):
                 multi_snapshot_id = sandbox.create_snapshot()
                 multi_snapshot = SandboxSnapshot.objects.create(
                     integration=github_integration,
-                    repos=["hanzoai/insights-js", "insights/hanzo.ai"],
+                    repos=["insights/insights-js", "insights/hanzo.ai"],
                     external_id=multi_snapshot_id,
                     status=SandboxSnapshot.Status.COMPLETE,
                 )

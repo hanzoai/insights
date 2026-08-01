@@ -17,7 +17,7 @@ from webauthn.helpers import base64url_to_bytes, bytes_to_base64url, options_to_
 from webauthn.helpers.decode_credential_public_key import decode_credential_public_key
 from webauthn.helpers.structs import AuthenticatorTransport, PublicKeyCredentialDescriptor
 
-from insights.api.authentication import axes_locked_out
+from insights.api.authentication import axes_locked_out, is_email_verified_for_login
 from insights.auth import SessionAuthentication, WebAuthnAuthenticationResponse, WebauthnBackend
 from insights.event_usage import report_user_logged_in
 from insights.helpers.two_factor_session import set_two_factor_verified_in_session
@@ -32,6 +32,7 @@ from insights.passkey import (
     verify_passkey_registration_response,
 )
 from insights.rate_limit import WebAuthnSignupRegistrationThrottle
+from insights.session.activity import revoke_other_sessions_for_request
 from insights.tasks.email import send_passkey_added_email, send_passkey_removed_email
 from insights.workos_radar import RadarAction, RadarAuthMethod, evaluate_auth_attempt
 
@@ -286,34 +287,10 @@ class WebAuthnLoginViewSet(viewsets.ViewSet):
         # Track if user was already authenticated (for re-auth detection)
         was_authenticated_before_login_attempt = request.user is not None and request.user.is_authenticated
 
-        # Extract user early for axes lockout checking
-        user = self._extract_user_from_user_handle(user_handle_b64)
-
-        # If we can't extract user from userHandle, return generic error
-        if not user:
-            return Response(
-                {"error": "Authentication failed. Please check your passkey and try again."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Evaluate signin attempt with WorkOS Radar (log-only mode, does not block)
-        evaluate_auth_attempt(
-            request=request._request,
-            email=user.email,
-            action=RadarAction.SIGNIN,
-            auth_method=RadarAuthMethod.PASSKEY,
-            user_id=str(user.distinct_id),
-        )
-
-        # Check axes lockout before attempting authentication
-        if lockout_response := self._check_axes_lockout(request, user):
-            return lockout_response
-
-        # Check SSO enforcement before attempting authentication
-        if sso_enforcement_response := self._check_sso_enforcement(user):
-            return sso_enforcement_response
-
         try:
+            # Perform cryptographic verification first — this is the only trustworthy
+            # source of user identity. The client-provided userHandle is NOT part of the
+            # signed assertion and can be freely spoofed.
             authenticated_user = authenticate(
                 request=request,
                 credential_id=credential_id,
@@ -323,8 +300,11 @@ class WebAuthnLoginViewSet(viewsets.ViewSet):
             )
 
             if not authenticated_user:
-                # Authentication failed - record failure with axes
-                if lockout_response := self._handle_authentication_failure(request, user):
+                # Try to extract user from userHandle for axes failure recording.
+                # This is best-effort — the userHandle may be spoofed, but recording
+                # failures against the claimed identity is acceptable for rate limiting.
+                claimed_user = self._extract_user_from_user_handle(user_handle_b64)
+                if lockout_response := self._handle_authentication_failure(request, claimed_user):
                     return lockout_response
 
                 return Response(
@@ -332,8 +312,59 @@ class WebAuthnLoginViewSet(viewsets.ViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            # Cast to our User model — WebauthnBackend.authenticate() always returns
+            # insights.models.User, but Django's authenticate() stub returns _User.
+            verified_user = cast(User, authenticated_user)
+
+            # Verify the userHandle matches the authenticated user. The userHandle
+            # is not signed, so we must confirm it wasn't spoofed before trusting
+            # any pre-authentication context derived from it.
+            claimed_user = self._extract_user_from_user_handle(user_handle_b64)
+            if not claimed_user or claimed_user.pk != verified_user.pk:
+                logger.warning(
+                    "webauthn_login_user_handle_mismatch",
+                    claimed_user_id=claimed_user.pk if claimed_user else None,
+                    authenticated_user_id=verified_user.pk,
+                )
+                # Record failure against the verified user so repeated
+                # mismatch attempts trigger axes rate limiting.
+                if lockout_response := self._handle_authentication_failure(request, verified_user):
+                    return lockout_response
+
+                return Response(
+                    {"error": "Authentication failed."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # All policy checks run against the cryptographically verified user
+            evaluate_auth_attempt(
+                request=request._request,
+                email=verified_user.email,
+                action=RadarAction.SIGNIN,
+                auth_method=RadarAuthMethod.PASSKEY,
+                user_id=str(verified_user.distinct_id),
+            )
+
+            # Check axes lockout against the verified user
+            if lockout_response := self._check_axes_lockout(request, verified_user):
+                return lockout_response
+
+            # Check SSO enforcement against the verified user
+            if sso_enforcement_response := self._check_sso_enforcement(verified_user):
+                return sso_enforcement_response
+
+            if not is_email_verified_for_login(verified_user):
+                return Response(
+                    {
+                        "error": (
+                            "Your account is awaiting verification. Please check your email for a verification link."
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             # Login the user with the WebauthnBackend
-            login(request, authenticated_user, backend="insights.auth.WebauthnBackend")
+            login(request, verified_user, backend="insights.auth.WebauthnBackend")
 
             # Passkey bypasses 2FA
             set_two_factor_verified_in_session(request)
@@ -341,7 +372,7 @@ class WebAuthnLoginViewSet(viewsets.ViewSet):
             request.session["reauth"] = "true" if was_authenticated_before_login_attempt else "false"
             request.session.save()
 
-            report_user_logged_in(cast(User, authenticated_user), social_provider="passkey")
+            report_user_logged_in(verified_user, social_provider="passkey")
 
             return Response({"success": True})
 
@@ -722,6 +753,11 @@ class WebAuthnCredentialViewSet(viewsets.ViewSet):
             credential.save()
 
             send_passkey_added_email.delay(user.id)
+
+            # The first passkey is a new login factor — revoke other sessions so the current device
+            # establishes the new posture.
+            if WebauthnCredential.objects.filter(user=user, verified=True).count() == 1:
+                revoke_other_sessions_for_request(request, user)
 
             logger.info("webauthn_credential_verify_complete", user_id=user.pk, credential_id=credential.pk)
 

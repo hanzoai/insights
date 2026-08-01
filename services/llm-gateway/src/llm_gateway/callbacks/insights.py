@@ -1,13 +1,27 @@
 import ast
+import asyncio
 import json
+from functools import partial
 from typing import Any
-from uuid import uuid4
+from uuid import UUID, uuid4, uuid5
 
-import hanzo_insights
 import structlog
+from hanzo_insights import Insights
+from hanzo_insights.ai.utils import _capture_ai_event
 
+from llm_gateway.auth.models import resolve_distinct_id
 from llm_gateway.callbacks.base import InstrumentedCallback
-from llm_gateway.request_context import get_auth_user, get_product, get_time_to_first_token
+from llm_gateway.products.config import get_product_config
+from llm_gateway.rate_limiting.cost_refresh import normalize_metric_labels
+from llm_gateway.request_context import (
+    get_auth_user,
+    get_effort,
+    get_insights_flags,
+    get_insights_properties,
+    get_product,
+    get_time_to_first_token,
+    get_traceparent_trace_id,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -39,10 +53,84 @@ def _replace_binary_content(data: Any) -> Any:
             return data
 
 
+# Capture rejects events whose Kafka message exceeds message.max.bytes (~1 MB,
+# the librdkafka default) with a 413, and the hanzo_insights client drops
+# events over its own ~900 KB ceiling. $ai_generation events carry the full
+# prompt/completion via $ai_input / $ai_output_choices, so they routinely cross
+# that line. Truncate well below 1 MB to leave headroom for the event envelope
+# (distinct_id, event name, other properties) and JSON re-escaping on the wire.
 _MAX_CAPTURE_SIZE = 800 * 1024
 _MIN_FIELD_SIZE_TO_TRUNCATE = 10 * 1024
 _TRUNCATION_MARKER = "[truncated: content too large for capture]"
 _TRUNCATABLE_FIELDS = ("$ai_output_choices", "$ai_input")
+
+
+def _is_product_billable(product: str) -> bool:
+    """A product is billable if it bills into a credit bucket in the central
+    registry. False for unknown products so we never accidentally bill calls we
+    can't attribute.
+    """
+    config = get_product_config(product)
+    return config is not None and config.credit_bucket is not None
+
+
+def _apply_owned_event_properties(properties: dict[str, Any], product: str, team_id: int | None) -> None:
+    """Enforce gateway-owned event properties, run after caller `x-insights-property-*` headers are merged.
+
+    `ai_product`, `$ai_billable`, and `$ai_effort` are gateway-derived (effort via
+    `ProviderConfig.extract_effort`) and must not be spoofable via headers, so we re-assert them
+    here and drop `$ai_effort` when the gateway found none. `team_id`, in contrast, is a
+    deliberate caller override (e.g. a shared-key caller attributing to a customer team); we only
+    fall back to the key owner's team when no override was supplied.
+    """
+    properties["ai_product"] = product
+    properties["$ai_billable"] = _is_product_billable(product)
+    effort = get_effort()
+    if effort is not None:
+        properties["$ai_effort"] = effort
+    else:
+        properties.pop("$ai_effort", None)
+    if team_id is not None:
+        properties.setdefault("team_id", team_id)
+    # A header-supplied team_id arrives as a string ("42"); store it as an int so the captured
+    # property matches the rest of the platform (the usage reporter reads it via JSONExtractInt)
+    # rather than relying on Datastore string coercion.
+    raw_team_id = properties.get("team_id")
+    if raw_team_id is not None:
+        try:
+            properties["team_id"] = int(raw_team_id)
+        except (TypeError, ValueError):
+            if team_id is not None:
+                properties["team_id"] = team_id
+            else:
+                properties.pop("team_id", None)
+
+
+# Stable namespace for hashing non-UUID trace identifiers (e.g. Claude Code's
+# JSON-encoded session blobs sent via Anthropic's metadata.user_id) into a
+# deterministic UUID. Generated once and frozen so the same input always maps
+# to the same trace UUID across runs and processes.
+_TRACE_ID_NAMESPACE = UUID("8d4f6b7e-6a3e-4f3a-9f3b-3b6f4d2e8a1a")
+
+
+def _normalize_trace_id(raw: Any) -> str:
+    """Normalize an incoming trace identifier into a UUID string.
+
+    AI observability renders trace links as `/ai-observability/traces/<id>`, so
+    `$ai_trace_id` must be a URL-safe identifier. Anthropic's
+    `metadata.user_id` is a free-form string that Claude Code populates with a
+    serialized JSON session blob — passing that through verbatim produces
+    unopenable trace links. We hash anything that isn't already a UUID into a
+    deterministic UUID5 so identical inputs continue to share the same trace.
+    """
+    if not raw:
+        return str(uuid4())
+    if not isinstance(raw, str):
+        raw = json.dumps(raw, default=str, sort_keys=True)
+    try:
+        return str(UUID(raw))
+    except ValueError:
+        return str(uuid5(_TRACE_ID_NAMESPACE, raw))
 
 
 def _truncate_for_capture(properties: dict[str, Any]) -> dict[str, Any]:
@@ -64,16 +152,34 @@ def _truncate_for_capture(properties: dict[str, Any]) -> dict[str, Any]:
 
 
 class InsightsCallback(InstrumentedCallback):
-    """Custom Insights callback for LLM analytics."""
+    """Custom Insights callback for AI observability."""
 
     callback_name = "insights"
 
-    def __init__(self, api_key: str, host: str):
+    def __init__(
+        self,
+        api_key: str,
+        host: str,
+        region_url: str = "https://us.hanzo.ai",
+        secondary_api_key: str | None = None,
+        secondary_host: str | None = None,
+    ):
         super().__init__()
         self._api_key = api_key
         self._host = host
-        hanzo_insights.api_key = api_key
-        hanzo_insights.host = host
+        # Customer-origin region URL stamped on every captured event via the
+        # `instance` group. The PHAI usage report filters on $group_<N> where
+        # N is the destination project's `instance` group_type_index, so the
+        # value must be the customer's region URL — not the capture host's.
+        # That keeps EU events tagged as EU even when the secondary capture
+        # mirrors them to the US instance for engineer visibility.
+        self._region_url = region_url
+        # Optional second capture target. When set, each captured event is
+        # mirrored to this host with the same payload, mirroring the
+        # `ee/hogai/core/runner.py:201-206` pattern that lets EU traffic also
+        # surface on the US dashboard. Set on the EU gateway deployment only.
+        self._secondary_api_key = secondary_api_key
+        self._secondary_host = secondary_host
 
     async def _on_success(
         self, kwargs: dict[str, Any], response_obj: Any, start_time: float, end_time: float, end_user_id: str | None
@@ -83,13 +189,14 @@ class InsightsCallback(InstrumentedCallback):
         auth_user = get_auth_user()
         product = get_product()
 
-        trace_id = (
-            metadata.get("user_id") or str(uuid4())
-        )  # anthropic stores user_id in metadata, but it actually refers to the trace_id rather than the user for claude code.
-        if auth_user and auth_user.auth_method == "oauth_access_token":
-            distinct_id = auth_user.distinct_id
+        # metadata.user_id carries Claude Code's session blob — constant for a
+        # whole task, so hashing it (_normalize_trace_id) collapses every turn
+        # into one trace. A per-turn traceparent therefore takes precedence.
+        trace_id = get_traceparent_trace_id() or _normalize_trace_id(metadata.get("user_id"))
+        if auth_user is None:
+            distinct_id = end_user_id or str(uuid4())
         else:
-            distinct_id = end_user_id or (auth_user.distinct_id if auth_user else str(uuid4()))
+            distinct_id = resolve_distinct_id(auth_user, end_user_id)
         team_id = auth_user.team_id if auth_user and auth_user.team_id else None
 
         logger.debug(
@@ -102,10 +209,16 @@ class InsightsCallback(InstrumentedCallback):
         )
 
         is_streaming = standard_logging_object.get("stream", False)
+        usage_object = (standard_logging_object.get("metadata") or {}).get("usage_object") or {}
+
+        ai_provider, ai_model = normalize_metric_labels(
+            standard_logging_object.get("model", ""),
+            standard_logging_object.get("custom_llm_provider", ""),
+        )
 
         properties: dict[str, Any] = {
-            "$ai_model": standard_logging_object.get("model", ""),
-            "$ai_provider": standard_logging_object.get("custom_llm_provider", ""),
+            "$ai_model": ai_model,
+            "$ai_provider": ai_provider,
             "$ai_input": _replace_binary_content(standard_logging_object.get("messages")),
             "$ai_input_tokens": standard_logging_object.get("prompt_tokens", 0),
             "$ai_output_tokens": standard_logging_object.get("completion_tokens", 0),
@@ -113,15 +226,58 @@ class InsightsCallback(InstrumentedCallback):
             "$ai_stream": is_streaming,
             "$ai_trace_id": trace_id,
             "$ai_span_id": str(uuid4()),
-            "ai_product": product,
+            # Stamped explicitly to bypass the SDK's group_type_index lookup.
+            # The AI usage report hardcodes `$group_1` (insights/tasks/usage_report.py)
+            # so the gateway must guarantee that slot regardless of how the
+            # destination team's group types are registered.
+            "$group_1": self._region_url,
         }
 
-        if team_id:
-            properties["team_id"] = team_id
+        # Cache and reasoning token breakdowns are reported by LiteLLM in the
+        # response usage object for providers that support them (Anthropic for
+        # cache, OpenAI o-series for reasoning). Emit the fields only when
+        # present so providers that don't report them don't pollute events with
+        # zeros, matching the schema in insights/models/ai_events/sql.py and the
+        # parity established by hanzo_insights' langchain CallbackHandler.
+        cache_read_input_tokens = usage_object.get("cache_read_input_tokens")
+        if cache_read_input_tokens is not None:
+            properties["$ai_cache_read_input_tokens"] = cache_read_input_tokens
+        cache_creation_input_tokens = usage_object.get("cache_creation_input_tokens")
+        if cache_creation_input_tokens is not None:
+            properties["$ai_cache_creation_input_tokens"] = cache_creation_input_tokens
+        completion_tokens_details = usage_object.get("completion_tokens_details") or {}
+        reasoning_tokens = completion_tokens_details.get("reasoning_tokens")
+        if reasoning_tokens is not None:
+            properties["$ai_reasoning_tokens"] = reasoning_tokens
+
+        insights_properties = get_insights_properties() or {}
+        if isinstance(insights_properties, dict):
+            for key, value in insights_properties.items():
+                properties[key] = value
+
+        insights_flags = get_insights_flags() or {}
+        if isinstance(insights_flags, dict):
+            for flag_key, variant in insights_flags.items():
+                properties[f"$feature/{flag_key}"] = variant
+
+        _apply_owned_event_properties(properties, product, team_id)
 
         response_cost = standard_logging_object.get("response_cost")
         if response_cost is not None:
             properties["$ai_total_cost_usd"] = response_cost
+
+        # Forward LiteLLM's cost_breakdown so ingestion passes the per-side
+        # numbers through instead of rederiving them and mispricing cache.
+        cost_breakdown = standard_logging_object.get("cost_breakdown") or {}
+        for breakdown_key, property_key in (
+            ("input_cost", "$ai_input_cost_usd"),
+            ("output_cost", "$ai_output_cost_usd"),
+            ("cache_read_cost", "$ai_cache_read_cost_usd"),
+            ("cache_creation_cost", "$ai_cache_creation_cost_usd"),
+        ):
+            cost_value = cost_breakdown.get(breakdown_key)
+            if cost_value is not None:
+                properties[property_key] = cost_value
 
         response = standard_logging_object.get("response")
         if response:
@@ -138,9 +294,8 @@ class InsightsCallback(InstrumentedCallback):
             "distinct_id": distinct_id,
             "event": "$ai_generation",
             "properties": properties,
+            "groups": self._build_groups(team_id),
         }
-        if team_id:
-            capture_kwargs["groups"] = {"project": team_id}
 
         logger.debug(
             "Insights capturing event",
@@ -149,7 +304,7 @@ class InsightsCallback(InstrumentedCallback):
             properties=properties,
             groups=capture_kwargs.get("groups"),
         )
-        hanzo_insights.capture(**capture_kwargs)
+        self._capture_fire_and_forget(**capture_kwargs)
 
     async def _on_failure(
         self, kwargs: dict[str, Any], response_obj: Any, start_time: float, end_time: float, end_user_id: str | None
@@ -159,13 +314,11 @@ class InsightsCallback(InstrumentedCallback):
         auth_user = get_auth_user()
         product = get_product()
 
-        trace_id = (
-            metadata.get("user_id") or str(uuid4())
-        )  # anthropic stores user_id in metadata, but it actually refers to the trace_id rather than the user for claude code.
-        if auth_user and auth_user.auth_method == "oauth_access_token":
-            distinct_id = auth_user.distinct_id
+        trace_id = get_traceparent_trace_id() or _normalize_trace_id(metadata.get("user_id"))
+        if auth_user is None:
+            distinct_id = end_user_id or str(uuid4())
         else:
-            distinct_id = end_user_id or (auth_user.distinct_id if auth_user else str(uuid4()))
+            distinct_id = resolve_distinct_id(auth_user, end_user_id)
         team_id = auth_user.team_id if auth_user and auth_user.team_id else None
 
         logger.debug(
@@ -182,19 +335,27 @@ class InsightsCallback(InstrumentedCallback):
             "$ai_trace_id": trace_id,
             "$ai_is_error": True,
             "$ai_error": standard_logging_object.get("error_str", ""),
-            "ai_product": product,
+            "$group_1": self._region_url,
         }
 
-        if team_id:
-            properties["team_id"] = team_id
+        insights_properties = get_insights_properties() or {}
+        if isinstance(insights_properties, dict):
+            for key, value in insights_properties.items():
+                properties[key] = value
+
+        insights_flags = get_insights_flags() or {}
+        if isinstance(insights_flags, dict):
+            for flag_key, variant in insights_flags.items():
+                properties[f"$feature/{flag_key}"] = variant
+
+        _apply_owned_event_properties(properties, product, team_id)
 
         capture_kwargs: dict[str, Any] = {
             "distinct_id": distinct_id,
             "event": "$ai_generation",
             "properties": properties,
+            "groups": self._build_groups(team_id),
         }
-        if team_id:
-            capture_kwargs["groups"] = {"project": team_id}
 
         logger.debug(
             "Insights capturing error event",
@@ -203,8 +364,73 @@ class InsightsCallback(InstrumentedCallback):
             properties=properties,
             groups=capture_kwargs.get("groups"),
         )
-        hanzo_insights.capture(**capture_kwargs)
+        self._capture_fire_and_forget(**capture_kwargs)
+
+    def _build_groups(self, team_id: int | None) -> dict[str, Any]:
+        """Build the `groups` dict for a captured event.
+
+        Billing region attribution comes from the hardcoded `$group_1`
+        property; the `instance` group here keeps LLM Analytics group
+        breakdowns working naturally. `project` is included when an
+        authenticated team is known.
+        """
+        groups: dict[str, Any] = {"instance": self._region_url}
+        if team_id:
+            groups["project"] = team_id
+        return groups
+
+    def _capture_fire_and_forget(self, **capture_kwargs: Any) -> None:
+        """
+        Initializes a separate client for the capture operation to avoid payload bloat.
+        Fires in background thread to avoid blocking the main thread.
+        """
+        loop = asyncio.get_running_loop()
+        loop.run_in_executor(None, partial(self._capture_sync, **capture_kwargs))
+
+    def _capture_sync(self, **capture_kwargs: Any) -> None:
+        # No outer try/except: the destinations feed regional billing
+        # aggregations, so we want them to succeed or fail together. If the
+        # primary raises, the secondary intentionally does not run so the two
+        # Insights instances stay in sync rather than diverging on billing state.
+        self._capture_to_destination(self._api_key, self._host, **capture_kwargs)
+        if self._secondary_api_key and self._secondary_host:
+            self._capture_to_destination(
+                self._secondary_api_key,
+                self._secondary_host,
+                **capture_kwargs,
+            )
+
+    def _capture_to_destination(self, api_key: str, host: str, **capture_kwargs: Any) -> None:
+        """Fire a single capture against one Insights instance.
+
+        Each call uses a fresh client so a slow shutdown on one destination
+        doesn't pin a pooled client and to avoid cross-destination state
+        bleed in the SDK. Mutable `properties` / `groups` dicts are
+        shallow-copied per destination so an in-place mutation by the SDK
+        (adding `$lib`, `$lib_version`, distinct-id resolution, etc.) on
+        one capture cannot bleed into the other.
+        """
+        capture_kwargs = dict(capture_kwargs)
+        if "properties" in capture_kwargs:
+            capture_kwargs["properties"] = dict(capture_kwargs["properties"])
+        if "groups" in capture_kwargs:
+            capture_kwargs["groups"] = dict(capture_kwargs["groups"])
+        client = Insights(
+            api_key,
+            host=host,
+            sync_mode=True,
+            enable_local_evaluation=False,
+            _use_ai_lane=True,
+            _enable_multimodal_capture=True,
+        )
+        try:
+            _capture_ai_event(client, **capture_kwargs)
+        except Exception as e:
+            client.capture_exception(e, **capture_kwargs)
+            logger.exception("insights_capture_failed", host=host, error=str(e))
+        finally:
+            client.shutdown()
 
     def _extract_metadata(self, kwargs: dict[str, Any]) -> dict[str, Any]:
-        llm_params = kwargs.get("llm_params", {}) or {}
-        return llm_params.get("metadata", {}) or {}
+        litellm_params = kwargs.get("litellm_params", {}) or {}
+        return litellm_params.get("metadata", {}) or {}

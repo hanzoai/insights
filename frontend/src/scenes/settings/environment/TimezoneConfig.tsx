@@ -1,9 +1,11 @@
 import { useActions, useValues } from 'kea'
 
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { Dialog } from 'lib/elements/Dialog'
 import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 import { Skeleton } from 'lib/elements/Skeleton'
-import { timeZoneLabel } from 'lib/utils'
+import { timeZoneLabel } from 'lib/utils/timezones'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -11,6 +13,10 @@ export function TimezoneConfig({ displayWarning = true }: { displayWarning?: boo
     const { preflight } = useValues(preflightLogic)
     const { currentTeam, timezone: currentTimezone, currentTeamLoading } = useValues(teamLogic)
     const { updateCurrentTeam } = useActions(teamLogic)
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
 
     if (!preflight?.available_timezones || !currentTeam) {
         return <Skeleton className="w-1/2 h-4" />
@@ -25,7 +31,7 @@ export function TimezoneConfig({ displayWarning = true }: { displayWarning?: boo
             <InputSelect
                 mode="single"
                 placeholder="Select a time zone"
-                disabled={currentTeamLoading}
+                disabled={currentTeamLoading || !!restrictedReason}
                 value={[currentTeam.timezone]}
                 popoverClassName="z-[1000]"
                 virtualized

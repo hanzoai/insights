@@ -9,7 +9,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Adds geoip data to the event',
     icon_url: '/static/transformations/geoip.png',
     category: ['Custom'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 // Define the properties to be added to the event
 let geoipProperties := {

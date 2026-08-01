@@ -2,19 +2,19 @@
  * Insights analytics for MCP UI Apps.
  *
  * Uses insights-js-lite for minimal footprint - we only need capture functionality.
- * Events are only captured if INSIGHTS_UI_APPS_TOKEN is set at build time.
+ * Events are only captured if POSTFN_UI_APPS_TOKEN is set at build time.
  */
-import { Insights } from './insights-lite'
+import { Insights } from 'insights-js-lite'
 
 // These are injected at build time by Vite
-declare const __INSIGHTS_UI_APPS_TOKEN__: string | undefined
-declare const __INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL__: string | undefined
+declare const __POSTFN_UI_APPS_TOKEN__: string | undefined
+declare const __POSTFN_MCP_APPS_ANALYTICS_BASE_URL__: string | undefined
 
-const INSIGHTS_TOKEN = typeof __INSIGHTS_UI_APPS_TOKEN__ !== 'undefined' ? __INSIGHTS_UI_APPS_TOKEN__ : undefined
-const INSIGHTS_HOST =
-    typeof __INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL__ !== 'undefined'
-        ? __INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL__
-        : 'https://insights.hanzo.ai'
+const POSTFN_TOKEN = typeof __POSTFN_UI_APPS_TOKEN__ !== 'undefined' ? __POSTFN_UI_APPS_TOKEN__ : undefined
+const POSTFN_HOST =
+    typeof __POSTFN_MCP_APPS_ANALYTICS_BASE_URL__ !== 'undefined'
+        ? __POSTFN_MCP_APPS_ANALYTICS_BASE_URL__
+        : 'https://us.hanzo.ai'
 
 let client: Insights | null = null
 let currentDistinctId: string | null = null
@@ -25,19 +25,19 @@ const log = (...args: any[]): void => {
 
 /**
  * Initialize Insights for UI Apps tracking.
- * Only initializes if INSIGHTS_UI_APPS_TOKEN is set.
+ * Only initializes if POSTFN_UI_APPS_TOKEN is set.
  */
 export function initInsights(appName: string, appVersion: string): void {
     if (client) {
         return
     }
 
-    if (!INSIGHTS_TOKEN) {
+    if (!POSTFN_TOKEN) {
         return
     }
 
-    log('Initializing Insights client', { token: INSIGHTS_TOKEN, host: INSIGHTS_HOST, appName, appVersion })
-    client = new Insights(INSIGHTS_TOKEN, { host: INSIGHTS_HOST })
+    log('Initializing Insights client', { token: POSTFN_TOKEN, host: POSTFN_HOST, appName, appVersion })
+    client = new Insights(POSTFN_TOKEN, { host: POSTFN_HOST })
     client.register({
         $mcp_app_name: appName,
         $mcp_app_version: appVersion,
@@ -156,11 +156,4 @@ export function captureHostContextChanged(params: {
  */
 export function captureLinkOpened(url: string): void {
     capture('mcp_ui_app_link_opened', { url })
-}
-
-/**
- * Capture display mode change requested.
- */
-export function captureDisplayModeRequested(mode: string): void {
-    capture('mcp_ui_app_display_mode_requested', { mode })
 }

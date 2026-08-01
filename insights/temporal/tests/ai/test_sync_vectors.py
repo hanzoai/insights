@@ -22,7 +22,6 @@ from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
 from insights.datastore.client import sync_execute
-from insights.models import Action
 from insights.models.ai.pg_embeddings import TRUNCATE_PG_EMBEDDINGS_TABLE_SQL
 from insights.temporal.ai.sync_vectors import (
     BatchEmbedAndSyncActionsInputs,
@@ -40,6 +39,8 @@ from insights.temporal.ai.sync_vectors import (
     sync_action_vectors,
 )
 from insights.temporal.common.datastore import get_client
+
+from products.actions.backend.models.action import Action
 
 
 @pytest.fixture(autouse=True)

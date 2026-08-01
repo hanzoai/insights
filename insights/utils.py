@@ -26,8 +26,8 @@ from zoneinfo import ZoneInfo
 from django.apps import apps
 from django.conf import settings
 from django.core.cache import cache
-from django.db import ProgrammingError
-from django.db.models.functions import Lower
+from django.db import ProgrammingError, models
+from django.db.models.functions import Coalesce, Lower
 from django.db.utils import DatabaseError
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import get_template
@@ -40,15 +40,16 @@ import orjson
 import lzstring
 import structlog
 import hanzo_insights
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from celery.result import AsyncResult
 from celery.schedules import crontab
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
+from opentelemetry import trace
+from prometheus_client import Histogram
 from rest_framework import serializers
 from rest_framework.request import Request
 from rest_framework.utils.encoders import JSONEncoder
-from user_agents import parse
 
 from insights.cloud_utils import get_cached_instance_license, is_cloud
 from insights.constants import AvailableFeature
@@ -57,11 +58,29 @@ from insights.exceptions_capture import capture_exception
 from insights.git import get_git_branch, get_git_commit_short
 from insights.metrics import KLUDGES_COUNTER
 from insights.redis import get_client
+from insights.security.url_validation import has_authority_bypass_chars
+
+tracer = trace.get_tracer(__name__)
+
+# Cardinality is bounded: render_template is only called with the literal template
+# names "index.html", "demo.html", and "render_query.html" — 3 templates × 2 auth
+# states = 6 series total.
+TEMPLATE_CONTEXT_DURATION_HISTOGRAM = Histogram(
+    "insights_template_context_duration_seconds",
+    "Time spent building the SPA template context (get_context_for_template).",
+    labelnames=["template_name", "authenticated"],
+    buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0),
+)
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 
-    from insights.models import Dashboard, DashboardTile, InsightVariable, Team, User
+    from insights.models import Team, User
+
+    from products.dashboards.backend.models.dashboard import Dashboard
+    from products.dashboards.backend.models.dashboard_tile import DashboardTile
+    from products.feature_flags.backend.sdk_cache_provider import HyperCacheFlagProvider
+    from products.product_analytics.backend.models.insight_variable import InsightVariable
 
 DATERANGE_MAP = {
     "second": datetime.timedelta(seconds=1),
@@ -101,6 +120,9 @@ def absolute_uri(url: Optional[str] = None) -> str:
     """
     if not url:
         return settings.SITE_URL
+
+    if has_authority_bypass_chars(url):
+        raise PotentialSecurityProblemException(f"It is forbidden to provide an absolute URI using {url}")
 
     provided_url = urlparse(url)
     if provided_url.hostname and provided_url.scheme:
@@ -225,6 +247,15 @@ def relative_date_parse_with_delta_mapping(
     else:
         parsed_dt -= relativedelta(**delta_mapping)  # type: ignore
 
+    if match_group_dict["kind"] == "q":
+        # Quarter boundaries depend on the resulting month, so they can't be expressed
+        # as a static delta mapping like mStart/yStart — snap after applying the delta
+        quarter_start_month = ((parsed_dt.month - 1) // 3) * 3 + 1
+        if match_group_dict["position"] == "Start":
+            parsed_dt += relativedelta(month=quarter_start_month, day=1)
+        elif match_group_dict["position"] == "End":
+            parsed_dt += relativedelta(month=quarter_start_month + 2, day=31)
+
     if always_truncate:
         # Truncate to the start of the hour for hour-precision datetimes, to the start of the day for larger intervals
         # TODO: Remove this from this function, this should not be the responsibility of it
@@ -307,7 +338,11 @@ def get_delta_mapping_for(
             delta_mapping["seconds"] = int(number)
     elif kind == "q":
         if number:
-            delta_mapping["weeks"] = 13 * int(number)
+            if human_friendly_comparison_periods:
+                # 13 whole weeks keeps weekdays aligned when comparing to the previous quarter
+                delta_mapping["weeks"] = 13 * int(number)
+            else:
+                delta_mapping["months"] = 3 * int(number)
     elif kind == "y":
         if number:
             if human_friendly_comparison_periods:
@@ -363,18 +398,97 @@ def get_js_url(request: HttpRequest) -> str:
     As the web app may be loaded from a non-localhost url (e.g. from the worker container calling the web container)
     it is necessary to set the JS_URL host based on the calling origin.
     """
-    if settings.DEBUG and settings.JS_URL == "http://localhost:8234":
-        # given the strict usage of 'get_host()', this string is not susceptible to xss
+    from urllib.parse import urlparse
+
+    from django.http.request import split_domain_port
+
+    parsed = urlparse(settings.JS_URL)
+    if settings.DEBUG and parsed.hostname == "localhost" and not request.is_secure():
+        # Rewrite the JS_URL hostname to match the request origin so the browser
+        # can reach the Vite dev server when accessed via a non-localhost address
+        # (e.g. from a Docker container or remote host). Skipped when the request
+        # is HTTPS (e.g. ngrok) — browsers exempt localhost from mixed-content blocking,
+        # so keeping http://localhost:8234 lets the browser load Vite assets directly.
+        # split_domain_port keeps IPv6 hosts wrapped in brackets so the URL stays valid.
+        domain, _ = split_domain_port(request.get_host())
         # nosemgrep: python.flask.security.audit.directly-returned-format-string.directly-returned-format-string
-        return f"http://{request.get_host().split(':')[0]}:8234"
+        return f"http://{domain}:{parsed.port}"
     return settings.JS_URL
 
 
+@lru_cache(maxsize=2)
+def _resolve_entry_assets(include_authenticated_shell: bool) -> tuple[str, tuple[str, ...], str]:
+    """
+    Return (css_url, js_preload_urls, font_url) for <head> preload tags, relative to JS_URL.
+    Preloading lets the browser fetch the boot chain (entry -> App -> AuthenticatedShell chunks,
+    the CSS bundle, and the Inter font, which is otherwise discovered only once the CSS is parsed)
+    in parallel instead of as a waterfall.
+
+    Reads the esbuild preload manifest (see writePreloadManifest in frontend/build.mjs). Returns
+    empty values in debug/test mode and when no manifest exists (e.g. a Vite build, which isn't
+    wired for production serving). Cached per process: manifests are immutable within a deploy.
+    """
+    if settings.DEBUG or settings.TEST:
+        return ("", (), "")
+    return _read_preload_manifest(
+        os.path.join(settings.BASE_DIR, "frontend", "dist", "preload-manifest.json"),
+        include_authenticated_shell,
+    )
+
+
+def _read_preload_manifest(manifest_path: str, include_authenticated_shell: bool) -> tuple[str, tuple[str, ...], str]:
+    """
+    Parse preload-manifest.json defensively: hints are an optimization, so any failure must
+    degrade to "no hints" rather than break page rendering — but loudly, because the caller
+    caches the result for the process lifetime, so a silent failure would turn the
+    optimization off fleet-wide until the next deploy.
+    """
+    try:
+        if not os.path.isfile(manifest_path):
+            return ("", (), "")
+        with open(manifest_path) as f:
+            manifest = json.load(f)
+        css = manifest.get("css", "")
+        font = manifest.get("font", "")
+        js = manifest.get("js", [])
+        authenticated_js = manifest.get("authenticatedJs", []) if include_authenticated_shell else []
+        if not (
+            isinstance(css, str)
+            and isinstance(font, str)
+            and isinstance(js, list)
+            and isinstance(authenticated_js, list)
+        ):
+            raise ValueError("preload manifest fields have unexpected types")
+        js_urls: list[str] = []
+        for url in [*js, *authenticated_js]:
+            if not isinstance(url, str):
+                raise ValueError("preload manifest fields have unexpected types")
+            if url not in js_urls:
+                js_urls.append(url)
+        return (css, tuple(js_urls), font)
+    except Exception as e:
+        logger.warning("preload_manifest_unreadable", manifest_path=manifest_path, error=str(e))
+        capture_exception(e)
+        return ("", (), "")
+
+
+@tracer.start_as_current_span("template.context")
 def get_context_for_template(
     template_name: str,
     request: HttpRequest,
     context: Optional[dict] = None,
     team_for_public_context: Optional["Team"] = None,
+) -> dict:
+    authenticated = "true" if request.user.is_authenticated else "false"
+    with TEMPLATE_CONTEXT_DURATION_HISTOGRAM.labels(template_name=template_name, authenticated=authenticated).time():
+        return _build_template_context(template_name, request, context, team_for_public_context)
+
+
+def _build_template_context(
+    template_name: str,
+    request: HttpRequest,
+    context: Optional[dict],
+    team_for_public_context: Optional["Team"],
 ) -> dict:
     if context is None:
         context = {}
@@ -396,36 +510,44 @@ def get_context_for_template(
         elif template_name == "render_query.html":
             source_path = "src/render-query/index.tsx"
         # Add vite dev scripts for development
+        js_url = get_js_url(request)
+        csp_nonce = getattr(request, "csp_nonce", "")
         context["vite_dev_scripts"] = f"""
-        <script nonce="{request.csp_nonce}" type="module">
-            import RefreshRuntime from 'http://localhost:8234/@react-refresh'
+        <script nonce="{csp_nonce}" type="module">
+            import RefreshRuntime from '{js_url}/@react-refresh'
             RefreshRuntime.injectIntoGlobalHook(window)
             window.$RefreshReg$ = () => {{}}
             window.$RefreshSig$ = () => (type) => type
             window.__vite_plugin_react_preamble_installed__ = true
         </script>
         <!-- Vite development server -->
-        <script type="module" src="http://localhost:8234/@vite/client"></script>
-        <script type="module" src="http://localhost:8234/{source_path}"></script>"""
+        <script type="module" src="{js_url}/@vite/client"></script>
+        <script type="module" src="{js_url}/{source_path}"></script>"""
 
     if settings.E2E_TESTING:
         context["e2e_testing"] = True
-        context["js_insights_api_key"] = "hi_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"
-        context["js_insights_host"] = settings.TELEMETRY_HOST
-        context["js_insights_ui_host"] = settings.TELEMETRY_HOST
+        context["js_insights_api_key"] = "phc_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"
+        context["js_insights_host"] = "https://internal-j.hanzo.ai"
+        context["js_insights_ui_host"] = "https://us.hanzo.ai"
 
     elif settings.SELF_CAPTURE:
-        if hanzo_insights.api_key:
+        # insights-js uses this token to evaluate Insights's own gating flags, so it must point at the
+        # team those flags are synced to — the dogfood-flags team (first team by PK), the same team
+        # the server-side bootstrap evaluates against via _build_flag_provider(). Do NOT use the
+        # self-capture team here (hanzo_insights.api_key = most-recently-active user's current_team):
+        # it drifts onto demo teams that hold no internal flags, so flags load from the bootstrap and
+        # then vanish the moment insights-js reloads them against that team.
+        dogfood_team = resolve_dogfood_flags_team()
+        if dogfood_team is not None:
+            context["js_insights_api_key"] = dogfood_team.api_token
+            context["js_insights_host"] = ""  # Becomes location.origin in the frontend
+        elif hanzo_insights.api_key:
             context["js_insights_api_key"] = hanzo_insights.api_key
             context["js_insights_host"] = ""  # Becomes location.origin in the frontend
-
-    elif settings.TELEMETRY_KEY:
-        context["js_insights_api_key"] = settings.TELEMETRY_KEY
-        context["js_insights_host"] = settings.TELEMETRY_HOST
-        context["js_insights_ui_host"] = settings.TELEMETRY_HOST
-
-    # No telemetry destination configured: leave js_insights_api_key unset so
-    # head.html emits no snippet and loadInsightsJS() never initialises the SDK.
+    else:
+        context["js_insights_api_key"] = "sTMFPsFhdP1Ssg"
+        context["js_insights_host"] = "https://internal-j.hanzo.ai"
+        context["js_insights_ui_host"] = "https://us.hanzo.ai"
 
     context["js_capture_time_to_see_data"] = settings.CAPTURE_TIME_TO_SEE_DATA
     context["js_url"] = get_js_url(request)
@@ -446,15 +568,19 @@ def get_context_for_template(
         from insights.api.team import TeamSerializer
         from insights.api.user import UserSerializer
         from insights.models.file_system.user_product_list import UserProductList
+        from insights.models.user_home_settings import UserHomeSettings
         from insights.rbac.user_access_control import ACCESS_CONTROL_RESOURCES, UserAccessControl
         from insights.user_permissions import UserPermissions
         from insights.views import preflight_check
+
+        with tracer.start_as_current_span("template.preflight"):
+            preflight_payload = json.loads(preflight_check(request).getvalue())
 
         insights_app_context = {
             "current_user": None,
             "current_project": None,
             "current_team": None,
-            "preflight": json.loads(preflight_check(request).getvalue()),
+            "preflight": preflight_payload,
             "default_event_name": "$pageview",
             "custom_products": [],
             "switched_team": getattr(request, "switched_team", None),
@@ -474,30 +600,22 @@ def get_context_for_template(
 
             user_permissions = UserPermissions(user=user, team=user.team)
             user_access_control = UserAccessControl(user=user, team=user.team)
-            insights_app_context["effective_resource_access_control"] = {
-                resource: user_access_control.effective_access_level_for_resource(resource)
-                for resource in ACCESS_CONTROL_RESOURCES
-            }
-            insights_app_context["resource_access_control"] = {
-                resource: user_access_control.access_level_for_resource(resource)
-                for resource in ACCESS_CONTROL_RESOURCES
-            }
+            with tracer.start_as_current_span("template.rbac.effective"):
+                effective_access: dict[str, Any] = {}
+                for resource in ACCESS_CONTROL_RESOURCES:
+                    with tracer.start_as_current_span(f"template.rbac.effective.{resource}"):
+                        effective_access[resource] = user_access_control.effective_access_level_for_resource(resource)
+                insights_app_context["effective_resource_access_control"] = effective_access
+            with tracer.start_as_current_span("template.rbac.levels"):
+                resource_access: dict[str, Any] = {}
+                for resource in ACCESS_CONTROL_RESOURCES:
+                    with tracer.start_as_current_span(f"template.rbac.levels.{resource}"):
+                        resource_access[resource] = user_access_control.access_level_for_resource(resource)
+                insights_app_context["resource_access_control"] = resource_access
 
-            user_serialized = UserSerializer(
-                request.user,
-                context={
-                    "request": request,
-                    "user_permissions": user_permissions,
-                    "user_access_control": user_access_control,
-                },
-                many=False,
-            )
-            insights_app_context["current_user"] = user_serialized.data
-            insights_distinct_id = user_serialized.data.get("distinct_id")
-
-            if user.team:
-                team_serialized = TeamSerializer(
-                    user.team,
+            with tracer.start_as_current_span("template.user_serializer"):
+                user_serialized = UserSerializer(
+                    request.user,
                     context={
                         "request": request,
                         "user_permissions": user_permissions,
@@ -505,27 +623,54 @@ def get_context_for_template(
                     },
                     many=False,
                 )
-                insights_app_context["current_team"] = team_serialized.data
+                insights_app_context["current_user"] = user_serialized.data
+                insights_distinct_id = user_serialized.data.get("distinct_id")
 
-                project_serialized = ProjectSerializer(
-                    user.team.project,
-                    context={"request": request, "user_permissions": user_permissions},
-                    many=False,
-                )
-                insights_app_context["current_project"] = project_serialized.data
+            if user.team:
+                with tracer.start_as_current_span("template.team_serializer"):
+                    team_serialized = TeamSerializer(
+                        user.team,
+                        context={
+                            "request": request,
+                            "user_permissions": user_permissions,
+                            "user_access_control": user_access_control,
+                        },
+                        many=False,
+                    )
+                    insights_app_context["current_team"] = team_serialized.data
+
+                with tracer.start_as_current_span("template.project_serializer"):
+                    project_serialized = ProjectSerializer(
+                        user.team.project,
+                        context={"request": request, "user_permissions": user_permissions},
+                        many=False,
+                    )
+                    insights_app_context["current_project"] = project_serialized.data
                 insights_app_context["frontend_apps"] = get_frontend_apps(user.team.pk)
                 event_info = get_default_event_info(user.team)
                 insights_app_context["default_event_name"] = event_info["default_event_name"]
                 insights_app_context["has_pageview"] = event_info["has_pageview"]
                 insights_app_context["has_screen"] = event_info["has_screen"]
+                insights_app_context["has_person_email"] = get_has_person_email(user.team)
 
-                user_product_list = UserProductListSerializer(
-                    UserProductList.objects.filter(team=user.team, user=user, enabled=True).order_by(
-                        Lower("product_path")
-                    ),
-                    many=True,
-                )
-                insights_app_context["custom_products"] = user_product_list.data
+                with tracer.start_as_current_span("template.user_product_list"):
+                    user_product_list = UserProductListSerializer(
+                        UserProductList.objects.filter(team=user.team, user=user, enabled=True).order_by(
+                            Lower("product_path")
+                        ),
+                        many=True,
+                    )
+                    insights_app_context["custom_products"] = user_product_list.data
+
+                with tracer.start_as_current_span("template.user_home_settings"):
+                    home_settings = UserHomeSettings.objects.filter(team=user.team, user=user).first()
+                    insights_app_context["homepage"] = (home_settings.homepage or None) if home_settings else None
+
+    # Merge caller-provided keys into insights_app_context (e.g. oauth_application from the authorize view)
+    if "oauth_application" in context:
+        insights_app_context["oauth_application"] = context.pop("oauth_application")
+    if "oauth_mcp_consent" in context:
+        insights_app_context["oauth_mcp_consent"] = context.pop("oauth_mcp_consent")
 
     # JSON dumps here since there may be objects like Queries
     # that are not serializable by Django's JSON serializer
@@ -546,13 +691,14 @@ def get_context_for_template(
                     "created_at": user.organization.created_at.isoformat(),
                 }
 
-        feature_flags = hanzo_insights.get_all_flags(
-            insights_distinct_id,
-            only_evaluate_locally=True,
-            person_properties=person_properties,
-            groups=groups,
-            group_properties=group_properties,
-        )
+        with tracer.start_as_current_span("template.feature_flag_bootstrap"):
+            feature_flags = hanzo_insights.get_all_flags(
+                insights_distinct_id,
+                only_evaluate_locally=True,
+                person_properties=person_properties,
+                groups=groups,
+                group_properties=group_properties,
+            )
         # don't forcefully set distinctID, as this breaks the link for anonymous users coming from `hanzo.ai`.
         insights_bootstrap["featureFlags"] = feature_flags
 
@@ -561,7 +707,33 @@ def get_context_for_template(
     # `get_all_flags` call above.
     context["insights_bootstrap"] = json.dumps(insights_bootstrap)
 
-    context["insights_js_uuid_version"] = settings.INSIGHTS_JS_UUID_VERSION
+    context["insights_js_uuid_version"] = settings.POSTFN_JS_UUID_VERSION
+
+    # Only the SPA shell references these; other templates (exporter, layout, ...) load different bundles
+    if template_name == "index.html":
+        context["preload_css_url"], context["preload_js_urls"], context["preload_font_url"] = _resolve_entry_assets(
+            bool(request.user and request.user.is_authenticated)
+        )
+        # Theme for the pre-React shell (critical CSS in index.html), mirroring the app's
+        # themeLogic.isDarkModeOn: anonymous pages are always light, a missing theme_mode
+        # means light, and only "system" defers to prefers-color-scheme.
+        user_theme_mode = (
+            getattr(request.user, "theme_mode", None) if request.user and request.user.is_authenticated else None
+        )
+        context["boot_theme"] = user_theme_mode or "light"
+
+    if insights_distinct_id:
+        from insights.models.instance_setting import get_instance_setting
+
+        support_secret = get_instance_setting("CONVERSATIONS_HMAC_SIGNING_SECRET")
+        if support_secret:
+            from products.conversations.backend.services.identity import compute_identity_hash
+
+            context["js_insights_identity_distinct_id"] = insights_distinct_id
+            context["js_insights_identity_hash"] = compute_identity_hash(
+                insights_distinct_id,
+                support_secret,
+            )
 
     return context
 
@@ -592,29 +764,105 @@ def render_template(
     return response
 
 
-async def initialize_self_capture_api_token():
-    """
-    Configures `hanzo_insights` for self-capture, in an ASGI-compatible, async way.
-    """
+def resolve_self_capture_team() -> Optional["Team"]:
+    """Resolve the team a local/self-hosted instance should treat as its own.
 
+    Mirrors the self-capture chain: the most-recently-active user's current team,
+    then the first team on the instance, then None. Safe before migrations have run
+    and when no users/teams exist. Loads a full Team row (no `.only(...)`) so callers
+    can read any field without a deferred-field lazy query on a background thread.
+    """
     User = apps.get_model("insights", "User")
     Team = apps.get_model("insights", "Team")
     try:
         user = (
-            await User.objects.filter(last_login__isnull=False)
-            .order_by("-last_login")
-            .select_related("current_team")
-            .afirst()
+            User.objects.filter(last_login__isnull=False).order_by("-last_login").select_related("current_team").first()
         )
-        # Get the current user's team (or first team in the instance) to set self capture configs
-        team = None
         if user and getattr(user, "current_team", None):
-            team = user.current_team
-        else:
-            team = await Team.objects.only("api_token").afirst()
-        local_api_key = team.api_token if team else None
-    except (User.DoesNotExist, Team.DoesNotExist, ProgrammingError):
-        local_api_key = None
+            return user.current_team
+        return Team.objects.first()
+    except ProgrammingError:
+        # Tables absent before migrations have run; `.first()` returns None otherwise.
+        return None
+
+
+def get_self_capture_team_id() -> Optional[int]:
+    """team_id form of `resolve_self_capture_team()` — the team self-capture events route to.
+
+    For the team whose flag definitions represent this instance, use `get_dogfood_flags_team_id`.
+    """
+    team = resolve_self_capture_team()
+    return team.id if team is not None else None
+
+
+def resolve_dogfood_flags_team() -> Optional["Team"]:
+    """Resolve the team whose flag DEFINITIONS represent this instance's own flags.
+
+    For internal feature_enabled() dogfooding on local/self-hosted. This is the same
+    team `sync_feature_flags_from_api` writes imported flags to: `project.teams.first()`
+    — the first/oldest team by PK. Deliberately NOT current_team-based (that is
+    `resolve_self_capture_team`, which routes analytics events and can point at a team
+    holding no flag definitions). Safe before migrations have run / when no teams exist.
+    """
+    Team = apps.get_model("insights", "Team")
+    try:
+        # Order by PK to match the sync write target (`project.teams.first()`).
+        return Team.objects.order_by("pk").first()
+    except ProgrammingError:
+        # Table absent before migrations have run.
+        return None
+
+
+def get_dogfood_flags_team_id() -> Optional[int]:
+    """team_id form of `resolve_dogfood_flags_team()`, for the flag-cache provider."""
+    team = resolve_dogfood_flags_team()
+    return team.id if team is not None else None
+
+
+def _build_flag_provider() -> "HyperCacheFlagProvider":
+    """Construct the HyperCache flag-definition provider for this deploy.
+
+    Single source of truth shared by InsightsConfig.ready() (WSGI) and
+    initialize_self_capture_api_token() (ASGI). Callers assign the result to
+    hanzo_insights.flag_definition_cache_provider and handle loading themselves.
+    """
+    from products.feature_flags.backend.cache_keys import (
+        EU_CROSS_REGION_MIRROR_CACHE_KEY,  # noqa: PLC0415 — this core module doesn't otherwise depend on product code
+    )
+    from products.feature_flags.backend.sdk_cache_provider import (  # noqa: PLC0415 — keeps the heavy dep off the import path
+        HyperCacheFlagProvider,
+    )
+
+    explicit_team_id = os.environ.get("POSTFN_SELF_TEAM_ID")
+    if explicit_team_id:
+        # Operator override: pin the flag-definitions team explicitly.
+        # Truthiness, not `is not None`: an empty env var means "unset" and must
+        # fall through to the defaults below, not crash on int("").
+        return HyperCacheFlagProvider.for_static_team(int(explicit_team_id))
+    if settings.SELF_CAPTURE and not settings.E2E_TESTING:
+        # Local/self-hosted: read flag definitions from the dogfood team
+        # (project.teams.first()), resolved lazily once teams/migrations exist.
+        # Intentionally the FIRST team, not self-capture's current_team — see
+        # resolve_dogfood_flags_team().
+        return HyperCacheFlagProvider.for_dynamic_resolution(get_dogfood_flags_team_id)
+    if get_instance_region() == "EU":
+        # EU has no rows for Insights's own team — reads go to the sentinel-keyed
+        # mirror that cross_region_flag_sync writes (see the key's definition).
+        return HyperCacheFlagProvider.for_static_team(EU_CROSS_REGION_MIRROR_CACHE_KEY)
+    # Cloud (SELF_CAPTURE off) or E2E, non-EU: the canonical Insights-internal team is 2.
+    return HyperCacheFlagProvider.for_static_team(2)
+
+
+async def initialize_self_capture_api_token():
+    """Configure `hanzo_insights` for self-capture, ASGI-compatible (async).
+
+    Overwrites process-global SDK config (api_key, host, disabled, and the
+    flag-definition cache provider) from the DB-resolved self-capture team — the
+    async counterpart to InsightsConfig.ready()'s WSGI path. Mainly the local dev
+    self-capture bootstrap; also invoked by the Dagster InsightsAnalyticsResource.
+    """
+    team = await sync_to_async(resolve_self_capture_team)()
+    local_api_key = team.api_token if team else None
 
     # This is running _after_ InsightsConfig.ready(), so we re-enable hanzo_insights while setting the params
     if local_api_key is not None:
@@ -622,9 +870,33 @@ async def initialize_self_capture_api_token():
         hanzo_insights.api_key = local_api_key
         hanzo_insights.host = settings.SITE_URL
 
+        # ready() wires the flag-definition provider only when hanzo_insights is enabled at
+        # that point — true for WSGI but NOT for ASGI, where self-capture is deferred to here.
+        # Without this the ASGI process has no local flag definitions and falls back to a remote
+        # flags call against SITE_URL (unreachable server-side in dev), so feature_enabled()
+        # always returns False. Mirror ready() so ASGI evaluates flags from HyperCache too.
+        hanzo_insights.flag_definition_cache_provider = _build_flag_provider()  # ty: ignore[invalid-assignment]
 
+        if hanzo_insights.feature_flag_definitions() is None:
+            await sync_to_async(hanzo_insights.load_feature_flags)()
+
+
+BOTH_DEFAULTS_PRESENT_TTL_SECONDS = 24 * 60 * 60
+ONE_DEFAULT_PRESENT_TTL_SECONDS = 30 * 60
+
+
+def _default_event_info_cache_key(team_id: int) -> str:
+    return f"default_event_info:{team_id}"
+
+
+@tracer.start_as_current_span("template.default_event_info")
 def get_default_event_info(team: "Team") -> dict:
     from insights.models import EventDefinition
+
+    cache_key = _default_event_info_cache_key(team.id)
+    cached = get_safe_cache(cache_key)
+    if cached is not None:
+        return cached
 
     existing_names = set(
         EventDefinition.objects.filter(team=team, name__in=["$pageview", "$screen"]).values_list("name", flat=True)
@@ -641,19 +913,94 @@ def get_default_event_info(team: "Team") -> dict:
     else:
         default_event_name = "$pageview"
 
-    return {
+    result = {
         "default_event_name": default_event_name,
         "has_pageview": has_pageview,
         "has_screen": has_screen,
     }
+
+    # Only cache positive answers: a negative result might just mean events haven't
+    # been ingested yet. With both true the answer is fully monotonic so we can
+    # cache for a day; with only one true the team might still be setting up the
+    # other surface (e.g. wired up web, later wires up mobile) so cap the TTL.
+    ttl = _default_event_info_ttl(has_pageview=has_pageview, has_screen=has_screen)
+    if ttl is not None:
+        safe_cache_set(cache_key, result, timeout=ttl)
+
+    return result
+
+
+def _default_event_info_ttl(*, has_pageview: bool, has_screen: bool) -> int | None:
+    if has_pageview and has_screen:
+        return BOTH_DEFAULTS_PRESENT_TTL_SECONDS
+    if has_pageview or has_screen:
+        return ONE_DEFAULT_PRESENT_TTL_SECONDS
+    return None
+
+
+def invalidate_default_event_info_cache(team_id: int) -> None:
+    safe_cache_delete(_default_event_info_cache_key(team_id))
 
 
 def get_default_event_name(team: "Team") -> str | None:
     return get_default_event_info(team)["default_event_name"]
 
 
+HAS_PERSON_EMAIL_PRESENT_TTL_SECONDS = 24 * 60 * 60
+HAS_PERSON_EMAIL_ABSENT_TTL_SECONDS = 30 * 60
+HAS_PERSON_EMAIL_ABSENT_YOUNG_PROJECT_TTL_SECONDS = 60
+YOUNG_PROJECT_AGE = datetime.timedelta(days=7)
+
+
+def _has_person_email_cache_key(project_id: int) -> str:
+    return f"has_person_email:project:{project_id}"
+
+
+def _has_person_email_ttl(team: "Team", has_person_email: bool) -> int:
+    if has_person_email:
+        return HAS_PERSON_EMAIL_PRESENT_TTL_SECONDS
+    # Most writes bypass the invalidation signal (raw-SQL ingestion via
+    # property-defs-rs, bulk_create/queryset.update, renames, the EE subclass), so
+    # these TTLs are the real freshness bound — for a project still setting up, the
+    # only thing standing between "started sending email" and the flag flipping.
+    if timezone.now() - team.project.created_at < YOUNG_PROJECT_AGE:
+        return HAS_PERSON_EMAIL_ABSENT_YOUNG_PROJECT_TTL_SECONDS
+    return HAS_PERSON_EMAIL_ABSENT_TTL_SECONDS
+
+
+@tracer.start_as_current_span("template.has_person_email")
+def get_has_person_email(team: "Team") -> bool:
+    from insights.models import PropertyDefinition
+
+    from products.event_definitions.backend.models.property_definition import PERSON_EMAIL_PROPERTY_NAME
+
+    cache_key = _has_person_email_cache_key(team.project_id)
+    cached = get_safe_cache(cache_key)
+    if cached is not None:
+        return cached
+
+    has_person_email = (
+        PropertyDefinition.objects.alias(
+            effective_project_id=Coalesce("project_id", "team_id", output_field=models.BigIntegerField())
+        )
+        .filter(
+            effective_project_id=team.project_id, type=PropertyDefinition.Type.PERSON, name=PERSON_EMAIL_PROPERTY_NAME
+        )
+        .exists()
+    )
+
+    safe_cache_set(cache_key, has_person_email, timeout=_has_person_email_ttl(team, has_person_email))
+
+    return has_person_email
+
+
+def invalidate_has_person_email_cache(project_id: int) -> None:
+    safe_cache_delete(_has_person_email_cache_key(project_id))
+
+
+@tracer.start_as_current_span("template.frontend_apps")
 def get_frontend_apps(team_id: int) -> dict[int, dict[str, Any]]:
-    from insights.models import Plugin, PluginSourceFile
+    from products.cdp.backend.models.plugin import Plugin, PluginSourceFile
 
     plugin_configs = (
         Plugin.objects.filter(pluginconfig__team_id=team_id, pluginconfig__enabled=True)
@@ -719,10 +1066,11 @@ def _is_valid_ip_address(ip: str) -> bool:
 def get_ip_address(request: HttpRequest) -> str:
     """use requestobject to fetch client machine's IP Address"""
     x_forwarded_for = request.headers.get("x-forwarded-for")
+    ip: str | None
     if x_forwarded_for:
-        ip: str | None = x_forwarded_for.split(",")[0].strip()
+        ip = x_forwarded_for.split(",")[0].strip()
     else:
-        ip = request.META.get("REMOTE_ADDR")  # Real IP address of client Machine
+        ip = request.META.get("REMOTE_ADDR")
 
     if not ip:
         return ""
@@ -746,11 +1094,62 @@ def get_ip_address(request: HttpRequest) -> str:
     return ip
 
 
+def sanitize_ip_address(ip: Any) -> Optional[str]:
+    """Return the value only if it is a valid IP address string, otherwise None.
+
+    Use this before persisting an externally supplied IP so a malformed or non-string
+    value can't reach an IP database column and fail the write.
+    """
+    if not isinstance(ip, str):
+        return None
+    return _normalize_ip(ip)
+
+
+def _normalize_ip(ip: str) -> Optional[str]:
+    """Strip an optional port and validate; returns None if the result isn't a valid IP."""
+    if ip.startswith("["):
+        # IPv6 with brackets, possibly with port: [2001:db8::1]:8080 -> 2001:db8::1
+        bracket_end = ip.find("]")
+        if bracket_end != -1:
+            ip = ip[1:bracket_end]
+    elif ip.count(":") == 1:
+        # IPv4 with port: 192.168.1.1:8080 -> 192.168.1.1
+        ip = ip.split(":")[0]
+    return ip if _is_valid_ip_address(ip) else None
+
+
+def get_trusted_client_ip(request: HttpRequest) -> Optional[str]:
+    """Client IP validated against the trusted-proxy chain (settings.TRUSTED_PROXIES / TRUST_ALL_PROXIES).
+
+    Unlike get_ip_address, which trusts the left-most X-Forwarded-For value, this accepts the
+    forwarded client IP only when every proxy hop is a trusted proxy — otherwise it returns None.
+    Use it for security decisions so a spoofed X-Forwarded-For header can't dictate the result.
+    """
+    client_ip = request.META.get("REMOTE_ADDR")
+    if getattr(settings, "USE_X_FORWARDED_HOST", False):
+        forwarded_for = [ip.strip() for ip in (request.headers.get("x-forwarded-for") or "").split(",") if ip.strip()]
+        if forwarded_for:
+            closest_proxy = client_ip
+            client_ip = forwarded_for.pop(0)
+            if settings.TRUST_ALL_PROXIES:
+                return _normalize_ip(client_ip)
+            trusted = [p.strip() for p in (settings.TRUSTED_PROXIES or "").split(",") if p.strip()]
+            for proxy in [closest_proxy, *forwarded_for]:
+                normalized = _normalize_ip(proxy) if proxy else None
+                if normalized is None or normalized not in trusted:
+                    return None
+    return _normalize_ip(client_ip) if client_ip else None
+
+
 def get_short_user_agent(request: HttpRequest) -> str:
     """Returns browser and OS info from user agent, eg: 'Chrome 135.0.0 on macOS 10.15'"""
     user_agent_str = request.headers.get("user-agent")
     if not user_agent_str:
         return ""
+
+    # Deferred: insights.utils is imported all over at django.setup(); user_agents is only needed on
+    # this request-time UA-parsing path, so keep it off the startup path.
+    from user_agents import parse  # noqa: PLC0415
 
     user_agent = parse(user_agent_str)
 
@@ -784,6 +1183,7 @@ def get_compare_period_dates(
     date_from_delta_mapping: Optional[dict[str, int]],
     date_to_delta_mapping: Optional[dict[str, int]],
     interval: str,
+    exclude_incomplete_periods: bool = False,
 ) -> tuple[datetime.datetime, datetime.datetime]:
     diff = date_to - date_from
     new_date_from = date_from - diff
@@ -809,6 +1209,9 @@ def get_compare_period_dates(
             and date_from_delta_mapping.get("days", None)
             and date_from_delta_mapping["days"] % 7 == 0
             and not date_to_delta_mapping
+            # With excludeIncompletePeriods the ongoing day is clipped out of the range, so -7d
+            # covers exactly 7 complete days and the extra day would misalign the previous period.
+            and not exclude_incomplete_periods
         ):
             # KLUDGE: Unfortunately common relative date ranges such as "Last 7 days" (-7d) or "Last 14 days" (-14d)
             # are wrong because they treat the current ongoing day as an _extra_ one. This means that those ranges
@@ -830,7 +1233,7 @@ def generate_cache_key(team_pk: int, stringified: str) -> str:
 
 
 def get_celery_heartbeat() -> Union[str, int]:
-    last_heartbeat = get_client().get("INSIGHTS_HEARTBEAT")
+    last_heartbeat = get_client().get("POSTFN_HEARTBEAT")
     worker_heartbeat = int(time.time()) - int(last_heartbeat) if last_heartbeat else -1
 
     if 0 <= worker_heartbeat < 300:
@@ -1130,21 +1533,31 @@ def get_instance_available_sso_providers() -> dict[str, bool]:
     Validates configuration settings and license validity (if applicable).
     """
     output: dict[str, bool] = {
+        "github": bool(settings.SOCIAL_AUTH_GITHUB_KEY and settings.SOCIAL_AUTH_GITHUB_SECRET),
+        "gitlab": bool(settings.SOCIAL_AUTH_GITLAB_KEY and settings.SOCIAL_AUTH_GITLAB_SECRET),
         "google-oauth2": False,
-        "oidc": bool(
-            getattr(settings, "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT", None)
-            and getattr(settings, "SOCIAL_AUTH_OIDC_KEY", None)
-            and getattr(settings, "SOCIAL_AUTH_OIDC_SECRET", None)
-        ),
     }
 
-    # All SSO features are available without license checks
+    # Get license information
+    bypass_license: bool = is_cloud() or settings.DEMO
+    license = None
+    if not bypass_license:
+        try:
+            from ee.models.license import License
+        except ImportError:
+            pass
+        else:
+            license = License.objects.first_valid()
+
     if getattr(settings, "SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", None) and getattr(
         settings,
         "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET",
         None,
     ):
-        output["google-oauth2"] = True
+        if bypass_license or (license is not None and AvailableFeature.SOCIAL_SSO in license.available_features):
+            output["google-oauth2"] = True
+        else:
+            logger.warning("You have Google login set up, but not the required license!")
 
     return output
 
@@ -1207,6 +1620,52 @@ def get_safe_cache(cache_key: str):
     return None
 
 
+def safe_cache_set(cache_key: str, value: Any, timeout: int | None = None) -> None:
+    """Best-effort cache write. Logs a warning on failure so Redis blips
+    are visible during incidents without breaking the calling request."""
+    try:
+        cache.set(cache_key, value, timeout)
+    except Exception:
+        logger.warning("safe_cache_set_failure", cache_key=cache_key, exc_info=True)
+
+
+def safe_cache_add(cache_key: str, value: Any, timeout: int | None = None) -> bool:
+    """Best-effort atomic set-if-absent. Returns True if this caller set the key
+    (i.e. won the race), False if it was already present — useful for cross-process
+    throttles where a wave of workers must act at most once per window.
+
+    On a cache failure, returns True so the caller still proceeds (e.g. captures the
+    error) rather than silently dropping the signal, matching the fail-visible
+    behaviour of the other safe_cache_* helpers."""
+    try:
+        return bool(cache.add(cache_key, value, timeout))
+    except Exception:
+        logger.warning("safe_cache_add_failure", cache_key=cache_key, exc_info=True)
+        return True
+
+
+def safe_cache_delete(cache_key: str) -> None:
+    """Best-effort cache delete. Logs a warning on failure so Redis blips
+    are visible during incidents without breaking the calling request."""
+    try:
+        cache.delete(cache_key)
+    except Exception:
+        logger.warning("safe_cache_delete_failure", cache_key=cache_key, exc_info=True)
+
+
+def capture_exception_throttled(throttle_key: str, exc: BaseException, ttl: int) -> bool:
+    """Capture an exception at most once per ``ttl`` window across processes (gated on
+    an atomic set-if-absent in the cache). Returns True if this caller captured, False
+    if it was throttled, so the caller can record which happened.
+
+    The atomic add means a wave of workers failing at once captures only once, instead
+    of each racing past a non-atomic get-then-set."""
+    captured = safe_cache_add(throttle_key, True, ttl)
+    if captured:
+        capture_exception(exc)
+    return captured
+
+
 def is_anonymous_id(distinct_id: str) -> bool:
     # Our anonymous ids are _not_ uuids, but a random collection of strings
     return bool(re.match(ANONYMOUS_REGEX, distinct_id))
@@ -1233,7 +1692,7 @@ class GenericEmails:
     """
 
     def __init__(self):
-        with open(get_absolute_path("helpers/generic_emails.txt")) as f:
+        with open(get_absolute_path("helpers/generic_emails.txt"), encoding="utf-8") as f:
             self.emails = {x.rstrip(): True for x in f}
 
     def is_generic(self, email: str) -> bool:
@@ -1243,9 +1702,11 @@ class GenericEmails:
         return self.emails.get(email[(at_location + 1) :], False)
 
 
-@lru_cache(maxsize=1)
-def get_available_timezones_with_offsets() -> dict[str, float]:
-    now = dt.datetime.now()
+# maxsize=2 keeps the previous hour's bucket warm so requests interleaved across the
+# top-of-hour boundary don't both pay the ~600-entry pytz walk.
+@lru_cache(maxsize=2)
+def _timezone_offsets_for_hour(year: int, month: int, day: int, hour: int) -> dict[str, float]:
+    now = dt.datetime(year, month, day, hour)
     result = {}
     for tz in pytz.common_timezones:
         try:
@@ -1255,6 +1716,13 @@ def get_available_timezones_with_offsets() -> dict[str, float]:
         offset_hours = int(offset.total_seconds()) / 3600
         result[tz] = offset_hours
     return result
+
+
+def get_available_timezones_with_offsets() -> dict[str, float]:
+    # Bucket by hour so the ~600-pytz-timezone walk only runs at most once per hour
+    # per process. Hourly granularity is enough to catch DST transitions promptly.
+    now = dt.datetime.now()
+    return _timezone_offsets_for_hour(now.year, now.month, now.day, now.hour)
 
 
 def refresh_requested_by_client(request: Request) -> bool | str:
@@ -1276,14 +1744,25 @@ def cache_requested_by_client(request: Request) -> bool | str:
     return _request_has_key_set("use_cache", request)
 
 
-def filters_override_requested_by_client(request: Request, dashboard: Optional["Dashboard"]) -> dict:
-    from insights.auth import SharingAccessTokenAuthentication
+def filters_override_requested_by_client(
+    request: Request, dashboard: Optional["Dashboard"], is_shared: bool = False
+) -> dict:
+    from insights.auth import SharingAccessTokenAuthentication, SharingPasswordProtectedAuthentication
 
     dashboard_filters = dashboard.filters if dashboard else {}
     raw_override = request.query_params.get("filters_override")
 
-    # Security: Don't allow overrides when accessing via sharing tokens
-    if not raw_override or isinstance(request.successful_authenticator, SharingAccessTokenAuthentication):
+    # Security: never honor client-supplied overrides for shared/embedded access. The
+    # successful_authenticator check catches token-authenticated refreshes; is_shared also covers
+    # the path-based /shared/<token> page load, where no authenticator runs and the check is blind.
+    if (
+        not raw_override
+        or is_shared
+        or isinstance(
+            request.successful_authenticator,
+            (SharingAccessTokenAuthentication, SharingPasswordProtectedAuthentication),
+        )
+    ):
         return dashboard_filters
 
     try:
@@ -1295,16 +1774,32 @@ def filters_override_requested_by_client(request: Request, dashboard: Optional["
 
 
 def variables_override_requested_by_client(
-    request: Optional[Request], dashboard: Optional["Dashboard"], variables: list["InsightVariable"]
+    request: Optional[Request],
+    dashboard: Optional["Dashboard"],
+    variables: list["InsightVariable"],
+    is_shared: bool = False,
 ) -> Optional[dict[str, dict]]:
-    from insights.api.insight_variable import map_stale_to_latest
-    from insights.auth import SharingAccessTokenAuthentication
+    from insights.auth import SharingAccessTokenAuthentication, SharingPasswordProtectedAuthentication
+
+    from products.product_analytics.backend.api.insight_variable import map_stale_to_latest
 
     dashboard_variables = (dashboard and dashboard.variables) or {}
     raw_override = request.query_params.get("variables_override") if request else None
 
-    # Security: Don't allow overrides when accessing via sharing tokens
-    if not raw_override or (request and isinstance(request.successful_authenticator, SharingAccessTokenAuthentication)):
+    # Security: never honor client-supplied overrides for shared/embedded access. The
+    # successful_authenticator check catches token-authenticated refreshes; is_shared also covers
+    # the path-based /shared/<token> page load, where no authenticator runs and the check is blind.
+    if (
+        not raw_override
+        or is_shared
+        or (
+            request
+            and isinstance(
+                request.successful_authenticator,
+                (SharingAccessTokenAuthentication, SharingPasswordProtectedAuthentication),
+            )
+        )
+    ):
         return map_stale_to_latest(dashboard_variables, variables)
 
     try:
@@ -1315,14 +1810,25 @@ def variables_override_requested_by_client(
     return map_stale_to_latest({**dashboard_variables, **request_variables}, variables)
 
 
-def tile_filters_override_requested_by_client(request: Request, tile: Optional["DashboardTile"]) -> dict:
-    from insights.auth import SharingAccessTokenAuthentication
+def tile_filters_override_requested_by_client(
+    request: Request, tile: Optional["DashboardTile"], is_shared: bool = False
+) -> dict:
+    from insights.auth import SharingAccessTokenAuthentication, SharingPasswordProtectedAuthentication
 
     tile_filters = tile.filters_overrides if tile and tile.filters_overrides else {}
     raw_override = request.query_params.get("tile_filters_override")
 
-    # Security: Don't allow overrides when accessing via sharing tokens
-    if not raw_override or isinstance(request.successful_authenticator, SharingAccessTokenAuthentication):
+    # Security: never honor client-supplied overrides for shared/embedded access. The
+    # successful_authenticator check catches token-authenticated refreshes; is_shared also covers
+    # the path-based /shared/<token> page load, where no authenticator runs and the check is blind.
+    if (
+        not raw_override
+        or is_shared
+        or isinstance(
+            request.successful_authenticator,
+            (SharingAccessTokenAuthentication, SharingPasswordProtectedAuthentication),
+        )
+    ):
         return tile_filters
 
     try:
@@ -1434,7 +1940,7 @@ def encode_get_request_params(data: dict[str, Any]) -> dict[str, str]:
 
 class DataclassJSONEncoder(json.JSONEncoder):
     def default(self, o):
-        if dataclasses.is_dataclass(o):
+        if dataclasses.is_dataclass(o) and not isinstance(o, type):
             return dataclasses.asdict(o)
         return super().default(o)
 
@@ -1503,7 +2009,7 @@ def generate_short_id():
 
 
 def get_week_start_for_country_code(country_code: str) -> int:
-    # Data from https://github.com/unicode-cldr/cldr-core/blob/main/supplemental/weekData.json
+    # Data from https://github.com/unicode-cldr/cldr-core/blob/master/supplemental/weekData.json
     if country_code in [
         "AG",
         "AS",
@@ -1585,7 +2091,7 @@ def get_week_start_for_country_code(country_code: str) -> int:
     return 1  # Monday
 
 
-def sleep_time_generator() -> Generator[float, None, None]:
+def sleep_time_generator() -> Generator[float]:
     # a generator that yield an exponential back off between 0.1 and 3 seconds
     for _ in range(10):
         yield 0.1  # 1 second in total
@@ -1707,32 +2213,6 @@ def patchable(fn):
     inner._temp_patch = temp_patch  # type: ignore[attr-defined]
 
     return inner
-
-
-def label_for_team_id_to_track(team_id: int) -> str:
-    """
-    LEGACY: Only used by flag_matching.py (cohort creation background task).
-    Returns empty string to avoid tracking specific team IDs in metrics.
-    """
-    team_id_as_string = str(team_id)
-    team_id_filter: list[str] = []  # No longer tracking specific teams
-
-    if "all" in team_id_filter:
-        return team_id_as_string
-
-    if team_id_as_string in team_id_filter:
-        return team_id_as_string
-
-    team_id_ranges = [team_id_range for team_id_range in team_id_filter if ":" in team_id_range]
-    for range in team_id_ranges:
-        try:
-            start, end = range.split(":")
-            if int(start) <= team_id <= int(end):
-                return team_id_as_string
-        except Exception:
-            pass
-
-    return "unknown"
 
 
 def camel_to_snake_case(name: str) -> str:

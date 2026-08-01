@@ -13,7 +13,7 @@ export const customerioPlugin: LegacyDestinationPlugin = {
         id: 'plugin-customerio-plugin',
         name: 'Customer.io',
         description: 'This plugin will send events to Customer.io.',
-        icon_url: 'https://raw.githubusercontent.com/hanzoai/customerio-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/insights/customerio-plugin/main/logo.png',
         category: [],
         code_language: 'javascript',
         code: `return event`,

@@ -25,7 +25,7 @@ def test_should_run_returns_false_for_non_matching_version():
 
 def test_should_run_returns_false_for_non_matching_kind():
     migration = TestMigration()
-    query = {"kind": NodeKind.HOG_QL_QUERY, "version": 1}
+    query = {"kind": NodeKind.FN_QL_QUERY, "version": 1}
     assert migration.should_run(query) is False
 
 

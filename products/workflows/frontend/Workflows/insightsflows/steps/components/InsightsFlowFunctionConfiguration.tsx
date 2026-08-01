@@ -1,73 +1,43 @@
-import { useValues } from 'kea'
+import { useActions, useValues } from 'kea'
+import insights from 'insights-js'
 import { useEffect } from 'react'
 
-import { Spinner } from '@hanzo/elements'
+import { IconCheck } from '@hanzo/icons'
+import { Banner, Button, Collapse, Link, Spinner } from '@hanzo/elements'
 
 import { CyclotronJobInputs } from 'lib/components/CyclotronJob/CyclotronJobInputs'
 import { templateToConfiguration } from 'scenes/insights-functions/configuration/insightsFunctionConfigurationLogic'
+import { teamLogic } from 'scenes/teamLogic'
+import { urls } from 'scenes/urls'
 
 import { CyclotronJobInputType, InsightsFunctionMappingType } from '~/types'
 
 import { workflowLogic } from '../../../workflowLogic'
 import { InsightsFlowFunctionMappings } from './InsightsFlowFunctionMappings'
 
-export function InsightsFlowFunctionConfiguration({
-    templateId,
-    inputs,
-    setInputs,
-    mappings,
-    setMappings,
-    errors,
-}: {
-    templateId: string
-    inputs: Record<string, CyclotronJobInputType>
-    mappings?: InsightsFunctionMappingType[]
-    setInputs: (inputs: Record<string, CyclotronJobInputType>) => void
-    setMappings?: (mappings: InsightsFunctionMappingType[]) => void
-    errors?: Record<string, string>
-}): JSX.Element {
-    const { workflow, insightsFunctionTemplatesById, insightsFunctionTemplatesByIdLoading } = useValues(workflowLogic)
-
-    const template = insightsFunctionTemplatesById[templateId]
-    useEffect(() => {
-        // oxlint-disable-next-line exhaustive-deps
-        if (template && Object.keys(inputs ?? {}).length === 0) {
-            setInputs(templateToConfiguration(template).inputs ?? {})
-        }
-    }, [templateId])
-
-    if (insightsFunctionTemplatesByIdLoading) {
-        return (
-            <div className="flex justify-center items-center">
-                <Spinner />
-            </div>
-        )
-    }
-
-    if (!template) {
-        return <div>Template not found!</div>
-    }
-
-    const triggerType = workflow?.trigger?.type
-
-    // Build workflow variables object for autocomplete
+// Builds the sample globals the input editor uses for autocomplete and unknown-global warnings.
+// The available globals depend on the trigger type: batch runs have no external triggering event,
+// but the worker backfills a real event.distinct_id at dequeue, so batch must expose `event` too or
+// the editor wrongly flags {event.distinct_id} as unknown.
+export function buildSampleGlobals(
+    triggerType: string | undefined,
+    variables: Array<Record<string, any>> | undefined | null
+): Record<string, any> {
     const workflowVariables: Record<string, any> = {}
-    if (workflow?.variables) {
-        workflow.variables.forEach((variable) => {
-            // Use placeholder values based on variable type
-            if (variable.type === 'string') {
-                workflowVariables[variable.key] = 'example_value'
-            } else if (variable.type === 'number') {
-                workflowVariables[variable.key] = 123
-            } else if (variable.type === 'boolean') {
-                workflowVariables[variable.key] = true
-            } else if (variable.type === 'dictionary' || variable.type === 'json') {
-                workflowVariables[variable.key] = {}
-            } else {
-                workflowVariables[variable.key] = null
-            }
-        })
-    }
+    variables?.forEach((variable) => {
+        // Use placeholder values based on variable type
+        if (variable.type === 'string') {
+            workflowVariables[variable.key] = 'example_value'
+        } else if (variable.type === 'number') {
+            workflowVariables[variable.key] = 123
+        } else if (variable.type === 'boolean') {
+            workflowVariables[variable.key] = true
+        } else if (variable.type === 'dictionary' || variable.type === 'json') {
+            workflowVariables[variable.key] = {}
+        } else {
+            workflowVariables[variable.key] = null
+        }
+    })
 
     const sampleGlobals: Record<string, any> = {
         variables: workflowVariables,
@@ -81,7 +51,6 @@ export function InsightsFlowFunctionConfiguration({
             params: {},
         }
     } else if (triggerType === 'event') {
-        // Event-based triggers
         sampleGlobals.event = {
             event: 'example_event',
             distinct_id: 'user123',
@@ -98,22 +67,183 @@ export function InsightsFlowFunctionConfiguration({
             },
         }
         sampleGlobals.groups = {}
+    } else if (triggerType === 'batch') {
+        // Batch runs carry a synthesized event whose distinct_id the worker backfills from the
+        // person, so {event.distinct_id} resolves at runtime. Expose it here so the editor
+        // doesn't flag it as an unknown global.
+        sampleGlobals.event = {
+            event: '$batch_hog_flow_invocation',
+            distinct_id: 'user123',
+            properties: {},
+            timestamp: '2024-01-01T12:00:00Z',
+        }
+        sampleGlobals.person = {
+            id: 'person123',
+            properties: {
+                email: 'user@example.com',
+                name: 'John Doe',
+            },
+        }
     }
+
+    return sampleGlobals
+}
+
+export function InsightsFlowFunctionConfiguration({
+    templateId,
+    inputs,
+    setInputs,
+    mappings,
+    setMappings,
+    errors,
+    warnings,
+}: {
+    templateId: string
+    inputs: Record<string, CyclotronJobInputType>
+    mappings?: InsightsFunctionMappingType[]
+    setInputs: (inputs: Record<string, CyclotronJobInputType>) => void
+    setMappings?: (mappings: InsightsFunctionMappingType[]) => void
+    errors?: Record<string, string>
+    warnings?: Record<string, string>
+}): JSX.Element {
+    const { workflow, insightsFunctionTemplatesById, insightsFunctionTemplatesByIdLoading } = useValues(workflowLogic)
+    const { currentTeam, currentTeamLoading } = useValues(teamLogic)
+    const { updateCurrentTeam } = useActions(teamLogic)
+
+    const template = insightsFunctionTemplatesById[templateId]
+    const isEmailStep = templateId === 'template-email'
+    const isPushStep = templateId === 'template-native-push'
+    const engagementEventsEnabled = !!currentTeam?.workflows_config?.capture_workflows_engagement_events
+    useEffect(() => {
+        // oxlint-disable-next-line exhaustive-deps
+        if (template) {
+            const defaults = templateToConfiguration(template).inputs ?? {}
+            const currentInputs = inputs ?? {}
+            const hasMissingDefaults = Object.keys(defaults).some((key) => !(key in currentInputs))
+            if (hasMissingDefaults) {
+                setInputs({ ...defaults, ...currentInputs })
+            }
+        }
+        // Re-run once the template resolves: it loads asynchronously, so on first render it can still be
+        // undefined and the defaults would otherwise never be applied.
+    }, [templateId, !!template])
+
+    if (insightsFunctionTemplatesByIdLoading) {
+        return (
+            <div className="flex justify-center items-center">
+                <Spinner />
+            </div>
+        )
+    }
+
+    if (!template) {
+        return <TemplateNotFoundFallback templateId={templateId} />
+    }
+
+    const triggerType = workflow?.trigger?.type
+    const sampleGlobals = buildSampleGlobals(triggerType, workflow?.variables)
+
+    // Native push carries a long tail of optional Android/iOS override fields. Keep the core message
+    // fields inline and tuck the platform-specific ones into collapsed sections so the form stays flat.
+    const inputsSchema = template.inputs_schema ?? []
+    const isPlatformInput = (key: string): boolean => key.startsWith('android_') || key.startsWith('ios_')
+    const coreInputsSchema = isPushStep ? inputsSchema.filter((s) => !isPlatformInput(s.key)) : inputsSchema
+    const androidInputsSchema = isPushStep ? inputsSchema.filter((s) => s.key.startsWith('android_')) : []
+    const iosInputsSchema = isPushStep ? inputsSchema.filter((s) => s.key.startsWith('ios_')) : []
+
+    const renderInputs = (schema: typeof inputsSchema): JSX.Element => (
+        <CyclotronJobInputs
+            errors={errors}
+            warnings={warnings}
+            configuration={{ inputs: inputs as Record<string, CyclotronJobInputType>, inputs_schema: schema }}
+            showSource={false}
+            sampleGlobalsWithInputs={sampleGlobals}
+            onInputChange={(key, value) => setInputs({ ...inputs, [key]: value })}
+        />
+    )
 
     return (
         <>
-            <CyclotronJobInputs
-                errors={errors}
-                configuration={{
-                    inputs: inputs as Record<string, CyclotronJobInputType>,
-                    inputs_schema: template?.inputs_schema ?? [],
-                }}
-                showSource={false}
-                sampleGlobalsWithInputs={sampleGlobals}
-                onInputChange={(key, value) => setInputs({ ...inputs, [key]: value })}
-            />
+            {renderInputs(coreInputsSchema)}
+            {isPushStep && (androidInputsSchema.length > 0 || iosInputsSchema.length > 0) && (
+                <Collapse
+                    className="mt-2"
+                    multiple
+                    panels={[
+                        ...(androidInputsSchema.length > 0
+                            ? [
+                                  {
+                                      key: 'android',
+                                      header: 'Android options',
+                                      content: renderInputs(androidInputsSchema),
+                                  },
+                              ]
+                            : []),
+                        ...(iosInputsSchema.length > 0
+                            ? [{ key: 'ios', header: 'iOS options', content: renderInputs(iosInputsSchema) }]
+                            : []),
+                    ]}
+                />
+            )}
+            {isEmailStep ? (
+                engagementEventsEnabled ? (
+                    <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-alt">
+                        <IconCheck className="text-success text-base" />
+                        <span>Email engagement is being captured as Insights events.</span>
+                        <Link
+                            to={urls.settings('environment-workflows', 'workflows-engagement-events')}
+                            target="_blank"
+                        >
+                            Manage in settings
+                        </Link>
+                    </div>
+                ) : (
+                    <Banner type="info" hideIcon className="mt-2">
+                        <div className="flex flex-col gap-2">
+                            <span className="text-xs">
+                                Email engagement (sends, opens, clicks, bounces) is recorded as workflow metrics. You
+                                can also capture these as standard Insights events for use in insights and funnels. They
+                                count toward your event usage and are billed like any other event.
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    type="primary"
+                                    size="xsmall"
+                                    loading={currentTeamLoading}
+                                    onClick={() =>
+                                        updateCurrentTeam({
+                                            workflows_config: {
+                                                ...currentTeam?.workflows_config,
+                                                capture_workflows_engagement_events: true,
+                                            },
+                                        })
+                                    }
+                                >
+                                    Enable engagement events
+                                </Button>
+                                <Button
+                                    type="tertiary"
+                                    size="xsmall"
+                                    to={urls.settings('environment-workflows', 'workflows-engagement-events')}
+                                    targetBlank
+                                >
+                                    Manage in settings
+                                </Button>
+                                <Button
+                                    type="tertiary"
+                                    size="xsmall"
+                                    to="https://hanzo.ai/docs/workflows/engagement-events"
+                                    targetBlank
+                                >
+                                    Learn more
+                                </Button>
+                            </div>
+                        </div>
+                    </Banner>
+                )
+            ) : null}
             <InsightsFlowFunctionMappings
-                useMapping={Array.isArray(mappings) ?? (template?.mapping_templates?.length ?? 0) > 0}
+                useMapping={!isPushStep && (Array.isArray(mappings) || (template?.mapping_templates?.length ?? 0) > 0)}
                 inputs={inputs}
                 inputs_schema={template?.inputs_schema ?? []}
                 mappings={mappings ?? []}
@@ -122,4 +252,19 @@ export function InsightsFlowFunctionConfiguration({
             />
         </>
     )
+}
+
+// Reaching this fallback means the workflow editor finished loading the template list but the
+// referenced template was not in it — typically a server-side filter regression (see PR #61992)
+// or a workflow that points at a deleted/renamed template. Surfaces to error tracking so an
+// alert can fire before users start reporting it.
+function TemplateNotFoundFallback({ templateId }: { templateId: string }): JSX.Element {
+    useEffect(() => {
+        insights.captureException(new Error('Workflow editor: script function template not found'), {
+            severity: 'error',
+            tag: 'workflow_editor_template_not_found',
+            templateId,
+        })
+    }, [templateId])
+    return <div>Template not found!</div>
 }

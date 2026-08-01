@@ -1,6 +1,6 @@
-import { PostgresRouter, PostgresUse } from '../../../utils/db/postgres'
-import { LazyLoader } from '../../../utils/lazy-loader'
-import { logger } from '../../../utils/logger'
+import { PostgresRouter, PostgresUse } from '~/common/utils/db/postgres'
+import { LazyLoader } from '~/common/utils/lazy-loader'
+import { logger } from '~/common/utils/logger'
 
 export type RecipientGetArgs = {
     teamId: number
@@ -15,6 +15,11 @@ const fromKey = (key: string): RecipientGetArgs => {
 }
 
 export type PreferenceStatus = 'OPTED_IN' | 'OPTED_OUT' | 'NO_PREFERENCE'
+
+// Reserved key in the preferences JSON for open/click tracking consent, alongside the '$all'
+// unsubscribe key. Mirrors EMAIL_TRACKING_PREFERENCE_ID in
+// products/messaging/backend/models/message_preferences.py.
+export const EMAIL_TRACKING_PREFERENCE_ID = '$email_tracking'
 
 // Type for the query result from the database
 type MessageRecipientPreferenceRow = {
@@ -69,6 +74,50 @@ export class RecipientsManagerService {
 
     public getAllMarketingMessagingPreference(recipient: RecipientManagerRecipient): PreferenceStatus {
         return recipient.preferences['$all'] ?? 'NO_PREFERENCE'
+    }
+
+    // Consent for open/click tracking, distinct from messaging opt-out: a recipient can keep
+    // receiving emails while refusing to have their opens/clicks tracked.
+    public getEmailTrackingPreference(recipient: RecipientManagerRecipient): PreferenceStatus {
+        return recipient.preferences[EMAIL_TRACKING_PREFERENCE_ID] ?? 'NO_PREFERENCE'
+    }
+
+    /**
+     * Opt out one or more recipients from all marketing messaging by upserting the $all preference to OPTED_OUT.
+     */
+    public async optOut(teamId: number, identifiers: string[]): Promise<void> {
+        if (identifiers.length === 0) {
+            return
+        }
+
+        const preferences = JSON.stringify({ $all: 'OPTED_OUT' })
+
+        // Build a single INSERT with multiple VALUES rows
+        const valueClauses: string[] = []
+        const params: (number | string)[] = []
+        for (let i = 0; i < identifiers.length; i++) {
+            const teamParam = i * 3 + 1
+            const identifierParam = i * 3 + 2
+            const prefsParam = i * 3 + 3
+            valueClauses.push(
+                `(gen_random_uuid(), $${teamParam}, $${identifierParam}, $${prefsParam}, NOW(), NOW(), false)`
+            )
+            params.push(teamId, identifiers[i], preferences)
+        }
+
+        const queryString = `
+            INSERT INTO insights_messagerecipientpreference (id, team_id, identifier, preferences, created_at, updated_at, deleted)
+            VALUES ${valueClauses.join(', ')}
+            ON CONFLICT (team_id, identifier)
+            DO UPDATE SET
+                preferences = insights_messagerecipientpreference.preferences || EXCLUDED.preferences,
+                updated_at = NOW()
+        `
+
+        await this.postgres.query(PostgresUse.COMMON_WRITE, queryString, params, 'optOutRecipients')
+
+        // Clear the cache so subsequent reads pick up the new preferences
+        this.lazyLoader.clear()
     }
 
     private async fetchRecipients(ids: string[]): Promise<Record<string, RecipientManagerRecipient | undefined>> {

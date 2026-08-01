@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCode2 } from '@hanzo/icons'
+import { IconEndpoints } from '@hanzo/icons'
 import {
     Button,
     Input,
@@ -12,10 +12,12 @@ import {
     toast,
 } from '@hanzo/elements'
 
+import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { Field } from 'lib/elements/Field'
 
 import { variablesLogic } from '~/queries/nodes/DataVisualization/Components/Variables/variablesLogic'
 import { NodeKind } from '~/queries/schema/schema-general'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 import { endpointLogic } from 'products/endpoints/frontend/endpointLogic'
 import { endpointsLogic } from 'products/endpoints/frontend/endpointsLogic'
@@ -34,11 +36,9 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
         setSelectedEndpointName,
         createEndpoint,
         updateEndpoint,
-    } = useActions(endpointLogic({ tabId }))
-    const { endpointName, endpointDescription, isUpdateMode, selectedEndpointName } = useValues(
-        endpointLogic({ tabId })
-    )
-    const { endpoints } = useValues(endpointsLogic({ tabId }))
+    } = useActions(endpointLogic)
+    const { endpointName, endpointDescription, isUpdateMode, selectedEndpointName } = useValues(endpointLogic)
+    const { endpoints } = useValues(endpointsLogic)
 
     const { variablesForInsight } = useValues(variablesLogic)
     const { queryInput } = useValues(sqlEditorLogic)
@@ -162,9 +162,14 @@ export function Endpoint({ tabId }: EndpointProps): JSX.Element {
                     />
                 </Field.Pure>
 
-                <Button type="primary" onClick={handleSubmit} icon={<IconCode2 />} size="medium">
-                    {isUpdateMode ? 'Update endpoint' : 'Create endpoint'}
-                </Button>
+                <AccessControlAction
+                    resourceType={AccessControlResourceType.Endpoint}
+                    minAccessLevel={AccessControlLevel.Editor}
+                >
+                    <Button type="primary" onClick={handleSubmit} icon={<IconEndpoints />} size="medium">
+                        {isUpdateMode ? 'Update endpoint' : 'Create endpoint'}
+                    </Button>
+                </AccessControlAction>
             </div>
         </div>
     )

@@ -1,5 +1,6 @@
 import json
 from collections.abc import Mapping
+from datetime import datetime
 from typing import Any, Literal, Optional, cast
 
 import pytest
@@ -11,13 +12,16 @@ from insights.test.base import (
     _create_person,
     clean_varying_query_parts,
     cleanup_materialized_columns,
+    flush_persons_and_events,
     get_index_from_explain,
+    get_inner_person_subquery_datastore_sql,
     materialized,
     snapshot_datastore_queries,
 )
 from unittest import mock
 from unittest.mock import patch
 
+from django.conf import settings
 from django.test import override_settings
 
 from parameterized import parameterized
@@ -29,11 +33,12 @@ from insights.schema import (
     PersonsArgMaxVersion,
     PersonsOnEventsMode,
     PropertyGroupsMode,
+    SessionTableVersion,
 )
 
 from insights.insightsql import ast
 from insights.insightsql.constants import (
-    MAX_SELECT_INSIGHTS_AI_LIMIT,
+    MAX_SELECT_POSTFN_AI_LIMIT,
     MAX_SELECT_RETURNED_ROWS,
     InsightsQLDialect,
     InsightsQLGlobalSettings,
@@ -45,26 +50,43 @@ from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.database import Database
 from insights.insightsql.database.models import DateDatabaseField, StringDatabaseField
 from insights.insightsql.errors import ExposedInsightsQLError, ImpossibleASTError, QueryError
+from insights.insightsql.escape_sql import escape_datastore_identifier, escape_datastore_string
 from insights.insightsql.insightsqlx import convert_tag_to_hx
+from insights.insightsql.modifiers import create_default_modifiers_for_team
 from insights.insightsql.parser import parse_expr, parse_select
 from insights.insightsql.printer import prepare_and_print_ast, prepare_ast_for_printing, print_prepared_ast, to_printed_insightsql
 from insights.insightsql.property import property_to_expr
 from insights.insightsql.query import execute_insightsql_query
+from insights.insightsql.visitor import clear_locations
 
 from insights.datastore.client.execute import sync_execute
 from insights.models import PropertyDefinition
-from insights.models.cohort.cohort import Cohort
+from insights.models.event.sql import (
+    EVENTS_JSON_DATA_TABLE,
+    EVENTS_PROPERTIES_JSON_SUBCOLUMNS,
+    PERSON_PROPERTIES_JSON_SUBCOLUMNS,
+)
 from insights.models.exchange_rate.sql import EXCHANGE_RATE_DICTIONARY_NAME
-from insights.models.property_definition import PropertyType
+from insights.models.instance_setting import override_instance_config
 from insights.models.team.team import WeekStartDay
 from insights.settings.data_stores import DATASTORE_DATABASE
 
-from products.data_warehouse.backend.models import DataWarehouseCredential, DataWarehouseTable
+from products.cohorts.backend.models.cohort import Cohort
+from products.event_definitions.backend.models.property_definition import PropertyType
+from products.warehouse_sources.backend.facade.models import DataWarehouseCredential, DataWarehouseTable
 
+from ee.datastore.materialized_columns.columns import (
+    get_bloom_filter_index_name,
+    get_bloom_filter_lower_index_name,
+    get_minmax_index_name,
+    get_ngram_lower_index_name,
+    materialize,
+)
 
 
 class TestPrinter(BaseTest):
     maxDiff = None
+    snapshot: Any
 
     # Helper to always translate InsightsQL with a blank context
     def _expr(
@@ -103,6 +125,79 @@ class TestPrinter(BaseTest):
             context or InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
             "datastore",
         )[0]
+
+    def _events_table_ref(self) -> str:
+        return "events_json AS events" if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA else "events"
+
+    def _json_reconstructed_blob(self, root: str) -> str:
+        return (
+            "concat('{', arrayStringConcat(arrayMap(kv -> concat(toJSONString(kv.1), ':', kv.2), "
+            + f"arrayFilter(kv -> {self._json_reconstructed_pair_filter(root)}, "
+            + f"JSONExtractKeysAndValuesRaw(toJSONString({root})))), ','), "
+            + "'}')"
+        )
+
+    def _json_reconstructed_pair_filter(self, root: str) -> str:
+        subcolumns = (
+            PERSON_PROPERTIES_JSON_SUBCOLUMNS
+            if root.endswith("person_properties")
+            else EVENTS_PROPERTIES_JSON_SUBCOLUMNS
+        )
+        array_keys = [key for key, column_type in subcolumns.items() if column_type.startswith("Array(")]
+        map_keys = [key for key, column_type in subcolumns.items() if column_type.startswith("Map(")]
+
+        filters = ["kv.2 != 'null'"]
+        if array_keys:
+            filters.append(f"NOT (kv.2 = '[]' AND has({self._datastore_string_array(array_keys)}, kv.1))")
+        if map_keys:
+            filters.append(f"NOT (kv.2 = '{{}}' AND has({self._datastore_string_array(map_keys)}, kv.1))")
+        return " AND ".join(filters)
+
+    def _datastore_string_array(self, values: list[str]) -> str:
+        return "[" + ", ".join(escape_datastore_string(value) for value in values) + "]"
+
+    def _json_dynamic_subcolumn_expr(self, root: str, property_name: str) -> str:
+        if "%" in property_name:
+            subcolumns = [f"getSubcolumn({root}, %(insightsql_val_{index})s)" for index in range(10)]
+            return (
+                f"if(notEquals(toJSONString({subcolumns[0]}), '{{}}'), toJSONString({subcolumns[1]}), "
+                f"if(isNull({subcolumns[2]}), NULL, if(startsWith(dynamicType({subcolumns[3]}), 'DateTime'), "
+                f"replaceOne(toString({subcolumns[4]}), ' ', 'T'), if(or(startsWith(dynamicType({subcolumns[5]}), "
+                f"'Array'), startsWith(dynamicType({subcolumns[6]}), 'Map'), startsWith(dynamicType({subcolumns[7]}), "
+                f"'Tuple')), toJSONString({subcolumns[8]}), toString({subcolumns[9]})))))"
+            )
+        return self._json_dynamic_subcolumn_path_expr(root, [property_name])
+
+    def _json_dynamic_subcolumn_path_expr(self, root: str, property_path: list[str]) -> str:
+        escaped = [escape_datastore_identifier(key) for key in property_path]
+        field = ".".join([root, *escaped])
+        sub_object = f"{root}.^" + ".".join(escaped)
+        object_read = f"toJSONString({sub_object})"
+        scalar_read = (
+            f"if(isNull({field}), NULL, "
+            f"if(startsWith(dynamicType({field}), 'DateTime'), "
+            f"replaceOne(toString({field}), ' ', 'T'), "
+            f"if(or(startsWith(dynamicType({field}), 'Array'), startsWith(dynamicType({field}), 'Map'), "
+            f"startsWith(dynamicType({field}), 'Tuple')), toJSONString({field}), toString({field}))))"
+        )
+        return f"if(notEquals({object_read}, '{{}}'), {object_read}, {scalar_read})"
+
+    def _json_dynamic_property_expr(self, property_name: str, table_alias: str = "events") -> str:
+        return self._json_dynamic_subcolumn_expr(f"{table_alias}.properties", property_name)
+
+    def _json_dynamic_person_property_expr(self, property_name: str, table_alias: str = "events") -> str:
+        return self._json_dynamic_subcolumn_expr(f"{table_alias}.person_properties", property_name)
+
+    def _with_active_events_table(self, expected_sql: str) -> str:
+        if not settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            return expected_sql
+        return expected_sql.replace("FROM events", f"FROM {self._events_table_ref()}")
+
+    def _schema_snapshot(self):
+        self.snapshot.session.pytest_session.config.option.warn_unused_snapshots = True
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            return self.snapshot(name="new_events_schema")
+        return self.snapshot
 
     def _assert_expr_error(
         self,
@@ -156,11 +251,141 @@ class TestPrinter(BaseTest):
         )
         return printed
 
+    @parameterized.expand([(12,), (84,)])
+    @override_settings(EVENTS_DATA_RETENTION_ENFORCED=True)
+    def test_events_retention_floor_applied(self, months: int):
+        self.team.event_retention_months = months
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True)
+        sql = self._select("select count() from events", context=context)
+        assert f"toIntervalMonth({months})" in sql
+        assert "greater(events.timestamp, minus(now" in sql
+
+    @override_settings(EVENTS_DATA_RETENTION_ENFORCED=False)
+    def test_events_retention_floor_not_applied_when_disabled(self):
+        self.team.event_retention_months = 12
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True)
+        sql = self._select("select count() from events", context=context)
+        assert "toIntervalMonth" not in sql
+
+    @override_settings(EVENTS_DATA_RETENTION_ENFORCED=True)
+    def test_events_retention_floor_only_on_events_table(self):
+        # The floor is keyed to the events table only — a persons query must not get an events.timestamp floor.
+        self.team.event_retention_months = 12
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team, enable_select_queries=True)
+        sql = self._select("select count() from persons", context=context)
+        assert "greater(events.timestamp, minus(now" not in sql
+        assert "toIntervalMonth(12)" not in sql
+
+    @override_settings(EVENTS_DATA_RETENTION_ENFORCED=True)
+    def test_events_retention_floor_loads_team_when_not_in_context(self):
+        # Prod path: the context carries only team_id (see query.py), so the window is loaded from the DB by id.
+        self.team.event_retention_months = 24
+        self.team.save()
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        sql = self._select("select count() from events", context=context)
+        assert "toIntervalMonth(24)" in sql
+
     def test_to_printed_insightsql(self):
         expr = parse_select("select 1 + 2, 3 from events")
         repsponse = to_printed_insightsql(expr, self.team)
         self.assertEqual(
             repsponse, f"SELECT\n    plus(1, 2),\n    3\nFROM\n    events\nLIMIT {MAX_SELECT_RETURNED_ROWS}"
+        )
+
+    def test_column_aliases_select_star_subquery_uses_real_column_names(self):
+        printed = self._select("select s.* from (select 1 as x, 2 as y, 3 as z) as s (a, b, c)")
+        # Datastore doesn't support (a, b, c) syntax, so the printer should
+        # bake aliases into the inner SELECT
+        self.assertNotIn("(a, b, c)", printed)
+        self.assertIn("AS a", printed)
+        self.assertIn("AS b", printed)
+        self.assertIn("AS c", printed)
+
+    def test_column_aliases_explicit_aliased_refs_use_real_names(self):
+        printed = self._select("select e.a, e.b from events as e (a, b, c)")
+        # e.a should resolve to e.uuid, e.b to e.event in Datastore
+        self.assertIn("e.uuid", printed)
+        self.assertIn("e.event", printed)
+        self.assertNotIn("e.a", printed)
+        self.assertNotIn("e.b", printed)
+
+    def test_column_aliases_in_where_clause(self):
+        printed = self._select("select e.a from events as e (a, b, c) where e.c is not null")
+        self.assertIn("e.uuid", printed)
+        self.assertIn("e.properties", printed)
+        self.assertNotIn("e.a", printed)
+        self.assertNotIn("e.c", printed)
+
+    def test_column_aliases_keep_table_filter_column(self):
+        printed = self._select("select b from events as e (a, b, c, d, f, g, h, i, j, team_id)")
+        self.assertIn("WHERE equals(e.team_id,", printed)
+        self.assertNotIn("WHERE equals(e.person_mode,", printed)
+
+    def test_column_aliases_unqualified_refs(self):
+        printed = self._select("select a, b from events as e (a, b, c)")
+        self.assertIn("e.uuid", printed)
+        self.assertIn("e.event", printed)
+
+    def test_column_aliases_remaining_columns_keep_original_names(self):
+        # Only 3 aliases for a table with many columns — remaining keep original names
+        printed = self._select("select e.a, e.timestamp from events as e (a, b, c)")
+        self.assertIn("e.uuid", printed)
+        self.assertIn("toTimeZone(e.timestamp", printed)
+
+    def test_column_aliases_original_name_not_accessible(self):
+        self._assert_select_error(
+            "select e.uuid from events as e (a, b, c)",
+            "Field not found: uuid",
+        )
+
+    def test_column_aliases_subquery_bakes_into_inner_select(self):
+        printed = self._select("select s.a from (select 1 as x, 2 as y) as s (a, b)")
+        # For Datastore, column aliases are baked into the inner SELECT
+        self.assertIn("AS a", printed)
+        self.assertIn("AS b", printed)
+        self.assertNotIn("(a, b)", printed)
+
+    def test_column_aliases_too_many_error(self):
+        self._assert_query_error(
+            "select 1 from (select 1 as x) as s (a, b)",
+            "1 column(s) but 2 column name(s) were provided",
+        )
+
+    @parameterized.expand(
+        [
+            ("range", "select range from range(10)", "range() is not supported in Datastore dialect"),
+            (
+                "generate_series",
+                "select generate_series from generate_series(1, 10)",
+                "generate_series() is not supported in Datastore dialect",
+            ),
+        ]
+    )
+    def test_table_function_not_supported_in_datastore(self, _name, query, expected_error):
+        self._assert_select_error(query, expected_error)
+
+    def test_lambda_style_datastore_prints(self):
+        printed = self._select("select lambda x: x + 1")
+        self.assertIn("x -> plus(x, 1)", printed)
+
+    def test_array_slice_datastore_prints_array_slice(self):
+        printed = self._select("select [1, 2, 3][1:3]")
+        self.assertIn("arraySlice([1, 2, 3], 1, plus(minus(3, 1), 1))", printed)
+
+    def test_try_cast_non_postgres_error(self):
+        self._assert_query_error(
+            "select try_cast(1 as Int64)",
+            "TRY_CAST is not allowed in datastore dialect",
+        )
+
+    def test_limit_percent_datastore_constant_prints_decimal(self):
+        printed = self._select("select 1 from events limit 40 %")
+        self.assertIn("LIMIT 0.4", printed)
+
+    def test_limit_percent_datastore_expression_error(self):
+        self._assert_query_error(
+            "select 1 from events limit (60 + 7) %",
+            "LIMIT percent with expressions is not supported in datastore dialect",
         )
 
     def test_union_distinct(self):
@@ -179,6 +404,11 @@ class TestPrinter(BaseTest):
             f"SELECT\n    1 AS id\nLIMIT 50000\nINTERSECT\nSELECT\n    2 AS id\nLIMIT {MAX_SELECT_RETURNED_ROWS}",
         )
 
+    def test_intersect_all_raises_in_datastore(self):
+        with self.assertRaises(ImpossibleASTError) as context:
+            self._select("select 1 as id intersect all select 2 as id")
+        self.assertIn("INTERSECT ALL is not supported", str(context.exception))
+
     def test_intersect_distinct(self):
         expr = parse_select("""select 1 as id intersect distinct select 2 as id""")
         response = to_printed_insightsql(expr, self.team)
@@ -194,6 +424,159 @@ class TestPrinter(BaseTest):
             response,
             f"SELECT\n    1 AS id\nLIMIT 50000\nEXCEPT\nSELECT\n    2 AS id\nLIMIT {MAX_SELECT_RETURNED_ROWS}",
         )
+
+    def test_except_all_raises_in_datastore(self):
+        with self.assertRaises(ImpossibleASTError) as context:
+            self._select("select 1 as id except all select 2 as id")
+        self.assertIn("EXCEPT ALL is not supported", str(context.exception))
+
+    def test_union_by_name(self):
+        expr = parse_select("""select 1 as a, 2 as b union by name select 3 as b, 4 as a""")
+        response = to_printed_insightsql(expr, self.team)
+        self.assertEqual(
+            response,
+            (
+                "SELECT\n"
+                "    1 AS a,\n"
+                "    2 AS b\n"
+                "LIMIT 50000\n"
+                "UNION DISTINCT BY NAME\n"
+                "SELECT\n"
+                "    3 AS b,\n"
+                "    4 AS a\n"
+                f"LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
+        )
+
+    @parameterized.expand(
+        [
+            ("union all by name", "UNION ALL"),
+            ("union by name", "UNION DISTINCT"),
+        ]
+    )
+    def test_union_by_name_lowered_for_datastore(self, operator: str, lowered: str):
+        response = self._select(f"select 1 as a, 2 as b {operator} select 3 as b, 4 as a")
+        self.assertNotIn("BY NAME", response)
+        self.assertIn(f" {lowered} ", response)
+        self.assertIn("SELECT 4 AS a, 3 AS b", response)
+
+    @parameterized.expand([("intersect by name",), ("except by name",)])
+    def test_intersect_except_by_name_rejected_for_datastore(self, operator: str):
+        # INTERSECT/EXCEPT bind tighter than UNION, so aligning their operand to the first branch
+        # rather than the true set partner would silently mispair columns. No engine supports them,
+        # so they are refused rather than lowered.
+        with self.assertRaises(QueryError) as context:
+            self._select(f"select 1 as a, 2 as b {operator} select 3 as b, 4 as a")
+        self.assertIn("is not supported", str(context.exception))
+
+    def test_union_by_name_executes_on_datastore(self):
+        sql = self._select("select 1 as a, 2 as b union all by name select 3 as b, 4 as a")
+        # UNION ALL branches come back in whatever order they finish, so sort before comparing:
+        # what matters here is that BY NAME lowering paired each value with the right column.
+        self.assertEqual(sorted(sync_execute(sql)), [(1, 2), (4, 3)])
+
+    def test_union_by_name_nested_set_operand_reorders_every_leaf(self):
+        response = self._select(
+            "select 1 as a, 2 as b union all by name (select 30 as b, 40 as a union all select 50 as b, 60 as a)"
+        )
+        self.assertNotIn("BY NAME", response)
+        self.assertIn("SELECT 40 AS a, 30 AS b", response)
+        self.assertIn("SELECT 60 AS a, 50 AS b", response)
+
+    @parameterized.expand(
+        [
+            ("missing_column", "select 1 as a, 2 as b union all by name select 3 as b", "missing: a"),
+            (
+                "extra_column",
+                "select 1 as a union all by name select 3 as a, 4 as b",
+                "unexpected: b",
+            ),
+            (
+                "same_arity_renamed_column",
+                "select 1 as a, 2 as b union all by name select 3 as a, 4 as c",
+                "missing: b",
+            ),
+            (
+                "duplicate_columns",
+                "select uuid, uuid from events union all by name select uuid from events",
+                "uniquely named columns",
+            ),
+            (
+                "nested_leaf_arity_mismatch",
+                "select 1 as a, 2 as b union all by name (select 3 as b, 4 as a union all select 5 as a, 6 as b, 7 as c)",
+                "number of columns",
+            ),
+        ]
+    )
+    def test_by_name_invalid_column_sets_raise(self, _name: str, query: str, expected_error: str):
+        with self.assertRaises(QueryError) as context:
+            self._select(query)
+        self.assertIn(expected_error, str(context.exception))
+
+    def test_union_by_name_remaps_positional_order_by(self):
+        # `order by 2` on the reordered branch must still sort by the column the user meant. Datastore
+        # binds a trailing ORDER BY to the last operand, so this needs multiple rows to be observable —
+        # a string check alone passes even when the ordinal points at the wrong column. The sentinel
+        # first-branch row floats freely across the UNION ALL boundary, so assert only the sorted
+        # branch: a correct remap sorts by x (8, 9, 10); a broken one sorts by y (10, 9, 8).
+        sql = self._select(
+            "select 0 as x, 0 as y union all by name select number as y, (10 - number) as x from numbers(3) order by 2"
+        )
+        sorted_branch = [row for row in sync_execute(sql) if row[0] != 0]
+        self.assertEqual(sorted_branch, [(8, 2), (9, 1), (10, 0)])
+
+    def test_union_by_name_kept_for_postgres_dialect(self):
+        response, _ = prepare_and_print_ast(
+            parse_select("select 1 as a, 2 as b union all by name select 3 as b, 4 as a"),
+            InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+            "postgres",
+        )
+        self.assertIn("UNION ALL BY NAME", response)
+        self.assertIn("SELECT 3 AS b, 4 AS a", response)
+
+    @parameterized.expand([("intersect by name",), ("except by name",)])
+    def test_intersect_except_by_name_rejected_for_postgres_dialect(self, operator: str):
+        # DuckDB supports UNION BY NAME natively but rejects INTERSECT/EXCEPT BY NAME, so the postgres
+        # printer must refuse them rather than emit SQL DuckDB won't run.
+        with self.assertRaises(QueryError) as context:
+            prepare_and_print_ast(
+                parse_select(f"select 1 as a, 2 as b {operator} select 3 as b, 4 as a"),
+                InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+                "postgres",
+            )
+        self.assertIn("is not supported", str(context.exception))
+
+    @parameterized.expand([("mysql",), ("snowflake",), ("redshift",)])
+    def test_by_name_rejected_in_warehouse_dialects(self, dialect: str):
+        with self.assertRaises(QueryError) as context:
+            prepare_and_print_ast(
+                parse_select("select 1 as a union all by name select 2 as a"),
+                InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+                cast(InsightsQLDialect, dialect),
+            )
+        self.assertIn("UNION ALL BY NAME is not supported", str(context.exception))
+
+    @parameterized.expand([("intersect all",), ("except all",)])
+    def test_intersect_except_all_rejected_for_redshift_and_snowflake(self, operator: str):
+        # These extend the permit-all Postgres printer, so without a real gate they would ship
+        # INTERSECT ALL/EXCEPT ALL verbatim to engines that don't support them.
+        for dialect in ("redshift", "snowflake"):
+            with self.assertRaises((QueryError, ImpossibleASTError)):
+                prepare_and_print_ast(
+                    parse_select(f"select 1 as a {operator} select 1 as a"),
+                    InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+                    cast(InsightsQLDialect, dialect),
+                )
+
+    @parameterized.expand([("intersect all",), ("except all",)])
+    def test_intersect_except_all_permitted_for_mysql(self, operator: str):
+        # MySQL 8.0.31+ supports the ALL modifier, so it must not be swept up in the Redshift/Snowflake gate.
+        printed, _ = prepare_and_print_ast(
+            parse_select(f"select 1 as a {operator} select 1 as a"),
+            InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+            "mysql",
+        )
+        self.assertIn(operator.upper(), printed)
 
     # these share the same priority, should stay in order
     def test_except_and_union(self):
@@ -272,6 +655,20 @@ class TestPrinter(BaseTest):
             "LIMIT 50000",
         )
 
+    def test_ignore_nulls_prints(self):
+        self.assertEqual(
+            self._select("SELECT event IGNORE NULLS FROM events"),
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
+            ),
+        )
+
+    def test_select_set_order_by_prints(self):
+        self.assertEqual(
+            self._select("select 1 union all select 2 order by 1"),
+            "SELECT 1 LIMIT 50000 UNION ALL SELECT 2 ORDER BY 1 ASC LIMIT 50000",
+        )
+
     def test_intersect_and_union_parens(self):
         expr = parse_select("""select 1 as id intersect (select 2 as id union all select 3 as id)""")
         response = to_printed_insightsql(expr, self.team)
@@ -314,15 +711,25 @@ class TestPrinter(BaseTest):
         self.assertEqual(self._expr("1.0 % 2.66"), "modulo(1.0, 2.66)")
         self.assertEqual(self._expr("'string'"), "%(insightsql_val_0)s")
 
+    def test_case_insensitive_function_name(self):
+        # rand is registered case-insensitively, so uppercase RAND() resolves to rand()
+        self.assertEqual(self._expr("rand()"), "rand()")
+        self.assertEqual(self._expr("RAND()"), "rand()")
+
     def test_arrays(self):
         self.assertEqual(self._expr("[]"), "[]")
         self.assertEqual(self._expr("[1,2]"), "[1, 2]")
 
     def test_array_access(self):
         self.assertEqual(self._expr("[1,2,3][1]"), "[1, 2, 3][1]")
+        expected_properties_index = (
+            self._json_dynamic_property_expr("1")
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+        )
         self.assertEqual(
             self._expr("events.properties[1]"),
-            "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')",
+            expected_properties_index,
         )
         self.assertEqual(self._expr("events.event[1 + 2]"), "events.event[plus(1, 2)]")
 
@@ -356,20 +763,36 @@ class TestPrinter(BaseTest):
     def test_fields_and_properties(self):
         self.assertEqual(
             self._expr("properties.bla"),
-            "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')",
+            (
+                self._json_dynamic_property_expr("bla")
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+            ),
         )
         self.assertEqual(
             self._expr("properties['bla']"),
-            "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')",
+            (
+                self._json_dynamic_property_expr("bla")
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+            ),
         )
         self.assertEqual(
             self._expr("properties['bla']['bla']"),
-            "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', '')",
+            (
+                self._json_dynamic_subcolumn_path_expr("events.properties", ["bla", "bla"])
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', '')"
+            ),
         )
         context = InsightsQLContext(team_id=self.team.pk)
         self.assertEqual(
             self._expr("properties.$bla", context),
-            "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')",
+            (
+                self._json_dynamic_property_expr("$bla")
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+            ),
         )
 
         with override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=False):
@@ -398,13 +821,53 @@ class TestPrinter(BaseTest):
             )
             self.assertEqual(
                 self._expr("person.properties.bla", context),
-                "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(person_properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')",
+                (
+                    self._json_dynamic_subcolumn_expr("person_properties", "bla")
+                    if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                    else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(person_properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+                ),
             )
             context = InsightsQLContext(team_id=self.team.pk)
             self.assertEqual(
                 self._expr("person.properties.bla", context),
-                "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')",
+                (
+                    self._json_dynamic_person_property_expr("bla")
+                    if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                    else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+                ),
             )
+
+    @parameterized.expand([(True,), (False,)])
+    def test_type_aware_simplification_modifier_drives_prepare_pipeline(self, modifier_enabled: bool):
+        # The production rollout path: the typeAwareCastSimplification modifier (not the internal
+        # context flag) must reach the simplifier inside prepare_ast_for_printing.
+        context = InsightsQLContext(
+            team_id=self.team.pk,
+            enable_select_queries=True,
+            modifiers=InsightsQLQueryModifiers(typeAwareCastSimplification=modifier_enabled),
+        )
+        sql = self._select("SELECT assumeNotNull(1) AS a, toString('x') AS b FROM events", context)
+
+        if modifier_enabled:
+            assert "assumeNotNull(" not in sql
+            assert "toString(" not in sql
+        else:
+            assert "assumeNotNull(" in sql
+            assert "toString(" in sql
+
+    def test_type_aware_simplification_stays_off_via_production_default_modifiers(self):
+        # Tripwire for the default flip: this exercises the real default path
+        # (create_default_modifiers_for_team), so turning the simplifier on by default is forced to
+        # be a deliberate, reviewed change that updates this test.
+        context = InsightsQLContext(
+            team_id=self.team.pk,
+            enable_select_queries=True,
+            modifiers=create_default_modifiers_for_team(self.team),
+        )
+        sql = self._select("SELECT assumeNotNull(1) AS a, toString('x') AS b FROM events", context)
+
+        assert "assumeNotNull(" in sql
+        assert "toString(" in sql
 
     def test_insightsql_properties(self):
         self.assertEqual(
@@ -457,7 +920,7 @@ class TestPrinter(BaseTest):
                 InsightsQLContext(team_id=self.team.pk),
                 "insightsql",
             ),
-            "properties.`$browser with a \\` tick`",
+            "properties.`$browser with a `` tick`",
         )
         self.assertEqual(
             self._expr(
@@ -465,7 +928,7 @@ class TestPrinter(BaseTest):
                 InsightsQLContext(team_id=self.team.pk),
                 "insightsql",
             ),
-            "properties.`$browser \\\\with a \\n\\` tick`",
+            "properties.`$browser \\\\with a \\n`` tick`",
         )
         # "dot NUMBER" means "tuple access" in datastore. To access strings properties, wrap them in `backquotes`
         self.assertEqual(
@@ -484,61 +947,203 @@ class TestPrinter(BaseTest):
 
     def test_insightsql_properties_json(self):
         context = InsightsQLContext(team_id=self.team.pk)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            expected_sql = self._json_dynamic_subcolumn_path_expr("events.properties", ["nomat", "json", "yet"])
+            expected_values = {}
+        else:
+            expected_sql = "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s, %(insightsql_val_1)s, %(insightsql_val_2)s), ''), 'null'), '^\"|\"$', '')"
+            expected_values = {"insightsql_val_0": "nomat", "insightsql_val_1": "json", "insightsql_val_2": "yet"}
         self.assertEqual(
             self._expr("properties.nomat.json.yet", context),
-            "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s, %(insightsql_val_1)s, %(insightsql_val_2)s), ''), 'null'), '^\"|\"$', '')",
+            expected_sql,
+        )
+        self.assertEqual(context.values, expected_values)
+
+    def test_insightsql_properties_use_active_storage_schema(self):
+        context = InsightsQLContext(team_id=self.team.pk)
+        expected_browser_sql = (
+            "events.properties.`$browser`"
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+        )
+        self.assertEqual(
+            self._expr("properties.$browser", context),
+            expected_browser_sql,
+        )
+        self.assertEqual(
+            context.values, {} if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA else {"insightsql_val_0": "$browser"}
+        )
+
+        context = InsightsQLContext(team_id=self.team.pk)
+        expected_ai_trace_sql = (
+            "events.properties.`$ai_trace_id`"
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+        )
+        self.assertEqual(
+            self._expr("properties.$ai_trace_id", context),
+            expected_ai_trace_sql,
+        )
+        self.assertEqual(
+            context.values, {} if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA else {"insightsql_val_0": "$ai_trace_id"}
+        )
+
+        context = InsightsQLContext(team_id=self.team.pk)
+        expected_client_id_sql = (
+            self._json_dynamic_property_expr("Account.client_id")
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+        )
+        self.assertEqual(
+            self._expr("properties.`Account.client_id`", context),
+            expected_client_id_sql,
         )
         self.assertEqual(
             context.values,
-            {"insightsql_val_0": "nomat", "insightsql_val_1": "json", "insightsql_val_2": "yet"},
+            {} if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA else {"insightsql_val_0": "Account.client_id"},
         )
 
+        context = InsightsQLContext(team_id=self.team.pk)
+        expected_dynamic_sql = (
+            self._json_dynamic_property_expr("unknown_dynamic_path")
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', '')"
+        )
+        self.assertEqual(
+            self._expr("properties.unknown_dynamic_path", context),
+            expected_dynamic_sql,
+        )
+        self.assertEqual(
+            context.values,
+            {} if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA else {"insightsql_val_0": "unknown_dynamic_path"},
+        )
+
+    def test_insightsql_property_comparisons_use_active_storage_schema(self):
+        context = InsightsQLContext(team_id=self.team.pk)
+        # The isNotNull guard keeps the comparison non-nullable while the bare column read stays
+        # skip-index eligible — same shape as nullable materialized columns on the legacy schema.
+        expected_sql = (
+            "and(equals(events.properties.`$browser`, %(insightsql_val_0)s), isNotNull(events.properties.`$browser`))"
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', ''), %(insightsql_val_1)s), 0)"
+        )
+        self.assertEqual(
+            self._expr("properties.$browser = 'Chrome'", context),
+            expected_sql,
+        )
+        self.assertEqual(
+            context.values,
+            (
+                {"insightsql_val_0": "Chrome"}
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else {"insightsql_val_0": "$browser", "insightsql_val_1": "Chrome"}
+            ),
+        )
+
+    def test_insightsql_events_table_uses_active_storage_schema(self):
+        printed = self._select(
+            "SELECT properties.$browser FROM events",
+            InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+        )
+        self.assertIn(f"FROM {self._events_table_ref()}", printed)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertNotIn("JSONExtractRaw", printed)
+
     def test_insightsql_properties_materialized_json_access(self):
+        try:
+            from ee.datastore.materialized_columns.analyze import materialize
+        except ModuleNotFoundError:
+            # EE not available? Assume we're good
+            self.assertEqual(1 + 2, 3)
+            return
+
         context = InsightsQLContext(team_id=self.team.pk)
         materialize("events", "withmat")
+        expected_withmat_sql = (
+            self._json_dynamic_subcolumn_path_expr("events.properties", ["withmat", "json", "yet"])
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(nullIf(nullIf(events.mat_withmat, ''), 'null'), %(insightsql_val_0)s, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', '')"
+        )
         self.assertEqual(
             self._expr("properties.withmat.json.yet", context),
-            "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(nullIf(nullIf(events.mat_withmat, ''), 'null'), %(insightsql_val_0)s, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', '')",
+            expected_withmat_sql,
         )
-        self.assertEqual(context.values, {"insightsql_val_0": "json", "insightsql_val_1": "yet"})
+        self.assertEqual(
+            context.values,
+            {} if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA else {"insightsql_val_0": "json", "insightsql_val_1": "yet"},
+        )
 
         context = InsightsQLContext(team_id=self.team.pk)
         materialize("events", "withmat_nullable", is_nullable=True)
+        expected_nullable_withmat_sql = (
+            self._json_dynamic_subcolumn_path_expr("events.properties", ["withmat_nullable", "json", "yet"])
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.mat_withmat_nullable, %(insightsql_val_0)s, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', '')"
+        )
         self.assertEqual(
             self._expr("properties.withmat_nullable.json.yet", context),
-            "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.mat_withmat_nullable, %(insightsql_val_0)s, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', '')",
+            expected_nullable_withmat_sql,
         )
-        self.assertEqual(context.values, {"insightsql_val_0": "json", "insightsql_val_1": "yet"})
+        self.assertEqual(
+            context.values,
+            {} if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA else {"insightsql_val_0": "json", "insightsql_val_1": "yet"},
+        )
 
     def test_materialized_fields_and_properties(self):
+        try:
+            from ee.datastore.materialized_columns.analyze import materialize
+        except ModuleNotFoundError:
+            # EE not available? Assume we're good
+            self.assertEqual(1 + 2, 3)
+            return
         materialize("events", "$browser")
         self.assertEqual(
             self._expr("properties['$browser']"),
-            "nullIf(nullIf(events.`mat_$browser`, ''), 'null')",
+            (
+                "events.properties.`$browser`"
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "nullIf(nullIf(events.`mat_$browser`, ''), 'null')"
+            ),
         )
 
         materialize("events", "withoutdollar")
         self.assertEqual(
             self._expr("properties['withoutdollar']"),
-            "nullIf(nullIf(events.mat_withoutdollar, ''), 'null')",
+            (
+                self._json_dynamic_property_expr("withoutdollar")
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "nullIf(nullIf(events.mat_withoutdollar, ''), 'null')"
+            ),
         )
 
         materialize("events", "$browser and string")
         self.assertEqual(
             self._expr("properties['$browser and string']"),
-            "nullIf(nullIf(events.`mat_$browser_and_string`, ''), 'null')",
+            (
+                self._json_dynamic_property_expr("$browser and string")
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "nullIf(nullIf(events.`mat_$browser_and_string`, ''), 'null')"
+            ),
         )
 
         materialize("events", "$browser%%%#@!@")
         self.assertEqual(
             self._expr("properties['$browser%%%#@!@']"),
-            "nullIf(nullIf(events.`mat_$browser_______`, ''), 'null')",
+            (
+                self._json_dynamic_property_expr("$browser%%%#@!@")
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "nullIf(nullIf(events.`mat_$browser_______`, ''), 'null')"
+            ),
         )
 
         materialize("events", "nullable_property", is_nullable=True)
         self.assertEqual(
             self._expr("properties['nullable_property']"),
-            "events.mat_nullable_property",
+            (
+                self._json_dynamic_property_expr("nullable_property")
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "events.mat_nullable_property"
+            ),
         )
 
     def test_property_groups(self):
@@ -552,16 +1157,27 @@ class TestPrinter(BaseTest):
 
         self.assertEqual(
             self._expr("properties['foo']", context),
-            "has(events.properties_group_custom, %(insightsql_val_0)s) ? events.properties_group_custom[%(insightsql_val_0)s] : null",
+            (
+                self._json_dynamic_property_expr("foo")
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "if(has(events.properties_group_custom, %(insightsql_val_0)s), events.properties_group_custom[%(insightsql_val_1)s], NULL)"
+            ),
         )
-        self.assertEqual(context.values["insightsql_val_0"], "foo")
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertEqual(context.values, {})
+        else:
+            self.assertEqual(context.values["insightsql_val_0"], "foo")
 
         with materialized("events", "foo"):
-            # Properties that are materialized as columns should take precedence over the values in the group's map
-            # column.
+            # Legacy materialized columns take precedence over the property group's map column. JSON subcolumns take
+            # precedence over both old physical layouts under the new schema.
             self.assertEqual(
                 self._expr("properties['foo']", context),
-                "nullIf(nullIf(events.mat_foo, ''), 'null')",
+                (
+                    self._json_dynamic_property_expr("foo")
+                    if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                    else "nullIf(nullIf(events.mat_foo, ''), 'null')"
+                ),
             )
 
     def test_property_groups_person_properties(self):
@@ -576,9 +1192,16 @@ class TestPrinter(BaseTest):
 
         self.assertEqual(
             self._expr("person.properties['foo']", context),
-            "has(events.person_properties_map_custom, %(insightsql_val_0)s) ? events.person_properties_map_custom[%(insightsql_val_0)s] : null",
+            (
+                self._json_dynamic_person_property_expr("foo")
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "if(has(events.person_properties_map_custom, %(insightsql_val_0)s), events.person_properties_map_custom[%(insightsql_val_1)s], NULL)"
+            ),
         )
-        self.assertEqual(context.values["insightsql_val_0"], "foo")
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertEqual(context.values, {})
+        else:
+            self.assertEqual(context.values["insightsql_val_0"], "foo")
 
     def _test_property_group_comparison(
         self,
@@ -599,6 +1222,15 @@ class TestPrinter(BaseTest):
 
         context = build_context(PropertyGroupsMode.OPTIMIZED)
         printed_expr = self._expr(input_expression, context)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            for property_groups_mode in (PropertyGroupsMode.DISABLED, PropertyGroupsMode.ENABLED):
+                baseline_context = build_context(property_groups_mode)
+                baseline_expr = self._expr(input_expression, baseline_context)
+                self.assertEqual(printed_expr % context.values, baseline_expr % baseline_context.values)
+            self.assertNotIn("properties_group_", printed_expr)
+            self.assertNotIn("person_properties_map_", printed_expr)
+            return
+
         if expected_optimized_query is not None:
             self.assertEqual(printed_expr, expected_optimized_query)
         else:
@@ -724,14 +1356,14 @@ class TestPrinter(BaseTest):
         # filter so it won't be used here.
         self._test_property_group_comparison(
             "properties.key = '' as eq",
-            "and(has(events.properties_group_custom, %(insightsql_val_0)s), equals(events.properties_group_custom[%(insightsql_val_0)s], %(insightsql_val_1)s)) AS eq",
-            {"insightsql_val_0": "key", "insightsql_val_1": ""},
+            "and(has(events.properties_group_custom, %(insightsql_val_0)s), equals(events.properties_group_custom[%(insightsql_val_1)s], %(insightsql_val_2)s)) AS eq",
+            {"insightsql_val_0": "key", "insightsql_val_1": "key", "insightsql_val_2": ""},
             expected_skip_indexes_used={"properties_group_custom_keys_bf"},
         )
         self._test_property_group_comparison(
             "equals(properties.key, '') as eq",
-            "and(has(events.properties_group_custom, %(insightsql_val_0)s), equals(events.properties_group_custom[%(insightsql_val_0)s], %(insightsql_val_1)s)) AS eq",
-            {"insightsql_val_0": "key", "insightsql_val_1": ""},
+            "and(has(events.properties_group_custom, %(insightsql_val_0)s), equals(events.properties_group_custom[%(insightsql_val_1)s], %(insightsql_val_2)s)) AS eq",
+            {"insightsql_val_0": "key", "insightsql_val_1": "key", "insightsql_val_2": ""},
             expected_skip_indexes_used={"properties_group_custom_keys_bf"},
         )
 
@@ -794,21 +1426,105 @@ class TestPrinter(BaseTest):
                 expected_skip_indexes_used={"properties_group_custom_keys_bf"},
             )
 
+    @override_settings(DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA=True)
+    def test_new_events_schema_json_has_uses_direct_json_subcolumns(self) -> None:
+        expected_by_expr = {
+            "JSONHas(properties, 'dynamic_key')": "or(isNotNull(events.properties.dynamic_key), notEquals(toJSONString(events.properties.^dynamic_key), '{}'))",
+            "JSONHas(properties, '$ai_trace_id')": "isNotNull(events.properties.`$ai_trace_id`)",
+            "JSONHas(properties, '$browser')": "isNotNull(events.properties.`$browser`)",
+        }
+        for expression, expected in expected_by_expr.items():
+            context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+            printed = self._expr(expression, context)
+            self.assertEqual(printed, expected)
+            self.assertNotIn("JSONExtractKeysAndValuesRaw", printed)
+
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        printed = self._expr("JSONHas(properties, 'metadata', 'score')", context)
+        self.assertIn("JSONHas(ifNull(", printed)
+        self.assertIn("events.properties.^metadata", printed)
+        self.assertNotIn("JSONExtractKeysAndValuesRaw", printed)
+
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        printed = self._expr("JSONHas(properties, 'items', 1)", context)
+        self.assertIn("JSONHas(ifNull(", printed)
+        self.assertIn("events.properties.items", printed)
+        self.assertNotIn("JSONExtractKeysAndValuesRaw", printed)
+
+    @override_settings(DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA=True)
+    def test_new_events_schema_keyed_json_extracts_avoid_blob_reconstruction(self) -> None:
+        # Extracting one key must read only that subcolumn — falling back to the reconstructed
+        # whole-properties blob is a large per-row serialization cost.
+        for expression in (
+            "JSONExtract(properties, 'cart_items', 'Array(String)')",
+            "JSONExtractRaw(properties, 'custom_key')",
+            "JSONExtractRaw(properties, 'items', 1)",
+        ):
+            printed = self._expr(expression, InsightsQLContext(team_id=self.team.pk, enable_select_queries=True))
+            self.assertNotIn("JSONExtractKeysAndValuesRaw", printed, expression)
+            self.assertIn("events.properties.", printed, expression)
+
+    @override_settings(DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA=True)
+    def test_new_events_schema_to_json_string_scrubs_absent_typed_paths(self) -> None:
+        printed = self._expr("toJSONString(properties)")
+
+        self.assertEqual(printed, self._json_reconstructed_blob("events.properties"))
+
+    def test_instance_setting_enables_new_events_schema(self) -> None:
+        # The production rollout lever is the instance setting, not the env var — a fresh context
+        # must pick up a runtime flip.
+        with override_instance_config("DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA", True):
+            sql = self._select("SELECT event FROM events")
+        self.assertIn("FROM events_json", sql)
+
+    @override_settings(DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA=False)
+    def test_instance_setting_team_allowlist_enables_new_events_schema(self) -> None:
+        with override_instance_config("DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA", False):
+            with override_instance_config("DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA_TEAMS", f" 999999, {self.team.pk} "):
+                sql = self._select("SELECT event FROM events")
+            self.assertIn("FROM events_json", sql)
+
+            # A list naming only other teams must not flip this team.
+            with override_instance_config("DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA_TEAMS", "999999"):
+                sql = self._select("SELECT event FROM events")
+            self.assertNotIn("FROM events_json", sql)
+
+            with override_instance_config("DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA_TEAMS", "invalid"):
+                with pytest.raises(ValueError):
+                    self._select("SELECT event FROM events")
+
+    @override_settings(DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA=True)
+    def test_new_events_schema_percent_property_keys_use_bound_subcolumns(self) -> None:
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+
+        for expression in ("JSONHas(properties, 'bad%key')", "JSONExtractRaw(properties, 'bad%key')"):
+            printed = self._expr(expression, context)
+            self.assertIn("getSubcolumn(events.properties,", printed)
+            self.assertNotIn("JSONExtractKeysAndValuesRaw", printed)
+
+    @override_settings(DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA=True)
+    def test_new_events_schema_runtime_first_property_keys_fail_fast(self) -> None:
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+
+        for expression in ("JSONHas(properties, event)", "JSONExtractRaw(properties, event)"):
+            with pytest.raises(QueryError, match="constant first key"):
+                self._expr(expression, context)
+
     def test_property_groups_optimized_in_comparisons(self) -> None:
         # The IN operator works much like equality when the right hand side of the expression is all constants. Like
         # equality, it also needs to handle the empty string special case.
         # We check which skip indexes are used on the test DB, but please test this on a prod-sized DB too when changing this.
         self._test_property_group_comparison(
             "properties.key IN ('a', 'b')",
-            "and(has(events.properties_group_custom, %(insightsql_val_0)s), in(events.properties_group_custom[%(insightsql_val_0)s], tuple(%(insightsql_val_1)s, %(insightsql_val_2)s)))",
-            {"insightsql_val_0": "key", "insightsql_val_1": "a", "insightsql_val_2": "b"},
+            "and(has(events.properties_group_custom, %(insightsql_val_0)s), in(events.properties_group_custom[%(insightsql_val_1)s], tuple(%(insightsql_val_2)s, %(insightsql_val_3)s)))",
+            {"insightsql_val_0": "key", "insightsql_val_1": "key", "insightsql_val_2": "a", "insightsql_val_3": "b"},
             expected_skip_indexes_used={"properties_group_custom_keys_bf"},
             expected_skip_indexes_not_used={"properties_group_custom_values_bf"},
         )
         self._test_property_group_comparison(
             "properties.key IN ['a', 'b']",
-            "and(has(events.properties_group_custom, %(insightsql_val_0)s), in(events.properties_group_custom[%(insightsql_val_0)s], tuple(%(insightsql_val_1)s, %(insightsql_val_2)s)))",
-            {"insightsql_val_0": "key", "insightsql_val_1": "a", "insightsql_val_2": "b"},
+            "and(has(events.properties_group_custom, %(insightsql_val_0)s), in(events.properties_group_custom[%(insightsql_val_1)s], tuple(%(insightsql_val_2)s, %(insightsql_val_3)s)))",
+            {"insightsql_val_0": "key", "insightsql_val_1": "key", "insightsql_val_2": "a", "insightsql_val_3": "b"},
             expected_skip_indexes_used={"properties_group_custom_keys_bf"},
             expected_skip_indexes_not_used={"properties_group_custom_values_bf"},
         )
@@ -830,8 +1546,8 @@ class TestPrinter(BaseTest):
         # Single empty string does need to check if the key exists as well as equality
         self._test_property_group_comparison(
             "properties.key IN ''",
-            "and(has(events.properties_group_custom, %(insightsql_val_0)s), equals(events.properties_group_custom[%(insightsql_val_0)s], %(insightsql_val_1)s))",
-            {"insightsql_val_0": "key", "insightsql_val_1": ""},
+            "and(has(events.properties_group_custom, %(insightsql_val_0)s), equals(events.properties_group_custom[%(insightsql_val_1)s], %(insightsql_val_2)s))",
+            {"insightsql_val_0": "key", "insightsql_val_1": "key", "insightsql_val_2": ""},
             expected_skip_indexes_used={"properties_group_custom_keys_bf"},
             expected_skip_indexes_not_used={"properties_group_custom_values_bf"},
         )
@@ -842,26 +1558,26 @@ class TestPrinter(BaseTest):
         self._test_property_group_comparison("properties.key IN ('a', 'b', NULL)", None)
 
         # NULL values are can be equal if using transform_null_in = 1, which we do by default
-        # https://clickhouse.com/docs/operations/settings/settings#transform_null_in
-        # https://clickhouse.com/docs/en/sql-reference/operators/in#null-processing
+        # https://datastore.com/docs/operations/settings/settings#transform_null_in
+        # https://datastore.com/docs/en/sql-reference/operators/in#null-processing
         self.assertTrue(
             InsightsQLGlobalSettings().transform_null_in
         )  # if changing this assumption, you'll need to change the printer too
         self._test_property_group_comparison(
             "properties.key in NULL",
-            "in(has(events.properties_group_custom, %(insightsql_val_2)s) ? events.properties_group_custom[%(insightsql_val_2)s] : null, NULL)",
+            "in(if(has(events.properties_group_custom, %(insightsql_val_0)s), events.properties_group_custom[%(insightsql_val_1)s], NULL), NULL)",
         )
         self._test_property_group_comparison(
             "properties.key in (NULL)",
-            "in(has(events.properties_group_custom, %(insightsql_val_2)s) ? events.properties_group_custom[%(insightsql_val_2)s] : null, NULL)",
+            "in(if(has(events.properties_group_custom, %(insightsql_val_0)s), events.properties_group_custom[%(insightsql_val_1)s], NULL), NULL)",
         )
         self._test_property_group_comparison(
             "properties.key in (NULL, NULL, NULL)",
-            "in(has(events.properties_group_custom, %(insightsql_val_2)s) ? events.properties_group_custom[%(insightsql_val_2)s] : null, tuple(NULL, NULL, NULL))",
+            "in(if(has(events.properties_group_custom, %(insightsql_val_0)s), events.properties_group_custom[%(insightsql_val_1)s], NULL), tuple(NULL, NULL, NULL))",
         )
         self._test_property_group_comparison(
             "properties.key in [NULL, NULL, NULL]",
-            "in(has(events.properties_group_custom, %(insightsql_val_2)s) ? events.properties_group_custom[%(insightsql_val_2)s] : null, [NULL, NULL, NULL])",
+            "in(if(has(events.properties_group_custom, %(insightsql_val_0)s), events.properties_group_custom[%(insightsql_val_1)s], NULL), [NULL, NULL, NULL])",
         )
 
         # Don't optimize comparisons to types that require additional type conversions.
@@ -875,34 +1591,39 @@ class TestPrinter(BaseTest):
         self._test_property_group_comparison("properties.key in (lower('a'), lower('b'))", None)
 
     def test_event_property_groups_optimized_in_query_results(self):
+        # Unique event name so the query below sees only this test's events. Postgres teams roll back
+        # between tests but Datastore events don't, so a reused team_id can carry foreign events from
+        # another test class into an un-scoped `FROM events` query (a null-valued one polluted the
+        # `value IN (NULL)` case in CI).
+        event_name = "property_groups_result_test"
         _create_event(
             team=self.team,
             distinct_id="distinct_id",
-            event="event",
+            event=event_name,
             properties={"label": "string", "value": "s"},
         )
         _create_event(
             team=self.team,
             distinct_id="distinct_id",
-            event="event",
+            event=event_name,
             properties={"label": "empty_string", "value": ""},
         )
         _create_event(
             team=self.team,
             distinct_id="distinct_id",
-            event="event",
+            event=event_name,
             properties={"label": "null", "value": None},
         )
         _create_event(
             team=self.team,
             distinct_id="distinct_id",
-            event="event",
+            event=event_name,
             properties={"label": "not_set"},
         )
         _create_event(
             team=self.team,
             distinct_id="distinct_id",
-            event="event",
+            event=event_name,
             properties={"label": "int", "value": 1},
         )
 
@@ -917,8 +1638,8 @@ class TestPrinter(BaseTest):
             insightsql_expr = parse_expr(expr)
 
             query = parse_select(
-                "select properties.label as label from events where properties.value in {expr} order by label asc",
-                placeholders={"expr": insightsql_expr},
+                "select properties.label as label from events where event = {event} and properties.value in {expr} order by label asc",
+                placeholders={"expr": insightsql_expr, "event": ast.Constant(value=event_name)},
             )
 
             disabled_context = InsightsQLContext(
@@ -958,8 +1679,14 @@ class TestPrinter(BaseTest):
 
             assert disabled_response.datastore and enabled_response.datastore and optimized_response.datastore
             assert "properties_group_custom" not in disabled_response.datastore
-            assert "properties_group_custom" in enabled_response.datastore
-            assert "properties_group_custom" in optimized_response.datastore
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert "properties_group_custom" not in enabled_response.datastore
+                assert "properties_group_custom" not in optimized_response.datastore
+                assert "events.properties." in enabled_response.datastore
+                assert "events.properties." in optimized_response.datastore
+            else:
+                assert "properties_group_custom" in enabled_response.datastore
+                assert "properties_group_custom" in optimized_response.datastore
             assert {row[0] for row in disabled_response.results} == labels
             assert {row[0] for row in enabled_response.results} == labels
             assert {row[0] for row in optimized_response.results} == labels
@@ -994,12 +1721,21 @@ class TestPrinter(BaseTest):
 
         parsed = parse_select("SELECT properties.file_type AS ft FROM events WHERE ft = 'image/svg'")
         printed, _ = prepare_and_print_ast(parsed, build_context(PropertyGroupsMode.OPTIMIZED), dialect="datastore")
-        assert printed == (
-            "SELECT has(events.properties_group_custom, %(insightsql_val_0)s) ? events.properties_group_custom[%(insightsql_val_0)s] : null AS ft "
-            "FROM events "
-            f"WHERE and(equals(events.team_id, {self.team.pk}), equals(events.properties_group_custom[%(insightsql_val_1)s], %(insightsql_val_2)s)) "
-            "LIMIT 50000"
-        )
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            assert printed == (
+                f"SELECT {self._json_dynamic_property_expr('file_type')} AS ft "
+                f"FROM {self._events_table_ref()} "
+                f"WHERE and(equals(events.team_id, {self.team.pk}), ifNull(equals(ft, %(insightsql_val_0)s), 0)) "
+                "LIMIT 50000"
+            )
+            assert "properties_group_custom" not in printed
+        else:
+            assert printed == (
+                "SELECT if(has(events.properties_group_custom, %(insightsql_val_0)s), events.properties_group_custom[%(insightsql_val_1)s], NULL) AS ft "
+                "FROM events "
+                f"WHERE and(equals(events.team_id, {self.team.pk}), equals(events.properties_group_custom[%(insightsql_val_2)s], %(insightsql_val_3)s)) "
+                "LIMIT 50000"
+            )
 
         # TODO: Ideally we'd be able to optimize queries that compare aliases, but this is a bit tricky since we need
         # the ability to resolve the field back to the aliased expression (if one exists) to determine whether or not
@@ -1010,6 +1746,36 @@ class TestPrinter(BaseTest):
             prepare_and_print_ast(parsed, build_context(PropertyGroupsMode.OPTIMIZED), dialect="datastore")[0]
             == prepare_and_print_ast(parsed, build_context(PropertyGroupsMode.ENABLED), dialect="datastore")[0]
         )
+
+    def _print_shadowed_alias_query(self) -> str:
+        # Two aliases share the name `a`: the outer one is a property read, the inner one is `event`. The inner
+        # `WHERE a = 'v'` must compare the inner alias — never the outer query's property.
+        context = InsightsQLContext(
+            team_id=self.team.pk,
+            enable_select_queries=True,
+            modifiers=InsightsQLQueryModifiers(
+                materializationMode=MaterializationMode.AUTO,
+                propertyGroupsMode=PropertyGroupsMode.OPTIMIZED,
+            ),
+        )
+        parsed = parse_select(
+            "SELECT properties.file_type AS a FROM events WHERE event IN (SELECT event AS a FROM events WHERE a = 'v')"
+        )
+        printed, _ = prepare_and_print_ast(parsed, context, dialect="datastore")
+        return printed
+
+    def test_property_alias_shadowed_in_subquery_is_not_rebound(self):
+        printed = self._print_shadowed_alias_query()
+        inner = printed.split("SELECT", 2)[2]
+        assert "properties_group_custom" not in inner, f"inner alias rebound to the outer property:\n{printed}"
+        assert "equals(a," in inner, f"expected the inner comparison to stay on the inner alias:\n{printed}"
+
+    def test_materialized_property_alias_shadowed_in_subquery_is_not_rebound(self):
+        with materialized("events", "file_type"):
+            printed = self._print_shadowed_alias_query()
+        inner = printed.split("SELECT", 2)[2]
+        assert "file_type" not in inner, f"inner alias rebound to the outer materialized property:\n{printed}"
+        assert "equals(a," in inner, f"expected the inner comparison to stay on the inner alias:\n{printed}"
 
     def test_methods(self):
         self.assertEqual(self._expr("count()"), "count()")
@@ -1034,6 +1800,8 @@ class TestPrinter(BaseTest):
         self.assertEqual(
             self._expr("toDecimal('3.14', 2)", context), "accurateCastOrNull(%(insightsql_val_6)s, %(insightsql_val_7)s)"
         )
+        # Single-arg toFloatOrDefault is degenerate; rewritten to toFloatOrZero for Datastore.
+        self.assertEqual(self._expr("toFloatOrDefault('1.5')", context), "toFloat64OrZero(%(insightsql_val_8)s)")
         self.assertEqual(self._expr("quantile(0.95)( event )"), "quantile(0.95)(events.event)")
 
         self.assertEqual(self._expr("groupArraySample(5)(event)"), "groupArraySample(5)(events.event)")
@@ -1046,6 +1814,31 @@ class TestPrinter(BaseTest):
             self._expr("groupArraySampleIf(5, 123456)(event, event is not null)"),
             "groupArraySampleIf(5, 123456)(events.event, isNotNull(events.event))",
         )
+
+    @parameterized.expand(
+        [
+            ("toBool", "toBool(uuid)", "accurateCastOrNull(events.uuid, %(insightsql_val_0)s)"),
+            ("every", "every(uuid)", "accurateCastOrNull(min(events.uuid), 'Bool')"),
+        ]
+    )
+    def test_to_bool_is_null_safe(self, _name: str, expr: str, expected: str) -> None:
+        # Boolean casts must not hard-fail on non-boolean input (e.g. a UUID-shaped string).
+        # They route through accurateCastOrNull so unparseable values become NULL instead
+        # of raising "Cannot parse boolean value here" and failing the whole query.
+        self.assertEqual(self._expr(expr), expected)
+
+    @parameterized.expand(
+        [
+            ("toFloat", "toFloat('1.3')"),
+            ("toFloatOrNull", "toFloatOrNull('1.3')"),
+            ("toFloat64OrNull", "toFloat64OrNull('1.3')"),
+        ]
+    )
+    def test_to_float_aliases(self, _name: str, expr: str) -> None:
+        # toFloatOrNull / toFloat64OrNull are accepted Datastore-name aliases of toFloat,
+        # all routing through accurateCastOrNull so unparseable input becomes NULL.
+        context = InsightsQLContext(team_id=self.team.pk)
+        self.assertEqual(self._expr(expr, context), "accurateCastOrNull(%(insightsql_val_0)s, %(insightsql_val_1)s)")
 
     def test_expr_parse_errors(self):
         self._assert_expr_error("", "Empty query")
@@ -1080,6 +1873,22 @@ class TestPrinter(BaseTest):
             "tostring(event)",
             "Unsupported function call 'tostring(...)'. Perhaps you meant 'toString(...)'?",
         )
+        self._assert_expr_error(
+            "int(event)",
+            "Unsupported function call 'int(...)'. Perhaps you meant 'toInt(...)'?",
+        )
+        self._assert_expr_error(
+            "float(event)",
+            "Unsupported function call 'float(...)'. Perhaps you meant 'toFloat(...)'?",
+        )
+        self._assert_expr_error(
+            "string(event)",
+            "Unsupported function call 'string(...)'. Perhaps you meant 'toString(...)'?",
+        )
+        self._assert_expr_error(
+            "uuid(event)",
+            "Unsupported function call 'uuid(...)'. Perhaps you meant 'toUUID(...)'?",
+        )
         self._assert_expr_error("yeet.the.cloud", "Unable to resolve field: yeet")
         self._assert_expr_error("chipotle", "Unable to resolve field: chipotle")
         self._assert_expr_error(
@@ -1099,6 +1908,24 @@ class TestPrinter(BaseTest):
         self._assert_expr_error(
             "event as `as%d`",
             'The InsightsQL identifier "as%d" is not permitted as it contains the "%" character',
+        )
+
+    @parameterized.expand([["percentile_cont"], ["percentile_disc"]])
+    def test_percentile_within_group_printer(self, function_name: str):
+        self.assertEqual(
+            self._expr(f"{function_name}(0.5) within group (order by event desc)", dialect="insightsql"),
+            f"{function_name}(0.5) WITHIN GROUP (ORDER BY event DESC)",
+        )
+
+    @parameterized.expand([["percentile_cont"], ["percentile_disc"]])
+    def test_percentile_within_group_parse_errors(self, function_name: str):
+        self._assert_expr_error(
+            f"{function_name}(0.5)",
+            f"Aggregation '{function_name}' requires WITHIN GROUP",
+        )
+        self._assert_expr_error(
+            f"{function_name}(0.5) within group (order by event desc)",
+            f"Aggregation '{function_name}' with WITHIN GROUP is not supported in Datastore dialect",
         )
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=True)
@@ -1172,7 +1999,11 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             self._expr("properties.bla and properties.bla2"),
-            "and(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', ''), replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', ''))",
+            (
+                f"and({self._json_dynamic_property_expr('bla')}, {self._json_dynamic_property_expr('bla2')})"
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "and(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^\"|\"$', ''), replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_1)s), ''), 'null'), '^\"|\"$', ''))"
+            ),
         )
         self.assertEqual(
             self._expr("event or timestamp or count()"),
@@ -1273,8 +2104,55 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             self._select("select 1 as `-- select team_id` from events"),
-            f"SELECT 1 AS `-- select team_id` FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 AS `-- select team_id` FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
+
+    @parameterized.expand(
+        [
+            # Injection-shaped strings — whitespace / punctuation makes them obviously not identifiers.
+            ("sql_injection", "; DROP TABLE events --"),
+            ("union_injection", "current_date UNION SELECT 1"),
+            ("whitespace", "current date"),
+            ("special_chars", "now()"),
+            ("empty_string", ""),
+            # Python-valid identifiers outside `VALID_KEYWORD_NAMES` — would emit unquoted as arbitrary Datastore tokens if the gate only checked `isidentifier()`.
+            ("python_identifier_but_not_keyword", "hello"),
+            ("looks_like_keyword_uppercase", "CURRENT_DATE"),
+            ("dunder_attr", "__class__"),
+            ("sql_keyword_select", "SELECT"),
+        ]
+    )
+    def test_keyword_rejects_invalid_names(self, _name: str, keyword_name: str):
+        # `Keyword.__post_init__` rejects at construction; `visit_keyword` re-checks at print time (defense-in-depth catches the `setattr` bypass path).
+        with self.assertRaises((ValueError, QueryError)):
+            node = ast.Keyword(name=keyword_name)
+            context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+            select_query = ast.SelectQuery(select=[node], select_from=ast.JoinExpr(table=ast.Field(chain=["events"])))
+            print_prepared_ast(node, context=context, dialect="datastore", stack=[select_query])
+
+    @parameterized.expand(
+        [
+            ("current_date",),
+            ("current_time",),
+            ("current_timestamp",),
+            ("localtime",),
+            ("localtimestamp",),
+        ]
+    )
+    def test_keyword_accepts_valid_names(self, keyword_name: str):
+        # The five names in `ast.VALID_KEYWORD_NAMES`, kept in sync with `resolver.POSTGRES_KEYWORD_TYPES` via import-time assert.
+        ast.Keyword(name=keyword_name)
+
+    def test_keyword_printer_rejects_setattr_bypass(self):
+        # `setattr`-after-construction skips `__post_init__`; the printer's allowlist re-check stops the bypass.
+        node = ast.Keyword(name="current_date")
+        node.name = "; DROP TABLE events --"
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        select_query = ast.SelectQuery(select=[node], select_from=ast.JoinExpr(table=ast.Field(chain=["events"])))
+        with self.assertRaises(QueryError):
+            print_prepared_ast(node, context=context, dialect="datastore", stack=[select_query])
 
     def test_case_when(self):
         self.assertEqual(self._expr("case when 1 then 2 else 3 end"), "if(1, 2, 3)")
@@ -1297,7 +2175,9 @@ class TestPrinter(BaseTest):
         self.assertEqual(self._select("select 1 + 2, 3"), f"SELECT plus(1, 2), 3 LIMIT {MAX_SELECT_RETURNED_ROWS}")
         self.assertEqual(
             self._select("select 1 + 2, 3 + 4 from events"),
-            f"SELECT plus(1, 2), plus(3, 4) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT plus(1, 2), plus(3, 4) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_select_alias(self):
@@ -1305,13 +2185,19 @@ class TestPrinter(BaseTest):
         self.assertEqual(self._select("select 1 as b"), f"SELECT 1 AS b LIMIT {MAX_SELECT_RETURNED_ROWS}")
         self.assertEqual(
             self._select("select 1 from events as e"),
-            f"SELECT 1 FROM events AS e WHERE equals(e.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            (
+                f"SELECT 1 FROM events_json AS e WHERE equals(e.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else f"SELECT 1 FROM events AS e WHERE equals(e.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_select_from(self):
         self.assertEqual(
             self._select("select 1 from events"),
-            f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self._assert_query_error("select 1 from other", "Unknown table `other`.")
 
@@ -1321,7 +2207,9 @@ class TestPrinter(BaseTest):
                 "select 1 from {placeholder}",
                 placeholders={"placeholder": ast.Field(chain=["events"])},
             ),
-            f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         with self.assertRaises(QueryError) as error_context:
             (
@@ -1344,11 +2232,15 @@ class TestPrinter(BaseTest):
     def test_select_cross_join(self):
         self.assertEqual(
             self._select("select 1 from events cross join raw_groups"),
-            f"SELECT 1 FROM events CROSS JOIN groups WHERE and(equals(groups.team_id, {self.team.pk}), equals(events.team_id, {self.team.pk})) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events CROSS JOIN groups WHERE and(equals(groups.team_id, {self.team.pk}), equals(events.team_id, {self.team.pk})) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("select 1 from events, raw_groups"),
-            f"SELECT 1 FROM events CROSS JOIN groups WHERE and(equals(groups.team_id, {self.team.pk}), equals(events.team_id, {self.team.pk})) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events CROSS JOIN groups WHERE and(equals(groups.team_id, {self.team.pk}), equals(events.team_id, {self.team.pk})) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_left_join_team_id_in_on_clause(self):
@@ -1428,162 +2320,394 @@ class TestPrinter(BaseTest):
         self.assertIn(f"equals(events.team_id, {self.team.pk})", where_clause)
         self.assertIn(f"equals(e2.team_id, {self.team.pk})", where_clause)
 
+    @parameterized.expand(
+        [
+            ("gte", ast.CompareOperationOp.GtEq),
+            ("gt", ast.CompareOperationOp.Gt),
+            ("lte", ast.CompareOperationOp.LtEq),
+            ("lt", ast.CompareOperationOp.Lt),
+            ("not_eq", ast.CompareOperationOp.NotEq),
+            ("eq", ast.CompareOperationOp.Eq),
+        ],
+    )
+    def test_join_comparison_op_does_not_emit_query_level_analyzer_setting(
+        self, _name: str, op: ast.CompareOperationOp
+    ):
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        settings = InsightsQLGlobalSettings()
+
+        select_query = ast.SelectQuery(
+            select=[ast.Constant(value=1)],
+            select_from=ast.JoinExpr(
+                table=ast.Field(chain=["events"]),
+                next_join=ast.JoinExpr(
+                    join_type="LEFT JOIN",
+                    table=ast.Field(chain=["events"]),
+                    alias="e2",
+                    constraint=ast.JoinConstraint(
+                        expr=ast.CompareOperation(
+                            op=op,
+                            left=ast.Field(chain=["events", "event"]),
+                            right=ast.Field(chain=["e2", "event"]),
+                        ),
+                        constraint_type="ON",
+                    ),
+                ),
+            ),
+        )
+
+        prepared = cast(
+            ast.SelectQuery,
+            prepare_ast_for_printing(select_query, context=context, dialect="datastore", stack=[select_query]),
+        )
+        result = print_prepared_ast(prepared, context=context, dialect="datastore", stack=[], settings=settings)
+
+        self.assertNotIn("enable_analyzer=1", result)
+
+    @parameterized.expand(
+        [
+            (
+                "bare_column_table_join",
+                "SELECT q1.event FROM events AS q1 INNER JOIN events AS q2 USING event",
+                "ON equals(q1.event, q2.event)",
+            ),
+            (
+                "cte_join",
+                "WITH exposed AS (SELECT event, distinct_id FROM events), "
+                "first_event AS (SELECT event, distinct_id FROM events) "
+                "SELECT e.distinct_id FROM exposed AS e JOIN first_event AS f USING (distinct_id)",
+                "ON equals(e.distinct_id, f.distinct_id)",
+            ),
+            (
+                "multiple_columns_subquery_join",
+                "SELECT a.event FROM (SELECT event, distinct_id FROM events) AS a "
+                "JOIN (SELECT event, distinct_id FROM events) AS b USING (event, distinct_id)",
+                "ON and(equals(a.event, b.event), equals(a.distinct_id, b.distinct_id))",
+            ),
+            (
+                "aliasless_subquery_right_join",
+                "SELECT a.event FROM events AS a JOIN (SELECT event FROM events) USING event",
+                "AS __using_join_1 ON equals(a.event, __using_join_1.event)",
+            ),
+            (
+                "aliasless_subquery_left_join",
+                "SELECT 1 FROM (SELECT event FROM events) JOIN events AS e USING event",
+                "ON equals(__using_join_1.event, e.event)",
+            ),
+            (
+                "aliasless_subqueries_both_sides",
+                "SELECT 1 FROM (SELECT event FROM events) JOIN (SELECT event FROM events) USING event",
+                "AS __using_join_2 ON equals(__using_join_1.event, __using_join_2.event)",
+            ),
+        ],
+    )
+    def test_join_using_desugars_to_on_constraint(self, _name: str, query: str, expected_constraint: str):
+        printed = self._select(query)
+        self.assertIn(expected_constraint, printed)
+        self.assertNotIn("USING", printed)
+
+    def test_join_using_unknown_right_column_raises(self):
+        with self.assertRaisesMessage(
+            QueryError, "Unable to resolve USING column 'event' on the right-hand table \"b\" of the join"
+        ):
+            self._select(
+                "SELECT a.event FROM (SELECT event FROM events) AS a "
+                "JOIN (SELECT distinct_id FROM events) AS b USING event"
+            )
+
     def test_select_array_join(self):
         self.assertEqual(
             self._select("select 1, a from events array join [1,2,3] as a"),
-            f"SELECT 1, a FROM events ARRAY JOIN [1, 2, 3] AS a WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1, a FROM events ARRAY JOIN [1, 2, 3] AS a WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("select 1, a, [1,2,3] as nums from events array join nums as a"),
-            f"SELECT 1, a, [1, 2, 3] AS nums FROM events ARRAY JOIN nums AS a WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1, a, [1, 2, 3] AS nums FROM events ARRAY JOIN nums AS a WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("select 1, a from events left array join [1,2,3] as a"),
-            f"SELECT 1, a FROM events LEFT ARRAY JOIN [1, 2, 3] AS a WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1, a FROM events LEFT ARRAY JOIN [1, 2, 3] AS a WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("select 1, a from events inner array join [1,2,3] as a"),
-            f"SELECT 1, a FROM events INNER ARRAY JOIN [1, 2, 3] AS a WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1, a FROM events INNER ARRAY JOIN [1, 2, 3] AS a WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
+
+    def test_select_positional_join(self):
+        result = self._select("select 1 from events positional join groups")
+        self.assertIn("POSITIONAL JOIN", result)
 
     def test_select_where(self):
         self.assertEqual(
             self._select("select 1 from events where 1 == 1"),
-            f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
         self.assertEqual(
             self._select("select 1 from events where 1 == 2"),
-            f"SELECT 1 FROM events WHERE 0 LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(f"SELECT 1 FROM events WHERE 0 LIMIT {MAX_SELECT_RETURNED_ROWS}"),
+        )
+
+    def test_function_filter_prints(self):
+        result = self._select("select sum(event) filter (where event = 'a') from events")
+        self.assertIn("FILTER (WHERE", result)
+
+    def test_with_clause_before_parens_select_set_prints(self):
+        self.assertEqual(
+            self._select("WITH cte AS (SELECT 1 AS a) (SELECT a FROM cte UNION ALL SELECT a FROM cte)"),
+            "WITH cte AS (SELECT 1 AS a) SELECT cte.a AS a FROM cte LIMIT 50000 UNION ALL SELECT cte.a AS a FROM cte LIMIT 50000",
         )
 
         self.assertEqual(
             self._select("select 1 from events where event='name'"),
-            f"SELECT 1 FROM events WHERE and(equals(events.team_id, {self.team.pk}), equals(events.event, %(insightsql_val_0)s)) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events WHERE and(equals(events.team_id, {self.team.pk}), equals(events.event, %(insightsql_val_0)s)) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_select_having(self):
         self.assertEqual(
             self._select("select 1 from events having 1 == 2"),
-            f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) HAVING 0 LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) HAVING 0 LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
+        )
+
+    def test_select_qualify_not_supported_in_datastore(self):
+        self._assert_select_error(
+            "select row_number() OVER () as rn from events qualify rn = 1",
+            "QUALIFY is not supported in the 'datastore' dialect",
         )
 
     def test_select_prewhere(self):
         self.assertEqual(
             self._select("select 1 from events prewhere 1 == 2 where 2 == 3"),
-            f"SELECT 1 FROM events PREWHERE 0 WHERE 0 LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(f"SELECT 1 FROM events PREWHERE 0 WHERE 0 LIMIT {MAX_SELECT_RETURNED_ROWS}"),
         )
         self.assertEqual(
             self._select("select 1 from events prewhere 1 == 2"),
-            f"SELECT 1 FROM events PREWHERE 0 WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events PREWHERE 0 WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("select 1 from events prewhere 1 == 2 where event='name'"),
-            f"SELECT 1 FROM events PREWHERE 0 WHERE and(equals(events.team_id, {self.team.pk}), equals(events.event, %(insightsql_val_0)s)) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events PREWHERE 0 WHERE and(equals(events.team_id, {self.team.pk}), equals(events.event, %(insightsql_val_0)s)) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_select_order_by(self):
         self.assertEqual(
             self._select("select event from events order by event"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) ORDER BY events.event ASC LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) ORDER BY events.event ASC LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("select event from events order by event desc"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) ORDER BY events.event DESC LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) ORDER BY events.event DESC LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("select event from events order by event desc, timestamp"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) ORDER BY events.event DESC, toTimeZone(events.timestamp, %(insightsql_val_0)s) ASC LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) ORDER BY events.event DESC, toTimeZone(events.timestamp, %(insightsql_val_0)s) ASC LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
+
+    @parameterized.expand(
+        [
+            [
+                "bare",
+                "select event from events order by event WITH FILL",
+                "ORDER BY events.event ASC WITH FILL",
+            ],
+            [
+                "from_to_step",
+                "select event from events order by event WITH FILL FROM 0 TO 10 STEP 1",
+                "ORDER BY events.event ASC WITH FILL FROM 0 TO 10 STEP 1",
+            ],
+            [
+                "desc_from_to",
+                "select event from events order by event DESC WITH FILL FROM 0 TO 10",
+                "ORDER BY events.event DESC WITH FILL FROM 0 TO 10",
+            ],
+            [
+                "interpolate",
+                "select event, distinct_id from events order by event WITH FILL FROM 'a' TO 'z' INTERPOLATE (distinct_id AS 0)",
+                "ORDER BY events.event ASC WITH FILL FROM %(insightsql_val_0)s TO %(insightsql_val_1)s INTERPOLATE (`events.distinct_id` AS 0)",
+            ],
+            [
+                "naked_interpolate",
+                "select event from events order by event WITH FILL FROM 0 TO 10 INTERPOLATE",
+                "ORDER BY events.event ASC WITH FILL FROM 0 TO 10 INTERPOLATE",
+            ],
+            [
+                "interpolate_no_as",
+                "select event, distinct_id from events order by event WITH FILL FROM 0 TO 10 INTERPOLATE (distinct_id)",
+                "ORDER BY events.event ASC WITH FILL FROM 0 TO 10 INTERPOLATE (`events.distinct_id`)",
+            ],
+        ]
+    )
+    def test_select_order_by_with_fill(self, _name: str, query: str, expected_fragment: str):
+        result = self._select(query)
+        self.assertIn(expected_fragment, result)
 
     def test_select_limit(self):
         self.assertEqual(
             self._select("select event from events limit 10"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10"
+            ),
         )
         self.assertEqual(
             self._select("select event from events limit 1000000"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("select event from events limit (select 100000000)"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT min2({MAX_SELECT_RETURNED_ROWS}, (SELECT 100000000))",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT min2({MAX_SELECT_RETURNED_ROWS}, (SELECT 100000000))"
+            ),
         )
 
         self.assertEqual(
             self._select("select event from events limit (select 100000000) with ties"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT min2({MAX_SELECT_RETURNED_ROWS}, (SELECT 100000000)) WITH TIES",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT min2({MAX_SELECT_RETURNED_ROWS}, (SELECT 100000000)) WITH TIES"
+            ),
         )
 
     def test_select_limit_with_insights_ai_context(self):
-        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, limit_context=LimitContext.INSIGHTS_AI)
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, limit_context=LimitContext.POSTFN_AI)
         self.assertEqual(
             self._select("select 1 limit 1000", context=context),
-            f"SELECT 1 LIMIT {MAX_SELECT_INSIGHTS_AI_LIMIT}",
+            f"SELECT 1 LIMIT {MAX_SELECT_POSTFN_AI_LIMIT}",
         )
 
     def test_select_offset(self):
         # Only the default limit if OFFSET is specified alone
         self.assertEqual(
             self._select("select event from events offset 10"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} OFFSET 10",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} OFFSET 10"
+            ),
         )
         self.assertEqual(
             self._select("select event from events limit 10 offset 10"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10 OFFSET 10",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10 OFFSET 10"
+            ),
         )
         self.assertEqual(
             self._select("select event from events limit 10 offset 0"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10 OFFSET 0",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10 OFFSET 0"
+            ),
         )
         self.assertEqual(
             self._select("select event from events limit 10 with ties offset 0"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10 WITH TIES OFFSET 0",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10 WITH TIES OFFSET 0"
+            ),
         )
 
         self.assertEqual(
             self._select("select event from (select event from events offset 10)"),
-            f"SELECT event AS event FROM (SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) OFFSET 10) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT event AS event FROM (SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) OFFSET 10) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_select_limit_by(self):
         self.assertEqual(
             self._select("select event from events limit 10 offset 0 by 1,event"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10 OFFSET 0 BY 1, events.event LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 10 OFFSET 0 BY 1, events.event LIMIT 50000"
+            ),
         )
 
     def test_select_group_by(self):
         self.assertEqual(
             self._select("select event from events group by event, timestamp"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) GROUP BY events.event, toTimeZone(events.timestamp, %(insightsql_val_0)s) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) GROUP BY events.event, toTimeZone(events.timestamp, %(insightsql_val_0)s) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
+
+    @parameterized.expand(
+        [
+            (
+                "grouping_sets",
+                "select event, distinct_id, count() as c from events group by grouping sets ((event), (distinct_id), ())",
+                "GROUP BY GROUPING SETS ((events.event), (events.distinct_id), ())",
+            ),
+            (
+                "cube",
+                "select event, distinct_id, count() as c from events group by cube(event, distinct_id)",
+                "GROUP BY CUBE(events.event, events.distinct_id)",
+            ),
+            (
+                "rollup",
+                "select event, distinct_id, count() as c from events group by rollup(event, distinct_id)",
+                "GROUP BY ROLLUP(events.event, events.distinct_id)",
+            ),
+        ]
+    )
+    def test_select_group_by_mode(self, _name: str, input_sql: str, expected_fragment: str):
+        result = self._select(input_sql)
+        self.assertIn(expected_fragment, result)
 
     def test_select_distinct(self):
         self.assertEqual(
             self._select("select distinct event from events group by event, timestamp"),
-            f"SELECT DISTINCT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) GROUP BY events.event, toTimeZone(events.timestamp, %(insightsql_val_0)s) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT DISTINCT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) GROUP BY events.event, toTimeZone(events.timestamp, %(insightsql_val_0)s) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_select_subquery(self):
         self.assertEqual(
             self._select("SELECT event from (select distinct event from events group by event, timestamp)"),
-            f"SELECT event AS event FROM (SELECT DISTINCT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) GROUP BY events.event, toTimeZone(events.timestamp, %(insightsql_val_0)s)) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT event AS event FROM (SELECT DISTINCT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) GROUP BY events.event, toTimeZone(events.timestamp, %(insightsql_val_0)s)) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("SELECT event from (select distinct event from events group by event, timestamp) e"),
-            f"SELECT e.event AS event FROM (SELECT DISTINCT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) GROUP BY events.event, toTimeZone(events.timestamp, %(insightsql_val_0)s)) AS e LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT e.event AS event FROM (SELECT DISTINCT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) GROUP BY events.event, toTimeZone(events.timestamp, %(insightsql_val_0)s)) AS e LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_select_union_all(self):
         self.assertEqual(
             self._select("SELECT events.event FROM events UNION ALL SELECT events.event FROM events WHERE 1 = 2"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} UNION ALL SELECT events.event AS event FROM events WHERE 0 LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} UNION ALL SELECT events.event AS event FROM events WHERE 0 LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select(
                 "SELECT events.event FROM events UNION ALL SELECT events.event FROM events WHERE 1 = 1 UNION ALL SELECT events.event FROM events WHERE 1 = 1"
             ),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} UNION ALL SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} UNION ALL SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} UNION ALL SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} UNION ALL SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             self._select("SELECT 1 UNION ALL (SELECT 1 UNION ALL SELECT 1) UNION ALL SELECT 1"),
@@ -1601,17 +2725,23 @@ class TestPrinter(BaseTest):
     def test_select_sample(self):
         self.assertEqual(
             self._select("SELECT events.event FROM events SAMPLE 1"),
-            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
         self.assertEqual(
             self._select("SELECT events.event FROM events SAMPLE 0.1 OFFSET 1/10"),
-            f"SELECT events.event AS event FROM events SAMPLE 0.1 OFFSET 1/10 WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events SAMPLE 0.1 OFFSET 1/10 WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
         self.assertEqual(
             self._select("SELECT events.event FROM events SAMPLE 2/78 OFFSET 999"),
-            f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
         with override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=False):
@@ -1626,20 +2756,22 @@ class TestPrinter(BaseTest):
             )
             self.assertEqual(
                 query,
-                f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 LEFT OUTER JOIN (SELECT "
-                "tupleElement(argMax(tuple(person_distinct_id_overrides.person_id), person_distinct_id_overrides.version), 1) AS person_id, "
-                "person_distinct_id_overrides.distinct_id AS distinct_id FROM person_distinct_id_overrides WHERE "
-                f"equals(person_distinct_id_overrides.team_id, {self.team.pk}) GROUP BY person_distinct_id_overrides.distinct_id "
-                "HAVING ifNull(equals(tupleElement(argMax(tuple(person_distinct_id_overrides.is_deleted), person_distinct_id_overrides.version), 1), 0), 0) "
-                "SETTINGS optimize_aggregation_in_order=1) AS events__override ON equals(events.distinct_id, events__override.distinct_id) "
-                f"JOIN (SELECT person.id AS id FROM person WHERE and(equals(person.team_id, {self.team.pk}), "
-                "in(tuple(person.id, person.version), (SELECT person.id AS id, max(person.version) AS version "
-                f"FROM person WHERE equals(person.team_id, {self.team.pk}) GROUP BY person.id "
-                "HAVING and(ifNull(equals(argMax(person.is_deleted, person.version), 0), 0), "
-                "ifNull(less(argMax(toTimeZone(person.created_at, %(insightsql_val_0)s), person.version), "
-                "plus(now64(6, %(insightsql_val_1)s), toIntervalDay(1))), 0))))) "
-                "SETTINGS optimize_aggregation_in_order=1) AS persons ON equals(persons.id, if(not(empty(events__override.distinct_id)), "
-                f"events__override.person_id, events.person_id)) WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+                self._with_active_events_table(
+                    f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 LEFT OUTER JOIN (SELECT "
+                    "argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version) AS person_id, "
+                    "person_distinct_id_overrides.distinct_id AS distinct_id FROM person_distinct_id_overrides WHERE "
+                    f"equals(person_distinct_id_overrides.team_id, {self.team.pk}) GROUP BY person_distinct_id_overrides.distinct_id "
+                    "HAVING equals(argMax(person_distinct_id_overrides.is_deleted, person_distinct_id_overrides.version), 0) "
+                    "SETTINGS optimize_aggregation_in_order=1) AS events__override ON equals(events.distinct_id, events__override.distinct_id) "
+                    f"JOIN (SELECT person.id AS id FROM person WHERE and(equals(person.team_id, {self.team.pk}), "
+                    "in(tuple(person.id, person.version), (SELECT person.id AS id, max(person.version) AS version "
+                    f"FROM person WHERE equals(person.team_id, {self.team.pk}) GROUP BY person.id "
+                    "HAVING and(equals(argMax(person.is_deleted, person.version), 0), "
+                    "less(argMax(toTimeZone(person.created_at, %(insightsql_val_0)s), person.version), "
+                    "plus(now64(6, %(insightsql_val_1)s), toIntervalDay(1))))))) "
+                    "SETTINGS optimize_aggregation_in_order=1) AS persons ON equals(persons.id, if(not(empty(events__override.distinct_id)), "
+                    f"events__override.person_id, events.person_id)) WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+                ),
             )
 
             context = InsightsQLContext(
@@ -1647,25 +2779,29 @@ class TestPrinter(BaseTest):
                 enable_select_queries=True,
                 modifiers=InsightsQLQueryModifiers(personsArgMaxVersion=PersonsArgMaxVersion.V2),
             )
+            # A SAMPLE on a lazy table is dropped when the table expands into a subquery: Datastore
+            # rejects SAMPLE on a subquery, and sampling a pre-aggregated table is meaningless.
             self.assertEqual(
                 self._select(
                     "SELECT events.event FROM events SAMPLE 2/78 OFFSET 999 JOIN persons SAMPLE 0.1 ON persons.id=events.person_id",
                     context,
                 ),
-                f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 LEFT OUTER JOIN (SELECT "
-                "tupleElement(argMax(tuple(person_distinct_id_overrides.person_id), person_distinct_id_overrides.version), 1) AS person_id, "
-                "person_distinct_id_overrides.distinct_id AS distinct_id FROM person_distinct_id_overrides WHERE "
-                f"equals(person_distinct_id_overrides.team_id, {self.team.pk}) GROUP BY person_distinct_id_overrides.distinct_id "
-                "HAVING ifNull(equals(tupleElement(argMax(tuple(person_distinct_id_overrides.is_deleted), person_distinct_id_overrides.version), 1), 0), 0) "
-                "SETTINGS optimize_aggregation_in_order=1) AS events__override ON equals(events.distinct_id, events__override.distinct_id) "
-                f"JOIN (SELECT person.id AS id FROM person WHERE and(equals(person.team_id, {self.team.pk}), "
-                "in(tuple(person.id, person.version), (SELECT person.id AS id, max(person.version) AS version "
-                f"FROM person WHERE equals(person.team_id, {self.team.pk}) GROUP BY person.id "
-                "HAVING and(ifNull(equals(argMax(person.is_deleted, person.version), 0), 0), "
-                "ifNull(less(argMax(toTimeZone(person.created_at, %(insightsql_val_0)s), person.version), "
-                "plus(now64(6, %(insightsql_val_1)s), toIntervalDay(1))), 0))))) "
-                "SETTINGS optimize_aggregation_in_order=1) AS persons SAMPLE 0.1 ON equals(persons.id, if(not(empty(events__override.distinct_id)), "
-                f"events__override.person_id, events.person_id)) WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+                self._with_active_events_table(
+                    f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 LEFT OUTER JOIN (SELECT "
+                    "argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version) AS person_id, "
+                    "person_distinct_id_overrides.distinct_id AS distinct_id FROM person_distinct_id_overrides WHERE "
+                    f"equals(person_distinct_id_overrides.team_id, {self.team.pk}) GROUP BY person_distinct_id_overrides.distinct_id "
+                    "HAVING equals(argMax(person_distinct_id_overrides.is_deleted, person_distinct_id_overrides.version), 0) "
+                    "SETTINGS optimize_aggregation_in_order=1) AS events__override ON equals(events.distinct_id, events__override.distinct_id) "
+                    f"JOIN (SELECT person.id AS id FROM person WHERE and(equals(person.team_id, {self.team.pk}), "
+                    "in(tuple(person.id, person.version), (SELECT person.id AS id, max(person.version) AS version "
+                    f"FROM person WHERE equals(person.team_id, {self.team.pk}) GROUP BY person.id "
+                    "HAVING and(equals(argMax(person.is_deleted, person.version), 0), "
+                    "less(argMax(toTimeZone(person.created_at, %(insightsql_val_0)s), person.version), "
+                    "plus(now64(6, %(insightsql_val_1)s), toIntervalDay(1))))))) "
+                    "SETTINGS optimize_aggregation_in_order=1) AS persons ON equals(persons.id, if(not(empty(events__override.distinct_id)), "
+                    f"events__override.person_id, events.person_id)) WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+                ),
             )
 
         with override_settings(PERSON_ON_EVENTS_OVERRIDE=True, PERSON_ON_EVENTS_V2_OVERRIDE=False):
@@ -1680,12 +2816,14 @@ class TestPrinter(BaseTest):
             )
             self.assertEqual(
                 expected,
-                f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 JOIN (SELECT person.id AS id FROM person WHERE "
-                f"and(equals(person.team_id, {self.team.pk}), in(tuple(person.id, person.version), (SELECT person.id AS id, "
-                f"max(person.version) AS version FROM person WHERE equals(person.team_id, {self.team.pk}) GROUP BY person.id "
-                f"HAVING and(ifNull(equals(argMax(person.is_deleted, person.version), 0), 0), ifNull(less(argMax(toTimeZone(person.created_at, "
-                f"%(insightsql_val_0)s), person.version), plus(now64(6, %(insightsql_val_1)s), toIntervalDay(1))), 0))))) SETTINGS optimize_aggregation_in_order=1) "
-                f"AS persons ON equals(persons.id, events.person_id) WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+                self._with_active_events_table(
+                    f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 JOIN (SELECT person.id AS id FROM person WHERE "
+                    f"and(equals(person.team_id, {self.team.pk}), in(tuple(person.id, person.version), (SELECT person.id AS id, "
+                    f"max(person.version) AS version FROM person WHERE equals(person.team_id, {self.team.pk}) GROUP BY person.id "
+                    f"HAVING and(equals(argMax(person.is_deleted, person.version), 0), less(argMax(toTimeZone(person.created_at, "
+                    f"%(insightsql_val_0)s), person.version), plus(now64(6, %(insightsql_val_1)s), toIntervalDay(1))))))) SETTINGS optimize_aggregation_in_order=1) "
+                    f"AS persons ON equals(persons.id, events.person_id) WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+                ),
             )
 
             context = InsightsQLContext(
@@ -1693,36 +2831,53 @@ class TestPrinter(BaseTest):
                 enable_select_queries=True,
                 modifiers=InsightsQLQueryModifiers(personsArgMaxVersion=PersonsArgMaxVersion.V2),
             )
+            # SAMPLE on the lazy persons table is dropped once it expands into a subquery.
             expected = self._select(
                 "SELECT events.event FROM events SAMPLE 2/78 OFFSET 999 JOIN persons SAMPLE 0.1 ON persons.id=events.person_id",
                 context,
             )
             self.assertEqual(
                 expected,
-                f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 JOIN (SELECT person.id AS id FROM person WHERE "
-                f"and(equals(person.team_id, {self.team.pk}), in(tuple(person.id, person.version), (SELECT person.id AS id, "
-                f"max(person.version) AS version FROM person WHERE equals(person.team_id, {self.team.pk}) GROUP BY person.id "
-                f"HAVING and(ifNull(equals(argMax(person.is_deleted, person.version), 0), 0), ifNull(less(argMax(toTimeZone(person.created_at, "
-                f"%(insightsql_val_0)s), person.version), plus(now64(6, %(insightsql_val_1)s), toIntervalDay(1))), 0))))) SETTINGS optimize_aggregation_in_order=1) "
-                f"AS persons SAMPLE 0.1 ON equals(persons.id, events.person_id) WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+                self._with_active_events_table(
+                    f"SELECT events.event AS event FROM events SAMPLE 2/78 OFFSET 999 JOIN (SELECT person.id AS id FROM person WHERE "
+                    f"and(equals(person.team_id, {self.team.pk}), in(tuple(person.id, person.version), (SELECT person.id AS id, "
+                    f"max(person.version) AS version FROM person WHERE equals(person.team_id, {self.team.pk}) GROUP BY person.id "
+                    f"HAVING and(equals(argMax(person.is_deleted, person.version), 0), less(argMax(toTimeZone(person.created_at, "
+                    f"%(insightsql_val_0)s), person.version), plus(now64(6, %(insightsql_val_1)s), toIntervalDay(1))))))) SETTINGS optimize_aggregation_in_order=1) "
+                    f"AS persons ON equals(persons.id, events.person_id) WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+                ),
             )
 
     def test_count_distinct(self):
         self.assertEqual(
             self._select("SELECT count(distinct event) as count FROM events"),
-            f"SELECT count(DISTINCT events.event) AS count FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT count(DISTINCT events.event) AS count FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
+        )
+
+    def test_count_distinct_function(self):
+        self.assertEqual(
+            self._select("SELECT countDistinct(event) as count FROM events"),
+            self._with_active_events_table(
+                f"SELECT countDistinct(events.event) AS count FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_count_star(self):
         self.assertEqual(
             self._select("SELECT count(*) as count FROM events"),
-            f"SELECT count(*) AS count FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT count(*) AS count FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_count_if_distinct(self):
         self.assertEqual(
             self._select("SELECT countIf(distinct event, event like '%a%') as count FROM events"),
-            f"SELECT countIf(DISTINCT events.event, like(events.event, %(insightsql_val_0)s)) AS count FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT countIf(DISTINCT events.event, like(events.event, %(insightsql_val_0)s)) AS count FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_print_timezone(self):
@@ -1738,7 +2893,9 @@ class TestPrinter(BaseTest):
                 "SELECT now() as a, toDateTime(timestamp) as b, toDate(test_date) as c, toDateTime('2020-02-02') as d, toDateTime('2020-02-02 12:25') as e FROM events",
                 context,
             ),
-            f"SELECT now64(6, %(insightsql_val_0)s) AS a, toDateTime(toTimeZone(events.timestamp, %(insightsql_val_1)s), %(insightsql_val_2)s) AS b, toDate(events.test_date) AS c, toDateTime(%(insightsql_val_3)s, %(insightsql_val_4)s) AS d, parseDateTime64BestEffort(%(insightsql_val_5)s, 6, %(insightsql_val_6)s) AS e FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT now64(6, %(insightsql_val_0)s) AS a, toDateTime(toTimeZone(events.timestamp, %(insightsql_val_1)s), %(insightsql_val_2)s) AS b, toDate(events.test_date) AS c, toDateTime(%(insightsql_val_3)s, %(insightsql_val_4)s) AS d, parseDateTime64BestEffort(%(insightsql_val_5)s, 6, %(insightsql_val_6)s) AS e FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             context.values,
@@ -1762,7 +2919,9 @@ class TestPrinter(BaseTest):
                 "SELECT now() as a, toDateTime(timestamp) as b, toDateTime('2020-02-02') as c FROM events",
                 context,
             ),
-            f"SELECT now64(6, %(insightsql_val_0)s) AS a, toDateTime(toTimeZone(events.timestamp, %(insightsql_val_1)s), %(insightsql_val_2)s) AS b, toDateTime(%(insightsql_val_3)s, %(insightsql_val_4)s) AS c FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT now64(6, %(insightsql_val_0)s) AS a, toDateTime(toTimeZone(events.timestamp, %(insightsql_val_1)s), %(insightsql_val_2)s) AS b, toDateTime(%(insightsql_val_3)s, %(insightsql_val_4)s) AS c FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             context.values,
@@ -1774,6 +2933,35 @@ class TestPrinter(BaseTest):
                 "insightsql_val_4": "Europe/Brussels",
             },
         )
+
+    @parameterized.expand([("=",), ("!=",), (">",), ("<",), (">=",), ("<=",)])
+    def test_zoned_datetime_string_compared_to_timestamp_is_inlined_as_datetime(self, op: str):
+        # Datastore can't parse 'Z'/offset datetime strings, so they are parsed in Python and inlined.
+        printed = self._select(f"SELECT count() FROM events WHERE timestamp {op} '2026-06-30T09:59:12.988000Z'")
+        assert "toDateTime64('2026-06-30 09:59:12.988000', 6, 'UTC')" in printed, printed
+        assert "BestEffort" not in printed, printed
+
+    def test_zoned_datetime_string_instant_converted_to_team_timezone(self):
+        # The inlined literal must be the same instant converted to the team timezone.
+        self.team.timezone = "US/Pacific"
+        self.team.save()
+        printed = self._select("SELECT count() FROM events WHERE timestamp > '2026-06-30T09:59:12.988000Z'")
+        assert "toDateTime64('2026-06-30 02:59:12.988000', 6, 'US/Pacific')" in printed, printed
+
+    @parameterized.expand(
+        [
+            ("events", "timestamp = '2026-06-30 09:59:12'"),  # no timezone, Datastore handles it
+            ("events", "timestamp = '2026-06-30'"),
+            ("events", "event = '2026-06-30T09:59:12.988000Z'"),  # String column
+            ("events", "timestamp = '2026-30-06T00:00:00Z'"),  # looks zoned but invalid, still errors loudly
+            ("exchange_rate", "date = '2026-06-30T09:59:12.988000Z'"),  # Date column, left alone
+        ]
+    )
+    def test_datetime_string_comparison_stays_bare(self, table: str, where: str):
+        # Only valid timezone-carrying strings compared to DateTime fields get inlined.
+        printed = self._select(f"SELECT count() FROM {table} WHERE {where}")
+        assert "2026" not in printed, printed
+        assert "BestEffort" not in printed, printed
 
     def test_print_timezone_gibberish(self):
         self.team.timezone = "Europe/InsightsLandia"
@@ -1787,50 +2975,83 @@ class TestPrinter(BaseTest):
             )
         self.assertEqual(str(error_context.exception), "Unknown timezone: 'Europe/InsightsLandia'")
 
+    def test_to_datetime_does_not_double_parse_datetime_property(self):
+        PropertyDefinition.objects.create(
+            team=self.team, name="dt_prop", property_type="DateTime", type=PropertyDefinition.Type.EVENT
+        )
+        printed = self._expr("toDateTime(properties.dt_prop)")
+        # The property-type swapper already wraps a DateTime property in toDateTime;
+        # an outer toDateTime must not re-parse the resulting datetime.
+        self.assertEqual(printed.count("parseDateTime64BestEffortOrNull"), 1, printed)
+
+    def test_to_datetime_does_not_double_parse_aliased_datetime_property(self):
+        PropertyDefinition.objects.create(
+            team=self.team, name="dt_prop", property_type="DateTime", type=PropertyDefinition.Type.EVENT
+        )
+        # The toDateTime arg is an Alias whose declared type is stale after the
+        # swapper rewrites the inner DateTime property; the printer must look
+        # through the Alias to resolve the already-a-datetime overload.
+        printed = self._expr("toDateTime(properties.dt_prop AS d)")
+        self.assertEqual(printed.count("parseDateTime64BestEffortOrNull"), 1, printed)
+
     def test_window_functions(self):
         self.assertEqual(
             self._select(
                 "SELECT distinct_id, min(timestamp) over win1 as timestamp FROM events WINDOW win1 as (PARTITION by distinct_id ORDER BY timestamp DESC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)"
             ),
-            f"SELECT events.distinct_id AS distinct_id, min(toTimeZone(events.timestamp, %(insightsql_val_0)s)) OVER win1 AS timestamp FROM events WHERE equals(events.team_id, {self.team.pk}) WINDOW win1 AS (PARTITION BY events.distinct_id ORDER BY timestamp DESC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, min(toTimeZone(events.timestamp, %(insightsql_val_0)s)) OVER win1 AS timestamp FROM events WHERE equals(events.team_id, {self.team.pk}) WINDOW win1 AS (PARTITION BY events.distinct_id ORDER BY timestamp DESC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_postgres_compatible_lag_and_lead_functions(self):
         # Simple example without ROWS
         self.assertEqual(
             self._select("SELECT distinct_id, lag(timestamp) OVER (ORDER BY timestamp) FROM events"),
-            f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
+            ),
         )
         self.assertEqual(
             self._select("SELECT distinct_id, lead(timestamp) OVER (ORDER BY timestamp) FROM events"),
-            f"SELECT events.distinct_id AS distinct_id, leadInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, leadInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
+            ),
         )
         # Example with ROWS specified
         self.assertEqual(
             self._select(
                 "SELECT distinct_id, lag(timestamp) OVER (ORDER BY timestamp ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM events"
             ),
-            f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
+            ),
         )
         self.assertEqual(
             self._select(
                 "SELECT distinct_id, lead(timestamp) OVER (ORDER BY timestamp ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM events"
             ),
-            f"SELECT events.distinct_id AS distinct_id, leadInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, leadInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
+            ),
         )
         # Example with named windows
         self.assertEqual(
             self._select(
                 "SELECT distinct_id, lag(timestamp) over win1 as prev_ts FROM events WINDOW win1 as (PARTITION by distinct_id ORDER BY timestamp)"
             ),
-            f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS prev_ts FROM events WHERE equals(events.team_id, {self.team.pk}) WINDOW win1 AS (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_2)s) ASC) LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS prev_ts FROM events WHERE equals(events.team_id, {self.team.pk}) WINDOW win1 AS (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_2)s) ASC) LIMIT 50000"
+            ),
         )
         # Example with multiple named windows, to make sure we don't add ROWS BETWEEN for non lag/lead functions
         self.assertEqual(
             self._select(
                 "SELECT distinct_id, lag(timestamp) over win1 as prev_ts, min(timestamp) over win1 as min_ts FROM events WINDOW win1 as (PARTITION by distinct_id ORDER BY timestamp)"
             ),
-            f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS prev_ts, min(toTimeZone(events.timestamp, %(insightsql_val_2)s)) OVER win1 AS min_ts FROM events WHERE equals(events.team_id, {self.team.pk}) WINDOW win1 AS (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_3)s) ASC) LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS prev_ts, min(toTimeZone(events.timestamp, %(insightsql_val_2)s)) OVER win1 AS min_ts FROM events WHERE equals(events.team_id, {self.team.pk}) WINDOW win1 AS (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_3)s) ASC) LIMIT 50000"
+            ),
         )
         # Simple example with partiton by
         # Simple example with partition by
@@ -1838,7 +3059,9 @@ class TestPrinter(BaseTest):
             self._select(
                 "SELECT distinct_id, lag(timestamp) OVER (PARTITION BY distinct_id ORDER BY timestamp) FROM events"
             ),
-            f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(toTimeZone(events.timestamp, %(insightsql_val_0)s))) OVER (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_1)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
+            ),
         )
 
         # No rows but order by exists
@@ -1846,7 +3069,9 @@ class TestPrinter(BaseTest):
             self._select(
                 "SELECT distinct_id, lag(event) OVER (PARTITION BY distinct_id ORDER BY timestamp) FROM events"
             ),
-            f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(events.event)) OVER (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_0)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, lagInFrame(toNullable(events.event)) OVER (PARTITION BY events.distinct_id ORDER BY toTimeZone(events.timestamp, %(insightsql_val_0)s) ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
+            ),
         )
 
     def test_window_functions_with_window(self):
@@ -1854,7 +3079,9 @@ class TestPrinter(BaseTest):
             self._select(
                 "SELECT distinct_id, min(timestamp) over win1 as timestamp FROM events WINDOW win1 as (PARTITION by distinct_id ORDER BY timestamp DESC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)"
             ),
-            f"SELECT events.distinct_id AS distinct_id, min(toTimeZone(events.timestamp, %(insightsql_val_0)s)) OVER win1 AS timestamp FROM events WHERE equals(events.team_id, {self.team.pk}) WINDOW win1 AS (PARTITION BY events.distinct_id ORDER BY timestamp DESC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT events.distinct_id AS distinct_id, min(toTimeZone(events.timestamp, %(insightsql_val_0)s)) OVER win1 AS timestamp FROM events WHERE equals(events.team_id, {self.team.pk}) WINDOW win1 AS (PARTITION BY events.distinct_id ORDER BY timestamp DESC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_window_functions_with_arg(self):
@@ -1862,7 +3089,9 @@ class TestPrinter(BaseTest):
             self._select(
                 "SELECT quantiles(0.0, 0.25, 0.5, 0.75, 1.0)(distinct distinct_id) over () as values FROM events"
             ),
-            f"SELECT quantiles(0.0, 0.25, 0.5, 0.75, 1.0)(events.distinct_id) OVER () AS values FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000",
+            self._with_active_events_table(
+                f"SELECT quantiles(0.0, 0.25, 0.5, 0.75, 1.0)(events.distinct_id) OVER () AS values FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
+            ),
         )
 
     def test_nullish_concat(self):
@@ -1919,7 +3148,9 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             self._select("SELECT tumble(timestamp, toIntervalDay('1')) as t FROM events"),
-            f"SELECT tumble(toDateTime(toTimeZone(events.timestamp, %(insightsql_val_0)s), 'UTC'), toIntervalDay(%(insightsql_val_1)s)) AS t FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT tumble(toDateTime(toTimeZone(events.timestamp, %(insightsql_val_0)s), 'UTC'), toIntervalDay(%(insightsql_val_1)s)) AS t FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
 
     def test_field_nullable_equals(self):
@@ -1948,18 +3179,18 @@ class TestPrinter(BaseTest):
         assert generated_sql_statements1 == generated_sql_statements2
         assert generated_sql_statements1 == (
             f"SELECT "
+            # The view projects min(...)/sum(...), which resolve non-nullable, and the printer reads a subquery
+            # column's nullability from its resolved type — so every comparison below prints bare, no ifNull wrapping.
             # start_time = toStartOfMonth(now())
-            # (the return of toStartOfMonth() is treated as "potentially nullable" since we yet have full typing support)
-            f"ifNull(equals(session_replay_events.start_time, toStartOfMonth(now64(6, %(insightsql_val_1)s))), "
-            f"isNull(session_replay_events.start_time) and isNull(toStartOfMonth(now64(6, %(insightsql_val_1)s)))) AS a, "
+            f"equals(session_replay_events.start_time, toStartOfMonth(now64(6, %(insightsql_val_1)s))) AS a, "
             # 1 = 1
             f"1 AS b, "
             # click_count = 1
-            f"ifNull(equals(session_replay_events.click_count, 1), 0) AS c, "
+            f"equals(session_replay_events.click_count, 1) AS c, "
             # 1 = click_count
-            f"ifNull(equals(1, session_replay_events.click_count), 0) AS d, "
+            f"equals(1, session_replay_events.click_count) AS d, "
             # click_count = keypress_count
-            f"ifNull(equals(session_replay_events.click_count, session_replay_events.keypress_count), isNull(session_replay_events.click_count) and isNull(session_replay_events.keypress_count)) AS e, "
+            f"equals(session_replay_events.click_count, session_replay_events.keypress_count) AS e, "
             # click_count = null
             f"isNull(session_replay_events.click_count) AS f, "
             # null = click_count
@@ -1982,30 +3213,115 @@ class TestPrinter(BaseTest):
         assert generated_sql1 == generated_sql2
         assert generated_sql1 == (
             f"SELECT "
-            # start_time = toStartOfMonth(now())
-            # (the return of toStartOfMonth() is treated as "potentially nullable" since we yet have full typing support)
-            f"ifNull(notEquals(session_replay_events.start_time, toStartOfMonth(now64(6, %(insightsql_val_1)s))), "
-            f"isNotNull(session_replay_events.start_time) or isNotNull(toStartOfMonth(now64(6, %(insightsql_val_1)s)))) AS a, "
-            # 1 = 1
+            # Same as test_field_nullable_equals: non-nullable view columns print bare comparisons.
+            # start_time != toStartOfMonth(now())
+            f"notEquals(session_replay_events.start_time, toStartOfMonth(now64(6, %(insightsql_val_1)s))) AS a, "
+            # 1 != 1
             f"0 AS b, "
-            # click_count = 1
-            f"ifNull(notEquals(session_replay_events.click_count, 1), 1) AS c, "
-            # 1 = click_count
-            f"ifNull(notEquals(1, session_replay_events.click_count), 1) AS d, "
-            # click_count = keypress_count
-            f"ifNull(notEquals(session_replay_events.click_count, session_replay_events.keypress_count), isNotNull(session_replay_events.click_count) or isNotNull(session_replay_events.keypress_count)) AS e, "
-            # click_count = null
+            # click_count != 1
+            f"notEquals(session_replay_events.click_count, 1) AS c, "
+            # 1 != click_count
+            f"notEquals(1, session_replay_events.click_count) AS d, "
+            # click_count != keypress_count
+            f"notEquals(session_replay_events.click_count, session_replay_events.keypress_count) AS e, "
+            # click_count != null
             f"isNotNull(session_replay_events.click_count) AS f, "
-            # null = click_count
+            # null != click_count
             f"isNotNull(session_replay_events.click_count) AS g "
             # ...
             f"FROM (SELECT min(toTimeZone(session_replay_events.min_first_timestamp, %(insightsql_val_0)s)) AS start_time, sum(session_replay_events.click_count) AS click_count, sum(session_replay_events.keypress_count) AS keypress_count FROM session_replay_events WHERE equals(session_replay_events.team_id, {self.team.pk})) AS session_replay_events LIMIT {MAX_SELECT_RETURNED_ROWS}"
         )
 
+    def test_subquery_column_nullability_drives_comparison_wrapping(self):
+        # The printer reads a subquery column's nullability from its resolved type. Both directions matter: a
+        # genuinely nullable projection must KEEP its ifNull comparison guard (erasing it would change NULL semantics
+        # outside filter position), and a non-nullable projection prints bare (wrapping it hides the column from
+        # join-key detection and skip indexes).
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, database=Database())
+        context.database.get_table("events").fields["nullable_field"] = StringDatabaseField(  # type: ignore
+            name="nullable_field", nullable=True
+        )
+        printed_nullable = self._select(
+            "SELECT x = 'a' AS matches FROM (SELECT nullable_field AS x FROM events) AS sub",
+            context,
+        )
+        assert "ifNull(equals(sub.x, %(insightsql_val_0)s), 0) AS matches" in printed_nullable, printed_nullable
+
+        printed_non_nullable = self._select(
+            "SELECT x = 'a' AS matches FROM (SELECT event AS x FROM events) AS sub",
+            InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, database=Database()),
+        )
+        assert "equals(sub.x, %(insightsql_val_0)s) AS matches" in printed_non_nullable, printed_non_nullable
+        assert "ifNull" not in printed_non_nullable.split("FROM")[0], printed_non_nullable
+
+    def test_field_nullable_not_in(self):
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, database=Database())
+        context.database.get_table("events").fields["nullable_field"] = StringDatabaseField(  # type: ignore
+            name="nullable_field", nullable=True
+        )
+
+        generated_sql = self._select(
+            "SELECT minIf(timestamp, nullable_field NOT IN ('a', 'b')) AS first_seen FROM events",
+            context,
+        )
+
+        assert generated_sql == self._with_active_events_table(
+            "SELECT "
+            "minIf(toTimeZone(events.timestamp, %(insightsql_val_0)s), "
+            "ifNull(notIn(events.nullable_field, tuple(%(insightsql_val_1)s, %(insightsql_val_2)s)), 1)) AS first_seen "
+            f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+        )
+
+    def test_typed_string_function_prevents_ifnull_wrapping_in_comparison(self):
+        sql = self._expr("event = base64Encode('test')")
+
+        self.assertNotIn("ifNull(", sql)
+        self.assertTrue(sql.startswith("equals("))
+
+    def test_typed_url_function_prevents_ifnull_wrapping_in_comparison(self):
+        sql = self._expr("event = protocol('https://hanzo.ai')")
+
+        self.assertNotIn("ifNull(", sql)
+        self.assertTrue(sql.startswith("equals("))
+
+    def test_assume_not_null_prevents_ifnull_wrapping_for_unknown_function(self):
+        sql_without = self._expr("event = throwIf(0, 'not reached')")
+        self.assertIn("ifNull(", sql_without)
+
+        sql_with = self._expr("event = assumeNotNull(throwIf(0, 'not reached'))")
+        self.assertNotIn("ifNull(", sql_with)
+        self.assertTrue(sql_with.startswith("equals("))
+
+    def test_typed_string_function_prevents_ifnull_wrapping_not_equals(self):
+        sql = self._expr("event != base64Encode('test')")
+
+        self.assertNotIn("ifNull(", sql)
+        self.assertTrue(sql.startswith("notEquals("))
+
+    def test_typed_url_function_prevents_ifnull_wrapping_not_equals(self):
+        sql = self._expr("event != protocol('https://hanzo.ai')")
+
+        self.assertNotIn("ifNull(", sql)
+        self.assertTrue(sql.startswith("notEquals("))
+
+    def test_assume_not_null_prevents_ifnull_wrapping_unknown_function_not_equals(self):
+        sql_without = self._expr("event != throwIf(0, 'not reached')")
+        self.assertIn("ifNull(", sql_without)
+
+        sql_with = self._expr("event != assumeNotNull(throwIf(0, 'not reached'))")
+        self.assertNotIn("ifNull(", sql_with)
+        self.assertTrue(sql_with.startswith("notEquals("))
+
     def test_field_nullable_boolean(self):
         PropertyDefinition.objects.create(
             team=self.team, name="is_boolean", property_type="Boolean", type=PropertyDefinition.Type.EVENT
         )
+        try:
+            from ee.datastore.materialized_columns.analyze import materialize
+        except ModuleNotFoundError:
+            # EE not available? Assume we're good
+            self.assertEqual(1 + 2, 3)
+            return
         materialize("events", "is_boolean")
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
         generated_sql_statements1 = self._select(
@@ -2016,58 +3332,67 @@ class TestPrinter(BaseTest):
             "FROM events",
             context=context,
         )
-        assert generated_sql_statements1 == (
+        property_expr = (
+            self._json_dynamic_property_expr("is_boolean")
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "nullIf(nullIf(events.mat_is_boolean, ''), 'null')"
+        )
+        assert generated_sql_statements1 == self._with_active_events_table(
             f"SELECT "
-            "ifNull(equals(toBool(transform(toString(nullIf(nullIf(events.mat_is_boolean, ''), 'null')), %(insightsql_val_0)s, %(insightsql_val_1)s, NULL)), 1), 0), "
-            "ifNull(equals(toBool(transform(toString(nullIf(nullIf(events.mat_is_boolean, ''), 'null')), %(insightsql_val_2)s, %(insightsql_val_3)s, NULL)), 0), 0), "
-            "isNull(toBool(transform(toString(nullIf(nullIf(events.mat_is_boolean, ''), 'null')), %(insightsql_val_4)s, %(insightsql_val_5)s, NULL))) "
+            f"ifNull(equals(accurateCastOrNull(transform(toString({property_expr}), %(insightsql_val_0)s, %(insightsql_val_1)s, NULL), %(insightsql_val_2)s), 1), 0), "
+            f"ifNull(equals(accurateCastOrNull(transform(toString({property_expr}), %(insightsql_val_3)s, %(insightsql_val_4)s, NULL), %(insightsql_val_5)s), 0), 0), "
+            f"isNull(accurateCastOrNull(transform(toString({property_expr}), %(insightsql_val_6)s, %(insightsql_val_7)s, NULL), %(insightsql_val_8)s)) "
             f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
         )
         assert context.values == {
             "insightsql_val_0": ["true", "false"],
             "insightsql_val_1": [1, 0],
-            "insightsql_val_2": ["true", "false"],
-            "insightsql_val_3": [1, 0],
-            "insightsql_val_4": ["true", "false"],
-            "insightsql_val_5": [1, 0],
+            "insightsql_val_2": "Bool",
+            "insightsql_val_3": ["true", "false"],
+            "insightsql_val_4": [1, 0],
+            "insightsql_val_5": "Bool",
+            "insightsql_val_6": ["true", "false"],
+            "insightsql_val_7": [1, 0],
+            "insightsql_val_8": "Bool",
         }
 
-    @patch("insights.insightsql.printer.base.get_materialized_column_for_property")
-    def test_ai_trace_id_optimizations(self, mock_get_mat_col):
-        """Test that $ai_trace_id gets special treatment for bloom filter index optimization"""
+    @patch("insights.datastore.materialized_columns.get_enabled_materialized_columns_by_table")
+    def test_ai_trace_id_optimizations(self, mock_matcols_by_table):
+        """Test that $ai_trace_id uses the active storage path without wrappers that block skip indexes."""
+        from ee.datastore.materialized_columns.columns import MaterializedColumn, MaterializedColumnDetails
 
-
-        mock_mat_col = MaterializedColumn(
+        # The column is in the registry either way; JSON-backed event properties must ignore it.
+        mat_col = MaterializedColumn(
             name="mat_$ai_trace_id",
             details=MaterializedColumnDetails(
                 table_column="properties", property_name="$ai_trace_id", is_disabled=False
             ),
             is_nullable=True,
         )
+        mock_matcols_by_table.return_value = {"events": {("$ai_trace_id", "properties"): mat_col}}
 
-        # Basic equality comparison - no ifNull wrapping
-        mock_get_mat_col.return_value = mock_mat_col
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            expected_expr = "events.properties.`$ai_trace_id`"
+        else:
+            expected_expr = "events.`mat_$ai_trace_id`"
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
 
         sql = self._select("SELECT * FROM events WHERE properties.$ai_trace_id = 'trace123'", context)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertNotIn("mat_$ai_trace_id", sql)
 
-        # Should generate: equals(mat_$ai_trace_id, 'trace123') without ifNull wrapper
-        # Check that the WHERE clause contains the direct equals check for $ai_trace_id
-        self.assertIn("equals(events.`mat_$ai_trace_id`, %(insightsql_val_4)s)", sql)
+        # Find the placeholder that holds our value (index varies with number of joins)
+        trace_param_key = next((k for k, v in context.values.items() if v == "trace123"), None)
+        self.assertIsNotNone(trace_param_key, "Expected 'trace123' to be recorded as a parameter value")
+        self.assertIn(f"equals({expected_expr}, %({trace_param_key})s)", sql)
         # Verify the equals for $ai_trace_id is NOT wrapped in ifNull (it appears directly in WHERE clause)
         self.assertIn("WHERE and(equals(events.team_id,", sql)
-        self.assertIn("equals(events.`mat_$ai_trace_id`, %(insightsql_val_4)s))", sql)
 
-        # Verify the placeholder value (it's insightsql_val_4 due to other parameters in the query)
-        self.assertEqual(context.values["insightsql_val_4"], "trace123")
-
-        # With materialized column - no nullIf wrapping
+        # Direct property read should stay on the active indexed path with no sentinel scrubbing.
         context = InsightsQLContext(team_id=self.team.pk)
         sql = self._expr("properties.$ai_trace_id", context)
 
-        # Should be: events.mat_$ai_trace_id
-        # NOT: nullIf(nullIf(events.mat_$ai_trace_id, ''), 'null')
-        self.assertEqual(sql.strip(), "events.`mat_$ai_trace_id`")
+        self.assertEqual(sql.strip(), expected_expr)
         self.assertNotIn("nullIf", sql)
 
         # IN operations - no ifNull wrapping
@@ -2075,61 +3400,78 @@ class TestPrinter(BaseTest):
         sql = self._select("SELECT * FROM events WHERE properties.$ai_trace_id IN ('trace1', 'trace2')", context)
 
         # Should generate clean IN without ifNull wrapper
-        self.assertIn("in(events.`mat_$ai_trace_id`, tuple(%(insightsql_val_4)s, %(insightsql_val_5)s))", sql)
+        trace1_param_key = next((k for k, v in context.values.items() if v == "trace1"), None)
+        assert trace1_param_key is not None, "Expected 'trace1' to be recorded as a parameter value"
+        trace2_param_key = next((k for k, v in context.values.items() if v == "trace2"), None)
+        assert trace2_param_key is not None, "Expected 'trace2' to be recorded as a parameter value"
+        self.assertIn(f"in({expected_expr}, tuple(%({trace1_param_key})s, %({trace2_param_key})s))", sql)
         self.assertNotIn("ifNull(in", sql)
 
-        # Verify the placeholder values
-        self.assertEqual(context.values["insightsql_val_4"], "trace1")
-        self.assertEqual(context.values["insightsql_val_5"], "trace2")
+        # NOT IN operations - no ifNull wrapping
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        sql = self._select("SELECT * FROM events WHERE properties.$ai_trace_id NOT IN ('trace1', 'trace2')", context)
 
-        # Verify other properties still get normal treatment
-        mock_get_mat_col.return_value = None  # No materialized column for other props
+        trace1_param_key = next((k for k, v in context.values.items() if v == "trace1"), None)
+        assert trace1_param_key is not None, "Expected 'trace1' to be recorded as a parameter value"
+        trace2_param_key = next((k for k, v in context.values.items() if v == "trace2"), None)
+        assert trace2_param_key is not None, "Expected 'trace2' to be recorded as a parameter value"
+        self.assertIn(f"notIn({expected_expr}, tuple(%({trace1_param_key})s, %({trace2_param_key})s))", sql)
+        self.assertNotIn("ifNull(notIn", sql)
+
+        # Dynamic properties use JSON subcolumns under the new schema and JSON extraction under legacy.
+        # `other_prop` is not in the materialized-column registry, so it stays on the JSON path.
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
 
         sql = self._select("SELECT * FROM events WHERE properties.other_prop = 'value'", context)
 
-        # Other properties should still have null handling with ifNull wrapping
-        self.assertIn(
-            "ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_7)s), ''), 'null'), '^\"|\"$', ''), %(insightsql_val_8)s), 0)",
-            sql,
-        )
+        value_param_key = next((k for k, v in context.values.items() if v == "value"), None)
+        assert value_param_key is not None, "Expected 'value' to be recorded as a parameter value"
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            other_prop_expr = self._json_dynamic_property_expr("other_prop")
+            self.assertIn(f"ifNull(equals({other_prop_expr}, %({value_param_key})s), 0)", sql)
+            self.assertNotIn("JSONExtractRaw(events.properties,", sql)
+        else:
+            other_prop_param_key = next((k for k, v in context.values.items() if v == "other_prop"), None)
+            assert other_prop_param_key is not None, "Expected 'other_prop' to be recorded as a parameter value"
+            self.assertIn(
+                f"ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %({other_prop_param_key})s), ''), 'null'), '^\"|\"$', ''), %({value_param_key})s), 0)",
+                sql,
+            )
 
-    @patch("insights.insightsql.printer.base.get_materialized_column_for_property")
-    def test_ai_session_id_optimizations(self, mock_get_mat_col):
-        """Test that $ai_session_id gets special treatment for bloom filter index optimization"""
+    @patch("insights.datastore.materialized_columns.get_enabled_materialized_columns_by_table")
+    def test_ai_session_id_optimizations(self, mock_matcols_by_table):
+        """Test that $ai_session_id uses the active storage path without wrappers that block skip indexes."""
+        from ee.datastore.materialized_columns.columns import MaterializedColumn, MaterializedColumnDetails
 
-
-        mock_mat_col = MaterializedColumn(
+        # The column is in the registry either way; JSON-backed event properties must ignore it.
+        mat_col = MaterializedColumn(
             name="mat_$ai_session_id",
             details=MaterializedColumnDetails(
                 table_column="properties", property_name="$ai_session_id", is_disabled=False
             ),
             is_nullable=True,
         )
+        mock_matcols_by_table.return_value = {"events": {("$ai_session_id", "properties"): mat_col}}
 
-        # Basic equality comparison - no ifNull wrapping
-        mock_get_mat_col.return_value = mock_mat_col
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            expected_expr = "events.properties.`$ai_session_id`"
+        else:
+            expected_expr = "events.`mat_$ai_session_id`"
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
 
         sql = self._select("SELECT * FROM events WHERE properties.$ai_session_id = 'session123'", context)
 
-        # Should generate: equals(mat_$ai_session_id, 'session123') without ifNull wrapper
-        # Check that the WHERE clause contains the direct equals check for $ai_session_id
-        self.assertIn("equals(events.`mat_$ai_session_id`, %(insightsql_val_4)s)", sql)
+        session_param_key = next((k for k, v in context.values.items() if v == "session123"), None)
+        assert session_param_key is not None, "Expected 'session123' to be recorded as a parameter value"
+        self.assertIn(f"equals({expected_expr}, %({session_param_key})s)", sql)
         # Verify the equals for $ai_session_id is NOT wrapped in ifNull (it appears directly in WHERE clause)
         self.assertIn("WHERE and(equals(events.team_id,", sql)
-        self.assertIn("equals(events.`mat_$ai_session_id`, %(insightsql_val_4)s))", sql)
 
-        # Verify the placeholder value (it's insightsql_val_4 due to other parameters in the query)
-        self.assertEqual(context.values["insightsql_val_4"], "session123")
-
-        # With materialized column - no nullIf wrapping
+        # Direct property read should stay on the active indexed path with no sentinel scrubbing.
         context = InsightsQLContext(team_id=self.team.pk)
         sql = self._expr("properties.$ai_session_id", context)
 
-        # Should be: events.mat_$ai_session_id
-        # NOT: nullIf(nullIf(events.mat_$ai_session_id, ''), 'null')
-        self.assertEqual(sql.strip(), "events.`mat_$ai_session_id`")
+        self.assertEqual(sql.strip(), expected_expr)
         self.assertNotIn("nullIf", sql)
 
         # IN operations - no ifNull wrapping
@@ -2137,12 +3479,84 @@ class TestPrinter(BaseTest):
         sql = self._select("SELECT * FROM events WHERE properties.$ai_session_id IN ('session1', 'session2')", context)
 
         # Should generate clean IN without ifNull wrapper
-        self.assertIn("in(events.`mat_$ai_session_id`, tuple(%(insightsql_val_4)s, %(insightsql_val_5)s))", sql)
+        session1_param_key = next((k for k, v in context.values.items() if v == "session1"), None)
+        assert session1_param_key is not None, "Expected 'session1' to be recorded as a parameter value"
+        session2_param_key = next((k for k, v in context.values.items() if v == "session2"), None)
+        assert session2_param_key is not None, "Expected 'session2' to be recorded as a parameter value"
+        self.assertIn(f"in({expected_expr}, tuple(%({session1_param_key})s, %({session2_param_key})s))", sql)
         self.assertNotIn("ifNull(in", sql)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertNotIn("mat_$ai_session_id", sql)
 
-        # Verify the placeholder values
-        self.assertEqual(context.values["insightsql_val_4"], "session1")
-        self.assertEqual(context.values["insightsql_val_5"], "session2")
+    @patch("insights.datastore.materialized_columns.get_enabled_materialized_columns_by_table")
+    def test_materialized_property_through_column_aliased_table(self, mock_matcols_by_table):
+        # A property read through a column-renamed table (`FROM events AS e (...)`, a ColumnAliasedTableType) must still
+        # resolve to the active storage path. Property resolution has to unwrap that table type to reach the real table; if
+        # it doesn't, the read silently falls back to a slow JSONExtract over the raw blob.
+        from ee.datastore.materialized_columns.columns import MaterializedColumn, MaterializedColumnDetails
+
+        # The column is in the registry either way; JSON-backed event properties must ignore it.
+        mat_col = MaterializedColumn(
+            name="mat_foo",
+            details=MaterializedColumnDetails(table_column="properties", property_name="foo", is_disabled=False),
+            is_nullable=False,
+        )
+        mock_matcols_by_table.return_value = {"events": {("foo", "properties"): mat_col}}
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        sql = self._select("SELECT e.properties.foo FROM events AS e (a, b)", context)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertIn(self._json_dynamic_property_expr("foo", "e"), sql)
+            self.assertIn("FROM events_json AS e", sql)
+            self.assertNotIn("mat_foo", sql)
+        else:
+            self.assertIn("mat_foo", sql)
+        self.assertNotIn("JSONExtractRaw(events.properties", sql)
+
+    @patch("insights.datastore.materialized_columns.get_enabled_materialized_columns_by_table")
+    def test_deep_key_materialized_read_prints_shared_json_extract_shape(self, mock_matcols_by_table):
+        # Legacy materialized columns store the first key as a raw JSON string, so deeper reads must extract the tail
+        # keys with the same SQL shape as ingest and backfill. JSON subcolumns can address the full string-key path
+        # directly.
+        from insights.datastore.kafka_engine import json_extract_trim_quotes
+
+        from ee.datastore.materialized_columns.columns import MaterializedColumn, MaterializedColumnDetails
+
+        # The column is in the registry either way; JSON-backed event properties must ignore it.
+        mat_col = MaterializedColumn(
+            name="mat_foo",
+            details=MaterializedColumnDetails(table_column="properties", property_name="foo", is_disabled=False),
+            is_nullable=False,
+        )
+        mock_matcols_by_table.return_value = {"events": {("foo", "properties"): mat_col}}
+
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            expected = self._json_dynamic_subcolumn_path_expr("events.properties", ["foo", "bar"])
+            expected_values = {}
+        else:
+            head = "nullIf(nullIf(events.mat_foo, ''), 'null')"
+            expected = json_extract_trim_quotes(head, "%(insightsql_val_0)s")
+            expected_values = {"insightsql_val_0": "bar"}
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        printed = self._expr("properties.foo.bar", context)
+        self.assertEqual(printed, expected)
+        self.assertEqual(context.values, expected_values)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertNotIn("mat_foo", printed)
+
+    def _print_constant(self, node: ast.Constant) -> str:
+        return print_prepared_ast(
+            node, InsightsQLContext(team_id=self.team.pk, enable_select_queries=True), "datastore", stack=[]
+        )
+
+    def test_inline_sentinel_renders_allowlisted_literal_inline(self):
+        # An allowlisted scrubbing sentinel renders inline (escaped), not as a bound parameter.
+        self.assertEqual(self._print_constant(ast.Constant(value="null", inline_sentinel=True)), "'null'")
+
+    def test_inline_sentinel_rejects_non_allowlisted_literal(self):
+        # The flag is internal-only; setting it on anything outside the sentinel allowlist is a bug, so the printer
+        # refuses to inline it rather than emit unparameterized text.
+        with self.assertRaises(ImpossibleASTError):
+            self._print_constant(ast.Constant(value="evil'; DROP", inline_sentinel=True))
 
     def test_field_nullable_like(self):
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, database=Database())
@@ -2177,7 +3591,7 @@ class TestPrinter(BaseTest):
             context,
         )
         assert generated_sql_statements1 == generated_sql_statements2
-        assert generated_sql_statements1 == (
+        assert generated_sql_statements1 == self._with_active_events_table(
             f"SELECT "
             # event like 'a',
             "ifNull(like(events.nullable_field, %(insightsql_val_0)s), 0) AS a, "
@@ -2227,7 +3641,7 @@ class TestPrinter(BaseTest):
             context,
         )
         assert generated_sql_statements1 == generated_sql_statements2
-        assert generated_sql_statements1 == (
+        assert generated_sql_statements1 == self._with_active_events_table(
             f"SELECT "
             # event like 'a',
             "ifNull(notLike(events.nullable_field, %(insightsql_val_0)s), 1) AS a, "
@@ -2248,7 +3662,9 @@ class TestPrinter(BaseTest):
         printed = self._print("SELECT 1 FROM events", settings=InsightsQLGlobalSettings(max_execution_time=10))
         self.assertEqual(
             printed,
-            f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            ),
         )
 
     def test_print_query_level_settings(self):
@@ -2262,7 +3678,9 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             printed,
-            f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS optimize_aggregation_in_order=1",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS optimize_aggregation_in_order=1"
+            ),
         )
 
     def test_print_both_settings(self):
@@ -2277,7 +3695,9 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             printed,
-            f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS optimize_aggregation_in_order=1, readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0",
+            self._with_active_events_table(
+                f"SELECT 1 FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS optimize_aggregation_in_order=1, readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            ),
         )
 
     def test_table_top_level_settings_added_to_query(self):
@@ -2359,6 +3779,53 @@ class TestPrinter(BaseTest):
     def test_subquery_table_settings_bubble_up(self):
         printed = self._print("SELECT job_id FROM (SELECT job_id FROM preaggregation_results)")
         assert "load_balancing='in_order'" in printed
+
+    def test_warehouse_csv_table_with_double_quotes_setting(self):
+        from insights.insightsql.database.models import TableNode
+        from insights.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
+
+        csv_table = InsightsQLDataWarehouseTable(
+            name="csv_table",
+            url="https://example.com/test.csv",
+            format="CSVWithNames",
+            fields={"col1": StringDatabaseField(name="col1")},
+            structure="`col1` String",
+            top_level_settings=InsightsQLQuerySettings(format_csv_allow_double_quotes=True),
+        )
+        db = Database()
+        root = TableNode()
+        root.add_child(TableNode(name="csv_table", table=csv_table))
+        db._add_warehouse_tables(root)
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, database=db)
+        query = parse_select("SELECT col1 FROM csv_table")
+        printed, _ = prepare_and_print_ast(query, context, "datastore")
+        assert "format_csv_allow_double_quotes=1" in printed
+
+    @parameterized.expand(["Parquet", "Delta", "DeltaS3Wrapper"])
+    def test_warehouse_parquet_table_disables_prewhere_scoped(self, fmt: str):
+        from insights.insightsql.database.models import TableNode
+        from insights.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
+
+        parquet_table = InsightsQLDataWarehouseTable(
+            name="parquet_table",
+            url="https://example.com/test.parquet",
+            format=fmt,
+            fields={"col1": StringDatabaseField(name="col1")},
+            structure="`col1` String",
+        )
+        db = Database()
+        root = TableNode()
+        root.add_child(TableNode(name="parquet_table", table=parquet_table))
+        db._add_warehouse_tables(root)
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, database=db)
+        query = parse_select("SELECT col1 FROM parquet_table")
+        printed, _ = prepare_and_print_ast(query, context, "datastore")
+        # PREWHERE is disabled only inside the subquery wrapping the read, so the
+        # surrounding query keeps PREWHERE. The read renders as s3() for Parquet/
+        # DeltaS3Wrapper and deltaLake() for Delta, so assert on the wrap, not the function.
+        assert "(SELECT * FROM " in printed
+        assert "SETTINGS optimize_move_to_prewhere = 0)" in printed
+        assert printed.count("optimize_move_to_prewhere") == 1
 
     def test_pretty_print(self):
         printed = self._pretty("SELECT 1, event FROM events")
@@ -2446,7 +3913,7 @@ class TestPrinter(BaseTest):
             LIMIT {MAX_SELECT_RETURNED_ROWS}
         """
         )
-        assert printed == self.snapshot  # type: ignore
+        assert printed == self._schema_snapshot()
 
     def test_print_hidden_aliases_timestamp(self):
         printed = self._print(
@@ -2455,9 +3922,11 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             printed,
-            f"SELECT timestamp AS timestamp FROM (SELECT toTimeZone(events.timestamp, %(insightsql_val_0)s), "
-            f"toTimeZone(events.timestamp, %(insightsql_val_1)s) AS timestamp FROM events WHERE equals(events.team_id, {self.team.pk})) "
-            f"LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0",
+            self._with_active_events_table(
+                f"SELECT timestamp AS timestamp FROM (SELECT toTimeZone(events.timestamp, %(insightsql_val_0)s), "
+                f"toTimeZone(events.timestamp, %(insightsql_val_1)s) AS timestamp FROM events WHERE equals(events.team_id, {self.team.pk})) "
+                f"LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            ),
         )
 
     def test_print_hidden_aliases_column_override(self):
@@ -2467,39 +3936,71 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             printed,
-            f"SELECT event AS event FROM (SELECT toTimeZone(events.timestamp, %(insightsql_val_0)s) AS event, "
-            f"event FROM events WHERE equals(events.team_id, {self.team.pk})) "
-            f"LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0",
+            self._with_active_events_table(
+                f"SELECT event AS event FROM (SELECT toTimeZone(events.timestamp, %(insightsql_val_0)s) AS event, "
+                f"event FROM events WHERE equals(events.team_id, {self.team.pk})) "
+                f"LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            ),
         )
 
     def test_print_hidden_aliases_properties(self):
+        try:
+            from ee.datastore.materialized_columns.analyze import materialize
+        except ModuleNotFoundError:
+            # EE not available? Assume we're good
+            self.assertEqual(1 + 2, 3)
+            return
         materialize("events", "$browser")
 
         printed = self._print(
             "select * from (SELECT properties.$browser FROM events)",
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
+        browser_expr = (
+            "events.properties.`$browser`"
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "nullIf(nullIf(events.`mat_$browser`, ''), 'null')"
+        )
         self.assertEqual(
             printed,
-            f"SELECT `$browser` AS `$browser` FROM (SELECT nullIf(nullIf(events.`mat_$browser`, ''), 'null') AS `$browser` "
-            f"FROM events WHERE equals(events.team_id, {self.team.pk})) LIMIT {MAX_SELECT_RETURNED_ROWS} "
-            f"SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0",
+            self._with_active_events_table(
+                f"SELECT `$browser` AS `$browser` FROM (SELECT {browser_expr} AS `$browser` "
+                f"FROM events WHERE equals(events.team_id, {self.team.pk})) LIMIT {MAX_SELECT_RETURNED_ROWS} "
+                f"SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            ),
         )
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertNotIn("mat_$browser", printed)
 
     def test_print_hidden_aliases_double_property(self):
+        try:
+            from ee.datastore.materialized_columns.analyze import materialize
+        except ModuleNotFoundError:
+            # EE not available? Assume we're good
+            self.assertEqual(1 + 2, 3)
+            return
         materialize("events", "$browser")
 
         printed = self._print(
             "select * from (SELECT properties.$browser, properties.$browser FROM events)",
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
+        browser_expr = (
+            "events.properties.`$browser`"
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            else "nullIf(nullIf(events.`mat_$browser`, ''), 'null')"
+        )
         self.assertEqual(
             printed,
-            f"SELECT `$browser` AS `$browser` FROM (SELECT nullIf(nullIf(events.`mat_$browser`, ''), 'null'), "
-            f"nullIf(nullIf(events.`mat_$browser`, ''), 'null') AS `$browser` "  # only the second one gets the alias
-            f"FROM events WHERE equals(events.team_id, {self.team.pk})) LIMIT {MAX_SELECT_RETURNED_ROWS} "
-            f"SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0",
+            self._with_active_events_table(
+                f"SELECT `$browser` AS `$browser` FROM (SELECT {browser_expr} AS `$browser`, "
+                f"{browser_expr} AS `$browser` "
+                f"FROM events WHERE equals(events.team_id, {self.team.pk})) LIMIT {MAX_SELECT_RETURNED_ROWS} "
+                f"SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            ),
         )
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertNotIn("mat_$browser", printed)
 
     def test_lookup_domain_type(self):
         printed = self._print(
@@ -2507,15 +4008,18 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT coalesce(dictGetOrNull('insights_test.channel_definition_dict', 'domain_type', "
-            "(coalesce(%(insightsql_val_0)s, ''), 'source')), "
-            "dictGetOrNull('insights_test.channel_definition_dict', 'domain_type', "
-            "(cutToFirstSignificantSubdomain(coalesce(%(insightsql_val_0)s, '')), 'source'))) AS domain "
-            f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000 SETTINGS "
-            "readonly=2, max_execution_time=10, allow_experimental_object_type=1, "
-            "format_csv_allow_double_quotes=0, max_ast_elements=4000000, "
-            "max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
-        ) == printed
+            self._with_active_events_table(
+                "SELECT coalesce(dictGetOrNull('insights_test.channel_definition_dict', 'domain_type', "
+                "(coalesce(%(insightsql_val_0)s, ''), 'source')), "
+                "dictGetOrNull('insights_test.channel_definition_dict', 'domain_type', "
+                "(cutToFirstSignificantSubdomain(coalesce(%(insightsql_val_0)s, '')), 'source'))) AS domain "
+                f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000 SETTINGS "
+                "readonly=2, max_execution_time=10, allow_experimental_object_type=1, "
+                "max_ast_elements=4000000, "
+                "max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            )
+            == printed
+        )
 
     def test_lookup_paid_source_type(self):
         printed = self._print(
@@ -2523,15 +4027,18 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT coalesce(dictGetOrNull('insights_test.channel_definition_dict', 'type_if_paid', "
-            "(coalesce(%(insightsql_val_0)s, ''), 'source')) , "
-            "dictGetOrNull('insights_test.channel_definition_dict', 'type_if_paid', "
-            "(cutToFirstSignificantSubdomain(coalesce(%(insightsql_val_0)s, '')), 'source'))) AS source "
-            f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000 SETTINGS "
-            "readonly=2, max_execution_time=10, allow_experimental_object_type=1, "
-            "format_csv_allow_double_quotes=0, max_ast_elements=4000000, "
-            "max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
-        ) == printed
+            self._with_active_events_table(
+                "SELECT coalesce(dictGetOrNull('insights_test.channel_definition_dict', 'type_if_paid', "
+                "(coalesce(%(insightsql_val_0)s, ''), 'source')) , "
+                "dictGetOrNull('insights_test.channel_definition_dict', 'type_if_paid', "
+                "(cutToFirstSignificantSubdomain(coalesce(%(insightsql_val_0)s, '')), 'source'))) AS source "
+                f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000 SETTINGS "
+                "readonly=2, max_execution_time=10, allow_experimental_object_type=1, "
+                "max_ast_elements=4000000, "
+                "max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            )
+            == printed
+        )
 
     def test_lookup_paid_medium_type(self):
         printed = self._print(
@@ -2539,11 +4046,14 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT dictGetOrNull('insights_test.channel_definition_dict', 'type_if_paid', "
-            "(coalesce(%(insightsql_val_0)s, ''), 'medium')) AS medium "
-            f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS "
-            "readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
-        ) == printed
+            self._with_active_events_table(
+                "SELECT dictGetOrNull('insights_test.channel_definition_dict', 'type_if_paid', "
+                "(coalesce(%(insightsql_val_0)s, ''), 'medium')) AS medium "
+                f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS "
+                "readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            )
+            == printed
+        )
 
     def test_lookup_organic_source_type(self):
         printed = self._print(
@@ -2551,15 +4061,18 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT coalesce(dictGetOrNull('insights_test.channel_definition_dict', 'type_if_organic', "
-            "(coalesce(%(insightsql_val_0)s, ''), 'source')), "
-            "dictGetOrNull('insights_test.channel_definition_dict', 'type_if_organic', "
-            "(cutToFirstSignificantSubdomain(coalesce(%(insightsql_val_0)s, '')), 'source'))) AS source "
-            f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000 SETTINGS "
-            "readonly=2, max_execution_time=10, allow_experimental_object_type=1, "
-            "format_csv_allow_double_quotes=0, max_ast_elements=4000000, "
-            "max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
-        ) == printed
+            self._with_active_events_table(
+                "SELECT coalesce(dictGetOrNull('insights_test.channel_definition_dict', 'type_if_organic', "
+                "(coalesce(%(insightsql_val_0)s, ''), 'source')), "
+                "dictGetOrNull('insights_test.channel_definition_dict', 'type_if_organic', "
+                "(cutToFirstSignificantSubdomain(coalesce(%(insightsql_val_0)s, '')), 'source'))) AS source "
+                f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000 SETTINGS "
+                "readonly=2, max_execution_time=10, allow_experimental_object_type=1, "
+                "max_ast_elements=4000000, "
+                "max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            )
+            == printed
+        )
 
     def test_lookup_organic_medium_type(self):
         printed = self._print(
@@ -2567,11 +4080,14 @@ class TestPrinter(BaseTest):
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
         assert (
-            "SELECT dictGetOrNull('insights_test.channel_definition_dict', 'type_if_organic', "
-            "(coalesce(%(insightsql_val_0)s, ''), 'medium')) AS medium "
-            f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS "
-            "readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
-        ) == printed
+            self._with_active_events_table(
+                "SELECT dictGetOrNull('insights_test.channel_definition_dict', 'type_if_organic', "
+                "(coalesce(%(insightsql_val_0)s, ''), 'medium')) AS medium "
+                f"FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS "
+                "readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            )
+            == printed
+        )
 
     def test_currency_conversion(self):
         printed = self._print(
@@ -2580,8 +4096,8 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             (
-                f"SELECT if(equals(%(insightsql_val_0)s, %(insightsql_val_1)s), toDecimal64(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)) = 0, toDecimal64(0, 10), multiplyDecimal(divideDecimal(toDecimal64(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)) = 0, toDecimal64(1, 10), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)))), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_1)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10))))) AS currency "
-                "LIMIT 50000 SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+                f"SELECT if(equals(%(insightsql_val_0)s, %(insightsql_val_1)s), toDecimal128(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)) = 0, toDecimal128(0, 10), multiplyDecimal(divideDecimal(toDecimal128(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)) = 0, toDecimal128(1, 10), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10)))), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_1)s, toDateOrNull(%(insightsql_val_2)s), toDecimal64(0, 10))))) AS currency "
+                "LIMIT 50000 SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
             ),
             printed,
         )
@@ -2593,11 +4109,49 @@ class TestPrinter(BaseTest):
         )
         self.assertEqual(
             (
-                f"SELECT if(equals(%(insightsql_val_0)s, %(insightsql_val_1)s), toDecimal64(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)) = 0, toDecimal64(0, 10), multiplyDecimal(divideDecimal(toDecimal64(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)) = 0, toDecimal64(1, 10), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)))), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_1)s, today(), toDecimal64(0, 10))))) AS currency "
-                "LIMIT 50000 SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+                f"SELECT if(equals(%(insightsql_val_0)s, %(insightsql_val_1)s), toDecimal128(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)) = 0, toDecimal128(0, 10), multiplyDecimal(divideDecimal(toDecimal128(100, 10), if(dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)) = 0, toDecimal128(1, 10), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_0)s, today(), toDecimal64(0, 10)))), dictGetOrDefault(`{DATASTORE_DATABASE}`.`{EXCHANGE_RATE_DICTIONARY_NAME}`, 'rate', %(insightsql_val_1)s, today(), toDecimal64(0, 10))))) AS currency "
+                "LIMIT 50000 SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
             ),
             printed,
         )
+
+    def test_currency_conversion_uses_decimal128(self):
+        # Regression guard: a Decimal64 amount cast (scale 10) overflows above ~10^8 integer part (Code 407)
+        # when summing converted amounts. The amount must be cast to Decimal128 so the divide/multiply path
+        # is promoted. (The dictGetOrDefault defaults stay Decimal64 — they match the dict attribute type.)
+        # test_currency_conversion asserts the full SQL; this makes the amount-cast requirement explicit.
+        printed = self._print("select convertCurrency('USD', 'EUR', 100, toDate('2021-01-01')) as currency")
+        self.assertIn("toDecimal128(100, 10)", printed)
+        self.assertNotIn("toDecimal64(100", printed)
+
+    def test_decimal_division_uses_divide_decimal(self):
+        # Regression guard: dividing two Decimal columns whose scales differ (e.g. a warehouse
+        # Decimal(38, 2) column over a Decimal(38, 18) one) makes Datastore's plain divide() derive a
+        # negative result scale and error with "Decimal result's scale is less than argument's one".
+        # divideDecimal derives a valid result scale instead, so the query runs. Non-division decimal
+        # arithmetic (and non-decimal division) must stay on the plain operators.
+        from insights.insightsql.database.models import DecimalDatabaseField
+
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, database=Database())
+        assert context.database is not None
+        events = context.database.get_table("events")
+        events.fields["wholesale"] = DecimalDatabaseField(name="wholesale", nullable=True)
+        events.fields["rate"] = DecimalDatabaseField(name="rate", nullable=True)
+
+        # The reported shape: a decimal column divided by nullIf(decimal_column, 0).
+        printed = self._select("SELECT wholesale / nullIf(rate, 0) AS ratio FROM events", context)
+        assert "divideDecimal(" in printed, printed
+        assert "divide(" not in printed, printed
+
+        # Multiplication of the same decimals is unaffected.
+        printed_mult = self._select("SELECT wholesale * rate AS product FROM events", context)
+        assert "multiply(" in printed_mult, printed_mult
+        assert "divideDecimal" not in printed_mult, printed_mult
+
+        # Non-decimal division still uses plain divide().
+        printed_int = self._select("SELECT 10 / 3 AS q FROM events", context)
+        assert "divide(10, 3)" in printed_int, printed_int
+        assert "divideDecimal" not in printed_int, printed_int
 
     def test_sortable_semver(self):
         # Also test different capitalizations
@@ -2611,13 +4165,14 @@ class TestPrinter(BaseTest):
             """,
             settings=InsightsQLGlobalSettings(max_execution_time=10),
         )
+        strict_regex = "^\\\\s*v?((0|[1-9]\\\\d*)\\\\.(0|[1-9]\\\\d*)\\\\.(0|[1-9]\\\\d*))(?:[-+][^\\\\s]*)?\\\\s*$"
         self.assertEqual(
             (
-                f"SELECT arrayMap(x -> toInt64OrZero(x),  splitByChar('.', extract(assumeNotNull(%(insightsql_val_0)s), '(\\d+(\\.\\d+)+)'))) AS semver1, "
-                f"arrayMap(x -> toInt64OrZero(x),  splitByChar('.', extract(assumeNotNull(%(insightsql_val_1)s), '(\\d+(\\.\\d+)+)'))) AS semver2, "
-                f"arrayMap(x -> toInt64OrZero(x),  splitByChar('.', extract(assumeNotNull(%(insightsql_val_2)s), '(\\d+(\\.\\d+)+)'))) AS semver3, "
-                f"arrayMap(x -> toInt64OrZero(x),  splitByChar('.', extract(assumeNotNull(%(insightsql_val_3)s), '(\\d+(\\.\\d+)+)'))) AS semver4 "
-                "LIMIT 50000 SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+                f"SELECT arrayMap(x -> toInt64OrNull(x), splitByChar('.', coalesce(nullIf(extract(assumeNotNull(%(insightsql_val_0)s), '{strict_regex}'), ''), '_'))) AS semver1, "
+                f"arrayMap(x -> toInt64OrNull(x), splitByChar('.', coalesce(nullIf(extract(assumeNotNull(%(insightsql_val_1)s), '{strict_regex}'), ''), '_'))) AS semver2, "
+                f"arrayMap(x -> toInt64OrNull(x), splitByChar('.', coalesce(nullIf(extract(assumeNotNull(%(insightsql_val_2)s), '{strict_regex}'), ''), '_'))) AS semver3, "
+                f"arrayMap(x -> toInt64OrNull(x), splitByChar('.', coalesce(nullIf(extract(assumeNotNull(%(insightsql_val_3)s), '{strict_regex}'), ''), '_'))) AS semver4 "
+                "LIMIT 50000 SETTINGS readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
             ),
             printed,
         )
@@ -2629,12 +4184,18 @@ class TestPrinter(BaseTest):
             query="SELECT getSurveyResponse(0) FROM events",
         )
         assert result.datastore is not None
-        # Dynamic key (no question_id) uses concat for key construction
         self.assertIn("coalesce", result.datastore)
         self.assertIn("nullIf", result.datastore)
-        self.assertIn("concat", result.datastore)
-        # Always uses JSONExtractString for consistent String return type
-        self.assertIn("JSONExtractString", result.datastore)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertIn("events.properties.`$survey_response`", result.datastore)
+            # The dynamic id-based key arm must stay in the coalesce — it reads the whole
+            # reconstructed properties blob via the legacy JSONExtractString form.
+            self.assertIn("toJSONString(events.properties)", result.datastore)
+            self.assertIn("JSONExtractString", result.datastore)
+        else:
+            self.assertIn("concat", result.datastore)
+            # Always uses JSONExtractString for consistent String return type
+            self.assertIn("JSONExtractString", result.datastore)
 
         # Test with question index and specific ID - static key
         result = execute_insightsql_query(
@@ -2642,10 +4203,13 @@ class TestPrinter(BaseTest):
             query="SELECT getSurveyResponse(1, 'question123') FROM events",
         )
         assert result.datastore is not None
-        # Static key also uses JSONExtractString for type consistency
         self.assertIn("coalesce", result.datastore)
         self.assertIn("nullIf", result.datastore)
-        self.assertIn("JSONExtractString", result.datastore)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertIn("events.properties.`$survey_response_question123`", result.datastore)
+            self.assertNotIn("toJSONString(events.properties)", result.datastore)
+        else:
+            self.assertIn("JSONExtractString", result.datastore)
 
         # Test with multiple choice question
         result = execute_insightsql_query(
@@ -2653,8 +4217,11 @@ class TestPrinter(BaseTest):
             query="SELECT getSurveyResponse(2, 'abc123', true) FROM events",
         )
         assert result.datastore is not None
-        # Multiple choice uses if() with JSONHas and JSONExtractArrayRaw
-        self.assertIn("JSONHas", result.datastore)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertIn("isNotNull", result.datastore)
+            self.assertNotIn("toJSONString(events.properties)", result.datastore)
+        else:
+            self.assertIn("JSONHas", result.datastore)
         self.assertIn("JSONExtractArrayRaw", result.datastore)
         self.assertIn("if(", result.datastore)
 
@@ -2686,9 +4253,14 @@ class TestPrinter(BaseTest):
         # Query should execute successfully (even with no results)
         assert result.datastore is not None
         # Both branches of coalesce should return String type (via JSONExtractString)
-        self.assertIn("JSONExtractString", result.datastore)
-        # Should NOT contain Float64 casting which would cause type mismatch
-        self.assertNotIn("accurateCastOrNull", result.datastore)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertIn("toString(accurateCastOrNull", result.datastore)
+            # The dynamic id-based key arm reads the whole reconstructed properties blob.
+            self.assertIn("toJSONString(events.properties)", result.datastore)
+        else:
+            self.assertIn("JSONExtractString", result.datastore)
+            # Should NOT contain Float64 casting which would cause type mismatch
+            self.assertNotIn("accurateCastOrNull", result.datastore)
         self.assertNotIn("Float64", result.datastore)
 
     def test_unique_survey_submissions_filter(self):
@@ -2701,9 +4273,39 @@ class TestPrinter(BaseTest):
         self.assertIn("argMax", printed)
         self.assertIn("in(events.uuid", printed)
         self.assertIn("SELECT argMax(events.uuid", printed)
-        self.assertIn("FROM events WHERE", printed)
+        self.assertIn(f"FROM {self._events_table_ref()} WHERE", printed)
         self.assertIn("GROUP BY", printed)
-        self.assertIn("JSONExtractString", printed)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            self.assertIn("events.properties.`$survey_id`", printed)
+            # The grouping key must read the property as a JSON subcolumn, not extract from the blob.
+            self.assertIn("events.properties.`$survey_submission_id`", printed)
+            self.assertNotIn("JSONExtractRaw(events.properties", printed)
+        else:
+            self.assertIn("JSONExtractRaw(events.properties", printed)
+
+    def test_unique_survey_submissions_filter_with_timestamps(self):
+        printed = self._print(
+            "select uuid from events where uniqueSurveySubmissionsFilter('survey123', '2025-01-01', '2025-01-31')",
+            settings=InsightsQLGlobalSettings(max_execution_time=10),
+        )
+
+        self.assertIn("events.timestamp", printed)
+        self.assertIn("greaterOrEquals", printed)
+        self.assertIn("lessOrEquals", printed)
+
+    def test_unique_survey_submissions_filter_with_datetime_placeholders(self):
+        printed = self._print(
+            "select uuid from events where uniqueSurveySubmissionsFilter('survey123', {start_date}, {end_date})",
+            placeholders={
+                "start_date": ast.Constant(value=datetime(2025, 1, 1, 0, 0, 0)),
+                "end_date": ast.Constant(value=datetime(2025, 1, 31, 23, 59, 59)),
+            },
+            settings=InsightsQLGlobalSettings(max_execution_time=10),
+        )
+
+        self.assertIn("events.timestamp", printed)
+        self.assertIn("greaterOrEquals", printed)
+        self.assertIn("lessOrEquals", printed)
 
     def test_override_timezone(self):
         context = InsightsQLContext(
@@ -2724,7 +4326,9 @@ class TestPrinter(BaseTest):
                 """,
                 context,
             ),
-            f"SELECT toDateTime(toTimeZone(events.timestamp, %(insightsql_val_0)s), %(insightsql_val_1)s) AS ts, toDateTime(toTimeZone(events.timestamp, %(insightsql_val_2)s), %(insightsql_val_3)s) AS tsz, now64(6, %(insightsql_val_4)s) AS now, now64(6, %(insightsql_val_5)s) AS nowz FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            self._with_active_events_table(
+                f"SELECT toDateTime(toTimeZone(events.timestamp, %(insightsql_val_0)s), %(insightsql_val_1)s) AS ts, toDateTime(toTimeZone(events.timestamp, %(insightsql_val_2)s), %(insightsql_val_3)s) AS tsz, now64(6, %(insightsql_val_4)s) AS now, now64(6, %(insightsql_val_5)s) AS nowz FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT {MAX_SELECT_RETURNED_ROWS}"
+            ),
         )
         self.assertEqual(
             context.values,
@@ -2745,7 +4349,7 @@ class TestPrinter(BaseTest):
         )
         assert printed == (
             f"SELECT trim(LEADING %(insightsql_val_1)s FROM %(insightsql_val_0)s) AS a, trim(TRAILING %(insightsql_val_3)s FROM %(insightsql_val_2)s) AS b, trim(BOTH %(insightsql_val_5)s FROM %(insightsql_val_4)s) AS c LIMIT {MAX_SELECT_RETURNED_ROWS} SETTINGS "
-            "readonly=2, max_execution_time=10, allow_experimental_object_type=1, format_csv_allow_double_quotes=0, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
+            "readonly=2, max_execution_time=10, allow_experimental_object_type=1, max_ast_elements=4000000, max_expanded_ast_elements=4000000, max_bytes_before_external_group_by=0, transform_null_in=1, optimize_min_equality_disjunction_chain_length=4294967295, optimize_rewrite_aggregate_function_with_if=0, optimize_min_inequality_conjunction_chain_length=4294967295, allow_experimental_join_condition=1, use_hive_partitioning=0"
         )
         printed2 = self._print(
             "select trimLeft('media', 'xy') as a, trimRight('media', 'xy') as b, trim('media', 'xy') as c",
@@ -2898,6 +4502,53 @@ class TestPrinter(BaseTest):
             "SELECT arrayReduce(%(insightsql_val_0)s, [1, 2, 3]) AS `arrayReduce('sum', [1, 2, 3])` LIMIT 50000"
         )
 
+    def test_dropped_hidden_alias_still_reserves_type_based_name(self):
+        subquery_type = ast.SelectQueryType(
+            columns={"toDate(period_end)": ast.DateType(), "period_end": ast.DateType()}
+        )
+
+        query = ast.SelectQuery(
+            select=[
+                ast.Alias(
+                    alias="toDate(period_end)",
+                    expr=ast.Field(
+                        chain=["toDate(period_end)"],
+                        type=ast.FieldType(name="toDate(period_end)", table_type=subquery_type),
+                    ),
+                    hidden=True,
+                ),
+                ast.Call(
+                    name="toDate",
+                    args=[
+                        ast.Field(
+                            chain=["period_end"],
+                            type=ast.FieldType(name="period_end", table_type=subquery_type),
+                        )
+                    ],
+                ),
+                ast.Alias(
+                    alias="toDate(period_end)",
+                    expr=ast.Field(
+                        chain=["toDate(period_end)"],
+                        type=ast.FieldType(name="toDate(period_end)", table_type=subquery_type),
+                        from_asterisk=True,
+                    ),
+                    hidden=True,
+                ),
+            ]
+        )
+
+        printed = print_prepared_ast(
+            query,
+            InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+            dialect="datastore",
+        )
+
+        assert (
+            printed
+            == "SELECT `toDate(period_end)`, toDate(period_end), `toDate(period_end)` AS `toDate(period_end)` LIMIT 50000"
+        )
+
     def test_can_call_parametric_function_from_placeholder(self):
         printed = self._print("SELECT arrayReduce({f}, [1, 2, 3])", placeholders={"f": ast.Constant(value="sum")})
         assert printed == (
@@ -2999,8 +4650,8 @@ class TestPrinter(BaseTest):
         sql = self._select(
             "SELECT event FROM events",
         )
-        assert (
-            sql == f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
+        assert sql == self._with_active_events_table(
+            f"SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk}) LIMIT 50000"
         )
 
     @parameterized.expand(
@@ -3043,7 +4694,7 @@ class TestPrinter(BaseTest):
             else:
                 assert "GLOBAL JOIN" not in printed
 
-            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self.snapshot  # type: ignore
+            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self._schema_snapshot()
 
     @parameterized.expand([[True], [False]])
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -3076,7 +4727,7 @@ class TestPrinter(BaseTest):
             else:
                 assert "GLOBAL JOIN" not in printed
 
-            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self.snapshot  # type: ignore
+            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self._schema_snapshot()
 
     @parameterized.expand([[True], [False]])
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -3108,7 +4759,7 @@ class TestPrinter(BaseTest):
                 assert "GLOBAL JOIN" not in printed  # Join #1
                 assert "GLOBAL LEFT JOIN" not in printed  # Join #2
 
-            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self.snapshot  # type: ignore
+            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self._schema_snapshot()
 
     @parameterized.expand([[True], [False]])
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -3139,7 +4790,65 @@ class TestPrinter(BaseTest):
             else:
                 assert "globalIn" not in printed
 
-            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self.snapshot  # type: ignore
+            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self._schema_snapshot()
+
+    @parameterized.expand(
+        [
+            (SessionTableVersion.V1, "IN", "globalIn"),
+            (SessionTableVersion.V1, "NOT IN", "globalNotIn"),
+            (SessionTableVersion.V2, "IN", "globalIn"),
+            (SessionTableVersion.V2, "NOT IN", "globalNotIn"),
+            (SessionTableVersion.V3, "IN", "globalIn"),
+            (SessionTableVersion.V3, "NOT IN", "globalNotIn"),
+        ]
+    )
+    def test_sessions_filter_by_event_subquery_uses_global_in(self, version, op, expected):
+        modifiers = InsightsQLQueryModifiers(sessionTableVersion=version)
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
+        printed = self._select(
+            f"""
+            SELECT session_id
+            FROM sessions
+            WHERE session_id {op} (SELECT $session_id FROM events WHERE event = 'payment_confirm_clicked')
+            """,
+            context=context,
+        )
+        assert expected in printed, f"expected {expected} in:\n{printed}"
+
+    @parameterized.expand([("IN", "globalIn"), ("NOT IN", "globalNotIn")])
+    def test_sessions_filter_by_event_subquery_uses_global_in_with_alias(self, op, expected):
+        modifiers = InsightsQLQueryModifiers(sessionTableVersion=SessionTableVersion.V3)
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
+        printed = self._select(
+            f"""
+            SELECT s.session_id
+            FROM sessions AS s
+            WHERE s.session_id {op} (SELECT $session_id FROM events)
+            """,
+            context=context,
+        )
+        assert expected in printed, f"expected {expected} in:\n{printed}"
+
+    @parameterized.expand([("IN", "globalIn"), ("NOT IN", "globalNotIn")])
+    def test_events_filter_by_sessions_subquery_uses_global_in(self, op, expected):
+        modifiers = InsightsQLQueryModifiers(sessionTableVersion=SessionTableVersion.V3)
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
+        printed = self._select(
+            f"""
+            SELECT uuid
+            FROM events
+            WHERE $session_id {op} (SELECT session_id FROM sessions)
+            """,
+            context=context,
+        )
+        assert expected in printed, f"expected {expected} in:\n{printed}"
+
+    def test_events_in_subquery_not_promoted(self):
+        # Non-sessions case: no cross-cluster hazard, keep plain in.
+        printed = self._select(
+            "SELECT uuid FROM events WHERE event IN (SELECT event FROM events WHERE timestamp > now() - toIntervalDay(1))"
+        )
+        assert "globalIn" not in printed, f"did not expect globalIn in:\n{printed}"
 
     @parameterized.expand(
         [
@@ -3184,7 +4893,7 @@ class TestPrinter(BaseTest):
             else:
                 assert "GLOBAL INNER JOIN" not in printed
 
-            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self.snapshot  # type: ignore
+            assert clean_varying_query_parts(printed, replace_all_numbers=False) == self._schema_snapshot()
 
     @parameterized.expand([("with_optimize_projections", True), ("without_optimize_projections", False)])
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -3194,7 +4903,7 @@ class TestPrinter(BaseTest):
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
         result = self._select("SELECT event FROM (SELECT * FROM events) AS sub", context)
 
-        assert clean_varying_query_parts(result, replace_all_numbers=False) == self.snapshot  # type: ignore
+        assert clean_varying_query_parts(result, replace_all_numbers=False) == self._schema_snapshot()
 
     @parameterized.expand([("with_optimize_projections", True), ("without_optimize_projections", False)])
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -3212,7 +4921,7 @@ class TestPrinter(BaseTest):
             context,
         )
 
-        assert clean_varying_query_parts(result, replace_all_numbers=False) == self.snapshot  # type: ignore
+        assert clean_varying_query_parts(result, replace_all_numbers=False) == self._schema_snapshot()
 
     @parameterized.expand([("with_optimize_projections", True), ("without_optimize_projections", False)])
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -3229,7 +4938,7 @@ class TestPrinter(BaseTest):
             context,
         )
 
-        assert clean_varying_query_parts(result, replace_all_numbers=False) == self.snapshot  # type: ignore
+        assert clean_varying_query_parts(result, replace_all_numbers=False) == self._schema_snapshot()
 
     @parameterized.expand([("with_optimize_projections", True), ("without_optimize_projections", False)])
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -3246,7 +4955,7 @@ class TestPrinter(BaseTest):
             context,
         )
 
-        assert clean_varying_query_parts(result, replace_all_numbers=False) == self.snapshot  # type: ignore
+        assert clean_varying_query_parts(result, replace_all_numbers=False) == self._schema_snapshot()
 
     @parameterized.expand([("with_optimize_projections", True), ("without_optimize_projections", False)])
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -3256,7 +4965,7 @@ class TestPrinter(BaseTest):
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
         result = self._select("SELECT event FROM (SELECT event, distinct_id FROM events) AS sub", context)
 
-        assert clean_varying_query_parts(result, replace_all_numbers=False) == self.snapshot  # type: ignore
+        assert clean_varying_query_parts(result, replace_all_numbers=False) == self._schema_snapshot()
 
     def test_cte_with_alias_in_join_datastore(self):
         """Test that CTETableAliasType properly prints in Datastore dialect with qualified fields"""
@@ -3358,8 +5067,8 @@ class TestPrinter(BaseTest):
             ("char", "event::char", "toString(events.event)"),
             ("string", "event::string", "toString(events.event)"),
             # Boolean types
-            ("boolean", "event::boolean", "toBoolean(events.event)"),
-            ("bool", "event::bool", "toBoolean(events.event)"),
+            ("boolean", "event::boolean", "accurateCastOrNull(events.event, 'Bool')"),
+            ("bool", "event::bool", "accurateCastOrNull(events.event, 'Bool')"),
             # Date type
             ("date", "event::date", "toDate(events.event)"),
             # Constant cast
@@ -3381,10 +5090,285 @@ class TestPrinter(BaseTest):
             self._expr("event::unsupported_type")
         self.assertIn("Unsupported type cast", str(ctx.exception))
 
+    @parameterized.expand(
+        [
+            ("int", "accurateCast('1', 'Int64')"),
+            ("nullable", "accurateCastOrNull('1', 'Nullable(Int64)')"),
+            ("array", "accurateCast('[]', 'Array(String)')"),
+            ("datetime", "accurateCast('2024-01-01', 'DateTime64(6, \\'UTC\\')')"),
+        ]
+    )
+    def test_accurate_cast_known_type_names_print(self, _name, expr):
+        assert "accurateCast" in self._expr(expr)
+
+    def test_accurate_cast_unknown_type_name_rejected(self):
+        with self.assertRaises(QueryError) as ctx:
+            self._expr("accurateCast('1', 'TotallyMadeUpType')")
+        self.assertIn("Unsupported type in accurateCast", str(ctx.exception))
+
+    def test_accurate_cast_non_constant_type_name_rejected(self):
+        with self.assertRaises(QueryError) as ctx:
+            self._expr("accurateCast('1', concat('Int', '64'))")
+        self.assertIn("constant string type name", str(ctx.exception))
+
+    def test_cte_materialization_hint_materialized(self):
+        self.assertEqual(
+            self._select(
+                """
+                WITH some_cte AS MATERIALIZED (SELECT event FROM events)
+                SELECT event FROM some_cte
+                """,
+            ),
+            self._with_active_events_table(
+                f"WITH some_cte AS MATERIALIZED (SELECT events.event AS event FROM events WHERE equals(events.team_id, {self.team.pk})) "
+                "SELECT some_cte.event AS event FROM some_cte LIMIT 50000"
+            ),
+        )
+
+    def test_cte_materialization_hint_not_materialized_not_supported(self):
+        with self.assertRaises(ImpossibleASTError) as ctx:
+            self._select(
+                """
+                WITH some_cte AS NOT MATERIALIZED (SELECT event FROM events)
+                SELECT event FROM some_cte
+                """,
+            )
+        self.assertIn("NOT MATERIALIZED", str(ctx.exception))
+
+    def test_cte_column_name_list_not_supported(self):
+        with self.assertRaises(NotImplementedError):
+            self._select(
+                "WITH stats(a, b) AS (SELECT event, timestamp FROM events) SELECT a, b FROM stats",
+            )
+
+    def test_cte_using_key_not_supported(self):
+        with self.assertRaises(ImpossibleASTError) as ctx:
+            self._select(
+                "WITH x USING KEY (a) AS (SELECT 1 AS a, 2 AS b) SELECT * FROM x",
+            )
+        self.assertIn("not supported", str(ctx.exception))
+
+    def test_projection_pushdown_cte_with_lazy_table_join(self):
+        modifiers = InsightsQLQueryModifiers(optimizeProjections=True)
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True, modifiers=modifiers)
+        # Pruning the CTE should not leave stale LazyTableType references
+        # in SelectQueryType.columns that cause KeyError during lazy table resolution
+        self._select(
+            """
+            WITH combined AS (SELECT * FROM persons LIMIT 10)
+            SELECT 1 FROM events AS e LEFT JOIN combined AS c ON e.distinct_id = c.id
+            """,
+            context=context,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "eq_direct_field",
+                "$session_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'",
+                "equals(events.`$session_id_uuid`, toUInt128(accurateCastOrNull(%(insightsql_val_0)s, 'UUID')))",
+            ),
+            (
+                "neq_direct_field",
+                "$session_id != 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'",
+                "notEquals(events.`$session_id_uuid`, toUInt128(accurateCastOrNull(%(insightsql_val_0)s, 'UUID')))",
+            ),
+            (
+                "eq_constant_on_left",
+                "'a1b2c3d4-e5f6-7890-abcd-ef1234567890' = $session_id",
+                "equals(events.`$session_id_uuid`, toUInt128(accurateCastOrNull(%(insightsql_val_0)s, 'UUID')))",
+            ),
+            (
+                # Under the JSON schema the property-access form keeps the resolver's generic
+                # nullable-comparison guard; it is redundant next to the uuid equality but does
+                # not block the uuid index.
+                "eq_property_access",
+                "properties.$session_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'",
+                (
+                    "and(equals(events.`$session_id_uuid`, toUInt128(accurateCastOrNull(%(insightsql_val_0)s, 'UUID'))), "
+                    "isNotNull(events.properties.`$session_id`))"
+                )
+                if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+                else "equals(events.`$session_id_uuid`, toUInt128(accurateCastOrNull(%(insightsql_val_0)s, 'UUID')))",
+            ),
+            (
+                "in_operation",
+                "$session_id IN ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b2c3d4e5-f6a7-8901-bcde-f12345678901')",
+                "in(events.`$session_id_uuid`, tuple(toUInt128(accurateCastOrNull(%(insightsql_val_0)s, 'UUID')), toUInt128(accurateCastOrNull(%(insightsql_val_1)s, 'UUID'))))",
+            ),
+            (
+                "not_in_operation",
+                "$session_id NOT IN ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b2c3d4e5-f6a7-8901-bcde-f12345678901')",
+                "notIn(events.`$session_id_uuid`, tuple(toUInt128(accurateCastOrNull(%(insightsql_val_0)s, 'UUID')), toUInt128(accurateCastOrNull(%(insightsql_val_1)s, 'UUID'))))",
+            ),
+            (
+                "eq_uppercase_uuid",
+                "$session_id = 'A1B2C3D4-E5F6-7890-ABCD-EF1234567890'",
+                "equals(events.`$session_id_uuid`, toUInt128(accurateCastOrNull(%(insightsql_val_0)s, 'UUID')))",
+            ),
+        ]
+    )
+    def test_session_id_uuid_optimization(self, _name, expr, expected):
+        self.assertEqual(self._expr(expr), expected)
+
+    @parameterized.expand(
+        [
+            ("non_uuid_string", "$session_id = 'not-a-uuid'"),
+            ("non_string_constant", "$session_id = 123"),
+            ("in_with_non_uuid", "$session_id IN ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'not-a-uuid')"),
+            # SQL injection attempts — none of these are valid UUIDs, so the optimization is
+            # skipped and values go through the normal parameterized query path (%(insightsql_val_N)s)
+            ("sqli_uuid_with_suffix", "$session_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890; DROP TABLE events'"),
+            ("sqli_uuid_with_parens", "$session_id = 'a1b2c3d4-e5f6-7890-abcd-ef123456789()'"),
+            ("sqli_overlong_hex", "$session_id = 'a1b2c3d4-e5f6-7890-abcd-ef12345678901'"),
+            ("sqli_short_hex", "$session_id = 'a1b2c3d4-e5f6-7890-abcd-ef123456789'"),
+            ("sqli_non_hex_chars", "$session_id = 'g1b2c3d4-e5f6-7890-abcd-ef1234567890'"),
+            (
+                "sqli_in_with_injection",
+                "$session_id IN ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '1; DROP TABLE events')",
+            ),
+        ]
+    )
+    def test_session_id_uuid_optimization_skipped(self, _name, expr):
+        result = self._expr(expr)
+        self.assertNotIn("$session_id_uuid", result)
+
+    @parameterized.expand(
+        [
+            (
+                "single_level_struct",
+                {
+                    "membership": {
+                        "datastore": "Tuple(type String, tier String)",
+                        "insightsql": "StructDatabaseField",
+                        "valid": True,
+                        "fields": {
+                            "type": {"datastore": "String", "insightsql": "string", "valid": True},
+                            "tier": {"datastore": "String", "insightsql": "string", "valid": True},
+                        },
+                    }
+                },
+                "SELECT membership.type FROM members",
+                "tupleElement(members.membership",
+                "JSONExtractRaw(members.membership",
+            ),
+            (
+                "nested_struct",
+                {
+                    "customer": {
+                        "datastore": "Tuple(address Tuple(city String))",
+                        "insightsql": "StructDatabaseField",
+                        "valid": True,
+                        "fields": {
+                            "address": {
+                                "datastore": "Tuple(city String)",
+                                "insightsql": "StructDatabaseField",
+                                "valid": True,
+                                "fields": {
+                                    "city": {
+                                        "datastore": "String",
+                                        "insightsql": "string",
+                                        "valid": True,
+                                    },
+                                },
+                            }
+                        },
+                    }
+                },
+                "SELECT customer.address.city FROM members",
+                "tupleElement(tupleElement(members.customer",
+                "JSONExtractRaw(members.customer",
+            ),
+        ]
+    )
+    def test_data_warehouse_struct_dot_notation_emits_tuple_element(
+        self, _name, columns, query, expected_substring, forbidden_substring
+    ):
+        """Regression test for #58480.
+
+        Parquet struct columns surface in InsightsQL as ``StructDatabaseField``
+        backed by a Datastore ``Tuple(...)`` column. Dot notation on these
+        columns must emit ``tupleElement(col, 'field')`` (chained for nested
+        structs) rather than the ``JSONExtractRaw(col, 'field')`` chain used
+        for JSON-string columns, because Datastore rejects ``JSONExtractRaw``
+        on a ``Tuple`` argument with ``illegal type: Tuple(...)``.
+        """
+        credential = DataWarehouseCredential.objects.create(team=self.team, access_key="key", access_secret="secret")
+        DataWarehouseTable.objects.create(
+            team=self.team,
+            name="members",
+            format="Parquet",
+            url_pattern="http://s3/folder/",
+            credential=credential,
+            columns=columns,
+        )
+
+        printed = self._select(query)
+
+        self.assertNotIn(forbidden_substring, printed)
+        self.assertIn(expected_substring, printed)
+
+
+class TestNewEventsSchemaDefaults(BaseTest):
+    @parameterized.expand([("json", True), ("legacy", False)])
+    def test_insightsql_events_table_uses_configured_schema(self, _name: str, use_new_events_schema: bool) -> None:
+        # The instance setting's constance default is seeded from the same env var, so in
+        # json-mode CI override_settings alone still resolves to json via the fallback —
+        # pin the instance settings too.
+        with (
+            override_settings(DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA=use_new_events_schema),
+            override_instance_config("DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA", use_new_events_schema),
+            override_instance_config("DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA_TEAMS", ""),
+        ):
+            printed, _ = prepare_and_print_ast(
+                parse_select("SELECT properties.schema_test_property FROM events"),
+                InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+                "datastore",
+            )
+
+        if use_new_events_schema:
+            self.assertIn("FROM events_json AS events", printed)
+            self.assertIn("events.properties.schema_test_property", printed)
+            self.assertNotIn("JSONExtractRaw", printed)
+        else:
+            self.assertIn("FROM events ", printed)
+            self.assertIn("JSONExtractRaw(events.properties", printed)
+
 
 @snapshot_datastore_queries
 class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
+    allow_dual_schema_snapshots = True
+
+    def setUp(self) -> None:
+        super().setUp()
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            sync_execute(f"TRUNCATE TABLE {EVENTS_JSON_DATA_TABLE}")
+
+    def _json_dynamic_subcolumn_expr(self, root: str, property_name: str, *, as_json: bool = False) -> str:
+        escaped = escape_datastore_identifier(property_name)
+        field = f"{root}.{escaped}"
+        object_read = f"toJSONString({root}.^{escaped})"
+        scalar_value = (
+            f"concat('\"', ifNull(toString(replaceOne(toString({field}), ' ', 'T')), ''), '\"')"
+            if as_json
+            else f"replaceOne(toString({field}), ' ', 'T')"
+        )
+        fallback_value = (
+            f"toJSONString({field})"
+            if as_json
+            else (
+                f"if(or(startsWith(dynamicType({field}), 'Array'), startsWith(dynamicType({field}), 'Map'), "
+                f"startsWith(dynamicType({field}), 'Tuple')), toJSONString({field}), toString({field}))"
+            )
+        )
+        scalar_read = f"if(isNull({field}), NULL, if(startsWith(dynamicType({field}), 'DateTime'), {scalar_value}, {fallback_value}))"
+        return f"if(notEquals({object_read}, '{{}}'), {object_read}, {scalar_read})"
+
+    def _json_dynamic_property_expr(
+        self, property_name: str, table_alias: str = "events", *, as_json: bool = False
+    ) -> str:
+        return self._json_dynamic_subcolumn_expr(f"{table_alias}.properties", property_name, as_json=as_json)
 
     def _expr(
         self,
@@ -3420,6 +5404,20 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
             ),
         )
         printed_expr = self._expr(input_expression, context)
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            baseline_context = InsightsQLContext(
+                team_id=self.team.pk,
+                modifiers=InsightsQLQueryModifiers(
+                    materializationMode=MaterializationMode.DISABLED,
+                    materializedColumnsOptimizationMode=optimization_mode,
+                ),
+            )
+            baseline_expr = self._expr(input_expression, baseline_context)
+            self.assertEqual(printed_expr % context.values, baseline_expr % baseline_context.values)
+            self.assertNotIn("mat_", printed_expr)
+            self.assertNotIn("JSONExtractRaw(events.properties", printed_expr)
+            return
+
         assert printed_expr == expected_query
 
         if expected_context_values is not None:
@@ -3455,12 +5453,12 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
             # equals: use AND IS NOT NULL to preserve skip index usage
             self._test_materialized_column_comparison(
                 "properties.test_prop = 'some_value'",
-                f"(equals(events.{mat_col.name}, %(insightsql_val_0)s) AND (events.{mat_col.name} IS NOT NULL))",
+                f"and(equals(events.{mat_col.name}, %(insightsql_val_0)s), isNotNull(events.{mat_col.name}))",
                 {"insightsql_val_0": "some_value"},
             )
             self._test_materialized_column_comparison(
                 "'some_value' = properties.test_prop",
-                f"(equals(events.{mat_col.name}, %(insightsql_val_0)s) AND (events.{mat_col.name} IS NOT NULL))",
+                f"and(equals(events.{mat_col.name}, %(insightsql_val_0)s), isNotNull(events.{mat_col.name}))",
                 {"insightsql_val_0": "some_value"},
             )
             # notEquals: use ifNull since skip index is less important here
@@ -3505,63 +5503,319 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
 
     @parameterized.expand(
         [
+            # (input_op, expected_ch_fn)
+            ("<", "less"),
+            ("<=", "lessOrEquals"),
+            (">", "greater"),
+            (">=", "greaterOrEquals"),
+        ]
+    )
+    def test_materialized_column_optimized_range_comparison_non_nullable(self, op: str, ch_fn: str) -> None:
+        # Non-nullable: drop the ``nullIf(nullIf(..., ''), 'null')`` wrapper (opaque to minmax) and inline the sentinel exclusion as ``notEquals`` clauses so the bare comparison can use the index.
+        with materialized("events", "test_prop", is_nullable=False) as mat_col:
+            self._test_materialized_column_comparison(
+                f"properties.test_prop {op} 'some_value'",
+                f"and({ch_fn}(events.{mat_col.name}, %(insightsql_val_0)s), "
+                f"notEquals(events.{mat_col.name}, ''), "
+                f"notEquals(events.{mat_col.name}, 'null'))",
+                {"insightsql_val_0": "some_value"},
+            )
+
+    @parameterized.expand(
+        [
+            ("<", "less"),
+            ("<=", "lessOrEquals"),
+            (">", "greater"),
+            (">=", "greaterOrEquals"),
+        ]
+    )
+    def test_materialized_column_optimized_range_comparison_nullable(self, op: str, ch_fn: str) -> None:
+        # Nullable: replace ``ifNull(less(col, x), 0)`` (opaque to minmax) with ``(less(col, x) AND col IS NOT NULL)`` — same WHERE semantics (``NULL AND FALSE = FALSE``), minmax-friendly.
+        with materialized("events", "test_prop", is_nullable=True) as mat_col:
+            self._test_materialized_column_comparison(
+                f"properties.test_prop {op} 'some_value'",
+                f"and({ch_fn}(events.{mat_col.name}, %(insightsql_val_0)s), isNotNull(events.{mat_col.name}))",
+                {"insightsql_val_0": "some_value"},
+            )
+
+    def test_materialized_column_range_comparison_not_optimized_for_null_constant(self) -> None:
+        # ``col < null`` is NULL for every row → false in WHERE; the printer constant-folds to ``'0'``. The rewrite bails on the null constant so the fold path is reached — a naive ``(less(col, NULL) AND col IS NOT NULL)`` would hide it.
+        with materialized("events", "test_prop", is_nullable=True):
+            self._test_materialized_column_comparison(
+                "properties.test_prop < null",
+                "0",
+            )
+
+    def test_materialized_column_range_comparison_only_when_property_on_left(self) -> None:
+        # property_to_expr always puts the column on the left; the reverse form falls back to the default ``ifNull`` wrap rather than guessing a flipped op.
+        with materialized("events", "test_prop", is_nullable=True) as mat_col:
+            self._test_materialized_column_comparison(
+                "'some_value' < properties.test_prop",
+                f"ifNull(less(%(insightsql_val_0)s, events.{mat_col.name}), 0)",
+                {"insightsql_val_0": "some_value"},
+            )
+
+    def test_materialized_column_range_comparison_not_optimized_for_numeric_property_type(self) -> None:
+        PropertyDefinition.objects.create(
+            team=self.team,
+            project_id=self.team.project_id,
+            name="numeric_test_prop",
+            property_type=PropertyType.Numeric,
+            type=PropertyDefinition.Type.EVENT,
+        )
+
+        with materialized("events", "numeric_test_prop", is_nullable=True, create_minmax_index=True) as mat_col:
+            printed = self._expr("properties.numeric_test_prop < 5")
+
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            assert self._json_dynamic_property_expr("numeric_test_prop") in printed
+            assert mat_col.name not in printed
+        else:
+            assert f"less(accurateCastOrNull(events.{mat_col.name}," in printed
+            assert f"less(events.{mat_col.name}," not in printed
+
+    def test_materialized_column_range_comparison_not_optimized_for_datetime_property_type(self) -> None:
+        PropertyDefinition.objects.create(
+            team=self.team,
+            project_id=self.team.project_id,
+            name="datetime_test_prop",
+            property_type=PropertyType.Datetime,
+            type=PropertyDefinition.Type.EVENT,
+        )
+
+        with materialized("events", "datetime_test_prop", is_nullable=True, create_minmax_index=True) as mat_col:
+            printed = self._expr("properties.datetime_test_prop < toDateTime('2024-01-15')")
+
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            assert self._json_dynamic_property_expr("datetime_test_prop") in printed
+            assert mat_col.name not in printed
+        else:
+            assert f"less(parseDateTime64BestEffortOrNull(events.{mat_col.name}," in printed
+            assert f"less(events.{mat_col.name}," not in printed
+
+    @patch("insights.datastore.materialized_columns.get_enabled_materialized_columns_by_table")
+    def test_materialized_column_range_comparison_uses_typed_numeric_source(self, mock_matcols_by_table) -> None:
+        from ee.datastore.materialized_columns.columns import MaterializedColumn, MaterializedColumnDetails
+
+        PropertyDefinition.objects.create(
+            team=self.team,
+            project_id=self.team.project_id,
+            name="numeric_test_prop",
+            property_type=PropertyType.Numeric,
+            type=PropertyDefinition.Type.EVENT,
+        )
+        mock_mat_col = MaterializedColumn(
+            name="mat_numeric_test_prop",
+            details=MaterializedColumnDetails(
+                table_column="properties", property_name="numeric_test_prop", is_disabled=False
+            ),
+            is_nullable=True,
+            column_type="Nullable(Float64)",
+            has_minmax_index=True,
+        )
+        mock_matcols_by_table.return_value = {"events": {("numeric_test_prop", "properties"): mock_mat_col}}
+
+        printed = self._expr("properties.numeric_test_prop < 5")
+
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            assert self._json_dynamic_property_expr("numeric_test_prop") in printed
+            assert "mat_numeric_test_prop" not in printed
+            assert "accurateCastOrNull" in printed
+        else:
+            assert "less(events." in printed
+            assert "mat_numeric_test_prop" in printed
+            assert "accurateCastOrNull" not in printed
+
+    @patch("insights.datastore.materialized_columns.get_enabled_materialized_columns_by_table")
+    def test_materialized_column_range_comparison_uses_typed_datetime_source(self, mock_matcols_by_table) -> None:
+        from ee.datastore.materialized_columns.columns import MaterializedColumn, MaterializedColumnDetails
+
+        PropertyDefinition.objects.create(
+            team=self.team,
+            project_id=self.team.project_id,
+            name="datetime_test_prop",
+            property_type=PropertyType.Datetime,
+            type=PropertyDefinition.Type.EVENT,
+        )
+        mock_mat_col = MaterializedColumn(
+            name="mat_datetime_test_prop",
+            details=MaterializedColumnDetails(
+                table_column="properties", property_name="datetime_test_prop", is_disabled=False
+            ),
+            is_nullable=True,
+            column_type="Nullable(DateTime64(6, 'UTC'))",
+            has_minmax_index=True,
+        )
+        mock_matcols_by_table.return_value = {"events": {("datetime_test_prop", "properties"): mock_mat_col}}
+
+        printed = self._expr("properties.datetime_test_prop < '2024-01-15'")
+
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            assert self._json_dynamic_property_expr("datetime_test_prop") in printed
+            assert "mat_datetime_test_prop" not in printed
+            assert "parseDateTime64BestEffortOrNull" in printed
+        else:
+            assert "less(events." in printed
+            assert "mat_datetime_test_prop" in printed
+            assert "toDateTime64(" in printed
+            assert "parseDateTime64BestEffortOrNull" not in printed
+
+    @patch("insights.datastore.materialized_columns.get_enabled_materialized_columns_by_table")
+    def test_materialized_column_range_comparison_skips_non_nullable_numeric_source(
+        self, mock_matcols_by_table
+    ) -> None:
+        from ee.datastore.materialized_columns.columns import MaterializedColumn, MaterializedColumnDetails
+
+        PropertyDefinition.objects.create(
+            team=self.team,
+            project_id=self.team.project_id,
+            name="numeric_test_prop",
+            property_type=PropertyType.Numeric,
+            type=PropertyDefinition.Type.EVENT,
+        )
+        mock_mat_col = MaterializedColumn(
+            name="mat_numeric_test_prop",
+            details=MaterializedColumnDetails(
+                table_column="properties", property_name="numeric_test_prop", is_disabled=False
+            ),
+            is_nullable=False,
+            column_type="Float64",
+            has_minmax_index=True,
+        )
+        mock_matcols_by_table.return_value = {"events": {("numeric_test_prop", "properties"): mock_mat_col}}
+
+        printed = self._expr("properties.numeric_test_prop < 5")
+
+        # A non-nullable Float64 column stores 0 for missing JSON, so the bare minmax rewrite would
+        # match rows where the property is absent. The optimization must be skipped (no bare column).
+        assert "less(events.mat_numeric_test_prop, " not in printed
+
+    @parameterized.expand(
+        [
+            # Nullable: only actual JSON null / missing keys are SQL NULL — ``''`` and ``'null'`` are real values that compare lexically (``'' < 'mango'`` matches ``d_empty``, ``'null' >= 'mango'`` matches ``d_null_str`` since ``'n' > 'm'``).
+            ("nullable", True, [("d_empty",), ("d_low",)], [("d_high",), ("d_mid",), ("d_null_str",)]),
+            # Non-nullable: ``''`` and ``'null'`` are also NULL sentinels; the rewrite's inline ``notEquals`` clauses exclude them from both LT and GTE results.
+            ("not nullable", False, [("d_low",)], [("d_high",), ("d_mid",)]),
+        ]
+    )
+    def test_materialized_column_range_optimization_returns_correct_results(
+        self,
+        _: str,
+        is_nullable: bool,
+        expected_lt_mango: list[tuple[str]],
+        expected_gte_mango: list[tuple[str]],
+    ) -> None:
+        # End-to-end: rewrite preserves the printer's prior semantics for both nullability flavors AND Datastore picks up the minmax index. Companion to ``test_materialized_column_optimization_returns_correct_results`` below.
+        # Unique event name so the queries below see only this test's events. Postgres teams roll back
+        # between tests but Datastore events don't, so a reused team_id can carry foreign events from
+        # another test class into an un-scoped `FROM events` query.
+        event_name = "mat_col_opt_range_test"
+        with materialized("events", "test_prop", create_minmax_index=True, is_nullable=is_nullable) as mat_col:
+            _create_event(team=self.team, distinct_id="d_low", event=event_name, properties={"test_prop": "apple"})
+            _create_event(team=self.team, distinct_id="d_mid", event=event_name, properties={"test_prop": "mango"})
+            _create_event(team=self.team, distinct_id="d_high", event=event_name, properties={"test_prop": "zebra"})
+            _create_event(team=self.team, distinct_id="d_empty", event=event_name, properties={"test_prop": ""})
+            _create_event(team=self.team, distinct_id="d_null_str", event=event_name, properties={"test_prop": "null"})
+            _create_event(team=self.team, distinct_id="d_missing", event=event_name, properties={})
+            _create_event(team=self.team, distinct_id="d_null", event=event_name, properties={"test_prop": None})
+
+            index_name = get_minmax_index_name(mat_col.name)
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                expected_lt_mango = [("d_empty",), ("d_low",)]
+                expected_gte_mango = [("d_high",), ("d_mid",), ("d_null_str",)]
+
+            lt_result = execute_insightsql_query(
+                team=self.team,
+                query=f"SELECT distinct_id FROM events WHERE event = '{event_name}' AND properties.test_prop < 'mango' ORDER BY distinct_id",
+            )
+            self.assertEqual(lt_result.results, expected_lt_mango)
+            assert lt_result.datastore is not None
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert index_name not in lt_result.datastore
+                assert self._json_dynamic_property_expr("test_prop") in lt_result.datastore
+            else:
+                assert get_index_from_explain(lt_result.datastore, index_name), (
+                    f"Expected skip index {index_name} to be used for `<`"
+                )
+
+            gte_result = execute_insightsql_query(
+                team=self.team,
+                query=f"SELECT distinct_id FROM events WHERE event = '{event_name}' AND properties.test_prop >= 'mango' ORDER BY distinct_id",
+            )
+            self.assertEqual(gte_result.results, expected_gte_mango)
+            assert gte_result.datastore is not None
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert index_name not in gte_result.datastore
+                assert self._json_dynamic_property_expr("test_prop") in gte_result.datastore
+            else:
+                assert get_index_from_explain(gte_result.datastore, index_name), (
+                    f"Expected skip index {index_name} to be used for `>=`"
+                )
+
+    @parameterized.expand(
+        [
             ("nullable", True),
             ("not nullable", False),
         ]
     )
     def test_materialized_column_optimization_returns_correct_results(self, _, is_nullable) -> None:
+        event_name = "mat_col_opt_eq_test"
         with materialized("events", "test_prop", create_minmax_index=True, is_nullable=is_nullable) as mat_col:
             _create_event(
                 team=self.team,
                 distinct_id="d1",
-                event="test_event",
+                event=event_name,
                 properties={"test_prop": "target_value"},
             )
             _create_event(
                 team=self.team,
                 distinct_id="d2",
-                event="test_event",
+                event=event_name,
                 properties={"test_prop": "other_value"},
             )
             _create_event(
                 team=self.team,
                 distinct_id="d3",
-                event="test_event",
+                event=event_name,
                 properties={"test_prop": ""},
             )
             _create_event(
                 team=self.team,
                 distinct_id="d4",
-                event="test_event",
+                event=event_name,
                 properties={"test_prop": "null"},
             )
             _create_event(
                 team=self.team,
                 distinct_id="d5",
-                event="test_event",
+                event=event_name,
                 properties={},
             )
             _create_event(
                 team=self.team,
                 distinct_id="d6",
-                event="test_event",
+                event=event_name,
                 properties={"test_prop": None},
             )
 
             eq_result = execute_insightsql_query(
                 team=self.team,
-                query="SELECT distinct_id FROM events WHERE properties.test_prop = 'target_value' ORDER BY distinct_id",
+                query=f"SELECT distinct_id FROM events WHERE event = '{event_name}' AND properties.test_prop = 'target_value' ORDER BY distinct_id",
             )
             self.assertEqual(eq_result.results, [("d1",)])
             assert eq_result.datastore is not None
             index_name = get_minmax_index_name(mat_col.name)
-            assert get_index_from_explain(eq_result.datastore, index_name), (
-                f"Expected skip index {index_name} to be used"
-            )
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert index_name not in eq_result.datastore
+                assert self._json_dynamic_property_expr("test_prop") in eq_result.datastore
+            else:
+                assert get_index_from_explain(eq_result.datastore, index_name), (
+                    f"Expected skip index {index_name} to be used"
+                )
 
             neq_result = execute_insightsql_query(
                 team=self.team,
-                query="SELECT distinct_id FROM events WHERE properties.test_prop != 'target_value' ORDER BY distinct_id",
+                query=f"SELECT distinct_id FROM events WHERE event = '{event_name}' AND properties.test_prop != 'target_value' ORDER BY distinct_id",
             )
             self.assertEqual(neq_result.results, [("d2",), ("d3",), ("d4",), ("d5",), ("d6",)])
 
@@ -3636,6 +5890,7 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
         _create_event(team=self.team, event=event_name, distinct_id=distinct_id_with_empty)
         _create_event(team=self.team, event=event_name, distinct_id=distinct_id_with_null)
         _create_event(team=self.team, event=event_name, distinct_id=distinct_id_without)
+        flush_persons_and_events()
 
         # Build the is_not_set expression using property_to_expr
         is_not_set_expr = property_to_expr(
@@ -3663,7 +5918,7 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
                             ),
                         ]
                     ),
-                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/Hanzo Insights/insights/pull/44346 but test for equivalence here
+                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/Insights/insights/pull/44346 but test for equivalence here
             ],
             select_from=ast.JoinExpr(table=ast.Field(chain=["events"])),
             where=ast.CompareOperation(
@@ -3681,15 +5936,18 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
         )
         assert result.datastore
 
-        # Note: When columns are materialized, empty strings become NULL due to nullIf(nullIf(..., ''), 'null') wrapping - this is known inconsistent behaviour for materialized properties
+        # Materialized string columns use nullIf(nullIf(..., ''), 'null'), so empty strings become NULL.
+        materialized_column_nullifies_empty_string = is_materialized and (
+            not settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            or poe_mode != PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_ON_EVENTS
+        )
         expected_results = {
             (distinct_id_with_email, "test@example.com", 0, 0),
-            # Empty string behavior differs: becomes null when materialized
             (
                 distinct_id_with_empty,
-                None if is_materialized else "",
-                1 if is_materialized else 0,
-                1 if is_materialized else 0,
+                None if materialized_column_nullifies_empty_string else "",
+                1 if materialized_column_nullifies_empty_string else 0,
+                1 if materialized_column_nullifies_empty_string else 0,
             ),
             (distinct_id_with_null, None, 1, 1),
             (distinct_id_without, None, 1, 1),
@@ -3699,9 +5957,15 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
         # The query should never touch the json properties object if we are using the materialized column, these asserts protect against regression of the performance the bug fixed in
         # https://insights.slack.com/archives/C09B0SSQEDA/p1767698123669229?thread_ts=1767672165.250289&cid=C09B0SSQEDA
         sql_lower = result.datastore.lower()
-        # JSONHas is used in calculating is_not_set_result_historical, but nowhere else
-        assert sql_lower.count("jsonhas") == 1
-        if is_materialized:
+        if (
+            settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            and poe_mode == PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_ON_EVENTS
+        ):
+            assert "jsonextractraw" not in sql_lower
+        elif not settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            # JSONHas is used in calculating is_not_set_result_historical, but nowhere else
+            assert sql_lower.count("jsonhas") == 1
+        if is_materialized and not settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
             # the materialized version should not use any JSON operation, or any other Has operation (e.g. the Array/Set function `has`)
             assert sql_lower.count("json") == 1
             assert sql_lower.count("has") == 1
@@ -3734,6 +5998,12 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
             # should also work if wrapped with toString()
             self._test_materialized_column_comparison(
                 "ilike(toString(properties.test_prop), '%@gmail.com%')",
+                f"like(lower(events.{mat_col.name}), lower(%(insightsql_val_0)s))",
+                {"insightsql_val_0": "%@gmail.com%"},
+            )
+
+            self._test_materialized_column_comparison(
+                "ilike(JSONExtractString(properties, 'test_prop'), '%@gmail.com%')",
                 f"like(lower(events.{mat_col.name}), lower(%(insightsql_val_0)s))",
                 {"insightsql_val_0": "%@gmail.com%"},
             )
@@ -3777,13 +6047,13 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
         with materialized("events", "test_prop", is_nullable=False) as mat_col:
             self._test_materialized_column_comparison(
                 "properties.test_prop ilike '%null%'",
-                f"ifNull(ilike(nullIf(nullIf(events.{mat_col.name}, ''), 'null'), %(insightsql_val_1)s), 0)",
-                {"insightsql_val_1": "%null%"},
+                f"ifNull(ilike(nullIf(nullIf(events.{mat_col.name}, ''), 'null'), %(insightsql_val_0)s), 0)",
+                {"insightsql_val_0": "%null%"},
             )
             self._test_materialized_column_comparison(
                 "properties.test_prop ilike '%NULL%'",
-                f"ifNull(ilike(nullIf(nullIf(events.{mat_col.name}, ''), 'null'), %(insightsql_val_1)s), 0)",
-                {"insightsql_val_1": "%NULL%"},
+                f"ifNull(ilike(nullIf(nullIf(events.{mat_col.name}, ''), 'null'), %(insightsql_val_0)s), 0)",
+                {"insightsql_val_0": "%NULL%"},
             )
 
     def test_materialized_column_like_uses_raw_column_for_non_nullable(self) -> None:
@@ -3857,7 +6127,7 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
         with materialized("events", "test_prop", is_nullable=True) as mat_col:
             self._test_materialized_column_comparison(
                 "properties.test_prop in ('value1', 'value2')",
-                f"and(has([%(insightsql_val_0)s, %(insightsql_val_1)s], events.{mat_col.name}), events.mat_test_prop IS NOT NULL)",
+                f"and(has([%(insightsql_val_0)s, %(insightsql_val_1)s], events.{mat_col.name}), isNotNull(events.{mat_col.name}))",
                 {"insightsql_val_0": "value1", "insightsql_val_1": "value2"},
             )
 
@@ -3869,14 +6139,107 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
                 {"insightsql_val_0": "value1", "insightsql_val_1": "value2"},
             )
 
+    def test_materialized_column_lower_in_uses_bloom_filter_lower_index_non_nullable(self) -> None:
+        # lower(property) IN (...) is rewritten to has([...], lower(column)) so it can hit a bloom_filter_lower index
+        with materialized("events", "test_prop", is_nullable=False, create_bloom_filter_lower_index=True) as mat_col:
+            self._test_materialized_column_comparison(
+                "lower(properties.test_prop) in ('value1', 'value2')",
+                f"has([%(insightsql_val_0)s, %(insightsql_val_1)s], lower(events.{mat_col.name}))",
+                {"insightsql_val_0": "value1", "insightsql_val_1": "value2"},
+            )
+
+    def test_materialized_column_lower_not_in_uses_bloom_filter_lower_index_non_nullable(self) -> None:
+        with materialized("events", "test_prop", is_nullable=False, create_bloom_filter_lower_index=True) as mat_col:
+            self._test_materialized_column_comparison(
+                "lower(properties.test_prop) not in ('value1', 'value2')",
+                f"notIn(lower(events.{mat_col.name}), tuple(%(insightsql_val_0)s, %(insightsql_val_1)s))",
+                {"insightsql_val_0": "value1", "insightsql_val_1": "value2"},
+            )
+
+    def test_materialized_column_lower_in_uses_bloom_filter_lower_index_nullable(self) -> None:
+        # The index is built on lower(coalesce(column, '')) so the printed expression must match it exactly
+        with materialized("events", "test_prop", is_nullable=True, create_bloom_filter_lower_index=True) as mat_col:
+            self._test_materialized_column_comparison(
+                "lower(properties.test_prop) in ('value1', 'value2')",
+                f"has([%(insightsql_val_0)s, %(insightsql_val_1)s], lower(coalesce(events.{mat_col.name}, '')))",
+                {"insightsql_val_0": "value1", "insightsql_val_1": "value2"},
+            )
+
+    def test_materialized_column_lower_not_in_nullable(self) -> None:
+        with materialized("events", "test_prop", is_nullable=True, create_bloom_filter_lower_index=True) as mat_col:
+            self._test_materialized_column_comparison(
+                "lower(properties.test_prop) not in ('value1', 'value2')",
+                f"notIn(lower(coalesce(events.{mat_col.name}, '')), tuple(%(insightsql_val_0)s, %(insightsql_val_1)s))",
+                {"insightsql_val_0": "value1", "insightsql_val_1": "value2"},
+            )
+
+    def test_materialized_column_lower_in_matches_case_insensitive_lower_call(self) -> None:
+        # InsightsQL `lower` is case-insensitive, so `LOWER(...)` must still hit the optimization
+        with materialized("events", "test_prop", is_nullable=False, create_bloom_filter_lower_index=True) as mat_col:
+            self._test_materialized_column_comparison(
+                "LOWER(properties.test_prop) in ('value1', 'value2')",
+                f"has([%(insightsql_val_0)s, %(insightsql_val_1)s], lower(events.{mat_col.name}))",
+                {"insightsql_val_0": "value1", "insightsql_val_1": "value2"},
+            )
+
+    def test_materialized_column_lower_in_uses_ngram_lower_index(self) -> None:
+        # An ngram_lower index also serves IN lookups, so the rewrite fires for it too
+        with materialized("events", "test_prop", is_nullable=False, create_ngram_lower_index=True) as mat_col:
+            self._test_materialized_column_comparison(
+                "lower(properties.test_prop) in ('value1', 'value2')",
+                f"has([%(insightsql_val_0)s, %(insightsql_val_1)s], lower(events.{mat_col.name}))",
+                {"insightsql_val_0": "value1", "insightsql_val_1": "value2"},
+            )
+
+    def test_materialized_column_lower_in_not_optimized_without_a_lower_index(self) -> None:
+        # Without a bloom_filter_lower or ngram_lower index there's nothing to hit - leave the generic path
+        with materialized("events", "test_prop", is_nullable=False) as mat_col:
+            printed = self._expr("lower(properties.test_prop) in ('value1', 'value2')")
+            assert "has(" not in printed, printed
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert mat_col.name not in printed
+                assert self._json_dynamic_property_expr("test_prop") in printed
+            else:
+                assert mat_col.name in printed
+
+    def test_materialized_column_lower_in_bails_out_for_sentinel_value(self) -> None:
+        # '' and 'null' are NULL sentinels for non-nullable columns - bail so the generic path stays correct
+        with materialized("events", "test_prop", is_nullable=False, create_bloom_filter_lower_index=True):
+            assert "has(" not in self._expr("lower(properties.test_prop) in ('null', 'value2')")
+            assert "has(" not in self._expr("lower(properties.test_prop) in ('', 'value2')")
+
+    def test_materialized_column_lower_in_sentinels_for_nullable(self) -> None:
+        # Nullable columns only alias NULL to '' (via coalesce); 'null' is a real value, so it still optimizes
+        with materialized("events", "test_prop", is_nullable=True, create_bloom_filter_lower_index=True) as mat_col:
+            self._test_materialized_column_comparison(
+                "lower(properties.test_prop) in ('null', 'value2')",
+                f"has([%(insightsql_val_0)s, %(insightsql_val_1)s], lower(coalesce(events.{mat_col.name}, '')))",
+                {"insightsql_val_0": "null", "insightsql_val_1": "value2"},
+            )
+            assert "has(" not in self._expr("lower(properties.test_prop) in ('', 'value2')")
+
     def test_force_data_skipping_indices_works_with_simple_equality(self) -> None:
+        event_name = "mat_col_opt_force_index_test"
         with materialized("events", "test_prop", is_nullable=False, create_bloom_filter_index=True) as mat_col:
-            _create_event(team=self.team, distinct_id="test", event="test", properties={"test_prop": "foo"})
+            _create_event(team=self.team, distinct_id="test", event=event_name, properties={"test_prop": "foo"})
 
             index_name = get_bloom_filter_index_name(mat_col.name)
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                with pytest.raises(Exception) as exc_info:
+                    execute_insightsql_query(
+                        team=self.team,
+                        query="SELECT distinct_id FROM events WHERE properties.test_prop = 'foo'",
+                        modifiers=InsightsQLQueryModifiers(
+                            materializationMode=MaterializationMode.AUTO,
+                            forceDatastoreDataSkippingIndexes=[index_name],
+                        ),
+                    )
+                assert "index" in str(exc_info.value).lower()
+                return
+
             result = execute_insightsql_query(
                 team=self.team,
-                query="SELECT distinct_id FROM events WHERE properties.test_prop = 'foo'",
+                query=f"SELECT distinct_id FROM events WHERE event = '{event_name}' AND properties.test_prop = 'foo'",
                 modifiers=InsightsQLQueryModifiers(
                     materializationMode=MaterializationMode.AUTO,
                     forceDatastoreDataSkippingIndexes=[index_name],
@@ -3904,6 +6267,96 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
 
             assert "index" in str(exc_info.value).lower()
 
+    def test_lower_in_optimization_on_persons(self) -> None:
+        # The persons table hides the property filter in a subquery; the helper extracts it (see its docstring)
+        with materialized("person", "email", is_nullable=True, create_bloom_filter_lower_index=True) as mat_col:
+            _create_person(
+                distinct_ids=["p_foo"], team=self.team, properties={"email": "Foo@Example.com"}, immediate=True
+            )
+            _create_person(
+                distinct_ids=["p_bar"], team=self.team, properties={"email": "bar@example.com"}, immediate=True
+            )
+            _create_person(
+                distinct_ids=["p_other"], team=self.team, properties={"email": "other@example.com"}, immediate=True
+            )
+
+            result = execute_insightsql_query(
+                team=self.team,
+                query="SELECT id, properties.email FROM persons "
+                "WHERE lower(properties.email) IN {emails} ORDER BY properties.email",
+                placeholders={"emails": ast.Constant(value=["foo@example.com", "bar@example.com"])},
+                modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.AUTO),
+            )
+            # Correctness: case-insensitive match through the deduplication subquery
+            assert {email for (_id, email) in result.results} == {"Foo@Example.com", "bar@example.com"}
+            assert result.datastore
+
+            # Index usage: EXPLAIN the person-filter subquery from the SQL that actually ran.
+            subquery = get_inner_person_subquery_datastore_sql(result.datastore)
+            index_name = get_bloom_filter_lower_index_name(mat_col.name)
+            index_info = get_index_from_explain(subquery, index_name)
+            assert index_info is not None, (
+                f"Expected skip index {index_name} to be used in the persons filter subquery:\n{subquery}"
+            )
+
+    def test_lower_in_uses_bloom_filter_lower_index_on_events(self) -> None:
+        # Events are a single direct scan, so EXPLAIN of the executed query exposes the skip index directly
+        event_name = "mat_col_lower_bloom_events_test"
+        with materialized("events", "email", is_nullable=True, create_bloom_filter_lower_index=True) as mat_col:
+            _create_event(team=self.team, distinct_id="u1", event=event_name, properties={"email": "Foo@Example.com"})
+
+            result = execute_insightsql_query(
+                team=self.team,
+                query="SELECT count() FROM events WHERE event = {event} AND lower(properties.email) IN {emails}",
+                placeholders={
+                    "event": ast.Constant(value=event_name),
+                    "emails": ast.Constant(value=["foo@example.com", "bar@example.com"]),
+                },
+                modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.AUTO),
+            )
+            assert result.results == [(1,)]
+            assert result.datastore
+
+            index_name = get_bloom_filter_lower_index_name(mat_col.name)
+            index_info = get_index_from_explain(result.datastore, index_name)
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert index_info is None
+                assert "events.properties.email" in result.datastore
+                assert mat_col.name not in result.datastore
+            else:
+                assert index_info is not None, (
+                    f"Expected skip index {index_name} to be used in EXPLAIN output for:\n{result.datastore}"
+                )
+
+    def test_lower_in_uses_ngram_lower_index_on_events(self) -> None:
+        # The rewrite must also let an ngram_lower index serve the IN lookup end to end.
+        event_name = "mat_col_lower_ngram_events_test"
+        with materialized("events", "email", is_nullable=True, create_ngram_lower_index=True) as mat_col:
+            _create_event(team=self.team, distinct_id="u1", event=event_name, properties={"email": "Foo@Example.com"})
+
+            result = execute_insightsql_query(
+                team=self.team,
+                query="SELECT count() FROM events WHERE event = {event} AND lower(properties.email) IN {emails}",
+                placeholders={
+                    "event": ast.Constant(value=event_name),
+                    "emails": ast.Constant(value=["foo@example.com", "bar@example.com"]),
+                },
+                modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.AUTO),
+            )
+            assert result.results == [(1,)]
+            assert result.datastore
+
+            index_name = get_ngram_lower_index_name(mat_col.name)
+            index_info = get_index_from_explain(result.datastore, index_name)
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert index_info is None
+                assert "events.properties.email" in result.datastore
+                assert mat_col.name not in result.datastore
+            else:
+                assert index_info is not None, (
+                    f"Expected skip index {index_name} to be used in EXPLAIN output for:\n{result.datastore}"
+                )
+
     @parameterized.expand(
         [
             ("no_mat_col", None, False),
@@ -3916,6 +6369,7 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
     def test_ilike_and_not_ilike_optimization_gives_correct_results(
         self, _, is_nullable, create_ngram_lower_index
     ) -> None:
+        event_name = "mat_col_opt_ilike_test"
         if is_nullable is not None:
             mat_col = materialize(
                 "events", "test_prop", is_nullable=is_nullable, create_ngram_lower_index=create_ngram_lower_index
@@ -3927,7 +6381,7 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
         # do multiple test cases per test run, as setup and teardown are a bit slow
         cases: set[str] = {
             "hello@hanzo.ai",
-            "Hello@Insights.com",
+            "Hello@Hanzo.ai",
             "other_value",
             "null",
             "NULL",
@@ -3943,8 +6397,8 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
         # In this case we bail out of our optimization and fall back to default NULL handling/wrapping.
         # It'd be a good thing to fix this! And remove these special-cases from the tests! but my top priority was making sure that I didn't change any behavior.
         patterns_and_expected = {
-            "%@hanzo.ai": ({"hello@hanzo.ai", "Hello@Insights.com", "null@hanzo.ai"}, None),
-            "hello@hanzo.ai": ({"hello@hanzo.ai", "Hello@Insights.com"}, None),
+            "%@hanzo.ai": ({"hello@hanzo.ai", "Hello@Hanzo.ai", "null@hanzo.ai"}, None),
+            "hello@hanzo.ai": ({"hello@hanzo.ai", "Hello@Hanzo.ai"}, None),
             "%null%": (
                 {"null", "NULL", "'null'", "null@hanzo.ai", "contains null in the middle"},
                 {"NULL", "'null'", "null@hanzo.ai", "contains null in the middle"},
@@ -3953,7 +6407,7 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
                 {
                     "",
                     "hello@hanzo.ai",
-                    "Hello@Insights.com",
+                    "Hello@Hanzo.ai",
                     "other_value",
                     "null",
                     "NULL",
@@ -3963,7 +6417,7 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
                 },
                 {
                     "hello@hanzo.ai",
-                    "Hello@Insights.com",
+                    "Hello@Hanzo.ai",
                     "other_value",
                     "NULL",
                     "'null'",
@@ -3979,23 +6433,28 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
             _create_event(
                 team=self.team,
                 distinct_id=case,
-                event="test_event",
+                event=event_name,
                 properties={"test_prop": case if case != "None" else None},
             )
+        flush_persons_and_events()
 
         for pattern, (ilike_expected, ilike_expected_if_non_nullable) in patterns_and_expected.items():
-            if ilike_expected_if_non_nullable is not None and (is_nullable is False):
+            if (
+                ilike_expected_if_non_nullable is not None
+                and (is_nullable is False)
+                and not settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            ):
                 ilike_expected = ilike_expected_if_non_nullable
             pattern_expr = ast.Constant(value=pattern if pattern != "None" else None)
             ilike_result = execute_insightsql_query(
                 team=self.team,
-                query="SELECT distinct_id FROM events WHERE ilike(properties.test_prop, {pattern}) ORDER BY distinct_id",
-                placeholders={"pattern": pattern_expr},
+                query="SELECT distinct_id FROM events WHERE event = {event} AND ilike(properties.test_prop, {pattern}) ORDER BY distinct_id",
+                placeholders={"pattern": pattern_expr, "event": ast.Constant(value=event_name)},
             )
             ilike_matches = {d for (d,) in ilike_result.results}
             assert ilike_matches == ilike_expected, "ilike " + str(pattern)
 
-            if mat_col:
+            if mat_col and not settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
                 assert ilike_result.datastore
                 # we can only ever use the index if it exists, pattern was not NULL, and we didn't need to bail out of the optimisation
                 should_use_index = (
@@ -4011,11 +6470,14 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
             not_ilike_expected = cases.difference(ilike_expected)
             not_ilike_result = execute_insightsql_query(
                 team=self.team,
-                query="SELECT distinct_id FROM events WHERE notILike(properties.test_prop, {pattern}) ORDER BY distinct_id",
-                placeholders={"pattern": pattern_expr},
+                query="SELECT distinct_id FROM events WHERE event = {event} AND notILike(properties.test_prop, {pattern}) ORDER BY distinct_id",
+                placeholders={"pattern": pattern_expr, "event": ast.Constant(value=event_name)},
             )
             not_ilike_matches = {d for (d,) in not_ilike_result.results}
             assert not_ilike_matches == not_ilike_expected, "not_ilike " + str(pattern)
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert not_ilike_result.datastore
+                assert "mat_" not in not_ilike_result.datastore
 
     @parameterized.expand(
         [
@@ -4027,6 +6489,7 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
         ]
     )
     def test_in_and_not_in_optimization_gives_correct_results(self, _, is_nullable, create_bloom_filter_index) -> None:
+        event_name = "mat_col_opt_in_test"
         if is_nullable is not None:
             mat_col = materialize(
                 "events", "test_prop", is_nullable=is_nullable, create_bloom_filter_index=create_bloom_filter_index
@@ -4037,7 +6500,7 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
 
         cases: set[str] = {
             "hello@hanzo.ai",
-            "Hello@Insights.com",
+            "Hello@Hanzo.ai",
             "other_value",
             "null",
             "NULL",
@@ -4065,12 +6528,16 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
             _create_event(
                 team=self.team,
                 distinct_id=case,
-                event="test_event",
+                event=event_name,
                 properties={"test_prop": case if case != "None" else None},
             )
 
         for in_values, (in_expected, in_expected_if_non_nullable) in in_values_and_expected.items():
-            if in_expected_if_non_nullable is not None and (is_nullable is False):
+            if (
+                in_expected_if_non_nullable is not None
+                and (is_nullable is False)
+                and not settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA
+            ):
                 in_expected = in_expected_if_non_nullable
 
             in_values_exprs: list[ast.Expr] = [ast.Constant(value=v) for v in in_values]
@@ -4078,13 +6545,13 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
 
             in_result = execute_insightsql_query(
                 team=self.team,
-                query="SELECT distinct_id FROM events WHERE properties.test_prop IN {in_values} ORDER BY distinct_id",
-                placeholders={"in_values": in_tuple},
+                query="SELECT distinct_id FROM events WHERE event = {event} AND properties.test_prop IN {in_values} ORDER BY distinct_id",
+                placeholders={"in_values": in_tuple, "event": ast.Constant(value=event_name)},
             )
             in_matches = {d for (d,) in in_result.results}
             assert in_matches == in_expected, f"IN {in_values}"
 
-            if mat_col:
+            if mat_col and not settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
                 assert in_result.datastore
                 # We can use the bloom filter index if it exists and we didn't need to bail out of the optimisation
                 contains_sentinel = any(v in ("", "null") for v in in_values)
@@ -4097,11 +6564,56 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
             not_in_expected = cases.difference(in_expected)
             not_in_result = execute_insightsql_query(
                 team=self.team,
-                query="SELECT distinct_id FROM events WHERE properties.test_prop NOT IN {in_values} ORDER BY distinct_id",
-                placeholders={"in_values": in_tuple},
+                query="SELECT distinct_id FROM events WHERE event = {event} AND properties.test_prop NOT IN {in_values} ORDER BY distinct_id",
+                placeholders={"in_values": in_tuple, "event": ast.Constant(value=event_name)},
             )
             not_in_matches = {d for (d,) in not_in_result.results}
             assert not_in_matches == not_in_expected, f"NOT IN {in_values}"
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert not_in_result.datastore
+                assert "mat_" not in not_in_result.datastore
+
+    @parameterized.expand([("nullable", True), ("non_nullable", False)])
+    def test_lower_in_optimization_handles_null_and_sentinel_rows(self, _, is_nullable) -> None:
+        # The rewrite must stay correct for NULL/missing, empty-string, and literal-"null" property rows
+        event_name = "mat_col_opt_lower_in_test"
+        with materialized("events", "test_prop", is_nullable=is_nullable, create_bloom_filter_lower_index=True):
+            events: list[tuple[str, dict]] = [
+                ("mixed_case", {"test_prop": "Hello@Hanzo.ai"}),
+                ("lower_case", {"test_prop": "hello@hanzo.ai"}),
+                ("other", {"test_prop": "OTHER"}),
+                ("literal_null_str", {"test_prop": "null"}),
+                ("empty_str", {"test_prop": ""}),
+                ("missing_key", {}),
+                ("json_null", {"test_prop": None}),
+            ]
+            for distinct_id, properties in events:
+                _create_event(team=self.team, distinct_id=distinct_id, event=event_name, properties=properties)
+            all_ids = {distinct_id for distinct_id, _ in events}
+
+            def run(op: str) -> tuple[set[str], str]:
+                result = execute_insightsql_query(
+                    team=self.team,
+                    query=(
+                        f"SELECT distinct_id FROM events "
+                        f"WHERE event = '{event_name}' AND lower(properties.test_prop) {op} ('hello@hanzo.ai') ORDER BY distinct_id"
+                    ),
+                    modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.AUTO),
+                )
+                assert result.datastore
+                return {d for (d,) in result.results}, result.datastore
+
+            # Case-insensitive IN: matches the mixed-case and already-lowercase rows, nothing else.
+            in_matches, in_sql = run("IN")
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert "mat_" not in in_sql
+            else:
+                assert "has(" in in_sql, f"expected the bloom_filter_lower rewrite to fire: {in_sql}"
+            assert in_matches == {"mixed_case", "lower_case"}
+
+            # NOT IN returns the exact complement, including the NULL / missing / empty-string rows.
+            not_in_matches, _ = run("NOT IN")
+            assert not_in_matches == all_ids - {"mixed_case", "lower_case"}
 
     def test_recursive_cte_raises(self):
         query = """
@@ -4114,6 +6626,114 @@ class TestMaterializedColumnOptimization(DatastoreTestMixin, APIBaseTest):
         """
         with self.assertRaises(ImpossibleASTError):
             execute_insightsql_query(team=self.team, query=query)
+
+    def test_jsonextractstring_rewrite_emits_mat_column(self) -> None:
+        with materialized("events", "test_prop", is_nullable=False) as mat_col:
+            printed = self._expr("JSONExtractString(properties, 'test_prop')")
+            if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+                assert printed == (
+                    f"JSONExtractString(ifNull({self._json_dynamic_property_expr('test_prop', as_json=True)}, ''))"
+                )
+                assert mat_col.name not in printed
+            else:
+                assert printed == f"nullIf(nullIf(events.{mat_col.name}, ''), 'null')"
+
+    @patch("insights.datastore.materialized_columns.get_enabled_materialized_columns_by_table")
+    def test_jsonextractstring_not_rewritten_for_non_string_mat_column(self, mock_matcols_by_table) -> None:
+        from ee.datastore.materialized_columns.columns import MaterializedColumn, MaterializedColumnDetails
+
+        # JSONExtractString has string semantics, so a numeric-typed materialized column must not be
+        # substituted for it — that would emit a bare Float64 column where a string is expected.
+        mat_col = MaterializedColumn(
+            name="mat_numeric_prop",
+            details=MaterializedColumnDetails(
+                table_column="properties", property_name="numeric_prop", is_disabled=False
+            ),
+            is_nullable=True,
+            column_type="Nullable(Float64)",
+            has_minmax_index=True,
+        )
+        mock_matcols_by_table.return_value = {"events": {("numeric_prop", "properties"): mat_col}}
+        printed = self._expr("JSONExtractString(properties, 'numeric_prop')")
+
+        assert "mat_numeric_prop" not in printed
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            assert printed == (
+                f"JSONExtractString(ifNull({self._json_dynamic_property_expr('numeric_prop', as_json=True)}, ''))"
+            )
+        else:
+            assert "JSONExtractString(events.properties" in printed
+
+
+class TestSessionIdUuidOptimization(DatastoreTestMixin, APIBaseTest):
+    SESSION_UUID_1 = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    SESSION_UUID_2 = "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+
+    def setUp(self):
+        super().setUp()
+        _create_person(distinct_ids=["user1"], team_id=self.team.pk)
+        _create_event(
+            event="$pageview",
+            team=self.team,
+            distinct_id="user1",
+            properties={"$session_id": self.SESSION_UUID_1, "color": "blue"},
+        )
+        _create_event(
+            event="$pageview",
+            team=self.team,
+            distinct_id="user1",
+            properties={"$session_id": self.SESSION_UUID_2, "color": "red"},
+        )
+        _create_event(
+            event="$pageview",
+            team=self.team,
+            distinct_id="user1",
+            properties={"$session_id": "not-a-uuid", "color": "green"},
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "eq_direct_field",
+                "SELECT properties.color FROM events WHERE $session_id = '{session_uuid_1}' ORDER BY properties.color",
+                [("blue",)],
+            ),
+            (
+                "eq_property_access",
+                "SELECT properties.color FROM events WHERE properties.$session_id = '{session_uuid_1}' ORDER BY properties.color",
+                [("blue",)],
+            ),
+            (
+                "neq_direct_field",
+                "SELECT properties.color FROM events WHERE $session_id != '{session_uuid_1}' AND $session_id = '{session_uuid_2}' ORDER BY properties.color",
+                [("red",)],
+            ),
+            (
+                "in_operation",
+                "SELECT properties.color FROM events WHERE $session_id IN ('{session_uuid_1}', '{session_uuid_2}') ORDER BY properties.color",
+                [("blue",), ("red",)],
+            ),
+            (
+                "not_in_operation",
+                "SELECT properties.color FROM events WHERE $session_id NOT IN ('{session_uuid_1}') AND $session_id = '{session_uuid_2}' ORDER BY properties.color",
+                [("red",)],
+            ),
+        ]
+    )
+    def test_session_id_uuid_query(self, _name, query_template, expected):
+        query = query_template.format(session_uuid_1=self.SESSION_UUID_1, session_uuid_2=self.SESSION_UUID_2)
+        response = execute_insightsql_query(team=self.team, query=query)
+        self.assertEqual(response.results, expected)
+
+    # Remove xfail when we add a minmax index on $session_id_uuid (see events table in insights/models/event/sql.py)
+    # see https://insights.slack.com/archives/C076R4753Q8/p1772027599338529
+    @pytest.mark.xfail(strict=True, reason="No minmax index on $session_id_uuid yet")
+    def test_session_id_uuid_uses_minmax_index(self):
+        query = f"SELECT properties.color FROM events WHERE $session_id = '{self.SESSION_UUID_1}'"
+        response = execute_insightsql_query(team=self.team, query=query)
+        assert response.datastore is not None
+        index_info = get_index_from_explain(response.datastore, "minmax_$session_id_uuid")
+        assert index_info, "Expected minmax_$session_id_uuid skip index to be used"
 
 
 class TestPrinted(APIBaseTest):
@@ -4167,21 +6787,36 @@ class TestPostgresPrinter(BaseTest):
 
     @parameterized.expand(
         [
+            ("is_null", "event is null", "(events.event IS NULL)"),
+            ("is_not_null", "event is not null", "(events.event IS NOT NULL)"),
+            ("eq_null", "event = null", "(events.event = NULL)"),
+            ("neq_null", "event != null", "(events.event != NULL)"),
+        ]
+    )
+    def test_null_comparisons_in_postgres(self, _name: str, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    @parameterized.expand(
+        [
             (
                 "SELECT event FROM events",
                 "SELECT events.event FROM events LIMIT 50000",
             ),
             (
                 "SELECT distinct_id, event FROM events WHERE event = 'test'",
-                "SELECT events.distinct_id, events.event FROM events WHERE (events.event = 'test') LIMIT 50000",
+                "SELECT events.distinct_id, events.event FROM events WHERE (events.event = %(insightsql_val_0)s) LIMIT 50000",
             ),
             (
                 "SELECT event FROM events ORDER BY timestamp DESC",
                 "SELECT events.event FROM events ORDER BY events.timestamp DESC LIMIT 50000",
             ),
             (
+                "SELECT #1, #2 FROM events",
+                "SELECT #1, #2 FROM events LIMIT 50000",
+            ),
+            (
                 "SELECT count() FROM events GROUP BY event",
-                "SELECT count() FROM events GROUP BY events.event LIMIT 50000",
+                "SELECT count(*) FROM events GROUP BY events.event LIMIT 50000",
             ),
         ]
     )
@@ -4195,23 +6830,302 @@ class TestPostgresPrinter(BaseTest):
         self.assertNotIn("team_id", postgres)
         self.assertNotEqual(postgres, datastore)
 
+    def test_column_aliases(self):
+        printed = self._select("SELECT 1 FROM events AS e (event_alias, ts_alias)")
+        self.assertIn("AS e (event_alias, ts_alias)", printed)
+
+    def test_column_aliases_explicit_refs_use_aliased_names(self):
+        printed = self._select("SELECT e.a, e.b FROM events AS e (a, b, c)")
+        # Postgres supports (a, b, c) syntax natively, so field references
+        # should use the aliased names
+        self.assertIn("e.a", printed)
+        self.assertIn("e.b", printed)
+        self.assertNotIn("e.uuid", printed)
+        self.assertNotIn("e.event", printed)
+
+    def test_column_aliases_in_where(self):
+        printed = self._select("SELECT e.a FROM events AS e (a, b, c) WHERE e.c IS NOT NULL")
+        self.assertIn("e.a", printed)
+        self.assertIn("e.c", printed)
+
+    def test_column_aliases_select_star(self):
+        printed = self._select("SELECT s.* FROM (SELECT 1 AS x, 2 AS y, 3 AS z) AS s (a, b, c)")
+        self.assertIn("s.a", printed)
+        self.assertIn("s.b", printed)
+        self.assertIn("s.c", printed)
+
+    def test_column_aliases_subquery_preserves_syntax(self):
+        printed = self._select("SELECT s.a FROM (SELECT 1 AS x, 2 AS y) AS s (a, b)")
+        self.assertIn("(a, b)", printed)
+        self.assertIn("s.a", printed)
+
+    @parameterized.expand(
+        [
+            ("range_one_arg", "SELECT range FROM range(10)", "range(10)"),
+            ("range_two_args", "SELECT range FROM range(1, 10)", "range(1, 10)"),
+            ("range_three_args", "SELECT range FROM range(0, 10, 2)", "range(0, 10, 2)"),
+            (
+                "generate_series_two_args",
+                "SELECT generate_series FROM generate_series(1, 10)",
+                "generate_series(1, 10)",
+            ),
+        ]
+    )
+    def test_range_table_function_prints(self, _name, query, expected):
+        printed = self._select(query)
+        self.assertIn(expected, printed)
+
+    @parameterized.expand(
+        [
+            ("no_args", "SELECT range FROM range", "requires arguments"),
+            ("empty_args", "SELECT range FROM range()", "requires at least 1 argument"),
+            ("too_many_args", "SELECT range FROM range(1, 2, 3, 4)", "requires at most 3 arguments"),
+        ]
+    )
+    def test_range_table_function_arg_errors(self, _name, query, expected_error):
+        with self.assertRaises(QueryError) as ctx:
+            self._select(query)
+        self.assertIn(expected_error, str(ctx.exception))
+
+    def _context_with_table_functions(self, *function_names: str) -> InsightsQLContext:
+        return InsightsQLContext(
+            team_id=self.team.pk,
+            enable_select_queries=True,
+            direct_postgres_connection_metadata={
+                "available_table_functions": list(function_names),
+            },
+        )
+
+    @parameterized.expand(
+        [
+            ("unnest", "SELECT unnest FROM unnest(ARRAY[1, 2, 3])", "unnest("),
+            (
+                "regexp_matches",
+                "SELECT regexp_matches FROM regexp_matches('abc', '.', 'g')",
+                "regexp_matches(",
+            ),
+            (
+                "jsonb_array_elements_text",
+                "SELECT jsonb_array_elements_text FROM jsonb_array_elements_text('[\"a\"]')",
+                "jsonb_array_elements_text(",
+            ),
+        ]
+    )
+    def test_opaque_table_function_from_introspected_metadata(self, name, query, expected):
+        context = self._context_with_table_functions(name)
+        printed = self._select(query, context=context)
+        self.assertIn(expected, printed)
+
+    def test_opaque_table_function_unknown_name_still_errors(self):
+        context = self._context_with_table_functions("unnest")
+        with self.assertRaises(QueryError) as ctx:
+            self._select("SELECT * FROM totally_made_up_function(1)", context=context)
+        self.assertIn("Unknown table", str(ctx.exception))
+
+    def test_opaque_table_function_requires_args(self):
+        context = self._context_with_table_functions("unnest")
+        with self.assertRaises(QueryError) as ctx:
+            self._select("SELECT * FROM unnest", context=context)
+        self.assertIn("Unknown table", str(ctx.exception))
+
+    def test_opaque_table_function_rejects_empty_call(self):
+        context = self._context_with_table_functions("unnest")
+        with self.assertRaises(QueryError) as ctx:
+            self._select("SELECT * FROM unnest()", context=context)
+        self.assertIn("requires at least 1 argument", str(ctx.exception))
+
+    def test_opaque_table_function_falls_back_to_hardcoded_range_without_metadata(self):
+        # Connections that haven't refreshed since this rolled out won't have
+        # `available_table_functions` in their metadata. The hand-rolled RangeTable
+        # / GenerateSeriesTable registrations keep those two working.
+        printed = self._select("SELECT range FROM range(10)")
+        self.assertIn("range(10)", printed)
+
+    @parameterized.expand(
+        [
+            (
+                "basic",
+                "SELECT 1 FROM events PIVOT (count() FOR event IN ('a', 'b'))",
+                "SELECT 1 FROM events PIVOT (count(*) FOR events.event IN (%(insightsql_val_0)s, %(insightsql_val_1)s)) LIMIT 50000",
+            ),
+            (
+                "multiple_columns",
+                "SELECT 1 FROM events PIVOT (count() FOR event IN ('a') distinct_id IN (1, 2) GROUP BY timestamp)",
+                "SELECT 1 FROM events PIVOT (count(*) FOR events.event IN (%(insightsql_val_0)s) events.distinct_id IN (1, 2) GROUP BY events.timestamp) LIMIT 50000",
+            ),
+            (
+                "join",
+                "SELECT 1 FROM events JOIN events AS e2 ON 1 PIVOT (count() FOR events.event IN ('a'))",
+                "SELECT 1 FROM events JOIN events AS e2 ON 1 PIVOT (count(*) FOR events.event IN (%(insightsql_val_0)s)) LIMIT 50000",
+            ),
+        ]
+    )
+    def test_pivot_prints(self, _name: str, query: str, expected: str):
+        self.assertEqual(self._select(query), expected)
+
+    def test_limit_percent_basic(self):
+        printed = self._select("SELECT 1 FROM events LIMIT 10 %")
+        self.assertIn("LIMIT 10 %", printed)
+
+    def test_limit_percent_expr(self):
+        printed = self._select("SELECT 1 FROM events LIMIT (60 + 7) %")
+        self.assertIn("LIMIT (60 + 7) %", printed)
+
+    def test_lambda_style(self):
+        printed = self._select("SELECT lambda x, y: x + y")
+        self.assertIn("lambda x, y: (x + y)", printed)
+
+    @parameterized.expand(
+        [
+            ("[1, 2, 3][1:2]", "[1, 2, 3][1:2]"),
+            ("[1, 2, 3][:]", "[1, 2, 3][:]"),
+            ("[1, 2, 3][(1 + 2):(-3)]", "[1, 2, 3][(1 + 2):-3]"),
+            ("[1, 2, 3][-5:]", "[1, 2, 3][-5:]"),
+            ("([1, 2, 3] || [4, 5, 6])[1:3]", "concat([1, 2, 3], [4, 5, 6])[1:3]"),
+        ]
+    )
+    def test_array_slice(self, expr: str, expected: str):
+        printed = self._select(f"SELECT {expr}")
+        self.assertIn(expected, printed)
+
+    @parameterized.expand(
+        [
+            ("try_cast(1 AS Int64)", "TRY_CAST(1 AS int64)"),
+            ("try_cast(1 AS Int64) + 1", "TRY_CAST(1 AS int64)"),
+        ]
+    )
+    def test_try_cast(self, expr: str, expected: str):
+        printed = self._select(f"SELECT {expr}")
+        self.assertIn(expected, printed)
+
+    @parameterized.expand(
+        [
+            (
+                "sum_desc",
+                "SELECT sum(event ORDER BY timestamp DESC) FROM events",
+                "SELECT sum(events.event ORDER BY events.timestamp DESC) FROM events LIMIT 50000",
+            ),
+        ]
+    )
+    def test_function_call_order_by_prints(self, _name: str, query: str, expected: str):
+        self.assertEqual(self._select(query), expected)
+
+    @parameterized.expand(
+        [
+            ("1 IS DISTINCT FROM 2", "1 IS DISTINCT FROM 2"),
+            ("1 IS NOT DISTINCT FROM 2", "1 IS NOT DISTINCT FROM 2"),
+        ]
+    )
+    def test_is_distinct_from(self, expr: str, expected: str):
+        printed = self._select(f"SELECT {expr}")
+        self.assertIn(expected, printed)
+
+    @parameterized.expand(
+        [
+            (
+                "is_distinct_from_alias_rhs",
+                ast.IsDistinctFrom(
+                    left=ast.Constant(value=""),
+                    right=ast.Alias(alias="x", expr=ast.Constant(value=True)),
+                ),
+            ),
+            (
+                "is_not_distinct_from_alias_lhs",
+                ast.IsDistinctFrom(
+                    left=ast.Alias(alias="x", expr=ast.Field(chain=["a"])),
+                    right=ast.Constant(value=1),
+                    negated=True,
+                ),
+            ),
+            (
+                "between_alias_expr",
+                ast.BetweenExpr(
+                    expr=ast.Alias(alias="x", expr=ast.Field(chain=["a"])),
+                    low=ast.Constant(value=1),
+                    high=ast.Constant(value=10),
+                ),
+            ),
+            (
+                "between_alias_bounds",
+                ast.BetweenExpr(
+                    expr=ast.Constant(value=5),
+                    low=ast.Alias(alias="lo", expr=ast.Constant(value=1)),
+                    high=ast.Alias(alias="hi", expr=ast.Constant(value=10)),
+                ),
+            ),
+        ]
+    )
+    def test_alias_in_infix_operator_roundtrips(self, _name: str, node: ast.Expr):
+        """Regression: aliases inside BETWEEN / IS DISTINCT FROM must be parenthesized
+        by the printer so the InsightsQL roundtrip is stable, and the parsed AST has the
+        same top-level node type as the original."""
+        printed = node.to_insightsql()
+        parsed = parse_expr(printed)
+        self.assertEqual(type(parsed), type(node), f"AST type changed after roundtrip of: {printed!r}")
+        reprinted = parsed.to_insightsql()
+        self.assertEqual(printed, reprinted)
+
+    @parameterized.expand(
+        [
+            ("array_access_over_alias", "(1 as x)[1]"),
+            ("nullish_array_access_over_alias", "(1 as x)?.[1]"),
+            ("property_access_over_alias", "(1 as x).a"),
+            ("array_access_over_between", "(1 between 2 and 3)[1]"),
+            ("array_access_over_is_distinct_from", "(1 is distinct from 2)[1]"),
+        ]
+    )
+    def test_array_access_over_loose_operand_roundtrips(self, _name: str, source: str):
+        """Regression: `[...]` binds tighter than the infix-printed forms (alias,
+        BETWEEN, IS DISTINCT FROM), so the printer must parenthesize such an array
+        operand — `(1 as x)[1]` used to print as `1 AS x[1]`, which does not parse
+        back, and `(1 between 2 and 3)[1]` silently regrouped on reparse."""
+        node = parse_expr(source)
+        printed = node.to_insightsql()
+        parsed = parse_expr(printed)
+        self.assertEqual(clear_locations(parsed), clear_locations(node), f"AST changed after roundtrip: {printed!r}")
+        self.assertEqual(parsed.to_insightsql(), printed)
+
+    def test_limit_percent_with_subquery(self):
+        printed = self._select("SELECT 1 FROM events LIMIT (SELECT avg(team_id) FROM events) %")
+        self.assertIn("LIMIT (SELECT avg(events.team_id) FROM events) %", printed)
+
+    def test_limit_percent_with_offset(self):
+        printed = self._select("SELECT 1 FROM events LIMIT 42% OFFSET 20")
+        self.assertIn("LIMIT 42 % OFFSET 20", printed)
+
     def test_boolean_and_null_literals(self):
         self.assertEqual(self._expr("true"), "true")
         self.assertEqual(self._expr("false"), "false")
         self.assertEqual(self._expr("null"), "NULL")
 
     def test_json_properties_render_as_postgres_json_access(self):
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
         self.assertEqual(
-            self._expr("properties.a.b.c.$browser"),
-            "((((events.properties) -> 'a') -> 'b') -> 'c') ->> '$browser'",
+            self._expr("properties.a.b.c.$browser", context=context),
+            "((((events.properties) -> %(insightsql_val_0)s) -> %(insightsql_val_1)s) -> %(insightsql_val_2)s) ->> %(insightsql_val_3)s",
         )
+        self.assertEqual(list(context.values.values()), ["a", "b", "c", "$browser"])
 
     def test_json_properties_in_select_render_as_postgres_json_access(self):
-        printed = self._select("SELECT properties.detail.name FROM events")
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        printed = self._select("SELECT properties.detail.name FROM events", context=context)
 
         self.assertIn("(events.properties) ->", printed)
-        self.assertIn("->> 'name'", printed)
+        self.assertIn("->> %(insightsql_val", printed)
         self.assertIn('AS "properties.detail.name"', printed)
+        self.assertIn("name", context.values.values())
+
+    def test_json_property_key_injection_is_parameterized_not_inlined(self):
+        # A property key containing a single quote must not break out of the string literal.
+        # The Datastore ``\'`` escape does not work in Postgres (standard_conforming_strings=on),
+        # so the key must be parameterized rather than escape-inlined.
+        # The doubled '' is an escaped single quote in InsightsQL, so the key value contains a literal '.
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        printed = self._expr("properties['x''); DROP TABLE users; --']", context=context)
+
+        self.assertNotIn("DROP TABLE", printed)
+        self.assertNotIn("\\'", printed)
+        self.assertIn("x'); DROP TABLE users; --", context.values.values())
 
     def test_allows_dollar_identifiers(self):
         printed = self._select("SELECT event AS $value FROM events")
@@ -4220,10 +7134,111 @@ class TestPostgresPrinter(BaseTest):
     def test_simple_identifiers_render_without_quotes(self):
         self.assertEqual(self._expr("count(id)"), "count(id)")
 
+    @parameterized.expand(
+        [
+            ("toStartOfSecond(timestamp)", "date_trunc('second', events.timestamp)"),
+            ("toStartOfMinute(timestamp)", "date_trunc('minute', events.timestamp)"),
+            ("toStartOfHour(timestamp)", "date_trunc('hour', events.timestamp)"),
+            ("toStartOfDay(timestamp)", "date_trunc('day', events.timestamp)"),
+            ("toStartOfMonth(timestamp)", "date_trunc('month', events.timestamp)"),
+            ("toStartOfQuarter(timestamp)", "date_trunc('quarter', events.timestamp)"),
+            ("toStartOfYear(timestamp)", "date_trunc('year', events.timestamp)"),
+            (
+                "toStartOfISOYear(timestamp)",
+                "date_trunc('week', make_date(extract(isoyear from events.timestamp)::int, 1, 4)::timestamp)",
+            ),
+        ]
+    )
+    def test_to_start_of_functions_render_as_date_trunc(self, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    def test_to_start_of_week_defaults_to_sunday_in_postgres(self):
+        self.assertEqual(
+            self._expr("toStartOfWeek(timestamp)"),
+            "(date_trunc('week', (events.timestamp + interval '1 day')) - interval '1 day')",
+        )
+
+    def test_to_start_of_week_uses_project_week_start_day_in_postgres(self):
+        context = InsightsQLContext(
+            team_id=self.team.pk,
+            enable_select_queries=True,
+            database=Database(week_start_day=WeekStartDay.MONDAY),
+        )
+
+        self.assertEqual(self._expr("toStartOfWeek(timestamp)", context), "date_trunc('week', events.timestamp)")
+
+    @parameterized.expand(
+        [
+            (
+                "toStartOfWeek(timestamp, 0)",
+                "(date_trunc('week', (events.timestamp + interval '1 day')) - interval '1 day')",
+            ),
+            ("toStartOfWeek(timestamp, 3)", "date_trunc('week', events.timestamp)"),
+        ]
+    )
+    def test_to_start_of_week_preserves_supported_modes_in_postgres(self, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    def test_to_start_of_week_rejects_unsupported_mode_in_postgres(self):
+        with self.assertRaises(QueryError) as error:
+            self._expr("toStartOfWeek(timestamp, 2)")
+
+        self.assertIn("Unsupported toStartOfWeek mode", str(error.exception))
+
+    def test_to_start_of_day_rejects_timezone_override_in_postgres(self):
+        with self.assertRaises(QueryError) as error:
+            self._expr("toStartOfDay(timestamp, 'UTC')")
+
+        self.assertIn("timezone override", str(error.exception))
+
+    @parameterized.expand(
+        [
+            ("date_trunc('second', timestamp)", "date_trunc(%(insightsql_val_0)s, events.timestamp)"),
+            ("date_trunc('minute', timestamp)", "date_trunc(%(insightsql_val_0)s, events.timestamp)"),
+            ("date_trunc('hour', timestamp)", "date_trunc(%(insightsql_val_0)s, events.timestamp)"),
+            ("date_trunc('day', timestamp)", "date_trunc(%(insightsql_val_0)s, events.timestamp)"),
+            ("date_trunc('week', timestamp)", "date_trunc(%(insightsql_val_0)s, events.timestamp)"),
+            ("date_trunc('month', timestamp)", "date_trunc(%(insightsql_val_0)s, events.timestamp)"),
+            ("date_trunc('quarter', timestamp)", "date_trunc(%(insightsql_val_0)s, events.timestamp)"),
+            ("date_trunc('year', timestamp)", "date_trunc(%(insightsql_val_0)s, events.timestamp)"),
+        ]
+    )
+    def test_date_trunc_passthrough_in_postgres(self, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    @parameterized.expand(
+        [
+            (
+                "toStartOfFiveMinutes(timestamp)",
+                "date_trunc('hour', events.timestamp) + "
+                "(floor(extract(minute from events.timestamp) / 5)::int * 5 * interval '1 minute')",
+            ),
+            (
+                "toStartOfTenMinutes(timestamp)",
+                "date_trunc('hour', events.timestamp) + "
+                "(floor(extract(minute from events.timestamp) / 10)::int * 10 * interval '1 minute')",
+            ),
+            (
+                "toStartOfFifteenMinutes(timestamp)",
+                "date_trunc('hour', events.timestamp) + "
+                "(floor(extract(minute from events.timestamp) / 15)::int * 15 * interval '1 minute')",
+            ),
+        ]
+    )
+    def test_to_start_of_minute_bucket_functions_render_in_postgres(self, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
     def test_reserved_identifiers_are_quoted(self):
         printed = self._select("SELECT events.event AS select FROM events")
 
         self.assertIn('AS "select"', printed)
+
+    def test_long_generated_identifier_is_truncated_for_postgres(self):
+        long_alias = "insights_user__insights_organizationmemberships__organization___id"
+        printed = self._select(f"SELECT event AS {long_alias} FROM events")
+
+        self.assertIn("AS ", printed)
+        self.assertNotIn(long_alias, printed)
 
     def test_window_functions_keep_postgres_shape(self):
         printed = self._select("SELECT lag(timestamp) OVER (ORDER BY timestamp) FROM events")
@@ -4231,6 +7246,13 @@ class TestPostgresPrinter(BaseTest):
         self.assertIn("lag(", printed)
         self.assertNotIn("lagInFrame", printed)
         self.assertNotIn("ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING", printed)
+
+    @parameterized.expand([["percentile_cont"], ["percentile_disc"]])
+    def test_percentile_within_group_renders_in_postgres(self, function_name: str):
+        self.assertEqual(
+            self._expr(f"{function_name}(0.5) within group (order by timestamp desc)"),
+            f"{function_name}(0.5) WITHIN GROUP (ORDER BY events.timestamp DESC)",
+        )
 
     def test_in_operations_render_value_lists(self):
         self.assertEqual(self._expr("1 in (1, 2, 3)"), "(1 IN (1, 2, 3))")
@@ -4252,7 +7274,7 @@ class TestPostgresPrinter(BaseTest):
             stack=[prepared_select_query],
         )
 
-        self.assertEqual(rendered, "('__hx_tag', 'div')")
+        self.assertEqual(rendered, "(%(insightsql_val_0)s, %(insightsql_val_1)s)")
 
     def test_comparison_operators(self):
         self.assertEqual(self._expr("a = b"), "(a = b)")
@@ -4277,7 +7299,7 @@ class TestPostgresPrinter(BaseTest):
         self.assertEqual(self._expr("a - b"), "(a - b)")
         self.assertEqual(self._expr("a * b"), "(a * b)")
         self.assertEqual(self._expr("a / b"), "(a / b)")
-        self.assertEqual(self._expr("a % b"), "(a % b)")
+        self.assertEqual(self._expr("a % b"), "MOD(a, b)")
 
     def test_logical_operators(self):
         self.assertEqual(self._expr("a AND b"), "((a) AND (b))")
@@ -4314,12 +7336,20 @@ class TestPostgresPrinter(BaseTest):
     def test_postgres_style_cast(self):
         self.assertEqual(self._expr("123::int"), "CAST(123 AS int)")
         self.assertEqual(self._expr("123.45::float"), "CAST(123.45 AS float)")
-        self.assertEqual(self._expr("'2024-01-01'::date"), "CAST('2024-01-01' AS date)")
+        self.assertEqual(self._expr("'2024-01-01'::date"), "CAST(%(insightsql_val_0)s AS date)")
         self.assertEqual(self._expr("event::int"), "CAST(events.event AS int)")
         self.assertEqual(self._expr("event::text"), "CAST(events.event AS text)")
         self.assertEqual(self._expr("event::boolean"), "CAST(events.event AS boolean)")
         self.assertEqual(self._expr("event::INT"), "CAST(events.event AS int)")
         self.assertEqual(self._expr("(1 + 2)::int"), "CAST((1 + 2) AS int)")
+        self.assertEqual(
+            self._expr("CAST(event AS STRUCT(a INTEGER, b VARCHAR))"),
+            'CAST(events.event AS "struct(a integer, b varchar)")',
+        )
+        self.assertEqual(
+            self._expr("CAST(event AS DECIMAL(10, 2))"),
+            'CAST(events.event AS "decimal(10, 2)")',
+        )
 
     @parameterized.expand(
         [
@@ -4350,6 +7380,69 @@ class TestPostgresPrinter(BaseTest):
         )
         self.assertEqual(self._expr(node), f"CAST(123 AS {expected_escaped})")
 
+    @parameterized.expand(
+        [
+            # SQL injection attempts — mirrors test_type_cast_typename_escape for TRY_CAST.
+            ("int); DROP TABLE users; --", '"int); DROP TABLE users; --"'),
+            ("text' OR '1'='1", "\"text' OR '1'='1\""),
+            ("int; DELETE FROM events;", '"int; DELETE FROM events;"'),
+            ("varchar(100)); --", '"varchar(100)); --"'),
+            # Quote escaping
+            ('int"test', '"int""test"'),
+            ("int'test", '"int\'test"'),
+            # Backslash handling
+            ("int\\test", '"int\\test"'),
+            # Unicode/special chars
+            ("int\x00test", '"int\x00test"'),
+            # Newlines and whitespace injection
+            ("int\nDROP TABLE", '"int\nDROP TABLE"'),
+            ("int\rtest", '"int\rtest"'),
+            # Simple identifiers should not be quoted
+            ("varchar", "varchar"),
+            ("integer", "integer"),
+        ]
+    )
+    def test_try_cast_typename_escape(self, type_name, expected_escaped):
+        node = ast.TryCast(
+            expr=ast.Constant(value=123),
+            type_name=type_name,
+        )
+        self.assertEqual(self._expr(node), f"TRY_CAST(123 AS {expected_escaped})")
+
+    @parameterized.expand(
+        [
+            (
+                "basic",
+                "WITH stats(a, b) AS (SELECT event, timestamp FROM events) SELECT a, b FROM stats",
+                "stats(a, b) AS",
+            ),
+            (
+                "single column",
+                "WITH single(x) AS (SELECT event FROM events) SELECT x FROM single",
+                "single(x) AS",
+            ),
+            (
+                "reserved word as column name",
+                "WITH stats(select, from) AS (SELECT event, timestamp FROM events) SELECT stats.select FROM stats",
+                'stats("select", "from") AS',
+            ),
+            (
+                "used in join",
+                """
+                WITH cte1(id, val) AS (SELECT event, timestamp FROM events),
+                     cte2(id, val) AS (SELECT event, timestamp FROM events)
+                SELECT c1.id, c2.val
+                FROM cte1 AS c1
+                JOIN cte2 AS c2 ON c1.id = c2.id
+                """,
+                "cte1(id, val) AS",
+            ),
+        ]
+    )
+    def test_cte_column_name_list(self, _name: str, query: str, expected_fragment: str):
+        result = self._select(query)
+        self.assertIn(expected_fragment, result)
+
     def test_with_recursive(self):
         query = "WITH RECURSIVE events_cte AS (SELECT id FROM events) SELECT id FROM events_cte"
         self.assertEqual(
@@ -4361,6 +7454,914 @@ class TestPostgresPrinter(BaseTest):
         query = "WITH RECURSIVE nums AS (SELECT 1 AS n UNION ALL SELECT n + 1 FROM nums WHERE n < 5) SELECT n FROM nums"
         self.assertEqual(
             self._select(query),
-            "WITH RECURSIVE nums AS (SELECT 1 AS n UNION ALL SELECT (nums.n + 1) FROM nums WHERE (nums.n < 5)) "
+            "WITH RECURSIVE nums AS ((SELECT 1 AS n) UNION ALL (SELECT (nums.n + 1) FROM nums WHERE (nums.n < 5))) "
             "SELECT nums.n FROM nums LIMIT 50000",
         )
+
+    def test_cte_materialization_hint_materialized(self):
+        query = "WITH events_cte AS MATERIALIZED (SELECT id FROM events) SELECT id FROM events_cte"
+        self.assertEqual(
+            self._select(query),
+            "WITH events_cte AS MATERIALIZED (SELECT id FROM events) SELECT id FROM events_cte LIMIT 50000",
+        )
+
+    def test_cte_materialization_hint_not_materialized(self):
+        query = "WITH events_cte AS NOT MATERIALIZED (SELECT id FROM events) SELECT id FROM events_cte"
+        self.assertEqual(
+            self._select(query),
+            "WITH events_cte AS NOT MATERIALIZED (SELECT id FROM events) SELECT id FROM events_cte LIMIT 50000",
+        )
+
+    def test_cte_using_key_single_column(self):
+        query = "WITH RECURSIVE x(a, b) USING KEY (a) AS (SELECT 1 AS a, 2 AS b UNION ALL SELECT a + 1, b FROM x WHERE a < 5) SELECT * FROM x"
+        result = self._select(query)
+        self.assertIn("USING KEY", result)
+        self.assertIn("x(a, b) USING KEY (a) AS", result)
+
+    def test_cte_using_key_multiple_columns(self):
+        query = "WITH RECURSIVE x(a, b, c) USING KEY (a, b) AS (SELECT 1 AS a, 2 AS b, 3 AS c UNION ALL SELECT a + 1, b, c FROM x WHERE a < 5) SELECT * FROM x"
+        result = self._select(query)
+        self.assertIn("x(a, b, c) USING KEY (a, b) AS", result)
+
+    def test_cte_using_key_without_column_name_list(self):
+        query = "WITH RECURSIVE x USING KEY (a) AS (SELECT 1 AS a UNION ALL SELECT a + 1 FROM x WHERE a < 5) SELECT * FROM x"
+        result = self._select(query)
+        self.assertIn("USING KEY (a) AS", result)
+
+    def test_select_qualify(self):
+        result = self._select("SELECT row_number() OVER () AS rn FROM events QUALIFY rn = 1")
+        self.assertIn("QUALIFY", result)
+        self.assertIn("rn", result)
+
+    def test_select_qualify_with_having(self):
+        result = self._select("SELECT 1 FROM events HAVING 1 == 1 QUALIFY 1 == 1")
+        self.assertIn("HAVING", result)
+        self.assertIn("QUALIFY", result)
+
+    def test_values_query(self):
+        self.assertEqual(
+            self._select("SELECT * FROM (VALUES (1, 'a'), (2, 'b')) AS v (id, name)"),
+            "SELECT v.id, v.name FROM (VALUES (1, %(insightsql_val_0)s), (2, %(insightsql_val_1)s)) AS v (id, name) LIMIT 50000",
+        )
+
+    def test_values_query_no_alias_columns(self):
+        self.assertEqual(
+            self._select("SELECT * FROM (VALUES (1, 'hello')) AS v"),
+            "SELECT v.col0, v.col1 FROM (VALUES (1, %(insightsql_val_0)s)) AS v (col0, col1) LIMIT 50000",
+        )
+
+    def test_values_query_no_alias(self):
+        self.assertEqual(
+            self._select("SELECT * FROM (VALUES (1, 'george', 'created'), (2, 'jack', 'deleted'))"),
+            "SELECT values.col0, values.col1, values.col2 FROM (VALUES (1, %(insightsql_val_0)s, %(insightsql_val_1)s), (2, %(insightsql_val_2)s, %(insightsql_val_3)s)) AS values (col0, col1, col2) LIMIT 50000",
+        )
+
+    def test_values_query_datastore_raises_error(self):
+        from insights.insightsql.errors import QueryError
+
+        with self.assertRaises(QueryError):
+            self._select("SELECT * FROM (VALUES (1, 'a')) AS v(id, name)", dialect="datastore")
+
+    def test_unpivot_prints_basic(self):
+        self.assertEqual(
+            self._select("SELECT field_name, field_value FROM events UNPIVOT (field_value FOR field_name IN (event))"),
+            "SELECT field_name, field_value FROM events UNPIVOT (field_value FOR field_name IN (events.event)) LIMIT 50000",
+        )
+
+    def test_unpivot_prints_with_alias(self):
+        self.assertEqual(
+            self._select("SELECT field_name FROM events UNPIVOT (field_value FOR field_name IN (event)) AS u"),
+            "SELECT u.field_name FROM events UNPIVOT (field_value FOR field_name IN (events.event)) AS u LIMIT 50000",
+        )
+
+    def test_unpivot_prints_with_table_alias(self):
+        self.assertEqual(
+            self._select("SELECT field_name FROM events e UNPIVOT (field_value FOR field_name IN (event))"),
+            "SELECT field_name FROM events AS e UNPIVOT (field_value FOR field_name IN (e.event)) LIMIT 50000",
+        )
+
+    def test_unpivot_prints_with_multiple_in_columns(self):
+        self.assertEqual(
+            self._select(
+                "SELECT field_name, field_value FROM events UNPIVOT (field_value FOR field_name IN (event, uuid))"
+            ),
+            "SELECT field_name, field_value FROM events UNPIVOT (field_value FOR field_name IN (events.event, events.uuid)) LIMIT 50000",
+        )
+
+    def test_unpivot_prints_include_nulls(self):
+        result = self._select(
+            "SELECT field_name, field_value FROM events UNPIVOT INCLUDE NULLS (field_value FOR field_name IN (event))"
+        )
+        self.assertIn("UNPIVOT INCLUDE NULLS", result)
+
+    def test_unpivot_prints_with_where_group_order(self):
+        result = self._select(
+            "SELECT field_name, count() FROM events UNPIVOT (field_value FOR field_name IN (event)) "
+            "WHERE field_value != '' GROUP BY field_name ORDER BY field_name"
+        )
+        self.assertIn("UNPIVOT", result)
+        self.assertIn("WHERE", result)
+        self.assertIn("GROUP BY", result)
+        self.assertIn("ORDER BY", result)
+
+    def test_unpivot_join_prints(self):
+        self.assertEqual(
+            self._select(
+                "SELECT field_name, field_value FROM events JOIN events AS e2 ON 1 "
+                "UNPIVOT (field_value FOR field_name IN (events.event))"
+            ),
+            "SELECT field_name, field_value FROM events JOIN events AS e2 ON 1 UNPIVOT (field_value FOR field_name IN (events.event)) LIMIT 50000",
+        )
+
+    def test_unpivot_datastore_raises_error(self):
+        from insights.insightsql.errors import QueryError
+
+        with self.assertRaises(QueryError):
+            self._select(
+                "SELECT field_name, field_value FROM events UNPIVOT (field_value FOR field_name IN (event))",
+                dialect="datastore",
+            )
+
+    def test_replace_columns_prints(self):
+        self.assertEqual(
+            self._select(
+                "SELECT (* REPLACE (1 AS event)) FROM (SELECT 2 AS event, 3 AS other) AS s",
+            ),
+            "SELECT 1 AS event, s.other FROM (SELECT 2 AS event, 3 AS other) AS s LIMIT 50000",
+        )
+
+    def test_replace_columns_with_exclude_prints(self):
+        self.assertEqual(
+            self._select(
+                "SELECT (* EXCLUDE (b) REPLACE (0 AS a)) FROM (SELECT 1 AS a, 2 AS b, 3 AS c) AS s",
+            ),
+            "SELECT 0 AS a, s.c FROM (SELECT 1 AS a, 2 AS b, 3 AS c) AS s LIMIT 50000",
+        )
+
+    def test_replace_columns_with_column_aliases_prints(self):
+        self.assertEqual(
+            self._select(
+                "SELECT (* REPLACE (0 AS a)) FROM (SELECT 1 AS customer_id, 2 AS b, 3 AS c) AS customers (a, b, c)",
+            ),
+            "SELECT 0 AS a, customers.b, customers.c FROM (SELECT 1 AS customer_id, 2 AS b, 3 AS c) AS customers (a, b, c) LIMIT 50000",
+        )
+
+    def test_intersect_all(self):
+        result = self._select("select 1 as id intersect all select 2 as id")
+        self.assertIn("INTERSECT ALL", result)
+
+    def test_except_all(self):
+        result = self._select("select 1 as id except all select 2 as id")
+        self.assertIn("EXCEPT ALL", result)
+
+    # -- Datastore → Postgres function translation tests --
+
+    @parameterized.expand(
+        [
+            # Renames
+            ("ifNull", "ifNull(1, 2)", "COALESCE(1, 2)"),
+            ("replaceAll", "replaceAll('abc', 'a', 'z')", "REPLACE(%(insightsql_val_0)s, %(insightsql_val_1)s, %(insightsql_val_2)s)"),
+            (
+                "replaceRegexpAll",
+                "replaceRegexpAll('abc', 'a', 'z')",
+                "REGEXP_REPLACE(%(insightsql_val_0)s, %(insightsql_val_1)s, %(insightsql_val_2)s)",
+            ),
+            ("toTypeName", "toTypeName(1)", "pg_typeof(1)"),
+            ("now", "now()", "NOW()"),
+            ("any", "any(event)", "MIN(events.event)"),
+            ("startsWith", "startsWith('hello', 'he')", "starts_with(%(insightsql_val_0)s, %(insightsql_val_1)s)"),
+            ("rand", "rand()", "random()"),
+            ("generateSeries", "generateSeries(1, 10, 1)", "generate_series(1, 10, 1)"),
+            # Type conversions
+            ("toDate", "toDate('2024-01-01')", "CAST(%(insightsql_val_0)s AS DATE)"),
+            ("toDateTime", "toDateTime('2024-01-01')", "CAST(%(insightsql_val_0)s AS TIMESTAMP)"),
+            ("toDateTime_tz", "toDateTime('2024-01-01', 'UTC')", "CAST(%(insightsql_val_0)s AS TIMESTAMP)"),
+            ("toString", "toString(123)", "CAST(123 AS TEXT)"),
+            ("toInt", "toInt(3.14)", "CAST(3.14 AS BIGINT)"),
+            ("toFloat", "toFloat(1)", "CAST(1 AS DOUBLE PRECISION)"),
+            ("toFloatOrZero", "toFloatOrZero('1.5')", "CAST(%(insightsql_val_0)s AS DOUBLE PRECISION)"),
+            ("toFloatOrDefault", "toFloatOrDefault('1.5', 0)", "CAST(%(insightsql_val_0)s AS DOUBLE PRECISION)"),
+            ("toIntOrZero", "toIntOrZero('42')", "CAST(%(insightsql_val_0)s AS BIGINT)"),
+            ("toIntOrDefault", "toIntOrDefault('42', 0)", "CAST(%(insightsql_val_0)s AS BIGINT)"),
+            ("toBool", "toBool(1)", "CAST(1 AS BOOLEAN)"),
+            ("toUUID", "toUUID('abc')", "CAST(%(insightsql_val_0)s AS UUID)"),
+            ("toDecimal", "toDecimal(1, 2)", "CAST(1 AS DECIMAL)"),
+            ("toDateTime64", "toDateTime64('2024-01-01', 3)", "CAST(%(insightsql_val_0)s AS TIMESTAMP)"),
+            # Date extraction
+            ("toYear", "toYear(now())", "EXTRACT(YEAR FROM NOW())"),
+            ("toQuarter", "toQuarter(now())", "EXTRACT(QUARTER FROM NOW())"),
+            ("toMonth", "toMonth(now())", "EXTRACT(MONTH FROM NOW())"),
+            ("toDayOfMonth", "toDayOfMonth(now())", "EXTRACT(DAY FROM NOW())"),
+            ("toDayOfWeek", "toDayOfWeek(now())", "EXTRACT(ISODOW FROM NOW())"),
+            ("toDayOfYear", "toDayOfYear(now())", "EXTRACT(DOY FROM NOW())"),
+            ("toHour", "toHour(now())", "EXTRACT(HOUR FROM NOW())"),
+            ("toMinute", "toMinute(now())", "EXTRACT(MINUTE FROM NOW())"),
+            ("toSecond", "toSecond(now())", "EXTRACT(SECOND FROM NOW())"),
+            ("toISOWeek", "toISOWeek(now())", "EXTRACT(WEEK FROM NOW())"),
+            ("toISOYear", "toISOYear(now())", "EXTRACT(ISOYEAR FROM NOW())"),
+            ("toUnixTimestamp", "toUnixTimestamp(now())", "CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT)"),
+            ("toYYYYMM", "toYYYYMM(now())", "CAST(TO_CHAR(NOW(), 'YYYYMM') AS INTEGER)"),
+            ("toYYYYMMDD", "toYYYYMMDD(now())", "CAST(TO_CHAR(NOW(), 'YYYYMMDD') AS INTEGER)"),
+            ("toYYYYMMDDhhmmss", "toYYYYMMDDhhmmss(now())", "CAST(TO_CHAR(NOW(), 'YYYYMMDDHH24MISS') AS BIGINT)"),
+            # Date truncation (toStartOf* tested separately in test_to_start_of_*)
+            ("toMonday", "toMonday(now())", "CAST(DATE_TRUNC('week', NOW()) AS DATE)"),
+            (
+                "toLastDayOfMonth",
+                "toLastDayOfMonth(now())",
+                "CAST((DATE_TRUNC('month', NOW()) + INTERVAL '1 month' - INTERVAL '1 day') AS DATE)",
+            ),
+            (
+                "toLastDayOfWeek",
+                "toLastDayOfWeek(now())",
+                "CAST((DATE_TRUNC('week', NOW()) + INTERVAL '6 day') AS DATE)",
+            ),
+            # Date generators
+            ("today", "today()", "CURRENT_DATE"),
+            ("yesterday", "yesterday()", "(CURRENT_DATE - INTERVAL '1 day')"),
+            # Intervals
+            ("toIntervalSecond", "toIntervalSecond(60)", "(60 * INTERVAL '1 second')"),
+            ("toIntervalMinute", "toIntervalMinute(30)", "(30 * INTERVAL '1 minute')"),
+            ("toIntervalHour", "toIntervalHour(3)", "(3 * INTERVAL '1 hour')"),
+            ("toIntervalDay", "toIntervalDay(7)", "(7 * INTERVAL '1 day')"),
+            ("toIntervalWeek", "toIntervalWeek(2)", "(2 * INTERVAL '1 week')"),
+            ("toIntervalMonth", "toIntervalMonth(6)", "(6 * INTERVAL '1 month')"),
+            ("toIntervalQuarter", "toIntervalQuarter(1)", "(1 * INTERVAL '3 month')"),
+            ("toIntervalYear", "toIntervalYear(1)", "(1 * INTERVAL '1 year')"),
+            # Date arithmetic
+            ("addDays", "addDays(now(), 7)", "(NOW() + 7 * INTERVAL '1 day')"),
+            ("addHours", "addHours(now(), 3)", "(NOW() + 3 * INTERVAL '1 hour')"),
+            ("addMonths", "addMonths(now(), 1)", "(NOW() + 1 * INTERVAL '1 month')"),
+            ("addYears", "addYears(now(), 2)", "(NOW() + 2 * INTERVAL '1 year')"),
+            ("subtractDays", "subtractDays(now(), 7)", "(NOW() - 7 * INTERVAL '1 day')"),
+            ("subtractMonths", "subtractMonths(now(), 3)", "(NOW() - 3 * INTERVAL '1 month')"),
+            (
+                "dateDiff",
+                "dateDiff('day', now(), now())",
+                "DATE_PART(%(insightsql_val_0)s, CAST(NOW() AS TIMESTAMP) - CAST(NOW() AS TIMESTAMP))",
+            ),
+            # Conditional
+            ("if", "if(1, 'yes', 'no')", "CASE WHEN 1 THEN %(insightsql_val_0)s ELSE %(insightsql_val_1)s END"),
+            (
+                "multiIf",
+                "multiIf(1, 'a', 0, 'b', 'c')",
+                "CASE WHEN 1 THEN %(insightsql_val_0)s WHEN 0 THEN %(insightsql_val_1)s ELSE %(insightsql_val_2)s END",
+            ),
+            # Null/empty
+            ("empty", "empty('test')", "(%(insightsql_val_0)s IS NULL OR %(insightsql_val_0)s = '')"),
+            ("notEmpty", "notEmpty('test')", "(%(insightsql_val_0)s IS NOT NULL AND %(insightsql_val_0)s != '')"),
+            ("isNull", "isNull(1)", "(1 IS NULL)"),
+            ("isNotNull", "isNotNull(1)", "(1 IS NOT NULL)"),
+            ("assumeNotNull", "assumeNotNull(1)", "1"),
+            ("toNullable", "toNullable(1)", "1"),
+            # JSON
+            (
+                "JSONExtractInt",
+                "JSONExtractInt('{}', 'key')",
+                "CAST(json_extract_path_text(%(insightsql_val_0)s, %(insightsql_val_1)s) AS INTEGER)",
+            ),
+            (
+                "JSONExtractFloat",
+                "JSONExtractFloat('{}', 'key')",
+                "CAST(json_extract_path_text(%(insightsql_val_0)s, %(insightsql_val_1)s) AS DOUBLE PRECISION)",
+            ),
+            (
+                "JSONExtractBool",
+                "JSONExtractBool('{}', 'key')",
+                "CAST(json_extract_path_text(%(insightsql_val_0)s, %(insightsql_val_1)s) AS BOOLEAN)",
+            ),
+            (
+                "JSONExtractUInt",
+                "JSONExtractUInt('{}', 'key')",
+                "CAST(json_extract_path_text(%(insightsql_val_0)s, %(insightsql_val_1)s) AS INTEGER)",
+            ),
+            # String
+            ("match", "match('hello', 'h.*o')", "(%(insightsql_val_0)s ~ %(insightsql_val_1)s)"),
+            ("splitByString", "splitByString(',', 'a,b,c')", "STRING_TO_ARRAY(%(insightsql_val_1)s, %(insightsql_val_0)s)"),
+            ("splitByChar", "splitByChar(',', 'a,b,c')", "STRING_TO_ARRAY(%(insightsql_val_1)s, %(insightsql_val_0)s)"),
+            (
+                "endsWith",
+                "endsWith('hello', 'lo')",
+                "(RIGHT(%(insightsql_val_0)s, LENGTH(%(insightsql_val_1)s)) = %(insightsql_val_1)s)",
+            ),
+            (
+                "replaceOne",
+                "replaceOne('abc', 'a', 'z')",
+                "REGEXP_REPLACE(%(insightsql_val_0)s, %(insightsql_val_1)s, %(insightsql_val_2)s)",
+            ),
+            (
+                "replaceRegexpOne",
+                "replaceRegexpOne('abc', 'a+', 'z')",
+                "REGEXP_REPLACE(%(insightsql_val_0)s, %(insightsql_val_1)s, %(insightsql_val_2)s)",
+            ),
+            # Math
+            ("e", "e()", "exp(1)"),
+            ("log2", "log2(8)", "log(2, 8)"),
+            # Aggregation
+            ("uniq", "uniq(1)", "COUNT(DISTINCT 1)"),
+            ("uniqExact", "uniqExact(1)", "COUNT(DISTINCT 1)"),
+            # Case-insensitive function lookup
+            ("now_uppercase", "NOW()", "NOW()"),
+            ("count_uppercase", "COUNT(event)", "count(events.event)"),
+            ("if_uppercase", "IF(1, 2, 3)", "CASE WHEN 1 THEN 2 ELSE 3 END"),
+        ]
+    )
+    def test_datastore_functions_translate_to_postgres(self, _name: str, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    @parameterized.expand(
+        [
+            ("countIf_1arg", "countIf(1)", "count(*) FILTER (WHERE 1)"),
+            ("countIf_2arg", "countIf(event, 1)", "count(events.event) FILTER (WHERE 1)"),
+            ("sumIf", "sumIf(1, 1)", "sum(1) FILTER (WHERE 1)"),
+            ("avgIf", "avgIf(1, 1)", "avg(1) FILTER (WHERE 1)"),
+            ("minIf", "minIf(1, 1)", "min(1) FILTER (WHERE 1)"),
+            ("maxIf", "maxIf(1, 1)", "max(1) FILTER (WHERE 1)"),
+            ("anyIf", "anyIf(1, 1)", "MIN(1) FILTER (WHERE 1)"),
+            ("uniqIf", "uniqIf(1, 1)", "COUNT(DISTINCT 1) FILTER (WHERE 1)"),
+            ("uniqExactIf", "uniqExactIf(1, 1)", "COUNT(DISTINCT 1) FILTER (WHERE 1)"),
+            ("groupArrayIf", "groupArrayIf(1, 1)", "ARRAY_AGG(1) FILTER (WHERE 1)"),
+        ]
+    )
+    def test_if_combinator_functions(self, _name: str, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    @parameterized.expand(
+        [
+            ("argMax", "argMax(1, 2)"),
+            ("argMin", "argMin(1, 2)"),
+            ("range", "range(1, 10)"),
+        ]
+    )
+    def test_unmapped_datastore_functions_raise_error(self, _name: str, expr: str):
+        with self.assertRaises(QueryError) as ctx:
+            self._expr(expr)
+        self.assertIn("not supported in the Postgres dialect", str(ctx.exception))
+        self.assertNotIn("Datastore", str(ctx.exception))
+
+    @parameterized.expand(
+        [
+            ("count", "count()"),
+            ("sum", "sum(1)"),
+            ("abs", "abs(1)"),
+            ("lower", "lower('x')"),
+            ("coalesce", "coalesce(1, 2)"),
+            ("row_number", "row_number()"),
+            ("greatest", "greatest(1, 2)"),
+        ]
+    )
+    def test_standard_sql_functions_pass_through(self, _name: str, expr: str):
+        result = self._expr(expr)
+        self.assertIsNotNone(result)
+
+    def test_connection_metadata_functions_pass_through(self):
+        context = InsightsQLContext(
+            team_id=self.team.pk,
+            enable_select_queries=True,
+            direct_postgres_connection_metadata={"available_functions": ["date_bin"]},
+        )
+
+        self.assertEqual(
+            self._expr("date_bin(toIntervalHour(1), now(), now())", context=context),
+            "date_bin((1 * INTERVAL '1 hour'), NOW(), NOW())",
+        )
+
+    @parameterized.expand(
+        [
+            ("semicolon_injection", "evil; DROP TABLE users --"),
+            ("parenthesis_injection", "evil()--"),
+            ("spaces", "read text"),
+            ("dash_char", "read-text"),
+            ("dot_char", "schema.func"),
+        ]
+    )
+    def test_invalid_function_names_rejected(self, _name: str, func_name: str):
+        node = ast.Call(name=func_name, args=[ast.Constant(value=1)])
+        with self.assertRaises(QueryError):
+            self._expr(node)
+
+    def test_connection_metadata_filters_invalid_function_names(self):
+        context = InsightsQLContext(
+            team_id=self.team.pk,
+            enable_select_queries=True,
+            direct_postgres_connection_metadata={"available_functions": ["date_bin", "evil;drop", "read text"]},
+        )
+        # date_bin should work, but the invalid names should be filtered out
+        self.assertEqual(
+            self._expr("date_bin(toIntervalHour(1), now(), now())", context=context),
+            "date_bin((1 * INTERVAL '1 hour'), NOW(), NOW())",
+        )
+
+
+class TestDuckDBPrinter(BaseTest):
+    """DuckDB printer tests — focused on the DuckDB-specific overrides vs Postgres.
+
+    The DuckDB dialect inherits most of its behavior from PostgresPrinter, so the
+    full PG test surface is implicitly covered via inheritance. The assertions below
+    lock in the specific places DuckDB output diverges from PG.
+    """
+
+    maxDiff = None
+
+    def _expr(
+        self,
+        query: ast.Expr | str,
+        context: Optional[InsightsQLContext] = None,
+        settings: Optional[InsightsQLQuerySettings] = None,
+        backend: InsightsQLParserBackend = "cpp-json",
+    ) -> str:
+        node = parse_expr(query, backend=backend) if isinstance(query, str) else query
+        context = context or InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        select_query = ast.SelectQuery(
+            select=[node], select_from=ast.JoinExpr(table=ast.Field(chain=["events"])), settings=settings
+        )
+        prepared_select_query: ast.SelectQuery = cast(
+            ast.SelectQuery,
+            prepare_ast_for_printing(select_query, context=context, dialect="duckdb", stack=[select_query]),
+        )
+        return print_prepared_ast(
+            prepared_select_query.select[0],
+            context=context,
+            dialect="duckdb",
+            stack=[prepared_select_query],
+        )
+
+    def _select(
+        self,
+        query: str,
+        context: Optional[InsightsQLContext] = None,
+        placeholders: Optional[dict[str, ast.Expr]] = None,
+    ) -> str:
+        return prepare_and_print_ast(
+            parse_select(query, placeholders=placeholders, backend="cpp-json"),
+            context or InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
+            "duckdb",
+        )[0]
+
+    @parameterized.expand(
+        [
+            ("any_renames_to_any_value", "any(event)", "any_value(events.event)"),
+            ("toTypeName_renames_to_typeof", "toTypeName(event)", "typeof(events.event)"),
+            (
+                "formatDateTime_renames_to_strftime",
+                "formatDateTime(timestamp, '%Y-%m-%d')",
+                "strftime(events.timestamp, %(insightsql_val_0)s)",
+            ),
+            (
+                "endsWith_renames_to_ends_with",
+                "endsWith(event, '_done')",
+                "ends_with(events.event, %(insightsql_val_0)s)",
+            ),
+        ]
+    )
+    def test_function_renames(self, _name: str, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    def test_smoke_basic_select(self):
+        self.assertEqual(
+            self._select("SELECT event FROM events"),
+            "SELECT events.event FROM events LIMIT 50000",
+        )
+
+    def test_identifier_no_truncation(self):
+        # PG would truncate a >63-char generated alias containing double underscores into a SHA-suffixed
+        # name via ``_print_identifier``'s truncation heuristic. The separate ``escape_postgres_identifier``
+        # length error applies to overlong identifiers that don't hit that heuristic. DuckDB leaves it intact.
+        long_name = "a_really_long_table_name_that_would_force_pg_to_truncate__here"
+        long_name += "_even_further_past_63_chars"
+        self.assertGreater(len(long_name), 63)
+        from insights.insightsql.printer.duckdb import DuckDBPrinter
+
+        printer = DuckDBPrinter(context=InsightsQLContext(team_id=self.team.pk))
+        # Simple alphanumeric identifier — returned verbatim without quoting.
+        self.assertEqual(printer._print_identifier(long_name), long_name)
+
+    @parameterized.expand(
+        [
+            ("anti",),
+            ("asof",),
+            ("attach",),
+            ("detach",),
+            ("exclude",),
+            ("install",),
+            ("load",),
+            ("macro",),
+            ("pivot",),
+            ("positional",),
+            ("pragma",),
+            ("qualify",),
+            ("replace",),
+            ("sample",),
+            ("semi",),
+            ("summarize",),
+            ("unpivot",),
+        ]
+    )
+    def test_duckdb_extra_reserved_keywords_are_quoted(self, name: str):
+        # DuckDB reserves these even though Postgres doesn't — an unquoted identifier would parse-error.
+        from insights.insightsql.printer.duckdb import DuckDBPrinter
+
+        printer = DuckDBPrinter(context=InsightsQLContext(team_id=self.team.pk))
+        self.assertEqual(printer._print_identifier(name), f'"{name}"')
+
+    def test_percent_in_identifier_rejected_postgres_family(self):
+        # ``%`` in an identifier would confuse psycopg's parameter-placeholder scanning.
+        from insights.insightsql.printer.duckdb import DuckDBPrinter
+        from insights.insightsql.printer.postgres import PostgresPrinter
+
+        ctx = InsightsQLContext(team_id=self.team.pk)
+        for printer in (DuckDBPrinter(context=ctx), PostgresPrinter(context=ctx)):
+            with self.assertRaisesMessage(QueryError, 'is not permitted as it contains the "%" character'):
+                printer._print_identifier("bad%name")
+
+    def test_dollar_prefixed_property_renders_as_jsonpath_member(self):
+        # DuckDB's JSON arrow operator reads a key beginning with `$` as a JSONPath root marker, so the
+        # inherited Postgres form `(properties) ->> '$ai_session_id'` fails to bind on duckgres with
+        # "JSON path error near 'ai_session_id'". Every Insights built-in property is `$`-prefixed, so
+        # DuckDB must emit the key as a quoted JSONPath member instead: `$."$ai_session_id"`.
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        printed = self._expr("properties.$ai_session_id", context=context)
+        self.assertEqual(printed, "(events.properties) ->> %(insightsql_val_0)s")
+        self.assertEqual(list(context.values.values()), ['$."$ai_session_id"'])
+
+    def test_nested_property_renders_as_single_jsonpath_member(self):
+        # A nested chain collapses into one JSONPath bound as a single value, not a chain of arrows.
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        printed = self._expr("properties.a.b.$browser", context=context)
+        self.assertEqual(printed, "(events.properties) ->> %(insightsql_val_0)s")
+        self.assertEqual(list(context.values.values()), ['$."a"."b"."$browser"'])
+
+    def test_json_property_key_with_quote_is_escaped_in_jsonpath(self):
+        # A `"` in the key would terminate the quoted JSONPath member early, so it must be backslash
+        # escaped. The whole path is still a bound value, so this is not a SQL-injection vector.
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        self._expr("properties['a\"b']", context=context)
+        self.assertEqual(list(context.values.values()), ['$."a\\"b"'])
+
+    def test_repeated_property_access_reuses_one_placeholder(self):
+        # DuckDB rejects `GROUP BY <expr>` when the same JSON path is bound to a different placeholder
+        # in the SELECT than in the GROUP BY — it can't prove the two parameterized expressions are
+        # equal. Repeated identical reads must collapse to a single bound value so the printed
+        # expressions match textually.
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        printed = self._select(
+            "SELECT properties.$ai_session_id AS s, count() AS n FROM events GROUP BY properties.$ai_session_id",
+            context=context,
+        )
+        self.assertEqual(list(context.values.values()).count('$."$ai_session_id"'), 1)
+        # the SELECT and GROUP BY reference the very same placeholder token
+        self.assertEqual(printed.count("(events.properties) ->> %(insightsql_val_0)s"), 2)
+
+
+class TestMySQLPrinter(BaseTest):
+    maxDiff = None
+
+    def _expr(
+        self,
+        query: ast.Expr | str,
+        context: Optional[InsightsQLContext] = None,
+    ) -> str:
+        node = parse_expr(query, backend="cpp-json") if isinstance(query, str) else query
+        context = context or InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        select_query = ast.SelectQuery(select=[node], select_from=ast.JoinExpr(table=ast.Field(chain=["events"])))
+        prepared_select_query: ast.SelectQuery = cast(
+            ast.SelectQuery,
+            prepare_ast_for_printing(select_query, context=context, dialect="mysql", stack=[select_query]),
+        )
+        return print_prepared_ast(
+            prepared_select_query.select[0],
+            context=context,
+            dialect="mysql",
+            stack=[prepared_select_query],
+        )
+
+    @parameterized.expand(
+        [
+            ("is_null", "event is null", "(events.event IS NULL)"),
+            ("is_not_null", "event is not null", "(events.event IS NOT NULL)"),
+            ("ilike", "event ilike 'a'", "(LOWER(events.event) LIKE LOWER(%(insightsql_val_0)s))"),
+            ("not_ilike", "event not ilike 'a'", "(LOWER(events.event) NOT LIKE LOWER(%(insightsql_val_0)s))"),
+            ("regex", "event =~ 'a.*'", "REGEXP_LIKE(events.event, %(insightsql_val_0)s, 'c')"),
+            ("not_regex", "event !~ 'a.*'", "(NOT REGEXP_LIKE(events.event, %(insightsql_val_0)s, 'c'))"),
+            ("iregex", "event =~* 'a.*'", "REGEXP_LIKE(events.event, %(insightsql_val_0)s, 'i')"),
+            ("null_safe_eq", "event <=> 'a'", "(events.event <=> %(insightsql_val_0)s)"),
+            ("is_not_distinct_from", "event is not distinct from 'a'", "(events.event <=> %(insightsql_val_0)s)"),
+            ("is_distinct_from", "event is distinct from 'a'", "(NOT (events.event <=> %(insightsql_val_0)s))"),
+            ("modulo", "1 % 2", "MOD(1, 2)"),
+        ]
+    )
+    def test_mysql_operators(self, _name: str, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    @parameterized.expand(
+        [
+            ("start_of_day", "toStartOfDay(timestamp)", "CAST(DATE(events.timestamp) AS DATETIME)"),
+            ("start_of_year", "toStartOfYear(timestamp)", "MAKEDATE(YEAR(events.timestamp), 1)"),
+            (
+                "start_of_month",
+                "toStartOfMonth(timestamp)",
+                "DATE_SUB(DATE(events.timestamp), INTERVAL (DAYOFMONTH(events.timestamp) - 1) DAY)",
+            ),
+            (
+                "start_of_week",
+                "toStartOfWeek(timestamp, 3)",
+                "DATE_SUB(DATE(events.timestamp), INTERVAL WEEKDAY(events.timestamp) DAY)",
+            ),
+            ("date_diff", "dateDiff('day', timestamp, now())", "TIMESTAMPDIFF(DAY, events.timestamp, NOW())"),
+            (
+                "date_trunc",
+                "date_trunc('hour', timestamp)",
+                "DATE_ADD(DATE(events.timestamp), INTERVAL HOUR(events.timestamp) HOUR)",
+            ),
+            ("to_year", "toYear(timestamp)", "EXTRACT(YEAR FROM events.timestamp)"),
+            ("to_unix", "toUnixTimestamp(timestamp)", "UNIX_TIMESTAMP(events.timestamp)"),
+            ("add_days", "addDays(timestamp, 7)", "DATE_ADD(events.timestamp, INTERVAL (7) DAY)"),
+            ("interval_add", "timestamp + toIntervalDay(1)", "(events.timestamp + INTERVAL (1) DAY)"),
+        ]
+    )
+    def test_mysql_date_functions(self, _name: str, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    @parameterized.expand(
+        [
+            ("to_string", "CAST(1 AS TEXT)", "CAST(1 AS CHAR)"),
+            ("to_int", "CAST('1' AS BIGINT)", "CAST(%(insightsql_val_0)s AS SIGNED)"),
+            ("to_float", "CAST('1' AS FLOAT)", "CAST(%(insightsql_val_0)s AS DOUBLE)"),
+            ("to_datetime", "CAST('2020-01-01' AS TIMESTAMP)", "CAST(%(insightsql_val_0)s AS DATETIME)"),
+        ]
+    )
+    def test_mysql_casts(self, _name: str, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    def test_mysql_cast_unsupported_type(self):
+        with self.assertRaisesMessage(QueryError, "Unsupported CAST target"):
+            self._expr("CAST(1 AS Array(String))")
+
+    @parameterized.expand(
+        [
+            ("count_if", "countIf(1 = 1)", "COUNT(CASE WHEN (1 = 1) THEN 1 END)"),
+            ("sum_if", "sumIf(1, 2 = 2)", "SUM(CASE WHEN (2 = 2) THEN 1 END)"),
+            ("uniq", "uniq(event)", "COUNT(DISTINCT events.event)"),
+            ("if_null", "ifNull(event, 'a')", "IFNULL(events.event, %(insightsql_val_0)s)"),
+            ("if_", "if(1 = 1, 'a', 'b')", "CASE WHEN (1 = 1) THEN %(insightsql_val_0)s ELSE %(insightsql_val_1)s END"),
+            (
+                "starts_with",
+                "startsWith(event, 'a')",
+                "(LEFT(events.event, CHAR_LENGTH(%(insightsql_val_0)s)) = %(insightsql_val_0)s)",
+            ),
+            ("position", "position(event, 'a')", "LOCATE(%(insightsql_val_0)s, events.event)"),
+        ]
+    )
+    def test_mysql_functions(self, _name: str, expr: str, expected: str):
+        self.assertEqual(self._expr(expr), expected)
+
+    def test_mysql_unsupported_function_raises(self):
+        with self.assertRaisesMessage(QueryError, "is not supported in the MySQL dialect"):
+            self._expr("arrayJoin([1])")
+
+    def test_mysql_percentile_raises(self):
+        with self.assertRaisesMessage(QueryError, "not supported in the MySQL dialect"):
+            self._expr("percentile_cont(0.5) WITHIN GROUP (ORDER BY timestamp)")
+
+    def test_mysql_identifier_escaping(self):
+        from insights.insightsql.printer.mysql import MySQLPrinter
+
+        printer = MySQLPrinter(context=InsightsQLContext(team_id=self.team.pk))
+        self.assertEqual(printer._print_identifier("foo"), "foo")
+        self.assertEqual(printer._print_identifier("select"), "`select`")
+        self.assertEqual(printer._print_identifier("weird name"), "`weird name`")
+        self.assertEqual(printer._print_identifier("back`tick"), "`back``tick`")
+
+    def test_mysql_percent_in_identifier_rejected(self):
+        from insights.insightsql.printer.mysql import MySQLPrinter
+
+        printer = MySQLPrinter(context=InsightsQLContext(team_id=self.team.pk))
+        with self.assertRaisesMessage(QueryError, 'is not permitted as it contains the "%" character'):
+            printer._print_identifier("bad%name")
+
+
+# Pins what the Snowflake printer emits for each function category. The maps are
+# standalone (no Postgres fallback), so this also guards that every still-valid
+# function stays wired. (name, insightsql_expr, expected_snowflake_sql)
+SNOWFLAKE_EMIT_CASES: list[tuple[str, str, str]] = [
+    # Casts (Snowflake type synonyms; no UUID type → VARCHAR)
+    ("toString", "toString(1)", "CAST(1 AS VARCHAR)"),
+    ("toFloat", "toFloat('1.5')", "CAST(%(insightsql_val_0)s AS DOUBLE)"),
+    ("toUUID", "toUUID('x')", "CAST(%(insightsql_val_0)s AS VARCHAR)"),
+    ("toDate", "toDate(now())", "CAST(CURRENT_TIMESTAMP() AS DATE)"),
+    # Date extraction (Snowflake EXTRACT unit names)
+    ("toYear", "toYear(now())", "EXTRACT(YEAR FROM CURRENT_TIMESTAMP())"),
+    ("toDayOfWeek", "toDayOfWeek(now())", "EXTRACT(dayofweekiso FROM CURRENT_TIMESTAMP())"),
+    ("toDayOfYear", "toDayOfYear(now())", "EXTRACT(dayofyear FROM CURRENT_TIMESTAMP())"),
+    ("toISOWeek", "toISOWeek(now())", "EXTRACT(weekiso FROM CURRENT_TIMESTAMP())"),
+    ("toISOYear", "toISOYear(now())", "EXTRACT(yearofweekiso FROM CURRENT_TIMESTAMP())"),
+    ("toUnixTimestamp", "toUnixTimestamp(now())", "CAST(DATE_PART('epoch_second', CURRENT_TIMESTAMP()) AS BIGINT)"),
+    ("toYYYYMMDD", "toYYYYMMDD(now())", "CAST(TO_CHAR(CURRENT_TIMESTAMP(), 'YYYYMMDD') AS INTEGER)"),
+    # Date truncation / generators
+    ("toMonday", "toMonday(now())", "CAST(DATE_TRUNC('week', CURRENT_TIMESTAMP()) AS DATE)"),
+    ("toLastDayOfMonth", "toLastDayOfMonth(now())", "CAST(LAST_DAY(CURRENT_TIMESTAMP()) AS DATE)"),
+    ("today", "today()", "CURRENT_DATE"),
+    ("yesterday", "yesterday()", "(CURRENT_DATE - INTERVAL '1 day')"),
+    # toStartOf* (DATE_TRUNC; week/ISO-year via DAYOFWEEKISO so WEEK_START is irrelevant;
+    # sub-hour buckets via native TIME_SLICE)
+    ("toStartOfDay", "toStartOfDay(now())", "DATE_TRUNC('day', CURRENT_TIMESTAMP())"),
+    ("toStartOfMonth", "toStartOfMonth(now())", "DATE_TRUNC('month', CURRENT_TIMESTAMP())"),
+    ("toStartOfHour", "toStartOfHour(now())", "DATE_TRUNC('hour', CURRENT_TIMESTAMP())"),
+    ("toStartOfQuarter", "toStartOfQuarter(now())", "DATE_TRUNC('quarter', CURRENT_TIMESTAMP())"),
+    (
+        "toStartOfWeek",
+        "toStartOfWeek(now())",
+        "DATE_TRUNC('day', DATEADD('day', -(DAYOFWEEKISO(CURRENT_TIMESTAMP()) % 7), CURRENT_TIMESTAMP()))",
+    ),
+    (
+        "toStartOfISOYear",
+        "toStartOfISOYear(now())",
+        "DATEADD('day', 1 - DAYOFWEEKISO(DATE_FROM_PARTS(YEAROFWEEKISO(CURRENT_TIMESTAMP()), 1, 4)), "
+        "DATE_FROM_PARTS(YEAROFWEEKISO(CURRENT_TIMESTAMP()), 1, 4))",
+    ),
+    ("toStartOfFiveMinutes", "toStartOfFiveMinutes(now())", "TIME_SLICE(CURRENT_TIMESTAMP(), 5, 'MINUTE')"),
+    (
+        "toStartOfFifteenMinutes",
+        "toStartOfFifteenMinutes(now())",
+        "TIME_SLICE(CURRENT_TIMESTAMP(), 15, 'MINUTE')",
+    ),
+    # Intervals / arithmetic (DATEADD; no INTERVAL multiplication)
+    ("toIntervalDay", "toIntervalDay(7)", "INTERVAL '7 day'"),
+    ("addDays", "addDays(now(), 7)", "DATEADD('day', 7, CURRENT_TIMESTAMP())"),
+    ("subtractMonths", "subtractMonths(now(), 3)", "DATEADD('month', -(3), CURRENT_TIMESTAMP())"),
+    # dateDiff / formatDateTime — unit / format inlined as a literal
+    ("dateDiff", "dateDiff('day', now(), now())", "DATEDIFF('day', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())"),
+    (
+        "formatDateTime",
+        "formatDateTime(now(), '%Y-%m-%d %H:%M:%S')",
+        "TO_CHAR(CURRENT_TIMESTAMP(), 'YYYY-MM-DD HH24:MI:SS')",
+    ),
+    # A literal double-quote is escaped as "" inside the quoted run, not dropped.
+    (
+        "formatDateTime_escapes_literal_quote",
+        "formatDateTime(now(), '%Y\"q\"')",
+        'TO_CHAR(CURRENT_TIMESTAMP(), \'YYYY"""q"""\')',
+    ),
+    (
+        "formatDateTime_escapes_lone_quote",
+        "formatDateTime(now(), '%H\"%M')",
+        'TO_CHAR(CURRENT_TIMESTAMP(), \'HH24""""MI\')',
+    ),
+    # A literal single-quote (escaped `''` in InsightsQL) must be re-escaped as `''` so it can't close
+    # the surrounding SQL string literal — guards the formatDateTime injection vector.
+    (
+        "formatDateTime_escapes_single_quote",
+        "formatDateTime(now(), '%Y''T''%H')",
+        "TO_CHAR(CURRENT_TIMESTAMP(), 'YYYY\"''T''\"HH24')",
+    ),
+    # Conditional / null
+    ("if", "if(1, 2, 3)", "CASE WHEN 1 THEN 2 ELSE 3 END"),
+    ("isNull", "isNull(1)", "(1 IS NULL)"),
+    # Regex operators → REGEXP_INSTR (match()-style "found anywhere"); 'i' = case-insensitive
+    ("regex_match", "'h' =~ 'h.*o'", "(REGEXP_INSTR(%(insightsql_val_0)s, %(insightsql_val_1)s) != 0)"),
+    ("regex_not_match", "'h' !~ 'h.*o'", "(REGEXP_INSTR(%(insightsql_val_0)s, %(insightsql_val_1)s) = 0)"),
+    ("regex_imatch", "'h' =~* 'h.*o'", "(REGEXP_INSTR(%(insightsql_val_0)s, %(insightsql_val_1)s, 1, 1, 0, 'i') != 0)"),
+    ("regex_not_imatch", "'h' !~* 'h.*o'", "(REGEXP_INSTR(%(insightsql_val_0)s, %(insightsql_val_1)s, 1, 1, 0, 'i') = 0)"),
+    # `::` casts map InsightsQL type names to Snowflake types (consistent with toString/toInt/...)
+    ("cast_string", "1::String", "CAST(1 AS VARCHAR)"),
+    ("cast_int", "1.5::Int", "CAST(1.5 AS BIGINT)"),
+    ("cast_bool", "1::Bool", "CAST(1 AS BOOLEAN)"),
+    # Array / object literals → constructors
+    ("array_literal", "[1, 2, 3]", "ARRAY_CONSTRUCT(1, 2, 3)"),
+    ("object_literal", "{'a': 1}", "OBJECT_CONSTRUCT(%(insightsql_val_0)s, 1)"),
+    # JSON (PARSE_JSON + bracket path; chained keys for nested access)
+    (
+        "JSONExtractString",
+        "JSONExtractString('{}', 'a')",
+        "CAST(PARSE_JSON(%(insightsql_val_0)s)[%(insightsql_val_1)s] AS VARCHAR)",
+    ),
+    (
+        "JSONExtractInt_nested",
+        "JSONExtractInt('{}', 'a', 'b')",
+        "CAST(PARSE_JSON(%(insightsql_val_0)s)[%(insightsql_val_1)s][%(insightsql_val_2)s] AS INTEGER)",
+    ),
+    ("JSONExtractRaw", "JSONExtractRaw('{}', 'a')", "PARSE_JSON(%(insightsql_val_0)s)[%(insightsql_val_1)s]"),
+    ("JSONLength", "JSONLength('[]')", "ARRAY_SIZE(PARSE_JSON(%(insightsql_val_0)s))"),
+    # String
+    ("match", "match('h', 'h.*o')", "(REGEXP_INSTR(%(insightsql_val_0)s, %(insightsql_val_1)s) != 0)"),
+    ("splitByChar", "splitByChar(',', 'a,b')", "SPLIT(%(insightsql_val_1)s, %(insightsql_val_0)s)"),
+    (
+        "replaceOne",
+        "replaceOne('a', 'b', 'c')",
+        "REGEXP_REPLACE(%(insightsql_val_0)s, %(insightsql_val_1)s, %(insightsql_val_2)s, 1, 1)",
+    ),
+    # Math
+    ("log10", "log10(100)", "LOG(10, 100)"),
+    ("log", "log(2)", "LN(2)"),
+    ("rand", "rand()", "UNIFORM(0::float, 1::float, RANDOM())"),
+    # Aggregation (no FILTER clause; CASE WHEN / COUNT_IF)
+    ("countIf_1arg", "countIf(1)", "COUNT_IF(1)"),
+    ("countIf_2arg", "countIf(event, 1)", 'COUNT(CASE WHEN 1 THEN events."event" END)'),
+    ("sumIf", "sumIf(1, 1)", "SUM(CASE WHEN 1 THEN 1 END)"),
+    ("avgIf", "avgIf(1, 1)", "AVG(CASE WHEN 1 THEN 1 END)"),
+    ("anyIf", "anyIf(1, 1)", "MIN(CASE WHEN 1 THEN 1 END)"),
+    ("groupArrayIf", "groupArrayIf(1, 1)", "ARRAY_AGG(CASE WHEN 1 THEN 1 END)"),
+    ("uniqIf", "uniqIf(1, 1)", "COUNT(DISTINCT CASE WHEN 1 THEN 1 END)"),
+    ("uniq", "uniq(1)", "COUNT(DISTINCT 1)"),
+    # Renames
+    ("ifNull", "ifNull(1, 2)", "COALESCE(1, 2)"),
+    ("groupArray", "groupArray(event)", 'ARRAY_AGG(events."event")'),
+    ("toTypeName", "toTypeName(1)", "TYPEOF(1)"),
+    ("startsWith", "startsWith('a', 'b')", "STARTSWITH(%(insightsql_val_0)s, %(insightsql_val_1)s)"),
+    ("now", "now()", "CURRENT_TIMESTAMP()"),
+    ("pow", "pow(2, 3)", "POWER(2, 3)"),
+    # count() means "count all rows"; Snowflake rejects a bare COUNT(), so emit COUNT(*).
+    ("count_star", "count()", "count(*)"),
+    ("count_expr", "count(event)", 'count(events."event")'),
+    # Snowflake supports COUNT(DISTINCT expr) — the count handler must honor the distinct flag.
+    ("count_distinct", "count(distinct event)", 'count(DISTINCT events."event")'),
+    # Passthrough (valid Snowflake verbatim)
+    ("avg", "avg(1)", "avg(1)"),
+    ("coalesce", "coalesce(1, 2)", "coalesce(1, 2)"),
+    ("power", "power(2, 3)", "power(2, 3)"),
+]
+
+
+class TestSnowflakePrinter(BaseTest):
+    maxDiff = None
+
+    def _expr(
+        self,
+        query: ast.Expr | str,
+        context: Optional[InsightsQLContext] = None,
+    ) -> str:
+        node = parse_expr(query, backend="cpp-json") if isinstance(query, str) else query
+        context = context or InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        select_query = ast.SelectQuery(select=[node], select_from=ast.JoinExpr(table=ast.Field(chain=["events"])))
+        prepared_select_query: ast.SelectQuery = cast(
+            ast.SelectQuery,
+            prepare_ast_for_printing(select_query, context=context, dialect="snowflake", stack=[select_query]),
+        )
+        return print_prepared_ast(
+            prepared_select_query.select[0],
+            context=context,
+            dialect="snowflake",
+            stack=[prepared_select_query],
+        )
+
+    @parameterized.expand(SNOWFLAKE_EMIT_CASES)
+    def test_snowflake_emit(self, _name: str, insightsql_expr: str, expected: str):
+        self.assertEqual(self._expr(insightsql_expr), expected)
+
+    @parameterized.expand(
+        [
+            ("datediff_non_literal_unit", "dateDiff(event, now(), now())", "requires a literal unit"),
+            ("datediff_bad_unit", "dateDiff('fortnight', now(), now())", "Unsupported dateDiff unit 'fortnight'"),
+            (
+                "format_unknown_specifier",
+                "formatDateTime(now(), '%Q')",
+                "Unsupported formatDateTime specifier '%Q'",
+            ),
+            ("unsupported_function", "argMax(1, 2)", "not supported in the Snowflake dialect"),
+            # Tier 0: constructs with no safe Snowflake equivalent reject loudly
+            ("tuple", "(1, 2)", "Tuple expressions are not supported"),
+            ("array_slice", "[1, 2, 3][1:2]", "Array slices are not"),
+            ("unsupported_cast", "1::Nonsense", "Unsupported cast to type 'nonsense'"),
+        ]
+    )
+    def test_snowflake_errors(self, _name: str, insightsql_expr: str, error_substring: str):
+        with self.assertRaises(QueryError) as ctx:
+            self._expr(insightsql_expr)
+        self.assertIn(error_substring, str(ctx.exception))
+
+    def _select(self, query: str) -> str:
+        context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
+        return prepare_and_print_ast(parse_select(query, backend="cpp-json"), context, "snowflake")[0]
+
+    @parameterized.expand(
+        [
+            ("array_join", "SELECT x FROM events ARRAY JOIN [1, 2] AS x", "ARRAY JOIN is not supported"),
+            ("prewhere", "SELECT event FROM events PREWHERE event = 'x'", "PREWHERE is not supported"),
+            ("sample", "SELECT event FROM events SAMPLE 0.1", "SAMPLE is not supported"),
+            ("limit_by", "SELECT event FROM events LIMIT 1 BY event", "LIMIT BY is not supported"),
+        ]
+    )
+    def test_snowflake_clause_errors(self, _name: str, query: str, error_substring: str):
+        with self.assertRaises(QueryError) as ctx:
+            self._select(query)
+        self.assertIn(error_substring, str(ctx.exception))
+
+    def test_snowflake_qualify_emits_natively(self):
+        # QUALIFY parses and resolves but the base/InsightsQL printers rejected it; Snowflake supports
+        # it natively, so it should print straight through.
+        sql = self._select("SELECT event FROM events QUALIFY row_number() OVER (ORDER BY timestamp) = 1")
+        self.assertIn("QUALIFY", sql)
+
+    def test_snowflake_pivot_emits_unqualified_columns_and_star_projection(self):
+        # Snowflake rejects table-qualified columns inside PIVOT, and its output columns are named
+        # after the IN values (which InsightsQL can't enumerate) — so the projection stays `*`.
+        sql = self._select("SELECT * FROM events PIVOT(count(timestamp) FOR event IN ('pageview', 'click'))")
+        self.assertIn('PIVOT (count("timestamp") FOR "event" IN (', sql)
+        self.assertTrue(sql.startswith("SELECT * FROM events PIVOT ("), sql)
+
+    def test_snowflake_unpivot_emits_unqualified_columns(self):
+        sql = self._select("SELECT * FROM (SELECT 1 AS jan, 2 AS feb) AS t UNPIVOT(amount FOR month IN (jan, feb))")
+        self.assertIn('UNPIVOT ("amount" FOR "month" IN ("jan", "feb"))', sql)
+
+    def test_snowflake_pivot_rejects_inner_group_by(self):
+        with self.assertRaises(QueryError):
+            self._select("SELECT * FROM events PIVOT(count(timestamp) FOR event IN ('a') GROUP BY uuid)")

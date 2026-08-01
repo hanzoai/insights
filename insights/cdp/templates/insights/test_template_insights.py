@@ -5,7 +5,8 @@ from insights.cdp.templates.insights.template_insights import (
     TemplateInsightsMigrator,
     template as template_insights,
 )
-from insights.models import PluginConfig
+
+from products.cdp.backend.models.plugin import PluginConfig
 
 
 class TestTemplateInsights(BaseInsightsFunctionTemplateTest):

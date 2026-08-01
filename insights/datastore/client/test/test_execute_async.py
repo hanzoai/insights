@@ -8,9 +8,12 @@ from unittest.mock import MagicMock, patch
 from django.db import transaction
 from django.test import SimpleTestCase, TestCase
 
+from parameterized import parameterized
+
 from insights.schema import DatastoreQueryProgress, QueryStatus
 
-from insights.insightsql.constants import DEFAULT_INSIGHTS_AI_RETURNED_ROWS
+from insights.insightsql.constants import DEFAULT_POSTFN_AI_RETURNED_ROWS
+from insights.insightsql.errors import ExposedInsightsQLError
 
 from insights.datastore.client import (
     execute_async as client,
@@ -19,7 +22,8 @@ from insights.datastore.client import (
 from insights.datastore.client.async_task_chain import task_chain_context
 from insights.datastore.client.execute_async import QueryNotFoundError, QueryStatusManager, execute_process_query
 from insights.datastore.query_tagging import tag_queries
-from insights.errors import CHQueryErrorTooManySimultaneousQueries
+from insights.errors import ExposedCHQueryError
+from insights.exceptions import DatastoreAtCapacity, DatastoreQueryMemoryLimitExceeded
 from insights.models import Organization, Team
 from insights.models.user import User
 from insights.redis import get_client
@@ -58,6 +62,25 @@ class TestQueryStatusManager(SimpleTestCase):
         self.query_status.query_progress = DatastoreQueryProgress(**ZERO_PROGRESS)
         self.query_status.expiration_time = None  # We don't care about expiration time in this test
         self.assertEqual(self.manager.get_query_status(True), self.query_status)
+
+    def test_process_query_task_on_failure_marks_status_errored(self):
+        from insights.tasks.tasks import process_query_task
+
+        self.manager.store_query_status(self.query_status)
+
+        process_query_task.on_failure(
+            exc=DatastoreAtCapacity(),
+            task_id="celery-task-id",
+            args=(self.team_id, None, self.query_id),
+            kwargs={},
+            einfo=None,
+        )
+
+        result = self.manager.get_query_status()
+        self.assertTrue(result.complete)
+        self.assertTrue(result.error)
+        self.assertEqual(result.error_message, DatastoreAtCapacity.default_detail)
+        self.assertIsNotNone(result.end_time)
 
     def test_store_datastore_query_progress(self):
         query_status = {f"{self.team_id}_{self.query_id}_1": {"progress": 1234}}
@@ -134,6 +157,30 @@ class TestExecuteProcessQuery(TestCase):
         args_loaded = json.loads(args[1])
         self.assertEqual(args_loaded["results"], [None, None, None, 1.0, "👍"])
 
+    @parameterized.expand(
+        [
+            ("user_safe_ch_error", ExposedCHQueryError("NOT_AN_AGGREGATE"), False),
+            ("user_safe_insightsql_error", ExposedInsightsQLError("bad query"), False),
+            ("server_error", ValueError("something broke"), True),
+        ]
+    )
+    @patch("insights.datastore.client.execute_async.capture_exception")
+    @patch("insights.datastore.client.execute_async.redis.get_client")
+    @patch("insights.api.services.query.process_query_dict")
+    def test_execute_process_query_only_captures_non_user_safe_errors(
+        self, _name, error, should_capture, mock_process_query_dict, mock_redis_client, mock_capture_exception
+    ):
+        mock_redis = MagicMock()
+        mock_redis.get.return_value = json.dumps(
+            {"id": self.query_id, "team_id": self.team.id, "complete": False, "error": False}
+        ).encode()
+        mock_redis_client.return_value = mock_redis
+        mock_process_query_dict.side_effect = error
+
+        execute_process_query(self.team.id, self.user.id, self.query_id, self.query_json, self.limit_context)
+
+        self.assertEqual(mock_capture_exception.called, should_capture)
+
 
 class DatastoreClientTestCase(TestCase, DatastoreTestMixin):
     def setUp(self):
@@ -165,7 +212,7 @@ class DatastoreClientTestCase(TestCase, DatastoreTestMixin):
         self.assertFalse(result.error, result.error_message or "<no error message>")
         self.assertTrue(result.complete)
         assert result.results is not None
-        self.assertEqual(len(result.results["results"]), DEFAULT_INSIGHTS_AI_RETURNED_ROWS)
+        self.assertEqual(len(result.results["results"]), DEFAULT_POSTFN_AI_RETURNED_ROWS)
 
     def test_async_query_insights_ai_limit_with_explicit_limit(self):
         query = build_query("SELECT arrayJoin(range(1, 100001)) LIMIT 300")
@@ -195,16 +242,29 @@ class DatastoreClientTestCase(TestCase, DatastoreTestMixin):
         self.assertIsNotNone(result.pickup_time)
         self.assertIsNotNone(result.end_time)
         assert result.error_message
-        self.assertRegex(result.error_message, "no viable alternative at input")
+        self.assertRegex(result.error_message, "trailing tokens after expression")
+
+    def test_async_query_user_safe_error_carries_error_code(self):
+        query = build_query("SELECT * FROM events")
+        query_id = uuid.uuid4().hex
+
+        with patch("insights.api.services.query.process_query_dict", side_effect=DatastoreQueryMemoryLimitExceeded()):
+            client.enqueue_process_query_task(
+                self.team, self.user.id, query, query_id=query_id, _test_only_bypass_celery=True
+            )
+
+        result = client.get_query_status(self.team.id, query_id)
+        self.assertTrue(result.error)
+        self.assertTrue(result.complete)
+        assert result.error_message
+        self.assertEqual(result.error_code, DatastoreQueryMemoryLimitExceeded.default_code)
 
     def test_async_query_server_errors(self):
         query = build_query("SELECT * FROM events")
 
-        with patch(
-            "insights.api.services.query.process_query_dict", side_effect=CHQueryErrorTooManySimultaneousQueries("bla")
-        ):
+        with patch("insights.api.services.query.process_query_dict", side_effect=DatastoreAtCapacity()):
             self.assertRaises(
-                CHQueryErrorTooManySimultaneousQueries,
+                DatastoreAtCapacity,
                 client.enqueue_process_query_task,
                 **{"team": self.team, "user_id": self.user.id, "query_json": query, "_test_only_bypass_celery": True},
             )
@@ -217,8 +277,11 @@ class DatastoreClientTestCase(TestCase, DatastoreTestMixin):
             except Exception:
                 pass
 
+        # Transient capacity errors leave the status re-runnable (not complete, not errored)
+        # so the Celery retry doesn't short-circuit on the `if query_status.complete` guard.
         result = client.get_query_status(self.team.id, query_id)
-        self.assertTrue(result.error)
+        self.assertFalse(result.error)
+        self.assertFalse(result.complete)
         assert result.error_message is None
         self.assertIsNotNone(result.start_time)
         self.assertIsNotNone(result.pickup_time)
@@ -474,3 +537,76 @@ class DatastoreClientTestCase(TestCase, DatastoreTestMixin):
 
         # Both should execute (force bypasses deduplication)
         self.assertEqual(execute_process_query_mock.call_count, 2)
+
+    @parameterized.expand(
+        [
+            ("failed_task", True),
+            ("succeeded_task", False),
+        ]
+    )
+    @patch("insights.datastore.client.execute_process_query")
+    def test_stale_mapping_from_completed_task_does_not_block_reenqueue(
+        self, _name, task_errored, execute_process_query_mock
+    ):
+        query = build_query("SELECT 1")
+        cache_key = "stale_mapping_cache_key"
+        old_query_id = "old_completed_query_id"
+
+        # Simulate a stale mapping: previous task completed but did not clean up
+        old_manager = QueryStatusManager(old_query_id, self.team.id)
+        old_manager.store_query_status(
+            QueryStatus(id=old_query_id, team_id=self.team.id, complete=True, error=task_errored)
+        )
+        old_manager.register_cache_key_mapping(cache_key)
+
+        new_status = client.enqueue_process_query_task(
+            self.team, self.user.id, query, cache_key=cache_key, _test_only_bypass_celery=True
+        )
+
+        # A new task was enqueued — not the old completed one returned
+        execute_process_query_mock.assert_called_once()
+        assert new_status.id != old_query_id
+        assert not new_status.complete
+        # The new task registered its own mapping, replacing the stale one
+        assert old_manager.get_running_query_by_cache_key(cache_key) == new_status.id
+
+    @patch("insights.datastore.client.execute_process_query")
+    def test_in_progress_mapping_still_deduplicates(self, execute_process_query_mock):
+        query = build_query("SELECT 1")
+        cache_key = "in_progress_cache_key"
+        in_progress_query_id = "in_progress_query_id"
+
+        in_progress_manager = QueryStatusManager(in_progress_query_id, self.team.id)
+        in_progress_manager.store_query_status(
+            QueryStatus(id=in_progress_query_id, team_id=self.team.id, complete=False, error=False)
+        )
+        in_progress_manager.register_cache_key_mapping(cache_key)
+
+        second_status = client.enqueue_process_query_task(
+            self.team, self.user.id, query, cache_key=cache_key, _test_only_bypass_celery=True
+        )
+
+        # No new task should be enqueued
+        execute_process_query_mock.assert_not_called()
+        assert second_status.id == in_progress_query_id
+
+    @patch("insights.datastore.client.execute_process_query")
+    def test_expired_query_status_with_stale_mapping_cleans_up_and_reenqueues(self, execute_process_query_mock):
+        query = build_query("SELECT 1")
+        cache_key = "expired_status_cache_key"
+        expired_query_id = "expired_query_id"
+
+        # Register a mapping for a query whose status has already expired in Redis (no store_query_status call)
+        expired_manager = QueryStatusManager(expired_query_id, self.team.id)
+        expired_manager.register_cache_key_mapping(cache_key)
+
+        new_status = client.enqueue_process_query_task(
+            self.team, self.user.id, query, cache_key=cache_key, _test_only_bypass_celery=True
+        )
+
+        # A new task was enqueued
+        execute_process_query_mock.assert_called_once()
+        assert new_status.id != expired_query_id
+        assert not new_status.complete
+        # Stale mapping was replaced with the new query's mapping
+        assert expired_manager.get_running_query_by_cache_key(cache_key) == new_status.id

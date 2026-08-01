@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -21,14 +21,14 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'bash',
                                 file: 'Expo',
                                 code: dedent`
-                                    npx expo install insights-react-native expo-file-system expo-application expo-device expo-localization insights-react-native-session-replay
+                                    npx expo install insights-react-native expo-file-system expo-application expo-device expo-localization @hanzo/react-native-plugin
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize insights-react-native-session-replay
+                                    yarn add insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize @hanzo/react-native-plugin
 
                                     # for iOS
                                     cd ios && pod install
@@ -38,7 +38,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm i -s insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize insights-react-native-session-replay
+                                    npm i -s insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize @hanzo/react-native-plugin
 
                                     # for iOS
                                     cd ios && pod install
@@ -46,6 +46,13 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                             },
                         ]}
                     />
+                    <CalloutBox type="fyi" title="Plugin renamed in 4.47.0+">
+                        <Markdown>
+                            {dedent`
+                                \`@hanzo/react-native-plugin\` (\`>= 2.0.1\`) is the renamed \`insights-react-native-session-replay\` plugin — it was renamed in \`insights-react-native\` 4.47.0+ and now also powers [native error tracking](https://hanzo.ai/docs/error-tracking/installation/react-native). If you're on a \`insights-react-native\` version earlier than 4.47.0, install \`insights-react-native-session-replay\` instead.
+                            `}
+                        </Markdown>
+                    </CalloutBox>
                     <CalloutBox type="fyi" title="SDK version">
                         <Markdown>
                             Session replay requires Insights React Native SDK version 3.2.0 or higher. We recommend
@@ -61,7 +68,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             content: (
                 <>
                     <Markdown>
-                        Go to your Insights [Project Settings](https://insights.hanzo.ai/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://us.hanzo.ai/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                 </>
@@ -87,7 +94,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                     export function MyApp() {
                                         return (
                                             <InsightsProvider
-                                                apiKey="<ph_project_api_key>"
+                                                apiKey="<ph_project_token>"
                                                 options={{
                                                     host: "<ph_client_api_host>",
 
@@ -105,13 +112,27 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
 
                                                         // Capture logs automatically. Default is true.
                                                         // Android only (Native Logcat only)
+                                                        //
+                                                        // Support for remote configuration 
+                                                        // in the [session replay settings](https://app.hanzo.ai/settings/project-replay#replay-log-capture)
+                                                        // requires SDK version 4.35.0 or higher.
                                                         captureLog: true,
 
                                                         // Whether network requests are captured in recordings. Default is true
                                                         // Only metric-like data like speed, size, and response code are captured.
                                                         // No data is captured from the request or response body.
                                                         // iOS only
+                                                        //
+                                                        // Support for remote configuration 
+                                                        // in the [session replay settings](https://app.hanzo.ai/settings/project-replay#replay-network)
+                                                        // requires SDK version 4.35.0 or higher.
                                                         captureNetworkTelemetry: true,
+
+                                                        // Sample rate for session recordings. A value between 0.0 and 1.0.
+                                                        // 1.0 means 100% of sessions will be recorded. 0.5 means 50%, and so on.
+                                                        // Local config has precedence over remote config when both are set.
+                                                        // Default is undefined (all sessions are recorded).
+                                                        sampleRate: undefined,
 
                                                         // Throttling delay used to reduce the number of snapshots captured
                                                         // and reduce performance impact. Default is 1000ms

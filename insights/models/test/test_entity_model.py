@@ -1,6 +1,7 @@
 from django.test import TestCase
 
-from insights.models.entity import TREND_FILTER_TYPE_ACTIONS, TREND_FILTER_TYPE_EVENTS, Entity
+from insights.constants import TREND_FILTER_TYPE_ACTIONS, TREND_FILTER_TYPE_EVENTS
+from insights.models.entity import Entity
 
 
 class TestEntity(TestCase):

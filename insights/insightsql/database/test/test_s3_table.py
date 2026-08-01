@@ -3,6 +3,7 @@ from typing import Literal
 from insights.test.base import BaseTest
 from unittest import mock
 
+from django.conf import settings
 from django.test import override_settings
 
 from insights.insightsql.constants import MAX_SELECT_RETURNED_ROWS
@@ -16,10 +17,17 @@ from insights.insightsql.parser import parse_select
 from insights.insightsql.printer import prepare_and_print_ast
 from insights.insightsql.query import create_default_modifiers_for_team
 
-from products.data_warehouse.backend.models.table import DataWarehouseTable
+from insights.models.event.sql import DISTRIBUTED_EVENTS_JSON_TABLE
+
+from products.warehouse_sources.backend.facade.models import DataWarehouseTable
 
 
 class TestS3Table(BaseTest):
+    def _events_from_sql(self) -> str:
+        if settings.DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA:
+            return f"{DISTRIBUTED_EVENTS_JSON_TABLE} AS events"
+        return "events"
+
     def _init_database(self):
         self.database = Database.create_for(team=self.team)
         self.database._add_warehouse_tables(
@@ -161,7 +169,7 @@ class TestS3Table(BaseTest):
 
             self.assertEqual(
                 datastore,
-                f"SELECT aapl_stock.High AS High, aapl_stock.Low AS Low FROM (SELECT * FROM s3(%(insightsql_val_0_sensitive)s, %(insightsql_val_1)s)) AS aapl_stock JOIN events ON equals(aapl_stock.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
+                f"SELECT aapl_stock.High AS High, aapl_stock.Low AS Low FROM (SELECT * FROM s3(%(insightsql_val_0_sensitive)s, %(insightsql_val_1)s)) AS aapl_stock JOIN {self._events_from_sql()} ON equals(aapl_stock.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
             )
 
     def test_s3_table_select_and_non_s3_join_first(self):
@@ -187,7 +195,7 @@ class TestS3Table(BaseTest):
 
                 self.assertEqual(
                     datastore,
-                    f"SELECT aapl_stock.High AS High, aapl_stock.Low AS Low FROM events GLOBAL JOIN (SELECT * FROM s3(%(insightsql_val_0_sensitive)s, %(insightsql_val_1)s)) AS aapl_stock ON equals(aapl_stock.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
+                    f"SELECT aapl_stock.High AS High, aapl_stock.Low AS Low FROM {self._events_from_sql()} GLOBAL JOIN (SELECT * FROM s3(%(insightsql_val_0_sensitive)s, %(insightsql_val_1)s)) AS aapl_stock ON equals(aapl_stock.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
                 )
 
                 datastore = self._select(
@@ -197,7 +205,7 @@ class TestS3Table(BaseTest):
 
                 self.assertEqual(
                     datastore,
-                    f"SELECT aapl_stock.High AS High, aapl_stock.Low AS Low FROM events GLOBAL LEFT JOIN (SELECT * FROM s3(%(insightsql_val_2_sensitive)s, %(insightsql_val_3)s)) AS aapl_stock ON equals(aapl_stock.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
+                    f"SELECT aapl_stock.High AS High, aapl_stock.Low AS Low FROM {self._events_from_sql()} GLOBAL LEFT JOIN (SELECT * FROM s3(%(insightsql_val_2_sensitive)s, %(insightsql_val_3)s)) AS aapl_stock ON equals(aapl_stock.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
                 )
 
                 datastore = self._select(
@@ -207,7 +215,7 @@ class TestS3Table(BaseTest):
 
                 self.assertEqual(
                     datastore,
-                    f"SELECT aapl_stock.High AS High, aapl_stock.Low AS Low FROM events GLOBAL RIGHT JOIN (SELECT * FROM s3(%(insightsql_val_4_sensitive)s, %(insightsql_val_5)s)) AS aapl_stock ON equals(aapl_stock.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
+                    f"SELECT aapl_stock.High AS High, aapl_stock.Low AS Low FROM {self._events_from_sql()} GLOBAL RIGHT JOIN (SELECT * FROM s3(%(insightsql_val_4_sensitive)s, %(insightsql_val_5)s)) AS aapl_stock ON equals(aapl_stock.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
                 )
 
     def test_s3_table_select_alias_escaped(self):
@@ -247,7 +255,7 @@ class TestS3Table(BaseTest):
             # table name is escaped
             self.assertEqual(
                 datastore,
-                f"SELECT `random as (SELECT * FROM events), SELECT * FROM events --`.High AS High, `random as (SELECT * FROM events), SELECT * FROM events --`.Low AS Low FROM (SELECT * FROM s3(%(insightsql_val_0_sensitive)s, %(insightsql_val_1)s)) AS `random as (SELECT * FROM events), SELECT * FROM events --` JOIN events ON equals(`random as (SELECT * FROM events), SELECT * FROM events --`.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
+                f"SELECT `random as (SELECT * FROM events), SELECT * FROM events --`.High AS High, `random as (SELECT * FROM events), SELECT * FROM events --`.Low AS Low FROM (SELECT * FROM s3(%(insightsql_val_0_sensitive)s, %(insightsql_val_1)s)) AS `random as (SELECT * FROM events), SELECT * FROM events --` JOIN {self._events_from_sql()} ON equals(`random as (SELECT * FROM events), SELECT * FROM events --`.High, events.event) WHERE equals(events.team_id, {self.team.pk}) LIMIT 10",
             )
 
     def test_s3_table_select_table_name_bad_character(self):
@@ -290,7 +298,7 @@ class TestS3Table(BaseTest):
 
                 self.assertEqual(
                     datastore,
-                    f"SELECT events.uuid AS uuid, events.event AS event FROM events WHERE and(equals(events.team_id, {self.team.pk}), ifNull(globalIn(events.event, (SELECT aapl_stock.Date AS Date FROM s3(%(insightsql_val_0_sensitive)s, %(insightsql_val_1)s) AS aapl_stock)), 0)) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+                    f"SELECT events.uuid AS uuid, events.event AS event FROM {self._events_from_sql()} WHERE and(equals(events.team_id, {self.team.pk}), ifNull(globalIn(events.event, (SELECT aapl_stock.Date AS Date FROM s3(%(insightsql_val_0_sensitive)s, %(insightsql_val_1)s) AS aapl_stock)), 0)) LIMIT {MAX_SELECT_RETURNED_ROWS}",
                 )
 
     def test_s3_build_function_call_without_context(self):

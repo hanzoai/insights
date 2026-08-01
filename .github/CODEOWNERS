@@ -12,26 +12,61 @@
 # justification. If you are not _certain_ there is _no other way_
 # to manage the risk you're thinking about, do not add an entry.
 
-# ClickHouse team owns Clickhouse migrations
-insights/clickhouse/migrations/** @hanzoai/clickhouse
+# Datastore team owns Datastore migrations
+insights/datastore/migrations/** @Insights/datastore
 
 # InsightsQL team owns InsightsQL changes
-insights/insightsql/** @hanzoai/insightsql
+insights/insightsql/** @Insights/insightsql
+# ...except per-table schema definitions, which product teams add and maintain for their own features
+insights/insightsql/database/schema/**
+# ...and the generated schema snapshot, which changes when those definitions are regenerated
+insights/insightsql/database/test/__snapshots__/test_database.ambr
 
 # Being open source brings us unwanted problems because Github Actions are untrusted and inherently unsafe
 # so we have to be extra careful with changes here. Let's have the security team own these checks.
-.github/workflows/ci-security.yaml @hanzoai/team-security
-.github/workflows/codeql.yml @hanzoai/team-security
+.github/workflows/ci-security.yaml @Insights/team-security
+.github/workflows/codeql.yml @Insights/team-security
 
 # This workflow runs on the `pull_request_target` event so that it can run without needing a GitHub org member to explicitly approve it.
 # We must be careful to only execute code from this repo's default branch, and never execute code from the PR's branch.
-.github/workflows/auto-assign-reviewers.yml @hanzoai/team-security
-.github/scripts/assign-reviewers.js @hanzoai/team-security
+.github/workflows/auto-assign-reviewers.yml @Insights/team-security
+.github/scripts/assign-reviewers.js @Insights/team-security
+# The vendored CODEOWNERS matcher the auto-assigner (and the ownership skill) depend on.
+.github/scripts/codeowners.js @Insights/team-security
+# The distributed-ownership resolver the auto-assigner executes on that same
+# pull_request_target event (via `python -m insights_owners`), with tools/owners
+# as the privileged sys.path root. Anything importable placed in that tree can
+# shadow stdlib/pyyaml for the privileged process — top-level modules (yaml.py),
+# shadow packages (yaml/__init__.py), and extension modules (yaml.so, *.pyd)
+# alike — so the whole directory is gated rather than enumerating suffixes.
+tools/owners/** @Insights/team-security
 
 # And of course modifying this file can bring us problems so let's have the security team own it.
-# This does not affect CODEOWNERS-soft which is used for assigning non-required reviewers and it's much safer to change.
-CODEOWNERS @hanzoai/team-security
+# This does not affect the distributed owners.yaml files, which drive non-required reviewer
+# assignment and are much safer to change.
+CODEOWNERS @Insights/team-security
+
+# PR approval agent — can auto-approve PRs, so changes need review
+.github/workflows/pr-approval-agent.yml @Insights/team-security
+tools/pr-approval-agent/** @Insights/team-security
+
+# Ingestion team owns persons migrations
+rust/persons_migrations/** @Insights/team-ingestion
 
 # Critical authentication logic
-insights/api/authentication.py @hanzoai/team-security
-insights/auth.py @hanzoai/team-security
+insights/api/authentication.py @Insights/team-security
+insights/auth.py @Insights/team-security
+ee/api/scim/auth.py @Insights/team-security
+
+# v1 data-modeling workflow is frozen during the v1 → v2 migration.
+# this will be removed from CODEOWNERS by June 1
+insights/temporal/data_modeling/run_workflow.py @Insights/team-data-modeling
+
+# Dev sandbox provides important protection in local dev
+bin/dev-sandbox* @Insights/team-security
+
+# The MCP store catalog is a fleet-wide trust decision, not ordinary code: a merged entry
+# becomes (probe permitting) an active server template in every environment on the next
+# deploy — installable by all tenants and feeding tool results into their LLM agents. The
+# probe only verifies liveness, so PR review is the vendor-identity gate.
+products/mcp_store/backend/catalog.py @Insights/team-self-driving @cvolzer3

@@ -1,0 +1,1243 @@
+# serializer version: 1
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1
+  '''
+  SELECT "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
+  FROM "insights_user"
+  WHERE ("insights_user"."is_active"
+         AND "insights_user"."id" = 99999)
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.1
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.10
+  '''
+  SELECT 1 AS "a"
+  FROM "insights_organizationmembership"
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 1
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.11
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.12
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.13
+  '''
+  SELECT COUNT(*) AS "__count"
+  FROM "insights_plugin"
+  WHERE ("insights_plugin"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         OR "insights_plugin"."is_global"
+         OR "insights_plugin"."id" IN
+           (SELECT U0."plugin_id" AS "plugin_id"
+            FROM "insights_pluginconfig" U0
+            INNER JOIN "insights_team" U1 ON (U0."team_id" = U1."id")
+            WHERE (NOT U0."deleted"
+                   AND U1."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid)))
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.14
+  '''
+  SELECT "insights_plugin"."id",
+         "insights_plugin"."organization_id",
+         "insights_plugin"."plugin_type",
+         "insights_plugin"."is_global",
+         "insights_plugin"."is_preinstalled",
+         "insights_plugin"."is_stateless",
+         "insights_plugin"."name",
+         "insights_plugin"."description",
+         "insights_plugin"."url",
+         "insights_plugin"."icon",
+         "insights_plugin"."config_schema",
+         "insights_plugin"."tag",
+         "insights_plugin"."archive",
+         "insights_plugin"."latest_tag",
+         "insights_plugin"."latest_tag_checked_at",
+         "insights_plugin"."capabilities",
+         "insights_plugin"."metrics",
+         "insights_plugin"."public_jobs",
+         "insights_plugin"."error",
+         "insights_plugin"."from_json",
+         "insights_plugin"."from_web",
+         "insights_plugin"."source",
+         "insights_plugin"."created_at",
+         "insights_plugin"."updated_at",
+         "insights_plugin"."log_level",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_plugin"
+  LEFT OUTER JOIN "insights_organization" ON ("insights_plugin"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_plugin"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         OR "insights_plugin"."is_global"
+         OR "insights_plugin"."id" IN
+           (SELECT U0."plugin_id" AS "plugin_id"
+            FROM "insights_pluginconfig" U0
+            INNER JOIN "insights_team" U1 ON (U0."team_id" = U1."id")
+            WHERE (NOT U0."deleted"
+                   AND U1."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid)))
+  LIMIT 100
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.15
+  '''
+  SELECT "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
+  FROM "insights_user"
+  WHERE ("insights_user"."is_active"
+         AND "insights_user"."id" = 99999)
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.16
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.17
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.18
+  '''
+  SELECT 1 AS "a"
+  FROM "insights_organizationmembership"
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 1
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.19
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.2
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.20
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.21
+  '''
+  SELECT COUNT(*) AS "__count"
+  FROM "insights_plugin"
+  WHERE ("insights_plugin"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         OR "insights_plugin"."is_global"
+         OR "insights_plugin"."id" IN
+           (SELECT U0."plugin_id" AS "plugin_id"
+            FROM "insights_pluginconfig" U0
+            INNER JOIN "insights_team" U1 ON (U0."team_id" = U1."id")
+            WHERE (NOT U0."deleted"
+                   AND U1."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid)))
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.22
+  '''
+  SELECT "insights_plugin"."id",
+         "insights_plugin"."organization_id",
+         "insights_plugin"."plugin_type",
+         "insights_plugin"."is_global",
+         "insights_plugin"."is_preinstalled",
+         "insights_plugin"."is_stateless",
+         "insights_plugin"."name",
+         "insights_plugin"."description",
+         "insights_plugin"."url",
+         "insights_plugin"."icon",
+         "insights_plugin"."config_schema",
+         "insights_plugin"."tag",
+         "insights_plugin"."archive",
+         "insights_plugin"."latest_tag",
+         "insights_plugin"."latest_tag_checked_at",
+         "insights_plugin"."capabilities",
+         "insights_plugin"."metrics",
+         "insights_plugin"."public_jobs",
+         "insights_plugin"."error",
+         "insights_plugin"."from_json",
+         "insights_plugin"."from_web",
+         "insights_plugin"."source",
+         "insights_plugin"."created_at",
+         "insights_plugin"."updated_at",
+         "insights_plugin"."log_level",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_plugin"
+  LEFT OUTER JOIN "insights_organization" ON ("insights_plugin"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_plugin"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         OR "insights_plugin"."is_global"
+         OR "insights_plugin"."id" IN
+           (SELECT U0."plugin_id" AS "plugin_id"
+            FROM "insights_pluginconfig" U0
+            INNER JOIN "insights_team" U1 ON (U0."team_id" = U1."id")
+            WHERE (NOT U0."deleted"
+                   AND U1."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid)))
+  LIMIT 100
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.23
+  '''
+  SELECT "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
+  FROM "insights_user"
+  WHERE ("insights_user"."is_active"
+         AND "insights_user"."id" = 99999)
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.24
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.25
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.26
+  '''
+  SELECT 1 AS "a"
+  FROM "insights_organizationmembership"
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 1
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.27
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.28
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.29
+  '''
+  SELECT COUNT(*) AS "__count"
+  FROM "insights_plugin"
+  WHERE ("insights_plugin"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         OR "insights_plugin"."is_global"
+         OR "insights_plugin"."id" IN
+           (SELECT U0."plugin_id" AS "plugin_id"
+            FROM "insights_pluginconfig" U0
+            INNER JOIN "insights_team" U1 ON (U0."team_id" = U1."id")
+            WHERE (NOT U0."deleted"
+                   AND U1."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid)))
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.3
+  '''
+  SELECT 1 AS "a"
+  FROM "insights_organizationmembership"
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 1
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.30
+  '''
+  SELECT "insights_plugin"."id",
+         "insights_plugin"."organization_id",
+         "insights_plugin"."plugin_type",
+         "insights_plugin"."is_global",
+         "insights_plugin"."is_preinstalled",
+         "insights_plugin"."is_stateless",
+         "insights_plugin"."name",
+         "insights_plugin"."description",
+         "insights_plugin"."url",
+         "insights_plugin"."icon",
+         "insights_plugin"."config_schema",
+         "insights_plugin"."tag",
+         "insights_plugin"."archive",
+         "insights_plugin"."latest_tag",
+         "insights_plugin"."latest_tag_checked_at",
+         "insights_plugin"."capabilities",
+         "insights_plugin"."metrics",
+         "insights_plugin"."public_jobs",
+         "insights_plugin"."error",
+         "insights_plugin"."from_json",
+         "insights_plugin"."from_web",
+         "insights_plugin"."source",
+         "insights_plugin"."created_at",
+         "insights_plugin"."updated_at",
+         "insights_plugin"."log_level",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_plugin"
+  LEFT OUTER JOIN "insights_organization" ON ("insights_plugin"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_plugin"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         OR "insights_plugin"."is_global"
+         OR "insights_plugin"."id" IN
+           (SELECT U0."plugin_id" AS "plugin_id"
+            FROM "insights_pluginconfig" U0
+            INNER JOIN "insights_team" U1 ON (U0."team_id" = U1."id")
+            WHERE (NOT U0."deleted"
+                   AND U1."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid)))
+  LIMIT 100
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.4
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.5
+  '''
+  SELECT "insights_organizationmembership"."id",
+         "insights_organizationmembership"."organization_id",
+         "insights_organizationmembership"."user_id",
+         "insights_organizationmembership"."level",
+         "insights_organizationmembership"."joined_at",
+         "insights_organizationmembership"."updated_at",
+         "insights_organizationmembership"."invited_by_id",
+         "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organizationmembership"
+  INNER JOIN "insights_organization" ON ("insights_organizationmembership"."organization_id" = "insights_organization"."id")
+  WHERE ("insights_organizationmembership"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         AND "insights_organizationmembership"."user_id" = 99999)
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.6
+  '''
+  SELECT COUNT(*) AS "__count"
+  FROM "insights_plugin"
+  WHERE ("insights_plugin"."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid
+         OR "insights_plugin"."is_global"
+         OR "insights_plugin"."id" IN
+           (SELECT U0."plugin_id" AS "plugin_id"
+            FROM "insights_pluginconfig" U0
+            INNER JOIN "insights_team" U1 ON (U0."team_id" = U1."id")
+            WHERE (NOT U0."deleted"
+                   AND U1."organization_id" = '00000000-0000-0000-0000-000000000000'::uuid)))
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.7
+  '''
+  SELECT "insights_user"."id",
+         "insights_user"."password",
+         "insights_user"."last_login",
+         "insights_user"."first_name",
+         "insights_user"."last_name",
+         "insights_user"."is_staff",
+         "insights_user"."date_joined",
+         "insights_user"."uuid",
+         "insights_user"."current_organization_id",
+         "insights_user"."current_team_id",
+         "insights_user"."email",
+         "insights_user"."pending_email",
+         "insights_user"."distinct_id",
+         "insights_user"."is_email_verified",
+         "insights_user"."credentials_reviewed_at",
+         "insights_user"."requested_2fa_reset_at",
+         "insights_user"."has_seen_product_intro_for",
+         "insights_user"."strapi_id",
+         "insights_user"."is_active",
+         "insights_user"."role_at_organization",
+         "insights_user"."theme_mode",
+         "insights_user"."partial_notification_settings",
+         "insights_user"."anonymize_data",
+         "insights_user"."allow_impersonation",
+         "insights_user"."toolbar_mode",
+         "insights_user"."mascot_config",
+         "insights_user"."allow_sidebar_suggestions",
+         "insights_user"."shortcut_position",
+         "insights_user"."passkeys_enabled_for_2fa",
+         "insights_user"."hide_mcp_hints",
+         "insights_user"."ui_configuration",
+         "insights_user"."onboarding_skipped_at",
+         "insights_user"."onboarding_skipped_reason",
+         "insights_user"."onboarding_skipped_organization_id",
+         "insights_user"."onboarding_delegated_to_invite_id",
+         "insights_user"."onboarding_delegated_to_organization_id",
+         "insights_user"."onboarding_delegation_accepted_at",
+         "insights_user"."events_column_config",
+         "insights_user"."email_opt_in"
+  FROM "insights_user"
+  WHERE ("insights_user"."is_active"
+         AND "insights_user"."id" = 99999)
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.8
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_listing_plugins_is_not_nplus1.9
+  '''
+  SELECT "insights_organization"."id",
+         "insights_organization"."name",
+         "insights_organization"."slug",
+         "insights_organization"."logo_media_id",
+         "insights_organization"."created_at",
+         "insights_organization"."updated_at",
+         "insights_organization"."is_active",
+         "insights_organization"."is_not_active_reason",
+         "insights_organization"."session_cookie_age",
+         "insights_organization"."is_member_join_email_enabled",
+         "insights_organization"."is_ai_data_processing_approved",
+         "insights_organization"."is_ai_training_opted_in",
+         "insights_organization"."is_ai_training_locked",
+         "insights_organization"."is_ai_training_cta_shown",
+         "insights_organization"."enforce_2fa",
+         "insights_organization"."members_can_invite",
+         "insights_organization"."members_can_create_projects",
+         "insights_organization"."members_can_use_personal_api_keys",
+         "insights_organization"."members_can_see_org_members",
+         "insights_organization"."allow_publicly_shared_resources",
+         "insights_organization"."default_role_id",
+         "insights_organization"."plugins_access_level",
+         "insights_organization"."for_internal_metrics",
+         "insights_organization"."default_experiment_stats_method",
+         "insights_organization"."default_anonymize_ips",
+         "insights_organization"."is_hipaa",
+         "insights_organization"."is_pending_deletion",
+         "insights_organization"."customer_id",
+         "insights_organization"."available_product_features",
+         "insights_organization"."usage",
+         "insights_organization"."never_drop_data",
+         "insights_organization"."customer_trust_scores",
+         "insights_organization"."setup_section_2_completed",
+         "insights_organization"."personalization",
+         "insights_organization"."domain_whitelist",
+         "insights_organization"."is_platform"
+  FROM "insights_organization"
+  WHERE "insights_organization"."id" = '00000000-0000-0000-0000-000000000000'::uuid
+  LIMIT 21
+  '''
+# ---
+# name: TestPluginAPI.test_transpile_plugin_frontend_source
+  '''
+  "use strict";
+  export function getFrontendApp (require) { let exports = {}; export const scene = {}; return exports; }
+  '''
+# ---
+# name: TestPluginAPI.test_transpile_plugin_frontend_source.1
+  '''
+  (function() {
+              console.log('hello')
+              return {};
+          })
+  '''
+# ---

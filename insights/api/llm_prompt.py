@@ -1,200 +1,181 @@
-import re
-from typing import cast
+import json
+from typing import Any, cast
 
 from django.conf import settings
+from django.db import IntegrityError
+from django.db.models import Func, IntegerField, Q, QuerySet, TextField
+from django.db.models.functions import Cast
 
-from rest_framework import serializers, status, viewsets
+from drf_spectacular.utils import extend_schema
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
 
 from insights.api.capture import capture_internal
-from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.llm_prompt_serializers import (
+    ALLOWED_LIST_ORDERINGS,
+    LLMPromptDuplicateSerializer,
+    LLMPromptFetchQuerySerializer,
+    LLMPromptGetByNameQuerySerializer,
+    LLMPromptLabelSerializer,
+    LLMPromptListQuerySerializer,
+    LLMPromptListSerializer,
+    LLMPromptPublicSerializer,
+    LLMPromptPublishSerializer,
+    LLMPromptResolveQuerySerializer,
+    LLMPromptResolveResponseSerializer,
+    LLMPromptSerializer,
+    LLMPromptSetLabelSerializer,
+    LLMPromptVersionSummarySerializer,
+    validate_prompt_label_name_value,
+)
 from insights.api.monitoring import monitor
 from insights.api.routing import TeamAndOrgViewSetMixin
-from insights.api.shared import UserBasicSerializer
-from insights.auth import JwtAuthentication, SessionAuthentication
+from insights.api.services.llm_prompt import (
+    LLMPromptDuplicateNameConflictError,
+    LLMPromptEditError,
+    LLMPromptLabelConflictError,
+    LLMPromptLabelLimitError,
+    LLMPromptLabelNotFoundError,
+    LLMPromptNotFoundError,
+    LLMPromptVersionConflictError,
+    LLMPromptVersionLimitError,
+    archive_prompt,
+    duplicate_prompt,
+    get_active_prompt_queryset,
+    get_latest_prompts_queryset,
+    get_prompt_by_name_from_db,
+    get_prompt_labels,
+    publish_prompt_version,
+    remove_prompt_label,
+    resolve_versions_page,
+    set_prompt_label,
+)
+from insights.auth import (
+    JwtAuthentication,
+    OAuthAccessTokenAuthentication,
+    PersonalAPIKeyAuthentication,
+    SessionAuthentication,
+)
 from insights.event_usage import report_team_action, report_user_action
 from insights.exceptions_capture import capture_exception
 from insights.models import User
-from insights.models.llm_prompt import LLMPrompt
-from insights.permissions import AccessControlPermission, InsightsFeatureFlagPermission
-from insights.rate_limit import BurstRateThrottle, SustainedRateThrottle
+from insights.permissions import AccessControlPermission
+from insights.rate_limit import BurstRateThrottle, LLMPromptPublishBurstRateThrottle, SustainedRateThrottle
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
+from insights.storage.llm_prompt_cache import get_prompt_by_name_from_cache
 
-from products.llm_analytics.backend.api.metrics import llma_track_latency
+from products.ai_observability.backend.activity_logging import log_llm_prompt_activity
+from products.ai_observability.backend.api.metrics import llma_track_latency
+from products.ai_observability.backend.models.llm_prompt import LLMPrompt, LLMPromptLabel, get_prompt_outline
 
-RESERVED_PROMPT_NAMES = {"new"}
 PROMPT_FETCHED_EVENT = "$llm_prompt_fetched"
 PROMPT_FETCHED_EVENT_SOURCE = "llm_prompt_management"
 
 
-class LLMPromptSerializer(serializers.ModelSerializer):
-    created_by = UserBasicSerializer(read_only=True)
-
-    class Meta:
-        model = LLMPrompt
-        fields = [
-            "id",
-            "name",
-            "prompt",
-            "version",
-            "created_by",
-            "created_at",
-            "updated_at",
-            "deleted",
-        ]
-        read_only_fields = [
-            "id",
-            "version",
-            "created_by",
-            "created_at",
-            "updated_at",
-        ]
-
-    def validate_name(self, value: str) -> str:
-        if value.lower() in RESERVED_PROMPT_NAMES:
-            raise serializers.ValidationError(
-                "'new' is a reserved name and cannot be used.",
-                code="reserved_name",
-            )
-
-        if not re.match(r"^[a-zA-Z0-9_-]+$", value):
-            raise serializers.ValidationError(
-                "Only letters, numbers, hyphens (-) and underscores (_) are allowed.",
-                code="invalid_name",
-            )
-
-        return value
-
-    def validate(self, data):
-        team = self.context["get_team"]()
-        name = data.get("name")
-
-        # On CREATE: check if name already exists
-        if self.instance is None:
-            if LLMPrompt.objects.filter(name=name, team=team, deleted=False).exists():
-                raise serializers.ValidationError({"name": "A prompt with this name already exists."}, code="unique")
-
-        # On UPDATE: reject name changes (name is immutable after creation)
-        else:
-            if name is not None and self.instance.name != name:
-                raise serializers.ValidationError(
-                    {"name": "Prompt name cannot be changed after creation."},
-                    code="immutable",
-                )
-
-            # Check for name conflicts when restoring a deleted prompt
-            is_being_restored = self.instance.deleted and data.get("deleted") is False
-
-            if is_being_restored:
-                if (
-                    LLMPrompt.objects.filter(name=self.instance.name, team=team, deleted=False)
-                    .exclude(id=self.instance.id)
-                    .exists()
-                ):
-                    raise serializers.ValidationError(
-                        {"name": "A prompt with this name already exists."}, code="unique"
-                    )
-
-        return data
-
-    def create(self, validated_data):
-        request = self.context["request"]
-        team = self.context["get_team"]()
-
-        return LLMPrompt.objects.create(
-            team=team,
-            created_by=request.user,
-            **validated_data,
-        )
-
-
-class LLMPromptViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, ForbidDestroyModel, viewsets.ModelViewSet):
+@extend_schema(extensions={"x-product": "llm_analytics"})
+class LLMPromptViewSet(
+    TeamAndOrgViewSetMixin,
+    AccessControlViewSetMixin,
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     scope_object = "llm_prompt"
     queryset = LLMPrompt.objects.all()
     serializer_class = LLMPromptSerializer
-    permission_classes = [InsightsFeatureFlagPermission, AccessControlPermission]
-    insights_feature_flag = "llm-analytics-prompts"
+    permission_classes = [AccessControlPermission]
 
-    def safely_get_queryset(self, queryset):
-        return queryset.filter(deleted=False)
+    def safely_get_queryset(self, queryset: QuerySet[LLMPrompt]) -> QuerySet[LLMPrompt]:
+        return get_active_prompt_queryset(self.team)
 
     def get_throttles(self):
+        if self.action == "update_by_name":
+            return [LLMPromptPublishBurstRateThrottle(), BurstRateThrottle(), SustainedRateThrottle()]
         if self.action in ["get_by_name", "resolve_by_name"]:
             return [BurstRateThrottle(), SustainedRateThrottle()]
 
         return super().get_throttles()
 
-    def _get_prompt_by_name(self, prompt_name: str) -> LLMPrompt | None:
-        try:
-            return LLMPrompt.objects.get(
-                team=self.team,
-                name=prompt_name,
-                deleted=False,
+    def dangerously_get_required_scopes(self, request: Request, view) -> list[str] | None:
+        super_method = getattr(super(), "dangerously_get_required_scopes", None)
+        if callable(super_method):
+            mixin_result = super_method(request, view)
+            if mixin_result is not None:
+                return mixin_result
+
+        if view.action in ["get_by_name", "update_by_name"]:
+            return ["llm_prompt:write"] if request.method == "PATCH" else ["llm_prompt:read"]
+        return None
+
+    def _ensure_web_authenticated(self, request: Request) -> Response | None:
+        if not isinstance(
+            request.successful_authenticator,
+            SessionAuthentication | JwtAuthentication | PersonalAPIKeyAuthentication | OAuthAccessTokenAuthentication,
+        ):
+            return Response(
+                {"detail": "This endpoint is only available to web-authenticated users."},
+                status=status.HTTP_403_FORBIDDEN,
             )
-        except LLMPrompt.DoesNotExist:
-            return None
+        return None
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-
-        report_user_action(
-            cast(User, self.request.user),
-            "llma prompt created",
-            {
-                "prompt_id": str(instance.id),
-                "prompt_name": instance.name,
-            },
-            self.team,
+    def _prompt_not_found_response(self, prompt_name: str) -> Response:
+        return Response(
+            {"detail": f"Prompt with name '{prompt_name}' not found."},
+            status=status.HTTP_404_NOT_FOUND,
         )
 
-    def perform_update(self, serializer):
-        is_being_deleted = serializer.validated_data.get("deleted") is True and not self.get_object().deleted
+    def _serialize_prompt(self, prompt: LLMPrompt) -> dict[str, Any]:
+        return cast(dict[str, Any], self.get_serializer(prompt).data)
 
-        instance = serializer.save()
+    def _serialize_version_summaries(self, prompts: list[LLMPrompt]) -> list[dict[str, Any]]:
+        return cast(list[dict[str, Any]], LLMPromptVersionSummarySerializer(prompts, many=True).data)
 
-        if is_being_deleted:
-            report_user_action(
-                cast(User, self.request.user),
-                "llma prompt deleted",
-                {
-                    "prompt_id": str(instance.id),
-                    "prompt_name": instance.name,
-                },
-                self.team,
-            )
+    def _get_requested_version_params(self, request: Request) -> dict[str, Any]:
+        serializer = LLMPromptFetchQuerySerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data
+
+    def _get_get_by_name_params(self, request: Request) -> dict[str, Any]:
+        serializer = LLMPromptGetByNameQuerySerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data
+
+    def _get_resolve_query_params(self, request: Request) -> dict[str, Any]:
+        serializer = LLMPromptResolveQuerySerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data
+
+    def _apply_content_mode(self, prompt: dict[str, Any], content_mode: str) -> dict[str, Any]:
+        prompt = dict(prompt)
+        prompt["outline"] = get_prompt_outline(prompt.get("prompt"))
+        if content_mode == "none":
+            prompt.pop("prompt", None)
+            prompt.pop("config", None)
+        elif content_mode == "preview":
+            original = prompt.pop("prompt", "")
+            display_value = original if isinstance(original, str) else json.dumps(original, ensure_ascii=False)
+            prompt["prompt_preview"] = display_value[:160] + ("..." if len(display_value) > 160 else "")
+            prompt.pop("config", None)
         else:
-            changed_fields = [field for field in serializer.validated_data.keys() if field != "deleted"]
+            # .get, not [] — cache entries written before the config field existed lack the key.
+            prompt["config"] = prompt.get("config")
+        return prompt
 
-            if changed_fields:
-                report_user_action(
-                    cast(User, self.request.user),
-                    "llma prompt updated",
-                    {
-                        "prompt_id": str(instance.id),
-                        "prompt_name": instance.name,
-                        "changed_fields": changed_fields,
-                    },
-                    self.team,
-                )
-
-    @action(
-        methods=["GET"],
-        detail=False,
-        url_path=r"name/(?P<prompt_name>[^/]+)",
-        required_scopes=["llm_prompt:read"],
-    )
-    @llma_track_latency("llma_prompts_get_by_name")
-    @monitor(feature=None, endpoint="llma_prompts_get_by_name", method="GET")
-    def get_by_name(self, request: Request, prompt_name: str = "", **kwargs) -> Response:
-        prompt = self._get_prompt_by_name(prompt_name)
-        if prompt is None:
-            return Response(
-                {"detail": f"Prompt with name '{prompt_name}' not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
+    def _track_prompt_fetch(self, prompt: dict[str, Any]) -> None:
+        # prompt_label + prompt_version together answer "what was the production label
+        # actually serving at time X" from the event stream alone.
+        properties = {
+            "prompt_id": prompt["id"],
+            "prompt_name": prompt["name"],
+            "prompt_version": prompt["version"],
+            "prompt_label": prompt.get("label"),
+            "prompt_is_latest": prompt["is_latest"],
+            "prompt_first_version_created_at": prompt["first_version_created_at"],
+            "prompt_has_config": prompt.get("config") is not None,
+        }
         if not settings.TEST:
             try:
                 capture_internal(
@@ -203,26 +184,168 @@ class LLMPromptViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbid
                     event_source=PROMPT_FETCHED_EVENT_SOURCE,
                     distinct_id=str(self.team.uuid),
                     timestamp=None,
-                    properties={
-                        "prompt_id": str(prompt.id),
-                        "prompt_name": prompt.name,
-                    },
+                    properties=properties,
                 )
             except Exception as err:
                 capture_exception(err)
 
-        report_team_action(
-            self.team,
-            "llma prompt fetched",
-            {
-                "prompt_id": str(prompt.id),
-                "prompt_name": prompt.name,
-            },
+        report_team_action(self.team, "llma prompt fetched", properties)
+
+    def _get_list_params(self, request: Request) -> dict[str, Any]:
+        serializer = LLMPromptListQuerySerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data
+
+    def _get_list_queryset(self, request: Request) -> QuerySet[LLMPrompt]:
+        params = self._get_list_params(request)
+
+        queryset = get_latest_prompts_queryset(self.team).annotate(
+            prompt_size_bytes=Func(
+                Cast("prompt", output_field=TextField()), function="OCTET_LENGTH", output_field=IntegerField()
+            ),
         )
 
-        serializer = self.get_serializer(prompt)
-        return Response(serializer.data)
+        search = params.get("search", "").strip()
+        if search:
+            queryset = queryset.annotate(prompt_text=Cast("prompt", output_field=TextField())).filter(
+                Q(name__icontains=search) | Q(prompt_text__icontains=search)
+            )
 
+        created_by_id = params.get("created_by_id")
+        if created_by_id:
+            queryset = queryset.filter(created_by_id=created_by_id)
+
+        order_by = params.get("order_by", "-created_at")
+        queryset = queryset.order_by(ALLOWED_LIST_ORDERINGS.get(order_by, "-created_at"), "-id")
+        return queryset
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return LLMPromptListSerializer
+        return super().get_serializer_class()
+
+    def get_serializer_context(self) -> dict[str, Any]:
+        context = super().get_serializer_context()
+        if self.action == "list":
+            context["content_mode"] = self._get_list_params(self.request).get("content", "full")
+        return context
+
+    def perform_create(self, serializer: BaseSerializer[Any]) -> None:
+        instance = cast(LLMPrompt, serializer.save())
+
+        log_llm_prompt_activity(
+            team=self.team,
+            user=cast(User, self.request.user),
+            prompt_name=instance.name,
+            activity="created",
+        )
+        report_user_action(
+            cast(User, self.request.user),
+            "llma prompt created",
+            {
+                "prompt_id": str(instance.id),
+                "prompt_name": instance.name,
+                "prompt_version": instance.version,
+                "has_config": instance.config is not None,
+            },
+            team=self.team,
+            request=self.request,
+        )
+
+    @extend_schema(
+        parameters=[LLMPromptGetByNameQuerySerializer],
+        responses={200: LLMPromptPublicSerializer},
+    )
+    @action(methods=["GET"], detail=False, url_path=r"name/(?P<prompt_name>[^/]+)")
+    @llma_track_latency("llma_prompts_get_by_name")
+    @monitor(feature=None, endpoint="llma_prompts_get_by_name", method="GET")
+    def get_by_name(self, request: Request, prompt_name: str = "", **kwargs) -> Response:
+        query_params = self._get_get_by_name_params(request)
+        version = cast(int | None, query_params.get("version"))
+        label = cast(str | None, query_params.get("label"))
+        content_mode = cast(str, query_params.get("content", "full"))
+        prompt = get_prompt_by_name_from_cache(self.team, prompt_name, version, label=label)
+        if prompt is None:
+            if label is not None:
+                return Response(
+                    {"detail": f"Prompt '{prompt_name}' not found or has no label '{label}'."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            return self._prompt_not_found_response(prompt_name)
+
+        self._track_prompt_fetch(prompt)
+        return Response(self._apply_content_mode(prompt, content_mode))
+
+    @extend_schema(request=LLMPromptPublishSerializer, responses={200: LLMPromptSerializer})
+    @get_by_name.mapping.patch
+    @llma_track_latency("llma_prompts_publish_by_name")
+    @monitor(feature=None, endpoint="llma_prompts_publish_by_name", method="PATCH")
+    def update_by_name(self, request: Request, prompt_name: str = "", **kwargs) -> Response:
+        auth_error = self._ensure_web_authenticated(request)
+        if auth_error is not None:
+            return auth_error
+
+        payload = LLMPromptPublishSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+
+        try:
+            published_prompt = publish_prompt_version(
+                self.team,
+                user=cast(User, request.user),
+                prompt_name=prompt_name,
+                prompt_payload=payload.validated_data.get("prompt"),
+                edits=payload.validated_data.get("edits"),
+                config=payload.validated_data.get("config"),
+                config_provided="config" in payload.validated_data,
+                base_version=payload.validated_data["base_version"],
+                version_description=payload.validated_data.get("version_description"),
+            )
+        except LLMPromptNotFoundError:
+            return self._prompt_not_found_response(prompt_name)
+        except LLMPromptVersionConflictError as err:
+            return Response(
+                {
+                    "detail": "The prompt changed since you opened it. Reload the latest version and try again.",
+                    "current_version": err.current_version,
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        except LLMPromptVersionLimitError as err:
+            return Response(
+                {
+                    "detail": (
+                        f"Prompt has reached the maximum of {err.max_version} versions. "
+                        "Archive and recreate the prompt to continue publishing."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except LLMPromptEditError as err:
+            return Response(
+                {
+                    "detail": err.message,
+                    "edit_index": err.edit_index,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        report_user_action(
+            cast(User, request.user),
+            "llma prompt version published",
+            {
+                "prompt_id": str(published_prompt.id),
+                "prompt_name": published_prompt.name,
+                "prompt_version": published_prompt.version,
+                "base_version": payload.validated_data["base_version"],
+                "config_provided": "config" in payload.validated_data,
+                "has_config": published_prompt.config is not None,
+            },
+            team=self.team,
+            request=request,
+        )
+        return Response(self._serialize_prompt(published_prompt))
+
+    @extend_schema(parameters=[LLMPromptResolveQuerySerializer], responses={200: LLMPromptResolveResponseSerializer})
     @action(
         methods=["GET"],
         detail=False,
@@ -232,43 +355,246 @@ class LLMPromptViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbid
     @llma_track_latency("llma_prompts_resolve_by_name")
     @monitor(feature=None, endpoint="llma_prompts_resolve_by_name", method="GET")
     def resolve_by_name(self, request: Request, prompt_name: str = "", **kwargs) -> Response:
-        if not isinstance(request.successful_authenticator, SessionAuthentication | JwtAuthentication):
+        auth_error = self._ensure_web_authenticated(request)
+        if auth_error is not None:
+            return auth_error
+
+        query_params = self._get_resolve_query_params(request)
+        version = cast(int | None, query_params.get("version"))
+        version_id = query_params.get("version_id")
+        prompt = get_prompt_by_name_from_db(
+            self.team,
+            prompt_name=prompt_name,
+            version=version,
+            version_id=str(version_id) if version_id else None,
+        )
+        if prompt is None:
+            return self._prompt_not_found_response(prompt_name)
+
+        limit = cast(int, query_params["limit"])
+        offset = cast(int | None, query_params.get("offset"))
+        before_version = cast(int | None, query_params.get("before_version"))
+        versions, has_more = resolve_versions_page(
+            self.team,
+            prompt_name=prompt_name,
+            limit=limit,
+            offset=offset,
+            before_version=before_version,
+        )
+        return Response(
+            {
+                "prompt": self._serialize_prompt(prompt),
+                "versions": self._serialize_version_summaries(versions),
+                "has_more": has_more,
+                "labels": LLMPromptLabelSerializer(get_prompt_labels(self.team, prompt_name), many=True).data,
+            }
+        )
+
+    @extend_schema(request=None, responses={204: None})
+    @action(
+        methods=["POST"],
+        detail=False,
+        url_path=r"name/(?P<prompt_name>[^/]+)/archive",
+        required_scopes=["llm_prompt:write"],
+    )
+    @llma_track_latency("llma_prompts_archive")
+    @monitor(feature=None, endpoint="llma_prompts_archive", method="POST")
+    def archive(self, request: Request, prompt_name: str = "", **kwargs) -> Response:
+        auth_error = self._ensure_web_authenticated(request)
+        if auth_error is not None:
+            return auth_error
+
+        try:
+            prompt_versions = archive_prompt(self.team, prompt_name, user=cast(User, request.user))
+        except LLMPromptNotFoundError:
+            return self._prompt_not_found_response(prompt_name)
+
+        report_user_action(
+            cast(User, request.user),
+            "llma prompt archived",
+            {
+                "prompt_name": prompt_name,
+                "prompt_versions": prompt_versions,
+            },
+            team=self.team,
+            request=request,
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(request=LLMPromptDuplicateSerializer, responses={201: LLMPromptSerializer})
+    @action(
+        methods=["POST"],
+        detail=False,
+        url_path=r"name/(?P<prompt_name>[^/]+)/duplicate",
+        required_scopes=["llm_prompt:write"],
+    )
+    @llma_track_latency("llma_prompts_duplicate")
+    @monitor(feature=None, endpoint="llma_prompts_duplicate", method="POST")
+    def duplicate(self, request: Request, prompt_name: str = "", **kwargs) -> Response:
+        auth_error = self._ensure_web_authenticated(request)
+        if auth_error is not None:
+            return auth_error
+
+        payload = LLMPromptDuplicateSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        new_name = payload.validated_data["new_name"]
+
+        try:
+            new_prompt = duplicate_prompt(
+                self.team,
+                user=cast(User, request.user),
+                source_name=prompt_name,
+                new_name=new_name,
+            )
+        except LLMPromptNotFoundError:
+            return self._prompt_not_found_response(prompt_name)
+        except LLMPromptDuplicateNameConflictError:
             return Response(
-                {"detail": "This endpoint is only available to web-authenticated users."},
-                status=status.HTTP_403_FORBIDDEN,
+                {"attr": "new_name", "detail": "A prompt with this name already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        prompt = self._get_prompt_by_name(prompt_name)
-        if prompt is None:
+        report_user_action(
+            cast(User, request.user),
+            "llma prompt duplicated",
+            {
+                "prompt_id": str(new_prompt.id),
+                "prompt_name": new_prompt.name,
+                "source_prompt_name": prompt_name,
+            },
+            team=self.team,
+            request=request,
+        )
+        return Response(self._serialize_prompt(new_prompt), status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=LLMPromptSetLabelSerializer, responses={200: LLMPromptLabelSerializer})
+    @action(
+        methods=["PUT"],
+        detail=False,
+        url_path=r"name/(?P<prompt_name>[^/]+)/labels/(?P<label_name>[^/]+)",
+        required_scopes=["llm_prompt:write"],
+    )
+    @llma_track_latency("llma_prompts_set_label")
+    @monitor(feature=None, endpoint="llma_prompts_set_label", method="PUT")
+    def set_label(self, request: Request, prompt_name: str = "", label_name: str = "", **kwargs) -> Response:
+        auth_error = self._ensure_web_authenticated(request)
+        if auth_error is not None:
+            return auth_error
+
+        label_name = validate_prompt_label_name_value(label_name)
+        payload = LLMPromptSetLabelSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        version = payload.validated_data["version"]
+
+        try:
+            result = set_prompt_label(
+                self.team,
+                user=cast(User, request.user),
+                prompt_name=prompt_name,
+                label_name=label_name,
+                version=version,
+            )
+        except LLMPromptNotFoundError:
             return Response(
-                {"detail": f"Prompt with name '{prompt_name}' not found."},
+                {"detail": f"Prompt '{prompt_name}' has no version {version}."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except LLMPromptLabelConflictError:
+            return Response(
+                {"detail": "This label was changed by someone else at the same time. Try again."},
+                status=status.HTTP_409_CONFLICT,
+            )
+        except LLMPromptLabelLimitError as err:
+            return Response(
+                {
+                    "detail": (
+                        f"This prompt has reached the maximum of {err.max_labels} labels. "
+                        "Remove a label to add a new one."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        report_user_action(
+            cast(User, request.user),
+            "llma prompt label set",
+            {
+                "prompt_name": prompt_name,
+                "label": label_name,
+                "version": version,
+                "previous_version": result.previous_version,
+                "created": result.created,
+            },
+            team=self.team,
+            request=request,
+        )
+        return Response(
+            LLMPromptLabelSerializer(result.label).data,
+            status=status.HTTP_201_CREATED if result.created else status.HTTP_200_OK,
+        )
+
+    @extend_schema(responses={204: None})
+    @set_label.mapping.delete
+    @llma_track_latency("llma_prompts_delete_label")
+    @monitor(feature=None, endpoint="llma_prompts_delete_label", method="DELETE")
+    def delete_label(self, request: Request, prompt_name: str = "", label_name: str = "", **kwargs) -> Response:
+        auth_error = self._ensure_web_authenticated(request)
+        if auth_error is not None:
+            return auth_error
+
+        try:
+            remove_prompt_label(self.team, prompt_name=prompt_name, label_name=label_name)
+        except LLMPromptLabelNotFoundError:
+            return Response(
+                {"detail": f"Label '{label_name}' not found on prompt '{prompt_name}'."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = self.get_serializer(prompt)
-        return Response(serializer.data)
+        report_user_action(
+            cast(User, request.user),
+            "llma prompt label deleted",
+            {"prompt_name": prompt_name, "label": label_name},
+            team=self.team,
+            request=request,
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def _get_prompt_labels_map(self, prompt_names: list[str]) -> dict[str, list[dict[str, Any]]]:
+        labels_map: dict[str, list[dict[str, Any]]] = {}
+        labels = (
+            LLMPromptLabel.objects.filter(team=self.team, prompt_name__in=prompt_names)
+            .select_related("prompt")
+            .order_by("prompt_name", "name")
+        )
+        for label in labels:
+            labels_map.setdefault(label.prompt_name, []).append({"name": label.name, "version": label.prompt.version})
+        return labels_map
+
+    @extend_schema(parameters=[LLMPromptListQuerySerializer])
     @llma_track_latency("llma_prompts_list")
     @monitor(feature=None, endpoint="llma_prompts_list", method="GET")
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+    def list(self, request: Request, *args, **kwargs) -> Response:
+        queryset = self.filter_queryset(self._get_list_queryset(request))
+        page = self.paginate_queryset(queryset)
+        prompts = page if page is not None else list(queryset)
 
-    @llma_track_latency("llma_prompts_retrieve")
-    @monitor(feature=None, endpoint="llma_prompts_retrieve", method="GET")
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        context = self.get_serializer_context()
+        context["prompt_labels_by_name"] = self._get_prompt_labels_map([prompt.name for prompt in prompts])
+        serializer = LLMPromptListSerializer(prompts, many=True, context=context)
+
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response({"count": len(serializer.data), "results": serializer.data})
 
     @llma_track_latency("llma_prompts_create")
     @monitor(feature=None, endpoint="llma_prompts_create", method="POST")
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    @llma_track_latency("llma_prompts_update")
-    @monitor(feature=None, endpoint="llma_prompts_update", method="PUT")
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-
-    @llma_track_latency("llma_prompts_partial_update")
-    @monitor(feature=None, endpoint="llma_prompts_partial_update", method="PATCH")
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
+        try:
+            return super().create(request, *args, **kwargs)
+        except IntegrityError as err:
+            if any(
+                constraint_name in str(err)
+                for constraint_name in ["unique_llm_prompt_latest_per_team", "unique_llm_prompt_version_per_team"]
+            ):
+                raise serializers.ValidationError({"name": "A prompt with this name already exists."}, code="unique")
+            raise

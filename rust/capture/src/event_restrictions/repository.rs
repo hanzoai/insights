@@ -9,7 +9,7 @@ use tracing::warn;
 
 use super::types::{Restriction, RestrictionFilters, RestrictionScope, RestrictionType};
 
-const KV_KEY_PREFIX: &str = "event_ingestion_restriction_dynamic_config";
+const REDIS_KEY_PREFIX: &str = "event_ingestion_restriction_dynamic_config";
 
 /// Entry format for restriction data (matches Python's JSON format)
 #[derive(Debug, Clone, Deserialize)]
@@ -26,6 +26,10 @@ pub struct RestrictionEntry {
     pub event_names: Vec<String>,
     #[serde(default)]
     pub event_uuids: Vec<String>,
+    #[serde(default)]
+    pub args: Option<serde_json::Value>,
+    #[serde(default)]
+    pub index: Option<i64>,
 }
 
 impl RestrictionEntry {
@@ -49,6 +53,7 @@ impl RestrictionEntry {
         Restriction {
             restriction_type,
             scope,
+            args: self.args,
         }
     }
 }
@@ -81,13 +86,13 @@ impl RedisRestrictionsRepository {
     /// The Redis client is configured with UTF-8 format (no compression) to read
     /// plain JSON data written by Python.
     pub async fn new(
-        kv_url: String,
+        redis_url: String,
         response_timeout: Option<Duration>,
         connection_timeout: Option<Duration>,
     ) -> Result<Self, CustomRedisError> {
         let redis = Arc::new(
             common_redis::RedisClient::with_config(
-                kv_url,
+                redis_url,
                 common_redis::CompressionConfig::disabled(),
                 common_redis::RedisValueFormat::Utf8,
                 response_timeout,
@@ -107,12 +112,12 @@ impl RedisRestrictionsRepository {
     /// Like `new()`, this creates a correctly-configured Redis client internally.
     #[cfg(test)]
     pub async fn with_prefix_for_test(
-        kv_url: String,
+        redis_url: String,
         prefix: String,
     ) -> Result<Self, CustomRedisError> {
         let redis = Arc::new(
             common_redis::RedisClient::with_config(
-                kv_url,
+                redis_url,
                 common_redis::CompressionConfig::disabled(),
                 common_redis::RedisValueFormat::Utf8,
                 None,
@@ -133,11 +138,11 @@ impl RedisRestrictionsRepository {
                 format!(
                     "{}{}:{}",
                     prefix,
-                    KV_KEY_PREFIX,
+                    REDIS_KEY_PREFIX,
                     restriction_type.redis_key()
                 )
             }
-            None => format!("{}:{}", KV_KEY_PREFIX, restriction_type.redis_key()),
+            None => format!("{}:{}", REDIS_KEY_PREFIX, restriction_type.redis_key()),
         }
     }
 }
@@ -362,7 +367,7 @@ mod integration_tests {
             let key = format!(
                 "{}{}:{}",
                 prefix,
-                KV_KEY_PREFIX,
+                REDIS_KEY_PREFIX,
                 restriction_type.redis_key()
             );
             client.del(key).await.ok();
@@ -378,7 +383,7 @@ mod integration_tests {
         let json = r#"[{"version": 2, "token": "test_token", "pipelines": ["analytics"]}]"#;
         let key = format!(
             "{}{}:force_overflow_from_ingestion",
-            prefix, KV_KEY_PREFIX
+            prefix, REDIS_KEY_PREFIX
         );
         helper.set(key, json.to_string()).await.unwrap();
 
@@ -432,7 +437,7 @@ mod integration_tests {
             "distinct_ids": ["user1", "user2"],
             "event_names": ["$pageview", "$autocapture"]
         }]"#;
-        let key = format!("{}{}:drop_event_from_ingestion", prefix, KV_KEY_PREFIX);
+        let key = format!("{}{}:drop_event_from_ingestion", prefix, REDIS_KEY_PREFIX);
         helper.set(key, json.to_string()).await.unwrap();
 
         let repo = RedisRestrictionsRepository::with_prefix_for_test(
@@ -464,7 +469,7 @@ mod integration_tests {
             {"version": 2, "token": "token_b", "pipelines": ["session_recordings"]},
             {"version": 2, "token": "token_c", "pipelines": ["analytics", "ai"], "distinct_ids": ["user1"]}
         ]"#;
-        let key = format!("{}{}:drop_event_from_ingestion", prefix, KV_KEY_PREFIX);
+        let key = format!("{}{}:drop_event_from_ingestion", prefix, REDIS_KEY_PREFIX);
         helper.set(key, json.to_string()).await.unwrap();
 
         let repo = RedisRestrictionsRepository::with_prefix_for_test(
@@ -505,7 +510,7 @@ mod integration_tests {
 
         helper
             .set(
-                format!("{}{}:drop_event_from_ingestion", prefix, KV_KEY_PREFIX),
+                format!("{}{}:drop_event_from_ingestion", prefix, REDIS_KEY_PREFIX),
                 drop_json.to_string(),
             )
             .await
@@ -514,7 +519,7 @@ mod integration_tests {
             .set(
                 format!(
                     "{}{}:force_overflow_from_ingestion",
-                    prefix, KV_KEY_PREFIX
+                    prefix, REDIS_KEY_PREFIX
                 ),
                 overflow_json.to_string(),
             )
@@ -522,14 +527,14 @@ mod integration_tests {
             .unwrap();
         helper
             .set(
-                format!("{}{}:redirect_to_dlq", prefix, KV_KEY_PREFIX),
+                format!("{}{}:redirect_to_dlq", prefix, REDIS_KEY_PREFIX),
                 dlq_json.to_string(),
             )
             .await
             .unwrap();
         helper
             .set(
-                format!("{}{}:skip_person_processing", prefix, KV_KEY_PREFIX),
+                format!("{}{}:skip_person_processing", prefix, REDIS_KEY_PREFIX),
                 skip_json.to_string(),
             )
             .await

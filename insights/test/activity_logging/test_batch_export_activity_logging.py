@@ -1,5 +1,6 @@
-from insights.batch_exports.models import BatchExport, BatchExportDestination
 from insights.test.activity_log_utils import ActivityLogTestHelper
+
+from products.batch_exports.backend.models.batch_export import BatchExport, BatchExportDestination
 
 
 class TestBatchExportActivityLogging(ActivityLogTestHelper):

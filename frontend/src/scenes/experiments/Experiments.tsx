@@ -1,34 +1,37 @@
+import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { Banner, Dialog, Input, Select, Tag, Tooltip, toast } from '@hanzo/elements'
+import * as experimentPng from '@hanzo/brand/hoggies/png/experiment'
+import { Input, Select, Tag, Tooltip, toast } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
-import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
-import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
-import { MemberSelect } from 'lib/components/MemberSelect'
+import { MemberMultiSelect } from 'lib/components/MemberMultiSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { ExperimentsMascot } from 'lib/components/mascots'
+import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
+import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { dayjs } from 'lib/dayjs'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
 import { Divider } from 'lib/elements/Divider'
+import { Markdown } from 'lib/elements/Markdown'
 import { Progress } from 'lib/elements/Progress'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
-import { TableLink } from 'lib/elements/Table/TableLink'
 import { atColumn, createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { Tabs } from 'lib/elements/Tabs'
-import { pluralize } from 'lib/utils'
-import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
+import { pluralize } from 'lib/utils/strings'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import MaxTool from 'scenes/max/MaxTool'
 import { useMaxTool } from 'scenes/max/useMaxTool'
+import { organizationLogic } from 'scenes/organizationLogic'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
-import { QuickSurveyModal } from 'scenes/surveys/QuickSurveyModal'
 import { QuickSurveyType } from 'scenes/surveys/quick-create/types'
+import { QuickSurveyModal } from 'scenes/surveys/QuickSurveyModal'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -39,16 +42,15 @@ import {
     AccessControlResourceType,
     ActivityScope,
     Experiment,
-    ExperimentProgressStatus,
+    ExperimentConclusion,
+    ExperimentStatus,
     ExperimentsTabs,
 } from '~/types'
 
+import { CONCLUSION_DISPLAY_CONFIG } from './constants'
+import { CopyExperimentToProjectModal } from './CopyExperimentToProjectModal'
 import { DuplicateExperimentModal } from './DuplicateExperimentModal'
-import { ExperimentVelocityStats } from './ExperimentVelocityStats'
-import { StatusTag } from './ExperimentView/components'
-import { ExperimentsSettings } from './ExperimentsSettings'
-import { Holdouts } from './Holdouts'
-import { SharedMetrics } from './SharedMetrics/SharedMetrics'
+import { canArchiveExperiment, confirmArchiveExperiment, confirmDeleteExperiment } from './experimentActions'
 import {
     EXPERIMENTS_PER_PAGE,
     ExperimentsFilters,
@@ -57,7 +59,13 @@ import {
     getShippedVariantKey,
     isSingleVariantShipped,
 } from './experimentsLogic'
-import { isLegacyExperiment } from './utils'
+import { ExperimentsSettings } from './ExperimentsSettings'
+import { ExperimentVelocityStats } from './ExperimentVelocityStats'
+import { StatusTag } from './ExperimentView/StatusTag'
+import { Holdouts } from './Holdouts'
+import { SharedMetrics } from './SharedMetrics/SharedMetrics'
+
+const MascotExperiment = pngHoggie(experimentPng)
 
 export const scene: SceneExport = {
     component: Experiments,
@@ -66,7 +74,7 @@ export const scene: SceneExport = {
 }
 
 export const EXPERIMENTS_PRODUCT_DESCRIPTION =
-    'Experiments help you test changes to your product to see which changes will lead to optimal results. Automatic statistical calculations let you see if the results are valid or if they are likely just a chance occurrence.'
+    'Experiments help you test changes to your product to see which changes will lead to optimal results. Automatic statistical calculations let you see if the results are valid or due to chance.'
 
 // Component for the survey button using QuickSurveyModal
 const ExperimentSurveyButton = ({
@@ -106,7 +114,7 @@ const ExperimentsTableFilters = ({
     return (
         <div className="flex justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-6">
-                <AppShortcut
+                <Shortcut
                     name="SearchExperiments"
                     keybind={[keyBinds.filter]}
                     intent="Search experiments"
@@ -119,7 +127,7 @@ const ExperimentsTableFilters = ({
                         onChange={(search) => onFiltersChange({ search, page: 1 })}
                         value={filters.search || ''}
                     />
-                </AppShortcut>
+                </Shortcut>
                 <div className="flex items-center gap-2">
                     <span>
                         <b>Status</b>
@@ -131,15 +139,17 @@ const ExperimentsTableFilters = ({
                                 const { status: _, ...restFilters } = filters
                                 onFiltersChange({ ...restFilters, page: 1 }, true)
                             } else {
-                                onFiltersChange({ status: status as ExperimentProgressStatus, page: 1 })
+                                onFiltersChange({ status: status as ExperimentStatus, page: 1 })
                             }
                         }}
                         options={
                             [
                                 { label: 'All', value: 'all' },
-                                { label: 'Draft', value: ExperimentProgressStatus.Draft },
-                                { label: 'Running / Paused', value: ExperimentProgressStatus.Running },
-                                { label: 'Complete', value: ExperimentProgressStatus.Complete },
+                                { label: 'Draft', value: ExperimentStatus.Draft },
+                                { label: 'Running', value: ExperimentStatus.Running },
+                                { label: 'Paused', value: ExperimentStatus.Paused },
+                                { label: 'Exposure frozen', value: ExperimentStatus.ExposureFrozen },
+                                { label: 'Complete', value: ExperimentStatus.Stopped },
                             ] as { label: string; value: string }[]
                         }
                         value={filters.status ?? 'all'}
@@ -149,16 +159,16 @@ const ExperimentsTableFilters = ({
                     <span className="ml-1">
                         <b>Created by</b>
                     </span>
-                    <MemberSelect
+                    <MemberMultiSelect
                         defaultLabel="Any user"
-                        value={filters.created_by_id ?? null}
+                        value={filters.created_by_id ?? []}
                         size="xsmall"
-                        onChange={(user) => {
-                            if (!user) {
+                        onChange={(userIds) => {
+                            if (!userIds.length) {
                                 const { created_by_id, ...restFilters } = filters
                                 onFiltersChange({ ...restFilters, page: 1 }, true)
                             } else {
-                                onFiltersChange({ created_by_id: user.id, page: 1 })
+                                onFiltersChange({ created_by_id: userIds, page: 1 })
                             }
                         }}
                     />
@@ -188,22 +198,18 @@ const ExperimentsTableFilters = ({
 const ExperimentsTable = ({
     openDuplicateModal,
     openSurveyModal,
+    openCopyToProjectModal,
 }: {
     openDuplicateModal: (experiment: Experiment) => void
     openSurveyModal: (experiment: Experiment) => void
+    openCopyToProjectModal: (experiment: Experiment) => void
 }): JSX.Element => {
-    const {
-        currentProjectId,
-        experiments,
-        experimentsLoading,
-        experimentsLoadFailed,
-        tab,
-        shouldShowEmptyState,
-        filters,
-        count,
-        pagination,
-    } = useValues(experimentsLogic)
-    const { loadExperiments, archiveExperiment, setExperimentsFilters } = useActions(experimentsLogic)
+    const { currentProjectId, experiments, experimentsLoading, tab, shouldShowEmptyState, filters, count, pagination } =
+        useValues(experimentsLogic)
+    const { loadExperiments, archiveExperiment, unarchiveExperiment, setExperimentsFilters } =
+        useActions(experimentsLogic)
+    const { currentOrganization } = useValues(organizationLogic)
+    const hasMultipleProjects = (currentOrganization?.projects?.length ?? 0) > 1
 
     const page = filters.page || 1
     const startCount = count === 0 ? 0 : (page - 1) * EXPERIMENTS_PER_PAGE + 1
@@ -228,7 +234,7 @@ const ExperimentsTable = ({
                                         No-code
                                     </Tag>
                                 )}
-                                {isLegacyExperiment(experiment) && (
+                                {experiment.is_legacy && (
                                     <Tooltip
                                         title="This experiment uses the legacy engine, so some features and improvements may be missing."
                                         docLink="https://hanzo.ai/docs/experiments/new-experimentation-engine"
@@ -249,7 +255,14 @@ const ExperimentsTable = ({
                                 )}
                             </>
                         }
-                        description={experiment.description}
+                        description={
+                            experiment.description ? (
+                                // Hypotheses can run many paragraphs, so clamp to keep list rows compact
+                                <Markdown className="max-w-[30rem] line-clamp-2" lowKeyHeadings disableImages>
+                                    {experiment.description}
+                                </Markdown>
+                            ) : undefined
+                        }
                     />
                 )
             },
@@ -277,7 +290,7 @@ const ExperimentsTable = ({
             key: 'remaining_time',
             width: 80,
             render: function Render(_, experiment: Experiment) {
-                const remainingDays = experiment.parameters?.recommended_running_time
+                const remainingDays = experiment.running_time_calculation?.recommended_running_time
                 const daysElapsed = experiment.start_date
                     ? dayjs().diff(dayjs(experiment.start_date), 'day')
                     : undefined
@@ -327,12 +340,48 @@ const ExperimentsTable = ({
                 const statusA = getExperimentStatus(a)
                 const statusB = getExperimentStatus(b)
 
-                const score = {
-                    draft: 1,
-                    running: 2,
-                    complete: 3,
+                const score: Record<ExperimentStatus, number> = {
+                    [ExperimentStatus.Draft]: 1,
+                    [ExperimentStatus.Running]: 2,
+                    [ExperimentStatus.Paused]: 3,
+                    [ExperimentStatus.ExposureFrozen]: 4,
+                    [ExperimentStatus.Stopped]: 5,
                 }
                 return score[statusA] > score[statusB] ? 1 : -1
+            },
+        },
+        {
+            title: 'Result',
+            key: 'conclusion',
+            render: function Render(_, experiment: Experiment) {
+                if (!experiment.conclusion) {
+                    return <span className="text-secondary">—</span>
+                }
+                const config = CONCLUSION_DISPLAY_CONFIG[experiment.conclusion]
+                const tooltip = experiment.conclusion_comment
+                    ? `${config.description} — ${experiment.conclusion_comment}`
+                    : config.description
+                return (
+                    <Tooltip title={tooltip}>
+                        <div className="flex items-center gap-2 cursor-default">
+                            <div className={clsx('w-2 h-2 rounded-full', config.color)} />
+                            <span className="font-medium">{config.title}</span>
+                        </div>
+                    </Tooltip>
+                )
+            },
+            align: 'left',
+            sorter: (a, b) => {
+                const conclusionScore: Record<ExperimentConclusion, number> = {
+                    [ExperimentConclusion.Won]: 1,
+                    [ExperimentConclusion.Lost]: 2,
+                    [ExperimentConclusion.Inconclusive]: 3,
+                    [ExperimentConclusion.StoppedEarly]: 4,
+                    [ExperimentConclusion.Invalid]: 5,
+                }
+                const aScore = a.conclusion ? conclusionScore[a.conclusion] : 6
+                const bScore = b.conclusion ? conclusionScore[b.conclusion] : 6
+                return aScore - bScore
             },
         },
         {
@@ -345,9 +394,32 @@ const ExperimentsTable = ({
                                 <Button to={urls.experiment(`${experiment.id}`)} size="small" fullWidth>
                                     View
                                 </Button>
-                                <Button onClick={() => openDuplicateModal(experiment)} size="small" fullWidth>
+                                <Button
+                                    onClick={() => openDuplicateModal(experiment)}
+                                    size="small"
+                                    fullWidth
+                                    disabledReason={
+                                        experiment.is_legacy
+                                            ? 'Not supported for experiments using legacy metrics. Please recreate the experiment manually.'
+                                            : undefined
+                                    }
+                                >
                                     Duplicate
                                 </Button>
+                                {hasMultipleProjects && (
+                                    <Button
+                                        onClick={() => openCopyToProjectModal(experiment)}
+                                        size="small"
+                                        fullWidth
+                                        disabledReason={
+                                            experiment.is_legacy
+                                                ? 'Copying is not supported for experiments using legacy metrics.'
+                                                : undefined
+                                        }
+                                    >
+                                        Copy to project
+                                    </Button>
+                                )}
                                 <ExperimentSurveyButton
                                     experiment={experiment}
                                     onOpenModal={() => {
@@ -359,44 +431,43 @@ const ExperimentsTable = ({
                                         })
                                     }}
                                 />
-                                {!experiment.archived &&
-                                    experiment?.end_date &&
-                                    dayjs().isSameOrAfter(dayjs(experiment.end_date), 'day') && (
-                                        <AccessControlAction
-                                            resourceType={AccessControlResourceType.Experiment}
-                                            minAccessLevel={AccessControlLevel.Editor}
-                                            userAccessLevel={experiment.user_access_level}
-                                        >
-                                            <Button
-                                                onClick={() => {
-                                                    Dialog.open({
-                                                        title: 'Archive this experiment?',
-                                                        content: (
-                                                            <div className="text-sm text-secondary">
-                                                                This action will hide the experiment from the list by
-                                                                default. It can be restored at any time.
-                                                            </div>
-                                                        ),
-                                                        primaryButton: {
-                                                            children: 'Archive',
-                                                            type: 'primary',
-                                                            onClick: () => archiveExperiment(experiment.id as number),
-                                                            size: 'small',
-                                                        },
-                                                        secondaryButton: {
-                                                            children: 'Cancel',
-                                                            type: 'tertiary',
-                                                            size: 'small',
-                                                        },
+                                {canArchiveExperiment(experiment) && (
+                                    <AccessControlAction
+                                        resourceType={AccessControlResourceType.Experiment}
+                                        minAccessLevel={AccessControlLevel.Editor}
+                                        userAccessLevel={experiment.user_access_level}
+                                    >
+                                        <Button
+                                            onClick={() =>
+                                                confirmArchiveExperiment(experiment, (disableFlag) =>
+                                                    archiveExperiment({
+                                                        id: experiment.id as number,
+                                                        disableFeatureFlag: disableFlag,
                                                     })
-                                                }}
-                                                data-attr={`experiment-${experiment.id}-dropdown-archive`}
-                                                fullWidth
-                                            >
-                                                Archive experiment
-                                            </Button>
-                                        </AccessControlAction>
-                                    )}
+                                                )
+                                            }
+                                            data-attr={`experiment-${experiment.id}-dropdown-archive`}
+                                            fullWidth
+                                        >
+                                            Archive experiment
+                                        </Button>
+                                    </AccessControlAction>
+                                )}
+                                {experiment.archived && (
+                                    <AccessControlAction
+                                        resourceType={AccessControlResourceType.Experiment}
+                                        minAccessLevel={AccessControlLevel.Editor}
+                                        userAccessLevel={experiment.user_access_level}
+                                    >
+                                        <Button
+                                            onClick={() => unarchiveExperiment(experiment.id as number)}
+                                            data-attr={`experiment-${experiment.id}-dropdown-unarchive`}
+                                            fullWidth
+                                        >
+                                            Unarchive experiment
+                                        </Button>
+                                    </AccessControlAction>
+                                )}
                                 <Divider />
                                 <AccessControlAction
                                     resourceType={AccessControlResourceType.Experiment}
@@ -405,36 +476,13 @@ const ExperimentsTable = ({
                                 >
                                     <Button
                                         status="danger"
-                                        onClick={() => {
-                                            Dialog.open({
-                                                title: 'Delete this experiment?',
-                                                content: (
-                                                    <div className="text-sm text-secondary">
-                                                        Experiment with its settings will be deleted, but event data
-                                                        will be preserved.
-                                                    </div>
-                                                ),
-                                                primaryButton: {
-                                                    children: 'Delete',
-                                                    type: 'primary',
-                                                    onClick: () => {
-                                                        void deleteWithUndo({
-                                                            endpoint: `projects/${currentProjectId}/experiments`,
-                                                            object: { name: experiment.name, id: experiment.id },
-                                                            callback: () => {
-                                                                loadExperiments()
-                                                            },
-                                                        })
-                                                    },
-                                                    size: 'small',
-                                                },
-                                                secondaryButton: {
-                                                    children: 'Cancel',
-                                                    type: 'tertiary',
-                                                    size: 'small',
-                                                },
+                                        onClick={() =>
+                                            confirmDeleteExperiment({
+                                                projectId: currentProjectId,
+                                                experiment,
+                                                onDelete: () => loadExperiments(),
                                             })
-                                        }}
+                                        }
                                         data-attr={`experiment-${experiment.id}-dropdown-remove`}
                                         fullWidth
                                     >
@@ -451,17 +499,6 @@ const ExperimentsTable = ({
 
     return (
         <SceneContent>
-            {/*
-             * Experiments has no REST layer in this deployment, so the list request fails rather
-             * than returning an empty list. Saying "create your first experiment" on top of that
-             * would invite the user into a flow whose every request 404s. Report the failure.
-             */}
-            {experimentsLoadFailed && (
-                <Banner type="error" action={{ children: 'Retry', onClick: () => loadExperiments() }}>
-                    Couldn't load experiments — the request failed, so we can't show what exists. This is not the same
-                    as having no experiments.
-                </Banner>
-            )}
             {tab === ExperimentsTabs.All && (
                 <AccessControlAction
                     resourceType={AccessControlResourceType.Experiment}
@@ -475,8 +512,9 @@ const ExperimentsTable = ({
                         docsURL="https://hanzo.ai/docs/experiments"
                         action={() => router.actions.push(urls.experiment('new'))}
                         isEmpty={shouldShowEmptyState}
-                        customInsights={ExperimentsMascot}
+                        customHog={MascotExperiment}
                         className="my-0"
+                        mcpSurfaceKey="experiments.create"
                     />
                 </AccessControlAction>
             )}
@@ -524,6 +562,7 @@ export function Experiments(): JSX.Element {
     const { setExperimentsTab, loadExperiments } = useActions(experimentsLogic)
 
     const [duplicateModalExperiment, setDuplicateModalExperiment] = useState<Experiment | null>(null)
+    const [copyToProjectModalExperiment, setCopyToProjectModalExperiment] = useState<Experiment | null>(null)
     const [surveyModalExperiment, setSurveyModalExperiment] = useState<Experiment | null>(null)
 
     // Register feature flag creation tool so that it's always available on experiments page
@@ -549,51 +588,53 @@ export function Experiments(): JSX.Element {
                             resourceType={AccessControlResourceType.Experiment}
                             minAccessLevel={AccessControlLevel.Editor}
                         >
-                            <MaxTool
-                                identifier="create_experiment"
-                                initialMaxPrompt="Create an experiment for "
-                                suggestions={[
-                                    'Create an experiment to test…',
-                                    'Set up an A/B test with a 70/30 split between control and test for…',
-                                ]}
-                                callback={(toolOutput: {
-                                    experiment_id?: string | number
-                                    experiment_name?: string
-                                    feature_flag_key?: string
-                                    error?: string
-                                }) => {
-                                    if (toolOutput?.error || !toolOutput?.experiment_id) {
-                                        toast.error(
-                                            `Failed to create experiment: ${toolOutput?.error || 'Unknown error'}`
-                                        )
-                                        return
-                                    }
-                                    // Refresh experiments list to show new experiment, then redirect to it
-                                    loadExperiments()
-                                    router.actions.push(urls.experiment(toolOutput.experiment_id))
-                                }}
-                                position="bottom-right"
-                                active={true}
-                                context={{}}
-                            >
-                                <AppShortcut
-                                    name="NewExperiment"
-                                    keybind={[keyBinds.new]}
-                                    intent="New experiment"
-                                    interaction="click"
-                                    scope={Scene.Experiments}
+                            <div className="flex items-center gap-2">
+                                <MaxTool
+                                    identifier="create_experiment"
+                                    initialMaxPrompt="Create an experiment for "
+                                    suggestions={[
+                                        'Create an experiment to test…',
+                                        'Set up an A/B test with a 70/30 split between control and test for…',
+                                    ]}
+                                    callback={(toolOutput: {
+                                        experiment_id?: string | number
+                                        experiment_name?: string
+                                        feature_flag_key?: string
+                                        error?: string
+                                    }) => {
+                                        if (toolOutput?.error || !toolOutput?.experiment_id) {
+                                            toast.error(
+                                                `Failed to create experiment: ${toolOutput?.error || 'Unknown error'}`
+                                            )
+                                            return
+                                        }
+                                        // Refresh experiments list to show new experiment, then redirect to it
+                                        loadExperiments()
+                                        router.actions.push(urls.experiment(toolOutput.experiment_id))
+                                    }}
+                                    position="bottom-right"
+                                    active={true}
+                                    context={{}}
                                 >
-                                    <Button
-                                        size="small"
-                                        type="primary"
-                                        data-attr="create-experiment"
-                                        to={urls.experiment('new')}
-                                        tooltip="New experiment"
+                                    <Shortcut
+                                        name="NewExperiment"
+                                        keybind={[keyBinds.new]}
+                                        intent="New experiment"
+                                        interaction="click"
+                                        scope={Scene.Experiments}
                                     >
-                                        <span className="pr-3">New experiment</span>
-                                    </Button>
-                                </AppShortcut>
-                            </MaxTool>
+                                        <Button
+                                            size="small"
+                                            type="primary"
+                                            data-attr="create-experiment"
+                                            to={urls.experiment('new')}
+                                            tooltip="New experiment"
+                                        >
+                                            <span className="pr-3">New experiment</span>
+                                        </Button>
+                                    </Shortcut>
+                                </MaxTool>
+                            </div>
                         </AccessControlAction>
                     ) : undefined
                 }
@@ -610,6 +651,7 @@ export function Experiments(): JSX.Element {
                             <ExperimentsTable
                                 openDuplicateModal={setDuplicateModalExperiment}
                                 openSurveyModal={setSurveyModalExperiment}
+                                openCopyToProjectModal={setCopyToProjectModalExperiment}
                             />
                         ),
                     },
@@ -636,6 +678,13 @@ export function Experiments(): JSX.Element {
                     isOpen={true}
                     onClose={() => setDuplicateModalExperiment(null)}
                     experiment={duplicateModalExperiment}
+                />
+            )}
+            {copyToProjectModalExperiment && (
+                <CopyExperimentToProjectModal
+                    isOpen={true}
+                    onClose={() => setCopyToProjectModalExperiment(null)}
+                    experiment={copyToProjectModalExperiment}
                 />
             )}
             {surveyModalExperiment && (

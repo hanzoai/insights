@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Creates Airtable records",
     icon_url="/static/services/airtable.png",
     category=["Custom"],
-    code_language="fn",
+    code_language="script",
     code="""
 let url := f'https://api.airtable.com/v0/{inputs.base_id}/{inputs.table_name}'
 

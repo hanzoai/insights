@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from insights.storage import object_storage
 
+from ee.hogai.tool import MaxTool
 
 from .models import Task, TaskRun
 from .temporal.client import execute_task_processing_workflow_async
@@ -13,7 +14,7 @@ from .temporal.client import execute_task_processing_workflow_async
 class CreateTaskArgs(BaseModel):
     title: str = Field(description="Title of the task")
     description: str = Field(description="Detailed description of what the task should accomplish")
-    repository: str = Field(description="Repository in format 'org/repo' (e.g., 'hanzoai/insights-js')")
+    repository: str = Field(description="Repository in format 'org/repo' (e.g., 'insights/insights-js')")
     run: bool = Field(default=True, description="Whether to immediately run the task after creation")
 
 
@@ -35,7 +36,7 @@ class ListTasksArgs(BaseModel):
     origin_product: str | None = Field(
         default=None, description="Filter by origin product (e.g., 'error_tracking', 'user_created')"
     )
-    repository: str | None = Field(default=None, description="Filter by repository (e.g., 'hanzoai/insights-js')")
+    repository: str | None = Field(default=None, description="Filter by repository (e.g., 'insights/insights-js')")
     limit: int = Field(default=10, ge=1, le=50, description="Maximum number of tasks to return")
 
 
@@ -151,6 +152,8 @@ Use this tool when the user wants to:
 
             if not task:
                 return None
+            if task.runtime == Task.Runtime.PI:
+                return {"error": "unsupported_runtime"}
 
             task_run = task.create_run()
             task_url = f"/project/{task.team.project.id}/tasks/{task.id}?runId={task_run.id}"
@@ -167,6 +170,8 @@ Use this tool when the user wants to:
 
         if not result:
             return f"Task with ID {task_id} not found", {"error": "not_found"}
+        if result.get("error") == "unsupported_runtime":
+            return "Pi tasks cannot be run through the ACP task workflow.", result
 
         # Extract slack thread context from config if available
         slack_thread_context = (self._config.get("configurable") or {}).get("slack_thread_context")
@@ -499,10 +504,11 @@ Use this tool when the user wants to:
                 try:
                     github = GitHubIntegration(integration)
                     org = github.organization()
-                    repo_names = github.list_repositories()
+                    repos = github.list_all_cached_repositories()
 
-                    for repo_name in repo_names:
-                        full_name = f"{org}/{repo_name}"
+                    for repo in repos:
+                        repo_name = repo["name"]
+                        full_name = repo["full_name"]
                         if search:
                             if search.lower() not in repo_name.lower():
                                 continue
@@ -523,7 +529,7 @@ Use this tool when the user wants to:
         if not repos:
             if search:
                 return f"No repositories found matching '{search}'", {"repositories": []}
-            settings_url = "/settings/project-integrations"
+            settings_url = "/integrations/github"
             return (
                 f"No GitHub repositories available. Please connect a GitHub integration in Settings: {settings_url}",
                 {"repositories": [], "settings_url": settings_url},

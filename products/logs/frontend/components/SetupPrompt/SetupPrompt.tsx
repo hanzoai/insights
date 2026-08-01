@@ -1,25 +1,28 @@
 import { useActions, useValues } from 'kea'
+import insights from 'insights-js'
 import { useEffect } from 'react'
 
+import * as greekPng from '@hanzo/brand/hoggies/png/greek'
 import { IconGear } from '@hanzo/icons'
-import insights from '@hanzo/insights'
 import { Button, Link, Spinner } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { ListMascot } from 'lib/components/mascots'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useInterval } from 'lib/hooks/useInterval'
-import goImage from 'scenes/onboarding/sdks/logos/go.svg'
-import javaImage from 'scenes/onboarding/sdks/logos/java.svg'
-import nextjsImage from 'scenes/onboarding/sdks/logos/nextjs.svg'
-import nodejsImage from 'scenes/onboarding/sdks/logos/nodejs.svg'
-import pythonImage from 'scenes/onboarding/sdks/logos/python.svg'
+import goImage from 'scenes/onboarding/shared/logos/go.svg'
+import javaImage from 'scenes/onboarding/shared/logos/java.svg'
+import nextjsImage from 'scenes/onboarding/shared/logos/nextjs.svg'
+import nodejsImage from 'scenes/onboarding/shared/logos/nodejs.svg'
+import pythonImage from 'scenes/onboarding/shared/logos/python.svg'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 
 import { useOpenLogsSettingsPanel } from '../../hooks/useOpenLogsSettingsPanel'
 import { logsIngestionLogic } from './logsIngestionLogic'
+
+const MascotGreek = pngHoggie(greekPng)
 
 const FRAMEWORK_LINKS: { name: string; image?: string; docsLink: string }[] = [
     { name: 'Node.js', image: nodejsImage, docsLink: 'https://hanzo.ai/docs/logs/installation/nodejs' },
@@ -96,7 +99,7 @@ const NoLogsPrompt = ({ className }: { className?: string }): JSX.Element | null
             isEmpty={true}
             productKey={ProductKey.LOGS}
             className={className}
-            customInsights={ListMascot}
+            customHog={MascotGreek}
             actionElementOverride={
                 <div className="flex flex-col items-start gap-4">
                     <p className="text-sm text-secondary m-0">

@@ -5,6 +5,9 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 from insights.temporal.ai.research_agent import ResearchAgentWorkflowInputs, process_research_agent_activity
 
+from products.insights_ai.backend.models.assistant import Conversation
+
+from ee.hogai.stream.redis_stream import CONVERSATION_STREAM_PREFIX
 
 
 def get_research_agent_stream_key(conversation_id):

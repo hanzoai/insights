@@ -1,27 +1,29 @@
-import { useActions, useValues } from 'kea'
+// Side-effect import: register all integration setups
+import './integrationSetups'
 
-import { IconExternal, IconX } from '@hanzo/icons'
-import { Button, Menu, Skeleton } from '@hanzo/elements'
+import { useActions, useValues } from 'kea'
+import { useEffect, useRef } from 'react'
+
+import { IconExternal, IconTrash, IconX } from '@hanzo/icons'
+import { Banner, Button, Menu, Skeleton } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { IntegrationView } from 'lib/integrations/IntegrationView'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
+import { IntegrationView } from 'lib/integrations/IntegrationView'
 import { getIntegrationNameFromKind } from 'lib/integrations/utils'
 import { urls } from 'scenes/urls'
 
-import { CyclotronJobInputSchemaType } from '~/types'
-
+import { findIntegrationByFormValue, matchesIntegrationIdValue } from './integrationLookup'
 import { getAllRegisteredIntegrationSetups, getIntegrationSetup } from './integrationSetupRegistry'
-// Side-effect import: register all integration setups
-import './integrationSetups'
 
 export type IntegrationConfigureProps = {
     value?: number
     onChange?: (value: number | null) => void
     redirectUrl?: string
-    schema?: CyclotronJobInputSchemaType
+    schema?: { requiredScopes?: string }
     integration?: string
     beforeRedirect?: () => void
+    allowClear?: boolean
 }
 
 export function IntegrationChoice({
@@ -31,13 +33,32 @@ export function IntegrationChoice({
     integration,
     redirectUrl,
     beforeRedirect,
+    allowClear = true,
 }: IntegrationConfigureProps): JSX.Element | null {
-    const { integrationsLoading, integrations, newIntegrationModalKind } = useValues(integrationsLogic)
-    const { newGoogleCloudKey, openNewIntegrationModal, closeNewIntegrationModal } = useActions(integrationsLogic)
+    const { integrationsLoading, integrations, newIntegrationModalKind, slackAvailable } = useValues(integrationsLogic)
+    const { newGoogleCloudKey, openNewIntegrationModal, closeNewIntegrationModal, deleteIntegration } =
+        useActions(integrationsLogic)
     const kind = integration
 
     const integrationsOfKind = integrations?.filter((x) => x.kind === kind)
-    const integrationKind = integrationsOfKind?.find((integration) => integration.id === value)
+    const integrationKind = findIntegrationByFormValue(integrationsOfKind, value)
+
+    // The stored value points to an integration that's no longer available (deleted, or
+    // re-installed under a new ID). We deliberately do NOT auto-substitute here — that
+    // would silently mask the missing reference and let stale config keep flowing through
+    // saves. The UI surfaces a warning below instead so the user picks explicitly.
+    const valueIsMissing = !integrationsLoading && !!value && !!integrations && !integrationKind
+
+    // Fire at most once: the consumer's write may take a full state round-trip before it flows
+    // back into `value`, and re-dispatching on every render in that window can amplify into an
+    // infinite update loop (React #185).
+    const autoSelected = useRef(false)
+    useEffect(() => {
+        if (!integrationsLoading && !value && integrationsOfKind?.length && !autoSelected.current) {
+            autoSelected.current = true
+            onChange?.(integrationsOfKind[0].id)
+        }
+    }, [integrationsLoading, onChange, integrationsOfKind?.length, value, integrationsOfKind])
 
     if (!kind) {
         return null
@@ -71,16 +92,25 @@ export function IntegrationChoice({
     }
 
     const setupDef = getIntegrationSetup(kind)
+    // When the instance doesn't have OAuth credentials for this kind, /integrations/authorize
+    // 400s with "Kind not configured". Send users to the settings page instead.
+    const oauthUnavailable = kind === 'slack' && !slackAvailable
     const setupMenuItem = setupDef
         ? setupDef.menuItem({ kind, openModal: openNewIntegrationModal, uploadKey })
-        : {
-              to: api.integrations.authorizeUrl({ kind, next: redirectUrl }),
-              disableClientSideRouting: true,
-              onClick: beforeRedirect,
-              label: integrationsOfKind?.length
-                  ? `Connect to a different integration for ${kindName}`
-                  : `Connect to ${kindName}`,
-          }
+        : oauthUnavailable
+          ? {
+                to: urls.settings('project-integrations'),
+                sideIcon: <IconExternal />,
+                label: `${kindName} is not configured on this instance`,
+            }
+          : {
+                to: api.integrations.authorizeUrl({ kind, next: redirectUrl }),
+                disableClientSideRouting: true,
+                onClick: beforeRedirect,
+                label: integrationsOfKind?.length
+                    ? `Connect to a different integration for ${kindName}`
+                    : `Connect to ${kindName}`,
+            }
 
     const button = (
         <Menu
@@ -97,7 +127,7 @@ export function IntegrationChoice({
                                       />
                                   ),
                                   onClick: () => onChange?.(integ.id),
-                                  active: integ.id === value,
+                                  active: matchesIntegrationIdValue(integ.id, value),
                                   label: integ.display_name,
                               })) || []),
                           ],
@@ -111,11 +141,21 @@ export function IntegrationChoice({
                             label: 'Manage integrations',
                             sideIcon: <IconExternal />,
                         },
-                        value
+                        value && allowClear
                             ? {
                                   onClick: () => onChange?.(null),
-                                  label: 'Clear',
+                                  label: 'Clear selection',
                                   sideIcon: <IconX />,
+                              }
+                            : null,
+                        integrationKind
+                            ? {
+                                  onClick: () => {
+                                      deleteIntegration(integrationKind.id)
+                                  },
+                                  label: 'Disconnect integration',
+                                  status: 'danger' as const,
+                                  sideIcon: <IconTrash />,
                               }
                             : null,
                     ],
@@ -134,6 +174,14 @@ export function IntegrationChoice({
         <>
             {integrationKind ? (
                 <IntegrationView schema={schema} integration={integrationKind} suffix={button} />
+            ) : valueIsMissing ? (
+                <div className="flex flex-col gap-2">
+                    <Banner type="warning">
+                        The previously selected {kindName} connection (ID: {value}) is no longer available. Pick a
+                        different connection or clear the selection — this connection will fail at runtime otherwise.
+                    </Banner>
+                    {button}
+                </div>
             ) : (
                 button
             )}

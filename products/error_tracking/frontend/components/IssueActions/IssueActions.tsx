@@ -1,9 +1,20 @@
 import { useActions, useValues } from 'kea'
 
-import { Button, Dialog, Select } from '@hanzo/elements'
+import { Dialog } from '@hanzo/elements'
 
-import { useConfetti } from 'lib/components/Confetti/Confetti'
-import { sceneLogic } from 'scenes/sceneLogic'
+import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import {
+    Button,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from 'lib/ui/quill'
+import { newInternalTab } from 'lib/utils/newInternalTab'
 import { urls } from 'scenes/urls'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
@@ -26,8 +37,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
     const { filterGroup } = useValues(issueFiltersLogic)
     const { setFilterGroup } = useActions(issueFiltersLogic)
     const { setSelectedIssueIds } = useActions(bulkSelectLogic)
-    const { newTab } = useActions(sceneLogic)
-    const { trigger: triggerConfetti, ConfettiComponent } = useConfetti()
+    const { trigger: triggerHogfetti, HogfettiComponent } = useHogfetti()
 
     const hasAtLeastTwoIssues = selectedIds.length >= 2
 
@@ -35,7 +45,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
         selectedIds.forEach((id) => {
             const issue = issues.find((issue) => issue.id === id)
             if (issue) {
-                newTab(urls.errorTrackingIssue(id, { timestamp: issue.last_seen }))
+                newInternalTab(urls.errorTrackingIssue(id, { timestamp: issue.last_seen }))
             }
         })
     }
@@ -75,42 +85,53 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
 
     let options: IssueStatus[] = ['active', 'resolved', 'suppressed']
 
+    const mergeButton = (
+        <Button
+            variant="outline"
+            disabled={!hasAtLeastTwoIssues}
+            onClick={() =>
+                Dialog.open({
+                    title: 'Merge Issues',
+                    content: `Are you sure you want to merge these ${selectedIds.length} issues?`,
+                    primaryButton: {
+                        children: 'Merge',
+                        status: 'danger',
+                        onClick: () => {
+                            mergeIssues(selectedIds)
+                        },
+                    },
+                })
+            }
+        >
+            Merge
+        </Button>
+    )
+
     return (
         <div className="flex gap-x-2 justify-between">
-            <ConfettiComponent />
+            <HogfettiComponent />
             <div className="flex gap-x-2">
-                <Button type="secondary" size="small" onClick={openInNewTabs}>
+                <Button variant="outline" onClick={openInNewTabs}>
                     Open all
                 </Button>
-                <Button
-                    disabledReason={!hasAtLeastTwoIssues ? 'Select at least two issues to merge' : null}
-                    type="secondary"
-                    size="small"
-                    onClick={() =>
-                        Dialog.open({
-                            title: 'Merge Issues',
-                            content: `Are you sure you want to merge these ${selectedIds.length} issues?`,
-                            primaryButton: {
-                                children: 'Merge',
-                                status: 'danger',
-                                onClick: () => {
-                                    mergeIssues(selectedIds)
-                                },
-                            },
-                        })
-                    }
-                >
-                    Merge
-                </Button>
+                {hasAtLeastTwoIssues ? (
+                    mergeButton
+                ) : (
+                    <Tooltip>
+                        <TooltipTrigger render={mergeButton} />
+                        <TooltipContent>Select at least two issues to merge</TooltipContent>
+                    </Tooltip>
+                )}
                 <Select
-                    onChange={(value) => {
-                        if (value == currentStatus) {
+                    value={currentStatus === 'mixed' ? null : currentStatus}
+                    onValueChange={(value) => {
+                        if (!value || value === currentStatus) {
                             return
                         }
                         switch (value) {
                             case 'resolved':
                                 resolveIssues(selectedIds)
-                                ;[0, 400, 800].forEach((delay) => setTimeout(triggerConfetti, delay))
+                                ;[0, 400, 800].forEach((delay) => setTimeout(triggerHogfetti, delay))
                                 break
                             case 'suppressed':
                                 suppressIssues(selectedIds)
@@ -122,23 +143,38 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
                                 break
                         }
                     }}
-                    value={currentStatus == 'mixed' ? null : currentStatus}
-                    placeholder="Mark as"
-                    options={options.map((key) => ({
-                        value: key,
-                        label: <StatusIndicator status={key} size="small" className="w-full" withTooltip="right" />,
-                    }))}
-                    size="small"
-                />
+                >
+                    <SelectTrigger>
+                        <SelectValue>
+                            {currentStatus && currentStatus !== 'mixed' ? (
+                                <StatusIndicator status={currentStatus} size="xsmall" className="w-full" />
+                            ) : (
+                                'Mark as'
+                            )}
+                        </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent align="start" alignItemWithTrigger={false}>
+                        {options.map((status) => (
+                            <SelectItem key={status} value={status}>
+                                <StatusIndicator status={status} size="xsmall" className="w-full" withTooltip="right" />
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
                 <AssigneeSelect assignee={null} onChange={(assignee) => assignIssues(selectedIds, assignee)}>
                     {(displayAssignee) => (
-                        <Button type="secondary" size="small">
+                        <Button variant="outline">
                             <AssigneeLabelDisplay assignee={displayAssignee} placeholder="Assign" />
                         </Button>
                     )}
                 </AssigneeSelect>
+                {issues.some((issue) => selectedIds.includes(issue.id) && issue.assignee != null) && (
+                    <Button variant="outline" onClick={() => assignIssues(selectedIds, null)}>
+                        Unassign
+                    </Button>
+                )}
             </div>
-            <Button type="secondary" size="small" onClick={excludeSelectedIssues}>
+            <Button variant="outline" onClick={excludeSelectedIssues}>
                 Hide from search
             </Button>
         </div>

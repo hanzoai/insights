@@ -1,4 +1,4 @@
-from datastore_orm import migrations
+from infi.datastore_orm import migrations
 
 from insights.datastore.client import sync_execute
 from insights.models.performance.sql import UPDATE_PERFORMANCE_EVENTS_TABLE_TTL_SQL

@@ -1,3 +1,5 @@
+import { Logo } from 'lib/brand'
+
 export function IconUnderline(): JSX.Element {
     return (
         <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,25 +67,6 @@ export function IconAlignRight(): JSX.Element {
     )
 }
 
-export function InsightsLogo(): JSX.Element {
-    return (
-        <svg
-            width="56"
-            height="14"
-            viewBox="0 0 120 30"
-            fill="none"
-            role="img"
-            aria-label="Hanzo"
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <path d="M4 4h4v9h10V4h4v22h-4V17H8v9H4V4z" fill="currentColor" />
-            <path d="M26 26l8-22h4l8 22h-4.2l-1.8-5H32l-1.8 5H26zm7.2-8.5h5.6L36 10l-2.8 7.5z" fill="currentColor" />
-            <path d="M50 26V4h4l12 14.5V4h4v22h-3.8L54 11.5V26h-4z" fill="currentColor" />
-            <path d="M74 4h16v4l-9 14h9v4H74v-4l9-14h-9V4z" fill="currentColor" />
-            <path
-                d="M104 4a10 11 0 1 0 0 22 10 11 0 1 0 0-22zm0 4a6 7 0 1 1 0 14 6 7 0 1 1 0-14z"
-                fill="currentColor"
-            />
-        </svg>
-    )
-}
+// The product-tour editor preview mimics what insights-js renders in tours; scss supplies the mono
+// `color` and a 14px height. Preview may diverge from real tours until insights-js adopts the new mark.
+export const InsightsLogo = (): JSX.Element => <Logo variant="mono" />

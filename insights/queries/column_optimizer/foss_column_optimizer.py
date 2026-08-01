@@ -7,7 +7,6 @@ from typing import Union, cast
 
 from insights.datastore.materialized_columns import ColumnName, get_materialized_column_for_property
 from insights.constants import TREND_FILTER_TYPE_ACTIONS, FunnelCorrelationType
-from insights.models.action.util import get_action_tables_and_properties
 from insights.models.entity import Entity
 from insights.models.filters import Filter
 from insights.models.filters.mixins.utils import cached_property
@@ -16,9 +15,11 @@ from insights.models.filters.properties_timeline_filter import PropertiesTimelin
 from insights.models.filters.retention_filter import RetentionFilter
 from insights.models.filters.stickiness_filter import StickinessFilter
 from insights.models.filters.utils import GroupTypeIndex
-from insights.models.property import PropertyIdentifier, PropertyType, TableWithProperties
+from insights.models.property import PropertyIdentifier, PropertyType, TableColumn, TableWithProperties
 from insights.models.property.util import box_value, extract_tables_and_properties
 from insights.queries.property_optimizer import PropertyOptimizer
+
+from products.actions.backend.models.util import get_action_tables_and_properties
 
 
 class FOSSColumnOptimizer:
@@ -65,9 +66,15 @@ class FOSSColumnOptimizer:
         self,
         table: TableWithProperties,
         used_properties: set[PropertyIdentifier],
-        table_column: str = "properties",
+        table_column: TableColumn = "properties",
     ) -> set[ColumnName]:
         "Transforms a list of property names to what columns are needed for that query"
+        if not used_properties:
+            return set()
+        # The native-JSON events schema has no mat_* columns; property SQL reads subcolumns off the
+        # JSON column itself, so that column is all a query needs to select.
+        if table == "events" and self.filter.insightsql_context.uses_new_events_schema():
+            return {table_column}
         column_names = set()
         for property_name, _, _ in used_properties:
             column = get_materialized_column_for_property(table, table_column, property_name)
@@ -102,9 +109,6 @@ class FOSSColumnOptimizer:
 
         if not isinstance(self.filter, StickinessFilter):
             # Some breakdown types read properties
-            #
-            # See ee/datastore/queries/trends/breakdown.py#get_query or
-            # ee/datastore/queries/breakdown_props.py#get_breakdown_prop_values
             if self.filter.breakdown_type in ["event", "person"]:
                 boxed_breakdown = box_value(self.filter.breakdown)
                 for b in boxed_breakdown:
@@ -167,7 +171,7 @@ class FOSSColumnOptimizer:
             }
         )
 
-    def entities_used_in_filter(self) -> Generator[Entity, None, None]:
+    def entities_used_in_filter(self) -> Generator[Entity]:
         yield from self.filter.entities
         yield from cast(list[Entity], self.filter.exclusions)
 

@@ -63,7 +63,13 @@ export function renderInsightsQLX(value: any): JSX.Element {
 
     if (typeof object === 'object') {
         if (Array.isArray(object)) {
-            return <>{object.map((obj) => renderInsightsQLX(obj))}</>
+            return (
+                <>
+                    {object.map((obj, index) => (
+                        <React.Fragment key={index}>{renderInsightsQLX(obj)}</React.Fragment>
+                    ))}
+                </>
+            )
         }
 
         if (object === null) {
@@ -92,7 +98,7 @@ export function renderInsightsQLX(value: any): JSX.Element {
                         type="primary"
                         size="xsmall"
                         sideIcon={<IconAI />}
-                        data-attr="fn-ql-explaincsp-button"
+                        data-attr="script-ql-explaincsp-button"
                         className="inline-block"
                         disabledReason={
                             properties
@@ -113,7 +119,7 @@ export function renderInsightsQLX(value: any): JSX.Element {
                         recordingStatus={recordingStatus}
                         type="primary"
                         size="xsmall"
-                        data-attr="fn-ql-view-recording-button"
+                        data-attr="script-ql-view-recording-button"
                         className="inline-block"
                     />
                 </LightErrorBoundary>
