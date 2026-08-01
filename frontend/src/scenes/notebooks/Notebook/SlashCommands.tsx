@@ -353,8 +353,8 @@ order by count() desc
         },
     },
     {
-        title: 'People',
-        search: 'persons users',
+        title: 'Users',
+        search: 'persons users people',
         icon: <IconPeople />,
         command: (chain, pos) =>
             chain.insertContentAt(

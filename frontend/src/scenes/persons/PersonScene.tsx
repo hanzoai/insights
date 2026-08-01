@@ -339,7 +339,7 @@ export function PersonScene(): JSX.Element | null {
                               label: (
                                   <span className="flex items-center" data-attr="persons-related-tab">
                                       Related groups
-                                      <Tooltip title="People and groups that have shared events with this user in the last 90 days.">
+                                      <Tooltip title="Users and groups that have shared events with this user in the last 90 days.">
                                           <IconInfo className="ml-1 text-base shrink-0" />
                                       </Tooltip>
                                   </span>
