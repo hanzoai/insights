@@ -169,6 +169,57 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
 Tenancy is the IAM `owner` claim = the org (one tenancy). All Go observability
 (`/v1/evals`, `/v1/analytics`) scopes exclusively by `c.Org()`; secrets via KMS.
 
+## Identity: a user is their IAM `sub`, and `person` is only a column name
+
+**The id is the IAM `sub`** — every Hanzo property sends the same one for the
+same human. It is IAM's single derivation of identity (`subjectOf`,
+`iam/internal/oidc/token.go`): the stable opaque user id, with `owner/name` only
+a legacy fallback for pre-cutover rows. `owner/name` is a display path that moves
+when a user or org is renamed, and it is a different id space from the one Cloud
+stamps server-side on a reduced principal — so a property sending it counts one
+human as two.
+
+**A property that does not attach its bearer has no identity at all.** Cloud's
+anonymous lane (`apps/analytics/public.go`) admits only pageview and error, files
+them under the `$public` tenant, and DROPS `identify` with a 200 receipt. That is
+deliberate and must not be widened. The fix is always the caller's own token, not
+a baked publishable key — one console image serves three brands and a `pk-` maps
+to exactly one org.
+
+**`user` above the projection, `person` below it.** `person_id` is a physical
+column in `sharded_events`' sort key and the whole `insightsql` engine compiles
+against it; renaming it is a live-column migration whose backfill would
+double-count. So the vocabulary boundary is `insights/models/event/plane.py`:
+expressions are named for what they mean to us, written into the columns the fork
+reads. What a reader is SHOWN is ours — "0 users", "Users & groups".
+
+**Three views, one source.** `event_mv`, `user_mv` and `user_alias_mv` all
+project `event.event` through the same identity expressions:
+
+| view | writes | fact |
+|---|---|---|
+| `event_mv` | `writable_events` | this event happened |
+| `user_mv` | `writable_person` | this user exists |
+| `user_alias_mv` | `writable_person_distinct_id_overrides` | this visitor IS that user |
+
+The alias is what makes signing up non-destructive: a visitor's pageviews are
+written under a browser-minted id and everything after sign-in under their IAM
+subject, so without it a user's history ends exactly when it starts being worth
+having. `@hanzo/event` already sends the pre-login id beside the subject and
+Cloud stores it as `anonymous_id` — the alias just writes the join down where the
+query engine reads it.
+
+`user_mv`/`user_alias_mv` backfills are safe to re-run; `event_mv`'s is not. That
+is the collapse key, not a policy: `person` collapses on `(team_id, id)` and the
+overrides on `(team_id, distinct_id)`, both deterministic functions of the source
+row, while `sharded_events` collapses on a key containing the `team_id` a
+re-projection changes (see `0220`).
+
+An MV over `event.event` runs inside Cloud's INSERT, so **an expression that can
+throw takes down fleet-wide ingest.** Every expression in the projection is total
+over any input. Verify `POST /v1/event` still answers `accepted:1` after touching
+these views.
+
 ## Django migrations — squashed to a clean baseline (v1.52.0)
 
 The Postgres/Django migrations were **squashed to a fresh `0001_initial` per app**
