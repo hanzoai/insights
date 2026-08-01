@@ -11,6 +11,7 @@ use capture::config::CaptureMode;
 use capture::quota_limiters::CaptureQuotaLimiter;
 use capture::router::router;
 use capture::sinks::Event;
+use capture::team::StaticTeamResolver;
 use capture::time::TimeSource;
 use capture::v0_request::ProcessedEvent;
 use chrono::{DateTime, TimeZone, Utc};
@@ -28,6 +29,9 @@ use std::time::Duration;
 // Test constants for mock blob storage
 const TEST_BLOB_BUCKET: &str = "test-bucket";
 const TEST_BLOB_PREFIX: &str = "llma/";
+// The fixed team every token resolves to under StaticTeamResolver; AI blobs are
+// now partitioned by this validated team id instead of hash(token).
+const TEST_TEAM_ID: i32 = 1;
 
 fn create_mock_blob_storage() -> Arc<dyn BlobStorage> {
     Arc::new(MockBlobStorage::new(
@@ -188,6 +192,7 @@ fn setup_ai_test_router() -> Router {
         Some(10),                         // request_timeout_seconds
         None,                             // body_chunk_read_timeout_ms
         256,                              // body_read_chunk_size_kb
+        Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
     )
 }
 
@@ -1643,6 +1648,7 @@ fn setup_ai_test_router_with_capturing_sink() -> (Router, CapturingSink) {
         Some(10),                         // request_timeout_seconds
         None,                             // body_chunk_read_timeout_ms
         256,                              // body_read_chunk_size_kb
+        Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
     );
 
     (router, sink_clone)
@@ -1779,10 +1785,10 @@ async fn test_ai_event_with_blobs_published_with_s3_placeholders() {
     let output_url = props["$ai_output"].as_str().unwrap();
 
     // Verify S3 URLs point to same file with different ranges
-    // URL format: s3://test-bucket/llma/<token_hash>/<uuid>?range=...
-    // Token is hashed (first 16 chars of SHA-256) to prevent path traversal attacks
-    let token_hash = "896566b02a7f7462"; // SHA-256 of "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"
-    let expected_prefix = format!("s3://{TEST_BLOB_BUCKET}/{TEST_BLOB_PREFIX}{token_hash}/");
+    // URL format: s3://test-bucket/llma/<team_id>/<uuid>?range=...
+    // Partitioned by the validated team id (StaticTeamResolver → TEST_TEAM_ID),
+    // never the caller-chosen token.
+    let expected_prefix = format!("s3://{TEST_BLOB_BUCKET}/{TEST_BLOB_PREFIX}{TEST_TEAM_ID}/");
     assert!(
         input_url.starts_with(&expected_prefix),
         "Input URL should start with {expected_prefix}, got {input_url}"
@@ -2550,6 +2556,7 @@ fn setup_ai_test_router_with_token_dropper(token_dropper: TokenDropper) -> (Rout
         Some(10),                         // request_timeout_seconds
         None,                             // body_chunk_read_timeout_ms
         256,                              // body_read_chunk_size_kb
+        Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
     );
 
     (router, sink_clone)
@@ -2752,6 +2759,7 @@ fn setup_ai_test_router_with_llm_quota_limited(token: &str) -> (Router, Capturin
         Some(10),                         // request_timeout_seconds
         None,                             // body_chunk_read_timeout_ms
         256,                              // body_read_chunk_size_kb
+        Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
     );
 
     (router, sink_clone)

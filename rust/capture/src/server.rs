@@ -426,6 +426,14 @@ where
         (None, None, None)
     };
 
+    // Positive token→team allow-list over the shared KV — the ONE ingest tenancy
+    // seam. Forged / unknown / revoked project tokens resolve to no team and are
+    // rejected before any event is stored (team::KvTeamResolver).
+    let team_resolver: Option<Arc<dyn crate::team::TeamResolver>> =
+        Some(Arc::new(crate::team::KvTeamResolver::new(
+            redis_client.clone(),
+        )));
+
     let app = router::router(
         crate::time::SystemTime {},
         liveness,
@@ -449,6 +457,7 @@ where
         config.request_timeout_seconds,
         config.body_chunk_read_timeout_ms,
         config.body_read_chunk_size_kb,
+        team_resolver,
     );
 
     info!("listening on {:?}", listener.local_addr().unwrap());
