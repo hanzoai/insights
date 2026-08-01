@@ -126,12 +126,31 @@ Both are universe changes.
 
 **Before giving insights-plugin a Service, know what it exposes.** It serves the
 recording API: block reads, `DELETE .../recordings/:session_id` and
-`POST .../recordings/bulk_delete`, with `team_id` read straight from the path and
-never verified. Those routes now refuse a caller that does not present
-`INTERNAL_API_SECRET` (an empty secret denies), so a Service must ship **with the
-secret provisioned from KMS on both insights-plugin and insights-web**, or
-playback 401s. Keep it ClusterIP; that is not a boundary against other pods, but
-it should not be an Ingress either.
+`POST .../recordings/bulk_delete`. `INTERNAL_API_SECRET` is **gone** — it was one
+static string shared by both processes, it was never set in production, and the
+old image serves those routes to any pod in the cluster (reproduced: an
+unauthenticated `DELETE` reached the handler). A password could not have fixed it
+anyway: it says nothing about who is calling or which org they may touch.
+
+The gate is now **Hanzo IAM**, in one place each:
+- `nodejs/src/api/principal.ts` — verifies an IAM bearer against `hanzo.id`'s
+  JWKS and yields `{user, org}` from signed claims. No token, bad signature,
+  wrong issuer, expired, unreachable JWKS, IAM unconfigured → **401**. There is
+  no header form of the org, deliberately.
+- `nodejs/src/api/team-access.ts` — the `:team_id` in the path is authorized
+  against `insights_organization.slug` for the principal's org → **403** on
+  mismatch or unknown team. A path segment requests a resource; it never asserts
+  tenancy.
+- `insights/iam.py` — insights-web presents its own IAM identity, reusing the SSO
+  application it already has (`SOCIAL_AUTH_OIDC_KEY`/`_SECRET`, from KMS at
+  `hanzo//insights-secrets`). No new credential, and it raises rather than
+  sending an unauthenticated request.
+
+Consequence worth knowing: the token's `owner` must equal the org owning the
+team. Today there is exactly one org (`hanzo`) and one team, so this holds. A
+second tenant would need its own credential — and would **fail closed** (403), not
+leak. Keep the Service ClusterIP; that is not a boundary against other pods, which
+is exactly why the IAM gate is the one that matters.
 
 The `ingress-routes` CM hot-reloads via file-provider fsnotify — NEVER
 `rollout restart deploy/ingress` (ACME/TLS outage). Routes live in

@@ -434,7 +434,8 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert (
-            self.client.get(f"/api/projects/{self.team.id}/insights_functions/{id}").status_code == status.HTTP_404_NOT_FOUND
+            self.client.get(f"/api/projects/{self.team.id}/insights_functions/{id}").status_code
+            == status.HTTP_404_NOT_FOUND
         )
 
         response = self.client.patch(
@@ -442,7 +443,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             data={"deleted": False},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
-        assert self.client.get(f"/api/projects/{self.team.id}/insights_functions/{id}").status_code == status.HTTP_200_OK
+        assert (
+            self.client.get(f"/api/projects/{self.team.id}/insights_functions/{id}").status_code == status.HTTP_200_OK
+        )
 
     def test_inputs_required(self, *args):
         payload = {
@@ -928,11 +931,10 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             assert response.json()["status"] == DEFAULT_STATE
 
     def test_patches_status_on_enabled_update(self, *args):
-        internal_api_secret = "test-internal-secret"
-        internal_api_headers = {"x-internal-api-secret": internal_api_secret}
+        internal_api_headers = {"Authorization": "Bearer test-token"}
         with patch("insights.plugins.plugin_server_api.requests.get") as mock_get:
             with patch("insights.plugins.plugin_server_api.requests.patch") as mock_patch:
-                with patch("insights.plugins.plugin_server_api.INTERNAL_API_SECRET", internal_api_secret):
+                with patch("insights.plugins.plugin_server_api.iam.authorization", return_value=internal_api_headers):
                     mock_get.return_value.status_code = status.HTTP_200_OK
                     mock_get.return_value.json.return_value = {
                         "state": InsightsFunctionState.DISABLED.value,
@@ -1598,7 +1600,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         ]
 
     def test_can_call_a_test_invocation(self):
-        with patch("insights.api.insights_function.create_script_invocation_test") as mock_create_script_invocation_test:
+        with patch(
+            "insights.api.insights_function.create_script_invocation_test"
+        ) as mock_create_script_invocation_test:
             res = MagicMock(status_code=200, json=lambda: {"status": "success"})
             mock_create_script_invocation_test.return_value = res
 
@@ -2129,7 +2133,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         insights_function_id = response.json()["id"]
         insights_function = InsightsFunction.objects.get(id=insights_function_id)
         assert insights_function.insights_function_template is not None, "FK should be set when template_id is provided"
-        assert insights_function.insights_function_template.id == _template.id, "FK should point to the correct template"
+        assert insights_function.insights_function_template.id == _template.id, (
+            "FK should point to the correct template"
+        )
 
         # Create a InsightsFunction without template_id
         response = self.client.post(
@@ -2144,7 +2150,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response.status_code == 201, response.json()
         insights_function_id = response.json()["id"]
         insights_function = InsightsFunction.objects.get(id=insights_function_id)
-        assert insights_function.insights_function_template is None, "FK should be null when template_id is not provided"
+        assert insights_function.insights_function_template is None, (
+            "FK should be null when template_id is not provided"
+        )
 
     def test_insights_function_template_fk_validation_error_on_missing_template(self):
         """
