@@ -13,6 +13,7 @@ use capture::event_restrictions::{
 };
 use capture::quota_limiters::CaptureQuotaLimiter;
 use capture::router::router;
+use capture::team::StaticTeamResolver;
 use capture::sinks::Event;
 use capture::time::TimeSource;
 use capture::v0_request::{DataType, ProcessedEvent};
@@ -29,6 +30,7 @@ use std::time::Duration;
 
 const TEST_BLOB_BUCKET: &str = "test-bucket";
 const TEST_BLOB_PREFIX: &str = "llma/";
+const TEST_TEAM_ID: i32 = 1;
 
 fn create_mock_blob_storage() -> Arc<dyn BlobStorage> {
     Arc::new(MockBlobStorage::new(
@@ -183,6 +185,7 @@ async fn setup_ai_router_with_restriction(
         Some(10),
         None,
         256, // body_read_chunk_size_kb
+        Some(Arc::new(StaticTeamResolver::new(TEST_TEAM_ID))), // team_resolver
     );
 
     (router, sink_clone)

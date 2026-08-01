@@ -146,6 +146,7 @@ async fn setup_router_with_limits(
         Some(10),    // request_timeout_seconds
         None,        // body_chunk_read_timeout_ms
         256,         // body_read_chunk_size_kb
+        None, // team_resolver (gate disabled: this suite does not exercise it)
     );
 
     (app, sink)
@@ -1190,6 +1191,7 @@ async fn test_survey_quota_cross_batch_first_submission_allowed() {
         Some(10), // request_timeout_seconds
         None,     // body_chunk_read_timeout_ms
         256,      // body_read_chunk_size_kb
+        None, // team_resolver (gate disabled: this suite does not exercise it)
     );
 
     let client = TestClient::new(app);
@@ -1272,6 +1274,7 @@ async fn test_survey_quota_cross_batch_duplicate_submission_dropped() {
         Some(10), // request_timeout_seconds
         None,     // body_chunk_read_timeout_ms
         256,      // body_read_chunk_size_kb
+        None, // team_resolver (gate disabled: this suite does not exercise it)
     );
 
     let client = TestClient::new(app);
@@ -1358,6 +1361,7 @@ async fn test_survey_quota_cross_batch_redis_error_fail_open() {
         Some(10), // request_timeout_seconds
         None,     // body_chunk_read_timeout_ms
         256,      // body_read_chunk_size_kb
+        None, // team_resolver (gate disabled: this suite does not exercise it)
     );
 
     let client = TestClient::new(app);
@@ -1781,6 +1785,7 @@ async fn test_ai_quota_cross_batch_redis_error_fail_open() {
         Some(10), // request_timeout_seconds
         None,     // body_chunk_read_timeout_ms
         256,      // body_read_chunk_size_kb
+        None, // team_resolver (gate disabled: this suite does not exercise it)
     );
 
     let client = TestClient::new(app);
