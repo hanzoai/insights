@@ -319,9 +319,7 @@ if DATASTORE_SECURE:
 
 DATASTORE_HTTP_URL: str = f"{_datastore_http_protocol}{DATASTORE_HOST}:{_datastore_http_port}/"
 
-DATASTORE_OFFLINE_HTTP_URL: str = (
-    f"{_datastore_http_protocol}{DATASTORE_OFFLINE_CLUSTER_HOST}:{_datastore_http_port}/"
-)
+DATASTORE_OFFLINE_HTTP_URL: str = f"{_datastore_http_protocol}{DATASTORE_OFFLINE_CLUSTER_HOST}:{_datastore_http_port}/"
 
 if TEST or DEBUG or os.getenv("DATASTORE_OFFLINE_CLUSTER_HOST", None) is None:
     # When testing, there is no offline cluster.
@@ -399,6 +397,7 @@ KAFKA_SASL_PASSWORD = os.getenv("KAFKA_SASL_PASSWORD", None)
 # needing to have a deploy.
 TOKENS_HISTORICAL_DATA = os.getenv("TOKENS_HISTORICAL_DATA", "").split(",")
 
+
 # Hanzo KV is the ONE key/value + cache + celery-broker backend. It speaks the
 # Redis (RESP) wire protocol, so the kv:// URL is normalized to redis:// for the
 # RESP drivers (redis-py / django_redis / celery). Config surface is KV_URL —
@@ -464,9 +463,6 @@ CDP_API_URL = get_from_env("CDP_API_URL", "")
 
 if not CDP_API_URL:
     CDP_API_URL = "http://localhost:6738" if DEBUG else "http://ingestion-cdp-api.insights.svc.cluster.local"
-
-# Shared secret for internal API authentication between Django and Node.js services
-INTERNAL_API_SECRET = get_from_env("INTERNAL_API_SECRET", "")
 
 EMBEDDING_API_URL = get_from_env("EMBEDDING_API_URL", "")
 

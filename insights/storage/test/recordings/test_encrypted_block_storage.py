@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import snappy
 import aiohttp
 
+from insights.iam import IamUnavailable
 from insights.storage.recordings.block_storage import EncryptedBlockStorage, encrypted_block_storage
 from insights.storage.recordings.errors import BlockFetchError, RecordingDeletedError
 
@@ -349,6 +350,14 @@ class TestBulkDeleteRecordings:
 
 
 class TestEncryptedBlockStorageContextManager:
+    @pytest.fixture(autouse=True)
+    def iam_token(self):
+        # Every session now carries this deployment's IAM identity, so the cases
+        # below stand in for a real mint rather than reaching for IAM.
+        with patch("insights.storage.recordings.block_storage.iam.authorization") as authorization:
+            authorization.return_value = {"Authorization": "Bearer test-token"}
+            yield authorization
+
     @pytest.mark.asyncio
     async def test_raises_error_when_url_not_configured(self):
         with patch("insights.storage.recordings.block_storage.settings") as mock_settings:
@@ -371,7 +380,6 @@ class TestEncryptedBlockStorageContextManager:
     async def test_creates_client_with_configured_url(self):
         with patch("insights.storage.recordings.block_storage.settings") as mock_settings:
             mock_settings.RECORDING_API_URL = "http://test-api:8080"
-            mock_settings.INTERNAL_API_SECRET = ""
             mock_settings.DEBUG = True
 
             with patch("insights.storage.recordings.block_storage.aiohttp.ClientSession") as mock_client_session:
@@ -388,34 +396,31 @@ class TestEncryptedBlockStorageContextManager:
                 call_kwargs = mock_client_session.call_args[1]
                 assert call_kwargs["timeout"].total == 30
                 assert call_kwargs["timeout"].connect == 5
-                assert call_kwargs["headers"] == {}
+                assert call_kwargs["headers"] == {"Authorization": "Bearer test-token"}
 
     @pytest.mark.asyncio
-    async def test_warns_when_secret_missing_in_production(self):
+    async def test_refuses_to_open_a_session_without_an_iam_token(self):
+        # No identity, no call. Opening an unauthenticated session would put the
+        # request on the wire for the recording API to refuse — or, before the
+        # gate existed, to serve.
         with (
             patch("insights.storage.recordings.block_storage.settings") as mock_settings,
-            patch("insights.storage.recordings.block_storage.logger") as mock_logger,
             patch("insights.storage.recordings.block_storage.aiohttp.ClientSession") as mock_client_session,
+            patch("insights.storage.recordings.block_storage.iam.authorization") as mock_authorization,
         ):
             mock_settings.RECORDING_API_URL = "http://test-api:8080"
-            mock_settings.INTERNAL_API_SECRET = ""
-            mock_settings.DEBUG = False
+            mock_authorization.side_effect = IamUnavailable("IAM did not issue a token")
 
-            mock_session = AsyncMock()
-            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-            mock_session.__aexit__ = AsyncMock(return_value=None)
-            mock_client_session.return_value = mock_session
+            with pytest.raises(IamUnavailable):
+                async with encrypted_block_storage():
+                    pass
 
-            async with encrypted_block_storage():
-                pass
-
-            mock_logger.warning.assert_called_once_with("encrypted_block_storage.missing_internal_api_secret")
+            mock_client_session.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_passes_internal_api_secret_header(self):
+    async def test_presents_the_iam_bearer(self):
         with patch("insights.storage.recordings.block_storage.settings") as mock_settings:
             mock_settings.RECORDING_API_URL = "http://test-api:8080"
-            mock_settings.INTERNAL_API_SECRET = "test-secret"
 
             with patch("insights.storage.recordings.block_storage.aiohttp.ClientSession") as mock_client_session:
                 mock_session = AsyncMock()
@@ -427,4 +432,4 @@ class TestEncryptedBlockStorageContextManager:
                     assert storage.session == mock_session
 
                 call_kwargs = mock_client_session.call_args[1]
-                assert call_kwargs["headers"] == {"X-Internal-Api-Secret": "test-secret"}
+                assert call_kwargs["headers"] == {"Authorization": "Bearer test-token"}

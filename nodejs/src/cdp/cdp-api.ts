@@ -1,10 +1,10 @@
-// @ts-nocheck
 import { DateTime } from 'luxon'
 import express from 'ultimate-express'
 
 import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { ModifiedRequest } from '~/api/router'
+import { TeamOrgs, requireTeamAccess } from '~/api/team-access'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 import { STREAM_CDP_BATCH_INSIGHTSFLOW_REQUESTS, STREAM_WAREHOUSE_SOURCE_WEBHOOKS } from '~/config/stream-topics'
 import { StreamProducerWrapper } from '~/stream/producer'
@@ -21,8 +21,10 @@ import {
     SourceWebhookError,
 } from './consumers/cdp-source-webhooks.consumer'
 import { ScriptTransformerHub, ScriptTransformerService } from './script-transformations/script-transformer.service'
-import { ScriptExecutorExecuteAsyncOptions, ScriptExecutorService, MAX_ASYNC_STEPS } from './services/script-executor.service'
-import { InsightsFlowExecutorService, createInsightsFlowInvocation } from './services/insightsflows/insightsflow-executor.service'
+import {
+    InsightsFlowExecutorService,
+    createInsightsFlowInvocation,
+} from './services/insightsflows/insightsflow-executor.service'
 import { InsightsFlowFunctionsService } from './services/insightsflows/insightsflow-functions.service'
 import { InsightsFlowManagerService } from './services/insightsflows/insightsflow-manager.service'
 import { InsightsFunctionManagerService } from './services/managers/insights-function-manager.service'
@@ -34,10 +36,19 @@ import { RecipientTokensService } from './services/messaging/recipient-tokens.se
 import { InsightsFunctionMonitoringService } from './services/monitoring/insights-function-monitoring.service'
 import { ScriptWatcherService, ScriptWatcherState } from './services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from './services/native-destination-executor.service'
+import {
+    MAX_ASYNC_STEPS,
+    ScriptExecutorExecuteAsyncOptions,
+    ScriptExecutorService,
+} from './services/script-executor.service'
 import { SegmentDestinationExecutorService } from './services/segment-destination-executor.service'
 import { INSIGHTS_FUNCTION_TEMPLATES } from './templates'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType, MinimalLogEntry } from './types'
-import { convertToInsightsFunctionInvocationGlobals, isNativeInsightsFunction, isSegmentPluginInsightsFunction } from './utils'
+import {
+    convertToInsightsFunctionInvocationGlobals,
+    isNativeInsightsFunction,
+    isSegmentPluginInsightsFunction,
+} from './utils'
 import { convertToInsightsFunctionFilterGlobal } from './utils/insights-function-filtering'
 
 /**
@@ -156,15 +167,36 @@ export class CdpApi {
             (req: ModifiedRequest, res: express.Response, next: express.NextFunction): Promise<void> =>
                 fn(req, res).catch(next)
 
-        // API routes (authentication handled globally by middleware)
-        router.post('/api/projects/:team_id/insights_functions/:id/invocations', asyncHandler(this.postFunctionInvocation))
-        router.post('/api/projects/:team_id/insights_flows/:id/invocations', asyncHandler(this.postCustomflowInvocation))
+        // The caller is authenticated globally (createPrincipalMiddleware). A
+        // route that names a team ALSO has to prove the caller owns that team —
+        // authentication says who is asking, not what they may reach.
+        const teamAccess = requireTeamAccess(new TeamOrgs(this.hub.postgres))
+
+        router.post(
+            '/api/projects/:team_id/insights_functions/:id/invocations',
+            teamAccess,
+            asyncHandler(this.postFunctionInvocation)
+        )
+        router.post(
+            '/api/projects/:team_id/insights_flows/:id/invocations',
+            teamAccess,
+            asyncHandler(this.postCustomflowInvocation)
+        )
         router.post(
             '/api/projects/:team_id/insights_flows/:id/batch_invocations/:parent_run_id',
+            teamAccess,
             asyncHandler(this.postInsightsFlowBatchInvocation)
         )
-        router.get('/api/projects/:team_id/insights_functions/:id/status', asyncHandler(this.getFunctionStatus()))
-        router.patch('/api/projects/:team_id/insights_functions/:id/status', asyncHandler(this.patchFunctionStatus()))
+        router.get(
+            '/api/projects/:team_id/insights_functions/:id/status',
+            teamAccess,
+            asyncHandler(this.getFunctionStatus())
+        )
+        router.patch(
+            '/api/projects/:team_id/insights_functions/:id/status',
+            teamAccess,
+            asyncHandler(this.patchFunctionStatus())
+        )
         router.get('/api/insights_functions/states', asyncHandler(this.getFunctionStates()))
         router.get('/api/insights_function_templates', this.getInsightsFunctionTemplates)
         router.post('/api/messaging/generate_preferences_token', asyncHandler(this.generatePreferencesToken()))
@@ -263,7 +295,8 @@ export class CdpApi {
                     function_name: insightsFunctions[x.function_id]?.name,
                     function_team_id: insightsFunctions[x.function_id]?.team_id,
                     function_type: insightsFunctions[x.function_id]?.type,
-                    function_enabled: insightsFunctions[x.function_id]?.enabled && !insightsFunctions[x.function_id]?.deleted,
+                    function_enabled:
+                        insightsFunctions[x.function_id]?.enabled && !insightsFunctions[x.function_id]?.deleted,
                 }))
 
                 res.json({
@@ -454,7 +487,9 @@ export class CdpApi {
             }
 
             const isNewInsightsFlow = req.params.id === 'new'
-            const insightsFlow = isNewInsightsFlow ? null : await this.insightsFlowManager.getInsightsFlow(req.params.id)
+            const insightsFlow = isNewInsightsFlow
+                ? null
+                : await this.insightsFlowManager.getInsightsFlow(req.params.id)
 
             const team = await this.hub.teamManager.getTeam(parseInt(team_id)).catch(() => null)
 
@@ -513,8 +548,13 @@ export class CdpApi {
                 : undefined
 
             const logs: MinimalLogEntry[] = []
-            const options: ScriptExecutorExecuteAsyncOptions = buildScriptExecutorAsyncOptions(mock_async_functions, logs)
-            const result = await this.insightsFlowExecutor.executeCurrentAction(invocation, { scriptExecutorOptions: options })
+            const options: ScriptExecutorExecuteAsyncOptions = buildScriptExecutorAsyncOptions(
+                mock_async_functions,
+                logs
+            )
+            const result = await this.insightsFlowExecutor.executeCurrentAction(invocation, {
+                scriptExecutorOptions: options,
+            })
 
             res.json({
                 nextActionId: result.invocation.state.currentAction?.id,
