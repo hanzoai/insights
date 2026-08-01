@@ -50,7 +50,7 @@ from insights.models.filters.stickiness_filter import StickinessFilter
 from insights.models.person.deletion import reset_deleted_person_distinct_ids
 from insights.models.person.missing_person import MissingPerson
 from insights.models.person.person import PersonDistinctId
-from insights.models.person.util import delete_person, get_persons_by_distinct_ids
+from insights.models.person.util import delete_person, get_persons_by_distinct_ids, retire_projected_users
 from insights.queries.actor_base_query import ActorBaseQuery, get_serialized_people
 from insights.queries.funnels import DatastoreFunnelActors, DatastoreFunnelTrendsActors
 from insights.queries.funnels.funnel_strict_persons import DatastoreFunnelStrictActors
@@ -489,6 +489,15 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                     activity="deleted",
                     detail=Detail(name=str(person.uuid)),
                 )
+            # The loop above is driven by Postgres, so it only reaches users
+            # Postgres knows about. Users PROJECTED from the event plane have no
+            # Postgres row, so that queryset is empty for them and this endpoint
+            # would report success having deleted nothing — an erasure request
+            # answered 202 with the user still listed. They are deleted where
+            # they actually live. Asked for the same user twice this is a no-op:
+            # a tombstone is idempotent, so the two paths need no bookkeeping
+            # between them.
+            retire_projected_users(team_id=self.team_id, ids=ids, distinct_ids=distinct_ids)
 
         if delete_events:
             self._queue_event_deletion(persons)
