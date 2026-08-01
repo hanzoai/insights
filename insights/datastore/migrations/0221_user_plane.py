@@ -21,15 +21,32 @@ so the join is already in the data — this view is only where it gets written
 down in the shape the query engine reads (`person_distinct_id_overrides` is
 exactly the table its person joins consult).
 
-BACKFILL SAFETY. `0220` explains that re-projecting `sharded_events` DOUBLE-
-COUNTS: `team_id` is in its collapse key, so a row written under a corrected
-team does not replace the row it corrects. Neither target here has that shape.
-`person` collapses on `(team_id, id)` and `person_distinct_id_overrides` on
-`(team_id, distinct_id)`, and in both cases every component of the key is a
-deterministic function of the source row — the same event always yields the
-same key, so a second pass merges into the first pass's row instead of adding
-one beside it. That is why these two backfill and the event projection does
-not, and the difference is the collapse key, not a policy.
+BACKFILL SAFETY, AND ITS ONE CONDITION. `0220` explains that re-projecting
+`sharded_events` DOUBLE-COUNTS: `team_id` is in its collapse key, so a row
+written under a corrected team does not replace the row it corrects. `person`
+collapses on `(team_id, id)` and `person_distinct_id_overrides` on
+`(team_id, distinct_id)` — the SAME shape. What makes re-running these safe is
+narrower than "the key is a function of the event", which is not true:
+`team_id` is `transform(org, ...)` over `org_team`, a table `0220` exists to
+MUTATE. The key is a function of the event GIVEN THE ROUTING, so a second pass
+merges into the first pass's row for as long as the routing is unchanged, and
+re-routing an org that already has events leaves a stale user row under its old
+team — the same double-count, one table over.
+
+That is not hypothetical here: `0220` moved `$public` from team 1 to team 0
+AFTER `event_mv` had already written its events under team 1, and deliberately
+did not re-project them. So on this warehouse the users are routed correctly
+and ~92% of team 1's events still point at users that team cannot see. The
+users are right and the events are stale. Reconciling them means deleting the
+event rows written under the old routing, which is the "separate and deliberate
+operation" `0220` names — an operator step, not a side effect of this file:
+
+    -- events captured before 0220 under the routing it corrected
+    DELETE FROM `insights`.`sharded_events`
+    WHERE team_id = 1 AND person_id NOT IN (SELECT id FROM `insights`.`person` WHERE team_id = 1)
+
+Re-routing an org with existing users needs the same treatment for `person` and
+`person_distinct_id_overrides`, keyed on the old team.
 
 Requires `event.event` to exist — Cloud owns it; see
 `insights/models/event/plane.py`.
