@@ -221,6 +221,10 @@ impl EventRestrictionService {
     }
 
     /// Get restrictions for an event. Returns empty set if fail-open is active.
+    ///
+    /// FAIL-OPEN: on cache staleness this returns NO restrictions, i.e. the event
+    /// is accepted. Correct for high-volume analytics (a stale drop-list must not
+    /// halt ingest), but WRONG for PII — see [`Self::get_restrictions_fail_closed`].
     pub async fn get_restrictions(&self, token: &str, event: &EventContext<'_>) -> RestrictionSet {
         if self.is_stale_at(event.now_ts) {
             gauge!(
@@ -229,6 +233,35 @@ impl EventRestrictionService {
             )
             .set(1.0);
             return RestrictionSet::new();
+        }
+
+        let guard = self.manager.read().await;
+        guard.get_restrictions(token, event)
+    }
+
+    /// Get restrictions for the PII RECORDINGS path, failing CLOSED on staleness.
+    ///
+    /// A session replay is PII an org collects about its OWN users; a drop entry
+    /// is how that org (or compliance) says "stop recording this". If the cache is
+    /// stale we cannot know whether such an entry exists, so `get_restrictions`'
+    /// fail-OPEN posture would silently keep recording PII we may have been told to
+    /// drop. This variant instead returns a DropEvent restriction while stale — the
+    /// recording is dropped until the drop-list can be verified again. Only the
+    /// staleness branch differs; a fresh cache resolves identically.
+    pub async fn get_restrictions_fail_closed(
+        &self,
+        token: &str,
+        event: &EventContext<'_>,
+    ) -> RestrictionSet {
+        if self.is_stale_at(event.now_ts) {
+            gauge!(
+                "capture_event_restrictions_stale",
+                "pipeline" => self.pipeline.as_pipeline_name().to_string()
+            )
+            .set(1.0);
+            let mut set = RestrictionSet::new();
+            set.insert(RestrictionType::DropEvent);
+            return set;
         }
 
         let guard = self.manager.read().await;
@@ -564,5 +597,32 @@ mod tests {
         // Now should be stale (fail-open)
         let restrictions_after = service.get_restrictions("token1", &event_ctx_now()).await;
         assert!(restrictions_after.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_recordings_fail_closed_when_stale() {
+        // Never refreshed ⇒ stale. The PII path must DROP; the analytics path
+        // (fail-open) returns empty for the exact same stale state.
+        let service =
+            EventRestrictionService::new(CaptureMode::Recordings, Duration::from_secs(300));
+        let closed = service
+            .get_restrictions_fail_closed("token", &event_ctx_now())
+            .await;
+        assert!(closed.contains(RestrictionType::DropEvent));
+        let open = service.get_restrictions("token", &event_ctx_now()).await;
+        assert!(open.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_recordings_fail_closed_honors_fresh_cache() {
+        // When the cache is fresh, fail-closed resolves exactly like the normal
+        // path — it only diverges on staleness, so it never over-drops live data.
+        let service =
+            EventRestrictionService::new(CaptureMode::Recordings, Duration::from_secs(300));
+        service.update(RestrictionManager::new()).await; // fresh, no restrictions
+        let closed = service
+            .get_restrictions_fail_closed("token", &event_ctx_now())
+            .await;
+        assert!(closed.is_empty());
     }
 }

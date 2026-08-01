@@ -69,6 +69,21 @@ pub async fn event(
         }
 
         Ok((context, events)) => {
+            // Positive token→team allow-list. A token that resolves to no team is
+            // forged/unknown ⇒ REJECT. A KV outage (Unavailable) fails OPEN on this
+            // high-volume analytics path: a forged token is still rejected whenever
+            // the KV is healthy, but an infra blip must never halt ingest.
+            if let Some(resolver) = &state.team_resolver {
+                match resolver.resolve(&context.token).await {
+                    Ok(_) => {}
+                    Err(crate::team::TeamResolveError::Unknown) => {
+                        report_dropped_events("unknown_token", events.len() as u64);
+                        return Err(CaptureError::UnknownToken);
+                    }
+                    Err(crate::team::TeamResolveError::Unavailable) => {}
+                }
+            }
+
             if let Err(err) = process_events(
                 state.sink.clone(),
                 state.token_dropper.clone(),
@@ -135,6 +150,28 @@ pub async fn recording(
         }
         Ok((context, events)) => {
             let count = events.len() as u64;
+
+            // Positive token→team allow-list for the PII recordings path. Unknown
+            // ⇒ REJECT. Unavailable ⇒ fail CLOSED: drop the recording (accepted,
+            // not stored) rather than persist session PII we cannot bind to a real
+            // team while the KV is unreachable.
+            if let Some(resolver) = &state.team_resolver {
+                match resolver.resolve(&context.token).await {
+                    Ok(_) => {}
+                    Err(crate::team::TeamResolveError::Unknown) => {
+                        report_dropped_events("unknown_token", count);
+                        return Err(CaptureError::UnknownToken);
+                    }
+                    Err(crate::team::TeamResolveError::Unavailable) => {
+                        report_dropped_events("team_unavailable_fail_closed", count);
+                        return Ok(CaptureResponse {
+                            status: CaptureResponseCode::Ok,
+                            quota_limited: None,
+                        });
+                    }
+                }
+            }
+
             if let Err(err) = process_replay_events(
                 state.sink.clone(),
                 state.event_restriction_service.clone(),
