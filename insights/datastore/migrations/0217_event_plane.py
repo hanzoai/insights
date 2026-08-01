@@ -12,22 +12,16 @@ Requires `event.event` to exist — Cloud owns it; see
 
 from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.event.plane import (
-    DROP_EVENT_MV_SQL,
-    EVENT_BACKFILL_SQL,
-    EVENT_MV_SQL,
-    ORG_TEAM_DATA_SQL,
-    ORG_TEAM_TABLE_SQL,
-)
+from insights.models.event.plane import DROP_EVENT_MV_SQL, EVENT_BACKFILL_SQL, EVENT_MV_SQL, ORG_PROJECT_TABLE_SQL
 
 operations = [
-    # org -> team, read by the view. Created everywhere the view may run.
+    # org -> project, read by the view. Created everywhere the view may run,
+    # and left EMPTY: which project an org owns is the app's own record, so it
+    # is published by `manage.py route_orgs` rather than seeded here. A
+    # migration that also authored the mapping is what let a hand-written copy
+    # disagree with it — see the routing note in `plane.py`.
     run_sql_with_exceptions(
-        ORG_TEAM_TABLE_SQL(),
-        node_roles=[NodeRole.DATA, NodeRole.COORDINATOR],
-    ),
-    run_sql_with_exceptions(
-        ORG_TEAM_DATA_SQL(),
+        ORG_PROJECT_TABLE_SQL(),
         node_roles=[NodeRole.DATA, NodeRole.COORDINATOR],
     ),
     # Recreate so a changed projection takes effect on re-run.
