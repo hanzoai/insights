@@ -68,6 +68,34 @@ ORG_TEAM = [
 
 EMPTY_JSON = "'{}'"
 
+# ── the event's name ─────────────────────────────────────────────────────────
+# The plane names a fact the way the SURFACE says it (`page_viewed`). Every
+# lens the fork ships names that same fact the way ITS schema says it
+# (`$pageview`). Passing `name` straight through therefore publishes rows no
+# lens can find: web analytics, `sessions_mv.pageview_count` and
+# `raw_sessions_v3_mv.page_screen_uniq` all key on the literal `$pageview`, so
+# without this back-map every session on insights.hanzo.ai reads ZERO pageviews
+# while the rows sit in the warehouse — measured on 2026-08-01, where 06:00
+# through 15:00 UTC held 168 sessions and 0 counted pageviews.
+#
+# The map is keyed on KIND, not on the name, because kind is the plane's closed
+# vocabulary: a surface that invents a new page-event name is still a page. A
+# surface that already sends the reserved name keeps it — multiIf's fallback is
+# the name itself.
+RESERVED_KIND = {"page": "$pageview", "screen": "$screen"}
+
+EVENT_NAME_SQL = (
+    "multiIf(" + ", ".join(f"kind = '{kind}', '{name}'" for kind, name in RESERVED_KIND.items()) + ", name)"
+)
+
+# What the surface called it, kept only where the back-map above replaced it.
+# An event that already arrived as its reserved name has nothing to preserve,
+# and `text_json` drops the empty string.
+ORIGINAL_NAME_SQL = (
+    "if(kind IN (" + ", ".join(f"'{kind}'" for kind in RESERVED_KIND) + ")"
+    " AND NOT (name IN (" + ", ".join(f"'{name}'" for name in RESERVED_KIND.values()) + ")), name, '')"
+)
+
 # ── the five layers of `properties`, merged in this order ────────────────────
 # JSONMergePatch takes the LAST writer of a key, so each block below overrides
 # the one above it: the envelope's own columns are the most authoritative
@@ -88,6 +116,12 @@ PROPERTY_COLUMN = {
     "product": "product",
     "tenant": "org",
     "kind": "kind",
+    # The plane's own name for an event the projection had to rename (see
+    # EVENT_NAME_SQL). Carried so renaming a name to a reserved one never loses
+    # it: `$pageview` says WHICH KIND of fact this is, `$event_name` says what
+    # the surface called it, and a breakdown over the second still separates
+    # `page_viewed` from `docs_page_viewed`.
+    "$event_name": ORIGINAL_NAME_SQL,
 }
 
 # Attributes that carry a well-known meaning get the `$` name the UI expects.
@@ -196,7 +230,7 @@ TEAM_SQL = (
 def EVENT_COLUMNS(historical: bool) -> list[tuple[str, str]]:
     return [
         ("uuid", UUID_SQL),
-        ("event", "name"),
+        ("event", EVENT_NAME_SQL),
         ("properties", PROPERTIES_SQL),
         ("timestamp", "toDateTime64(time, 6, 'UTC')"),
         ("team_id", TEAM_SQL),
