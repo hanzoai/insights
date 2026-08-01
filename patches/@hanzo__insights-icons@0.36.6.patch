@@ -1,0 +1,26 @@
+diff --git a/dist/posthog-icons.cjs.js b/dist/posthog-icons.cjs.js
+index 05b28acd797359b55ce6fa20cbf71f3f4e047888..bed5a94a7d1aadc05a1c390cb0c2ba45cc1ee170 100644
+--- a/dist/posthog-icons.cjs.js
++++ b/dist/posthog-icons.cjs.js
+@@ -949,7 +949,7 @@ const BaseIcon = require$$0.forwardRef(function BaseIcon2({ className, ...props
+     "svg",
+     {
+       ref,
+-      className: "LemonIcon" + customClassName,
++      className: "Icon" + customClassName,
+       width: "100%",
+       fill: "currentColor",
+       xmlns: "http://www.w3.org/2000/svg",
+diff --git a/dist/posthog-icons.es.js b/dist/posthog-icons.es.js
+index 510ed5a20e50d82db5a499b33237c3ed39a55214..a78e46e05151895f5bba851603adba73f59fce2c 100644
+--- a/dist/posthog-icons.es.js
++++ b/dist/posthog-icons.es.js
+@@ -947,7 +947,7 @@ const BaseIcon = forwardRef(function BaseIcon2({ className, ...props }, ref) {
+     "svg",
+     {
+       ref,
+-      className: "LemonIcon" + customClassName,
++      className: "Icon" + customClassName,
+       width: "100%",
+       fill: "currentColor",
+       xmlns: "http://www.w3.org/2000/svg",
