@@ -7,7 +7,10 @@ import { StepDefinition, StepModifier } from '@hanzo/shared-onboarding/steps'
 import { CodeSnippet, getLanguage } from 'lib/components/CodeSnippet'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
-import { Markdown } from 'lib/elements/Markdown'
+// Aliased because the renderer below must keep the name Markdown to fill the
+// Markdown slot of the component map: the debrand renamed LemonMarkdown onto
+// that name, so the unaliased import collided and the renderer called itself.
+import { Markdown as ElementsMarkdown } from 'lib/elements/Markdown'
 import { Tabs } from 'lib/elements/Tabs'
 import { Tag } from 'lib/elements/Tag'
 import { apiHostOrigin } from 'lib/utils/apiHost'
@@ -255,7 +258,7 @@ function OSButton(props: any): JSX.Element {
 function Markdown({ children }: { children: string | ReactNode }): JSX.Element {
     const content = typeof children === 'string' ? children : String(children)
 
-    return <Markdown disableDocsRedirect={true}>{content}</Markdown>
+    return <ElementsMarkdown disableDocsRedirect={true}>{content}</ElementsMarkdown>
 }
 
 function Blockquote({ children }: { children: ReactNode }): JSX.Element {

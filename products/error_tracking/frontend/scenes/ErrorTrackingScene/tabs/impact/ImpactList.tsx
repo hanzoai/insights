@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
+import { Button, Spinner, Table, TableColumns } from '@hanzo/elements'
 import { IconRefresh } from '@hanzo/icons'
-import { Button, Table, TableColumns, Spinner } from '@hanzo/elements'
 
 import { humanFriendlyLargeNumber } from 'lib/utils'
 import { InsightEmptyState } from 'scenes/insights/EmptyStates'
@@ -29,12 +29,15 @@ export function ImpactList(): JSX.Element | null {
     return (
         <div>
             <Options />
-            <Table />
+            <Issues />
         </div>
     )
 }
 
-const Table = (): JSX.Element => {
+// Named for the rows it lists, not the element it renders into: this was also
+// called Table until the debrand renamed the imported LemonTable onto that name,
+// leaving a private component that rendered itself.
+const Issues = (): JSX.Element => {
     const { issues, issuesLoading } = useValues(errorTrackingImpactListLogic)
 
     const columns: TableColumns<ErrorTrackingCorrelatedIssue> = [
