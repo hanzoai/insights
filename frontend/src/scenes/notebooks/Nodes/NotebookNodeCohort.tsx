@@ -48,7 +48,7 @@ const Component = ({ attributes }: NotebookNodeProps<NotebookNodeCohortAttribute
             !cohortMissing
                 ? [
                       {
-                          text: 'People in cohort',
+                          text: 'Users in cohort',
                           icon: <IconPerson />,
                           onClick: () => {
                               setExpanded(false)

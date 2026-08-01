@@ -17,11 +17,16 @@ The envelope carries the columns Insights reads as first-class values — `org`,
 `url`, `path` — and everything else in one `attributes` map, so the projection
 below is a rename plus a JSON merge, not a translation layer.
 
+The same envelope also names the USER an event belongs to, so `user_mv` and
+`user_alias_mv` project the users out of it the same way — three views, one
+source, one set of identity expressions. See "the USER plane" below.
+
 Prerequisite: `event.event` must exist. Cloud owns the write path into it; this
 module only reads it, and deliberately does not declare it.
 """
 
 from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
+from insights.models.person.sql import PERSON_DISTINCT_ID_OVERRIDES_WRITABLE_TABLE, PERSONS_WRITABLE_TABLE
 from insights.settings.data_stores import DATASTORE_DATABASE
 
 from .sql import WRITABLE_EVENTS_DATA_TABLE
@@ -146,12 +151,35 @@ PROPERTIES_SQL = (
     f"{text_json(PROPERTY_COLUMN)})"
 )
 
+# ── identity ────────────────────────────────────────────────────────────────
+#
+# `user` is the Hanzo word (IAM vocabulary: user / org / project); `person` is
+# the fork's, and it is a PHYSICAL column name in tables the query engine
+# compiles against. The two meet HERE, in the projection, which is the one place
+# a rename belongs: every expression below is named for what it means to us and
+# is written into the column the fork reads. Nothing above this file says
+# "person".
+#
+# `event.event.person_id` carries the IAM SUBJECT (the `sub` claim — the stable
+# opaque user id) whenever the writer was signed in, and is empty otherwise;
+# `anonymous_id` is the browser-minted id the same visitor carried BEFORE they
+# signed in. So the plane already holds both halves of a user's history, and the
+# only question is how to key them.
+#
 # MD5 is a total function over any String, so the uuid is deterministic: a
 # replay or a re-run of the backfill produces the same key and the
 # ReplacingMergeTree collapses it.
 UUID_SQL = "reinterpretAsUUID(MD5(id))"
 DISTINCT_SQL = "if(distinct_id != '', distinct_id, anonymous_id)"
-PERSON_SQL = f"reinterpretAsUUID(MD5(if(person_id != '', person_id, {DISTINCT_SQL})))"
+
+# Whether a row names a signed-in user. Every expression that has to agree about
+# identity derives from THIS one predicate, so they cannot disagree.
+IDENTIFIED_SQL = "person_id != ''"
+
+# The user key: the IAM subject when we have one, else the visitor's own id.
+# Signed-in rows therefore key on the IAM user, and anonymous rows key on the
+# browser — two keys for one human until an alias joins them (USER_ALIAS below).
+USER_SQL = f"reinterpretAsUUID(MD5(if({IDENTIFIED_SQL}, person_id, {DISTINCT_SQL})))"
 
 # Both arrays come from the identical subquery, so they are ordered alike and
 # element i of one names element i of the other. An empty table yields empty
@@ -175,7 +203,7 @@ def EVENT_COLUMNS(historical: bool) -> list[tuple[str, str]]:
         ("distinct_id", DISTINCT_SQL),
         ("elements_chain", "''"),
         ("created_at", "toDateTime64(ingested_at, 6, 'UTC')"),
-        ("person_id", PERSON_SQL),
+        ("person_id", USER_SQL),
         # The plane carries no person profile, so person properties are read
         # from the person tables rather than off the event.
         ("person_mode", "'propertyless'"),
@@ -222,4 +250,152 @@ def EVENT_BACKFILL_SQL() -> str:
     return f"""
 INSERT INTO `{DATASTORE_DATABASE}`.`{WRITABLE_EVENTS_DATA_TABLE()}` ({names})
 {EVENT_SELECT_SQL(historical=True)}
+"""
+
+
+# ── the USER plane ──────────────────────────────────────────────────────────
+#
+# The events projection above answers "which user did this", but a user is a
+# ROW somewhere, and the People list, every actor drill-down and every cohort
+# read it from `person` — which nothing on this plane was writing, so the fork
+# reported zero users against a warehouse full of their events.
+#
+# So two more views over the SAME source, deriving identity from the SAME
+# expressions. Each states ONE fact:
+#
+#   user_mv        — this user exists.
+#   user_alias_mv  — this anonymous visitor turned out to be that user.
+#
+# WHY A BACKFILL IS SAFE HERE, WHERE IT IS NOT FOR EVENTS. `0220` explains that
+# re-projecting `sharded_events` DOUBLE-COUNTS: its collapse key includes
+# `team_id`, so a row written under a corrected team does not replace the row it
+# corrects. Neither target below has that shape. `person` collapses on
+# `(team_id, id)` and `person_distinct_id_overrides` on `(team_id, distinct_id)`
+# — and both keys are FUNCTIONS of the same event columns the projection reads,
+# so re-running it produces the identical key and merges into the identical row.
+# Running the backfill twice is indistinguishable from running it once.
+
+USER_TABLE = PERSONS_WRITABLE_TABLE
+USER_ALIAS_TABLE = PERSON_DISTINCT_ID_OVERRIDES_WRITABLE_TABLE
+
+USER_MV = "user_mv"
+USER_ALIAS_MV = "user_alias_mv"
+
+# A ReplacingMergeTree keeps the row with the LARGEST `version`. Which row we
+# want to survive differs per fact, so the two versions below are the two
+# answers, not one shared default.
+
+# The user's first event wins, because `created_at` means first seen. bitNot
+# inverts an unsigned value's ordering exactly and totally — no sentinel
+# constant, no horizon, no overflow.
+FIRST_SEEN_VERSION = "bitNot(toUInt64(toUnixTimestamp64Milli(time)))"
+
+# The alias's newest event wins: a shared browser belongs to whoever signed in
+# last, which is the same rule a merge has always followed. Signed, because
+# `person_distinct_id_overrides.version` is Int64 where `person.version` is
+# UInt64 — each expression is typed for the column it is written into, so
+# neither insert relies on a coercion.
+LAST_SEEN_VERSION = "toInt64(toUnixTimestamp64Milli(time))"
+
+
+def USER_COLUMNS() -> list[tuple[str, str]]:
+    return [
+        ("id", USER_SQL),
+        ("created_at", "toDateTime64(time, 3, 'UTC')"),
+        ("team_id", TEAM_SQL),
+        # The plane carries no user profile — `event_mv` writes events as
+        # `propertyless` for exactly this reason — so the row claims none.
+        # Traits belong to IAM, and inventing them here would put a second,
+        # weaker source under a name the UI reads as authoritative.
+        ("properties", EMPTY_JSON),
+        # True iff the key came from an IAM subject. It is derived from the SAME
+        # predicate the key is, so the two cannot contradict each other: a row
+        # keyed on the subject is always identified, one keyed on the browser
+        # never is, and no later event can flip either.
+        ("is_identified", f"toInt8({IDENTIFIED_SQL})"),
+        ("is_deleted", "toInt8(0)"),
+        ("version", FIRST_SEEN_VERSION),
+    ]
+
+
+def USER_ALIAS_COLUMNS() -> list[tuple[str, str]]:
+    return [
+        ("team_id", TEAM_SQL),
+        # The id the visitor carried BEFORE signing in — the one every earlier
+        # event of theirs was written under.
+        ("distinct_id", "anonymous_id"),
+        # …resolves to the user those events actually belong to.
+        ("person_id", USER_SQL),
+        ("is_deleted", "toInt8(0)"),
+        ("version", LAST_SEEN_VERSION),
+    ]
+
+
+# An alias is only a fact when the event knows BOTH halves and they differ:
+# signed in (so there is a user to alias to) and carrying a distinct anonymous
+# id (so there is a history to attach). Anything else would alias a user to
+# themselves.
+#
+# The predicate is QUALIFIED because this projection writes a column called
+# `person_id` and ClickHouse resolves a WHERE against the SELECT's aliases
+# before the table's columns: unqualified, `person_id != ''` compares the
+# projected UUID to a string and the view fails to create at all. Naming the
+# source says which row the filter is about — the one we READ, never the one we
+# write.
+EVENT_SOURCE = "e"
+USER_ALIAS_WHERE = (
+    f"{EVENT_SOURCE}.person_id != ''"
+    f" AND {EVENT_SOURCE}.anonymous_id != ''"
+    f" AND {EVENT_SOURCE}.anonymous_id != {EVENT_SOURCE}.person_id"
+)
+
+
+def USER_SELECT_SQL() -> str:
+    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_COLUMNS())
+    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE}"
+
+
+def USER_ALIAS_SELECT_SQL() -> str:
+    projection = ",\n    ".join(f"{expression} AS {name}" for name, expression in USER_ALIAS_COLUMNS())
+    return f"SELECT\n    {projection}\nFROM {EVENT_TABLE} AS {EVENT_SOURCE}\nWHERE {USER_ALIAS_WHERE}"
+
+
+def USER_MV_SQL() -> str:
+    return f"""
+CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`{USER_MV}`
+TO `{DATASTORE_DATABASE}`.`{USER_TABLE}`
+AS {USER_SELECT_SQL()}
+"""
+
+
+def USER_ALIAS_MV_SQL() -> str:
+    return f"""
+CREATE MATERIALIZED VIEW IF NOT EXISTS `{DATASTORE_DATABASE}`.`{USER_ALIAS_MV}`
+TO `{DATASTORE_DATABASE}`.`{USER_ALIAS_TABLE}`
+AS {USER_ALIAS_SELECT_SQL()}
+"""
+
+
+def DROP_USER_MV_SQL() -> str:
+    return f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`{USER_MV}`"
+
+
+def DROP_USER_ALIAS_MV_SQL() -> str:
+    return f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`{USER_ALIAS_MV}`"
+
+
+def USER_BACKFILL_SQL() -> str:
+    # INSERT ... SELECT binds by position, so the column list is explicit.
+    names = ", ".join(name for name, _ in USER_COLUMNS())
+    return f"""
+INSERT INTO `{DATASTORE_DATABASE}`.`{USER_TABLE}` ({names})
+{USER_SELECT_SQL()}
+"""
+
+
+def USER_ALIAS_BACKFILL_SQL() -> str:
+    names = ", ".join(name for name, _ in USER_ALIAS_COLUMNS())
+    return f"""
+INSERT INTO `{DATASTORE_DATABASE}`.`{USER_ALIAS_TABLE}` ({names})
+{USER_ALIAS_SELECT_SQL()}
 """

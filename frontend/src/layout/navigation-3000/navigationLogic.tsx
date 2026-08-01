@@ -445,7 +445,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                         },
                         {
                             identifier: Scene.Persons,
-                            label: 'People and groups',
+                            label: 'Users & groups',
                             icon: <IconPeople />,
                             to: urls.persons(),
                             tooltipDocLink: 'https://hanzo.ai/docs/data/persons',

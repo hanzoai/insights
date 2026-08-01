@@ -265,7 +265,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.Game368]: { name: '368 Mascots', projectBased: true },
     [Scene.Group]: {
         projectBased: true,
-        name: 'People & groups',
+        name: 'Users & groups',
         defaultDocsPath: '/docs/product-analytics/group-analytics',
     },
     [Scene.GroupsNew]: { projectBased: true, defaultDocsPath: '/docs/product-analytics/group-analytics' },
@@ -390,7 +390,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.VercelLinkError]: { name: 'Vercel account mismatch' },
     [Scene.Person]: {
         projectBased: true,
-        name: 'People',
+        name: 'Users',
         activityScope: ActivityScope.PERSON,
         defaultDocsPath: '/docs/data/persons',
         iconType: 'user',
