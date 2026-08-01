@@ -140,7 +140,17 @@ fancy-regex = "0.17"
 lz-str = "0.2.1"
 opentelemetry-proto = { version = "0.29.0", features = ["with-serde"] }
 tonic = "0.12.3"
-datastore = { version = "0.13.2", features = [
+# Our name for it is `datastore`, so `use datastore::Row` stays — but the crate
+# published upstream is named `clickhouse`, and cargo needs the published name to
+# find it. `package =` is exactly that: our alias, their artifact.
+#
+# Renaming this to a bare `datastore` resolved against a DIFFERENT, unrelated
+# crates.io package whose newest version is 0.1.5, so the requirement could never
+# be met. Cargo answers a version it cannot satisfy by failing the whole
+# WORKSPACE, which is why every cargo invocation here — including the
+# cyclotron-node build the insights-plugin image is made of — exited 101, and why
+# that image has not been buildable since.
+datastore = { package = "clickhouse", version = "0.13.2", features = [
     "uuid",
     "time",
     "inserter",
