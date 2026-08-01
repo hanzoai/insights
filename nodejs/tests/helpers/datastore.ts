@@ -1,18 +1,18 @@
-import { DatastoreClient, ExecResult, createClient as createDatastoreClient } from '@datastore/client'
 import { performance } from 'perf_hooks'
 import { Readable } from 'stream'
 
 import { withSpan } from '~/common/tracing/tracing-utils'
 import {
     DatastoreEvent,
+    DatastoreGroup,
     DatastorePerson,
     DatastorePersonDistinctId2,
-    DatastoreGroup,
     DeadLetterQueueEvent,
     InternalPerson,
     RawDatastoreEvent,
     RawSessionRecordingEvent,
 } from '~/types'
+import { DatastoreExecResult, DatastoreNativeClient, createDatastoreNativeClient } from '~/utils/db/datastore-client'
 import { timeoutGuard } from '~/utils/db/utils'
 import { isTestEnv } from '~/utils/env-utils'
 import { parseRawDatastoreEvent } from '~/utils/event'
@@ -23,20 +23,20 @@ import { logger } from '../../src/utils/logger'
 import { delay, escapeDatastoreString } from '../../src/utils/utils'
 
 export class Datastore {
-    private client: DatastoreClient
+    private client: DatastoreNativeClient
 
-    constructor(client: DatastoreClient) {
+    constructor(client: DatastoreNativeClient) {
         this.client = client
     }
 
-    static createClient(): DatastoreClient {
+    static createClient(): DatastoreNativeClient {
         // NOTE: We never query CH in production so we just load these from the env directly
         const DATASTORE_HOST = process.env.DATASTORE_HOST ?? 'localhost'
         const DATASTORE_DATABASE = process.env.DATASTORE_DATABASE ?? (isTestEnv() ? 'insights_test' : 'default')
         const DATASTORE_USER = process.env.DATASTORE_USER ?? 'default'
         const DATASTORE_PASSWORD = process.env.DATASTORE_PASSWORD ?? null
 
-        const datastore = createDatastoreClient({
+        const datastore = createDatastoreNativeClient({
             // We prefer to run queries on the offline cluster.
             url: `http://${DATASTORE_HOST}:8123`,
             username: DATASTORE_USER,
@@ -145,7 +145,7 @@ export class Datastore {
         throw Error(`Failed to get data in time, got ${JSON.stringify(data)}`)
     }
 
-    async exec(query: string): Promise<ExecResult<Readable>> {
+    async exec(query: string): Promise<DatastoreExecResult<Readable>> {
         try {
             return await this.client.exec({
                 query,
@@ -166,7 +166,7 @@ export class Datastore {
                 const queryResult = await this.client.query({
                     query,
                     format: 'JSON',
-                    datastore_settings: {
+                    clickhouse_settings: {
                         output_format_json_quote_64bit_integers: 0,
                         output_format_json_quote_denormals: 0,
                     },
