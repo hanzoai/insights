@@ -221,6 +221,50 @@ def delete_person(person: Person, sync: bool = False) -> None:
         _delete_ch_distinct_id(person.team_id, person.uuid, distinct_id, version, sync)
 
 
+def retire_projected_users(
+    team_id: int,
+    ids: Optional[list] = None,
+    distinct_ids: Optional[list[str]] = None,
+) -> int:
+    """Delete users the EVENT PLANE projected, and return how many it reached.
+
+    `delete_person` above cannot: it is driven by a Django instance, and a
+    projected user has no Postgres row to be one. Its tombstone also travels by
+    Kafka, which this deployment does not run — so for these rows there is no
+    path that both finds them and lands.
+
+    The plane wrote them straight into the warehouse, so this deletes them
+    there, in the reserved version band that outranks anything the projection
+    can write. That is what makes it durable: the next backfill re-projects
+    every user from the events, and the tombstone still wins.
+    """
+    from insights.models.event.plane import (
+        PLANE_USER_IDS_SQL,
+        USER_ALIAS_TOMBSTONE_SQL,
+        USER_IDS_FOR_DISTINCT_SQL,
+        USER_TOMBSTONE_SQL,
+    )
+
+    targets = {str(uuid) for uuid in (ids or [])}
+    if distinct_ids:
+        targets |= {
+            str(row[0])
+            for row in sync_execute(
+                USER_IDS_FOR_DISTINCT_SQL(), {"team_id": team_id, "distinct_ids": list(distinct_ids)}
+            )
+        }
+    if not targets:
+        return 0
+
+    args = {"team_id": team_id, "ids": sorted(targets)}
+    # Count first: the tombstone is an INSERT, so afterwards the rows are still
+    # there (carrying is_deleted) and cannot answer "how many did we reach".
+    reached = len(sync_execute(PLANE_USER_IDS_SQL(), args))
+    sync_execute(USER_ALIAS_TOMBSTONE_SQL(), args)
+    sync_execute(USER_TOMBSTONE_SQL(), args)
+    return reached
+
+
 def _delete_person(
     team_id: int,
     uuid: UUID,
