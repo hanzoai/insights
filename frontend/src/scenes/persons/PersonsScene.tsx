@@ -1,27 +1,30 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 
-import { IconEllipsis, IconRewind } from '@hanzo/icons'
-import { Button, Dialog, Input, Menu } from '@hanzo/elements'
+import { IconRewind } from '@hanzo/icons'
+import { Dialog, Input } from '@hanzo/elements'
 
+import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Field } from 'lib/elements/Field'
 import { Link } from 'lib/elements/Link'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
+import { isUUIDLike } from 'lib/utils/guards'
 import { PersonsManagementSceneTabs } from 'scenes/persons-management/PersonsManagementSceneTabs'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
-import { ScenePanel, ScenePanelActionsSection } from '~/layout/scenes/SceneLayout'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
+import { SceneMenuBar, SceneMenuBarItem, SceneMenuBarMenu } from '~/layout/scenes/components/SceneMenuBar'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
-import { useFeatureFlag } from '~/lib/hooks/useFeatureFlag'
+import { ScenePanel, ScenePanelActionsSection } from '~/layout/scenes/SceneLayout'
 import { Query } from '~/queries/Query/Query'
-import { ProductKey } from '~/queries/schema/schema-general'
-import { CustomerProfileScope, OnboardingStepKey } from '~/types'
+import { ActorsQuery, ProductKey } from '~/queries/schema/schema-general'
+import { ActivityTab, CustomerProfileScope, OnboardingStepKey } from '~/types'
 
-import { FeedbackBanner } from 'products/customer_analytics/frontend/components/FeedbackBanner'
+import { FeedbackButton } from 'products/customer_analytics/frontend/components/FeedbackButton'
 import { PersonDisplayNameNudgeBanner } from 'products/customer_analytics/frontend/components/PersonDisplayNameNudgeBanner'
 import { customerProfileConfigLogic } from 'products/customer_analytics/frontend/customerProfileConfigLogic'
 
@@ -33,31 +36,64 @@ export const scene: SceneExport = {
     productKey: ProductKey.PRODUCT_ANALYTICS,
 }
 
-export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
-    if (!tabId) {
-        // TODO: sometimes when opening a property filter on a scene, the tabId is suddently empty.
-        // If I remove the "{closable && !disabledReason && ...}" block from within
-        // "frontend/src/lib/components/PropertyFilters/components/PropertyFilterButton.tsx"
-        // ... then the issue goes away. We should still figure out why this happens.
-        // Throwing seems to make it go away.
-        throw new Error('PersonsScene rendered with no tabId')
-    }
-
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
-    const { query, showDisplayNameNudge } = useValues(personsSceneLogic)
+export function PersonsScene(): JSX.Element {
+    const { query } = useValues(personsSceneLogic)
     const { setQuery } = useActions(personsSceneLogic)
     const { resetDeletedDistinctId } = useAsyncActions(personsSceneLogic)
     const { currentTeam, baseCurrency } = useValues(teamLogic)
     const { loadConfigs } = useActions(customerProfileConfigLogic({ scope: CustomerProfileScope.PERSON }))
-    const queryUniqueKey = `persons-query-${tabId}`
+    const queryUniqueKey = 'persons-query'
+    const sceneMenuBarEnabled = useFeatureFlag('SCENE_MENU_BAR')
+
+    // A UUID-shaped search that returns nothing is often a session ID typed into the wrong field.
+    // Session IDs aren't part of the persons query, so point the user to where they are searchable.
+    const rawSearch: unknown = (query.source as Partial<ActorsQuery> | undefined)?.search
+    const searchTerm = typeof rawSearch === 'string' ? rawSearch.trim() : undefined
+    const searchLooksLikeSessionId = !!searchTerm && isUUIDLike(searchTerm)
 
     useOnMountEffect(() => {
         loadConfigs()
     })
 
+    const onResetDeletedPerson = (): void => {
+        Dialog.openForm({
+            width: '30rem',
+            title: 'Reset deleted person',
+            description: `Once a person is deleted, the "distinct_id" associated with them can no longer be used.
+                You can use this tool to reset the "distinct_id" for a person so that new events associated with it will create a new Person profile.`,
+            initialValues: { distinct_id: '' },
+            content: (
+                <Field name="distinct_id" label="Distinct ID to reset">
+                    <Input type="text" autoFocus />
+                </Field>
+            ),
+            errors: {
+                distinct_id: (distinct_id) => (!distinct_id ? 'This is required' : undefined),
+            },
+            onSubmit: async ({ distinct_id }) => await resetDeletedDistinctId(distinct_id),
+        })
+    }
+
     return (
         <SceneContent>
             <PersonsManagementSceneTabs tabKey="persons" />
+
+            {sceneMenuBarEnabled && (
+                <SceneMenuBar>
+                    <SceneMenuBarMenu label="File" dataAttr="persons-menubar-file">
+                        <SceneMenuBarFileItems dataAttrKey="persons" />
+                        <SceneMenuBarItem
+                            variant="destructive"
+                            opensFloatingUi
+                            onClick={onResetDeletedPerson}
+                            data-attr="persons-menubar-reset-deleted"
+                        >
+                            <IconRewind />
+                            Reset a deleted person
+                        </SceneMenuBarItem>
+                    </SceneMenuBarMenu>
+                </SceneMenuBar>
+            )}
 
             <SceneTitleSection
                 name={sceneConfigurations[Scene.Persons].name}
@@ -67,110 +103,89 @@ export function PersonsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                 }}
                 actions={
                     <>
-                        {isRemovingSidePanelFlag ? (
-                            <ScenePanel>
-                                <ScenePanelActionsSection>
-                                    <ButtonPrimitive
-                                        menuItem
-                                        variant="danger"
-                                        onClick={() => {
-                                            Dialog.openForm({
-                                                width: '30rem',
-                                                title: 'Reset deleted user',
-                                                description: `Once a user is deleted, the "distinct_id" associated with them can no longer be used.
-                                                You can use this tool to reset the "distinct_id" for a user so that new events associated with it will create a new user profile.`,
-                                                initialValues: {
-                                                    distinct_id: '',
-                                                },
-                                                content: (
-                                                    <Field name="distinct_id" label="Distinct ID to reset">
-                                                        <Input type="text" autoFocus />
-                                                    </Field>
-                                                ),
-                                                errors: {
-                                                    distinct_id: (distinct_id) =>
-                                                        !distinct_id ? 'This is required' : undefined,
-                                                },
-                                                onSubmit: async ({ distinct_id }) =>
-                                                    await resetDeletedDistinctId(distinct_id),
-                                            })
-                                        }}
-                                    >
-                                        <IconRewind />
-                                        Reset a deleted user...
-                                    </ButtonPrimitive>
-                                </ScenePanelActionsSection>
-                            </ScenePanel>
-                        ) : (
-                            <Menu
-                                items={[
-                                    {
-                                        label: 'Reset a deleted user...',
-                                        onClick: () =>
-                                            Dialog.openForm({
-                                                width: '30rem',
-                                                title: 'Reset deleted user',
-                                                description: `Once a user is deleted, the "distinct_id" associated with them can no longer be used.
-                                                You can use this tool to reset the "distinct_id" for a user so that new events associated with it will create a new user profile.`,
-                                                initialValues: {
-                                                    distinct_id: '',
-                                                },
-                                                content: (
-                                                    <Field name="distinct_id" label="Distinct ID to reset">
-                                                        <Input type="text" autoFocus />
-                                                    </Field>
-                                                ),
-                                                errors: {
-                                                    distinct_id: (distinct_id) =>
-                                                        !distinct_id ? 'This is required' : undefined,
-                                                },
-                                                onSubmit: async ({ distinct_id }) =>
-                                                    await resetDeletedDistinctId(distinct_id),
-                                            }),
-                                    },
-                                ]}
-                            >
-                                <Button aria-label="more" icon={<IconEllipsis />} size="small" />
-                            </Menu>
-                        )}
+                        <FeedbackButton id="customer-analytics-people-list-feedback-button" />
+                        <ScenePanel>
+                            <ScenePanelActionsSection>
+                                <ButtonPrimitive
+                                    menuItem
+                                    variant="danger"
+                                    onClick={() => {
+                                        Dialog.openForm({
+                                            width: '30rem',
+                                            title: 'Reset deleted person',
+                                            description: `Once a person is deleted, the "distinct_id" associated with them can no longer be used.
+                                                You can use this tool to reset the "distinct_id" for a person so that new events associated with it will create a new Person profile.`,
+                                            initialValues: {
+                                                distinct_id: '',
+                                            },
+                                            content: (
+                                                <Field name="distinct_id" label="Distinct ID to reset">
+                                                    <Input type="text" autoFocus />
+                                                </Field>
+                                            ),
+                                            errors: {
+                                                distinct_id: (distinct_id) =>
+                                                    !distinct_id ? 'This is required' : undefined,
+                                            },
+                                            onSubmit: async ({ distinct_id }) =>
+                                                await resetDeletedDistinctId(distinct_id),
+                                        })
+                                    }}
+                                >
+                                    <IconRewind />
+                                    Reset a deleted person...
+                                </ButtonPrimitive>
+                            </ScenePanelActionsSection>
+                        </ScenePanel>
                     </>
                 }
             />
             <PersonDisplayNameNudgeBanner uniqueKey={queryUniqueKey} />
-            {!showDisplayNameNudge && (
-                <FeedbackBanner
-                    feedbackButtonId="people-list"
-                    message="We're improving the users experience. Send us your feedback!"
-                />
-            )}
 
             <Query
                 uniqueKey={queryUniqueKey}
-                attachTo={personsSceneLogic({ tabId })}
+                attachTo={personsSceneLogic()}
                 query={{ ...query, showCount: true, showTableViews: true }}
                 setQuery={setQuery}
                 context={{
                     refresh: 'blocking',
-                    emptyStateHeading: currentTeam?.ingested_event
-                        ? 'There are no matching users for this query'
-                        : 'No users exist because no events have been ingested',
-                    emptyStateDetail: currentTeam?.ingested_event ? (
-                        'Try changing the date range or property filters.'
-                    ) : (
-                        <>
-                            Go to the{' '}
-                            <Link
-                                to={urls.onboarding({
-                                    productKey: ProductKey.PRODUCT_ANALYTICS,
-                                    stepKey: OnboardingStepKey.INSTALL,
-                                })}
-                                data-attr="real_project_with_no_events-ingestion_link"
-                            >
-                                onboarding wizard
-                            </Link>{' '}
-                            to get things moving
-                        </>
-                    ),
+                    emptyStateHeading:
+                        currentTeam?.ingested_event && searchLooksLikeSessionId
+                            ? 'Looking for a session?'
+                            : currentTeam?.ingested_event
+                              ? 'There are no matching persons for this query'
+                              : 'No persons exist because no events have been ingested',
+                    emptyStateDetail:
+                        currentTeam?.ingested_event && searchLooksLikeSessionId ? (
+                            <>
+                                Session IDs can't be searched here. Open it directly in{' '}
+                                <Link to={urls.replaySingle(searchTerm!)}>Session replay</Link>, or search sessions on
+                                the <Link to={urls.activity(ActivityTab.ExploreSessions)}>Activity</Link> page. To find
+                                a person instead, search by name, email, person ID, or distinct ID.
+                            </>
+                        ) : currentTeam?.ingested_event ? (
+                            <>
+                                This page only shows{' '}
+                                <Link to="https://hanzo.ai/docs/data/persons">identified persons</Link>. Try
+                                adjusting your property filters, or make sure you're calling{' '}
+                                <Link to="https://hanzo.ai/docs/product-analytics/identify">identify</Link> in your
+                                app.
+                            </>
+                        ) : (
+                            <>
+                                Go to the{' '}
+                                <Link
+                                    to={urls.onboarding({
+                                        productKey: ProductKey.PRODUCT_ANALYTICS,
+                                        stepKey: OnboardingStepKey.INSTALL,
+                                    })}
+                                    data-attr="real_project_with_no_events-ingestion_link"
+                                >
+                                    onboarding flow
+                                </Link>{' '}
+                                to get things moving
+                            </>
+                        ),
                     baseCurrency,
                 }}
                 dataAttr="persons-table"

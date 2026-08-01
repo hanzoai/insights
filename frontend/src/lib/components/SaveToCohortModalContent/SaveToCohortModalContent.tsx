@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 
 import { Button, Input, Table, TableColumns } from '@hanzo/elements'
 
-import { TableLink } from 'lib/elements/Table/TableLink'
 import { IconOpenInNew } from 'lib/elements/icons'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { urls } from 'scenes/urls'
 
 import { ActorsQuery } from '~/queries/schema/schema-general'

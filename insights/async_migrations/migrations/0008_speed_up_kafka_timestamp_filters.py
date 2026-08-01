@@ -1,10 +1,12 @@
-from functools import cached_property
-
 from django.conf import settings
 
 import structlog
 
-from insights.async_migrations.definition import AsyncMigrationDefinition, AsyncMigrationOperationSQL
+from insights.async_migrations.definition import (
+    AsyncMigrationDefinition,
+    AsyncMigrationOperation,
+    AsyncMigrationOperationSQL,
+)
 from insights.datastore.client import sync_execute
 from insights.constants import AnalyticsDBMS
 from insights.version_requirement import ServiceVersionRequirement
@@ -42,9 +44,9 @@ class Migration(AsyncMigrationDefinition):
         )
         return result[0][0] if len(result) > 0 else ""
 
-    @cached_property
-    def operations(self):
-        operations = []
+    @property
+    def operations(self) -> list[AsyncMigrationOperation]:
+        operations: list[AsyncMigrationOperation] = []
         on_cluster = lambda sharded_table: f"ON CLUSTER '{settings.DATASTORE_CLUSTER}'" if sharded_table else ""
 
         for table, sharded in PROJECTION_TABLES:
@@ -68,7 +70,7 @@ class Migration(AsyncMigrationDefinition):
                 [
                     AsyncMigrationOperationSQL(
                         database=AnalyticsDBMS.DATASTORE,
-                        sql=f"ALTER TABLE {table} {on_cluster(sharded)} ADD INDEX kafka_timestamp_minmax_{table} _timestamp TYPE minmax GRANULARITY 3",
+                        sql=f"ALTER TABLE {table} {on_cluster(sharded)} ADD INDEX IF NOT EXISTS kafka_timestamp_minmax_{table} _timestamp TYPE minmax GRANULARITY 3",
                         rollback=f"ALTER TABLE {table} {on_cluster(sharded)} DROP INDEX kafka_timestamp_minmax_{table}",
                     ),
                     AsyncMigrationOperationSQL(

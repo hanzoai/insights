@@ -2,33 +2,22 @@ import uuid
 
 from insights.test.base import APIBaseTest
 
+from django.test import SimpleTestCase, override_settings
+
+from parameterized import parameterized
 from rest_framework import status
+
+from insights.models.instance_setting import override_instance_config
+from insights.urls import region_host_from_current_instance
 
 
 class TestUrls(APIBaseTest):
-    def test_logout_temporary_token_reset(self):
-        # update temporary token
-        self.user.temporary_token = "token123"
-        self.user.save()
-
-        # logout
-        with self.settings(TEST=False):
-            response = self.client.post("/logout", follow=True)
-            self.assertRedirects(response, "/login")
-
-        # no more token
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.temporary_token, None)
-
     def test_logged_out_user_is_redirected_to_login(self):
         self.client.logout()
 
-        # Root is the exception: it serves the marketing landing page rather
-        # than bouncing to SSO, so the product has a public face. Every OTHER
-        # path still redirects. See TestLandingPage in test_landing.py.
+        # Root path should redirect to /login without ?next=/ since "/" is the default destination
         response = self.client.get("/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("landing.html", [t.name for t in response.templates])
+        self.assertRedirects(response, "/login")
 
         response = self.client.get("/events")
         self.assertRedirects(response, "/login?next=/events")
@@ -45,6 +34,62 @@ class TestUrls(APIBaseTest):
             fetch_redirect_response=False,
         )
 
+    @parameterized.expand(
+        [
+            ("eu", "https://eu.hanzo.ai", "https://eu.hanzo.ai/organization/billing"),
+            ("us", "https://us.hanzo.ai", "https://us.hanzo.ai/organization/billing"),
+        ]
+    )
+    def test_app_host_deep_link_redirects_to_logged_in_region(self, _name, cookie_value, expected_location):
+        # /organization/billing is behind login_required; the region redirect must fire first,
+        # so a logged-out EU user reaches EU instead of the US login page.
+        self.client.logout()
+        self.client.cookies["ph_current_instance"] = cookie_value
+        response = self.client.get("/organization/billing", HTTP_HOST="app.hanzo.ai", follow=False)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response["Location"], expected_location)
+
+    def test_app_host_deep_link_without_region_cookie_falls_through_to_login(self):
+        self.client.logout()
+        self.client.cookies.pop("ph_current_instance", None)
+        response = self.client.get("/organization/billing", HTTP_HOST="app.hanzo.ai", follow=False)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertIn("/login", response["Location"])
+
+    def test_app_host_deep_link_without_region_cookie_falls_back_to_us_when_redirect_app_to_us(self):
+        # With no region cookie, REDIRECT_APP_TO_US routes app.hanzo.ai to US before the auth gate.
+        self.client.logout()
+        self.client.cookies.pop("ph_current_instance", None)
+        with override_instance_config("REDIRECT_APP_TO_US", True):
+            response = self.client.get("/organization/billing", HTTP_HOST="app.hanzo.ai", follow=False)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response["Location"], "https://us.hanzo.ai/organization/billing")
+
+    def test_integration_connect_redirect_authenticated(self):
+        response = self.client.get(
+            f"/integrations/connect/github/?project_id={self.team.id}&connect_from=slack", follow=False
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        location = response["Location"]
+        self.assertIn(f"/api/projects/{self.team.id}/integrations/authorize/", location)
+        self.assertIn("kind=github", location)
+        self.assertIn("account-connected", location)
+        self.assertIn("connect_from%3Dslack", location)
+
+    def test_integration_connect_redirect_requires_login(self):
+        self.client.logout()
+        response = self.client.get("/integrations/connect/github/?project_id=1&connect_from=slack", follow=False)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertIn("/login", response["Location"])
+
+    def test_integration_connect_redirect_rejects_bad_kind(self):
+        response = self.client.get(f"/integrations/connect/notreal/?project_id={self.team.id}&connect_from=slack")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_integration_connect_redirect_rejects_bad_connect_from(self):
+        response = self.client.get(f"/integrations/connect/github/?project_id={self.team.id}&connect_from=evil")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_unauthenticated_routes_get_loaded_on_the_frontend(self):
         self.client.logout()
 
@@ -60,6 +105,33 @@ class TestUrls(APIBaseTest):
         response = self.client.get(f"/login")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    @parameterized.expand(
+        [
+            ("no_slash_no_qs", "/sign-up", "/signup"),
+            ("trailing_slash_no_qs", "/sign-up/", "/signup"),
+            ("no_slash_with_qs", "/sign-up?email=foo%40bar.com", "/signup?email=foo%40bar.com"),
+            ("trailing_slash_with_qs", "/sign-up/?email=foo%40bar.com", "/signup?email=foo%40bar.com"),
+        ]
+    )
+    def test_sign_up_redirects_to_signup(self, _name, request_path, expected_location):
+        self.client.logout()
+        response = self.client.get(request_path, follow=False)
+        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
+        self.assertEqual(response["Location"], expected_location)
+
+    @parameterized.expand(
+        [
+            ("no_query_string", "/admin", "/admin/"),
+            ("with_query_string", "/admin?foo=bar&baz=qux", "/admin/?foo=bar&baz=qux"),
+        ]
+    )
+    @override_settings(ADMIN_PORTAL_ENABLED=True)
+    def test_admin_without_trailing_slash_redirects(self, _name, request_path, expected_location):
+        # APPEND_SLASH is disabled globally, so /admin needs an explicit redirect
+        response = self.client.get(request_path, follow=False)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response["Location"], expected_location)
+
     def test_authorize_and_redirect_domain(self):
         self.team.app_urls = ["https://domain.com", "https://not.com"]
         self.team.save()
@@ -69,7 +141,10 @@ class TestUrls(APIBaseTest):
             headers={"referer": "https://not-permitted.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertTrue("Can only redirect to a permitted domain." in str(response.content))
+        content = response.content.decode()
+        self.assertIn("Domain not authorized", content)
+        self.assertIn("not-permitted.com", content)
+        self.assertIn("/settings/project-toolbar#authorized-urls", content)
 
         response = self.client.get(
             "/authorize_and_redirect/?redirect=https://domain.com", headers={"referer": "https://not.com"}
@@ -105,3 +180,21 @@ class TestUrls(APIBaseTest):
         #     response,
         #     "Do you want to give the Insights Toolbar on <strong>https://domain.com/sdf</strong> access to your Insights data?",
         # )
+
+
+class TestRegionHostFromCurrentInstance(SimpleTestCase):
+    @parameterized.expand(
+        [
+            ("eu", "https://eu.hanzo.ai", "eu.hanzo.ai"),
+            ("us", "https://us.hanzo.ai", "us.hanzo.ai"),
+            ("with_port", "https://eu.hanzo.ai:8123", "eu.hanzo.ai"),
+            ("wrapping_quotes", '"https://eu.hanzo.ai"', "eu.hanzo.ai"),
+            ("app_is_not_a_region", "https://app.hanzo.ai", None),
+            ("unknown_host_is_rejected", "https://evil.example.com", None),
+            ("none", None, None),
+            ("empty", "", None),
+            ("not_a_url", "yo ho ho", None),
+        ]
+    )
+    def test_region_host_from_current_instance(self, _name, cookie_value, expected):
+        self.assertEqual(region_host_from_current_instance(cookie_value), expected)

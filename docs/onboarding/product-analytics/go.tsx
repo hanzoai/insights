@@ -1,4 +1,4 @@
-import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/OnboardingDocsContentWrapper'
+import { OnboardingComponentsContext, createInstallation } from 'scenes/onboarding/shared/OnboardingDocsContentWrapper'
 
 import { StepDefinition } from '../steps'
 
@@ -18,7 +18,7 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                go get "github.com/hanzoai/insights-go"
+                                go get "github.com/insights/insights-go"
                             `,
                             },
                         ]}
@@ -31,7 +31,7 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Initialize the Insights client with your API key and host:</Markdown>
+                    <Markdown>Initialize the Insights client with your project token and host:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -41,11 +41,11 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
                                 package main
 
                                 import (
-                                    "github.com/hanzoai/insights-go"
+                                    "github.com/insights/insights-go"
                                 )
 
                                 func main() {
-                                    client, _ := insights.NewWithConfig("<ph_project_api_key>", insights.Config{Endpoint: "<ph_client_api_host>"})
+                                    client, _ := insights.NewWithConfig("<ph_project_token>", insights.Config{Endpoint: "<ph_client_api_host>"})
                                     defer client.Close()
                                 }
                             `,

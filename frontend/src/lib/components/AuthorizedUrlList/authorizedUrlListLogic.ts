@@ -1,4 +1,5 @@
 import {
+    MakeLogicType,
     actions,
     afterMount,
     connect,
@@ -11,27 +12,28 @@ import {
     selectors,
     sharedListeners,
 } from 'kea'
+import type { BreakPointFunction } from 'kea'
 import { forms } from 'kea-forms'
+import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { encodeParams, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
-import { toast } from 'lib/elements/Toast'
-import { isDomain, isURL } from 'lib/utils'
-import { apiHostOrigin } from 'lib/utils/apiHost'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { addProductIntent } from 'lib/utils/product-intents'
+import { isDomain, isURL } from 'lib/utils/url'
 import { sceneLogic } from 'scenes/sceneLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
+import { userLogic } from 'scenes/userLogic'
 
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 import { insightsql } from '~/queries/utils'
 import { ExperimentIdType, ToolbarParams, ToolbarUserIntent } from '~/types'
 
-import type { authorizedUrlListLogicType } from './authorizedUrlListLogicType'
+import type { TeamPublicType, TeamType, UserType } from '../../../types'
 
 export interface ProposeNewUrlFormType {
     url: string
@@ -134,9 +136,7 @@ const _buildToolbarUserIntent = (options?: BuildToolbarParamsOptions): ToolbarUs
 function buildToolbarParams(options?: BuildToolbarParamsOptions): ToolbarParams {
     return {
         userIntent: _buildToolbarUserIntent(options),
-        // Keeping this as backward compatibility, but we don't use it anymore in the toolbar
-        // and instead depend on the `insights`'s instance configuration
-        apiURL: apiHostOrigin(),
+        uiHost: window.location.origin,
         ...(options?.actionId ? { actionId: options.actionId } : {}),
         ...(options?.experimentId ? { experimentId: options.experimentId } : {}),
         ...(options?.productTourId && options.productTourId !== 'new' ? { productTourId: options.productTourId } : {}),
@@ -157,40 +157,97 @@ export function appEditorUrl(
     }
 ): string {
     const params = buildToolbarParams(options) as Record<string, unknown>
-    // See https://github.com/hanzoai/insights-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
+    // See https://github.com/Insights/insights-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
     // are passed. `appUrl` is an extra `redirect_to_site` param.
     params['appUrl'] = appUrl
     params['generateOnly'] = options?.generateOnly
     return '/api/user/redirect_to_site/' + encodeParams(params, '?')
 }
 
+/**
+ * Builds a direct toolbar launch URL that navigates to the app with toolbar params in the hash.
+ * Unlike appEditorUrl which goes through redirect_to_site,
+ * this constructs the URL client-side so the toolbar uses OAuth for authentication.
+ */
+export function directToolbarUrl(
+    appUrl: string,
+    options?: BuildToolbarParamsOptions & {
+        token?: string
+        dataAttributes?: string[]
+        userEmail?: string
+        distinctId?: string
+    }
+): string {
+    const params: Record<string, unknown> = {
+        action: 'ph_authorize',
+        token: options?.token,
+        toolbarVersion: 'toolbar',
+        instrument: true,
+        userEmail: options?.userEmail,
+        distinctId: options?.distinctId,
+        ...buildToolbarParams(options),
+        dataAttributes: options?.dataAttributes,
+    }
+    const state = encodeURIComponent(JSON.stringify(params))
+    return `${appUrl}#__insights=${state}`
+}
+
+/** Treat www.domain.com and domain.com as equivalent. */
+const stripWww = (host: string): string => (host.startsWith('www.') ? host.slice(4) : host)
+
 export const checkUrlIsAuthorized = (url: string | URL, authorizedUrls: string[]): boolean => {
     try {
         const parsedUrl = typeof url === 'string' ? sanitizePossibleWildCardedURL(url) : url
         const urlWithoutPath = parsedUrl.protocol + '//' + parsedUrl.host
-        // Is this domain already in the list of urls?
-        const exactMatch =
-            authorizedUrls.filter((authorizedUrl) => authorizedUrl.indexOf(urlWithoutPath) > -1).length > 0
+        const hostNormalized = stripWww(parsedUrl.hostname)
 
-        if (exactMatch) {
-            return true
-        }
+        return authorizedUrls.some((authorizedUrl) => {
+            // Wildcard entries (subdomain or port wildcards, e.g. `https://*.example.com`). Anchor the
+            // pattern with ^…$ so a `*` cannot match a suffix of an unrelated origin such as
+            // `https://app.example.com.evil.com`.
+            if (authorizedUrl.includes('*')) {
+                try {
+                    const regex = new RegExp('^' + authorizedUrl.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$')
+                    return regex.test(urlWithoutPath)
+                } catch {
+                    return false
+                }
+            }
 
-        const wildcardMatch = !!authorizedUrls.find((authorizedUrl) => {
-            // Matches something like `https://*.example.com` against the urlWithoutPath
-            const regex = new RegExp(authorizedUrl.replace(/\./g, '\\.').replace(/\*/g, '.*'))
-            return urlWithoutPath.match(regex)
+            // Exact entries: compare by origin (protocol + host) instead of a substring check, so a
+            // different domain cannot be authorized merely by being a prefix/substring of an entry
+            // (e.g. `https://example.co` against `https://example.com`).
+            try {
+                const authorizedUrlParsed = sanitizePossibleWildCardedURL(authorizedUrl)
+                if (authorizedUrlParsed.protocol + '//' + authorizedUrlParsed.host === urlWithoutPath) {
+                    return true
+                }
+                // www-equivalence: same protocol, hostnames equal with www. stripped. The protocol
+                // check keeps an http origin from matching an https-only authorized entry.
+                return (
+                    authorizedUrlParsed.protocol === parsedUrl.protocol &&
+                    stripWww(authorizedUrlParsed.hostname) === hostNormalized
+                )
+            } catch {
+                return false
+            }
         })
-
-        if (wildcardMatch) {
-            return true
-        }
     } catch {
         // Ignore invalid URLs
     }
 
     return false
 }
+
+/**
+ * Schemes allowed to be rendered in the Site preview iframe. That iframe runs with
+ * `allow-scripts allow-same-origin`, so a `javascript:`/`data:`/`blob:` src would execute in the
+ * Insights origin. Only ever frame an http(s) URL the team has explicitly authorized.
+ */
+const FRAMEABLE_URL_SCHEME = /^https?:\/\//i
+
+export const checkUrlIsSafeToFrame = (url: string, authorizedUrls: string[]): boolean =>
+    FRAMEABLE_URL_SCHEME.test(url) && checkUrlIsAuthorized(url, authorizedUrls)
 
 export interface SuggestedDomain {
     url: string
@@ -251,12 +308,172 @@ export const defaultAuthorizedUrlProperties = {
     userIntent: undefined,
 }
 
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface authorizedUrlListLogicValues {
+    currentTeam: TeamPublicType | TeamType | null // teamLogic
+    currentTeamId: number | null // teamLogic
+    user: UserType | null // userLogic
+    authorizedUrls: string[]
+    checkUrlIsAuthorized: (url: string) => boolean
+    checkUrlIsSafeToFrame: (url: string) => boolean
+    editUrlIndex: number | null
+    isAddUrlFormVisible: boolean
+    isProposedUrlSubmitting: boolean
+    isProposedUrlValid: boolean
+    launchUrl: (url: string) => string
+    onlyAllowDomains: boolean
+    proposedUrl: ProposeNewUrlFormType
+    proposedUrlAllErrors: Record<string, any>
+    proposedUrlChanged: boolean
+    proposedUrlErrors: DeepPartialMap<ProposeNewUrlFormType, ValidationErrorType>
+    proposedUrlHasErrors: boolean
+    proposedUrlManualErrors: Record<string, any>
+    proposedUrlTouched: boolean
+    proposedUrlTouches: Record<string, boolean>
+    proposedUrlValidationErrors: DeepPartialMap<ProposeNewUrlFormType, ValidationErrorType>
+    showProposedURLForm: boolean
+    showProposedUrlErrors: boolean
+    suggestions: any[]
+    suggestionsLoading: boolean
+    urlToEdit: string
+    urlsKeyed: KeyedAppUrl[]
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface authorizedUrlListLogicActions {
+    updateCurrentTeam: (payload: Partial<TeamType>) => Partial<TeamType> // teamLogic
+    addUrl: (
+        url: string,
+        launch?: boolean
+    ) => {
+        launch: boolean | undefined
+        url: string
+    }
+    cancelProposingUrl: () => {
+        value: true
+    }
+    copyLaunchCode: () => {
+        value: true
+    }
+    launchAtUrl: (url: string) => {
+        url: string
+    }
+    loadSuggestions: (_: void) => void
+    loadSuggestionsFailure: (
+        error: string,
+        errorObject?: any
+    ) => {
+        error: string
+        errorObject?: any
+    }
+    loadSuggestionsSuccess: (
+        suggestions: SuggestedDomain[],
+        payload?: void
+    ) => {
+        suggestions: SuggestedDomain[]
+        payload?: void
+    }
+    newUrl: () => {
+        value: true
+    }
+    removeUrl: (index: number) => {
+        index: number
+    }
+    resetProposedUrl: (values?: ProposeNewUrlFormType) => {
+        values?: ProposeNewUrlFormType
+    }
+    setAuthorizedUrls: (authorizedUrls: string[]) => {
+        authorizedUrls: string[]
+    }
+    setEditUrlIndex: (originalIndex: number | null) => {
+        originalIndex: number | null
+    }
+    setProposedUrlManualErrors: (errors: Record<string, any>) => {
+        errors: Record<string, any>
+    }
+    setProposedUrlValue: (
+        key: FieldName,
+        value: any
+    ) => {
+        name: FieldName
+        value: any
+    }
+    setProposedUrlValues: (values: DeepPartial<ProposeNewUrlFormType>) => {
+        values: DeepPartial<ProposeNewUrlFormType>
+    }
+    submitProposedUrl: () => {
+        value: boolean
+    }
+    submitProposedUrlFailure: (
+        error: Error,
+        errors: Record<string, any>
+    ) => {
+        error: Error
+        errors: Record<string, any>
+    }
+    submitProposedUrlRequest: (proposedUrl: ProposeNewUrlFormType) => {
+        proposedUrl: ProposeNewUrlFormType
+    }
+    submitProposedUrlSuccess: (proposedUrl: ProposeNewUrlFormType) => {
+        proposedUrl: ProposeNewUrlFormType
+    }
+    touchProposedUrlField: (key: string) => {
+        key: string
+    }
+    updateUrl: (
+        index: number,
+        url: string
+    ) => {
+        index: number
+        url: string
+    }
+}
+
+// Generated by kea-typegen. Update if you're an agent, ignore if you're human.
+export interface authorizedUrlListLogicMeta {
+    key: string
+    sharedListeners: {
+        saveUrls: (
+            payload: any,
+            breakpoint: BreakPointFunction,
+            action: {
+                type: string
+                payload: any
+            },
+            previousState: any
+        ) => void | Promise<void>
+    }
+    __keaTypeGenInternalSelectorTypes: {
+        urlToEdit: (authorizedUrls: string[], editUrlIndex: number | null) => string
+        urlsKeyed: (authorizedUrls: string[], suggestions: any[]) => KeyedAppUrl[]
+        launchUrl: (
+            currentTeam: TeamPublicType | TeamType | null,
+            user: UserType | null,
+            actionId: number | null,
+            experimentId: ExperimentIdType | null,
+            productTourId: string | null,
+            arg: ToolbarUserIntent | undefined
+        ) => (url: string) => string
+        isAddUrlFormVisible: (editUrlIndex: number | null) => boolean
+        onlyAllowDomains: (type: AuthorizedUrlListType) => boolean
+        checkUrlIsAuthorized: (authorizedUrls: string[]) => (url: string) => boolean
+        checkUrlIsSafeToFrame: (authorizedUrls: string[]) => (url: string) => boolean
+    }
+}
+
+export type authorizedUrlListLogicType = MakeLogicType<
+    authorizedUrlListLogicValues,
+    authorizedUrlListLogicActions,
+    AuthorizedUrlListLogicProps,
+    authorizedUrlListLogicMeta
+>
+
 export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
     path((key) => ['lib', 'components', 'AuthorizedUrlList', 'authorizedUrlListLogic', key]),
     key((props) => `${props.type}-${props.experimentId}-${props.actionId}-${props.productTourId}`), // Some will be undefined but that's ok, this avoids experiment/action with same ID sharing same store
     props({ ...defaultAuthorizedUrlProperties } as AuthorizedUrlListLogicProps),
     connect(() => ({
-        values: [teamLogic, ['currentTeam', 'currentTeamId']],
+        values: [teamLogic, ['currentTeam', 'currentTeamId'], userLogic, ['user']],
         actions: [teamLogic, ['updateCurrentTeam']],
     })),
     actions(() => ({
@@ -268,12 +485,12 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
         launchAtUrl: (url: string) => ({ url }),
         setEditUrlIndex: (originalIndex: number | null) => ({ originalIndex }),
         cancelProposingUrl: true,
-        copyLaunchCode: (url: string) => ({ url }),
+        copyLaunchCode: true,
     })),
-    loaders(({ values, props }) => ({
+    loaders(({ values }) => ({
         suggestions: {
             __default: [] as SuggestedDomain[],
-            loadSuggestions: async () => {
+            loadSuggestions: async (_: void, breakpoint) => {
                 const query = insightsql`
                     select properties.$current_url, count()
                     from events
@@ -290,9 +507,10 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
                     scene: currentScene,
                     productKey: 'platform_and_support',
                 })
+                breakpoint()
                 const result = response.results as [string, number][]
 
-                if (result && result.length === 0) {
+                if (!result || result.length === 0) {
                     return []
                 }
 
@@ -302,27 +520,6 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
                 )
 
                 return suggestedDomains.slice(0, 20)
-            },
-        },
-        manualLaunchParams: {
-            loadManualLaunchParams: async (url: string): Promise<string | undefined> => {
-                const response = await api.get(
-                    appEditorUrl(url, {
-                        ...(props?.actionId ? { actionId: props.actionId } : {}),
-                        ...(props?.experimentId ? { experimentId: props.experimentId } : {}),
-                        generateOnly: true,
-                    })
-                )
-
-                let decoded: string | undefined = undefined
-                try {
-                    if (response?.toolbarParams) {
-                        decoded = decodeURIComponent(response.toolbarParams)
-                    }
-                } catch {
-                    toast.error('Failed to generate toolbar params')
-                }
-                return decoded
             },
         },
     })),
@@ -413,22 +610,25 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
             }
         },
     })),
-    listeners(({ sharedListeners, values, actions }) => ({
+    listeners(({ sharedListeners, values, actions, props }) => ({
         setEditUrlIndex: () => {
             actions.setProposedUrlValue('url', values.urlToEdit)
         },
         newUrl: () => {
             actions.setProposedUrlValue('url', NEW_URL)
         },
-        addUrl: [
-            sharedListeners.saveUrls,
-            ({ url, launch }) => {
-                if (launch) {
-                    actions.launchAtUrl(url)
-                }
-                globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.AddAuthorizedDomain)
-            },
-        ],
+        addUrl: async ({ url, launch }) => {
+            // Await the app_urls PATCH before markTaskAsCompleted to avoid a race on the team PATCH response.
+            if (props.type === AuthorizedUrlListType.RECORDING_DOMAINS) {
+                await teamLogic.asyncActions.updateCurrentTeam({ recording_domains: values.authorizedUrls })
+            } else {
+                await teamLogic.asyncActions.updateCurrentTeam({ app_urls: values.authorizedUrls })
+            }
+            if (launch) {
+                actions.launchAtUrl(url)
+            }
+            globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.AddAuthorizedDomain)
+        },
         removeUrl: sharedListeners.saveUrls,
         updateUrl: sharedListeners.saveUrls,
         launchAtUrl: ({ url }) => {
@@ -445,26 +645,34 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
             actions.setEditUrlIndex(null)
             actions.resetProposedUrl()
         },
-        copyLaunchCode: ({ url }) => {
-            actions.loadManualLaunchParams(url)
-        },
-        loadManualLaunchParamsSuccess: async ({ manualLaunchParams }) => {
-            if (manualLaunchParams) {
-                const templateScript = `
+        copyLaunchCode: async () => {
+            const params: Record<string, unknown> = {
+                action: 'ph_authorize',
+                token: values.currentTeam?.api_token,
+                toolbarVersion: 'toolbar',
+                instrument: true,
+                userEmail: values.user?.email,
+                distinctId: values.user?.distinct_id,
+                ...buildToolbarParams({
+                    ...(props.actionId ? { actionId: props.actionId } : {}),
+                    ...(props.experimentId ? { experimentId: props.experimentId } : {}),
+                }),
+                dataAttributes: values.currentTeam?.data_attributes,
+            }
+            const templateScript = `
                 if (!window?.insights) {
                     console.warn('Insights must be added to the window object on this page, for this to work. This is normally done in the loaded callback of your insights init code.')
                 } else {
-                    window.insights.loadToolbar(${manualLaunchParams})
+                    window.insights.loadToolbar(${JSON.stringify(params)})
                 }
                 `
-                await copyToClipboard(templateScript, 'code to paste into the console')
-            }
+            await copyToClipboard(templateScript, 'code to paste into the console')
         },
     })),
     selectors({
         urlToEdit: [
             (s) => [s.authorizedUrls, s.editUrlIndex],
-            (authorizedUrls, editUrlIndex) => {
+            (authorizedUrls: string[], editUrlIndex: number | null) => {
                 if (editUrlIndex === null || editUrlIndex === -1) {
                     return NEW_URL
                 }
@@ -473,7 +681,7 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
         ],
         urlsKeyed: [
             (s) => [s.authorizedUrls, s.suggestions],
-            (authorizedUrls, suggestions): KeyedAppUrl[] => {
+            (authorizedUrls: string[], suggestions: any[]): KeyedAppUrl[] => {
                 const keyedUrls = authorizedUrls
                     .map((url, index) => ({
                         url,
@@ -493,30 +701,55 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
             },
         ],
         launchUrl: [
-            (_, p) => [p.actionId, p.experimentId, p.productTourId, p.userIntent ?? (() => undefined)],
-            (actionId, experimentId, productTourId, userIntent) => (url: string) => {
-                if (experimentId) {
-                    return appEditorUrl(url, {
-                        experimentId,
-                    })
-                }
-
-                if (productTourId) {
-                    return appEditorUrl(url, { productTourId, userIntent })
-                }
-
-                return appEditorUrl(url, {
-                    actionId,
-                })
-            },
+            (s, p) => [
+                s.currentTeam,
+                s.user,
+                p.actionId,
+                p.experimentId,
+                p.productTourId,
+                p.userIntent ?? (() => undefined),
+            ],
+            (
+                currentTeam: null | import('~/types').TeamPublicType | import('~/types').TeamType,
+                user: null | import('~/types').UserType,
+                actionId: number | null,
+                experimentId: ExperimentIdType | null,
+                productTourId: string | null,
+                userIntent: ToolbarUserIntent | undefined
+            ) =>
+                (url: string) => {
+                    const commonOptions = {
+                        token: currentTeam?.api_token,
+                        dataAttributes: currentTeam?.data_attributes,
+                        userEmail: user?.email,
+                        distinctId: user?.distinct_id,
+                    }
+                    if (experimentId) {
+                        return directToolbarUrl(url, { ...commonOptions, experimentId })
+                    }
+                    if (productTourId) {
+                        return directToolbarUrl(url, { ...commonOptions, productTourId, userIntent })
+                    }
+                    return directToolbarUrl(url, { ...commonOptions, actionId })
+                },
         ],
-        isAddUrlFormVisible: [(s) => [s.editUrlIndex], (editUrlIndex) => editUrlIndex === -1],
-        onlyAllowDomains: [(_, p) => [p.type], (type) => type === AuthorizedUrlListType.RECORDING_DOMAINS],
+        isAddUrlFormVisible: [(s) => [s.editUrlIndex], (editUrlIndex: number | null) => editUrlIndex === -1],
+        onlyAllowDomains: [
+            (_, p) => [p.type],
+            (type: AuthorizedUrlListType) => type === AuthorizedUrlListType.RECORDING_DOMAINS,
+        ],
 
         checkUrlIsAuthorized: [
             (s) => [s.authorizedUrls],
-            (authorizedUrls) => (url: string) => {
+            (authorizedUrls: string[]) => (url: string) => {
                 return checkUrlIsAuthorized(url, authorizedUrls)
+            },
+        ],
+
+        checkUrlIsSafeToFrame: [
+            (s) => [s.authorizedUrls],
+            (authorizedUrls: string[]) => (url: string) => {
+                return checkUrlIsSafeToFrame(url, authorizedUrls)
             },
         ],
     }),

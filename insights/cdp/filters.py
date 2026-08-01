@@ -3,19 +3,181 @@ from typing import Any, Optional
 from django.conf import settings
 
 from insights.insightsql.compiler.bytecode import create_bytecode
+from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.parser import parse_expr
 from insights.insightsql.property import action_to_expr, ast, property_to_expr
-from insights.insightsql.visitor import TraversingVisitor
+from insights.insightsql.visitor import CloningVisitor, TraversingVisitor
 
-from insights.models.action.action import Action
 from insights.models.team.team import Team
+
+from products.actions.backend.models.action import Action
+from products.cohorts.backend.models.cohort import Cohort
+
+COHORT_FILTER_TYPES = frozenset({"cohort", "static-cohort", "precalculated-cohort", "dynamic-cohort"})
+
+# Internal events (e.g. activity logs) carry real nested JSON objects in their properties — such as
+# `detail` on `$activity_log_entry_created`, which the activity log filter UI exposes as `detail.name`
+# and `detail.changes`. Unlike analytics events (whose properties are a flat map), these need dotted
+# keys resolved into nested field chains so the ScriptVM matches against the nested object.
+INTERNAL_NESTED_PROPERTY_EVENTS = frozenset({"$activity_log_entry_created"})
+
+
+class _NestedPropertyKeyResolver(CloningVisitor):
+    """Resolve dotted event-property keys into nested field chains.
+
+    A property key like `detail.name` is otherwise compiled into a single flat lookup
+    (`properties["detail.name"]`) that never matches the nested global. Splitting it into the
+    chain `properties.detail.name` lets it resolve against the nested object at runtime.
+    Only `properties.*` chains are touched, so person/group property filters are left as-is.
+    """
+
+    def visit_field(self, node: ast.Field) -> ast.Field:
+        field = super().visit_field(node)
+        if not field.chain or field.chain[0] != "properties":
+            return field
+        resolved: list[str | int] = [field.chain[0]]
+        for element in field.chain[1:]:
+            if isinstance(element, str) and "." in element:
+                resolved.extend(element.split("."))
+            else:
+                resolved.append(element)
+        field.chain = resolved
+        return field
+
+
+def _only_targets_internal_nested_events(filters: dict) -> bool:
+    """True only when every targeted event/action is an internal nested event.
+
+    Global property filters apply across all event branches, so a dotted key there can only be
+    resolved into a nested chain when *every* targeted event carries nested JSON. If an internal
+    event is mixed with an analytics event (e.g. `$pageview`), the same global key may be a flat
+    property on that branch — so leave it untouched and let per-branch resolution handle the
+    internal event's own properties.
+    """
+    all_filters = filters.get("events", []) + filters.get("actions", [])
+    return bool(all_filters) and all(f.get("id") in INTERNAL_NESTED_PROPERTY_EVENTS for f in all_filters)
+
+
+class CohortInlineError(Exception):
+    """Raised when cohort test account filters can't be inlined for real-time use."""
+
+    def __init__(self, reasons: list[str]):
+        self.reasons = reasons
+        super().__init__("Can't use cohorts in real-time filters")
+
+
+def _is_cohort_filter(prop: dict) -> bool:
+    return isinstance(prop, dict) and prop.get("type") in COHORT_FILTER_TYPES
+
+
+def _check_only_person_properties(properties: Any) -> set[str]:
+    """Walk a cohort's filter property tree and return any non-person leaf types found.
+
+    Returns an empty set if all leaves are person property filters.
+    """
+    non_person_types: set[str] = set()
+
+    def _walk(node: Any) -> None:
+        if isinstance(node, list):
+            for item in node:
+                _walk(item)
+            return
+        if not isinstance(node, dict):
+            return
+
+        node_type = node.get("type")
+
+        if node_type in ("AND", "OR"):
+            values = node.get("values")
+            if isinstance(values, list):
+                for v in values:
+                    _walk(v)
+            return
+
+        if node_type != "person":
+            non_person_types.add(node_type or "<unknown>")
+
+    _walk(properties)
+    return non_person_types
+
+
+def _try_inline_cohort_filter(prop: dict, team: Team) -> tuple[list[ast.Expr], None] | tuple[None, str]:
+    """Try to inline a cohort test account filter as person property expressions.
+
+    Returns (exprs, None) on success, or (None, reason) on failure.
+    """
+    cohort_id = prop.get("value")
+    if cohort_id is None:
+        return None, "cohort filter has no value"
+
+    try:
+        # nosemgrep: idor-lookup-without-team (scoped by team__project_id)
+        cohort = Cohort.objects.get(id=cohort_id, team__project_id=team.project_id)
+    except Cohort.DoesNotExist:
+        return None, f"cohort id={cohort_id} not found"
+
+    if cohort.is_static:
+        return (
+            None,
+            f"cohort '{cohort.name}' (id={cohort_id}) is a static cohort — static cohort membership can't be evaluated in real-time filters",
+        )
+
+    cohort_properties = (cohort.filters or {}).get("properties")
+    if not cohort_properties:
+        return None, f"cohort '{cohort.name}' (id={cohort_id}) has no properties defined"
+
+    non_person_types = _check_only_person_properties(cohort_properties)
+
+    if non_person_types:
+        types_str = ", ".join(sorted(non_person_types))
+        return None, (
+            f"cohort '{cohort.name}' (id={cohort_id}) contains {types_str} filters — "
+            f"only cohorts with exclusively person property filters can be used in real-time filters"
+        )
+
+    # Reuse cohort_filters_to_expr which walks the same AND/OR tree structure.
+    # Since _check_only_person_properties already validated only person leaves exist,
+    # the behavioral/fallback branches in cohort_filters_to_expr are unreachable here.
+    expr = cohort_filters_to_expr({"properties": cohort_properties}, team)
+    # If the tree was empty/trivial, treat as if no properties
+    if isinstance(expr, ast.Constant) and expr.value is True:
+        return None, f"cohort '{cohort.name}' (id={cohort_id}) has no person property filters"
+
+    is_negated = prop.get("negation") or prop.get("operator") == "not_in"
+    exprs: list[ast.Expr] = [ast.Not(expr=expr)] if is_negated else [expr]
+    return exprs, None
 
 
 def _build_test_account_filters(filters: dict, team: Team) -> list[ast.Expr]:
-    """Build filters to exclude test account events."""
+    """Build filters to exclude test account events.
+
+    For cohort filters that only contain person properties, inline the properties
+    directly so they work in real-time bytecode filters (which can't do cohort lookups).
+    """
     if not filters.get("filter_test_accounts", False):
         return []
-    return [property_to_expr(property, team) for property in team.test_account_filters]
+
+    result: list[ast.Expr] = []
+    inline_failures: list[str] = []
+    for prop in team.test_account_filters:
+        if _is_cohort_filter(prop):
+            exprs, reason = _try_inline_cohort_filter(prop, team)
+            if exprs is not None:
+                result.extend(exprs)
+                continue
+            # Cohort couldn't be inlined — record the reason and skip the standard
+            # path (property_to_expr would generate a CohortMembership node that
+            # the bytecode compiler will reject anyway).
+            if reason:
+                inline_failures.append(reason)
+            continue
+        # Non-cohort filter — use standard path
+        result.append(property_to_expr(prop, team))
+
+    if inline_failures:
+        raise CohortInlineError(inline_failures)
+
+    return result
 
 
 def _build_global_property_filters(filters: dict, team: Team) -> list[ast.Expr]:
@@ -62,11 +224,18 @@ def _build_single_filter_expr(filter: dict, actions: dict[int, Action], team: Te
 
     # Return single expression or AND combination
     if not filter_exprs:
-        return ast.Constant(value=True)
+        expr: ast.Expr = ast.Constant(value=True)
     elif len(filter_exprs) == 1:
-        return filter_exprs[0]
+        expr = filter_exprs[0]
     else:
-        return ast.And(exprs=filter_exprs)
+        expr = ast.And(exprs=filter_exprs)
+
+    # Internal events carry nested JSON properties, so resolve dotted keys (e.g. `detail.name`)
+    # into nested chains for this branch only — never for sibling non-internal event branches.
+    if filter.get("id") in INTERNAL_NESTED_PROPERTY_EVENTS:
+        expr = _NestedPropertyKeyResolver().visit(expr)
+
+    return expr
 
 
 def _combine_expressions(expressions: list[ast.Expr]) -> ast.Expr:
@@ -81,7 +250,7 @@ def _combine_expressions(expressions: list[ast.Expr]) -> ast.Expr:
 
 def insights_function_filters_to_expr(filters: dict, team: Team, actions: dict[int, Action]) -> ast.Expr:
     """
-    Build a InsightsQL expression from custom function filters.
+    Build a InsightsQL expression from script function filters.
 
     Optimized to evaluate test account filters only once at the top level,
     rather than duplicating them for each event/action check.
@@ -97,8 +266,16 @@ def insights_function_filters_to_expr(filters: dict, team: Team, actions: dict[i
     if not all_filters:
         return _combine_expressions(test_account_filters + global_property_filters)
 
-    # Build expressions for each event/action filter
+    # Build expressions for each event/action filter (dotted keys on internal events are resolved
+    # per-branch inside _build_single_filter_expr).
     event_action_exprs = [_build_single_filter_expr(filter, actions, team) for filter in all_filters]
+
+    # Global property filters apply across all branches; the activity log UI stores `detail.name`
+    # here, so resolve dotted keys only when every targeted event is an internal nested event —
+    # never when a sibling analytics event could read the same key as a flat property.
+    if _only_targets_internal_nested_events(filters):
+        resolver = _NestedPropertyKeyResolver()
+        global_property_filters = [resolver.visit(expr) for expr in global_property_filters]
 
     # Combine event/action filters with OR (match any of these events/actions)
     combined_events_expr = ast.Or(exprs=event_action_exprs) if len(event_action_exprs) > 1 else event_action_exprs[0]
@@ -149,6 +326,39 @@ class SelectFinder(TraversingVisitor):
         return visitor.found
 
 
+def _internal_user_settings_url(team_id: int) -> str:
+    site_url = settings.SITE_URL.rstrip("/")
+    return f"{site_url}/project/{team_id}/settings/project-customization#internal-user-filtering"
+
+
+class _LowerConstantMembership(CloningVisitor):
+    """Rewrite `x IN (c1, c2, ...)` / `x NOT IN (...)` over constant literals into a coercing
+    OR-of-EQ / AND-of-NotEq chain. The Script VM evaluates the IN/NOT_IN opcode with strict equality
+    (no type coercion), unlike EQ/NotEq which unify operand types first. So a numeric property — e.g.
+    a survey rating sent as a number — never matches a list of string literals like ("1".."6"), and
+    the condition silently falls through. Scoped to real-time filter bytecode: the shared Script
+    compiler, the Datastore query path, and the JS-transpiled filter path are all untouched."""
+
+    def visit_compare_operation(self, node: ast.CompareOperation) -> ast.Expr:
+        if node.op in (ast.CompareOperationOp.In, ast.CompareOperationOp.NotIn) and isinstance(
+            node.right, ast.Tuple | ast.Array
+        ):
+            elements = node.right.exprs
+            if elements and all(isinstance(element, ast.Constant) for element in elements):
+                eq_op = (
+                    ast.CompareOperationOp.Eq if node.op == ast.CompareOperationOp.In else ast.CompareOperationOp.NotEq
+                )
+                comparisons: list[ast.Expr] = [
+                    ast.CompareOperation(op=eq_op, left=self.visit(node.left), right=self.visit(element))
+                    for element in elements
+                ]
+                if len(comparisons) == 1:
+                    return comparisons[0]
+                # IN → "matches any" (OR); NOT IN → "matches none" (AND).
+                return ast.Or(exprs=comparisons) if node.op == ast.CompareOperationOp.In else ast.And(exprs=comparisons)
+        return super().visit_compare_operation(node)
+
+
 def compile_filters_bytecode(filters: Optional[dict], team: Team, actions: Optional[dict[int, Action]] = None) -> dict:
     filters = filters or {}
     try:
@@ -156,37 +366,42 @@ def compile_filters_bytecode(filters: Optional[dict], team: Team, actions: Optio
         if SelectFinder.has_select(expr):
             raise Exception("Select queries are not allowed in filters")
 
-        filters["bytecode"] = create_bytecode(expr).bytecode
+        expr = _LowerConstantMembership().visit(expr)
+        context = InsightsQLContext(team_id=team.id)
+        filters["bytecode"] = create_bytecode(expr, context=context).bytecode
+
+        # context.errors here only contains "function not implemented" errors from the
+        # bytecode compiler (the resolver doesn't run during create_bytecode). These are
+        # genuinely fatal — the bytecode would reference a non-existent function at runtime.
+        if context.errors:
+            error_messages = "; ".join(e.message for e in context.errors if e.message)
+            raise Exception(f"Filter compilation errors: {error_messages}")
         if "bytecode_error" in filters:
             del filters["bytecode_error"]
+    except CohortInlineError as e:
+        settings_url = _internal_user_settings_url(team.id)
+        details = "; ".join(e.reasons)
+        filters["bytecode"] = None
+        filters["bytecode_error"] = (
+            f"Your internal/test user filters include cohorts that can't be used in real-time filters: "
+            f"{details}. "
+            f"Either switch to a cohort that only uses person properties, "
+            f"or replace the cohort with inline person property filters. "
+            f"Update your filters at: {settings_url}"
+        )
     except Exception as e:
         error_msg = str(e)
 
-        # Check if the error is about cohorts and if test account filters are involved
-        if "Can't use cohorts in real-time filters" in error_msg and filters.get("filter_test_accounts", False):
-            # Check if team has cohort filters in test account filters
-            if team.test_account_filters:
-                cohort_filters = [
-                    f
-                    for f in team.test_account_filters
-                    if isinstance(f, dict)
-                    and f.get("type") in ["cohort", "static-cohort", "precalculated-cohort", "dynamic-cohort"]
-                ]
-                if cohort_filters:
-                    # Extract cohort information for the error message
-                    cohort_info = []
-                    for cohort_filter in cohort_filters:
-                        value = cohort_filter.get("value")
-                        if value:
-                            cohort_info.append(f"cohort id={value}")
-
-                    cohort_names = " (" + ", ".join(cohort_info) + ")" if cohort_info else ""
-                    site_url = settings.SITE_URL.rstrip("/")
-                    error_msg = (
-                        f"Can't use cohorts in real-time filters. "
-                        f"Update your filters at: {site_url}/project/{team.id}/settings/project#internal-user-filtering. "
-                        f"Please inline the relevant expressions{cohort_names}."
-                    )
+        # Cohort errors from sources other than test account filters (e.g. global
+        # property filters referencing a cohort) still hit the bytecode compiler's
+        # generic "Can't use cohorts in real-time filters" error.
+        if "Can't use cohorts in real-time filters" in error_msg:
+            settings_url = _internal_user_settings_url(team.id)
+            error_msg = (
+                f"Cohort membership can't be evaluated in real-time filters. "
+                f"Replace cohorts with equivalent inline person property filters. "
+                f"Update your filters at: {settings_url}"
+            )
 
         filters["bytecode"] = None
         filters["bytecode_error"] = error_msg
@@ -222,7 +437,7 @@ def build_behavioral_event_expr(behavioral_filter: dict, team: Team) -> ast.Expr
 
 
 def cohort_filters_to_expr(filters: dict, team: Team) -> ast.Expr:
-    """Assemble a InsightsQL expression for cohort filters similarly to custom function filters.
+    """Assemble a InsightsQL expression for cohort filters similarly to script function filters.
 
     - Recursively walks the cohort `properties` group
     - For behavioral filters, builds event matcher AND per-filter properties

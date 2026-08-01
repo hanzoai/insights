@@ -13,9 +13,10 @@ from insights.schema import (
     TeamTaxonomyItem,
 )
 
-from insights.models import GroupTypeMapping, Organization, Project, Team
-from insights.models.property_definition import PropertyDefinition
+from insights.models import Organization, Project, Team
+from insights.test.persons import create_group_type_mapping
 
+from products.event_definitions.backend.models.property_definition import PropertyDefinition
 from products.insights_ai.dags.snapshot_team_data import (
     SnapshotUnrecoverableError,
     snapshot_actors_property_taxonomy,
@@ -26,6 +27,7 @@ from products.insights_ai.dags.snapshot_team_data import (
     snapshot_properties_taxonomy,
 )
 
+from ee.hogai.eval.schema import PostgresTeamDataSnapshot, TeamSnapshot
 
 
 @pytest.fixture
@@ -313,7 +315,7 @@ def test_snapshot_actors_property_taxonomy_can_be_skipped(
 
 @patch("products.insights_ai.dags.snapshot_team_data.check_dump_exists")
 @patch("products.insights_ai.dags.snapshot_team_data.call_query_runner")
-@pytest.mark.django_db(databases=["default", "persons_db_writer"])
+@pytest.mark.django_db(databases=["default"])
 def test_snapshot_actors_property_taxonomy_dumps_with_group_type_mapping(
     mock_call_query_runner, mock_check_dump_exists, mock_context, mock_s3, team, mock_dump
 ):
@@ -321,7 +323,7 @@ def test_snapshot_actors_property_taxonomy_dumps_with_group_type_mapping(
     mock_check_dump_exists.return_value = False
 
     # Create a GroupTypeMapping for the team
-    GroupTypeMapping.objects.create(
+    create_group_type_mapping(
         team=team,
         project=team.project,
         group_type="organization",

@@ -2,7 +2,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-use axum::async_trait;
+use async_trait::async_trait;
 use kafka_deduplicator::kafka::{
     batch_consumer::*,
     batch_context::{ConsumerCommand, ConsumerCommandSender},
@@ -29,77 +29,12 @@ use rdkafka::{
 };
 use std::sync::Mutex;
 use time::OffsetDateTime;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio::sync::oneshot;
 use uuid::Uuid;
 
 const KAFKA_BROKERS: &str = "localhost:9092";
 const TEST_TOPIC_BASE: &str = "kdedup-batch-consumer-integration-test";
-
-/// Helper to create a BatchKafkaConsumer for integration smoke tests
-#[allow(clippy::type_complexity)]
-fn create_batch_kafka_consumer(
-    topic: &str,
-    group_id: &str,
-    batch_size: usize,
-    batch_timeout: Duration,
-) -> Result<(
-    BatchConsumer<CapturedEvent>,
-    UnboundedReceiver<Batch<CapturedEvent>>,
-    oneshot::Sender<()>,
-)> {
-    let mut config = ClientConfig::new();
-    config
-        .set("bootstrap.servers", KAFKA_BROKERS)
-        .set("group.id", group_id)
-        .set("enable.auto.commit", "false")
-        .set("auto.offset.reset", "earliest")
-        .set("session.timeout.ms", "6000")
-        .set("heartbeat.interval.ms", "2000");
-
-    // Create shutdown channel - return sender so test can control shutdown
-    let (shutdown_tx, shutdown_rx) = oneshot::channel();
-
-    let (chan_tx, chan_rx) = unbounded_channel();
-
-    // Create a test processor that sends batches to the channel
-    struct TestProcessor {
-        sender: UnboundedSender<Batch<CapturedEvent>>,
-    }
-
-    #[async_trait]
-    impl BatchConsumerProcessor<CapturedEvent> for TestProcessor {
-        async fn process_batch(&self, messages: Vec<KafkaMessage<CapturedEvent>>) -> Result<()> {
-            let mut batch = Batch::new();
-            for msg in messages {
-                batch.push_message(msg);
-            }
-            self.sender
-                .send(batch)
-                .map_err(|e| anyhow::anyhow!("Failed to send batch: {e}"))
-        }
-    }
-
-    // Create offset tracker with coordinator
-    let coordinator = create_test_tracker();
-    let processor = Arc::new(TestProcessor { sender: chan_tx });
-    let offset_tracker = Arc::new(OffsetTracker::new(coordinator));
-
-    let consumer = BatchConsumer::<CapturedEvent>::new(
-        &config,
-        Arc::new(TestRebalanceHandler::default()),
-        processor,
-        offset_tracker,
-        shutdown_rx,
-        topic,
-        batch_size,
-        batch_timeout,
-        Duration::from_secs(1),
-        Duration::from_secs(5), // seek_timeout
-    )?;
-
-    Ok((consumer, chan_rx, shutdown_tx))
-}
 
 /// Rebalance handler that captures the ConsumerCommandSender when async_setup runs,
 /// so tests can send SeekPartitions (or other commands) to the consumer.
@@ -240,68 +175,102 @@ async fn test_simple_batch_kafka_consumer() -> Result<()> {
 
     send_test_messages(&test_topic, test_messages).await?;
 
-    let (consumer, mut batch_rx, shutdown_tx) =
-        create_batch_kafka_consumer(&test_topic, &group_id, batch_size, batch_timeout)?;
+    // Build consumer manually so we can use CaptureCommandSenderHandler for
+    // deterministic readiness signalling (wait for partition assignment instead
+    // of a fixed sleep).
+    let (ready_tx, ready_rx) = oneshot::channel();
+    let handler = Arc::new(CaptureCommandSenderHandler::new(ready_tx));
+
+    let mut config = ClientConfig::new();
+    config
+        .set("bootstrap.servers", KAFKA_BROKERS)
+        .set("group.id", &group_id)
+        .set("enable.auto.commit", "false")
+        .set("auto.offset.reset", "earliest")
+        .set("session.timeout.ms", "6000")
+        .set("heartbeat.interval.ms", "2000");
+
+    let (shutdown_tx, shutdown_rx) = oneshot::channel();
+    let (chan_tx, mut batch_rx) = unbounded_channel();
+
+    struct TestProcessor {
+        sender: UnboundedSender<Batch<CapturedEvent>>,
+    }
+    #[async_trait]
+    impl BatchConsumerProcessor<CapturedEvent> for TestProcessor {
+        async fn process_batch(&self, messages: Vec<KafkaMessage<CapturedEvent>>) -> Result<()> {
+            let mut batch = Batch::new();
+            for msg in messages {
+                batch.push_message(msg);
+            }
+            self.sender
+                .send(batch)
+                .map_err(|e| anyhow::anyhow!("Failed to send batch: {e}"))
+        }
+    }
+
+    let coordinator = create_test_tracker();
+    let processor = Arc::new(TestProcessor { sender: chan_tx });
+    let offset_tracker = Arc::new(OffsetTracker::new(coordinator));
+    let consumer = BatchConsumer::<CapturedEvent>::new(
+        &config,
+        handler,
+        processor,
+        offset_tracker,
+        None, // on_commit - not needed in tests
+        shutdown_rx,
+        &test_topic,
+        batch_size,
+        batch_timeout,
+        Duration::from_secs(1),
+        Duration::from_secs(5),
+    )?;
 
     // Start consumption in background task
     let consumer_handle = tokio::spawn(async move { consumer.start_consumption().await });
 
-    // this will cause the consumer.recv() loop below to exit
-    //when the consumer's start_consumption loop breaks and
-    // closes the batch submission channel
-    let _shutdown_handle = tokio::spawn(async move {
-        tokio::time::sleep(Duration::from_millis(200)).await;
-        let _ = shutdown_tx.send(());
-    });
+    // Wait until partitions are assigned before scheduling shutdown —
+    // this replaces the previous fixed sleep and eliminates the race.
+    tokio::time::timeout(Duration::from_secs(10), ready_rx)
+        .await
+        .expect("Timeout waiting for partition assignment")
+        .expect("ready_tx was dropped without sending");
 
-    tokio::time::sleep(Duration::from_millis(1)).await;
-
-    // Retry loop to wait for messages with timeout
+    // Collect batches until every message has been received. Waiting on the
+    // channel with a per-iteration timeout (rather than sleeping a fixed amount)
+    // lets a slow consumer — cold start, rebalance — catch up without failing
+    // the test spuriously.
     let mut msgs_recv = 0;
-    let max_attempts = 10;
-    let wait_duration = Duration::from_millis(500);
-
-    for attempt in 0..max_attempts {
-        // Try to receive all available batches without blocking
-        loop {
-            match batch_rx.try_recv() {
-                Ok(batch_result) => {
-                    let (msgs, errs) = batch_result.unpack();
-                    if !errs.is_empty() {
-                        panic!("Errors in batch: {errs:?}");
-                    }
-                    assert!(
-                        msgs.len() <= 3,
-                        "Batch size should be at most 3, got: {}",
-                        msgs.len()
-                    );
-                    msgs_recv += msgs.len();
+    let deadline = std::time::Instant::now() + Duration::from_secs(15);
+    while msgs_recv < expected_msg_count && std::time::Instant::now() < deadline {
+        match tokio::time::timeout(Duration::from_millis(200), batch_rx.recv()).await {
+            Ok(Some(batch_result)) => {
+                let (msgs, errs) = batch_result.unpack();
+                if !errs.is_empty() {
+                    panic!("Errors in batch: {errs:?}");
                 }
-                Err(tokio::sync::mpsc::error::TryRecvError::Empty) => break, // No more messages right now
-                Err(tokio::sync::mpsc::error::TryRecvError::Disconnected) => break, // Channel closed
+                assert!(
+                    msgs.len() <= batch_size,
+                    "Batch size should be at most {batch_size}, got: {}",
+                    msgs.len()
+                );
+                msgs_recv += msgs.len();
             }
-        }
-
-        // If we've received all messages, break early
-        if msgs_recv >= expected_msg_count {
-            break;
-        }
-
-        // Wait before next attempt (unless this is the last attempt)
-        if attempt < max_attempts - 1 {
-            tokio::time::sleep(wait_duration).await;
+            Ok(None) => break, // channel closed
+            Err(_) => {}       // nothing this interval; keep polling until the deadline
         }
     }
 
     assert_eq!(
-        msgs_recv,
-        expected_msg_count,
-        "Should have received all messages after {} attempts (waited up to {}ms), got: {msgs_recv}",
-        max_attempts,
-        (max_attempts - 1) * wait_duration.as_millis()
+        msgs_recv, expected_msg_count,
+        "Should have received all {expected_msg_count} messages within the deadline, got: {msgs_recv}"
     );
 
-    // Wait for graceful shutdown
+    // Shut down only AFTER all messages are received. The previous version armed
+    // a fixed 500ms timer to send shutdown, which raced message delivery: on a
+    // slow runner the consumer could be torn down before any batch arrived
+    // (msgs_recv == 0). Signalling here makes shutdown causally follow receipt.
+    let _ = shutdown_tx.send(());
     let _ = consumer_handle.await;
 
     Ok(())
@@ -535,6 +504,7 @@ async fn test_offset_commits_with_routing_processor() -> Result<()> {
         rebalance_handler,
         routing_processor,
         offset_tracker.clone(),
+        None, // on_commit - not needed in tests
         shutdown_rx,
         &test_topic,
         50, // batch size
@@ -679,12 +649,12 @@ async fn test_seek_partitions_rewinds_consumer() -> Result<()> {
     let coordinator = create_test_tracker();
     let processor = Arc::new(TestProcessor { sender: chan_tx });
     let offset_tracker = Arc::new(OffsetTracker::new(coordinator));
-
     let consumer = BatchConsumer::<CapturedEvent>::new(
         &config,
         handler.clone(),
         processor,
         offset_tracker,
+        None, // on_commit - not needed in tests
         shutdown_rx,
         &test_topic,
         10,
@@ -809,12 +779,12 @@ async fn test_seek_partitions_command_handled() -> Result<()> {
     let coordinator = create_test_tracker();
     let processor = Arc::new(NoopProcessor);
     let offset_tracker = Arc::new(OffsetTracker::new(coordinator));
-
     let consumer = BatchConsumer::<CapturedEvent>::new(
         &config,
         handler.clone(),
         processor,
         offset_tracker,
+        None, // on_commit - not needed in tests
         shutdown_rx,
         &test_topic,
         10,

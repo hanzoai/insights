@@ -1,8 +1,8 @@
 import { randomUUID } from 'crypto'
 
-import { findActionByType } from '~/cdp/services/insightsflows/insightsflow-utils'
-import { InsightsFlow, InsightsFlowAction, InsightsFlowEdge } from '~/schema/insightsflow'
-import { logger } from '~/utils/logger'
+import { InsightsFlow, InsightsFlowAction, InsightsFlowEdge } from '~/cdp/schema/hogflow'
+import { findActionByType } from '~/cdp/services/insightsflows/hogflow-utils'
+import { logger } from '~/common/utils/logger'
 
 import { FN_FILTERS_EXAMPLES } from '../examples'
 
@@ -41,13 +41,13 @@ export type SimpleInsightsFlowRepresentation = {
 }
 
 export class FixtureInsightsFlowBuilder {
-    private insightsFlow: InsightsFlow
+    private hogFlow: InsightsFlow
 
     constructor() {
-        this.insightsFlow = {
+        this.hogFlow = {
             id: randomUUID(),
             version: 1,
-            name: 'Custom Flow',
+            name: 'Script Flow',
             team_id: 1,
             status: 'active',
             trigger: undefined as any,
@@ -58,13 +58,13 @@ export class FixtureInsightsFlowBuilder {
     }
 
     build(): InsightsFlow {
-        if (this.insightsFlow.actions.length === 0) {
+        if (this.hogFlow.actions.length === 0) {
             this.withSimpleWorkflow()
         }
-        const triggerAction = findActionByType(this.insightsFlow, 'trigger')
-        this.insightsFlow.trigger = this.insightsFlow.trigger ?? (triggerAction ? triggerAction.config : undefined)
+        const triggerAction = findActionByType(this.hogFlow, 'trigger')
+        this.hogFlow.trigger = this.hogFlow.trigger ?? (triggerAction ? triggerAction.config : undefined)
 
-        if (!this.insightsFlow.trigger) {
+        if (!this.hogFlow.trigger) {
             logger.error('[InsightsFlowBuilder] No trigger action found. Indicates a faulty built workflow')
         }
 
@@ -72,39 +72,39 @@ export class FixtureInsightsFlowBuilder {
         const billableTypes = new Set(['function', 'function_email', 'function_sms', 'function_push'])
         const uniqueBillableTypes = new Set<string>()
 
-        for (const action of this.insightsFlow.actions) {
+        for (const action of this.hogFlow.actions) {
             if (billableTypes.has(action.type)) {
                 uniqueBillableTypes.add(action.type)
             }
         }
 
-        this.insightsFlow.billable_action_types = Array.from(uniqueBillableTypes).sort()
+        this.hogFlow.billable_action_types = Array.from(uniqueBillableTypes).sort()
 
-        return this.insightsFlow
+        return this.hogFlow
     }
 
     withName(name: string): this {
-        this.insightsFlow.name = name
+        this.hogFlow.name = name
         return this
     }
 
     withTeamId(teamId: number): this {
-        this.insightsFlow.team_id = teamId
+        this.hogFlow.team_id = teamId
         return this
     }
 
     withStatus(status: InsightsFlow['status']): this {
-        this.insightsFlow.status = status
+        this.hogFlow.status = status
         return this
     }
 
     withExitCondition(exitCondition: InsightsFlow['exit_condition']): this {
-        this.insightsFlow.exit_condition = exitCondition
+        this.hogFlow.exit_condition = exitCondition
         return this
     }
 
     withWorkflow(workflow: SimpleInsightsFlowRepresentation): this {
-        this.insightsFlow.actions = Object.entries(workflow.actions).map(([id, action]) => ({
+        this.hogFlow.actions = Object.entries(workflow.actions).map(([id, action]) => ({
             id,
             name: action.type,
             description: action.type,
@@ -114,13 +114,13 @@ export class FixtureInsightsFlowBuilder {
             ...(action as any), // TRICKY: Nasty cast as the union types are beyond me get right
         }))
 
-        this.insightsFlow.edges = workflow.edges
+        this.hogFlow.edges = workflow.edges
 
         return this
     }
 
     withConversion(conversion: InsightsFlow['conversion']): this {
-        this.insightsFlow.conversion = conversion
+        this.hogFlow.conversion = conversion
         return this
     }
 

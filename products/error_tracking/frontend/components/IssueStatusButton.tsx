@@ -1,10 +1,10 @@
 import { Button, MenuOverlay } from '@hanzo/elements'
 
-import { useConfetti } from 'lib/components/Confetti/Confetti'
+import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 
-import { STATUS_INTENT_LABEL } from './Indicators'
+import { ISSUE_STATUS_CONFIG } from './Indicators'
 
 export const IssueStatusButton = ({
     status,
@@ -13,7 +13,7 @@ export const IssueStatusButton = ({
     status: ErrorTrackingIssue['status']
     onChange: (status: ErrorTrackingIssue['status']) => void
 }): JSX.Element => {
-    const { trigger, ConfettiComponent } = useConfetti()
+    const { trigger, HogfettiComponent } = useHogfetti()
 
     const handleResolve = (): void => {
         if (status === 'active') {
@@ -26,11 +26,15 @@ export const IssueStatusButton = ({
 
     return (
         <>
-            <ConfettiComponent />
+            <HogfettiComponent />
             <Button
                 type="primary"
                 onClick={handleResolve}
-                tooltip={status === 'active' ? STATUS_INTENT_LABEL['resolved'] : STATUS_INTENT_LABEL['active']}
+                tooltip={
+                    status === 'active'
+                        ? ISSUE_STATUS_CONFIG.resolved.intentLabel
+                        : ISSUE_STATUS_CONFIG.active.intentLabel
+                }
                 data-attr="error-tracking-resolve"
                 sideAction={
                     status === 'active'
@@ -43,7 +47,7 @@ export const IssueStatusButton = ({
                                               {
                                                   label: 'Suppress',
                                                   onClick: () => onChange('suppressed'),
-                                                  tooltip: STATUS_INTENT_LABEL['suppressed'],
+                                                  tooltip: ISSUE_STATUS_CONFIG.suppressed.intentLabel,
                                               },
                                           ]}
                                       />

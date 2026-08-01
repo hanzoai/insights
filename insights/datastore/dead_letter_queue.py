@@ -3,7 +3,7 @@ from insights.datastore.indexes import index_by_kafka_timestamp
 from insights.datastore.kafka_engine import KAFKA_COLUMNS, kafka_engine, ttl_period
 from insights.datastore.table_engines import Distributed, ReplacingMergeTree
 from insights.kafka_client.topics import KAFKA_DEAD_LETTER_QUEUE
-from insights.settings import DATASTORE_CLUSTER, DATASTORE_DATABASE
+from insights.settings import DATASTORE_DATABASE
 from insights.settings.data_stores import DATASTORE_SINGLE_SHARD_CLUSTER
 
 # We pipe our Kafka dead letter queue into CH for easier analysis and longer retention
@@ -138,8 +138,6 @@ SELECT
 now()
 """
 
-TRUNCATE_DEAD_LETTER_QUEUE_TABLE_SQL = (
-    f"TRUNCATE TABLE IF EXISTS {DEAD_LETTER_QUEUE_TABLE} ON CLUSTER '{DATASTORE_CLUSTER}'"
-)
+TRUNCATE_DEAD_LETTER_QUEUE_TABLE_SQL = f"TRUNCATE TABLE IF EXISTS {DEAD_LETTER_QUEUE_TABLE} {ON_CLUSTER_CLAUSE()}"
 DROP_KAFKA_DEAD_LETTER_QUEUE_TABLE_SQL = f"DROP TABLE IF EXISTS kafka_{DEAD_LETTER_QUEUE_TABLE}"
 DROP_DEAD_LETTER_QUEUE_MV_TABLE_SQL = f"DROP TABLE IF EXISTS {DEAD_LETTER_QUEUE_TABLE}_mv"

@@ -27,35 +27,25 @@ from django.utils import timezone
 
 from rest_framework.exceptions import ValidationError
 
-from insights.schema import (
-    ActionsNode,
-    BreakdownFilter,
-    CompareFilter,
-    DataWarehouseNode,
-    DateRange,
-    EventsNode,
-    PropertyGroupFilter,
-    TrendsFilter,
-    TrendsQuery,
-)
+from insights.schema import TrendsQuery
 
 from insights.constants import TREND_FILTER_TYPE_EVENTS, TRENDS_BAR_VALUE, TRENDS_LINEAR, TRENDS_TABLE
 from insights.insightsql_queries.insights.trends.test.test_trends_persons import get_actors
 from insights.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
-from insights.insightsql_queries.legacy_compatibility.filter_to_query import (
-    clean_entity_properties,
-    clean_global_properties,
-    filter_to_query,
-)
-from insights.models import Action, Cohort, Entity, Filter, Organization, Person
+from insights.insightsql_queries.legacy_compatibility.filter_to_query import filter_to_query
+from insights.models import Entity, Filter, Organization, Person
 from insights.models.group.util import create_group
 from insights.models.instance_setting import get_instance_setting, override_instance_config
 from insights.models.person.util import create_person_distinct_id
-from insights.models.property_definition import PropertyDefinition
 from insights.models.team.team import Team
 from insights.models.utils import uuid7
+from insights.test.persons import create_person
 from insights.test.test_journeys import journeys_for
 from insights.test.test_utils import create_group_type_mapping_without_created_at
+
+from products.actions.backend.models.action import Action
+from products.cohorts.backend.models.cohort import Cohort
+from products.event_definitions.backend.models.property_definition import PropertyDefinition
 
 
 def breakdown_label(entity: Entity, value: Union[str, int]) -> dict[str, Optional[Union[str, int]]]:
@@ -75,113 +65,17 @@ def breakdown_label(entity: Entity, value: Union[str, int]) -> dict[str, Optiona
     return ret_dict
 
 
-def _create_cohort(**kwargs):
-    team = kwargs.pop("team")
-    name = kwargs.pop("name")
-    groups = kwargs.pop("groups")
+def _create_cohort(
+    *,
+    team: Team,
+    name: str,
+    groups: list[dict[str, Any]],
+    pending_version: int | None = 0,
+) -> Cohort:
     cohort = Cohort.objects.create(team=team, name=name, groups=groups, last_calculation=timezone.now())
-    cohort.calculate_people_ch(pending_version=0)
+    if pending_version is not None:
+        cohort.calculate_people_ch(pending_version=pending_version)
     return cohort
-
-
-def _props(dict: dict):
-    props = dict.get("properties", None)
-    if not props:
-        return None
-
-    if isinstance(props, list):
-        raw_properties = {
-            "type": "AND",
-            "values": [{"type": "AND", "values": props}],
-        }
-    else:
-        raw_properties = {
-            "type": "AND",
-            "values": [{"type": "AND", "values": [props]}],
-        }
-
-    return PropertyGroupFilter(**clean_global_properties(raw_properties))
-
-
-def convert_filter_to_trends_query(filter: Filter) -> TrendsQuery:
-    filter_as_dict = filter.to_dict()
-
-    events: list[EventsNode] = []
-    actions: list[ActionsNode] = []
-
-    for event in filter.events:
-        if isinstance(event._data.get("properties", None), list):
-            properties = clean_entity_properties(event._data.get("properties", None))
-        elif event._data.get("properties", None) is not None:
-            values = event._data.get("properties", None).get("values", None)
-            properties = clean_entity_properties(values)
-        else:
-            properties = None
-
-        events.append(
-            EventsNode(
-                event=event.id,
-                name=event.name,
-                custom_name=event.custom_name,
-                math=event.math,
-                math_property=event.math_property,
-                math_insightsql=event.math_insightsql,
-                math_group_type_index=event.math_group_type_index,
-                properties=properties,
-            )
-        )
-
-    for action in filter.actions:
-        if isinstance(action._data.get("properties", None), list):
-            properties = clean_entity_properties(action._data.get("properties", None))
-        elif action._data.get("properties", None) is not None:
-            values = action._data.get("properties", None).get("values", None)
-            properties = clean_entity_properties(values)
-        else:
-            properties = None
-
-        actions.append(
-            ActionsNode(
-                id=action.id,
-                name=action.name,
-                custom_name=action.custom_name,
-                math=action.math,
-                math_property=action.math_property,
-                math_insightsql=action.math_insightsql,
-                math_group_type_index=action.math_group_type_index,
-                properties=properties,
-            )
-        )
-
-    series: list[Union[EventsNode, ActionsNode, DataWarehouseNode]] = [*events, *actions]
-
-    tq = TrendsQuery(
-        series=series,
-        kind="TrendsQuery",
-        filterTestAccounts=filter.filter_test_accounts,
-        dateRange=DateRange(date_from=filter_as_dict.get("date_from"), date_to=filter_as_dict.get("date_to")),
-        samplingFactor=filter.sampling_factor,
-        aggregation_group_type_index=filter.aggregation_group_type_index,
-        breakdownFilter=BreakdownFilter(
-            breakdown=filter.breakdown,
-            breakdown_type=filter.breakdown_type,
-            breakdown_normalize_url=filter.breakdown_normalize_url,
-            breakdowns=filter.breakdowns,
-            breakdown_group_type_index=filter.breakdown_group_type_index,
-            breakdown_histogram_bin_count=filter.breakdown_histogram_bin_count,
-            breakdown_limit=filter._breakdown_limit,
-        ),
-        properties=_props(filter.to_dict()),
-        interval=filter.interval,
-        trendsFilter=TrendsFilter(
-            display=filter.display,
-            breakdown_histogram_bin_count=filter.breakdown_histogram_bin_count,
-            smoothingIntervals=filter.smoothing_intervals,
-        ),
-        compareFilter=CompareFilter(compare=filter.compare, compare_to=filter.compare_to),
-    )
-
-    return tq
 
 
 @override_settings(IN_UNIT_TESTING=True)
@@ -191,7 +85,13 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
     def _run(self, filter: Filter, team: Team):
         flush_persons_and_events()
 
-        trend_query = convert_filter_to_trends_query(filter)
+        trend_query = cast(TrendsQuery, filter_to_query(filter.to_dict()))
+        tqr = TrendsQueryRunner(team=team, query=trend_query)
+        return tqr.calculate().results
+
+    def _run_query(self, trend_query: TrendsQuery, team: Team):
+        flush_persons_and_events()
+
         tqr = TrendsQueryRunner(team=team, query=trend_query)
         return tqr.calculate().results
 
@@ -361,19 +261,19 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "http://insightsflix/first"},
+                properties={"$current_url": "http://hogflix/first"},
             )
             self._create_event(
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "http://insightsflix/first/"},
+                properties={"$current_url": "http://hogflix/first/"},
             )
             self._create_event(
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "http://insightsflix/second"},
+                properties={"$current_url": "http://hogflix/second"},
             )
 
     def _create_event_count_per_actor_events(self):
@@ -814,7 +714,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
             )
 
         labels = [item["label"] for item in response]
-        assert sorted(labels) == ["http://insightsflix/first", "http://insightsflix/second"]
+        assert sorted(labels) == ["http://hogflix/first", "http://hogflix/second"]
         breakdown_values = [item["breakdown_value"] for item in response]
         assert sorted(breakdown_values) == sorted(labels)
 
@@ -2504,7 +2404,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
         self._test_events_with_dates(
             dates=["2020-06-2", "2020-07-30"],
             interval="month",
-            date_from="2020-6-7",  # should round down to 6-1
+            date_from="2020-6-7",  # rounds labels down to 6-1 but only includes events on or after date_from
             date_to="2020-7-30",
             result=[
                 {
@@ -2521,8 +2421,8 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
                         "properties": [],
                     },
                     "label": "event_name",
-                    "count": 2.0,
-                    "data": [1.0, 1.0],
+                    "count": 1.0,
+                    "data": [0.0, 1.0],
                     "labels": ["Jun 2020", "Jul 2020"],
                     "days": ["2020-06-01", "2020-07-01"],
                 }
@@ -3667,12 +3567,6 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
 
             self.assertEqual(response[0]["count"], 2)
             self.assertEqual(response[0]["data"][-1], 2)
-
-    def test_response_empty_if_no_events(self):
-        self._create_events()
-        flush_persons_and_events()
-        response = self._run(Filter(team=self.team, data={"date_from": "2012-12-12"}), self.team)
-        self.assertEqual(response, [])
 
     def test_interval_filtering_hour(self):
         self._create_events(use_time=True)
@@ -5283,7 +5177,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
 
     @snapshot_datastore_queries
     def test_trends_aggregate_by_distinct_id(self):
-        # Stopgap until https://github.com/Hanzo Insights/meta/pull/39 is implemented
+        # Stopgap until https://github.com/Insights/meta/pull/39 is implemented
 
         self._create_person(
             team_id=self.team.pk,
@@ -6264,7 +6158,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(event_properties=["$host"], person_properties=["$some_prop"])
     def test_against_clashing_entity_and_property_filter_naming(self):
-        # Regression test for https://github.com/Hanzo Insights/insights/issues/5814
+        # Regression test for https://github.com/Insights/insights/issues/5814
         self._create_person(
             team_id=self.team.pk,
             distinct_ids=["blabla", "anonymous_id"],
@@ -7571,6 +7465,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
             team=self.team,
             name="cohort_2",
             groups=[{"properties": [{"key": "key_2", "value": "value_2", "type": "person"}]}],
+            pending_version=None,
         )
 
         # try different versions
@@ -8456,7 +8351,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(event_properties=["email", "name"], person_properties=["email", "name"])
     def test_ilike_regression_with_current_datastore_version(self):
-        # CH upgrade to 22.3 has this problem: https://github.com/hanzoai/datastore/issues/36279
+        # CH upgrade to 22.3 has this problem: https://github.com/Datastore/Datastore/issues/36279
         # While we're waiting to upgrade to a newer version, a workaround is to set `optimize_move_to_prewhere = 0`
         # Only happens in the materialized version
 
@@ -8482,19 +8377,19 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
                             {
                                 "key": "email",
                                 "type": "event",
-                                "value": "insights.com",
+                                "value": "hanzo.ai",
                                 "operator": "not_icontains",
                             },
                             {
                                 "key": "name",
                                 "type": "event",
-                                "value": "insights.com",
+                                "value": "hanzo.ai",
                                 "operator": "not_icontains",
                             },
                             {
                                 "key": "name",
                                 "type": "person",
-                                "value": "insights.com",
+                                "value": "hanzo.ai",
                                 "operator": "not_icontains",
                             },
                         ],
@@ -9199,7 +9094,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
     def test_breakdown_by_group_props_with_person_filter(self):
         self._create_groups()
 
-        Person.objects.create(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
+        create_person(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
 
         self._create_event(
             event="sign up",
@@ -9243,7 +9138,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
     def test_filtering_with_group_props(self):
         self._create_groups()
 
-        Person.objects.create(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
+        create_person(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
         self._create_event(
             event="$pageview",
             distinct_id="person1",
@@ -9296,7 +9191,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
     def test_filtering_with_group_props_event_with_no_group_data(self):
         self._create_groups()
 
-        Person.objects.create(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
+        create_person(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
         self._create_event(
             event="$pageview",
             distinct_id="person1",
@@ -9352,7 +9247,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
     def test_breakdown_by_group_props_with_person_filter_person_on_events(self):
         self._create_groups()
 
-        Person.objects.create(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
+        create_person(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
 
         self._create_event(
             event="sign up",
@@ -9397,7 +9292,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
     def test_filtering_with_group_props_person_on_events(self):
         self._create_groups()
 
-        Person.objects.create(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
+        create_person(team_id=self.team.pk, distinct_ids=["person1"], properties={"key": "value"})
         self._create_event(
             event="$pageview",
             distinct_id="person1",

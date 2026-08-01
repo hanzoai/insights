@@ -1,10 +1,21 @@
 import { IconInfo } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
 
+import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
+import { TeamMembershipLevel } from 'lib/constants'
 import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
 import { urls } from 'scenes/urls'
 
-export function DiscussionMentionNotifications(): JSX.Element {
+export function DiscussionMentionNotifications(): JSX.Element | null {
+    const restrictedReason = useRestrictedArea({
+        scope: RestrictionScope.Project,
+        minimumAccessLevel: TeamMembershipLevel.Admin,
+    })
+
+    if (restrictedReason) {
+        return null
+    }
+
     return (
         <div>
             <p className="flex items-center gap-1">

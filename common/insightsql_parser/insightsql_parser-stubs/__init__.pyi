@@ -23,7 +23,7 @@ def parse_select(expr: str, /, *, is_internal: bool = False) -> SelectQuery | Se
     ...
 
 def parse_full_template_string(expr: str, /, *, is_internal: bool = False) -> AST:
-    """Parse an IQL template string into an AST.
+    """Parse a Script template string into an AST.
 
     If the expr `is_internal`, spans and notices won't be included in the AST.
     """
@@ -37,7 +37,7 @@ def parse_string_literal_text(value: str, /) -> str:
     ...
 
 def parse_program(source: str, /, *, is_internal: bool = False) -> Program:
-    """Parse an IQL program.
+    """Parse a Script program.
 
     If the expr `is_internal`, spans and notices won't be included in the AST.
     """
@@ -65,14 +65,14 @@ def parse_select_json(expr: str, /, *, is_internal: bool = False) -> str:
     ...
 
 def parse_full_template_string_json(expr: str, /, *, is_internal: bool = False) -> str:
-    """Parse an IQL template string into a JSON AST.
+    """Parse a Script template string into a JSON AST.
 
     If the expr `is_internal`, spans and notices won't be included in the AST.
     """
     ...
 
 def parse_program_json(source: str, /, *, is_internal: bool = False) -> str:
-    """Parse an IQL program into a JSON AST.
+    """Parse a Script program into a JSON AST.
 
     If the expr `is_internal`, spans and notices won't be included in the AST.
     """

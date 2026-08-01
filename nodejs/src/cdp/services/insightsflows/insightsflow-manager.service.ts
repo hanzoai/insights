@@ -1,13 +1,26 @@
-// @ts-nocheck
-import { InsightsFlow } from '~/schema/insightsflow'
+import { Counter } from 'prom-client'
+
+import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { PostgresRouter, PostgresUse } from '~/common/utils/db/postgres'
+import { parseJSON } from '~/common/utils/json-parse'
+import { LazyLoader } from '~/common/utils/lazy-loader'
+import { logger } from '~/common/utils/logger'
+import { captureException } from '~/common/utils/insights'
+import { PubSub } from '~/common/utils/pubsub'
 import { Team } from '~/types'
-import { PostgresRouter, PostgresUse } from '~/utils/db/postgres'
-import { LazyLoader } from '~/utils/lazy-loader'
-import { logger } from '~/utils/logger'
-import { PubSub } from '~/utils/pubsub'
+
+import { EncryptedFields } from '../../utils/encryption-utils'
+
+// Nonzero means a flow's encrypted secret inputs couldn't be decrypted (most likely Fernet key skew
+// between Django and the workers, or a corrupt blob). The flow still runs, but its secret-input steps
+// run without their credentials, so this is worth alerting on.
+const counterEncryptedInputsDecryptFailed = new Counter({
+    name: 'cdp_hogflow_encrypted_inputs_decrypt_failed',
+    help: 'A script flow encrypted_inputs blob could not be decrypted; the flow runs without its secrets',
+})
 
 // TODO: Make sure we only have fields we truly need
-const INSIGHTS_FLOW_FIELDS = [
+const FN_FLOW_FIELDS = [
     'id',
     'team_id',
     'name',
@@ -22,8 +35,11 @@ const INSIGHTS_FLOW_FIELDS = [
     'exit_condition',
     'edges',
     'actions',
+    'encrypted_inputs',
     'abort_action',
     'billable_action_types',
+    'variables',
+    'action_redirects',
 ]
 
 export type InsightsFlowTeamInfo = Pick<InsightsFlow, 'id' | 'team_id' | 'version'>
@@ -34,22 +50,39 @@ export class InsightsFlowManagerService {
 
     constructor(
         private postgres: PostgresRouter,
-        private pubSub: PubSub
+        private pubSub: PubSub,
+        private encryptedFields: EncryptedFields
     ) {
+        // The reload-script-flows pub/sub below is the primary invalidation; these ages bound how
+        // stale a worker can run when it misses the publish (pod restart, Redis blip). Live edits
+        // are expected to reach in-flight runs, so a hot flow self-heals within ~30s via a
+        // non-blocking background refresh, with a 2 minute hard cap - without these, a missed
+        // publish serves stale config for the 5 minute default and the expiry refetch blocks the
+        // worker's hot path.
+        const cacheOptions = {
+            refreshAgeMs: 2 * 60 * 1000,
+            refreshBackgroundAgeMs: 30 * 1000,
+            // Absorb transient Postgres blips inside a single load attempt so failed background
+            // refreshes don't re-fire at caller QPS and hard-cap refreshes don't fail the batch.
+            loaderRetry: { retryIntervalMs: 250, retryJitterMs: 250, maxElapsedMs: 5000 },
+        }
+
         this.lazyLoaderByTeam = new LazyLoader({
-            name: 'insights_flow_manager_by_team',
+            name: 'hog_flow_manager_by_team',
+            ...cacheOptions,
             loader: async (teamIds) => await this.fetchTeamInsightsFlows(teamIds),
         })
 
         this.lazyLoader = new LazyLoader({
-            name: 'insights_flow_manager',
+            name: 'hog_flow_manager',
+            ...cacheOptions,
             loader: async (ids) => await this.fetchInsightsFlows(ids),
         })
 
-        this.pubSub.on<{ teamId: Team['id']; insightsFlowIds: InsightsFlow['id'][] }>('reload-insights-flows', (message) => {
-            const { teamId, insightsFlowIds } = message
-            logger.debug('⚡', '[PubSub] Reloading custom flows!', { teamId, insightsFlowIds })
-            this.onInsightsFlowsReloaded(teamId, insightsFlowIds)
+        this.pubSub.on<{ teamId: Team['id']; hogFlowIds: InsightsFlow['id'][] }>('reload-script-flows', (message) => {
+            const { teamId, hogFlowIds } = message
+            logger.debug('⚡', '[PubSub] Reloading script flows!', { teamId, hogFlowIds })
+            this.onInsightsFlowsReloaded(teamId, hogFlowIds)
         })
     }
 
@@ -108,16 +141,16 @@ export class InsightsFlowManagerService {
         return await this.lazyLoader.getMany(ids)
     }
 
-    private onInsightsFlowsReloaded(teamId: Team['id'], insightsFlowIds: InsightsFlow['id'][]): void {
+    private onInsightsFlowsReloaded(teamId: Team['id'], hogFlowIds: InsightsFlow['id'][]): void {
         this.lazyLoaderByTeam.markForRefresh(teamId.toString())
-        this.lazyLoader.markForRefresh(insightsFlowIds)
+        this.lazyLoader.markForRefresh(hogFlowIds)
     }
 
     private async fetchTeamInsightsFlows(teamIds: string[]): Promise<Record<string, InsightsFlowTeamInfo[]>> {
-        logger.debug('[InsightsFlowManager]', 'Fetching team custom flows', { teamIds })
+        logger.debug('[InsightsFlowManager]', 'Fetching team script flows', { teamIds })
         const response = await this.postgres.query<InsightsFlowTeamInfo>(
             PostgresUse.COMMON_READ,
-            `SELECT id, team_id, version FROM insights_flow WHERE status='active' AND team_id = ANY($1)`,
+            `SELECT id, team_id, version FROM insights_hogflow WHERE status='active' AND team_id = ANY($1)`,
             [teamIds],
             'fetchAllTeamInsightsFlows'
         )
@@ -136,11 +169,11 @@ export class InsightsFlowManagerService {
     }
 
     private async fetchInsightsFlows(ids: string[]): Promise<Record<string, InsightsFlow | undefined>> {
-        logger.debug('[InsightsFlowManager]', 'Fetching custom flows', { ids })
+        logger.debug('[InsightsFlowManager]', 'Fetching script flows', { ids })
 
         const response = await this.postgres.query<InsightsFlow>(
             PostgresUse.COMMON_READ,
-            `SELECT ${INSIGHTS_FLOW_FIELDS.join(', ')} FROM insights_flow WHERE id = ANY($1)`,
+            `SELECT ${FN_FLOW_FIELDS.join(', ')} FROM insights_hogflow WHERE id = ANY($1)`,
             [ids],
             'fetchInsightsFlows'
         )
@@ -164,8 +197,65 @@ export class InsightsFlowManagerService {
                     }
                 }
             }
+            this.mergeEncryptedInputs(item)
             acc[item.id] = item
             return acc
         }, {})
+    }
+
+    // Decrypts `encrypted_inputs` and folds each action's secret inputs back into
+    // `action.config.inputs` so the executor sees a whole config. `encrypted_inputs` is authoritative:
+    // if a key also appears in plaintext `actions` (a row not yet re-saved since encryption shipped),
+    // the encrypted value takes precedence, so both shapes resolve to the right value.
+    private mergeEncryptedInputs(item: InsightsFlow): void {
+        const raw = item.encrypted_inputs as unknown
+
+        let decrypted: Record<string, Record<string, unknown>> | undefined
+        if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+            // The sql lib occasionally hands back an already-parsed object
+            decrypted = raw as Record<string, Record<string, unknown>>
+        } else if (typeof raw === 'string' && raw) {
+            try {
+                const plaintext = this.encryptedFields.decrypt(raw)
+                if (plaintext) {
+                    decrypted = parseJSON(plaintext)
+                }
+            } catch (error) {
+                // The blob is dropped below and the flow runs without its secrets (fail-open, matching
+                // InsightsFunctionManagerService). The counter makes the failure alertable - the most likely
+                // cause is Fernet key skew between Django and the workers.
+                logger.warn('[InsightsFlowManager]', 'Could not decrypt encrypted inputs - flow will run without them', {
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                })
+                counterEncryptedInputsDecryptFailed.inc()
+                captureException(error)
+            }
+        }
+
+        // Drop the encrypted blob from the in-memory flow either way - downstream reads inputs off
+        // `action.config.inputs`, and this keeps the ciphertext out of anything that logs the flow.
+        delete item.encrypted_inputs
+
+        if (!decrypted) {
+            return
+        }
+
+        for (const action of item.actions ?? []) {
+            const actionSecrets = decrypted[action.id]
+            if (!actionSecrets || !('config' in action)) {
+                continue
+            }
+            const config = action.config as { inputs?: Record<string, unknown> }
+            config.inputs = { ...config.inputs, ...actionSecrets }
+
+            // The top-level `trigger` is derived from the trigger action and is stripped of secrets
+            // the same way. The source-webhook consumer builds its function from `hogFlow.trigger`
+            // (not the action), so re-merge the trigger action's secrets there too or a webhook
+            // trigger's secret auth header would be missing at runtime.
+            if (action.type === 'trigger' && item.trigger && 'inputs' in item.trigger) {
+                const trigger = item.trigger as { inputs?: Record<string, unknown> }
+                trigger.inputs = { ...trigger.inputs, ...actionSecrets }
+            }
+        }
     }
 }

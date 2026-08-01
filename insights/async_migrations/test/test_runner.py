@@ -15,7 +15,12 @@ from insights.async_migrations.utils import update_async_migration
 from insights.models.async_migration import AsyncMigration, AsyncMigrationError, MigrationStatus
 from insights.models.utils import UUIDT
 
-pytestmark = pytest.mark.async_migrations
+pytestmark = [
+    pytest.mark.async_migrations,
+    pytest.mark.skip(
+        reason="Async migrations are frozen for self-hosted backwards compat; only test_migrations_not_required still runs"
+    ),
+]
 
 
 class TestRunner(AsyncMigrationBaseTest):
@@ -48,6 +53,7 @@ class TestRunner(AsyncMigrationBaseTest):
         self.assertEqual(sm.current_operation_index, 7)
         self.assertEqual(sm.insights_min_version, "1.0.0")
         self.assertEqual(sm.insights_max_version, "100000.0.0")
+        assert sm.finished_at is not None
         self.assertEqual(sm.finished_at.day, datetime.today().day)
         self.assertEqual(self.migration.sec.side_effect_count, 3)
         self.assertEqual(self.migration.sec.side_effect_rollback_count, 0)

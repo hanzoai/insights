@@ -42,7 +42,7 @@ template_create_contact: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC
     description="Add contacts to Mailjet",
     icon_url="/static/services/mailjet.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.email)) {
     return false
@@ -97,7 +97,7 @@ template_update_contact_list: InsightsFunctionTemplateDC = InsightsFunctionTempl
     description="Update a Mailjet contact list",
     icon_url="/static/services/mailjet.png",
     category=["Email Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 if (empty(inputs.email)) {
     return false

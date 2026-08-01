@@ -16,11 +16,11 @@ import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedAr
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TeamMembershipLevel } from 'lib/constants'
+import { IconTuning, SortableDragIcon } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Checkbox } from 'lib/elements/Checkbox'
 import { Modal } from 'lib/elements/Modal'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconTuning, SortableDragIcon } from 'lib/elements/icons'
 
 import { dataTableLogic } from '~/queries/nodes/DataTable/dataTableLogic'
 import { DataTableNode } from '~/queries/schema/schema-general'
@@ -49,12 +49,19 @@ interface ColumnConfiguratorProps {
 export function ColumnConfigurator({ query, setQuery }: ColumnConfiguratorProps): JSX.Element {
     const { columnsInQuery } = useValues(dataTableLogic)
 
+    // users should not be able to edit the '*' column
+    const hasStarColumn = columnsInQuery.includes('*')
+    const configurableColumns = columnsInQuery.filter((c) => c !== '*')
+
     const [key] = useState(() => String(uniqueNode++))
     const columnConfiguratorLogicProps: ColumnConfiguratorLogicProps = {
         key,
         isPersistent: !!query.showPersistentColumnConfigurator,
-        columns: columnsInQuery,
+        columns: configurableColumns,
         setColumns: (columns: string[]) => {
+            const allColumns = hasStarColumn ? ['*', ...columns] : columns
+            // Strip stale `columns` from queryWithDefaults — source.select is the source of truth
+            const { columns: _discardColumns, ...queryWithoutColumns } = query
             if (isEventsQuery(query.source) || isSessionsQuery(query.source)) {
                 let orderBy = query.source.orderBy
                 if (orderBy && orderBy.length > 0) {
@@ -67,23 +74,23 @@ export function ColumnConfigurator({ query, setQuery }: ColumnConfiguratorProps)
                     }
                 }
                 setQuery?.({
-                    ...query,
+                    ...queryWithoutColumns,
                     source: {
                         ...query.source,
                         orderBy,
-                        select: columns,
+                        select: allColumns,
                     },
                 })
             } else if (isActorsQuery(query.source) || isGroupsQuery(query.source)) {
                 setQuery?.({
-                    ...query,
+                    ...queryWithoutColumns,
                     source: {
                         ...query.source,
-                        select: columns,
+                        select: allColumns,
                     },
                 })
             } else {
-                setQuery?.({ ...query, columns })
+                setQuery?.({ ...query, columns: allColumns })
             }
         },
         context: query.context
@@ -138,7 +145,11 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
     } else if (isActorsQuery(query.source)) {
         taxonomicGroupTypes = [TaxonomicFilterGroupType.PersonProperties, TaxonomicFilterGroupType.InsightsQLExpression]
     } else if (isSessionsQuery(query.source)) {
-        taxonomicGroupTypes = [TaxonomicFilterGroupType.SessionProperties, TaxonomicFilterGroupType.InsightsQLExpression]
+        taxonomicGroupTypes = [
+            TaxonomicFilterGroupType.SessionProperties,
+            TaxonomicFilterGroupType.PersonProperties,
+            TaxonomicFilterGroupType.InsightsQLExpression,
+        ]
     } else {
         taxonomicGroupTypes = [
             TaxonomicFilterGroupType.EventProperties,
@@ -163,7 +174,7 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
             onClose={hideModal}
             footer={
                 <>
-                    <div className="flex-1">
+                    <div className="flex-1 flex flex-wrap items-center gap-2">
                         <Button
                             type="secondary"
                             onClick={() =>
@@ -172,6 +183,21 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
                         >
                             Reset to defaults
                         </Button>
+                        {showPersistedColumnReorder && query.showPersistentColumnConfigurator && (
+                            <Checkbox
+                                label={
+                                    context?.type === 'groups'
+                                        ? 'Save as default columns for this group type'
+                                        : context?.type === 'event_definition'
+                                          ? 'Save as default columns for this event type'
+                                          : 'Save as default for all project members'
+                                }
+                                data-attr="events-table-save-columns-as-default-toggle"
+                                checked={saveAsDefault}
+                                onChange={toggleSaveAsDefault}
+                                disabledReason={restrictionReason}
+                            />
+                        )}
                     </div>
                     <Button type="secondary" onClick={hideModal}>
                         Close
@@ -236,6 +262,7 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
                                             }}
                                             popoverEnabled={false}
                                             selectFirstItem={false}
+                                            selectingKeyOnly
                                         />
                                     ) : null
                                 }
@@ -243,23 +270,6 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
                         </div>
                     </div>
                 </div>
-                {showPersistedColumnReorder && query.showPersistentColumnConfigurator && (
-                    <Checkbox
-                        label={
-                            context?.type === 'groups'
-                                ? 'Save as default columns for this group type'
-                                : context?.type === 'event_definition'
-                                  ? 'Save as default columns for this event type'
-                                  : 'Save as default for all project members'
-                        }
-                        className="mt-2"
-                        data-attr="events-table-save-columns-as-default-toggle"
-                        bordered
-                        checked={saveAsDefault}
-                        onChange={toggleSaveAsDefault}
-                        disabledReason={restrictionReason}
-                    />
-                )}
             </div>
         </Modal>
     )

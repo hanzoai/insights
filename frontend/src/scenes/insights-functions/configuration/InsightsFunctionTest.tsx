@@ -153,7 +153,9 @@ export const InsightsFunctionTestEditor = ({
 }
 
 export function InsightsFunctionTest(): JSX.Element {
-    const { logicProps, canLoadSampleGlobals, insightsFunction, template } = useValues(insightsFunctionConfigurationLogic)
+    const { logicProps, canLoadSampleGlobals, insightsFunction, template, configuration } =
+        useValues(insightsFunctionConfigurationLogic)
+    const isDataWarehouse = configuration?.filters?.source === 'data-warehouse-table'
     const {
         isTestInvocationSubmitting,
         testResult,
@@ -199,12 +201,17 @@ export function InsightsFunctionTest(): JSX.Element {
                         <h2 className="flex gap-2 items-center mb-0">
                             <span>Testing</span>
                         </h2>
-                        {inactive ? <p>Click here to test your function with an example event</p> : null}
+                        {inactive ? (
+                            <p>
+                                Click here to test your function with an example{' '}
+                                {isDataWarehouse ? 'row' : type === 'transformation_log' ? 'record' : 'event'}
+                            </p>
+                        ) : null}
                     </div>
 
                     {inactive ? (
                         <Button
-                            data-attr="expand-fn-testing"
+                            data-attr="expand-script-testing"
                             type="secondary"
                             onClick={() => {
                                 toggleExpanded()
@@ -223,7 +230,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                     type="primary"
                                     onClick={() => setTestResult(null)}
                                     loading={isTestInvocationSubmitting}
-                                    data-attr="clear-fn-test-result"
+                                    data-attr="clear-script-test-result"
                                 >
                                     Clear test result
                                 </Button>
@@ -240,7 +247,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                                                 <Switch
                                                                     onChange={(v) => onChange(!v)}
                                                                     checked={!value}
-                                                                    data-attr="toggle-fn-test-mocking"
+                                                                    data-attr="toggle-script-test-mocking"
                                                                     className="px-2 py-1"
                                                                     label={
                                                                         <Tooltip
@@ -268,7 +275,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                                 {savedGlobals.map(({ name, globals }, index) => (
                                                     <div className="flex justify-between w-full" key={index}>
                                                         <Button
-                                                            data-attr="open-fn-test-data"
+                                                            data-attr="open-script-test-data"
                                                             key={index}
                                                             onClick={() => setSampleGlobals(globals)}
                                                             fullWidth
@@ -277,7 +284,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                                             {name}
                                                         </Button>
                                                         <Button
-                                                            data-attr="delete-fn-test-data"
+                                                            data-attr="delete-script-test-data"
                                                             size="small"
                                                             icon={<IconX />}
                                                             onClick={() => deleteSavedGlobals(index)}
@@ -288,7 +295,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                                 {testInvocation.globals && (
                                                     <Button
                                                         fullWidth
-                                                        data-attr="save-fn-test-data"
+                                                        data-attr="save-script-test-data"
                                                         onClick={() => {
                                                             const name = prompt('Name this test data')
                                                             if (name) {
@@ -328,7 +335,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                     ) : null}
                                     <Button
                                         type="primary"
-                                        data-attr="test-insights-function"
+                                        data-attr="test-script-function"
                                         onClick={submitTestInvocation}
                                         loading={isTestInvocationSubmitting}
                                     >
@@ -339,7 +346,7 @@ export function InsightsFunctionTest(): JSX.Element {
 
                             {expanded && (
                                 <Button
-                                    data-attr="hide-fn-testing"
+                                    data-attr="hide-script-testing"
                                     icon={<IconX />}
                                     onClick={() => toggleExpanded()}
                                     tooltip="Hide testing"
@@ -371,7 +378,8 @@ export function InsightsFunctionTest(): JSX.Element {
                                           : 'Error'}
                                 </Banner>
 
-                                {type === 'transformation' && testResult.status !== 'error' ? (
+                                {(type === 'transformation' || type === 'transformation_log') &&
+                                testResult.status !== 'error' ? (
                                     <>
                                         <div className="flex gap-2 justify-between items-center">
                                             <Label>Transformation result</Label>
@@ -388,14 +396,21 @@ export function InsightsFunctionTest(): JSX.Element {
                                                 />
                                             )}
                                         </div>
-                                        <p>Below you can see the event after the transformation has been applied.</p>
+                                        <p>
+                                            Below you can see the {type === 'transformation_log' ? 'record' : 'event'}{' '}
+                                            after the transformation has been applied.
+                                        </p>
                                         {testResult.result ? (
                                             <>
                                                 {!sortedTestsResult?.hasDiff && (
                                                     <Banner type="info">
                                                         {testResult.status === 'skipped'
-                                                            ? 'The event was not modified as it did not match the filter criteria.'
-                                                            : 'The event was unmodified by the transformation.'}
+                                                            ? `The ${
+                                                                  type === 'transformation_log' ? 'record' : 'event'
+                                                              } was not modified as it did not match the filter criteria.`
+                                                            : `The ${
+                                                                  type === 'transformation_log' ? 'record' : 'event'
+                                                              } was unmodified by the transformation.`}
                                                     </Banner>
                                                 )}
                                                 <CodeEditorResizeable
@@ -432,8 +447,9 @@ export function InsightsFunctionTest(): JSX.Element {
                                             </>
                                         ) : (
                                             <Banner type="warning">
-                                                The event was dropped by the transformation. If this is expected then
-                                                great news! If not, you should double check the configuration.
+                                                The {type === 'transformation_log' ? 'record' : 'event'} was dropped by
+                                                the transformation. If this is expected then great news! If not, you
+                                                should double check the configuration.
                                             </Banner>
                                         )}
                                     </>

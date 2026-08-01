@@ -4,10 +4,17 @@ import datetime as dt
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from insights.batch_exports.models import BATCH_EXPORT_INTERVALS
-from insights.batch_exports.service import backfill_export, delete_batch_export, sync_batch_export
-from insights.models import BatchExport, BatchExportBackfill, BatchExportDestination, BatchExportRun, Team
+from insights.models import Team
 from insights.temporal.common.client import sync_connect
+
+from products.batch_exports.backend.models.batch_export import (
+    BATCH_EXPORT_INTERVALS,
+    BatchExport,
+    BatchExportBackfill,
+    BatchExportDestination,
+    BatchExportRun,
+)
+from products.batch_exports.backend.service import backfill_export, delete_batch_export, sync_batch_export
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -15,8 +22,8 @@ logger.setLevel(logging.INFO)
 EXPORT_NAME = "Insights HTTP Migration"
 VALID_INTERVALS = {i[0] for i in BATCH_EXPORT_INTERVALS}
 REGION_URLS = {
-    "us": "https://insights.hanzo.ai/batch",
-    "eu": "https://insights.hanzo.ai/batch",
+    "us": "https://app.hanzo.ai/batch",
+    "eu": "https://eu.hanzo.ai/batch",
 }
 
 
@@ -36,7 +43,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--delete-existing", default=False, type=bool, help="Delete existing batch export if it exists"
         )
-        parser.add_argument("--dest-token", default=None, type=str, help="Destination Project API Key (token)")
+        parser.add_argument("--dest-token", default=None, type=str, help="Destination project token")
         parser.add_argument("--dest-region", default=None, type=str, help="Destination region")
         parser.add_argument(
             "--end-days-from-now",
@@ -175,7 +182,7 @@ def display_existing(*, existing_export: BatchExport, verbose: bool):
         )
 
         if most_recent_completed_run:
-            data_start_at = existing_backfill.start_at
+            data_start_at = existing_backfill.adjusted_start_at or existing_backfill.start_at
             data_end_at = most_recent_completed_run.data_interval_end
             display(
                 "Found an existing migration, range of data migrated:",
@@ -217,8 +224,8 @@ def create_migration(
     if interval not in VALID_INTERVALS:
         raise CommandError("invalid interval, choices are: {}".format(VALID_INTERVALS))
 
-    if not dest_token.startswith("hi_"):
-        raise CommandError("invalid destination token, must start with 'hi_'")
+    if not dest_token.startswith("phc_"):
+        raise CommandError("invalid destination token, must start with 'phc_'")
 
     dest_region = dest_region.lower()
     if dest_region not in REGION_URLS:

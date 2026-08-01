@@ -2,11 +2,13 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconGear } from '@hanzo/icons'
-import { Button, Collapse, Input, Switch, Tooltip } from '@hanzo/elements'
+import { Button, Collapse, Input, Switch, Tag, Tooltip } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
+import { FEATURE_FLAGS } from 'lib/constants'
 import { Field } from 'lib/elements/Field'
 import { Slider } from 'lib/elements/Slider'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { ProductTourAppearance } from '~/types'
 
@@ -15,6 +17,7 @@ import { BoxShadowSelector, ColorPickerField, FontSelector } from '../components
 import { DEFAULT_APPEARANCE } from '../constants'
 import { productTourLogic } from '../productTourLogic'
 import { isBannerAnnouncement } from '../productToursLogic'
+import { TranslationsPanel } from './TranslationsPanel'
 
 const DEFAULT_BANNER_APPEARANCE: ProductTourAppearance = {
     backgroundColor: '#ffffff',
@@ -29,8 +32,13 @@ export interface TourSettingsPanelProps {
 }
 
 export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Element {
-    const { productTour, productTourForm, entityKeyword } = useValues(productTourLogic({ id: tourId }))
+    const { productTour, productTourForm, entityKeyword, selectedLanguage } = useValues(
+        productTourLogic({ id: tourId })
+    )
     const { setProductTourFormValue } = useActions(productTourLogic({ id: tourId }))
+    const { featureFlags } = useValues(featureFlagLogic)
+
+    const translationsEnabled = featureFlags[FEATURE_FLAGS.PRODUCT_TOURS_LOCALIZATION]
 
     const isBanner = productTour ? isBannerAnnouncement(productTour) : false
     const conditions = productTourForm.content?.conditions || {}
@@ -254,6 +262,20 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
                                 header: 'Theme',
                                 content: styleContent,
                             },
+                            ...(translationsEnabled
+                                ? [
+                                      {
+                                          key: 'translations',
+                                          header: (
+                                              <div className="flex gap-2 items-center">
+                                                  Translations
+                                                  {selectedLanguage && <Tag>{selectedLanguage}</Tag>}
+                                              </div>
+                                          ),
+                                          content: <TranslationsPanel tourId={tourId} />,
+                                      },
+                                  ]
+                                : []),
                         ]}
                     />
                 </div>

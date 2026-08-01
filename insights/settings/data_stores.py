@@ -1,13 +1,14 @@
 import os
 import json
 from contextlib import suppress
+from pathlib import Path
 from typing import Optional
-from urllib.parse import urlparse
 
 from django.core.exceptions import ImproperlyConfigured
 
 import dj_database_url
 
+from insights.product_db_config import load_product_db_routes
 from insights.settings.base_variables import DEBUG, IN_EVAL_TESTING, IS_COLLECT_STATIC, TEST
 from insights.settings.utils import get_from_env, get_list, str_to_bool
 from insights.utils import str_to_int_set
@@ -46,18 +47,18 @@ def postgres_config(host: str) -> dict:
 
     return {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_from_env("INSIGHTS_DB_NAME"),
-        "USER": os.getenv("INSIGHTS_DB_USER", "postgres"),
-        "PASSWORD": os.getenv("INSIGHTS_DB_PASSWORD", ""),
+        "NAME": get_from_env("POSTFN_DB_NAME"),
+        "USER": os.getenv("POSTFN_DB_USER", "postgres"),
+        "PASSWORD": os.getenv("POSTFN_DB_PASSWORD", ""),
         "HOST": host,
-        "PORT": os.getenv("INSIGHTS_POSTGRES_PORT", "5432"),
+        "PORT": os.getenv("POSTFN_POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 0,
         "DISABLE_SERVER_SIDE_CURSORS": DISABLE_SERVER_SIDE_CURSORS,
         "SSL_OPTIONS": {
-            "sslmode": os.getenv("INSIGHTS_POSTGRES_SSL_MODE", None),
-            "sslrootcert": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_CA", None),
-            "sslcert": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_CRT", None),
-            "sslkey": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_KEY", None),
+            "sslmode": os.getenv("POSTFN_POSTGRES_SSL_MODE", None),
+            "sslrootcert": os.getenv("POSTFN_POSTGRES_CLI_SSL_CA", None),
+            "sslcert": os.getenv("POSTFN_POSTGRES_CLI_SSL_CRT", None),
+            "sslkey": os.getenv("POSTFN_POSTGRES_CLI_SSL_KEY", None),
         },
         "TEST": {
             "MIRROR": "default",
@@ -66,7 +67,7 @@ def postgres_config(host: str) -> dict:
 
 
 if TEST or DEBUG:
-    PG_HOST: str = os.getenv("PGHOST", "localhost")
+    PG_HOST: str = os.getenv("PGHOST", "db")
     PG_USER: str = os.getenv("PGUSER", "insights")
     PG_PASSWORD: str = os.getenv("PGPASSWORD", "insights")
     PG_PORT: str = os.getenv("PGPORT", "5432")
@@ -80,16 +81,16 @@ if TEST or DEBUG:
         f"postgres://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DATABASE}",
     )
 else:
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 if DATABASE_URL:
-    DATABASES: dict[str, dict] = {"default": dj_database_url.config(default=DATABASE_URL, conn_max_age=0)}
+    DATABASES: dict[str, dict] = {"default": dict(dj_database_url.config(default=DATABASE_URL, conn_max_age=0))}
 
     if DISABLE_SERVER_SIDE_CURSORS:
         DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
-elif os.getenv("INSIGHTS_DB_NAME"):
-    DATABASES = {"default": postgres_config(os.getenv("INSIGHTS_POSTGRES_HOST", "localhost"))}
+elif os.getenv("POSTFN_DB_NAME"):
+    DATABASES = {"default": postgres_config(os.getenv("POSTFN_POSTGRES_HOST", "localhost"))}
 
     ssl_configurations = []
     for ssl_option, value in DATABASES["default"]["SSL_OPTIONS"].items():
@@ -112,7 +113,7 @@ elif os.getenv("INSIGHTS_DB_NAME"):
     )
 else:
     raise ImproperlyConfigured(
-        f'The environment vars "DATABASE_URL" or "INSIGHTS_DB_NAME" are absolutely required to run this software'
+        f'The environment vars "DATABASE_URL" or "POSTFN_DB_NAME" are absolutely required to run this software'
     )
 
 DATABASE_ROUTERS: list[str] = []
@@ -120,7 +121,7 @@ DATABASE_ROUTERS: list[str] = []
 # Configure the database which will be used as a read replica.
 # This should have all the same config as our main writer DB, just use a different host.
 # Our database router will point here.
-read_host = os.getenv("INSIGHTS_POSTGRES_READ_HOST")
+read_host = os.getenv("POSTFN_POSTGRES_READ_HOST")
 if read_host:
     DATABASES["replica"] = postgres_config(read_host)
     DATABASE_ROUTERS.append("insights.dbrouter.ReplicaRouter")
@@ -128,49 +129,137 @@ if read_host:
 # Configure a direct database connection bypassing PgBouncer.
 # This allows using PGOPTIONS like lock_timeout which PgBouncer doesn't support.
 # Used for migrations: python manage.py migrate --database=default_direct
-direct_host = os.getenv("INSIGHTS_POSTGRES_DIRECT_HOST")
+direct_host = os.getenv("POSTFN_POSTGRES_DIRECT_HOST")
 if direct_host:
-    # Copy from default database config (works with both DATABASE_URL and INSIGHTS_DB_NAME setups)
+    # Copy from default database config (works with both DATABASE_URL and POSTFN_DB_NAME setups)
     DATABASES["default_direct"] = DATABASES["default"].copy()
     # Override host and port for direct connection (bypassing PgBouncer)
     DATABASES["default_direct"]["HOST"] = direct_host
-    DATABASES["default_direct"]["PORT"] = os.getenv("INSIGHTS_POSTGRES_DIRECT_PORT", "5432")
+    DATABASES["default_direct"]["PORT"] = os.getenv("POSTFN_POSTGRES_DIRECT_PORT", "5432")
     # Disable server-side cursors is not needed for direct connection
     DATABASES["default_direct"]["DISABLE_SERVER_SIDE_CURSORS"] = False
     # Set lock_timeout for migrations to fail fast on lock contention
     lock_timeout_ms = os.getenv("MIGRATE_LOCK_TIMEOUT", "20000")
     DATABASES["default_direct"]["OPTIONS"] = {"options": f"-c lock_timeout={lock_timeout_ms}"}
 
-# Add the persons_db_writer database configuration using PERSONS_DB_WRITER_URL
-# For local development, default to the persons database in the main container if no URL is provided
-persons_db_writer_url = os.getenv("PERSONS_DB_WRITER_URL")
-if not persons_db_writer_url and DEBUG and not TEST:
-    # Default to local persons database in main container in development mode (but not test mode)
-    # This matches the docker-compose.dev.yml configuration
-    # A default is needed for generate_demo_data to properly populate the correct databases
-    # with the demo data
-    persons_db_writer_url = f"postgres://{PG_USER}:{PG_PASSWORD}@localhost:5432/insights_persons"
-elif not persons_db_writer_url and TEST:
-    # In test mode, use a placeholder database name that will be updated by conftest
-    # pytest-django adds test_ prefix which isn't known at settings import time
-    # conftest.py django_db_setup fixture will update the NAME with the correct test database name
-    test_persons_db = PG_DATABASE + "_persons"
-    persons_db_writer_url = f"postgres://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{test_persons_db}"
+# The persons database is not a Django connection. Person/group/cohort data lives behind
+# the personinsights service and is reached through the personinsights client or off-Django psycopg
+# (insights/persons_db.py), never the ORM. PersonDBRouter stays registered solely as a guard
+# that raises if a persons-DB model is queried through the ORM while the test block is active
+# (see insights/person_db_router.py); it routes nothing and adds no DATABASES entry.
+DATABASE_ROUTERS.insert(0, "insights.person_db_router.PersonDBRouter")
 
-if persons_db_writer_url:
-    DATABASES["persons_db_writer"] = dj_database_url.config(
-        env="PERSONS_DB_WRITER_URL", default=persons_db_writer_url, conn_max_age=0
-    )
 
-    # Fall back to the writer URL if no reader URL is set
-    DATABASES["persons_db_reader"] = dj_database_url.config(
-        env="PERSONS_DB_READER_URL", default=persons_db_writer_url, conn_max_age=0
-    )
+product_routes = load_product_db_routes(Path(__file__).resolve().parents[2])
+configured_product_databases: set[str] = set()
+PRODUCT_DB_WRITER_URLS: dict[str, str] = {}
+
+
+# Per-product SSL for the migration DIRECT_URL only. Runtime writer/reader route
+# through PgBouncer (in-cluster, plaintext, no SSL); only the direct migration
+# connection reaches Aurora, whose pg_hba requires SSL (hostssl). dj_database_url
+# sets only connect_timeout, so set sslmode here. Scoped per product (e.g.
+# PRODUCT_DB_<PRODUCT>_SSL_MODE); unset for local dev/test (plain Postgres).
+def _apply_product_db_ssl_options(db: str, options: dict) -> None:
+    ssl_mode = os.getenv(f"PRODUCT_DB_{db.upper()}_SSL_MODE")
+    ssl_root_cert = os.getenv(f"PRODUCT_DB_{db.upper()}_SSL_ROOT_CERT")
+    if ssl_mode:
+        options["sslmode"] = ssl_mode
+    if ssl_root_cert:
+        options["sslrootcert"] = ssl_root_cert
+
+
+# Fail-fast circuit breaker for product databases. When a product DB is
+# unreachable, the custom backend raises immediately on connect instead of
+# blocking the worker on `connect_timeout`, so one product's outage can't
+# exhaust the shared worker pool. See insights/db_circuit_breaker.py.
+PRODUCT_DB_FAIL_OPEN_ENGINE = "insights.db_backends.failopen"
+PRODUCT_DB_CIRCUIT_BREAKER_ENABLED: bool = get_from_env(
+    "PRODUCT_DB_CIRCUIT_BREAKER_ENABLED", not TEST, type_cast=str_to_bool
+)
+PRODUCT_DB_CIRCUIT_BREAKER_FAILURE_THRESHOLD: int = get_from_env(
+    "PRODUCT_DB_CIRCUIT_BREAKER_FAILURE_THRESHOLD", 3, type_cast=int
+)
+PRODUCT_DB_CIRCUIT_BREAKER_COOLDOWN_SECONDS: int = get_from_env(
+    "PRODUCT_DB_CIRCUIT_BREAKER_COOLDOWN_SECONDS", 30, type_cast=int
+)
+PRODUCT_DB_CIRCUIT_BREAKER_PROBE_TIMEOUT_SECONDS: int = get_from_env(
+    "PRODUCT_DB_CIRCUIT_BREAKER_PROBE_TIMEOUT_SECONDS", 5, type_cast=int
+)
+PRODUCT_DB_CIRCUIT_BREAKER_WINDOW_SECONDS: int = get_from_env(
+    "PRODUCT_DB_CIRCUIT_BREAKER_WINDOW_SECONDS", 30, type_cast=int
+)
+
+for route in product_routes:
+    if route.database in configured_product_databases:
+        continue
+
+    db = route.database
+    writer_env = f"PRODUCT_DB_{db.upper()}_WRITER_URL"
+    reader_env = f"PRODUCT_DB_{db.upper()}_READER_URL"
+    writer_alias = f"{db}_db_writer"
+    reader_alias = f"{db}_db_reader"
+
+    writer_url = os.getenv(writer_env)
+    if not writer_url and DEBUG and not TEST:
+        writer_url = f"postgres://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/insights_{db}"
+    elif not writer_url and TEST:
+        writer_url = f"postgres://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DATABASE}_{db}"
+
+    if not writer_url:
+        continue
+
+    PRODUCT_DB_WRITER_URLS[db] = writer_url
+    DATABASES[writer_alias] = dict(dj_database_url.parse(writer_url, conn_max_age=0))
+    DATABASES[writer_alias].setdefault("OPTIONS", {})["connect_timeout"] = 3
+    DATABASES[writer_alias]["ENGINE"] = PRODUCT_DB_FAIL_OPEN_ENGINE
+
+    reader_url = os.getenv(reader_env, writer_url)
+    DATABASES[reader_alias] = dict(dj_database_url.parse(reader_url, conn_max_age=0))
+    DATABASES[reader_alias].setdefault("OPTIONS", {})["connect_timeout"] = 3
+    DATABASES[reader_alias]["ENGINE"] = PRODUCT_DB_FAIL_OPEN_ENGINE
+
+    if TEST:
+        # Skip the global migration-graph walk during test DB setup. Without
+        # `MIGRATE: False`, Django's `create_test_db` calls `migrate --database
+        # <alias>` with no app filter, which walks the full ~1300-migration
+        # graph for `state_forwards` on every alias — even though
+        # `ProductDBRouter.allow_migrate` gates DDL to just the owning product
+        # app. The state-machine walk runs regardless of the router and burns
+        # ~5 min per affected shard on a fresh test DB.
+        #
+        # `MIGRATE: False` makes `create_test_db` skip migrations and fall
+        # through to `run_syncdb=True`, which creates tables directly from the
+        # current model definitions for any app that `allow_migrate` permits.
+        # For Django-owned product DBs (`managed=True` models), that yields
+        # the same final-schema tables in milliseconds instead of minutes.
+        #
+        # Reader shares the writer's test database so reads inside a write
+        # transaction see uncommitted data.
+        DATABASES[writer_alias]["TEST"] = {"MIGRATE": False, "DEPENDENCIES": []}
+        DATABASES[reader_alias]["TEST"] = {"MIRROR": writer_alias}
+
     if DISABLE_SERVER_SIDE_CURSORS:
-        DATABASES["persons_db_writer"]["DISABLE_SERVER_SIDE_CURSORS"] = True
-        DATABASES["persons_db_reader"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+        DATABASES[writer_alias]["DISABLE_SERVER_SIDE_CURSORS"] = True
+        DATABASES[reader_alias]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
-    DATABASE_ROUTERS.insert(0, "insights.person_db_router.PersonDBRouter")
+    # Direct connection for migrations (bypasses PgBouncer). Only registered
+    # when the env var is explicitly set — in dev/test there's no PgBouncer,
+    # so migrations use the writer alias directly.
+    direct_env = f"PRODUCT_DB_{db.upper()}_DIRECT_URL"
+    direct_url = os.getenv(direct_env)
+    if direct_url:
+        direct_alias = f"{db}_db_direct"
+        DATABASES[direct_alias] = dict(dj_database_url.parse(direct_url, conn_max_age=0))
+        DATABASES[direct_alias].setdefault("OPTIONS", {})["connect_timeout"] = 10
+        _apply_product_db_ssl_options(db, DATABASES[direct_alias]["OPTIONS"])
+        if DISABLE_SERVER_SIDE_CURSORS:
+            DATABASES[direct_alias]["DISABLE_SERVER_SIDE_CURSORS"] = True
+
+    configured_product_databases.add(db)
+
+if configured_product_databases:
+    DATABASE_ROUTERS.insert(0, "insights.product_db_router.ProductDBRouter")
 
 # Opt-in to using the read replica
 # Models using this will likely see better query latency, and better performance.
@@ -202,36 +291,22 @@ if IN_EVAL_TESTING:
 elif TEST:
     SUFFIX = "_test" + XDIST_SUFFIX
 
-# Hanzo Datastore. ONE env prefix: DATASTORE_*.
-#
-# The DATASTORE_* fallback is gone — two spellings for one setting is two ways
-# to configure the same thing, and the loser is silent: a stale DATASTORE_HOST
-# would be read only when DATASTORE_HOST happened to be unset. Nothing in the
-# cluster sets the old names (the App CRs are DATASTORE_*), so this is a rename,
-# not a migration.
-#
-# Internal Python identifiers are still DATASTORE_* — that rename spans ~974
-# files and belongs in its own pass, not this one.
+# Datastore Settings
 DATASTORE_TEST_DB: str = "insights" + SUFFIX
 
-DATASTORE_HOST: str = os.getenv("DATASTORE_HOST", "localhost")
+DATASTORE_HOST: str = os.getenv("DATASTORE_HOST", "datastore")
+DATASTORE_LOGS_HOST: str = os.getenv("DATASTORE_LOGS_HOST", "datastore")
 DATASTORE_OFFLINE_CLUSTER_HOST: str | None = os.getenv("DATASTORE_OFFLINE_CLUSTER_HOST", None)
 DATASTORE_MIGRATIONS_HOST: str = os.getenv("DATASTORE_MIGRATIONS_HOST", DATASTORE_HOST)
 DATASTORE_ENDPOINTS_HOST: str = os.getenv("DATASTORE_ENDPOINTS_HOST", DATASTORE_HOST)
 DATASTORE_USER: str = os.getenv("DATASTORE_USER", "default")
 DATASTORE_PASSWORD: str = os.getenv("DATASTORE_PASSWORD", "")
 DATASTORE_DATABASE: str = DATASTORE_TEST_DB if TEST else os.getenv("DATASTORE_DATABASE", "default")
-
-# RED M1: fail closed on a shared-datastore misconfig. The `insights` database is
-# co-resident with o11y/analytics on the shared datastore; running migrations or
-# queries against "default"/"system" could read or ALTER another tenant's data.
-if not TEST and not IS_COLLECT_STATIC and DATASTORE_DATABASE in ("", "default", "system"):
-    raise ImproperlyConfigured(
-        f"DATASTORE_DATABASE must name an explicit Insights database "
-        f"(got {DATASTORE_DATABASE!r}); refusing to run against a shared/system database."
-    )
 DATASTORE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", "insights")
 DATASTORE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", "insights_migrations")
+DATASTORE_SATELLITE_CLUSTERS: list[str] = [
+    s.strip() for s in os.getenv("DATASTORE_SATELLITE_CLUSTERS", "ai_events,aux,ops,sessions").split(",") if s.strip()
+]
 DATASTORE_CA: str | None = os.getenv("DATASTORE_CA", None)
 DATASTORE_SECURE: bool = get_from_env("DATASTORE_SECURE", not TEST and not DEBUG, type_cast=str_to_bool)
 DATASTORE_VERIFY: bool = get_from_env("DATASTORE_VERIFY", True, type_cast=str_to_bool)
@@ -239,6 +314,19 @@ DATASTORE_ENABLE_STORAGE_POLICY: bool = get_from_env("DATASTORE_ENABLE_STORAGE_P
 DATASTORE_SINGLE_SHARD_CLUSTER: str = os.getenv("DATASTORE_SINGLE_SHARD_CLUSTER", "insights_single_shard")
 DATASTORE_WRITABLE_CLUSTER: str = os.getenv("DATASTORE_WRITABLE_CLUSTER", "insights_writable")
 DATASTORE_PRIMARY_REPLICA_CLUSTER: str = os.getenv("DATASTORE_PRIMARY_REPLICA_CLUSTER", "insights_primary_replica")
+DATASTORE_AUX_CLUSTER: str = os.getenv("DATASTORE_AUX_CLUSTER", "aux")
+DATASTORE_AI_EVENTS_CLUSTER: str = os.getenv("DATASTORE_AI_EVENTS_CLUSTER", "ai_events")
+# CI uses this to run the test suite against both schemas. Production reads use the instance settings.
+DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA: bool = TEST and get_from_env(
+    "DATASTORE_INSIGHTSQL_USE_NEW_EVENTS_SCHEMA", False, type_cast=str_to_bool
+)
+# query_log_archive's single data table lives on the OPS cluster; every cluster's
+# Distributed read/write tables route to it via this cluster name.
+DATASTORE_OPS_CLUSTER: str = os.getenv("DATASTORE_OPS_CLUSTER", "ops")
+# Opt-in flag for the multinode Datastore smoke-test stack. When true, migrations
+# respect their declared NodeRole(s) instead of being collapsed to NodeRole.ALL,
+# so a per-cluster topology can actually exercise routing.
+MULTINODE_DATASTORE: bool = get_from_env("MULTINODE_DATASTORE", False, type_cast=str_to_bool)
 DATASTORE_FALLBACK_CANCEL_QUERY_ON_CLUSTER = get_from_env(
     "DATASTORE_FALLBACK_CANCEL_QUERY_ON_CLUSTER", default=False, type_cast=str_to_bool
 )
@@ -256,34 +344,54 @@ QUERYSERVICE_VERIFY: bool = get_from_env("QUERYSERVICE_VERIFY", DATASTORE_VERIFY
 DATASTORE_CONN_POOL_MIN: int = get_from_env("DATASTORE_CONN_POOL_MIN", 20, type_cast=int)
 DATASTORE_CONN_POOL_MAX: int = get_from_env("DATASTORE_CONN_POOL_MAX", 1000, type_cast=int)
 
+# Connection to the autoresearch test cluster, used by the query-performance
+# autoresearch proxy. Unset host fails closed at the call site.
+DATASTORE_TEST_CLUSTER_HOST: str = os.getenv("DATASTORE_TEST_CLUSTER_HOST", "")
+DATASTORE_TEST_CLUSTER_DATABASE: str = os.getenv("DATASTORE_TEST_CLUSTER_DATABASE", "")
+DATASTORE_TEST_CLUSTER_USER: str = os.getenv("DATASTORE_TEST_CLUSTER_USER", "")
+DATASTORE_TEST_CLUSTER_PASSWORD: str = os.getenv("DATASTORE_TEST_CLUSTER_PASSWORD", "")
+DATASTORE_TEST_CLUSTER_SECURE: bool = get_from_env(
+    "DATASTORE_TEST_CLUSTER_SECURE", not TEST and not DEBUG, type_cast=str_to_bool
+)
+DATASTORE_TEST_CLUSTER_CA: str | None = os.getenv("DATASTORE_TEST_CLUSTER_CA", None)
+DATASTORE_TEST_CLUSTER_VERIFY: bool = get_from_env("DATASTORE_TEST_CLUSTER_VERIFY", True, type_cast=str_to_bool)
+
 DATASTORE_STABLE_HOST: str = get_from_env("DATASTORE_STABLE_HOST", DATASTORE_HOST)
 # If enabled, some queries will use system.cluster table to query each shard
 DATASTORE_ALLOW_PER_SHARD_EXECUTION: bool = get_from_env(
     "DATASTORE_ALLOW_PER_SHARD_EXECUTION", False, type_cast=str_to_bool
 )
 
-# Logs share the one datastore connection: DATASTORE_HOST / _DATABASE / _USER /
-# _PASSWORD / _SECURE, same as every other query product.
-#
-# They used to carry a parallel DATASTORE_LOGS_CLUSTER_{HOST,PORT,USER,PASSWORD,
-# DATABASE,SECURE} family whose defaults were literals ("localhost", "default",
-# ""), not the base settings. Nothing in the fleet ever set them, so Logs — and
-# only Logs — dialled localhost:9000 and every one of its endpoints answered 500
-# while every other product on the same page worked. A per-product connection
-# knob that defaults to something other than the connection everything else uses
-# cannot be right when unset, so it is gone rather than re-defaulted: there is
-# now nothing to configure and nothing to drift.
-#
-# DATASTORE_LOGS_CLUSTER is the ON CLUSTER topology for the Distributed logs
-# table — a DDL concern, not a connection — so it stays.
 DATASTORE_LOGS_CLUSTER: str = os.getenv("DATASTORE_LOGS_CLUSTER", "insights_single_shard")
+DATASTORE_LOGS_CLUSTER_HOST: str = os.getenv("DATASTORE_LOGS_CLUSTER_HOST", "localhost")
+DATASTORE_LOGS_CLUSTER_PORT: str = os.getenv("DATASTORE_LOGS_CLUSTER_PORT", "9000")
+DATASTORE_LOGS_CLUSTER_USER: str = os.getenv("DATASTORE_LOGS_CLUSTER_USER", "default")
+DATASTORE_LOGS_CLUSTER_PASSWORD: str = os.getenv("DATASTORE_LOGS_CLUSTER_PASSWORD", "")
+DATASTORE_LOGS_CLUSTER_DATABASE: str = (
+    DATASTORE_TEST_DB if TEST else os.getenv("DATASTORE_LOGS_DATABASE", DATASTORE_DATABASE)
+)
+DATASTORE_LOGS_CLUSTER_SECURE: bool = get_from_env(
+    "DATASTORE_LOGS_CLUSTER_SECURE", not TEST and not DEBUG, type_cast=str_to_bool
+)
 DATASTORE_LOGS_ENABLE_STORAGE_POLICY: bool = get_from_env(
     "DATASTORE_LOGS_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool
 )
 
 DATASTORE_KAFKA_NAMED_COLLECTION: str = os.getenv("DATASTORE_KAFKA_NAMED_COLLECTION", "msk_cluster")
-DATASTORE_KAFKA_WARPSTREAM_NAMED_COLLECTION: str = os.getenv(
-    "DATASTORE_KAFKA_WARPSTREAM_NAMED_COLLECTION", "warpstream_ingestion"
+DATASTORE_KAFKA_WARPSTREAM_INGESTION_NAMED_COLLECTION: str = os.getenv(
+    "DATASTORE_KAFKA_WARPSTREAM_INGESTION_NAMED_COLLECTION", "warpstream_ingestion"
+)
+DATASTORE_KAFKA_WARPSTREAM_CALCULATED_EVENTS_NAMED_COLLECTION: str = os.getenv(
+    "DATASTORE_KAFKA_WARPSTREAM_CALCULATED_EVENTS_NAMED_COLLECTION", "warpstream_calculated_events"
+)
+DATASTORE_KAFKA_WARPSTREAM_REPLAY_NAMED_COLLECTION: str = os.getenv(
+    "DATASTORE_KAFKA_WARPSTREAM_REPLAY_NAMED_COLLECTION", "warpstream_replay"
+)
+DATASTORE_KAFKA_WARPSTREAM_SHARED_NAMED_COLLECTION: str = os.getenv(
+    "DATASTORE_KAFKA_WARPSTREAM_SHARED_NAMED_COLLECTION", "warpstream_shared"
+)
+DATASTORE_KAFKA_WARPSTREAM_CYCLOTRON_NAMED_COLLECTION: str = os.getenv(
+    "DATASTORE_KAFKA_WARPSTREAM_CYCLOTRON_NAMED_COLLECTION", "warpstream_cyclotron"
 )
 
 # Per-team settings used for client/pool connection parameters. Note that this takes precedence over any workload-based
@@ -299,6 +407,7 @@ try:
 except Exception:
     DATASTORE_PER_TEAM_QUERY_SETTINGS = {}
 
+
 # Set of teams querying the data before we switched to new limits
 API_QUERIES_LEGACY_TEAM_LIST: Optional[set[int]] = None
 with suppress(Exception):
@@ -311,6 +420,12 @@ with suppress(Exception):
     as_json = json.loads(os.getenv("API_QUERIES_PER_TEAM", "{}"))
     API_QUERIES_PER_TEAM = {int(k): int(v) for k, v in as_json.items()}
 
+# Fleet-wide, unlike Datastore's per-node max_concurrent_queries_for_user, so keep it at or below
+# that user's per-node value for the bound to mean anything.
+DATASTORE_LLM_ANALYTICS_MAX_CONCURRENT_QUERIES: int = get_from_env(
+    "DATASTORE_LLM_ANALYTICS_MAX_CONCURRENT_QUERIES", 8, type_cast=int
+)
+
 _datastore_http_protocol = "http://"
 _datastore_http_port = "8123"
 if DATASTORE_SECURE:
@@ -319,7 +434,9 @@ if DATASTORE_SECURE:
 
 DATASTORE_HTTP_URL: str = f"{_datastore_http_protocol}{DATASTORE_HOST}:{_datastore_http_port}/"
 
-DATASTORE_OFFLINE_HTTP_URL: str = f"{_datastore_http_protocol}{DATASTORE_OFFLINE_CLUSTER_HOST}:{_datastore_http_port}/"
+DATASTORE_OFFLINE_HTTP_URL: str = (
+    f"{_datastore_http_protocol}{DATASTORE_OFFLINE_CLUSTER_HOST}:{_datastore_http_port}/"
+)
 
 if TEST or DEBUG or os.getenv("DATASTORE_OFFLINE_CLUSTER_HOST", None) is None:
     # When testing, there is no offline cluster.
@@ -330,116 +447,61 @@ READONLY_DATASTORE_USER: str | None = os.getenv("READONLY_DATASTORE_USER", None)
 READONLY_DATASTORE_PASSWORD: str | None = os.getenv("READONLY_DATASTORE_PASSWORD", None)
 
 
-def _parse_kafka_hosts(hosts_string: str) -> list[str]:
-    hosts = []
-    for host in hosts_string.split(","):
-        if "://" in host:
-            hosts.append(urlparse(host).netloc)
-        else:
-            hosts.append(host)
-
-    # We don't want empty strings
-    return [host for host in hosts if host]
-
-
-# URL(s) used by Kafka clients/producers - KEEP IN SYNC WITH plugin-server/src/config/config.ts
-# We prefer KAFKA_HOSTS over KAFKA_URL (which used to be used)
-KAFKA_HOSTS = _parse_kafka_hosts(os.getenv("KAFKA_HOSTS", "") or os.getenv("KAFKA_URL", "") or "kafka:9092")
-# Dedicated kafka hosts for session recordings
-SESSION_RECORDING_KAFKA_HOSTS = _parse_kafka_hosts(os.getenv("SESSION_RECORDING_KAFKA_HOSTS", "")) or KAFKA_HOSTS
-# Kafka broker host(s) that is used by datastore for ingesting messages.
-# Useful if datastore is hosted outside the cluster.
-KAFKA_HOSTS_FOR_DATASTORE = _parse_kafka_hosts(os.getenv("KAFKA_URL_FOR_DATASTORE", "")) or KAFKA_HOSTS
-
-# To support e.g. Multi-tenanted plans on Heroko, we support specifying a prefix for
-# Kafka Topics. See
-# https://devcenter.heroku.com/articles/multi-tenant-kafka-on-heroku#differences-to-dedicated-kafka-plans
-# for details.
-KAFKA_PREFIX = os.getenv("KAFKA_PREFIX", "")
-
-KAFKA_BASE64_KEYS = get_from_env("KAFKA_BASE64_KEYS", False, type_cast=str_to_bool)
-
-KAFKA_PRODUCER_SETTINGS = {
-    key: value
-    for key, value in {
-        "client_id": get_from_env("KAFKA_PRODUCER_CLIENT_ID", optional=True),
-        "metadata_max_age_ms": get_from_env("KAFKA_PRODUCER_METADATA_MAX_AGE_MS", optional=True, type_cast=int),
-        "batch_size": get_from_env("KAFKA_PRODUCER_BATCH_SIZE", optional=True, type_cast=int),
-        "max_request_size": get_from_env("KAFKA_PRODUCER_MAX_REQUEST_SIZE", optional=True, type_cast=int),
-        "linger_ms": get_from_env("KAFKA_PRODUCER_LINGER_MS", optional=True, type_cast=int),
-        "partitioner": get_from_env("KAFKA_PRODUCER_PARTITIONER", optional=True),
-        "max_in_flight_requests_per_connection": get_from_env(
-            "KAFKA_PRODUCER_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION", optional=True, type_cast=int
-        ),
-        "buffer_memory": get_from_env("KAFKA_PRODUCER_BUFFER_MEMORY", optional=True, type_cast=int),
-        "max_block_ms": get_from_env("KAFKA_PRODUCER_MAX_BLOCK_MS", optional=True, type_cast=int),
-    }.items()
-    if value is not None
-}
-
-SESSION_RECORDING_KAFKA_MAX_REQUEST_SIZE_BYTES: int = get_from_env(
-    "SESSION_RECORDING_KAFKA_MAX_REQUEST_SIZE_BYTES",
-    1024 * 1024,  # 1MB
-    type_cast=int,
-)
-
-KAFKA_SECURITY_PROTOCOL = os.getenv("KAFKA_SECURITY_PROTOCOL", None)
-SESSION_RECORDING_KAFKA_SECURITY_PROTOCOL = os.getenv(
-    "SESSION_RECORDING_KAFKA_SECURITY_PROTOCOL", KAFKA_SECURITY_PROTOCOL
-)
-KAFKA_SASL_MECHANISM = os.getenv("KAFKA_SASL_MECHANISM", None)
-KAFKA_SASL_USER = os.getenv("KAFKA_SASL_USER", None)
-KAFKA_SASL_PASSWORD = os.getenv("KAFKA_SASL_PASSWORD", None)
-
 # A list of tokens for which events should be sent to the historical topic
 # TODO: possibly remove this and replace with something that provides the
 # separation of concerns between realtime and historical ingestion but without
 # needing to have a deploy.
 TOKENS_HISTORICAL_DATA = os.getenv("TOKENS_HISTORICAL_DATA", "").split(",")
 
-
-# Hanzo KV is the ONE key/value + cache + celery-broker backend. It speaks the
-# Redis (RESP) wire protocol, so the kv:// URL is normalized to redis:// for the
-# RESP drivers (redis-py / django_redis / celery). Config surface is KV_URL —
-# never REDIS_URL. REDIS_URL below is the derived RESP connection URL, not an env.
-def _kv_to_resp(url: str) -> str:
-    """Map Hanzo KV's kv:// scheme to the redis:// RESP wire the driver speaks."""
-    return "redis://" + url[len("kv://") :] if url.startswith("kv://") else url
-
-
+# The last case happens when someone upgrades Heroku but doesn't have Redis installed yet. Collectstatic gets called before we can provision Redis.
 if TEST or DEBUG or IS_COLLECT_STATIC:
     if PYTEST_XDIST_WORKER_NUM is not None:
-        KV_URL = os.getenv("KV_URL", f"kv://localhost/{PYTEST_XDIST_WORKER_NUM}")
+        REDIS_URL = os.getenv("REDIS_URL", f"redis://redis7/{PYTEST_XDIST_WORKER_NUM}")
     else:
-        KV_URL = os.getenv("KV_URL", "kv://localhost/")
+        REDIS_URL = os.getenv("REDIS_URL", "redis://redis7/")
 else:
-    KV_URL = os.getenv("KV_URL", "")
+    REDIS_URL = os.getenv("REDIS_URL", "")
 
-if not KV_URL and get_from_env("INSIGHTS_KV_HOST", ""):
-    KV_URL = "kv://:{}@{}:{}/".format(
-        os.getenv("INSIGHTS_KV_PASSWORD", ""),
-        os.getenv("INSIGHTS_KV_HOST", ""),
-        os.getenv("INSIGHTS_KV_PORT", "6379"),
+if not REDIS_URL and get_from_env("POSTFN_REDIS_HOST", ""):
+    REDIS_URL = "redis://:{}@{}:{}/".format(
+        os.getenv("POSTFN_REDIS_PASSWORD", ""),
+        os.getenv("POSTFN_REDIS_HOST", ""),
+        os.getenv("POSTFN_REDIS_PORT", "6379"),
     )
-
-# RESP connection URL consumed by redis-py / django_redis / celery (Hanzo KV backend).
-REDIS_URL = _kv_to_resp(KV_URL)
 
 SESSION_RECORDING_REDIS_URL = REDIS_URL
 
-if get_from_env("INSIGHTS_SESSION_RECORDING_KV_HOST", ""):
-    SESSION_RECORDING_REDIS_URL = _kv_to_resp(
-        "kv://{}:{}/".format(
-            os.getenv("INSIGHTS_SESSION_RECORDING_KV_HOST", ""),
-            os.getenv("INSIGHTS_SESSION_RECORDING_KV_PORT", "6379"),
-        )
+if get_from_env("POSTFN_SESSION_RECORDING_REDIS_HOST", ""):
+    SESSION_RECORDING_REDIS_URL = "redis://{}:{}/".format(
+        os.getenv("POSTFN_SESSION_RECORDING_REDIS_HOST", ""),
+        os.getenv("POSTFN_SESSION_RECORDING_REDIS_PORT", "6379"),
     )
+
+REPLAY_VISION_REDIS_URL = REDIS_URL
+
+if get_from_env("POSTFN_REPLAY_VISION_REDIS_HOST", ""):
+    REPLAY_VISION_REDIS_URL = "redis://{}:{}/".format(
+        os.getenv("POSTFN_REPLAY_VISION_REDIS_HOST", ""),
+        os.getenv("POSTFN_REPLAY_VISION_REDIS_PORT", "6379"),
+    )
+
+# The LLM gateway caches per-team quota state in its own Redis (llm_gateway/services/quota_resolver.py).
+# The central-Redis default only suits single-Redis setups; cloud must point this at the gateway's instance.
+LLM_GATEWAY_REDIS_URL = os.getenv("LLM_GATEWAY_REDIS_URL", REDIS_URL)
 
 if not REDIS_URL:
     raise ImproperlyConfigured(
-        "Env var KV_URL (or INSIGHTS_KV_HOST) is absolutely required to run this software.\n"
-        "Hanzo KV backs the cache, celery broker and rate-limits; there is no Redis."
+        "Env var REDIS_URL or POSTFN_REDIS_HOST is absolutely required to run this software.\n"
+        "If upgrading from Insights 1.0.10 or earlier, see here: "
+        "https://hanzo.ai/docs/deployment/upgrading-insights#upgrading-from-before-1011"
     )
+
+# Socket timeouts for the central Redis clients (insights/redis.py). The connect timeout is kept
+# small so a dead node fails fast. The read timeout must comfortably exceed the largest server-side
+# blocking window on the central client, which is a 15s XREAD BLOCK (notebooks collab_stream);
+# 20s leaves margin so blocking stream reads never spuriously time out.
+REDIS_SOCKET_CONNECT_TIMEOUT_SECONDS: float = get_from_env("REDIS_SOCKET_CONNECT_TIMEOUT_SECONDS", 3.0, type_cast=float)
+REDIS_SOCKET_TIMEOUT_SECONDS: float = get_from_env("REDIS_SOCKET_TIMEOUT_SECONDS", 20.0, type_cast=float)
 
 # Controls whether the ZstdCompressor is used for Redis compression when writing to Redis.
 # The ZstdCompressor uses zstd compression and can cope with compressed and uncompressed reading at the same time
@@ -462,7 +524,34 @@ PLUGINS_RELOAD_REDIS_URL = os.getenv("PLUGINS_RELOAD_REDIS_URL", REDIS_URL)
 CDP_API_URL = get_from_env("CDP_API_URL", "")
 
 if not CDP_API_URL:
-    CDP_API_URL = "http://localhost:6738" if DEBUG else "http://ingestion-cdp-api.insights.svc.cluster.local"
+    CDP_API_URL = (
+        "http://localhost:6738" if DEBUG else "http://ingestion-cdp-api.insights.svc.cluster.local"
+    )  # localhost is correct — plugin server runs on host in dev
+
+# Shared secret for internal API authentication between Django and Node.js services.
+# Only the services that make/serve internal calls get this injected, so a missing value must not
+# block startup. Defaults to the public dev secret in DEBUG/TEST; elsewhere it defaults to empty and
+# internal API requests fail closed at request time (InternalAPIAuthentication) rather than silently
+# running on a known-public value. Stripped at load so a mounted secret's trailing newline can't
+# cause a spurious mismatch; get_list already strips the fallbacks.
+# Do not add new callers or protected endpoints to this shared secret — mint a scoped JWT (see
+# RECORDING_API_JWT_SECRET) or add a dedicated per-purpose secret. See .agents/security.md.
+LOCAL_DEV_INTERNAL_API_SECRET = "insights123"
+INTERNAL_API_SECRET = get_from_env(
+    "INTERNAL_API_SECRET", LOCAL_DEV_INTERNAL_API_SECRET if DEBUG or TEST else ""
+).strip()
+# Previous secrets still accepted for verification during zero-downtime rotation, newest first.
+# Receivers accept INTERNAL_API_SECRET plus these; senders always send INTERNAL_API_SECRET.
+INTERNAL_API_SECRET_FALLBACKS = get_list(os.getenv("INTERNAL_API_SECRET_FALLBACKS", ""))
+
+# Scoped JWT keys for the workflows timing-reschedule sweep (Django mints, the plugin server's
+# reschedule_parked route verifies) — a per-purpose secret so this caller never touches
+# INTERNAL_API_SECRET. Comma-separated, newest first: the first key signs, the plugin server
+# verifies against all. Empty outside dev/test, so the sweep fails closed until provisioned.
+# The dev/test value must match the plugin server's default (nodejs/src/cdp/config.ts).
+WORKFLOWS_RESCHEDULE_JWT_SECRETS = get_list(
+    get_from_env("WORKFLOWS_RESCHEDULE_JWT_SECRET", "local-dev-workflows-reschedule-jwt" if DEBUG or TEST else "")
+)
 
 EMBEDDING_API_URL = get_from_env("EMBEDDING_API_URL", "")
 
@@ -474,12 +563,45 @@ if not EMBEDDING_API_URL:
 # This allows feature-flags service to have dedicated Redis for better resource isolation
 FLAGS_REDIS_URL = os.getenv("FLAGS_REDIS_URL", None)
 
+# Dedicated Redis for ai-gateway HyperCache reads. In local dev defaults to the
+# sibling ai-gateway's valkey (host port 6381) so the gateway-credential blob is
+# published where the gateway reads it — zero config for the gateway e2e
+# (see bin/setup-gateway-e2e). Prod sets it explicitly; tests leave it unset.
+AI_GATEWAY_REDIS_URL = os.getenv("AI_GATEWAY_REDIS_URL", "redis://localhost:6381" if DEBUG and not TEST else None)
+
+TASKS_REDIS_URL = os.getenv("TASKS_REDIS_URL", None)
+
+# Public base URL of the LLM gateway, surfaced in the app's per-gateway endpoint
+# examples (…/v1/<slug>/messages). Deployment-specific; empty until configured,
+# except in local dev where it defaults to the gateway's local listen addr
+# (AI_GATEWAY_LISTEN_ADDR=:8080 in Insights/ai-gateway).
+AI_GATEWAY_PUBLIC_URL = os.getenv("AI_GATEWAY_PUBLIC_URL", "http://localhost:8080" if DEBUG else "")
+
 # Rust feature flags service URL
 # This is used to proxy flag evaluation requests to the Rust feature flags service
 FEATURE_FLAGS_SERVICE_URL = os.getenv("FEATURE_FLAGS_SERVICE_URL", "http://localhost:3001")
 
+# Definitions fleet, which serves remote_config (the eval fleet 404s it). Falls back until set per env.
+FEATURE_FLAGS_DEFINITIONS_SERVICE_URL = os.getenv("FEATURE_FLAGS_DEFINITIONS_SERVICE_URL", FEATURE_FLAGS_SERVICE_URL)
+
+# Temporary (Rust remote_config port, phase 2): when true, each Django remote_config response is
+# shadow-compared against Rust. Off by default; flip per environment to start/stop without a deploy.
+# Delete with remote_config_shadow.py at the phase-3 cutover.
+REMOTE_CONFIG_SHADOW_ENABLED = get_from_env("REMOTE_CONFIG_SHADOW_ENABLED", False, type_cast=str_to_bool)
+
+# Bearer token for marking Django -> Rust /flags calls as internal (non-billable).
+# When set, internal Django callers (toolbar prep, my_flags, evaluation_reasons) pass this
+# as `Authorization: Bearer …` so the Rust service skips per-team billing and quota limits.
+# Must match `INTERNAL_REQUEST_TOKEN` in the feature-flags service env.
+INTERNAL_REQUEST_TOKEN = os.getenv("INTERNAL_REQUEST_TOKEN", "")
+
 FLAGS_CACHE_TTL = int(os.getenv("FLAGS_CACHE_TTL", str(60 * 60 * 24 * 7)))  # 7 days
 FLAGS_CACHE_MISS_TTL = int(os.getenv("FLAGS_CACHE_MISS_TTL", str(60 * 60 * 24)))  # 1 day
+LLM_PROMPTS_CACHE_TTL = int(os.getenv("LLM_PROMPTS_CACHE_TTL", str(60 * 60 * 24)))  # 1 day
+LLM_PROMPTS_CACHE_MISS_TTL = int(os.getenv("LLM_PROMPTS_CACHE_MISS_TTL", str(60 * 5)))  # 5 minutes
+# Label entries resolve a mutable pointer, so they get a short TTL as a hard bound on
+# staleness when a cache fill races an invalidation (signals stay the fast path).
+LLM_PROMPTS_LABEL_CACHE_TTL = int(os.getenv("LLM_PROMPTS_LABEL_CACHE_TTL", str(60)))  # 1 minute
 
 CACHES = {
     "default": {
@@ -513,7 +635,35 @@ if FLAGS_REDIS_URL:
         "KEY_PREFIX": "insights",
     }
 
+# Dedicated cache for the ai-gateway service (if configured)
+if AI_GATEWAY_REDIS_URL:
+    from insights.caching.ai_gateway_redis_cache import AI_GATEWAY_DEDICATED_CACHE_ALIAS
+
+    CACHES[AI_GATEWAY_DEDICATED_CACHE_ALIAS] = {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": AI_GATEWAY_REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "COMPRESSOR": "insights.caching.zstd_compressor.ZstdCompressor",
+        },
+        "KEY_PREFIX": "insights",
+    }
+
+if TASKS_REDIS_URL:
+    from insights.caching.tasks_redis_cache import TASKS_DEDICATED_CACHE_ALIAS
+
+    CACHES[TASKS_DEDICATED_CACHE_ALIAS] = {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": TASKS_REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "COMPRESSOR": "insights.caching.zstd_compressor.ZstdCompressor",
+        },
+        "KEY_PREFIX": "insights",
+    }
+
 QUERY_CACHE_REDIS_CLUSTER_URL: str | None = os.getenv("QUERY_CACHE_REDIS_CLUSTER_URL", None)
+ERROR_TRACKING_EVENT_PROPERTIES_REDIS_URL: str | None = os.getenv("ERROR_TRACKING_EVENT_PROPERTIES_REDIS_URL", None)
 
 if QUERY_CACHE_REDIS_CLUSTER_URL:
     CACHES["query_cache"] = {
@@ -526,13 +676,19 @@ if QUERY_CACHE_REDIS_CLUSTER_URL:
         },
         "KEY_PREFIX": "insights",
     }
+else:
+    CACHES["query_cache"] = CACHES["default"]
 
 if TEST:
     CACHES["default"] = {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
+    CACHES["query_cache"] = CACHES["default"]
 
 # Cache timeout for materialized columns metadata (in seconds)
 MATERIALIZED_COLUMNS_CACHE_TIMEOUT: int = get_from_env("MATERIALIZED_COLUMNS_CACHE_TIMEOUT", 900, type_cast=int)
-MATERIALIZED_COLUMNS_USE_CACHE: bool = get_from_env("MATERIALIZED_COLUMNS_USE_CACHE", False, type_cast=str_to_bool)
+# Default on in TEST: the schema-introspection query behind materialized-column lookups otherwise runs
+# hundreds of times per suite, and the test cache backend is process-local (LocMem) with all column
+# mutations invalidating the key (see ee/datastore/materialized_columns/columns.py).
+MATERIALIZED_COLUMNS_USE_CACHE: bool = get_from_env("MATERIALIZED_COLUMNS_USE_CACHE", TEST, type_cast=str_to_bool)
 
 # Limiting event_list API, saving Datastore, 0 - disabled, 1 - migration period, 2 - enabled.
 PATCH_EVENT_LIST_MAX_OFFSET: int = get_from_env("PATCH_EVENT_LIST_MAX_OFFSET", 0, type_cast=int)
@@ -541,3 +697,8 @@ PATCH_EVENT_LIST_MAX_OFFSET_PER_TEAM: set[int] = get_from_env(
 )
 
 DATASTORE_EVENT_LIST_MAX_THREADS: int = get_from_env("DATASTORE_EVENT_LIST_MAX_THREADS", 50, type_cast=int)
+
+WAREHOUSE_SOURCES_DATABASE_URL: str = os.getenv("WAREHOUSE_SOURCES_DATABASE_URL", "")
+WAREHOUSE_SOURCES_QUEUE_PARTITION_SLACK_WEBHOOK_URL: str = os.getenv(
+    "WAREHOUSE_SOURCES_QUEUE_PARTITION_SLACK_WEBHOOK_URL", ""
+)

@@ -1,0 +1,7 @@
+# serializer version: 1
+# name: test_compile_insightsql_predicate_emits_no_table_qualifier
+  'and(ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, %(insightsql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\'), %(insightsql_val_1)s), 0), equals(event, %(insightsql_val_2)s))'
+# ---
+# name: test_compile_insightsql_predicate_emits_unqualified_materialized_column
+  'like(`mat_$current_url`, %(insightsql_val_0)s)'
+# ---

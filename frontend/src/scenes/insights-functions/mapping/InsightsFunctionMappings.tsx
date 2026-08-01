@@ -12,7 +12,6 @@ import {
     Input,
     Label,
     Select,
-    Tag,
     Tooltip,
 } from '@hanzo/elements'
 
@@ -76,7 +75,6 @@ export const MappingSummary = memo(function MappingSummary({
                       : humanize(firstInputValue)}
             </span>
             <span className="flex-1" />
-            {mapping.disabled ? <Tag type="danger">Disabled</Tag> : null}
         </span>
     )
 })
@@ -94,51 +92,47 @@ export function InsightsFunctionMapping({
 }): JSX.Element | null {
     const { groupsTaxonomicTypes } = useValues(groupsModel)
     const { showSource, sampleGlobalsWithInputs } = useValues(insightsFunctionConfigurationLogic)
+    const hideEventFilter = mapping.use_all_events_by_default === true
 
     return (
         <>
             <div className="p-3 pl-10 deprecated-space-y-2">
-                {mapping.disabled ? (
-                    <Banner
-                        type="warning"
-                        className="p-2"
-                        action={{
-                            children: 'Enable',
-                            onClick: () => onChange({ ...mapping, disabled: false }),
-                        }}
-                    >
-                        This mapping is disabled. It will not trigger the function.
-                    </Banner>
-                ) : null}
-                <Label>Match events and actions</Label>
-                <ActionFilter
-                    filters={mapping.filters ?? ({} as any)}
-                    setFilters={(f: any) => onChange({ ...mapping, filters: f })}
-                    typeKey={`match-group-${index}`}
-                    mathAvailability={MathAvailability.None}
-                    hideRename
-                    hideDuplicate
-                    showNestedArrow={false}
-                    actionsTaxonomicGroupTypes={[TaxonomicFilterGroupType.Events, TaxonomicFilterGroupType.Actions]}
-                    propertiesTaxonomicGroupTypes={[
-                        TaxonomicFilterGroupType.EventProperties,
-                        TaxonomicFilterGroupType.EventFeatureFlags,
-                        TaxonomicFilterGroupType.Elements,
-                        TaxonomicFilterGroupType.PersonProperties,
-                        TaxonomicFilterGroupType.InsightsQLExpression,
-                        ...groupsTaxonomicTypes,
-                    ]}
-                    propertyFiltersPopover
-                    addFilterDefaultOptions={{
-                        id: '$pageview',
-                        name: '$pageview',
-                        type: EntityTypes.EVENTS,
-                    }}
-                    buttonProps={{
-                        type: 'secondary',
-                    }}
-                    buttonCopy="Add event matcher"
-                />
+                {!hideEventFilter && (
+                    <>
+                        <Label>Match events and actions</Label>
+                        <ActionFilter
+                            filters={mapping.filters ?? ({} as any)}
+                            setFilters={(f: any) => onChange({ ...mapping, filters: f })}
+                            typeKey={`match-group-${index}`}
+                            mathAvailability={MathAvailability.None}
+                            hideRename
+                            hideDuplicate
+                            showNestedArrow={false}
+                            actionsTaxonomicGroupTypes={[
+                                TaxonomicFilterGroupType.Events,
+                                TaxonomicFilterGroupType.Actions,
+                            ]}
+                            propertiesTaxonomicGroupTypes={[
+                                TaxonomicFilterGroupType.EventProperties,
+                                TaxonomicFilterGroupType.EventFeatureFlags,
+                                TaxonomicFilterGroupType.Elements,
+                                TaxonomicFilterGroupType.PersonProperties,
+                                TaxonomicFilterGroupType.InsightsQLExpression,
+                                ...groupsTaxonomicTypes,
+                            ]}
+                            propertyFiltersPopover
+                            addFilterDefaultOptions={{
+                                id: '$pageview',
+                                name: '$pageview',
+                                type: EntityTypes.EVENTS,
+                            }}
+                            buttonProps={{
+                                type: 'secondary',
+                            }}
+                            buttonCopy="Add event matcher"
+                        />
+                    </>
+                )}
                 <Group name={['mappings', index]}>
                     <CyclotronJobInputs
                         configuration={{
@@ -252,13 +246,6 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                     }
                 }
 
-                const toggleDisabled = (mapping: InsightsFunctionMappingType): void => {
-                    const index = mappingsValue.findIndex((m) => m === mapping)
-                    if (index !== -1) {
-                        onChange(mappingsValue.map((m, i) => (i === index ? { ...m, disabled: !m.disabled } : m)))
-                    }
-                }
-
                 const renameMapping = (mapping: InsightsFunctionMappingType): void => {
                     Dialog.openForm({
                         title: 'Rename mapping',
@@ -328,11 +315,6 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                                                         dropdown: {
                                                             overlay: (
                                                                 <div className="deprecated-space-y-px">
-                                                                    <Button
-                                                                        onClick={() => toggleDisabled(mapping)}
-                                                                    >
-                                                                        {mapping.disabled ? 'Enable' : 'Disable'}
-                                                                    </Button>
                                                                     <Button onClick={() => renameMapping(mapping)}>
                                                                         Rename
                                                                     </Button>

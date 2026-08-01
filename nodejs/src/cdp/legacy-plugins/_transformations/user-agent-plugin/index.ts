@@ -1,6 +1,6 @@
 import { detect } from 'detect-browser'
 
-import { PluginEvent } from '@hanzo/plugin-scaffold'
+import { PluginEvent } from '~/plugin-scaffold'
 
 import { LegacyTransformationPluginMeta } from '../../types'
 
@@ -28,7 +28,7 @@ export function setupPlugin({ config, global }: UserAgentMeta) {
         global.enableSegmentAnalyticsJs = config.enableSegmentAnalyticsJs === 'true'
         global.overrideUserAgentDetails = config.overrideUserAgentDetails === 'true'
         global.debugMode = config.debugMode === 'true'
-    } catch (e: unknown) {
+    } catch {
         throw new Error('Failed to read the configuration')
     }
 }
@@ -112,7 +112,7 @@ export function processEvent(event: PluginEvent, { global, logger }: UserAgentMe
     }
 
     // The special Insights property names are retrieved from:
-    // https://github.com/hanzoai/insights/blob/main/frontend/src/lib/components/PropertyKeyInfo.tsx
+    // https://github.com/Insights/insights/blob/master/frontend/src/lib/components/PropertyKeyInfo.tsx
     properties['$device'] = device
     properties['$device_type'] = deviceType
 
@@ -129,7 +129,7 @@ export function processEvent(event: PluginEvent, { global, logger }: UserAgentMe
     return event
 }
 
-// detectDevice and detectDeviceType from https://github.com/hanzoai/insights-js/blob/9abedce5ac877caeb09205c4b693988fc09a63ca/src/utils.js#L808-L837
+// detectDevice and detectDeviceType from https://github.com/Insights/insights-js/blob/9abedce5ac877caeb09205c4b693988fc09a63ca/src/utils.js#L808-L837
 function detectDevice(userAgent: string) {
     if (/Windows Phone/i.test(userAgent) || /WPDesktop/.test(userAgent)) {
         return 'Windows Phone'

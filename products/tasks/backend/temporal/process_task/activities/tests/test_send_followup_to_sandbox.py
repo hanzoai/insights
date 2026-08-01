@@ -1,0 +1,122 @@
+import json
+
+from insights.test.base import BaseTest
+from unittest.mock import MagicMock, patch
+
+from products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox import (
+    SendFollowupToSandboxInput,
+    _get_stop_reason,
+    _write_turn_complete,
+    send_followup_to_sandbox,
+)
+
+
+class TestGetStopReason(BaseTest):
+    def test_returns_result_stop_reason_when_present(self):
+        self.assertEqual(_get_stop_reason({"result": {"stopReason": "max_tokens"}}), "max_tokens")
+
+    def test_defaults_to_end_turn_when_missing(self):
+        self.assertEqual(_get_stop_reason({"result": {}}), "end_turn")
+        self.assertEqual(_get_stop_reason({}), "end_turn")
+        self.assertEqual(_get_stop_reason(None), "end_turn")
+
+    def test_defaults_to_end_turn_when_result_is_not_a_dict(self):
+        self.assertEqual(_get_stop_reason({"result": "ok"}), "end_turn")
+
+
+class TestWriteTurnComplete(BaseTest):
+    @patch(
+        "products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox.get_tasks_stream_redis_sync"
+    )
+    def test_writes_stop_reason_to_synthetic_event(self, mock_get_tasks_stream_redis_sync):
+        mock_conn = MagicMock()
+        mock_get_tasks_stream_redis_sync.return_value = mock_conn
+
+        _write_turn_complete("run-123", "max_tokens")
+
+        payload = mock_conn.xadd.call_args.args[1]["data"]
+        event = json.loads(payload)
+        self.assertEqual(event["notification"]["method"], "_insights/turn_complete")
+        self.assertEqual(event["notification"]["params"]["stopReason"], "max_tokens")
+
+
+class TestSendFollowupToSandbox(BaseTest):
+    @patch(
+        "products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox.get_tasks_stream_redis_sync"
+    )
+    @patch("products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox.send_user_message")
+    @patch("products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox.TaskRun.objects")
+    def test_propagates_stop_reason_from_command_result(
+        self, mock_task_run_objects, mock_send_user_message, mock_get_tasks_stream_redis_sync
+    ):
+        task_run = MagicMock()
+        task_run.task.created_by = None
+        mock_task_run_objects.select_related.return_value.get.return_value = task_run
+        mock_send_user_message.return_value = MagicMock(
+            success=True,
+            data={"result": {"stopReason": "max_tokens"}},
+        )
+
+        mock_conn = MagicMock()
+        mock_get_tasks_stream_redis_sync.return_value = mock_conn
+
+        send_followup_to_sandbox(SendFollowupToSandboxInput(run_id="run-123", message="hello"))
+
+        payload = mock_conn.xadd.call_args.args[1]["data"]
+        event = json.loads(payload)
+        self.assertEqual(event["notification"]["params"]["stopReason"], "max_tokens")
+
+    @patch("products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox._refresh_sandbox_mcp")
+    @patch(
+        "products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox.get_tasks_stream_redis_sync"
+    )
+    @patch("products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox.send_user_message")
+    @patch("products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox.TaskRun.objects")
+    def test_steer_skips_refresh_and_synthetic_turn_complete(
+        self,
+        mock_task_run_objects,
+        mock_send_user_message,
+        mock_get_tasks_stream_redis_sync,
+        mock_refresh_sandbox_mcp,
+    ):
+        task_run = MagicMock()
+        task_run.id = "run-123"
+        task_run.state = {"sandbox_id": "sandbox-123"}
+        task_run.task.created_by_id = 42
+        task_run.task.created_by = MagicMock(id=42)
+        mock_task_run_objects.select_related.return_value.get.return_value = task_run
+        mock_send_user_message.return_value = MagicMock(
+            success=True,
+            data={"result": {"stopReason": "steered", "steered": True}},
+        )
+
+        with (
+            patch(
+                "products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox.get_sandbox_mcp_session_user",
+                return_value=42,
+            ),
+            patch(
+                "products.tasks.backend.temporal.process_task.activities.send_followup_to_sandbox.create_sandbox_connection_token",
+                return_value=None,
+            ),
+        ):
+            send_followup_to_sandbox(
+                SendFollowupToSandboxInput(
+                    run_id="run-123",
+                    message="change direction",
+                    actor_user_id=42,
+                    steer=True,
+                )
+            )
+
+        mock_refresh_sandbox_mcp.assert_not_called()
+        mock_send_user_message.assert_called_once_with(
+            task_run,
+            "change direction",
+            artifacts=None,
+            auth_token=None,
+            timeout=1800,
+            message_id=None,
+            steer=True,
+        )
+        mock_get_tasks_stream_redis_sync.assert_not_called()

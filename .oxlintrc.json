@@ -1,16 +1,20 @@
 {
     "$schema": "./node_modules/oxlint/configuration_schema.json",
-    "plugins": ["typescript", "unicorn", "react", "react-perf", "jest", "promise", "jsdoc", "oxc"],
+    "plugins": ["typescript", "unicorn", "react", "react-perf", "jest", "promise", "jsdoc", "oxc", "import"],
     "env": {
         "builtin": true
     },
     "ignorePatterns": [
+        "products/desktop",
         "node_modules",
         "dist",
         "build",
         "rust",
         "cli",
         "nodejs",
+        ".semgrep",
+        ".github/actions/paths-filter",
+        ".github/scripts",
         "common/scriptvm/typescript",
         "common/scriptvm/typescript/dist",
         "common/plugin_transpiler/dist",
@@ -28,7 +32,6 @@
         "no-irregular-whitespace": "off",
         "require-await": "off",
         "no-await-in-loop": "off",
-        "react/prop-types": "off",
         "react/react-in-jsx-scope": "off",
         "react/no-unescaped-entities": "off",
         "react/jsx-no-target-blank": "off",
@@ -41,7 +44,9 @@
             "error",
             {
                 "ignoreRestSiblings": true,
-                "destructuredArrayIgnorePattern": "^_$"
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_",
+                "destructuredArrayIgnorePattern": "^_"
             }
         ],
         "no-useless-spread": "error",
@@ -99,12 +104,44 @@
                     {
                         "name": "~/queries/schema",
                         "message": "Import from 'queries/schema/schema-foo' to avoid Webpack/Sucrase enum export issues."
+                    },
+                    {
+                        "name": "monaco-editor",
+                        "message": "Value imports of monaco-editor statically couple ~4 MB of editor code into your chunk. Use `import type`, or render via the lazy facade in lib/monaco/CodeEditor.",
+                        "allowTypeImports": true
+                    },
+                    {
+                        "name": "lib/monaco/CodeEditorImpl",
+                        "message": "Import CodeEditor from lib/monaco/CodeEditor instead — the lazy facade keeps monaco out of your chunk."
+                    },
+                    {
+                        "name": "~/lib/monaco/CodeEditorImpl",
+                        "message": "Import CodeEditor from lib/monaco/CodeEditor instead — the lazy facade keeps monaco out of your chunk."
+                    },
+                    {
+                        "name": "@hanzo/brand/hoggies",
+                        "message": "Inline-SVG hoggies bundle up to ~1 MB of JS each. Use the PNG export instead: import * as name from '@hanzo/brand/hoggies/png/<name>' and wrap with pngHoggie from lib/brand/hoggies. If you truly need vector output, add an oxlint-disable comment stating why.",
+                        "allowTypeImports": true
+                    },
+                    {
+                        "name": "@hanzo/brand/hoggies/svg",
+                        "message": "Inline-SVG hoggies bundle up to ~1 MB of JS each. Use the PNG export instead: import * as name from '@hanzo/brand/hoggies/png/<name>' and wrap with pngHoggie from lib/brand/hoggies. If you truly need vector output, add an oxlint-disable comment stating why."
+                    },
+                    {
+                        "name": "@hanzo/brand/hoggies/png",
+                        "message": "Import the per-asset stub instead: import * as name from '@hanzo/brand/hoggies/png/<name>'. The barrel pulls every hoggie's stub into the graph."
+                    }
+                ],
+                "patterns": [
+                    {
+                        "group": ["@hanzo/brand/hoggies/svg/*"],
+                        "message": "Inline-SVG hoggies bundle up to ~1 MB of JS each. Use the PNG export instead: import * as name from '@hanzo/brand/hoggies/png/<name>' and wrap with pngHoggie from lib/brand/hoggies. If you truly need vector output, add an oxlint-disable comment stating why."
                     }
                 ]
             }
         ],
         "react/forbid-dom-props": [
-            "error",
+            "warn",
             {
                 "forbid": [
                     {
@@ -114,18 +151,11 @@
                 ]
             }
         ],
+        "no-new-array": "warn",
         "react/forbid-elements": [
             "error",
             {
                 "forbid": [
-                    {
-                        "element": "Layout",
-                        "message": "use utility classes instead"
-                    },
-                    {
-                        "element": "Tabs",
-                        "message": "use <Tabs> instead"
-                    },
                     {
                         "element": "Space",
                         "message": "use flex or space utility classes instead"
@@ -135,36 +165,8 @@
                         "message": "use Spinner instead"
                     },
                     {
-                        "element": "Badge",
-                        "message": "use Badge instead"
-                    },
-                    {
-                        "element": "InputNumber",
-                        "message": "use Input with type=\"number\" instead"
-                    },
-                    {
-                        "element": "Collapse",
-                        "message": "use <Collapse> instead"
-                    },
-                    {
-                        "element": "Slider",
-                        "message": "use <Slider> instead"
-                    },
-                    {
-                        "element": "Checkbox",
-                        "message": "use <Checkbox> instead"
-                    },
-                    {
                         "element": "MonacoEditor",
                         "message": "use <CodeEditor> instead"
-                    },
-                    {
-                        "element": "Typography",
-                        "message": "use utility classes instead"
-                    },
-                    {
-                        "element": "Input.TextArea",
-                        "message": "use <TextArea> instead"
                     },
                     {
                         "element": "ReactMarkdown",
@@ -173,54 +175,6 @@
                     {
                         "element": "a",
                         "message": "use <Link> instead"
-                    },
-                    {
-                        "element": "Tag",
-                        "message": "use <Tag> instead"
-                    },
-                    {
-                        "element": "Alert",
-                        "message": "use <Banner> instead"
-                    },
-                    {
-                        "element": "ReactJson",
-                        "message": "use <JSONViewer> for dark mode support instead"
-                    },
-                    {
-                        "element": "Radio",
-                        "message": "use <Radio> instead"
-                    },
-                    {
-                        "element": "Skeleton",
-                        "message": "use <Skeleton> instead"
-                    },
-                    {
-                        "element": "Divider",
-                        "message": "use <Divider> instead"
-                    },
-                    {
-                        "element": "Popconfirm",
-                        "message": "use <Dialog> instead"
-                    },
-                    {
-                        "element": "Button",
-                        "message": "use <Button> instead"
-                    },
-                    {
-                        "element": "Input",
-                        "message": "use <Input> instead"
-                    },
-                    {
-                        "element": "Modal",
-                        "message": "use <Modal> or <Dialog> instead"
-                    },
-                    {
-                        "element": "Select",
-                        "message": "use <Select> instead"
-                    },
-                    {
-                        "element": "Progress",
-                        "message": "use <Progress> instead"
                     }
                 ]
             }
@@ -228,6 +182,12 @@
         "no-constant-binary-expression": "error",
         "no-useless-rename": "error",
         "no-useless-call": "error",
+        "import/no-cycle": [
+            "warn",
+            {
+                "maxDepth": 10
+            }
+        ],
         "jest/no-restricted-matchers": [
             "error",
             {
@@ -243,7 +203,13 @@
             }
         },
         {
-            "files": ["services/mcp/src/ui-apps/**/*.ts"],
+            "files": ["services/mcp/src/generated/**/*.ts"],
+            "rules": {
+                "no-useless-escape": "off"
+            }
+        },
+        {
+            "files": ["services/mcp/src/ui-apps/**/*.{ts,tsx}"],
             "rules": {
                 "no-console": [
                     "error",
@@ -257,6 +223,194 @@
             "files": ["docs/onboarding/**/*.tsx"],
             "rules": {
                 "react/forbid-elements": "off"
+            }
+        },
+        {
+            "files": ["services/stripe-app/src/**/*.{ts,tsx}"],
+            "rules": {
+                "react/forbid-elements": "off",
+                "react/forbid-dom-props": "off",
+                "no-restricted-imports": "off"
+            }
+        },
+        {
+            "files": ["services/mcp/src/ui-apps/**/*.{ts,tsx}", "products/**/mcp/apps/**/*.{ts,tsx}"],
+            "rules": {
+                "react/forbid-elements": "off"
+            }
+        },
+        {
+            "files": [
+                "frontend/src/lib/monaco/**",
+                "frontend/src/lib/components/MonacoDiffEditor.tsx",
+                "frontend/src/scenes/data-warehouse/editor/sqlEditorLogic.tsx",
+                "frontend/src/scenes/insights-functions/configuration/InsightsFunctionTest.tsx"
+            ],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "paths": [
+                            {
+                                "name": "dayjs",
+                                "message": "Do not directly import dayjs. Only import the dayjs exported from 'lib/dayjs'."
+                            },
+                            {
+                                "name": "chart.js",
+                                "message": "Do not directly import chart.js. Only import the Chart and friends exported from 'lib/Chart'."
+                            },
+                            {
+                                "name": "chart.js/auto",
+                                "message": "Do not directly import chart.js/auto. Only import the Chart and friends exported from 'lib/Chart'."
+                            },
+                            {
+                                "name": "~/queries/schema",
+                                "message": "Import from 'queries/schema/schema-foo' to avoid Webpack/Sucrase enum export issues."
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["frontend/src/toolbar/**/*.{ts,tsx}"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "group": [
+                                    "scenes/**",
+                                    "~/scenes/**",
+                                    "!scenes/urls",
+                                    "!~/scenes/urls",
+                                    "!scenes/product-tours/stepUtils",
+                                    "!scenes/product-tours/constants",
+                                    "!scenes/product-tours/editor/generateStepHtml"
+                                ],
+                                "message": "The toolbar ships to customer pages and must not depend on app scenes. Import from lib/, or fetch via toolbarFetch. The listed exceptions are the toolbar's intentional seams; the full transitive boundary is enforced by frontend/bin/check-toolbar-graph.mjs."
+                            },
+                            {
+                                "group": ["~/products", "products/**", "~/products/**"],
+                                "message": "The toolbar must not import product manifests or product frontends — that pulls the whole product graph into the customer-facing bundle."
+                            },
+                            {
+                                "group": ["layout/**", "~/layout/**", "models/**", "~/models/**"],
+                                "message": "The toolbar must not import app layout or global models."
+                            }
+                        ],
+                        "paths": [
+                            {
+                                "name": "lib/api",
+                                "message": "Toolbar code must use toolbarFetch/toolbarApi (authorized via toolbar params), not the app's api client.",
+                                "allowTypeImports": true
+                            },
+                            {
+                                "name": "~/lib/api",
+                                "message": "Toolbar code must use toolbarFetch/toolbarApi (authorized via toolbar params), not the app's api client.",
+                                "allowTypeImports": true
+                            },
+                            {
+                                "name": "dayjs",
+                                "message": "Do not directly import dayjs. Only import the dayjs exported from 'lib/dayjs'."
+                            },
+                            {
+                                "name": "chart.js",
+                                "message": "Do not directly import chart.js. Only import the Chart and friends exported from 'lib/Chart'."
+                            },
+                            {
+                                "name": "chart.js/auto",
+                                "message": "Do not directly import chart.js/auto. Only import the Chart and friends exported from 'lib/Chart'."
+                            },
+                            {
+                                "name": "~/queries/schema",
+                                "message": "Import from 'queries/schema/schema-foo' to avoid Webpack/Sucrase enum export issues."
+                            },
+                            {
+                                "name": "monaco-editor",
+                                "message": "Value imports of monaco-editor statically couple ~4 MB of editor code into your chunk. Use `import type`, or render via the lazy facade in lib/monaco/CodeEditor.",
+                                "allowTypeImports": true
+                            },
+                            {
+                                "name": "lib/monaco/CodeEditorImpl",
+                                "message": "Import CodeEditor from lib/monaco/CodeEditor instead — the lazy facade keeps monaco out of your chunk."
+                            },
+                            {
+                                "name": "~/lib/monaco/CodeEditorImpl",
+                                "message": "Import CodeEditor from lib/monaco/CodeEditor instead — the lazy facade keeps monaco out of your chunk."
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["products/insights_ai/frontend/sandbox/**/*.{ts,tsx}"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "group": ["**/ee/api/conversation", "**/ee/api/conversation/**"],
+                                "message": "Sandbox renderer must not import the conversation API. Use products/tasks/frontend/generated/api for task data."
+                            },
+                            {
+                                "group": ["**/api.conversations*"],
+                                "message": "Sandbox renderer must not import api.conversations. Use api.tasks.* and products/tasks/frontend/generated/api."
+                            }
+                        ],
+                        "paths": [
+                            {
+                                "name": "scenes/max/maxThreadLogic",
+                                "message": "Sandbox module must not import maxThreadLogic (conversation orchestration). Forbidden by design boundary."
+                            },
+                            {
+                                "name": "scenes/max/maxContextLogic",
+                                "message": "Sandbox module must not import maxContextLogic. Forbidden by design boundary."
+                            },
+                            {
+                                "name": "scenes/max/maxLogic",
+                                "message": "Sandbox module must not import maxLogic. Forbidden by design boundary."
+                            },
+                            {
+                                "name": "scenes/max/maxGlobalLogic",
+                                "message": "Sandbox module must not import maxGlobalLogic. Forbidden by design boundary."
+                            },
+                            {
+                                "name": "scenes/max/maxTypes",
+                                "message": "Avoid importing maxTypes from the sandbox module. Extract needed types (e.g. SandboxToolCallMessage) into products/insights_ai/frontend/sandbox/types/ instead.",
+                                "allowTypeImports": true
+                            },
+                            {
+                                "name": "dayjs",
+                                "message": "Do not directly import dayjs. Only import the dayjs exported from 'lib/dayjs'."
+                            },
+                            {
+                                "name": "~/queries/schema",
+                                "message": "Import from 'queries/schema/schema-foo' to avoid Webpack/Sucrase enum export issues."
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["frontend/src/lib/components/UniversalFilters/constants.ts"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "paths": [
+                            {
+                                "name": "~/types",
+                                "allowTypeImports": true,
+                                "message": "constants.ts is a leaf module kept free of ~/types's value-import graph (which circles back through scenes/session-recordings and caused \"Cannot access 'DEFAULT_UNIVERSAL_GROUP_FILTER' before initialization\" TDZ errors). Only `import type` from ~/types is allowed here; import/no-cycle can't catch this because the real cycle is far deeper than its configured maxDepth."
+                            }
+                        ]
+                    }
+                ]
             }
         }
     ]

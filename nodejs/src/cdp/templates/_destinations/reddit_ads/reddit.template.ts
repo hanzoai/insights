@@ -40,7 +40,7 @@ export const template: InsightsFunctionTemplate = {
     description: 'Track how many Reddit users interact with your website.',
     icon_url: '/static/services/reddit.png',
     category: ['Advertisement'],
-    code_language: 'fn',
+    code_language: 'script',
     code: `
 if (empty(inputs.accountId) or empty(inputs.conversionsAccessToken)) {
     throw Error('Account ID and access token are required')
@@ -97,7 +97,7 @@ let body := {
 };
 
 let url := f'https://ads-api.reddit.com/api/v2.0/conversions/events/{inputs.accountId}';
-let userAgent := 'insights:com.hanzo.cdp:0.0.1 (by /u/HanzoTeam)';
+let userAgent := 'script:com.insights.cdp:0.0.1 (by /u/InsightsTeam)';
 let headers := {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {inputs.conversionsAccessToken}',

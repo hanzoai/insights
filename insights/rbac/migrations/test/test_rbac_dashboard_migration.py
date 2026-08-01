@@ -2,21 +2,29 @@ import pytest
 from insights.test.base import BaseTest
 
 from insights.constants import AvailableFeature
-from insights.models.dashboard import Dashboard
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.team.team import Team
 from insights.models.user import User
 from insights.rbac.migrations.rbac_dashboard_migration import rbac_dashboard_access_control_migration
 
+from products.dashboards.backend.models.dashboard import Dashboard
+
+try:
+    from ee.models.dashboard_privilege import DashboardPrivilege
+    from ee.models.rbac.access_control import AccessControl
+except ImportError:
+    pass
+
+
 @pytest.mark.ee
 class TestRBACDashboardMigration(BaseTest):
     def setUp(self):
         super().setUp()
-        # Enable advanced permissions for the organization
+        # Enable access control for the organization
         self.organization.available_product_features = [
             {
-                "key": AvailableFeature.ADVANCED_PERMISSIONS,
-                "name": AvailableFeature.ADVANCED_PERMISSIONS,
+                "key": AvailableFeature.ACCESS_CONTROL,
+                "name": AvailableFeature.ACCESS_CONTROL,
             },
         ]
         self.organization.save()

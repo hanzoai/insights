@@ -5,7 +5,6 @@ import {
     IconArrowLeft,
     IconChevronLeft,
     IconExpand45,
-    IconLock,
     IconOpenSidebar,
     IconPlus,
     IconShare,
@@ -13,35 +12,37 @@ import {
 } from '@hanzo/icons'
 import { Banner, Link, Tooltip } from '@hanzo/elements'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Button } from 'lib/elements/Button'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
-import { appLogic } from 'scenes/appLogic'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
-import { sceneLogic } from 'scenes/sceneLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
-import { SidePanelContentContainer } from '~/layout/navigation-3000/sidepanel/SidePanelContentContainer'
 import { SidePanelPaneHeader } from '~/layout/navigation-3000/sidepanel/components/SidePanelPaneHeader'
+import { SidePanelContentContainer } from '~/layout/navigation-3000/sidepanel/SidePanelContentContainer'
 import { sidePanelLogic } from '~/layout/navigation-3000/sidepanel/sidePanelLogic'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { SidePanelTab } from '~/types'
 
-import { ConversationHistory } from './ConversationHistory'
-import { HistoryPreview } from './HistoryPreview'
-import { Intro } from './Intro'
-import { Thread } from './Thread'
+import { runnerPanelLogic } from 'products/insights_ai/frontend/api/logics'
+
 import { AiFirstMaxInstance } from './components/AiFirstMaxInstance'
 import { AnimatedBackButton } from './components/AnimatedBackButton'
+import { MaxNotConfigured } from './components/MaxNotConfigured'
+import { MAX_SIDE_PANEL_ID, PhaiSidePanelChat } from './components/PhaiSidePanelChat'
+import { PhaiViewToggle } from './components/PhaiViewToggle'
 import { SidebarQuestionInput } from './components/SidebarQuestionInput'
 import { SidebarQuestionInputWithSuggestions } from './components/SidebarQuestionInputWithSuggestions'
 import { ThreadAutoScroller } from './components/ThreadAutoScroller'
-import { maxLogic } from './maxLogic'
+import { ConversationHistory } from './ConversationHistory'
+import { HistoryPreview } from './HistoryPreview'
+import { Intro } from './Intro'
+import { MaxLogicProps, SIDE_PANEL_PANEL_ID, maxLogic } from './maxLogic'
 import { MaxThreadLogicProps, maxThreadLogic } from './maxThreadLogic'
+import { SandboxComposerSurfaces, Thread } from './Thread'
 
 export const scene: SceneExport = {
     component: Max,
@@ -51,19 +52,15 @@ export const scene: SceneExport = {
 export function Max({ tabId }: { tabId?: string }): JSX.Element {
     const { sidePanelOpen, selectedTab } = useValues(sidePanelLogic)
     const { closeSidePanel } = useActions(sidePanelLogic)
-    const { conversationId: tabConversationId } = useValues(maxLogic({ tabId: tabId || '' }))
-    const { conversationId: sidepanelConversationId } = useValues(maxLogic({ tabId: 'sidepanel' }))
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
-
+    const { conversationId: tabConversationId } = useValues(maxLogic({ panelId: tabId }))
+    const { conversationId: sidepanelConversationId } = useValues(maxLogic({ panelId: SIDE_PANEL_PANEL_ID }))
     if (sidePanelOpen && selectedTab === SidePanelTab.Max && sidepanelConversationId === tabConversationId) {
         return (
             <SceneContent className="px-4 py-4 min-h-[calc(100vh-var(--scene-layout-header-height)-120px)]">
                 <SceneTitleSection name={null} resourceType={{ type: 'chat' }} />
                 <div className="flex flex-col items-center justify-center w-full grow">
                     <IconSidePanel className="text-3xl text-muted mb-2" />
-                    <h3 className="text-xl font-bold mb-1">
-                        The chat is currently in the {isRemovingSidePanelFlag ? 'context panel' : 'sidebar'}
-                    </h3>
+                    <h3 className="text-xl font-bold mb-1">The chat is currently in the context panel</h3>
                     <p className="text-sm text-muted mb-2">You can navigate freely around the app with it, or…</p>
                     <Button
                         type="secondary"
@@ -78,24 +75,20 @@ export function Max({ tabId }: { tabId?: string }): JSX.Element {
         )
     }
 
-    if (isRemovingSidePanelFlag) {
-        return <AiFirstMaxInstance tabId={tabId ?? ''} />
-    }
-
-    return <MaxInstance tabId={tabId ?? ''} />
+    return <AiFirstMaxInstance tabId={tabId ?? ''} />
 }
 
 export interface MaxInstanceProps {
     sidePanel?: boolean
-    tabId: string
-    isAIOnlyMode?: boolean
+    tabId?: string
 }
 
-export const MaxInstance = React.memo(function MaxInstance({
-    sidePanel,
-    tabId,
-    isAIOnlyMode,
-}: MaxInstanceProps): JSX.Element {
+export const MaxInstance = React.memo(function MaxInstance({ sidePanel, tabId }: MaxInstanceProps): JSX.Element {
+    // `sidePanel` here is presentational (side panel chrome/layout) and is independent of the logic
+    // identity we bind: a tabId identifies a scene tab (or a Storybook instance rendered with side
+    // panel chrome), while the real side panel — which has no tabId — binds the side panel panelId.
+    // Folding the presentational flag into the key would hijack tabbed instances.
+    const logicProps: MaxLogicProps = { panelId: tabId ?? SIDE_PANEL_PANEL_ID }
     const {
         threadVisible,
         conversationHistoryVisible,
@@ -104,25 +97,36 @@ export const MaxInstance = React.memo(function MaxInstance({
         threadLogicKey,
         conversation,
         conversationId,
-    } = useValues(maxLogic({ tabId }))
-    const { startNewConversation, goBack } = useActions(maxLogic({ tabId }))
+    } = useValues(maxLogic(logicProps))
+    const { startNewConversation, goBack } = useActions(maxLogic(logicProps))
     const { openSidePanelMax } = useActions(maxGlobalLogic)
-    const { closeTabId } = useActions(sceneLogic)
-    const { exitAIOnlyMode } = useActions(appLogic)
-    const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
+    const { isMaxAvailable, effectivePhaiView } = useValues(maxGlobalLogic)
+    // The new insights_ai view's back button walks its own panel view state (run -> history -> composer)
+    // rather than legacy Max's conversation stack — mounting this tiny headless logic in legacy view is
+    // harmless (unconditional hooks).
+    const { canGoBack: panelCanGoBack } = useValues(runnerPanelLogic({ panelId: MAX_SIDE_PANEL_ID }))
+    const { goBack: panelGoBack } = useActions(runnerPanelLogic({ panelId: MAX_SIDE_PANEL_ID }))
 
     const threadProps: MaxThreadLogicProps = {
-        tabId,
+        ...logicProps,
         conversationId: threadLogicKey,
         conversation,
     }
 
     const { closeSidePanel } = useActions(sidePanelLogic)
 
-    const content = (
-        <BindLogic logic={maxLogic} props={{ tabId }}>
+    const isNewView = effectivePhaiView === 'new'
+    const headerBackDisabled = isNewView ? !panelCanGoBack : backButtonDisabled
+
+    const content = !isMaxAvailable ? (
+        <MaxNotConfigured />
+    ) : (
+        <BindLogic logic={maxLogic} props={logicProps}>
             <BindLogic logic={maxThreadLogic} props={threadProps}>
-                {conversationHistoryVisible ? (
+                {effectivePhaiView === 'new' ? (
+                    // Side panel only shows the new composer + thread viewer — the tasks list lives on /ai.
+                    <PhaiSidePanelChat />
+                ) : conversationHistoryVisible ? (
                     <ConversationHistory sidePanel={sidePanel} />
                 ) : !threadVisible ? (
                     // pb-7 below is intentionally specific - it's chosen so that the bottom-most chat's title
@@ -132,7 +136,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                         className={cn(
                             '@container/max-welcome relative flex flex-col gap-4 px-4 pb-7 grow',
                             !sidePanel && 'min-h-[calc(100vh-var(--scene-layout-header-height)-120px)]',
-                            sidePanel && isRemovingSidePanelFlag && 'px-0'
+                            sidePanel && 'px-0'
                         )}
                     >
                         <div className="grow items-center justify-center flex flex-col gap-3 relative z-50">
@@ -157,7 +161,8 @@ export const MaxInstance = React.memo(function MaxInstance({
                                 </Banner>
                             </div>
                         )}
-                        <Thread className={cn('p-3', sidePanel && isRemovingSidePanelFlag && 'p-1')} />
+                        <Thread className={cn('p-3', sidePanel && 'p-1')} />
+                        <SandboxComposerSurfaces />
                         {!conversation?.has_unsupported_content && (
                             <SidebarQuestionInput isSticky sidePanel={sidePanel} />
                         )}
@@ -167,136 +172,77 @@ export const MaxInstance = React.memo(function MaxInstance({
         </BindLogic>
     )
     const header = (
-        <SidePanelPaneHeader
-            className="transition-all duration-200"
-            onClose={() => {
-                exitAIOnlyMode()
-                startNewConversation()
-            }}
-            showCloseButton={false}
-        >
+        <SidePanelPaneHeader className="transition-all duration-200" showCloseButton={false}>
             <div className="flex flex-1 min-w-0 overflow-hidden">
                 <div className="flex items-center flex-1 min-w-0">
-                    <AnimatedBackButton in={!backButtonDisabled}>
-                        {isRemovingSidePanelFlag ? (
-                            <ButtonPrimitive
-                                iconOnly
-                                onClick={() => goBack()}
-                                tooltip="Go back"
-                                tooltipPlacement="bottom-end"
-                                disabledReasons={backButtonDisabled ? { 'You are already at home': true } : undefined}
-                            >
-                                <IconChevronLeft className="text-tertiary size-3 group-hover:text-primary z-10" />
-                            </ButtonPrimitive>
-                        ) : (
-                            <Button
-                                size="small"
-                                icon={<IconChevronLeft />}
-                                onClick={() => goBack()}
-                                tooltip="Go back"
-                                tooltipPlacement="bottom-end"
-                                disabledReason={backButtonDisabled ? 'You are already at home' : undefined}
-                            />
-                        )}
+                    <AnimatedBackButton in={isNewView ? panelCanGoBack : !backButtonDisabled}>
+                        <ButtonPrimitive
+                            iconOnly
+                            onClick={() => (isNewView ? panelGoBack() : goBack())}
+                            tooltip="Go back"
+                            tooltipPlacement="bottom-end"
+                            disabledReasons={headerBackDisabled ? { 'You are already at home': true } : undefined}
+                        >
+                            <IconChevronLeft className="text-tertiary size-3 group-hover:text-primary z-10" />
+                        </ButtonPrimitive>
                     </AnimatedBackButton>
 
                     <Tooltip title={chatTitle || undefined} placement="bottom">
-                        <h3
-                            className={cn('flex-1 font-semibold mb-0 truncate text-sm ml-1', {
-                                'ml-2': isRemovingSidePanelFlag,
-                            })}
-                        >
-                            {chatTitle || 'Insights AI'}
-                        </h3>
+                        <h3 className="flex-1 font-semibold mb-0 truncate text-sm ml-2">{chatTitle || 'Insights AI'}</h3>
                     </Tooltip>
                 </div>
-                {conversationId && !conversationHistoryVisible && !threadVisible && !isAIOnlyMode && (
+                {conversationId && !conversationHistoryVisible && !threadVisible && (
                     <Button
                         size="small"
                         icon={<IconPlus />}
                         onClick={() => startNewConversation()}
+                        data-attr="max-new-chat"
                         tooltip="Start a new chat"
                         tooltipPlacement="bottom"
                     />
                 )}
                 {conversationId && (
-                    <>
-                        {isRemovingSidePanelFlag ? (
-                            <ButtonPrimitive
-                                onClick={() => {
-                                    copyToClipboard(
-                                        urls.absolute(urls.currentProject(urls.ai(conversationId))),
-                                        'conversation sharing link'
-                                    )
-                                }}
-                                tooltip="Copy link to chat"
-                                tooltipPlacement="bottom-end"
-                                iconOnly
-                            >
-                                <IconShare className="text-tertiary size-3 group-hover:text-primary z-10" />
-                            </ButtonPrimitive>
-                        ) : (
-                            <Button
-                                size="small"
-                                icon={<IconShare />}
-                                onClick={() => {
-                                    copyToClipboard(
-                                        urls.absolute(urls.currentProject(urls.ai(conversationId))),
-                                        'conversation sharing link'
-                                    )
-                                }}
-                                tooltip={
-                                    <>
-                                        Copy link to chat
-                                        <br />
-                                        <em>
-                                            <IconLock /> Requires organization access
-                                        </em>
-                                    </>
-                                }
-                                tooltipPlacement="bottom-end"
-                            />
-                        )}
-                    </>
-                )}
-                {isRemovingSidePanelFlag ? (
-                    <Link
-                        buttonProps={{
-                            iconOnly: true,
-                        }}
-                        to={urls.ai(conversationId ?? undefined)}
+                    <ButtonPrimitive
                         onClick={() => {
-                            closeSidePanel()
+                            copyToClipboard(
+                                urls.absolute(urls.currentProject(urls.ai(conversationId))),
+                                'conversation sharing link'
+                            )
                         }}
-                        target="_blank"
-                        tooltip="Open as main focus"
+                        tooltip="Copy link to chat"
                         tooltipPlacement="bottom-end"
+                        iconOnly
                     >
-                        <IconExpand45 className="text-tertiary size-3 group-hover:text-primary z-10" />
-                    </Link>
-                ) : (
-                    <Button
-                        size="small"
-                        sideIcon={<IconExpand45 />}
-                        to={urls.ai(conversationId ?? undefined)}
-                        onClick={() => {
-                            closeSidePanel()
-                            startNewConversation()
-                        }}
-                        targetBlank
-                        tooltip="Open as main focus"
-                        tooltipPlacement="bottom-end"
-                    />
+                        <IconShare className="text-tertiary size-3 group-hover:text-primary z-10" />
+                    </ButtonPrimitive>
                 )}
+                <PhaiViewToggle variant="primitive" />
+                <Link
+                    buttonProps={{
+                        iconOnly: true,
+                    }}
+                    to={urls.ai(conversationId ?? undefined)}
+                    onClick={() => {
+                        closeSidePanel()
+                    }}
+                    target="_blank"
+                    tooltip="Open as main focus"
+                    tooltipPlacement="bottom-end"
+                >
+                    <IconExpand45 className="text-tertiary size-3 group-hover:text-primary z-10" />
+                </Link>
             </div>
         </SidePanelPaneHeader>
     )
 
     return sidePanel ? (
         <>
-            {!isRemovingSidePanelFlag ? header : null}
-            <SidePanelContentContainer flagOffClassName="contents">
-                {isRemovingSidePanelFlag ? header : null}
+            {/* The new view scrolls internally (virtualized thread, history list), so the ScrollArea
+            content must stay clamped to the panel height — without `min-h-0` its `min-height: auto`
+            grows it to fit the whole thread and no scroller ever engages. The legacy view is the
+            opposite: it relies on this container growing so the outer viewport scrolls it. */}
+            <SidePanelContentContainer contentClassName={cn('flex flex-col flex-1', isNewView && 'min-h-0')}>
+                {header}
                 {content}
             </SidePanelContentContainer>
         </>
@@ -329,10 +275,9 @@ export const MaxInstance = React.memo(function MaxInstance({
                                 sideIcon={<IconOpenSidebar />}
                                 onClick={() => {
                                     openSidePanelMax(conversationId ?? undefined)
-                                    closeTabId(tabId, { source: 'open_in_side_panel' })
                                 }}
                             >
-                                {isRemovingSidePanelFlag ? 'Open in context panel' : 'Open in side panel'}
+                                Open in context panel
                             </Button>
                         ) : undefined}
                     </>

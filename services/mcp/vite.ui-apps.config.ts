@@ -1,146 +1,99 @@
 import react from '@vitejs/plugin-react'
-import { existsSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { type Plugin, defineConfig } from 'vite'
+import { defineConfig } from 'vite'
+
+import { discoverApps } from './scripts/utils'
 
 // Insights configuration - injected at build time
-// Set INSIGHTS_UI_APPS_TOKEN to enable analytics in UI apps
-const INSIGHTS_UI_APPS_TOKEN = process.env.INSIGHTS_UI_APPS_TOKEN || ''
+// Set POSTFN_UI_APPS_TOKEN to enable analytics in UI apps
+const POSTFN_UI_APPS_TOKEN = process.env.POSTFN_UI_APPS_TOKEN || ''
 
 // Analytics base URL for MCP Apps - where events are sent
 // For local development, set to http://localhost:8010
-const INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL =
-    process.env.INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL || 'https://us.i.hanzo.ai'
+const POSTFN_MCP_APPS_ANALYTICS_BASE_URL =
+    process.env.POSTFN_MCP_APPS_ANALYTICS_BASE_URL || 'https://us.i.hanzo.ai'
 
-// Apps directory - all subdirectories with index.html are apps
+// Apps directory - each .tsx file is an app
 const APPS_DIR = resolve(__dirname, 'src/ui-apps/apps')
 
-/**
- * Auto-discover UI apps from src/ui-apps/apps/
- */
-function discoverApps(): string[] {
-    const entries = readdirSync(APPS_DIR)
-    const apps: string[] = []
-
-    for (const entry of entries) {
-        const entryPath = resolve(APPS_DIR, entry)
-        const indexPath = resolve(entryPath, 'index.html')
-
-        if (statSync(entryPath).isDirectory() && existsSync(indexPath)) {
-            apps.push(entry)
-        }
-    }
-
-    return apps
-}
-
-// Get app name from env (set by build script) or undefined for multi-app mode
+// Single app mode: UI_APP env var selects which app to build
 const appName = process.env.UI_APP
 
-// Discover all apps for the inlining plugin
+// Discover all apps
 const ALL_APPS = discoverApps()
-
-/**
- * Custom plugin that inlines JS and CSS into HTML files after the build.
- */
-function inlineAllAssets(): Plugin {
-    const outDir = resolve(__dirname, 'ui-apps-dist')
-    // Only process the app being built (single-app mode)
-    const appsToProcess = appName ? [appName] : ALL_APPS
-
-    function readAsset(assetPath: string): string | null {
-        const fullPath = resolve(outDir, assetPath.replace(/^\//, ''))
-        try {
-            return readFileSync(fullPath, 'utf-8')
-        } catch {
-            return null
-        }
-    }
-
-    return {
-        name: 'inline-all-assets',
-        enforce: 'post',
-        apply: 'build',
-        closeBundle() {
-            for (const app of appsToProcess) {
-                const htmlPath = resolve(outDir, `src/ui-apps/apps/${app}/index.html`)
-
-                try {
-                    let html = readFileSync(htmlPath, 'utf-8')
-
-                    // Remove modulepreload links (dependencies are bundled with inlineDynamicImports)
-                    html = html.replace(/<link rel="modulepreload" crossorigin href="[^"]+">/g, '')
-
-                    // Inline main JS module
-                    html = html.replace(/<script type="module" crossorigin src="([^"]+)"><\/script>/g, (match, src) => {
-                        const js = readAsset(src)
-                        if (js) {
-                            return `<script type="module">${js}</script>`
-                        }
-                        return match
-                    })
-
-                    // Inline CSS
-                    html = html.replace(/<link rel="stylesheet" crossorigin href="([^"]+)">/g, (match, href) => {
-                        const css = readAsset(href)
-                        if (css) {
-                            return `<style>${css}</style>`
-                        }
-                        return match
-                    })
-
-                    writeFileSync(htmlPath, html)
-                    console.info(`[inline-all-assets] Inlined assets for ${app}`)
-                } catch (e) {
-                    // In single-app mode, only warn if the target app fails
-                    if (app === appName) {
-                        console.warn(`[inline-all-assets] Could not process ${app}:`, e)
-                    }
-                }
-            }
-
-            // Clean up assets folder since everything is inlined
-            const assetsDir = resolve(outDir, 'assets')
-            if (existsSync(assetsDir)) {
-                rmSync(assetsDir, { recursive: true })
-                console.info(`[inline-all-assets] Cleaned up assets folder`)
-            }
-        },
-    }
-}
 
 /**
  * Vite config for building UI apps.
  *
- * In single-app mode (UI_APP env var set), builds one app with inlineDynamicImports.
- * This ensures each app is completely self-contained with no shared chunks.
+ * Each app is built separately (via UI_APP env var) with inlineDynamicImports
+ * to produce a single JS bundle + CSS file. Output goes to public/ui-apps/{app}/
+ * for Workers Static Assets to serve.
+ *
+ * Entry points are .tsx files directly — no HTML needed since the runtime
+ * generates stub HTML that loads the built JS+CSS from static assets.
  *
  * Environment variables:
- * - INSIGHTS_UI_APPS_TOKEN: Insights API token for analytics (optional)
- * - INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: Insights base URL for analytics
+ * - POSTFN_UI_APPS_TOKEN: Insights API token for analytics (optional)
+ * - POSTFN_MCP_APPS_ANALYTICS_BASE_URL: Insights base URL for analytics
  */
 export default defineConfig({
-    plugins: [react(), inlineAllAssets()],
+    plugins: [react()],
+    resolve: {
+        alias: [
+            { find: 'products', replacement: resolve(__dirname, '../../products') },
+            { find: '@hanzo/mcp-ui', replacement: resolve(__dirname, 'src/ui-apps/lib') },
+            // Resolve Quill explicitly so files imported via the `products` alias
+            // (which live outside this package's node_modules tree) can find it.
+            // Match exact import (`@hanzo/quill`) -> dist/index.js, but leave
+            // subpath imports (`@hanzo/quill/tokens.css`, etc.) to fall through
+            // to the package's exports map.
+            {
+                find: /^@insights\/quill$/,
+                replacement: resolve(__dirname, '../../packages/quill/packages/quill/dist/index.js'),
+            },
+            // quill-charts is consumed as source (its package main is src/index.ts); resolve it
+            // explicitly so files reached via the `products` alias — and the local chart wrappers —
+            // can find it without a node_modules symlink.
+            {
+                find: /^@insights\/quill-charts$/,
+                replacement: resolve(__dirname, '../../packages/quill/packages/charts/src/index.ts'),
+            },
+            // lucide-react, react, and react-dom aren't reachable from files
+            // resolved via the `products` alias (products/ isn't a dep of this
+            // package), so pin them to this package's copies. react needs its
+            // subpaths covered too: Vite 7 resolves the injected react/jsx-runtime
+            // import relative to the importing file.
+            { find: /^lucide-react$/, replacement: resolve(__dirname, 'node_modules/lucide-react') },
+            { find: 'react', replacement: resolve(__dirname, 'node_modules/react') },
+            { find: 'react-dom', replacement: resolve(__dirname, 'node_modules/react-dom') },
+            { find: '@common', replacement: resolve(__dirname, '../../common') },
+        ],
+    },
     define: {
         // Inject Insights configuration at build time
-        __INSIGHTS_UI_APPS_TOKEN__: JSON.stringify(INSIGHTS_UI_APPS_TOKEN),
-        __INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL__: JSON.stringify(INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL),
+        __POSTFN_UI_APPS_TOKEN__: JSON.stringify(POSTFN_UI_APPS_TOKEN),
+        __POSTFN_MCP_APPS_ANALYTICS_BASE_URL__: JSON.stringify(POSTFN_MCP_APPS_ANALYTICS_BASE_URL),
     },
     build: {
-        outDir: 'ui-apps-dist',
+        outDir: 'public/ui-apps',
         emptyOutDir: false, // Handled by build script
         cssCodeSplit: false,
         chunkSizeWarningLimit: 1000, // Suppress chunk size warnings (our bundles include React)
         rollupOptions: {
             input: appName
-                ? resolve(APPS_DIR, `${appName}/index.html`)
-                : Object.fromEntries(ALL_APPS.map((name) => [name, resolve(APPS_DIR, `${name}/index.html`)])),
+                ? resolve(APPS_DIR, `${appName}.tsx`)
+                : Object.fromEntries(ALL_APPS.map((name) => [name, resolve(APPS_DIR, `${name}.tsx`)])),
             output: appName
                 ? {
-                      // Single app mode: inline everything into one bundle
+                      // Single app mode: inline everything into one bundle — no shared chunks
                       inlineDynamicImports: true,
+                      // IIFE format avoids CORS issues when loading scripts cross-origin from sandboxed iframes
+                      format: 'iife' as const,
+                      // Predictable filenames so stub HTML can reference them without a manifest
+                      entryFileNames: `${appName}/main.js`,
+                      assetFileNames: `${appName}/styles[extname]`,
                   }
-                : {},
+                : {}, // Multi-app fallback — uses hashed filenames, not compatible with buildAppStubHtml. Always use the build script (which sets UI_APP per app).
         },
     },
     logLevel: 'warn', // Reduce Vite output noise

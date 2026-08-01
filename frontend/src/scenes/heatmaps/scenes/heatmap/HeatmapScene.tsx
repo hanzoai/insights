@@ -1,24 +1,38 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
+import * as directorPng from '@hanzo/brand/hoggies/png/director'
 import { IconBrowser, IconDownload } from '@hanzo/icons'
 import { Tag, Spinner } from '@hanzo/elements'
 
+import { pngHoggie } from 'lib/brand/hoggies'
+import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { HeatmapCanvas } from 'lib/components/heatmaps/HeatmapCanvas'
-import { FilmCameraMascot } from 'lib/components/mascots'
+import { MAX_HEATMAP_HEIGHT } from 'lib/components/heatmaps/heatmapDataLogic'
 import { Banner } from 'lib/elements/Banner/Banner'
 import { Button } from 'lib/elements/Button'
 import { LoadingBar } from 'lib/elements/LoadingBar'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { FilterPanel } from 'scenes/heatmaps/components/FilterPanel'
 import { HeatmapHeader } from 'scenes/heatmaps/components/HeatmapHeader'
+import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
+import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
 import { heatmapLogic } from './heatmapLogic'
+
+const MascotDirector = pngHoggie(directorPng)
+
+export const scene: SceneExport<{ id: string }> = {
+    component: HeatmapScene,
+    logic: heatmapLogic,
+    paramsToProps: ({ params: { id } }) => ({ id }),
+}
 
 export function HeatmapScene({ id }: { id: string }): JSX.Element {
     const logicProps = { id: id }
@@ -38,9 +52,24 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
         desiredNumericWidth,
         effectiveWidth,
         scalePercent,
+        isHeightCapped,
+        userAccessLevel,
     } = useValues(logic)
-    const { setName, updateHeatmap, onIframeLoad, setScreenshotLoaded, exportHeatmap, setContainerWidth } =
-        useActions(logic)
+    const {
+        setName,
+        changeCaptureMethod,
+        updateHeatmap,
+        onIframeLoad,
+        setScreenshotLoaded,
+        setScreenshotError,
+        exportHeatmap,
+        setContainerWidth,
+    } = useActions(logic)
+
+    const toolbarAccessDisabledReason = getAccessControlDisabledReason(
+        AccessControlResourceType.Toolbar,
+        AccessControlLevel.Viewer
+    )
 
     const measureRef = useRef<HTMLDivElement | null>(null)
     useEffect(() => {
@@ -72,7 +101,7 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
         <BindLogic logic={heatmapLogic} props={logicProps}>
             <SceneContent>
                 <SceneTitleSection
-                    name={name || 'No name'}
+                    name={name}
                     resourceType={{
                         type: 'heatmap',
                     }}
@@ -86,9 +115,15 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                     }}
                     actions={
                         <>
-                            <Button type="primary" onClick={updateHeatmap} size="small">
-                                Save
-                            </Button>
+                            <AccessControlAction
+                                resourceType={AccessControlResourceType.Heatmap}
+                                minAccessLevel={AccessControlLevel.Editor}
+                                userAccessLevel={userAccessLevel ?? undefined}
+                            >
+                                <Button type="primary" onClick={updateHeatmap} size="small">
+                                    Save
+                                </Button>
+                            </AccessControlAction>
                             <Button
                                 onClick={exportHeatmap}
                                 data-attr="export-heatmap"
@@ -101,10 +136,7 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                                     type === 'screenshot' && !screenshotUrl ? 'Screenshot is not ready' : undefined
                                 }
                             >
-                                Export{' '}
-                                <Tag type="warning" className="ml-2">
-                                    BETA
-                                </Tag>
+                                Export
                             </Button>
                         </>
                     }
@@ -124,17 +156,21 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                             : undefined,
                         targetBlank: true,
                         'data-attr': 'heatmaps-open-in-toolbar',
-                        disabledReason: !displayUrl ? 'Select a URL first' : undefined,
+                        disabledReason: !displayUrl ? 'Select a URL first' : toolbarAccessDisabledReason,
                     }}
                 >
-                    You're viewing {type === 'screenshot' ? 'a' : 'an'}{' '}
-                    <Tag type="highlight">{type === 'screenshot' ? 'Screenshot' : 'Iframe'}</Tag> heatmap. We
-                    recommend trying both methods to see which works best for your site. You can also open your website
-                    using the toolbar and verify results there (useful for auth-protected pages).
+                    You can also open your website using the toolbar and verify results there (useful for auth-protected
+                    pages).
                 </Banner>
                 <HeatmapHeader />
-                <FilterPanel />
+                <FilterPanel captureMethod={type} onCaptureMethodChange={changeCaptureMethod} />
                 <SceneDivider />
+                {isHeightCapped && (
+                    <Banner type="info" className="mb-2">
+                        This heatmap is capped at {MAX_HEATMAP_HEIGHT.toLocaleString()}px tall to keep rendering fast,
+                        so data below that point isn't shown.
+                    </Banner>
+                )}
                 <div ref={measureRef} className="w-full">
                     <div
                         className="border mx-auto bg-surface-primary rounded-lg"
@@ -153,12 +189,12 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                             <div className="relative flex w-full justify-center flex-1" style={{ width: '100%' }}>
                                 {generatingScreenshot ? (
                                     <div className="flex-1 flex items-center justify-center min-h-96">
-                                        <style>{`@keyframes icon-wobble{from{transform:rotate(0deg)}to{transform:rotate(5deg)}}`}</style>
+                                        <style>{`@keyframes script-wobble{from{transform:rotate(0deg)}to{transform:rotate(5deg)}}`}</style>
                                         <div className="text-sm text-center font-semibold">
-                                            <FilmCameraMascot
+                                            <MascotDirector
                                                 className="w-32 h-32 mx-auto mb-2"
                                                 style={{
-                                                    animation: 'icon-wobble 1.2s ease-in-out infinite alternate',
+                                                    animation: 'script-wobble 1.2s ease-in-out infinite alternate',
                                                     transformOrigin: '50% 50%',
                                                 }}
                                             />
@@ -190,10 +226,12 @@ export function HeatmapScene({ id }: { id: string }): JSX.Element {
                                             }}
                                             onLoad={() => {
                                                 setScreenshotLoaded(true)
+                                                setScreenshotError(null)
                                             }}
                                             className="rounded-b-lg border-l border-r border-b"
                                             onError={() => {
-                                                console.error('Failed to load screenshot')
+                                                setScreenshotLoaded(false)
+                                                setScreenshotError('The screenshot failed to load.')
                                             }}
                                         />
                                     </>

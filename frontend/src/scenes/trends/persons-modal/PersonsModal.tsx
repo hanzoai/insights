@@ -24,26 +24,43 @@ import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { PropertiesTimeline } from 'lib/components/PropertiesTimeline'
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
+import { IconPlayCircle } from 'lib/elements/icons'
 import { Tabs } from 'lib/elements/Tabs'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { IconPlayCircle } from 'lib/elements/icons'
-import { capitalizeFirstLetter, isGroupType, midEllipsis, pluralize } from 'lib/utils'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
+import { isGroupType, isSessionType } from 'lib/utils/guards'
+import { capitalizeFirstLetter, midEllipsis, pluralize } from 'lib/utils/strings'
 import { InsightErrorState, InsightValidationError } from 'scenes/insights/EmptyStates'
 import { isOtherBreakdown } from 'scenes/insights/utils'
 import { GroupActorDisplay, groupDisplayId } from 'scenes/persons/GroupActorDisplay'
+import { asDisplay, pickBestPersonDistinctId } from 'scenes/persons/person-utils'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
-import { asDisplay } from 'scenes/persons/person-utils'
 import { teamLogic } from 'scenes/teamLogic'
 
+import { isSharedView } from '~/exporter/exporterViewLogic'
 import { Noun } from '~/models/groupsModel'
 import { MAX_SELECT_RETURNED_ROWS } from '~/queries/nodes/DataTable/DataTableExport'
-import { ActorType, ExporterFormat, PropertiesTimelineFilterType, PropertyDefinitionType } from '~/types'
+import { extractValidationErrorCode } from '~/queries/nodes/InsightViz/utils'
+import { FunnelsActorsQuery, NodeKind } from '~/queries/schema/schema-general'
+import {
+    AccessControlLevel,
+    AccessControlResourceType,
+    ActorType,
+    ExporterFormat,
+    PropertiesTimelineFilterType,
+    PropertyDefinitionType,
+} from '~/types'
 
-import { SaveCohortModal } from './SaveCohortModal'
-import { cleanedInsightActorsQueryOptions } from './persons-modal-utils'
+import {
+    cleanedInsightActorsQueryOptions,
+    funnelBreakdownSelectValue,
+    funnelStepBreakdownFromSelectValue,
+} from './persons-modal-utils'
 import { PersonModalLogicProps, personsModalLogic } from './personsModalLogic'
+import { SaveCohortModal } from './SaveCohortModal'
+import { SessionActorDisplay } from './SessionActorDisplay'
 
 export interface PersonsModalProps extends PersonModalLogicProps, Pick<ModalProps, 'inline'> {
     onAfterClose?: () => void
@@ -100,7 +117,17 @@ export function PersonsModal({
     const { currentTeam } = useValues(teamLogic)
     const { startExport } = useActions(exportsLogic)
 
+    // Creating an export requires editor access to the export resource.
+    const exportAccessControlDisabledReason = getAccessControlDisabledReason(
+        AccessControlResourceType.Export,
+        AccessControlLevel.Editor
+    )
+
     const totalActorsCount = missingActorsCount + actors.length
+    type ActorsQuery = NonNullable<typeof query>
+
+    const asLemonSelectValue = (value: unknown): string | number | boolean | null =>
+        typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' ? value : null
 
     const getTitle = useCallback(() => {
         if (typeof title === 'function') {
@@ -115,6 +142,7 @@ export function PersonsModal({
     }, [title, actorLabel.plural])
 
     const hasGroups = actors.some((actor) => isGroupType(actor))
+    const hasSessions = actors.some((actor) => isSessionType(actor))
 
     return (
         <>
@@ -135,10 +163,15 @@ export function PersonsModal({
                     {actorsResponse && !!missingActorsCount && !hasGroups && (
                         <MissingPersonsAlert actorLabel={actorLabel} missingActorsCount={missingActorsCount} />
                     )}
+
                     <Input
                         type="search"
                         placeholder={
-                            hasGroups ? 'Search for groups by name or ID' : 'Search for persons by email, name, or ID'
+                            hasGroups
+                                ? 'Search for groups by name or ID'
+                                : hasSessions
+                                  ? 'Search for sessions by person email or name'
+                                  : 'Search for persons by email, name, or ID'
                         }
                         fullWidth
                         value={searchTerm}
@@ -164,19 +197,63 @@ export function PersonsModal({
                     ) : null}
 
                     {query &&
-                        cleanedInsightActorsQueryOptions(insightActorsQueryOptions, query).map(([key, options]) =>
-                            key === 'breakdowns'
+                        cleanedInsightActorsQueryOptions(insightActorsQueryOptions, query).map(([key, options]) => {
+                            if (query.kind === NodeKind.FunnelsActorsQuery) {
+                                // Funnel actor queries use their own field names (funnelStepBreakdown),
+                                // and Baseline maps to "no breakdown filter".
+                                if (key === 'breakdown' && options.length > 1) {
+                                    return (
+                                        <div key={key}>
+                                            <Select
+                                                fullWidth
+                                                className="mb-2"
+                                                value={funnelBreakdownSelectValue(query.funnelStepBreakdown, options)}
+                                                onChange={(v) =>
+                                                    updateActorsQuery({
+                                                        funnelStepBreakdown: funnelStepBreakdownFromSelectValue(v),
+                                                    })
+                                                }
+                                                options={options}
+                                            />
+                                        </div>
+                                    )
+                                }
+                                if (key === 'compare' && options.length > 1) {
+                                    return (
+                                        <div key={key}>
+                                            <Select
+                                                fullWidth
+                                                className="mb-2"
+                                                value={query.compare ?? 'current'}
+                                                onChange={(v) =>
+                                                    v &&
+                                                    updateActorsQuery({
+                                                        compare: v as FunnelsActorsQuery['compare'],
+                                                    })
+                                                }
+                                                options={options}
+                                            />
+                                        </div>
+                                    )
+                                }
+                                // The step (and converted/dropped status) is fixed at click time.
+                                return null
+                            }
+                            return key === 'breakdowns'
                                 ? options.map(({ values }, index) => (
                                       <div key={`${key}_${index}`}>
                                           <Select
                                               fullWidth
                                               className="mb-2"
-                                              value={query?.breakdown?.[index] ?? null}
+                                              value={Array.isArray(query.breakdown) ? query.breakdown[index] : null}
                                               onChange={(v) => {
+                                                  if (!v) {
+                                                      return
+                                                  }
                                                   const breakdown = Array.isArray(query.breakdown)
                                                       ? [...query.breakdown]
                                                       : []
-                                                  breakdown[index] = v
+                                                  breakdown[index] = v.toString()
                                                   updateActorsQuery({ breakdown })
                                               }}
                                               options={values}
@@ -188,13 +265,13 @@ export function PersonsModal({
                                           <Select
                                               fullWidth
                                               className="mb-2"
-                                              value={query?.[key] ?? null}
+                                              value={asLemonSelectValue(query[key as keyof ActorsQuery])}
                                               onChange={(v) => updateActorsQuery({ [key]: v })}
                                               options={options}
                                           />
                                       </div>
                                   )
-                        )}
+                        })}
 
                     <div className="flex items-center justify-between gap-2 text-secondary">
                         <div className="flex items-center gap-2">
@@ -206,10 +283,10 @@ export function PersonsModal({
                             ) : (
                                 <span>
                                     {actorsResponse?.next || actorsResponse?.offset ? 'More than ' : ''}
-                                    <b>
+                                    <span className="font-semibold text-default">
                                         {totalActorsCount || 'No'} unique{' '}
                                         {pluralize(totalActorsCount, actorLabel.singular, actorLabel.plural, false)}
-                                    </b>
+                                    </span>
                                 </span>
                             )}
                         </div>
@@ -230,7 +307,11 @@ export function PersonsModal({
                     <div className="relative min-h-20 p-2 deprecated-space-y-2 rounded bg-border-light overflow-y-auto mb-2">
                         {errorObject ? (
                             validationError ? (
-                                <InsightValidationError query={query} detail={validationError} />
+                                <InsightValidationError
+                                    query={query}
+                                    detail={validationError}
+                                    validationErrorCode={extractValidationErrorCode(errorObject)}
+                                />
                             ) : (
                                 <InsightErrorState query={query} />
                             )
@@ -240,8 +321,13 @@ export function PersonsModal({
                                     <ActorRow
                                         key={actor.id}
                                         actor={actor}
+                                        // created_at is null for actors without a PostgreSQL Person record
+                                        // (personless mode, merged, or deleted persons) — skip the
+                                        // timeline which would 404, and show static properties instead.
                                         propertiesTimelineFilter={
-                                            actor.type == 'person' && currentTeam?.person_on_events_querying_enabled
+                                            actor.type == 'person' &&
+                                            actor.created_at &&
+                                            currentTeam?.person_on_events_querying_enabled
                                                 ? propertiesTimelineFilterFromUrl
                                                 : undefined
                                         }
@@ -291,12 +377,13 @@ export function PersonsModal({
                                         })
                                     }}
                                     tooltip={`Up to ${MAX_SELECT_RETURNED_ROWS} persons will be exported`}
+                                    disabledReason={exportAccessControlDisabledReason ?? undefined}
                                     data-attr="person-modal-download-csv"
                                 >
                                     Download CSV
                                 </Button>
                             )}
-                            {actors.length > 0 && !isGroupType(actors[0]) && (
+                            {actors.length > 0 && !isGroupType(actors[0]) && !hasSessions && (
                                 <Button
                                     onClick={() => setIsCohortModalOpen(true)}
                                     type="secondary"
@@ -355,7 +442,15 @@ interface ActorRowProps {
 export function ActorRow({ actor, propertiesTimelineFilter }: ActorRowProps): JSX.Element {
     const [expanded, setExpanded] = useState(false)
     const [tab, setTab] = useState('properties')
-    const name = isGroupType(actor) ? groupDisplayId(actor.group_key, actor.properties) : asDisplay(actor)
+    const isSession = isSessionType(actor)
+    const name = isGroupType(actor)
+        ? groupDisplayId(actor.group_key, actor.properties)
+        : isSession && actor.person
+          ? asDisplay(actor.person)
+          : asDisplay(actor)
+    // The most human-readable distinct ID, for the person row's copyable subtitle
+    const bestDistinctId =
+        !isGroupType(actor) && !isSessionType(actor) ? pickBestPersonDistinctId(actor.distinct_ids) : undefined
 
     const onOpenRecordingClick = (): void => {
         if (!actor.matched_recordings) {
@@ -381,33 +476,44 @@ export function ActorRow({ actor, propertiesTimelineFilter }: ActorRowProps): JS
                     data-attr={`persons-modal-expand-${actor.id}`}
                 />
 
-                <ProfilePicture name={name} size="md" />
+                {!isSession && <ProfilePicture name={name} size="md" />}
 
                 <div className="flex-1 overflow-hidden">
                     {isGroupType(actor) ? (
                         <div className="font-bold">
                             <GroupActorDisplay actor={actor} />
                         </div>
+                    ) : isSession ? (
+                        <SessionActorDisplay actor={actor} />
                     ) : (
                         <>
                             <div className="font-bold flex items-start">
                                 <PersonDisplay person={actor} withIcon={false} />
                             </div>
-                            {actor.distinct_ids?.[0] && (
+                            {bestDistinctId && (
                                 <CopyToClipboardInline
-                                    explicitValue={actor.distinct_ids[0]}
+                                    explicitValue={bestDistinctId}
                                     iconStyle={{ color: 'var(--color-accent)' }}
                                     iconPosition="end"
                                     className="text-xs text-secondary"
                                 >
-                                    {midEllipsis(actor.distinct_ids[0], 32)}
+                                    {midEllipsis(bestDistinctId, 32)}
                                 </CopyToClipboardInline>
                             )}
                         </>
                     )}
                 </div>
 
-                {matchedRecordings.length > 1 ? (
+                {isSession ? (
+                    <ViewRecordingButton
+                        sessionId={actor.id}
+                        checkIfViewed={true}
+                        type="secondary"
+                        size="small"
+                        openPlayerIn={RecordingPlayerType.Modal}
+                        hasRecording={true}
+                    />
+                ) : matchedRecordings.length > 1 ? (
                     <div className="shrink-0">
                         <Button
                             onClick={onOpenRecordingClick}
@@ -454,46 +560,63 @@ export function ActorRow({ actor, propertiesTimelineFilter }: ActorRowProps): JS
                                     <PropertiesTimeline actor={actor} filter={propertiesTimelineFilter} />
                                 ) : (
                                     <PropertiesTable
-                                        type={actor.type /* "person" or "group" */ as PropertyDefinitionType}
+                                        type={actor.type as PropertyDefinitionType}
                                         properties={actor.properties}
                                     />
                                 ),
                             },
-                            {
-                                key: 'recordings',
-                                label: 'Recordings',
-                                content: (
-                                    <div className="p-2 deprecated-space-y-2 font-medium mt-1">
-                                        <div className="flex justify-between items-center px-2">
-                                            <span>{pluralize(matchedRecordings.length, 'matched recording')}</span>
-                                        </div>
-                                        <ul className="deprecated-space-y-px">
-                                            {matchedRecordings?.length
-                                                ? matchedRecordings.map((recording, i) => (
-                                                      <React.Fragment key={i}>
-                                                          <Divider className="my-0" />
-                                                          <li>
-                                                              <ViewRecordingButton
-                                                                  sessionId={recording.session_id}
-                                                                  matchingEvents={[
-                                                                      {
-                                                                          events: recording.events,
-                                                                          session_id: recording.session_id,
-                                                                      },
-                                                                  ]}
-                                                                  label={`View recording ${i + 1}`}
-                                                                  checkIfViewed={true}
-                                                                  openPlayerIn={RecordingPlayerType.Modal}
-                                                                  fullWidth={true}
-                                                              />
-                                                          </li>
-                                                      </React.Fragment>
-                                                  ))
-                                                : null}
-                                        </ul>
-                                    </div>
-                                ),
-                            },
+                            ...(isSession && actor.person
+                                ? [
+                                      {
+                                          key: 'person',
+                                          label: 'Person',
+                                          content: (
+                                              <PropertiesTable
+                                                  type={PropertyDefinitionType.Person}
+                                                  properties={actor.person.properties}
+                                              />
+                                          ),
+                                      },
+                                  ]
+                                : [
+                                      {
+                                          key: 'recordings',
+                                          label: 'Recordings',
+                                          content: (
+                                              <div className="p-2 deprecated-space-y-2 font-medium mt-1">
+                                                  <div className="flex justify-between items-center px-2">
+                                                      <span>
+                                                          {pluralize(matchedRecordings.length, 'matched recording')}
+                                                      </span>
+                                                  </div>
+                                                  <ul className="deprecated-space-y-px">
+                                                      {matchedRecordings?.length
+                                                          ? matchedRecordings.map((recording, i) => (
+                                                                <React.Fragment key={i}>
+                                                                    <Divider className="my-0" />
+                                                                    <li>
+                                                                        <ViewRecordingButton
+                                                                            sessionId={recording.session_id}
+                                                                            matchingEvents={[
+                                                                                {
+                                                                                    events: recording.events,
+                                                                                    session_id: recording.session_id,
+                                                                                },
+                                                                            ]}
+                                                                            label={`View recording ${i + 1}`}
+                                                                            checkIfViewed={true}
+                                                                            openPlayerIn={RecordingPlayerType.Modal}
+                                                                            fullWidth={true}
+                                                                        />
+                                                                    </li>
+                                                                </React.Fragment>
+                                                            ))
+                                                          : null}
+                                                  </ul>
+                                              </div>
+                                          ),
+                                      },
+                                  ]),
                         ]}
                     />
                 </div>
@@ -535,6 +658,12 @@ export function MissingPersonsAlert({
 export type OpenPersonsModalProps = Omit<PersonsModalProps, 'onClose' | 'onAfterClose'>
 
 export const openPersonsModal = (props: OpenPersonsModalProps): void => {
+    if (isSharedView()) {
+        // Shared/exported views authenticate with a sharing token, which can never run the
+        // person-level queries this modal needs — it would only ever render an error state.
+        return
+    }
+
     const div = document.createElement('div')
     const root = createRoot(div)
     function destroy(): void {

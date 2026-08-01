@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from insights.datastore.table_engines import AggregatingMergeTree, ReplicationScheme
+from insights.datastore.table_engines import AggregatingMergeTree, Distributed, ReplicationScheme
 
 TABLE_NAME = "log_attributes"
 
@@ -9,7 +9,7 @@ STORAGE_POLICY = lambda: "hot" if settings.DATASTORE_LOGS_ENABLE_STORAGE_POLICY 
 
 def LOG_ATTRIBUTES_TABLE_SQL():
     return f"""
-CREATE TABLE IF NOT EXISTS {settings.DATASTORE_DATABASE}.{TABLE_NAME}
+CREATE TABLE IF NOT EXISTS {settings.DATASTORE_LOGS_CLUSTER_DATABASE}.{TABLE_NAME}
 (
     `team_id` Int32 CODEC(DoubleDelta, ZSTD(1)),
     `time_bucket` DateTime64(0) CODEC(DoubleDelta, ZSTD(1)),
@@ -33,3 +33,16 @@ SETTINGS
     deduplicate_merge_projection_mode = 'drop',
     index_granularity = 8192
 """
+
+
+def LOG_ATTRIBUTES_DISTRIBUTED_TABLE_SQL():
+    return """
+CREATE TABLE IF NOT EXISTS {database}.log_attributes_distributed AS {database}.{table_name} ENGINE = {engine}
+""".format(
+        engine=Distributed(
+            data_table=TABLE_NAME,
+            cluster=settings.DATASTORE_LOGS_CLUSTER,
+        ),
+        database=settings.DATASTORE_LOGS_CLUSTER_DATABASE,
+        table_name=TABLE_NAME,
+    )

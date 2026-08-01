@@ -1,0 +1,76 @@
+from django.core.management.base import BaseCommand
+
+from insights.models import OAuthApplication
+from insights.models.oauth import OAuthApplicationAuthBrand
+from insights.temporal.oauth import (
+    ARRAY_APP_CLIENT_ID_DEV,
+    ARRAY_APP_ID_DEV,
+    POSTFN_AI_APP_CLIENT_ID_DEV,
+    POSTFN_AI_APP_ID_DEV,
+)
+from insights.utils import get_instance_region
+
+ARRAY_REDIRECT_URIS = "http://localhost:8237/callback http://localhost:8239/callback"
+POSTFN_AI_REDIRECT_URIS = "http://localhost:8000/authorize"
+
+# Skipped rather than failed, so the unconditional call in bin/migrate is safe.
+PRODUCTION_REGIONS = frozenset({"US", "EU"})
+
+
+class Command(BaseCommand):
+    help = "Create the Array and Insights AI OAuth applications task sandboxes mint tokens under"
+
+    def handle(self, *args, **options):
+        region = get_instance_region()
+        if region in PRODUCTION_REGIONS:
+            self.stdout.write(f"Skipping dev OAuth application setup; region {region} has its own applications")
+            return
+
+        self._setup_app(
+            ARRAY_APP_CLIENT_ID_DEV,
+            {
+                "id": ARRAY_APP_ID_DEV,
+                "name": "Array Dev App",
+                "client_type": OAuthApplication.CLIENT_PUBLIC,
+                "authorization_grant_type": OAuthApplication.GRANT_AUTHORIZATION_CODE,
+                "redirect_uris": ARRAY_REDIRECT_URIS,
+                "algorithm": "RS256",
+            },
+        )
+        self._setup_app(
+            POSTFN_AI_APP_CLIENT_ID_DEV,
+            {
+                "id": POSTFN_AI_APP_ID_DEV,
+                "name": "Insights AI Dev App",
+                "client_type": OAuthApplication.CLIENT_CONFIDENTIAL,
+                "authorization_grant_type": OAuthApplication.GRANT_AUTHORIZATION_CODE,
+                "redirect_uris": POSTFN_AI_REDIRECT_URIS,
+                "algorithm": "RS256",
+                "auth_brand": OAuthApplicationAuthBrand.INSIGHTS.value,
+                "is_verified": True,
+                "is_first_party": True,
+            },
+        )
+
+    def _setup_app(self, client_id: str, defaults: dict[str, object]) -> None:
+        if not client_id:
+            self.stdout.write(self.style.WARNING(f"Skipping {defaults['name']}; no client_id configured"))
+            return
+
+        app, created = OAuthApplication.objects.get_or_create(
+            client_id=client_id,
+            defaults=defaults,
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f"Created OAuthApplication '{app.name}' (client_id={app.client_id})"))
+            return
+
+        self.stdout.write(self.style.SUCCESS(f"OAuthApplication '{app.name}' already exists"))
+        # Not repaired here: changing the pk means deleting the row, cascading to its tokens.
+        if str(app.id) != defaults["id"]:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"  '{app.name}' has id {app.id}, expected {defaults['id']}. The LLM gateway "
+                    "authorizes by application id, so tokens minted under it will be rejected."
+                )
+            )

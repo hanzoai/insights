@@ -1,15 +1,18 @@
 import { useActions, useValues } from 'kea'
 
 import { IconTrash } from '@hanzo/icons'
-import { Button, Divider, Select } from '@hanzo/elements'
+import { Button, Divider, Select, Switch, Tag } from '@hanzo/elements'
 
-import { SupermanMascot } from 'lib/components/mascots'
+import { SupermanHog } from 'lib/components/mascots'
 import { Modal } from 'lib/elements/Modal'
+import { preflightLogic } from 'lib/logic/preflightLogic'
+import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
+import { organizationLogic } from 'scenes/organizationLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { userLogic } from 'scenes/userLogic'
 
-import { openCHQueriesDebugModal } from '../AppShortcuts/utils/DebugCHQueries'
-import { FakeStatusOverride, superpowersLogic } from './superpowersLogic'
+import { openCHQueriesDebugModal } from '../Shortcuts/utils/DebugCHQueries'
+import { FakeBillingAlert, FakeStatusOverride, superpowersLogic } from './superpowersLogic'
 
 export function SuperpowersModal(): JSX.Element | null {
     const { isSuperpowersOpen } = useValues(superpowersLogic)
@@ -30,12 +33,23 @@ const STATUS_OPTIONS: { value: FakeStatusOverride; label: string }[] = [
     { value: 'major_outage', label: 'Major outage' },
 ]
 
+const BILLING_ALERT_OPTIONS: { value: FakeBillingAlert; label: string }[] = [
+    { value: 'none', label: 'None (use real alerts)' },
+    { value: 'info', label: 'Info' },
+    { value: 'warning', label: 'Warning' },
+    { value: 'error', label: 'Error' },
+]
+
 function SuperpowersContent(): JSX.Element {
     const { currentTeam } = useValues(teamLogic)
     const { updateCurrentTeam } = useActions(teamLogic)
     const { user } = useValues(userLogic)
-    const { fakeStatusOverride } = useValues(superpowersLogic)
-    const { closeSuperpowers, setFakeStatusOverride } = useActions(superpowersLogic)
+    const { fakeStatusOverride, fakeBillingAlert, mcpHintsDismissed } = useValues(superpowersLogic)
+    const { closeSuperpowers, setFakeStatusOverride, setFakeBillingAlert, reenableMCPHints } =
+        useActions(superpowersLogic)
+    const { dataProcessingAccepted } = useValues(maxGlobalLogic)
+    const { updateOrganization } = useActions(organizationLogic)
+    const { isDev } = useValues(preflightLogic)
 
     const clearOnboardingTasks = (): void => {
         updateCurrentTeam({ onboarding_tasks: {} })
@@ -50,11 +64,11 @@ function SuperpowersContent(): JSX.Element {
         <div className="space-y-4">
             {/* Hero section */}
             <div className="flex items-center gap-4 -mt-2">
-                <SupermanMascot className="w-24 h-24 shrink-0" />
+                <SupermanHog className="w-24 h-24 shrink-0" />
                 <div>
-                    <h2 className="text-xl font-bold mb-1">Super Powers</h2>
+                    <h2 className="text-xl font-bold mb-1">Super Script Powers</h2>
                     <p className="text-secondary text-sm">
-                        With great power comes great responsibility. Use these wisely, fellow user.
+                        With great power comes great responsibility. Use these wisely, fellow script.
                     </p>
                 </div>
             </div>
@@ -105,6 +119,78 @@ function SuperpowersContent(): JSX.Element {
                             options={STATUS_OPTIONS}
                             onChange={setFakeStatusOverride}
                         />
+                    </div>
+                </div>
+            </div>
+
+            <Divider />
+
+            <div>
+                <h3 className="font-semibold mb-2">Billing</h3>
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 border rounded">
+                        <div>
+                            <div className="font-medium">Fake billing alert</div>
+                            <div className="text-sm text-secondary">Simulate a billing alert banner for testing</div>
+                        </div>
+                        <Select
+                            size="small"
+                            value={fakeBillingAlert}
+                            options={BILLING_ALERT_OPTIONS}
+                            onChange={setFakeBillingAlert}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {isDev && (
+                <>
+                    <Divider />
+
+                    <div>
+                        <h3 className="font-semibold mb-2">
+                            AI <Tag size="small">Dev only</Tag>
+                        </h3>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between p-2 border rounded">
+                                <div>
+                                    <div className="font-medium">Enable AI data processing</div>
+                                    <div className="text-sm text-secondary">
+                                        Toggle organization-level AI data processing approval
+                                    </div>
+                                </div>
+                                <Switch
+                                    checked={dataProcessingAccepted}
+                                    onChange={(checked) =>
+                                        updateOrganization({ is_ai_data_processing_approved: checked })
+                                    }
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            <Divider />
+
+            <div>
+                <h3 className="font-semibold mb-2">MCP hints</h3>
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 border rounded">
+                        <div>
+                            <div className="font-medium">Re-enable MCP hints</div>
+                            <div className="text-sm text-secondary">
+                                Clear all dismissed surfaces, the global opt-out, and the cooldown so hints show again
+                            </div>
+                        </div>
+                        <Button
+                            type="secondary"
+                            size="small"
+                            onClick={reenableMCPHints}
+                            disabledReason={mcpHintsDismissed ? undefined : 'No MCP hints are currently dismissed'}
+                        >
+                            Re-enable
+                        </Button>
                     </div>
                 </div>
             </div>

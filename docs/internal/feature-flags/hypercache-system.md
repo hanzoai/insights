@@ -93,29 +93,76 @@ else:
 
 ETags are computed as SHA256 hashes of the JSON content.
 
-## Local evaluation caching
+## Service cache (Rust)
 
-Feature flag local evaluation uses two separate HyperCache instances in `insights/models/feature_flag/local_evaluation.py`:
+The feature-flags Rust evaluation service uses a separate HyperCache instance defined in `insights/models/feature_flag/flags_cache.py`. Unlike the local evaluation cache (which serves SDKs with cohort definitions and group type mappings), the service cache provides raw flag data plus pre-computed dependency metadata so the Rust service can evaluate flags in the correct order without recomputing the dependency graph on every request.
+
+### Cache instance
 
 ```python
-# Full flags with cohort definitions (for smart clients)
+# insights/models/feature_flag/flags_cache.py
 flags_hypercache = HyperCache(
     namespace="feature_flags",
-    value="flags_with_cohorts.json",
-    load_fn=lambda key: _get_flags_response_for_local_evaluation(team, include_cohorts=True),
-    enable_etag=True,
+    value="flags.json",
+    load_fn=lambda key: _get_feature_flags_for_service(HyperCache.team_from_key(key)),
+    cache_ttl=settings.FLAGS_CACHE_TTL,
+    cache_miss_ttl=settings.FLAGS_CACHE_MISS_TTL,
+    cache_alias=FLAGS_DEDICATED_CACHE_ALIAS if FLAGS_DEDICATED_CACHE_ALIAS in settings.CACHES else None,
+    batch_load_fn=_get_feature_flags_for_teams_batch,
+    expiry_sorted_set_key=FLAGS_CACHE_EXPIRY_SORTED_SET,
 )
+```
 
-# Simplified flags without cohorts (legacy)
-flags_without_cohorts_hypercache = HyperCache(
+The `_get_feature_flags_for_service` function fetches all flags for a team (including inactive, but excluding deleted and encrypted remote config flags) and returns the cache payload. The Rust service filters out inactive flags at request time via `filtered_out_flag_ids`.
+
+### Cache payload structure
+
+```json
+{
+  "flags": [
+    /* serialized flag dicts */
+  ],
+  "evaluation_metadata": {
+    "dependency_stages": [[1, 5], [3], [7]],
+    "flags_with_missing_deps": [9, 12],
+    "transitive_deps": { "3": [1, 5], "7": [1, 3, 5] }
+  }
+}
+```
+
+The `evaluation_metadata` fields:
+
+| Field                     | Type                   | Description                                                                                                                                                                                 |
+| ------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dependency_stages`       | `list[list[int]]`      | Flag IDs grouped by evaluation order. Stage 0 contains flags with no dependencies; stage N depends only on flags in stages 0…N-1. Flags within the same stage can be evaluated in parallel. |
+| `flags_with_missing_deps` | `list[int]`            | Flag IDs whose dependencies are missing, cyclic, or transitively broken. The Rust service treats these as evaluation errors.                                                                |
+| `transitive_deps`         | `dict[str, list[int]]` | Map of stringified flag ID to the sorted list of all its transitive dependency flag IDs.                                                                                                    |
+
+### Dependency computation
+
+The `_compute_flag_dependencies` function in `flags_cache.py` builds the evaluation metadata using Kahn's algorithm (layered topological sort). The algorithm:
+
+1. Extracts direct dependencies from each flag's `filters.groups[*].properties` where `type == "flag"`.
+2. Builds an in-degree map and reverse-dependency edges across all flags.
+3. Peels layers of zero-in-degree nodes, computing transitive dependency closures as it goes. Each layer becomes one evaluation stage.
+4. Detects cycles — any flag still with in-degree > 0 after all layers are peeled is a cycle participant. Cycled flags and any flag that transitively depends on them are added to `flags_with_missing_deps`.
+
+This matches the Rust fallback path's petgraph-based cycle handling, where all cycle participants are excluded from stages (not just back-edge targets).
+
+## Local evaluation caching
+
+Feature flag local evaluation uses a HyperCache instance in `products/feature_flags/backend/local_evaluation.py`:
+
+```python
+flag_definitions_hypercache = HyperCache(
     namespace="feature_flags",
-    value="flags_without_cohorts.json",
-    load_fn=lambda key: _get_flags_response_for_local_evaluation(team, include_cohorts=False),
+    value="flags_with_cohorts.json",
+    load_fn=lambda key: _get_flags_response_for_local_evaluation(HyperCache.team_from_key(key)),
     enable_etag=True,
 )
 ```
 
-All current SDKs support cohort evaluation locally, so the dual-cache strategy is legacy. The `flags_without_cohorts` cache exists for older SDK versions that couldn't handle cohort definitions. Once requests for flags without cohorts decline sufficiently, this cache can be removed.
+It includes full cohort definitions and group type mappings, since all current SDKs support cohort evaluation locally. A legacy `flag_definitions_without_cohorts_hypercache` variant — pre-flattened cohort filters for SDKs too old to evaluate cohorts locally — was removed once nothing served it to real clients anymore.
 
 ### Cache invalidation
 
@@ -302,11 +349,11 @@ The Rust service only operates when `FLAGS_REDIS_URL` is configured. All cache u
 
 Cache freshness is maintained through scheduled Celery tasks.
 
-| Task                                       | Schedule         | Purpose                                              |
-| ------------------------------------------ | ---------------- | ---------------------------------------------------- |
-| `refresh_expiring_flags_cache_entries`     | Hourly at :15    | Refresh caches with TTL < 24h before they expire     |
-| `cleanup_stale_flags_expiry_tracking_task` | Daily at 3:15 AM | Remove expired team entries from tracking sorted set |
-| `verify_and_fix_flags_cache_task`          | Every 30 min     | Compare cache to database and fix mismatches         |
+| Task                                         | Schedule         | Purpose                                              |
+| -------------------------------------------- | ---------------- | ---------------------------------------------------- |
+| `refresh_expiring_flags_cache_entries`       | Hourly at :15    | Refresh caches with TTL < 24h before they expire     |
+| `cleanup_stale_flags_expiry_tracking_task`   | Daily at 3:15 AM | Remove expired team entries from tracking sorted set |
+| `verify_and_fix_flag_definitions_cache_task` | Hourly at :50    | Verify flag definitions cache against database       |
 
 ### Refresh task
 
@@ -324,14 +371,17 @@ def refresh_expiring_flags_cache_entries():
 
 The task uses a Redis sorted set (`flags_cache_expiry`) to efficiently find expiring entries without scanning all keys.
 
-### Verification task
+### Verification tasks
 
-The verification task compares cached data against the database and fixes discrepancies:
+The flag definitions verification task (runs hourly at :50) compares cached flag definitions against the database and fixes discrepancies:
 
-1. Samples teams from the cache
-2. Compares cached flags to current database state
-3. Auto-fixes mismatches by refreshing the cache
-4. Reports metrics on match/mismatch/miss rates
+1. Acquires a distributed lock so overlapping scheduled runs skip instead of duplicating work
+2. Samples teams from the cache
+3. Compares cached flags to current database state
+4. Auto-fixes mismatches by refreshing the cache
+5. Reports metrics on match/mismatch/miss rates
+
+The task has a 25-minute soft / 30-minute hard time limit.
 
 Configuration:
 
@@ -341,11 +391,14 @@ FLAGS_CACHE_VERIFICATION_GRACE_PERIOD_MINUTES=5  # Skip recently updated flags
 
 ### For initial cache build
 
-Scheduled tasks only maintain existing caches. For initial population or schema migrations, use the management command:
+Scheduled tasks only maintain existing caches. For initial population, use the management command:
 
 ```bash
-python manage.py warm_flags_cache [--invalidate-first]
+python manage.py warm_flags_cache [--team-ids ID1 ID2 ...]
 ```
+
+By default, the command warms caches only for teams that have ever had a feature flag (using `config.get_teams_queryset()`). This includes teams whose flags have all been soft-deleted (so the cache correctly contains an empty flags list). Teams that have never had any feature flags are skipped to avoid unnecessary database queries and Redis writes.
+When `--team-ids` is provided, those specific teams are warmed regardless of the config scoping.
 
 ## Signal handlers
 
@@ -412,7 +465,8 @@ REMOTE_CONFIG_CDN_PURGE_DOMAINS=["cdn.example.com"]
 
 - `insights/storage/hypercache.py` - Core HyperCache implementation
 - `insights/models/feature_flag/local_evaluation.py` - Local evaluation caching
-- `insights/models/feature_flag/flags_cache.py` - Flags cache, signal handlers, verification
+- `insights/models/feature_flag/flags_cache.py` - Flags cache, signal handlers, verification, dependency computation
+- `insights/storage/hypercache_manager.py` - Batch management operations (warm, invalidate, stats)
 - `insights/caching/flags_redis_cache.py` - Dual-write pattern for dedicated Redis
 - `insights/models/remote_config.py` - Remote config caching
 - `insights/models/team/team_caching.py` - Team authentication caching
@@ -420,6 +474,8 @@ REMOTE_CONFIG_CDN_PURGE_DOMAINS=["cdn.example.com"]
 - `insights/tasks/hypercache_verification.py` - Cache verification task
 - `insights/tasks/remote_config.py` - Remote config sync tasks
 - `insights/tasks/scheduled.py` - Task schedule definitions
+
+- `insights/tasks/hypercache_verification.py` - Cache verification tasks
 
 ## See also
 

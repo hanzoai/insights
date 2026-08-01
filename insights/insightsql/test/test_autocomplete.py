@@ -2,9 +2,11 @@ from typing import Optional
 
 from insights.test.base import APIBaseTest, DatastoreTestMixin
 
+from parameterized import parameterized
+
 from insights.schema import (
     AutocompleteCompletionItemKind,
-    InsightsLanguage,
+    HogLanguage,
     InsightsQLAutocomplete,
     InsightsQLAutocompleteResponse,
     InsightsQLQuery,
@@ -17,14 +19,15 @@ from insights.insightsql.database.models import StringDatabaseField
 from insights.insightsql.database.schema.events import EventsTable
 from insights.insightsql.database.schema.persons import PERSONS_FIELDS
 
-from insights.models.insight_variable import InsightVariable
-from insights.models.property_definition import PropertyDefinition
-
-from products.data_warehouse.backend.models import ExternalDataSource
-from products.data_warehouse.backend.models.credential import DataWarehouseCredential
-from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
-from products.data_warehouse.backend.models.table import DataWarehouseTable
-from products.data_warehouse.backend.types import ExternalDataSourceType
+from products.data_modeling.backend.facade.models import DataWarehouseSavedQuery
+from products.event_definitions.backend.models.property_definition import PropertyDefinition
+from products.product_analytics.backend.models.insight_variable import InsightVariable
+from products.warehouse_sources.backend.facade.models import (
+    DataWarehouseCredential,
+    DataWarehouseTable,
+    ExternalDataSource,
+)
+from products.warehouse_sources.backend.facade.types import ExternalDataSourceType
 
 
 class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
@@ -46,7 +49,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         self, query: str, start: int, end: int, database: Optional[Database] = None
     ) -> InsightsQLAutocompleteResponse:
         autocomplete = InsightsQLAutocomplete(
-            kind="InsightsQLAutocomplete", query=query, language=InsightsLanguage.INSIGHTS_QL, startPosition=start, endPosition=end
+            kind="InsightsQLAutocomplete", query=query, language=HogLanguage.FN_QL, startPosition=start, endPosition=end
         )
         return get_insightsql_autocomplete(query=autocomplete, team=self.team, database_arg=database)
 
@@ -54,7 +57,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=InsightsLanguage.INSIGHTS_QL_EXPR,
+            language=HogLanguage.FN_QL_EXPR,
             sourceQuery=InsightsQLQuery(query="select * from events"),
             startPosition=start,
             endPosition=end,
@@ -67,7 +70,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=InsightsLanguage.INSIGHTS_TEMPLATE,
+            language=HogLanguage.FN_TEMPLATE,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -78,7 +81,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=InsightsLanguage.INSIGHTS_JSON,
+            language=HogLanguage.FN_JSON,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -91,7 +94,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=InsightsLanguage.INSIGHTS_SCRIPT,
+            language=HogLanguage.HOG,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -113,6 +116,53 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         results = self._select(query=query, start=7, end=7)
         assert "toDateTime" in [suggestion.label for suggestion in results.suggestions]
         assert "toDateTime()" in [suggestion.insertText for suggestion in results.suggestions]
+
+    def test_autocomplete_includes_direct_connection_functions(self):
+        database = Database.create_for(team=self.team)
+        database._direct_connection_metadata = {"available_functions": ["icu_collate_nl"]}
+
+        query = "select  from events"
+        results = self._select(query=query, start=7, end=7, database=database)
+
+        assert "icu_collate_nl" in [suggestion.label for suggestion in results.suggestions]
+        assert "icu_collate_nl()" in [suggestion.insertText for suggestion in results.suggestions]
+
+    def test_autocomplete_matches_partial_direct_connection_function_without_from(self):
+        database = Database()
+        database._direct_connection_metadata = {"available_functions": ["icu_collate_nl"]}
+
+        query = "select icu"
+        results = self._select(query=query, start=7, end=10, database=database)
+
+        assert "icu_collate_nl" in [suggestion.label for suggestion in results.suggestions]
+
+    def test_autocomplete_includes_introspected_table_functions_in_from(self):
+        database = Database.create_for(team=self.team)
+        database._direct_connection_metadata = {
+            "available_table_functions": ["unnest", "regexp_matches", "generate_series"],
+        }
+
+        query = "select * from "
+        results = self._select(query=query, start=14, end=14, database=database)
+
+        labels = [suggestion.label for suggestion in results.suggestions]
+        insert_texts = {suggestion.insertText for suggestion in results.suggestions}
+        details_by_label = {suggestion.label: suggestion.detail for suggestion in results.suggestions}
+
+        assert "unnest" in labels
+        assert "regexp_matches" in labels
+        assert "generate_series" in labels
+        assert "unnest()" in insert_texts
+        assert details_by_label["unnest"] == "Table function"
+
+    def test_autocomplete_skips_table_functions_without_metadata(self):
+        database = Database.create_for(team=self.team)
+
+        query = "select * from "
+        results = self._select(query=query, start=14, end=14, database=database)
+
+        for suggestion in results.suggestions:
+            assert suggestion.detail != "Table function"
 
     def test_autocomplete_persons_suggestions(self):
         query = "select  from persons"
@@ -400,7 +450,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         results = self._json(query=query, start=5, end=6, database=database)
         assert len(results.suggestions) == 0
 
-    def test_autocomplete_iql(self):
+    def test_autocomplete_hog(self):
         database = Database.create_for(team=self.team)
 
         # 1
@@ -524,12 +574,19 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         assert "some_view" not in [x.label for x in results.suggestions]
         assert "DELETED" not in [x.label for x in results.suggestions]
 
-    def test_autocomplete_empty_source_query(self):
+    @parameterized.expand(
+        [
+            ("empty", ""),
+            # An unquoted reserved keyword used as an alias makes the source query unparseable.
+            ("reserved_keyword_alias", "select 1 as team_id"),
+        ]
+    )
+    def test_autocomplete_degrades_gracefully_for_bad_source_query(self, _name: str, source_query: str):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query="SELECT * FROM e",
-            language=InsightsLanguage.INSIGHTS_QL,
-            sourceQuery=InsightsQLQuery(query=""),  # Empty source query
+            language=HogLanguage.FN_QL,
+            sourceQuery=InsightsQLQuery(query=source_query),
             startPosition=15,
             endPosition=15,
         )

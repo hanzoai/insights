@@ -84,6 +84,7 @@ INSIGHTSQL_AGGREGATIONS: dict[str, InsightsQLFunctionMeta] = {
     "countState": InsightsQLFunctionMeta("countState", 0, 1, aggregate=True),
     "countMerge": InsightsQLFunctionMeta("countMerge", 1, 1, aggregate=True),
     "countStateIf": InsightsQLFunctionMeta("countStateIf", 1, 2, aggregate=True),
+    "countDistinct": InsightsQLFunctionMeta("countDistinct", 1, 1, aggregate=True),
     "countDistinctIf": InsightsQLFunctionMeta("countDistinctIf", 1, 2, aggregate=True),
     "countMapIf": InsightsQLFunctionMeta("countMapIf", 2, 3, aggregate=True),
     "min": InsightsQLFunctionMeta("min", 1, 1, aggregate=True, case_sensitive=False),
@@ -144,7 +145,7 @@ INSIGHTSQL_AGGREGATIONS: dict[str, InsightsQLFunctionMeta] = {
         using_placeholder_arguments=True,
     ),
     "every": InsightsQLFunctionMeta(
-        "toBool(min({}))",
+        "accurateCastOrNull(min({}), 'Bool')",
         1,
         1,
         aggregate=True,
@@ -162,6 +163,10 @@ INSIGHTSQL_AGGREGATIONS: dict[str, InsightsQLFunctionMeta] = {
     "argMaxIf": InsightsQLFunctionMeta("argMaxIf", 3, 3, aggregate=True),
     "argMinMerge": InsightsQLFunctionMeta("argMinMerge", 1, 1, aggregate=True),
     "argMaxMerge": InsightsQLFunctionMeta("argMaxMerge", 1, 1, aggregate=True),
+    "argMinState": InsightsQLFunctionMeta("argMinState", 2, 2, aggregate=True),
+    "argMaxState": InsightsQLFunctionMeta("argMaxState", 2, 2, aggregate=True),
+    "sumForEachState": InsightsQLFunctionMeta("sumForEachState", 1, 1, aggregate=True),
+    "sumForEachMerge": InsightsQLFunctionMeta("sumForEachMerge", 1, 1, aggregate=True),
     "avgState": InsightsQLFunctionMeta("avgState", 1, 1, aggregate=True),
     "avgStateIf": InsightsQLFunctionMeta("avgStateIf", 2, 2, aggregate=True),
     "avgMerge": InsightsQLFunctionMeta("avgMerge", 1, 1, aggregate=True),
@@ -178,6 +183,10 @@ INSIGHTSQL_AGGREGATIONS: dict[str, InsightsQLFunctionMeta] = {
     # "groupArrayLastIf": InsightsQLFunctionMeta("groupArrayLastIf", 2, 2, aggregate=True),
     "groupUniqArray": InsightsQLFunctionMeta("groupUniqArray", 1, 1, aggregate=True),
     "groupUniqArrayIf": InsightsQLFunctionMeta("groupUniqArrayIf", 2, 2, aggregate=True),
+    "groupUniqArrayArray": InsightsQLFunctionMeta("groupUniqArrayArray", 1, 1, min_params=0, max_params=1, aggregate=True),
+    "groupUniqArrayArrayIf": InsightsQLFunctionMeta(
+        "groupUniqArrayArrayIf", 2, 2, min_params=0, max_params=1, aggregate=True
+    ),
     "groupArrayInsertAt": InsightsQLFunctionMeta("groupArrayInsertAt", 2, 2, aggregate=True),
     "groupArrayInsertAtIf": InsightsQLFunctionMeta("groupArrayInsertAtIf", 3, 3, aggregate=True),
     "groupArrayMovingAvg": InsightsQLFunctionMeta("groupArrayMovingAvg", 1, 1, aggregate=True),
@@ -290,11 +299,25 @@ INSIGHTSQL_AGGREGATIONS: dict[str, InsightsQLFunctionMeta] = {
     "medianTDigestWeightedIf": InsightsQLFunctionMeta("medianTDigestWeightedIf", 2, 2, aggregate=True),
     "medianBFloat16": InsightsQLFunctionMeta("medianBFloat16", 1, 1, aggregate=True),
     "medianBFloat16If": InsightsQLFunctionMeta("medianBFloat16If", 2, 2, aggregate=True),
+    "percentile_cont": InsightsQLFunctionMeta(
+        "percentile_cont", 0, 0, min_params=1, max_params=1, aggregate=True, requires_within_group=True
+    ),
+    "percentile_disc": InsightsQLFunctionMeta(
+        "percentile_disc", 0, 0, min_params=1, max_params=1, aggregate=True, requires_within_group=True
+    ),
     "quantile": InsightsQLFunctionMeta("quantile", 1, 1, min_params=1, max_params=1, aggregate=True),
     "quantileIf": InsightsQLFunctionMeta("quantileIf", 2, 2, min_params=1, max_params=1, aggregate=True),
     "quantiles": InsightsQLFunctionMeta("quantiles", 1, None, aggregate=True),
     "quantilesIf": InsightsQLFunctionMeta("quantilesIf", 2, 2, min_params=1, max_params=1, aggregate=True),
-    # "quantileExact": InsightsQLFunctionMeta("quantileExact", 1, 1, aggregate=True),
+    # `-State` and `-Merge*` combinators needed by lazy precompute paths that
+    # store quantile reservoirs (e.g. web_vitals_paths_preaggregated). Params
+    # are the percentile list; args are the value (for `-State`) or the
+    # state + filter condition (for `-MergeIf`).
+    "quantilesState": InsightsQLFunctionMeta("quantilesState", 1, 1, min_params=1, max_params=None, aggregate=True),
+    "quantilesStateIf": InsightsQLFunctionMeta("quantilesStateIf", 2, 2, min_params=1, max_params=None, aggregate=True),
+    "quantilesMerge": InsightsQLFunctionMeta("quantilesMerge", 1, 1, min_params=1, max_params=None, aggregate=True),
+    "quantilesMergeIf": InsightsQLFunctionMeta("quantilesMergeIf", 2, 2, min_params=1, max_params=None, aggregate=True),
+    "quantileExact": InsightsQLFunctionMeta("quantileExact", 1, 1, min_params=1, max_params=1, aggregate=True),
     # "quantileExactIf": InsightsQLFunctionMeta("quantileExactIf", 2, 2, aggregate=True),
     # "quantileExactLow": InsightsQLFunctionMeta("quantileExactLow", 1, 1, aggregate=True),
     # "quantileExactLowIf": InsightsQLFunctionMeta("quantileExactLowIf", 2, 2, aggregate=True),

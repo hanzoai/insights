@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: {{ include "insights-metrics-agent.fullname" . }}
+    labels:
+        {{- include "insights-metrics-agent.labels" . | nindent 8 }}
+data:
+    config.yaml: |
+        {{- include "insights-metrics-agent.collectorConfig" . | nindent 8 }}

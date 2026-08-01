@@ -21,6 +21,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         self.user.theme_mode = "light"
         self.user.toolbar_mode = "toolbar"
         self.user.anonymize_data = False
+        self.user.mascot_config = None
         self.user.save()
 
     def _mock_cloud_api_responses(self, mock_get):
@@ -34,6 +35,7 @@ class TestSyncUserSettingsCommand(BaseTest):
             "theme_mode": "dark",
             "toolbar_mode": "disabled",
             "anonymize_data": True,
+            "mascot_config": {"mode": "festive"},
             "partial_notification_settings": {"plugin_disabled": False},
             "has_seen_product_intro_for": {"feature_flags": True},
         }
@@ -77,13 +79,15 @@ class TestSyncUserSettingsCommand(BaseTest):
         """Test syncing all settings from cloud"""
         self._mock_cloud_api_responses(mock_get)
 
-        call_command("sync_user_settings", api_key="test_key", host="https://insights.hanzo.ai")
+        call_command("sync_user_settings", api_key="test_key", host="https://app.hanzo.ai")
 
         # Verify user preferences were synced
         self.user.refresh_from_db()
         assert self.user.theme_mode == "dark"
         assert self.user.toolbar_mode == "disabled"
         assert self.user.anonymize_data is True
+        assert self.user.mascot_config == {"mode": "festive"}
+
         # Verify home settings were synced
         home_settings = UserHomeSettings.objects.get(user=self.user, team=self.team)
         assert len(home_settings.tabs) == 1
@@ -117,7 +121,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         """Test using API key from environment variable"""
         self._mock_cloud_api_responses(mock_get)
 
-        with patch.dict("os.environ", {"INSIGHTS_PERSONAL_API_KEY": "env_key"}):
+        with patch.dict("os.environ", {"POSTFN_PERSONAL_API_KEY": "env_key"}):
             call_command("sync_user_settings")
 
         # Verify it worked
@@ -242,11 +246,11 @@ class TestSyncUserSettingsCommand(BaseTest):
         """Test syncing from a custom Insights host"""
         self._mock_cloud_api_responses(mock_get)
 
-        call_command("sync_user_settings", api_key="test_key", host="https://insights.hanzo.ai")
+        call_command("sync_user_settings", api_key="test_key", host="https://eu.hanzo.ai")
 
         # Verify API was called with correct host
         calls = [call[0][0] for call in mock_get.call_args_list]
-        assert any(urlparse(call).netloc == "insights.hanzo.ai" for call in calls)
+        assert any(urlparse(call).netloc == "eu.hanzo.ai" for call in calls)
 
     @parameterized.expand(
         [

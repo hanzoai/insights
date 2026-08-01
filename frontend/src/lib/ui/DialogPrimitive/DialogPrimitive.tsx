@@ -1,38 +1,49 @@
 import { Dialog } from '@base-ui/react/dialog'
-import { Suspense, lazy } from 'react'
+import { Suspense } from 'react'
 
 import { IconX } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
+import { lazyWithRetry } from 'lib/utils/retryImport'
 
 import { WrappingLoadingSkeleton } from '../WrappingLoadingSkeleton/WrappingLoadingSkeleton'
 
-const ButtonPrimitive = lazy(() => import('../Button/ButtonPrimitives').then((m) => ({ default: m.ButtonPrimitive })))
+const ButtonPrimitive = lazyWithRetry(() =>
+    import('../Button/ButtonPrimitives').then((m) => ({ default: m.ButtonPrimitive }))
+)
 
 function DialogPrimitive({
     children,
     open,
     onOpenChange,
     className,
+    disablePointerDismissal = false,
 }: {
     children: React.ReactNode
     open: boolean
     onOpenChange: (open: boolean, eventDetails?: Dialog.Root.ChangeEventDetails) => void
     className?: string
+    disablePointerDismissal?: boolean
 }): JSX.Element {
     return (
-        <Dialog.Root open={open} onOpenChange={(open, event) => onOpenChange(open, event)}>
-            <Dialog.Portal>
-                <Dialog.Backdrop className="fixed inset-0 min-h-dvh min-w-dvw bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 dark:opacity-70 z-[var(--z-modal)]" />
-                <Dialog.Popup
-                    className={cn(
-                        '@container fixed top-4 left-1/2 w-[400px] max-w-[calc(100vw-3rem)] max-h-[60vh] -translate-x-1/2 rounded-lg bg-surface-secondary shadow-xl border border-primary transition-all duration-150 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 flex flex-col overflow-hidden z-[var(--z-force-modal-above-popovers)]',
-                        className
-                    )}
-                >
-                    {children}
-                </Dialog.Popup>
-            </Dialog.Portal>
+        <Dialog.Root
+            open={open}
+            onOpenChange={(open, event) => onOpenChange(open, event)}
+            disablePointerDismissal={disablePointerDismissal}
+        >
+            {open && (
+                <Dialog.Portal>
+                    <Dialog.Backdrop className="fixed inset-0 min-h-dvh min-w-dvw bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 dark:opacity-70 z-[var(--z-modal)]" />
+                    <Dialog.Popup
+                        className={cn(
+                            '@container fixed top-4 left-1/2 w-[400px] max-w-[calc(100vw-3rem)] max-h-[60vh] -translate-x-1/2 rounded-lg bg-surface-secondary shadow-xl border border-primary transition-all duration-150 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 flex flex-col overflow-hidden z-[var(--z-force-modal-above-popovers)]',
+                            className
+                        )}
+                    >
+                        {children}
+                    </Dialog.Popup>
+                </Dialog.Portal>
+            )}
         </Dialog.Root>
     )
 }
@@ -68,4 +79,8 @@ function DialogClose({ className = '' }: { className?: string }): JSX.Element {
     )
 }
 
-export { DialogPrimitive, DialogPrimitiveTitle, DialogClose }
+function DialogTrigger({ children, ...rest }: React.ComponentProps<typeof Dialog.Trigger>): JSX.Element {
+    return <Dialog.Trigger {...rest}>{children}</Dialog.Trigger>
+}
+
+export { DialogPrimitive, DialogPrimitiveTitle, DialogClose, DialogTrigger }

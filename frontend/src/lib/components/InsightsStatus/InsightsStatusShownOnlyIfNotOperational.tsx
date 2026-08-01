@@ -4,16 +4,15 @@ import { Link } from '@hanzo/elements'
 
 import { cn } from 'lib/utils/css-classes'
 
-import { STATUS_PAGE_URL } from '~/layout/navigation-3000/sidepanel/panels/sidePanelStatusIncidentIoLogic'
-
-import { healthMenuLogic } from '../HealthMenu/healthMenuLogic'
+import { insightsStatusLogic } from '../HelpMenu/insightsStatusLogic'
 
 export function InsightsStatusShownOnlyIfNotOperational({
     iconOnly = false,
 }: {
     iconOnly?: boolean
 }): JSX.Element | null {
-    const { insightsStatus, insightsStatusTooltip, insightsStatusBadgeStatus } = useValues(healthMenuLogic)
+    const { insightsStatus, insightsStatusTooltip, insightsStatusBadgeStatus, statusPageUrl } =
+        useValues(insightsStatusLogic)
 
     if (insightsStatus === 'operational') {
         return null
@@ -33,7 +32,7 @@ export function InsightsStatusShownOnlyIfNotOperational({
                     iconOnly: iconOnly,
                     menuItem: !iconOnly,
                 }}
-                to={STATUS_PAGE_URL}
+                to={statusPageUrl}
                 tooltip={!iconOnly ? tooltipText : undefined}
                 tooltipCloseDelayMs={0}
                 target="_blank"
@@ -51,7 +50,7 @@ export function InsightsStatusShownOnlyIfNotOperational({
                         />
                     </svg>
                 </span>
-                {!iconOnly && <span>{tooltipText}</span>}
+                {!iconOnly && <span className="truncate">{tooltipText}</span>}
             </Link>
         </div>
     )

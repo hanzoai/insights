@@ -1,8 +1,8 @@
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Dialog } from 'lib/elements/Dialog'
-import { IconOpenInApp } from 'lib/elements/icons'
 
 import { Experiment } from '~/types'
 

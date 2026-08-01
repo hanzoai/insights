@@ -4,8 +4,8 @@ import { useCallback, useState } from 'react'
 import { IconChevronDown, IconClock, IconEllipsis } from '@hanzo/icons'
 import { Button, Menu, MenuItem, Spinner, Tooltip } from '@hanzo/elements'
 
-import { humanFriendlyDetailedTime } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
+import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 
 import { DatabaseSchemaTable } from '~/queries/schema/schema-general'
 

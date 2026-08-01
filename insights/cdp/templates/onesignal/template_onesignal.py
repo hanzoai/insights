@@ -9,7 +9,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     description="Send events to OneSignal",
     icon_url="/static/services/onesignal.svg",
     category=["Marketing"],
-    code_language="fn",
+    code_language="script",
     code="""
 let properties := inputs.eventProperties
 if (empty(properties)) {

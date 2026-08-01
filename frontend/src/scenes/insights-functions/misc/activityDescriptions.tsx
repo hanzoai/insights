@@ -1,4 +1,4 @@
-import { DiffEditor } from '@monaco-editor/react'
+import { Suspense } from 'react'
 
 import {
     ActivityLogItem,
@@ -8,52 +8,35 @@ import {
 } from 'lib/components/ActivityLog/humanizeActivity'
 import { Dropdown } from 'lib/elements/Dropdown'
 import { Link } from 'lib/elements/Link'
-import { initScriptLanguage } from 'lib/monaco/languages/script'
+import { Spinner } from 'lib/elements/Spinner'
+import { isObject } from 'lib/utils/guards'
+import { lazyWithRetry } from 'lib/utils/retryImport'
 import { urls } from 'scenes/urls'
 
 import { InsightsFunctionTypeType } from '~/types'
 
-import { humanizeInsightsFunctionType } from '../insights-function-utils'
+import { humanizeInsightsFunctionType } from '../script-function-utils'
+import type { DiffProps } from './Diff'
 
 const nameOrLinkToInsightsFunction = (id?: string | null, name?: string | null): string | JSX.Element => {
-    const displayName = name?.trim() ? name : 'Untitled custom function'
+    const displayName = name?.trim() ? name : 'Untitled script function'
     return id ? <Link to={urls.insightsFunction(id)}>{displayName}</Link> : displayName
 }
 
-export interface DiffProps {
-    before: string
-    after: string
-    language?: string
-}
+const LazyDiff = lazyWithRetry(() => import('./Diff').then((m) => ({ default: m.Diff })))
 
-export function Diff({ before, after, language }: DiffProps): JSX.Element {
+/** Lazy so the activity describer registry (imported app-wide) doesn't pull monaco into its chunk. */
+export function Diff(props: DiffProps): JSX.Element {
     return (
-        <DiffEditor
-            height="300px"
-            original={before}
-            modified={after}
-            language={language ?? 'json'}
-            onMount={(_, monaco) => {
-                if (language === 'fn') {
-                    initScriptLanguage(monaco)
-                }
-            }}
-            options={{
-                lineNumbers: 'off',
-                minimap: { enabled: false },
-                folding: false,
-                wordWrap: 'on',
-                renderLineHighlight: 'none',
-                scrollbar: { vertical: 'auto', horizontal: 'hidden' },
-                overviewRulerBorder: false,
-                hideCursorInOverviewRuler: true,
-                overviewRulerLanes: 0,
-                tabFocusMode: true,
-                enableSplitViewResizing: false,
-                renderSideBySide: false,
-                readOnly: true,
-            }}
-        />
+        <Suspense
+            fallback={
+                <div className="min-h-[300px]">
+                    <Spinner />
+                </div>
+            }
+        >
+            <LazyDiff {...props} />
+        </Suspense>
     )
 }
 
@@ -83,7 +66,7 @@ export function insightsFunctionActivityDescriber(logItem: ActivityLogItem, asNo
     }
 
     const rawType = logItem?.detail.type as InsightsFunctionTypeType | undefined
-    const objectNoun = rawType ? humanizeInsightsFunctionType(rawType) : 'custom function'
+    const objectNoun = rawType ? humanizeInsightsFunctionType(rawType) : 'script function'
 
     if (logItem.activity == 'created') {
         return {
@@ -132,18 +115,29 @@ export function insightsFunctionActivityDescriber(logItem: ActivityLogItem, asNo
                     break
                 }
                 case 'inputs': {
-                    const changedFields: JSX.Element[] = []
-                    Object.entries(change.after ?? {}).forEach(([key, value]) => {
-                        const before = JSON.stringify(change.before?.[key]?.value)
-                        const after = JSON.stringify(value?.value)
-                        if (before !== after) {
-                            changedFields.push(
-                                <DiffLink before={before} after={after}>
-                                    {key}
-                                </DiffLink>
-                            )
-                        }
-                    })
+                    const beforeValues = isObject(change.before)
+                        ? (change.before as Record<string, { value?: unknown }>)
+                        : {}
+                    const afterValues = isObject(change.after)
+                        ? (change.after as Record<string, { value?: unknown }>)
+                        : {}
+
+                    const changedFields = Object.entries(afterValues)
+                        .map(([key, value]) => {
+                            const before = JSON.stringify(beforeValues[key]?.value)
+                            const after = JSON.stringify(value?.value)
+
+                            if (before !== after) {
+                                return (
+                                    <DiffLink key={key} before={before} after={after}>
+                                        {key}
+                                    </DiffLink>
+                                )
+                            }
+                            return null
+                        })
+                        .filter((x): x is JSX.Element => !!x)
+
                     const changedSpans: JSX.Element[] = []
                     for (let index = 0; index < changedFields.length; index++) {
                         if (index !== 0 && index === changedFields.length - 1) {
@@ -153,6 +147,7 @@ export function insightsFunctionActivityDescriber(logItem: ActivityLogItem, asNo
                         }
                         changedSpans.push(changedFields[index])
                     }
+
                     const inputOrInputs = changedFields.length === 1 ? 'input' : 'inputs'
                     changes.push({
                         inline: (
@@ -170,13 +165,13 @@ export function insightsFunctionActivityDescriber(logItem: ActivityLogItem, asNo
                 }
                 case 'inputs_schema':
                 case 'filters':
-                case 'fn':
+                case 'script':
                 case 'name':
                 case 'description':
                 case 'masking': {
                     const code = (
                         <DiffLink
-                            language={change.field === 'fn' ? 'iql' : 'json'}
+                            language={change.field === 'script' ? 'script' : 'json'}
                             before={
                                 typeof change.before === 'string'
                                     ? change.before
@@ -186,7 +181,7 @@ export function insightsFunctionActivityDescriber(logItem: ActivityLogItem, asNo
                                 typeof change.after === 'string' ? change.after : JSON.stringify(change.after, null, 2)
                             }
                         >
-                            {change.field === 'fn'
+                            {change.field === 'script'
                                 ? 'source code'
                                 : change.field === 'inputs_schema'
                                   ? 'inputs schema'

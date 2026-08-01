@@ -1,2 +1,11 @@
-insightscli dev:setup now lets you configure which services to start
-Use 'insightscli dev:explain' to see why each service is running
+2026-07-02
+send feedback to the devex team (humans and agents): insightscli devex:feedback "..."
+
+2026-06-08
+objectstorage swapped minio -> seaweedfs; old local files stay on the old volume, run insightscli deploy:upgrade-objectstorage to copy them over
+
+2026-05-05
+check product maturity: insightscli product:maturity <product>, or --all for a leaderboard
+
+2026-04-30
+insightscli now supports detached mode: insightscli up -d, then insightscli wait / insightscli down

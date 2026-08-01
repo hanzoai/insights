@@ -1,6 +1,9 @@
 from django.contrib import admin
 
+from insights.models import AsyncDeletion
 
+
+@admin.register(AsyncDeletion)
 class AsyncDeletionAdmin(admin.ModelAdmin):
     list_display = (
         "id",

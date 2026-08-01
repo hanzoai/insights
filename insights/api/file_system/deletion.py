@@ -9,17 +9,18 @@ from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 
 from insights.models.file_system.file_system import FileSystem, join_path, split_path
-from insights.models.insights_functions.insights_function import InsightsFunctionType
 from insights.models.signals import mute_selected_signals
+
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunctionType
 
 logger = logging.getLogger(__name__)
 
-LEGACY_INSIGHTS_FUNCTION_TYPES = [
+LEGACY_FN_FUNCTION_TYPES = [
     "broadcast",
     "campaign",
     "source",
 ]
-INSIGHTS_FUNCTION_TYPES = sorted(set(LEGACY_INSIGHTS_FUNCTION_TYPES + list(InsightsFunctionType.values)))
+FN_FUNCTION_TYPES = sorted(set(LEGACY_FN_FUNCTION_TYPES + list(InsightsFunctionType.values)))
 
 
 @dataclass(frozen=True)
@@ -149,6 +150,10 @@ def register_post_restore_hook(type_string: str, hook: PostRestoreHook) -> None:
 
 def is_file_system_type_registered(type_string: str) -> bool:
     return type_string in _MODEL_REGISTRY
+
+
+def get_file_system_registration(type_string: str) -> ModelRegistration | None:
+    return _MODEL_REGISTRY.get(type_string)
 
 
 def _resolve_user(user: Any | None) -> Any | None:

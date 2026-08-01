@@ -3,8 +3,10 @@ from insights.test.base import BaseTest
 from insights.cdp.templates.insights_function_template import sync_template_to_db
 from insights.cdp.templates.zapier.template_zapier import template as template_zapier
 from insights.management.commands.migrate_hooks import migrate_hooks
-from insights.models.action.action import Action
-from insights.models.insights_functions.insights_function import InsightsFunction
+
+from products.actions.backend.models.action import Action
+from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
+from products.cdp.backend.models.hook import Hook
 
 from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
@@ -62,7 +64,7 @@ class TestMigrateHooks(BaseTest):
             "actions": [{"id": f"{self.action.id}", "name": "", "type": "actions", "order": 0}],
             "bytecode": ["_H", INSIGHTSQL_BYTECODE_VERSION, 29],
         }
-        assert insights_function.iql == template_zapier.code
+        assert insights_function.script == template_zapier.code
         assert insights_function.description == f"{template_zapier.description} Migrated from legacy hook {self.hook.id}."
         assert insights_function.inputs_schema == template_zapier.inputs_schema
         assert insights_function.template_id == template_zapier.id

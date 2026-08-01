@@ -3,13 +3,41 @@ from typing import Any, Optional, Union
 
 from django.db import models
 
+import structlog
+
 from insights.models.person.missing_person import MissingPerson
-from insights.models.person.person import READ_DB_FOR_PERSONS, Person
+from insights.models.person.person import Person
 from insights.models.team.team import Team
 from insights.models.utils import UUIDTModel
+from insights.personinsights_client.client import personinsights_call
+from insights.personinsights_client.metrics import PERSONFN_TEAM_MISMATCH_TOTAL, get_client_name
 from insights.session_recordings.models.metadata import RecordingMatchingEvents, RecordingMetadata
 from insights.session_recordings.models.session_recording_event import SessionRecordingViewed
-from insights.session_recordings.queries.session_replay_events import SessionReplayEvents
+
+logger = structlog.get_logger(__name__)
+
+
+def _fetch_person_by_distinct_id_via_personinsights(team_id: int, distinct_id: str) -> Person | None:
+    from insights.personinsights_client.caller_tag import personinsights_caller_tag
+    from insights.personinsights_client.client import get_personinsights_client
+    from insights.personinsights_client.converters import proto_person_to_model
+    from insights.personinsights_client.proto import GetPersonByDistinctIdRequest
+
+    client = get_personinsights_client()
+    if client is None:
+        raise RuntimeError("personinsights client not configured")
+
+    with personinsights_caller_tag("replay/recording-person"):
+        resp = client.get_person_by_distinct_id(GetPersonByDistinctIdRequest(team_id=team_id, distinct_id=distinct_id))
+    if resp.person and resp.person.id and resp.person.team_id == team_id:
+        # Only pass the queried distinct_id — the list endpoint also intentionally
+        # sets a single distinct_id to avoid expensive all-distinct-ids lookups.
+        # The MinimalPersonSerializer truncates to 10 anyway.
+        return proto_person_to_model(resp.person, distinct_ids=[distinct_id])
+    if resp.person and resp.person.id and resp.person.team_id != team_id:
+        PERSONFN_TEAM_MISMATCH_TOTAL.labels(operation="load_person", client_name=get_client_name()).inc()
+        logger.warning("personinsights_team_mismatch", operation="load_person", team_id=team_id, dropped=1)
+    return None
 
 
 class SessionRecording(UUIDTModel):
@@ -17,7 +45,7 @@ class SessionRecording(UUIDTModel):
         unique_together = ("team", "session_id")
 
     # Note: UUIDT is the Insights standard, but session_id's are generated with a different util in insights-js
-    # https://github.com/Hanzo Insights/insights-js/blob/e0dc2c005cfb5dd62b7c876676bcffe1654417a7/src/utils.ts#L457-L458
+    # https://github.com/Insights/insights-js/blob/e0dc2c005cfb5dd62b7c876676bcffe1654417a7/src/utils.ts#L457-L458
     # We create recording objects with both UUIDT and a unique session_id field to remain backwards compatible.
     # All other models related to the session recording model uses this unique `session_id` to create the link.
     session_id = models.CharField(unique=True, max_length=200)
@@ -45,8 +73,6 @@ class SessionRecording(UUIDTModel):
 
     start_url = models.CharField(blank=True, null=True, max_length=512)
 
-    # we can't store storage version in the stored content
-    # as we might need to know the version before knowing how to load the data
     storage_version = models.CharField(blank=True, null=True, max_length=20)
 
     retention_period_days = models.IntegerField(blank=True, null=True)
@@ -59,8 +85,13 @@ class SessionRecording(UUIDTModel):
     matching_events: Optional[RecordingMatchingEvents] = None
     ongoing: Optional[bool] = None
     activity_score: Optional[float] = None
+    has_summary: Optional[bool] = None
+    summary_outcome: Optional[dict] = None
     expiry_time: Optional[datetime] = None
     recording_ttl: Optional[int] = None
+    # False when this recording was included in listing results via session_recording_id
+    # despite not matching the listing filters
+    matches_filters: Optional[bool] = None
 
     # Metadata can be loaded from Datastore or S3
     _metadata: Optional[RecordingMetadata] = None
@@ -69,10 +100,14 @@ class SessionRecording(UUIDTModel):
         if self._metadata:
             return True
 
-        if self.object_storage_path or self.full_recording_v2_path:
+        if self.full_recording_v2_path:
             # Nothing todo as we have all the metadata in the model
             pass
         else:
+            # Deferred: session_replay_events pulls the InsightsQL/schema layer, and this model
+            # loads at django.setup() in every process.
+            from insights.session_recordings.queries.session_replay_events import SessionReplayEvents  # noqa: PLC0415
+
             # Try to load from Datastore
             metadata = SessionReplayEvents().get_metadata(
                 team=self.team,
@@ -102,6 +137,7 @@ class SessionRecording(UUIDTModel):
             self.retention_period_days = metadata["retention_period_days"]
             self.expiry_time = metadata["expiry_time"]
             self.recording_ttl = metadata["recording_ttl"]
+            self.ongoing = metadata["ongoing"]
 
         return True
 
@@ -130,14 +166,16 @@ class SessionRecording(UUIDTModel):
         if self._person:
             return
 
-        try:
-            self.person = Person.objects.db_manager(READ_DB_FOR_PERSONS).get(
-                persondistinctid__distinct_id=self.distinct_id,
-                persondistinctid__team_id=self.team.pk,
-                team=self.team,
-            )
-        except Person.DoesNotExist:
-            pass
+        distinct_id = self.distinct_id
+        if not distinct_id:
+            return
+
+        def _fn() -> None:
+            person = _fetch_person_by_distinct_id_via_personinsights(self.team.pk, distinct_id)
+            if person is not None:
+                self.person = person
+
+        personinsights_call("load_person", _fn)
 
     def check_viewed_for_user(self, user: Any, save_viewed=False) -> None:
         if not save_viewed:

@@ -7,7 +7,7 @@ from insights.schema import DataWarehouseNode, DateRange, PropertyMathType, Tren
 
 from insights.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
 
-from products.data_warehouse.backend.test.utils import create_data_warehouse_table_from_csv
+from products.warehouse_sources.backend.facade.testing import create_data_warehouse_table_from_csv
 
 TEST_BUCKET = "test_storage_bucket-insights.trends.datawarehouse.timestamp_handling"
 

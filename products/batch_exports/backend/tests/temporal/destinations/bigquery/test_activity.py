@@ -2,6 +2,7 @@
 
 import uuid
 import datetime as dt
+import dataclasses
 import collections.abc
 
 import pytest
@@ -9,9 +10,10 @@ import unittest.mock
 
 from google.cloud import bigquery
 
-from insights.batch_exports.service import BatchExportModel, BatchExportSchema
+from insights.models.integration import Integration
 from insights.temporal.tests.utils.events import generate_test_events_in_datastore
 
+from products.batch_exports.backend.service import BatchExportModel, BatchExportSchema
 from products.batch_exports.backend.temporal.destinations.bigquery_batch_export import (
     BigQueryInsertInputs,
     bigquery_default_fields,
@@ -71,6 +73,7 @@ async def _run_activity(
     expect_duplicates: bool = False,
     min_ingested_timestamp: dt.datetime = TEST_TIME,
     timestamp_columns: collections.abc.Sequence[str] = (),
+    integration: Integration | None = None,
 ):
     """Helper function to run BigQuery main activity and assert records are exported."""
     insert_inputs = BigQueryInsertInputs(
@@ -85,12 +88,13 @@ async def _run_activity(
         batch_export_schema=batch_export_schema,
         batch_export_model=batch_export_model,
         batch_export_id=str(uuid.uuid4()),
+        integration_id=integration.id if integration is not None else None,
         **bigquery_config,
     )
 
     assert insert_inputs.batch_export_id is not None
     # we first need to run the insert_into_internal_stage_activity so that we have data to export
-    stage_folder = await activity_environment.run(
+    stage_result = await activity_environment.run(
         insert_into_internal_stage_activity,
         BatchExportInsertIntoInternalStageInputs(
             team_id=insert_inputs.team_id,
@@ -106,7 +110,8 @@ async def _run_activity(
             destination_default_fields=bigquery_default_fields(),
         ),
     )
-    insert_inputs.stage_folder = stage_folder
+    insert_inputs.stage_folder = stage_result.stage_folder
+    insert_inputs.records_total = stage_result.records_total
     result = await activity_environment.run(insert_into_bigquery_activity_from_stage, insert_inputs)
 
     await assert_datastore_records_in_bigquery(
@@ -165,6 +170,7 @@ async def _run_activity(
     ],
     indirect=True,
 )
+@pytest.mark.parametrize("integration", ["key_file", "impersonated", None], indirect=True)
 async def test_insert_into_bigquery_activity_inserts_data_into_bigquery_table(
     datastore_client,
     activity_environment,
@@ -178,6 +184,7 @@ async def test_insert_into_bigquery_activity_inserts_data_into_bigquery_table(
     data_interval_start,
     data_interval_end,
     ateam,
+    integration,
 ):
     """Test that the `insert_into_bigquery_activity` function inserts data into a BigQuery table.
 
@@ -221,6 +228,7 @@ async def test_insert_into_bigquery_activity_inserts_data_into_bigquery_table(
         batch_export_model=batch_export_model,
         bigquery_config=bigquery_config,
         sort_key=sort_key,
+        integration=integration,
     )
 
 
@@ -491,6 +499,9 @@ async def test_insert_into_bigquery_activity_from_stage_merges_persons_data_in_f
             timestamp=old_person["_timestamp"],
         )
 
+    activity_environment.info = dataclasses.replace(
+        activity_environment.info, attempt=activity_environment.info.attempt + 1
+    )
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
@@ -567,6 +578,9 @@ async def test_insert_into_bigquery_activity_from_stage_merges_sessions_data_in_
         insert_sessions=True,
     )
 
+    activity_environment.info = dataclasses.replace(
+        activity_environment.info, attempt=activity_environment.info.attempt + 1
+    )
     result = await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
@@ -672,6 +686,9 @@ async def test_insert_into_bigquery_activity_from_stage_handles_person_new_colum
             timestamp=old_person["_timestamp"],
         )
 
+    activity_environment.info = dataclasses.replace(
+        activity_environment.info, attempt=activity_environment.info.attempt + 1
+    )
     # this time we don't expected there to be a created_at column
     expected_fields = [field for field in EXPECTED_PERSONS_BATCH_EXPORT_FIELDS if field != "created_at"]
     await _run_activity(
@@ -749,6 +766,9 @@ async def test_insert_into_bigquery_activity_from_stage_handles_datetime_to_int(
     )
     _ = query_job.result()
 
+    activity_environment.info = dataclasses.replace(
+        activity_environment.info, attempt=activity_environment.info.attempt + 1
+    )
     await _run_activity(
         activity_environment,
         bigquery_client=bigquery_client,
@@ -763,3 +783,57 @@ async def test_insert_into_bigquery_activity_from_stage_handles_datetime_to_int(
         sort_key="person_id",
         timestamp_columns=("created_at",),
     )
+
+
+async def test_insert_into_bigquery_activity_creates_tables_with_the_right_partitioning(
+    datastore_client,
+    activity_environment,
+    bigquery_client,
+    bigquery_config,
+    bigquery_dataset,
+    generate_test_data,
+    data_interval_start,
+    data_interval_end,
+    ateam,
+):
+    """Test that the `insert_into_bigquery_activity_from_stage` correctly partitions.
+
+    We expect the final table to always be partitioned by day (partly for backwards
+    compatibility, this may change in the future), and the consumer table to not be
+    partitioned.
+    """
+    model = BatchExportModel(name="events", schema=None)
+    table_id = f"test_insert_activity_partitioning_{ateam.pk}"
+
+    with (
+        unittest.mock.patch(
+            "products.batch_exports.backend.temporal.destinations.bigquery_batch_export.BigQueryClient.delete_table",
+            return_value=None,
+        ) as mocked_delete,
+    ):
+        await _run_activity(
+            activity_environment,
+            bigquery_client=bigquery_client,
+            datastore_client=datastore_client,
+            team=ateam,
+            table_id=table_id,
+            dataset_id=bigquery_dataset.dataset_id,
+            data_interval_start=data_interval_start,
+            data_interval_end=data_interval_end,
+            batch_export_model=model,
+            bigquery_config=bigquery_config,
+            sort_key="event",
+        )
+
+    final_table = bigquery_client.get_table(f"{bigquery_dataset.dataset_id}.{table_id}")
+
+    data_interval_end_str = data_interval_end.strftime("%Y-%m-%d_%H-%M-%S")
+    stage_table_id = f"stage_{table_id}_{data_interval_end_str}_{ateam.pk}_1_0"
+    consumer_table = bigquery_client.get_table(f"{bigquery_dataset.dataset_id}.{stage_table_id}")
+
+    mocked_delete.assert_called_once()
+    assert final_table.time_partitioning is not None
+    assert final_table.time_partitioning == bigquery.table.TimePartitioning(
+        type_=bigquery.TimePartitioningType.DAY, field="timestamp"
+    )
+    assert consumer_table.time_partitioning is None

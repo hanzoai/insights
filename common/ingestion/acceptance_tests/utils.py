@@ -5,7 +5,7 @@ import os
 
 def get_service_url(service: str = "proxy") -> str:
     """Get the URL for a service."""
-    if base_url := os.environ.get("INSIGHTS_TEST_BASE_URL"):
+    if base_url := os.environ.get("POSTFN_TEST_BASE_URL"):
         return base_url
 
     service_urls = {

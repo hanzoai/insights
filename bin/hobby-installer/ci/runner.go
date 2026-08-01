@@ -3,7 +3,7 @@ package ci
 import (
 	"fmt"
 
-	"github.com/hanzoai/insights/bin/hobby-installer/core"
+	"github.com/insights/insights/bin/hobby-installer/core"
 )
 
 type Config struct {

@@ -4,7 +4,9 @@ import useResizeObserver from 'use-resize-observer'
 
 import { Banner, Spinner } from '@hanzo/elements'
 
-import { ToolbarUserIntent } from '~/types'
+import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
+
+import { AccessControlLevel, AccessControlResourceType, ToolbarUserIntent } from '~/types'
 
 import { appEditorUrl } from '../AuthorizedUrlList/authorizedUrlListLogic'
 import { UserIntentVerb, iframedToolbarBrowserLogic } from './iframedToolbarBrowserLogic'
@@ -48,6 +50,19 @@ export function IframedToolbarBrowser({
     useEffect(() => {
         setIframeWidth(iframeWidth ?? null)
     }, [iframeWidth, setIframeWidth])
+
+    const toolbarAccessDisabledReason = getAccessControlDisabledReason(
+        AccessControlResourceType.Toolbar,
+        AccessControlLevel.Viewer
+    )
+
+    if (toolbarAccessDisabledReason) {
+        return (
+            <div className="relative flex-1 w-full h-full flex items-center justify-center p-4">
+                <Banner type="error">{toolbarAccessDisabledReason}</Banner>
+            </div>
+        )
+    }
 
     return browserUrl ? (
         <div className="relative flex-1 w-full h-full">

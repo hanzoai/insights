@@ -5,12 +5,12 @@ import { useActions, useValues } from 'kea'
 
 import { Select, SelectOption, Link } from '@hanzo/elements'
 
-import { Logo } from 'lib/brand/Logo'
+import { Logo } from 'lib/brand'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { Tooltip } from 'lib/elements/Tooltip'
-import { isObject } from 'lib/utils'
+import { isObject } from 'lib/utils/guards'
 import { DraggableToNotebook } from 'scenes/notebooks/AddToNotebook/DraggableToNotebook'
 import { IconWindow } from 'scenes/session-recordings/player/icons'
 import { PlayerMetaLinks } from 'scenes/session-recordings/player/player-meta/PlayerMetaLinks'
@@ -22,8 +22,9 @@ import { urls } from 'scenes/urls'
 
 import { getCurrentExporterData } from '~/exporter/exporterViewLogic'
 
-import { PlayerPersonMeta } from './PlayerPersonMeta'
+import { PlayerMetaExperimentTags } from './PlayerMetaExperimentTags'
 import { playerMetaLogic } from './playerMetaLogic'
+import { PlayerPersonMeta } from './PlayerPersonMeta'
 
 export function parseUrl(lastUrl: unknown): { urlToUse: string | undefined; isValidUrl: boolean } {
     let urlToUse: string | undefined = typeof lastUrl === 'string' ? lastUrl : undefined
@@ -114,7 +115,7 @@ export function PlayerMeta(): JSX.Element {
                     {!whitelabel ? (
                         <Tooltip title="Powered by Insights" placement="right">
                             <Link to="https://hanzo.ai" className="flex items-center" target="blank">
-                                <Logo />
+                                <Logo size="md" />
                             </Link>
                         </Tooltip>
                     ) : null}
@@ -176,6 +177,7 @@ export function PlayerMeta(): JSX.Element {
                             )}
                         </>
                     )}
+                    <PlayerMetaExperimentTags />
                     <div className={clsx('flex-1', size === 'small' ? 'min-w-[1rem]' : 'min-w-[5rem]')} />
                     <PlayerMetaLinks size={size} />
                     <PlayerPersonMeta />

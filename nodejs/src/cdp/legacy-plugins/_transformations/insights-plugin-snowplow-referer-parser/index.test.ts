@@ -24,7 +24,7 @@ const demoEvents = [
             $referrer: '$direct',
             $referring_domain: '$direct',
             $active_feature_flags: [],
-            token: 'hi_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z',
+            token: 'phc_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z',
             $session_id: '18528f8e5361b6d-07f85cfe92fe198-c6a5a43-fa00-18528f8e53714dd',
             $window_id: '1852ac00ad0a8d-03577d57d3a7a08-c6a5a43-1fa400-1852ac00ad159b',
             $set_once: {
@@ -58,7 +58,7 @@ const demoEvents = [
         team_id: 2,
         now: '2022-12-19T14:18:27.859614+00:00',
         sent_at: '2022-12-19T14:18:26.905000+00:00',
-        token: 'hi_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z',
+        token: 'phc_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z',
     },
     {
         event: 'SOME/custom_event',
@@ -83,7 +83,7 @@ const demoEvents = [
             $referrer: '$direct',
             $referring_domain: '$direct',
             $active_feature_flags: [],
-            token: 'hi_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z',
+            token: 'phc_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z',
             $session_id: '18528f8e5361b6d-07f85cfe92fe198-c6a5a43-fa00-18528f8e53714dd',
             $window_id: '1852ac00ad0a8d-03577d57d3a7a08-c6a5a43-1fa400-1852ac00ad159b',
             $set_once: {
@@ -117,7 +117,7 @@ const demoEvents = [
         team_id: 2,
         now: '2022-12-19T14:18:27.859614+00:00',
         sent_at: '2022-12-19T14:18:26.905000+00:00',
-        token: 'hi_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z',
+        token: 'phc_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z',
     },
 ]
 

@@ -1,13 +1,10 @@
-from typing import cast
-
-import hanzo_insights
+from typing import Any, cast
 
 from insights.schema import (
     ActionsNode,
     Breakdown as BreakdownSchema,
     ChartDisplayType,
     DataWarehouseNode,
-    DataWarehousePropertyFilter,
     EventsNode,
     GroupNode,
     InsightsQLQueryModifiers,
@@ -22,17 +19,19 @@ from insights.insightsql.timings import InsightsQLTimings
 
 from insights.insightsql_queries.insights.data_warehouse_mixin import DataWarehouseInsightQueryMixin
 from insights.insightsql_queries.insights.trends.aggregation_operations import AggregationOperations
-from insights.insightsql_queries.insights.trends.breakdown import (
-    BREAKDOWN_NULL_STRING_LABEL,
-    BREAKDOWN_OTHER_STRING_LABEL,
-    Breakdown,
-)
+from insights.insightsql_queries.insights.trends.breakdown import Breakdown
 from insights.insightsql_queries.insights.trends.display import TrendsDisplay
 from insights.insightsql_queries.insights.trends.utils import group_node_to_expr, is_groups_math
+from insights.insightsql_queries.insights.utils.breakdowns import BREAKDOWN_NULL_STRING_LABEL, BREAKDOWN_OTHER_STRING_LABEL
 from insights.insightsql_queries.utils.query_date_range import QueryDateRange
-from insights.models.action.action import Action
 from insights.models.filters.mixins.utils import cached_property
 from insights.models.team.team import Team
+from insights.ph_client import feature_enabled_or_false
+
+from products.actions.backend.models.action import Action
+from products.web_analytics.backend.insightsql_queries.first_pageview_attribution import (
+    first_pageview_aware_properties_to_expr,
+)
 
 
 class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
@@ -604,9 +603,20 @@ class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
         if self._trends_display.display_type == ChartDisplayType.WORLD_MAP:
             return 250
 
-        return (
-            self.query.breakdownFilter and self.query.breakdownFilter.breakdown_limit
-        ) or get_breakdown_limit_for_context(self.limit_context)
+        breakdown_filter = self.query.breakdownFilter
+        breakdown_limit = breakdown_filter.breakdown_limit if breakdown_filter else None
+        limit = breakdown_limit or get_breakdown_limit_for_context(self.limit_context)
+
+        # Cohorts are a user-picked, enumerable set — a smaller limit would push declared
+        # cohorts into "Other", which crashes the label lookup in `build_series_response`.
+        if (
+            breakdown_filter is not None
+            and breakdown_filter.breakdown_type == "cohort"
+            and isinstance(breakdown_filter.breakdown, list)
+        ):
+            limit = max(limit, len(breakdown_filter.breakdown))
+
+        return limit
 
     def _inner_breakdown_subquery(self, query: ast.SelectQuery, breakdown: Breakdown) -> ast.SelectQuery:
         assert self.query.breakdownFilter is not None  # type checking
@@ -686,31 +696,28 @@ class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
                         },
                     ),
                     parse_expr(
-                        "arrayMap((max_num, min_num) -> max_num - min_num, arrayZip(max_nums, min_nums)) as diff"
-                    ),
-                    ast.Alias(
-                        alias="bins",
-                        expr=ast.Array(
-                            exprs=[
-                                ast.Constant(value=alias["histogram_bin_count"])
-                                for alias in breakdown_aliases_with_histograms
-                            ]
-                        ),
-                    ),
-                    parse_expr(
                         """
                             arrayMap(
-                                i -> arrayMap(x -> [
-                                        ((diff[i] / bins[i]) * x) + min_nums[i],
-                                        ((diff[i] / bins[i]) * (x + 1)) + min_nums[i] + if(x + 1 = bins[i], 0.01, 0)
+                                (max_num, min_num, bin_count) -> arrayMap(x -> [
+                                        (((max_num - min_num) / bin_count) * x) + min_num,
+                                        (((max_num - min_num) / bin_count) * (x + 1))
+                                            + min_num
+                                            + if(x + 1 = bin_count, 0.01, 0)
                                     ],
-                                    range(bins[i])
+                                    range(bin_count)
                                 ),
-                                range(1, {breakdown_count})
+                                max_nums,
+                                min_nums,
+                                {bin_counts}
                             ) as buckets
                         """,
                         placeholders={
-                            "breakdown_count": ast.Constant(value=len(breakdown_aliases_with_histograms) + 1),
+                            "bin_counts": ast.Array(
+                                exprs=[
+                                    ast.Constant(value=alias["histogram_bin_count"])
+                                    for alias in breakdown_aliases_with_histograms
+                                ]
+                            ),
                         },
                     ),
                 ]
@@ -796,13 +803,6 @@ class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
     ) -> ast.Expr:
         series = self.series
         filters: list[ast.Expr] = []
-        is_data_warehouse_event_series = (
-            isinstance(series, DataWarehouseNode)
-            and self.modifiers.dataWarehouseEventsModifiers is not None
-            and any(
-                series.table_name == modifier.table_name for modifier in self.modifiers.dataWarehouseEventsModifiers
-            )
-        )
 
         # Dates
         if not self._aggregation_operation.requires_query_orchestration():
@@ -815,6 +815,10 @@ class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
                     parse_expr("timestamp <= {date_to}", placeholders=date_range_placeholders),
                 ]
             )
+
+        day_of_week_filter = self.query_date_range.day_of_week_filter_expr(ast.Field(chain=["timestamp"]))
+        if day_of_week_filter is not None:
+            filters.append(day_of_week_filter)
 
         # Filter by event or action name
         if not self._aggregation_operation.is_first_time_ever_math():
@@ -829,39 +833,15 @@ class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
             and len(self.team.test_account_filters) > 0
         ):
             for property in self.team.test_account_filters:
-                if is_data_warehouse_event_series:
-                    property_clone = property.copy()
-                    if property_clone["type"] in ("event", "person"):
-                        if property_clone["type"] == "event":
-                            property_clone["key"] = f"events.properties.{property_clone['key']}"
-                        elif property_clone["type"] == "person":
-                            property_clone["key"] = f"events.person.properties.{property_clone['key']}"
-                        property_clone["type"] = "data_warehouse"
-                    expr = property_to_expr(property_clone, self.team)
-                    if (
-                        property_clone["type"] in ("group", "element")
-                        and isinstance(expr, ast.CompareOperation)
-                        and isinstance(expr.left, ast.Field)
-                    ):
-                        expr.left.chain = ["events", *expr.left.chain]
-                    filters.append(expr)
-                else:
-                    filters.append(property_to_expr(property, self.team))
+                filters.append(property_to_expr(property, self.team))
 
         # Properties
         if self.query.properties is not None and self.query.properties != []:
-            if is_data_warehouse_event_series:
-                data_warehouse_properties = [
-                    p for p in self.query.properties if isinstance(p, DataWarehousePropertyFilter)
-                ]
-                if data_warehouse_properties:
-                    filters.append(property_to_expr(data_warehouse_properties, self.team))
-            else:
-                filters.append(property_to_expr(self.query.properties, self.team))
+            filters.append(self._properties_to_expr(self.query.properties))
 
         # Series Filters
         if series.properties is not None and series.properties != []:
-            filters.append(property_to_expr(series.properties, self.team))
+            filters.append(self._properties_to_expr(series.properties))
 
         # Breakdown
         if not ignore_breakdowns and breakdown is not None:
@@ -884,6 +864,16 @@ class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
             return ast.Constant(value=True)
 
         return ast.And(exprs=filters)
+
+    def _properties_to_expr(self, properties: Any) -> ast.Expr:
+        # Web analytics passes its drill-down filter at both query and series level.
+        return first_pageview_aware_properties_to_expr(
+            properties,
+            team=self.team,
+            modifiers=self.modifiers,
+            date_range=self.query_date_range,
+            timings=self.timings,
+        )
 
     def _event_or_action_where_expr(self) -> ast.Expr | None:
         if isinstance(self.series, EventsNode):
@@ -1038,7 +1028,7 @@ class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
         )
 
     def _team_flag_fewer_array_ops(self) -> bool:
-        return hanzo_insights.feature_enabled(
+        return feature_enabled_or_false(
             "trends-breakdown-fewer-array-ops",
             str(self.team.uuid),
             groups={

@@ -1,6 +1,6 @@
 ## How to generate source code files from grammar
 
-Grammar is located inside `InsightsQLLexer.g4` and `InsightsQLParser.g4` files.
+The grammar lives in `InsightsQLParser.g4` plus a split lexer: `InsightsQLLexer.common.g4` (shared rules) is concatenated with the target-specific `InsightsQLLexer.cpp.g4` at build time to form the lexer fed to ANTLR. The C++ parser is the only ANTLR target — the Rust parser is hand-written and does not consume these files (it mirrors them by hand).
 
 To generate source code you need to install locally the `antlr` binary. Run this on macOS:
 
@@ -8,7 +8,7 @@ To generate source code you need to install locally the `antlr` binary. Run this
 brew install antlr
 ```
 
-In case this installs a newer version than 4.13.2, update [ci-custom-script.yml](https://github.com/Hanzo Insights/insights/blob/main/.github/workflows/ci-custom-script.yml) to reflect the changes.
+In case this installs a newer version than 4.13.2, update [ci-script.yml](https://github.com/Insights/insights/blob/master/.github/workflows/ci-script.yml) to reflect the changes.
 
 Run this if you're using bash on ubuntu:
 
@@ -27,21 +27,15 @@ export CLASSPATH=".:$PWD/antlr.jar:$CLASSPATH"
 export PATH="$PWD:$PATH"
 ```
 
-Then either run
+Then run
 
 ```bash
 pnpm run grammar:build
 ```
 
-Or mess around with:
+This regenerates the C++ parser into `common/insightsql_parser/`. See the `grammar:build:cpp` script in the repo `package.json` for the exact ANTLR invocation it wraps.
 
-```bash
-cd insights/insightsql/grammar
-antlr -Dlanguage=Python3 InsightsQLLexer.g4
-antlr -visitor -Dlanguage=Python3 InsightsQLParser.g4
-```
-
-Original Datastore ANTLR grammar from: https://github.com/hanzoai/datastore/blob/main/utils/antlr/DatastoreParser.g4
+Original Datastore ANTLR grammar from: https://github.com/Datastore/Datastore/blob/master/utils/antlr/DatastoreParser.g4
 
 Changes with Datastore's grammar:
 

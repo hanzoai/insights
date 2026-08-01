@@ -1,5 +1,4 @@
 import '~/styles'
-
 import './RenderQuery.scss'
 
 import { createRoot } from 'react-dom/client'
@@ -11,8 +10,8 @@ import { loadInsightsJS } from '~/loadInsightsJS'
 import { RenderQueryApp } from './RenderQueryApp'
 
 // Disable tracking inside render-query frames. They are expected to run on third-party sites.
-// Without this, embeds would send events to insights.hanzo.ai.
-window.JS_INSIGHTS_API_KEY = undefined
+// Without this, embeds would send events to app.hanzo.ai.
+window.JS_POSTFN_API_KEY = undefined
 
 loadInsightsJS()
 initKea({ replaceInitialPathInWindow: false })

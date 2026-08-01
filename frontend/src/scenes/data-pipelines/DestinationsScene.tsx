@@ -4,10 +4,10 @@ import { IconPlusSmall } from '@hanzo/icons'
 import { Button, Tabs } from '@hanzo/elements'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
-import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
-import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
-import { Scene, SceneExport } from 'scenes/sceneTypes'
+import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
+import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { sceneConfigurations } from 'scenes/scenes'
+import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -29,7 +29,7 @@ export function DestinationsScene(): JSX.Element {
     const { setActiveTab } = useActions(destinationsSceneLogic)
 
     const action = (
-        <AppShortcut
+        <Shortcut
             name="NewPipelineDestination"
             keybind={[keyBinds.new]}
             intent="New destination"
@@ -46,7 +46,7 @@ export function DestinationsScene(): JSX.Element {
             >
                 New destination
             </Button>
-        </AppShortcut>
+        </Shortcut>
     )
 
     const tabs = [
@@ -64,7 +64,7 @@ export function DestinationsScene(): JSX.Element {
         {
             key: 'history',
             label: 'History',
-            content: <ActivityLog scope={[ActivityScope.INSIGHTS_FUNCTION, ActivityScope.BATCH_EXPORT]} />,
+            content: <ActivityLog scope={[ActivityScope.FN_FUNCTION, ActivityScope.BATCH_EXPORT]} />,
         },
     ]
 

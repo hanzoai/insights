@@ -11,6 +11,9 @@ import MaxTool from 'scenes/max/MaxTool'
 import { iconForType } from '~/layout/panel-layout/ProjectTree/defaultTree'
 import { AvailableFeature, CyclotronJobInputSchemaType } from '~/types'
 
+import { useAttachedContext } from 'products/insights_ai/frontend/api/logics'
+
+import { redactSecretInsightsFunctionInputs, truncateInsightsFunctionContext } from '../../script-function-utils'
 import { insightsFunctionConfigurationLogic } from '../insightsFunctionConfigurationLogic'
 
 export function InsightsFunctionInputs(): JSX.Element {
@@ -18,6 +21,7 @@ export function InsightsFunctionInputs(): JSX.Element {
         showSource,
         configuration,
         configurationErrors,
+        inputFormWarnings,
         sampleGlobalsWithInputs,
         usesGroups,
         hasGroupsAddon,
@@ -37,6 +41,24 @@ export function InsightsFunctionInputs(): JSX.Element {
         reportAIInsightsFunctionInputsPromptOpen,
     } = useActions(insightsFunctionConfigurationLogic)
 
+    useAttachedContext([
+        {
+            type: 'insights_function_inputs_schema',
+            value: truncateInsightsFunctionContext(
+                JSON.stringify({
+                    inputs_schema: configuration.inputs_schema ?? [],
+                    // Secret values never leave the scene: a freshly typed secret is cleartext in form state.
+                    inputs: redactSecretInsightsFunctionInputs(
+                        configuration.inputs ?? {},
+                        configuration.inputs_schema ?? []
+                    ),
+                    hog_code: configuration.script ?? '',
+                })
+            ),
+            label: 'Current inputs schema',
+        },
+    ])
+
     const content = (
         <div className={clsx('p-3 rounded border deprecated-space-y-2 bg-surface-primary')}>
             <div className="deprecated-space-y-2">
@@ -52,6 +74,7 @@ export function InsightsFunctionInputs(): JSX.Element {
 
                 <CyclotronJobInputs
                     errors={(configurationErrors.inputs ?? {}) as Record<string, string>}
+                    warnings={inputFormWarnings}
                     configuration={{
                         inputs_schema: newInputs ?? configuration.inputs_schema ?? [],
                         inputs: configuration.inputs ?? {},
@@ -135,7 +158,7 @@ export function InsightsFunctionInputs(): JSX.Element {
             identifier="create_insights_function_inputs"
             context={{
                 current_inputs_schema: configuration.inputs_schema ?? [],
-                iql_code: configuration.fn ?? '',
+                hog_code: configuration.script ?? '',
             }}
             contextDescription={{
                 text: 'Current inputs schema',

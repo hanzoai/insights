@@ -6,6 +6,3 @@ export * from './stl/stl'
 export * from './stl/print'
 export * from './types'
 export * from './utils'
-
-// Rebranded aliases
-export { convertHogToJS as convertScriptToJS } from './utils'

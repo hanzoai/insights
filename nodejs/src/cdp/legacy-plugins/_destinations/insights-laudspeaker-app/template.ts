@@ -13,7 +13,7 @@ export const laudspeakerPlugin: LegacyDestinationPlugin = {
         id: 'plugin-insights-laudspeaker-app',
         name: 'Laudspeaker',
         description: 'Send event data to Laudspeaker',
-        icon_url: 'https://raw.githubusercontent.com/laudspeaker/laudspeaker-insights-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/laudspeaker/laudspeaker-insights-plugin/master/logo.png',
         category: [],
         code_language: 'javascript',
         code: 'return event',

@@ -1,7 +1,9 @@
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
+from django.core import exceptions as django_exceptions
 from django.db import transaction
 from django.db.models import Q, QuerySet
+from django.utils import timezone
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import exceptions, pagination, serializers, viewsets
@@ -12,9 +14,38 @@ from insights.api.forbid_destroy_model import ForbidDestroyModel
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
 from insights.api.utils import ClassicBehaviorBooleanFieldSerializer, action
+from insights.models import User
+from insights.models.activity_logging.activity_log import Change, Detail, log_activity
+from insights.models.activity_logging.model_activity import get_was_impersonated
 from insights.models.comment import Comment
-from insights.models.comment.utils import produce_discussion_mention_events
+from insights.models.comment.comment import activity_log_scope_for
+from insights.models.comment.utils import produce_discussion_mention_events, send_mention_notifications
 from insights.tasks.email import send_discussions_mentioned
+
+if TYPE_CHECKING:
+    from insights.rbac.user_access_control import UserAccessControl
+
+
+def _require_ticket_editor_access(
+    *, team_id: int, item_id: str | None, user_access_control: "UserAccessControl"
+) -> None:
+    """Comments with scope=conversations_ticket are ticket messages (see TicketViewSet.reply) —
+    enforce the same object-level RBAC here, since the generic comments API is the write path the
+    Support UI actually uses and isn't gated by TicketViewSet's own access control."""
+    if not item_id:
+        return
+
+    from products.conversations.backend.models.ticket import (  # noqa: PLC0415 — keeps the generic comments API decoupled from the conversations product, only imported for ticket-scoped writes
+        Ticket,
+    )
+
+    try:
+        ticket = Ticket.objects.get(team_id=team_id, id=item_id)
+    except (Ticket.DoesNotExist, ValueError, django_exceptions.ValidationError):
+        raise exceptions.ValidationError({"item_id": "Ticket not found"})
+
+    if not user_access_control.check_access_level_for_object(ticket, required_level="editor"):
+        raise exceptions.PermissionDenied("You do not have access to this ticket")
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -44,11 +75,40 @@ class CommentSerializer(serializers.ModelSerializer):
     deleted = ClassicBehaviorBooleanFieldSerializer()
     mentions = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
     slug = serializers.CharField(write_only=True, required=False)
+    is_task = serializers.BooleanField(
+        default=False,
+        required=False,
+        help_text=(
+            "Whether this comment is an actionable task that can be marked complete. "
+            "Tasks render with a checkbox in the UI and can be filtered as a separate kind. "
+            "Cannot be set on replies (source_comment) or emoji reactions. Immutable after creation."
+        ),
+    )
+    completed_by = UserBasicSerializer(
+        read_only=True,
+        allow_null=True,
+        help_text="The user who marked this task complete. Null for open tasks and non-task comments.",
+    )
 
     class Meta:
         model = Comment
         exclude = ["team"]
-        read_only_fields = ["id", "created_by", "version"]
+        read_only_fields = ["id", "created_by", "version", "completed_at", "completed_by"]
+        extra_kwargs = {
+            "completed_at": {
+                "help_text": (
+                    "ISO timestamp when the task was marked complete. Only meaningful when is_task is true. "
+                    "Read-only — toggled via the /complete and /reopen actions, not via PATCH."
+                ),
+            },
+        }
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Coerce legacy null is_task rows to False so the contract stays non-null.
+        if data.get("is_task") is None:
+            data["is_task"] = False
+        return data
 
     def has_empty_paragraph(self, doc):
         for node in doc.get("content", []):
@@ -65,6 +125,27 @@ class CommentSerializer(serializers.ModelSerializer):
         if instance:
             if instance.created_by != request.user:
                 raise exceptions.PermissionDenied("You can only modify your own comments")
+            if "is_task" in data and bool(data["is_task"]) != bool(instance.is_task):
+                raise exceptions.ValidationError({"is_task": "Cannot change task state after creation."})
+
+        # Check both the comment's persisted (scope, item_id) and the submitted target — so losing
+        # ticket editor access after creation, and re-scoping a comment into or out of a ticket,
+        # are all caught, not just fresh ticket-message creation.
+        scopes_and_items = {
+            (
+                data.get("scope", instance.scope if instance else None),
+                data.get("item_id", instance.item_id if instance else None),
+            )
+        }
+        if instance:
+            scopes_and_items.add((instance.scope, instance.item_id))
+        for scope, item_id in scopes_and_items:
+            if scope == "conversations_ticket":
+                _require_ticket_editor_access(
+                    team_id=self.context["get_team"]().id,
+                    item_id=item_id,
+                    user_access_control=self.context["get_user_access_control"](),
+                )
 
         # Skip content validation when soft-deleting a comment
         is_deleting = data.get("deleted") is True
@@ -77,8 +158,25 @@ class CommentSerializer(serializers.ModelSerializer):
 
         if not instance:
             data["created_by"] = request.user
+            if data.get("is_task"):
+                if data.get("source_comment"):
+                    raise exceptions.ValidationError({"is_task": "Replies cannot be tasks."})
+                item_context = data.get("item_context") or {}
+                if item_context.get("is_emoji"):
+                    raise exceptions.ValidationError({"is_task": "Emoji reactions cannot be tasks."})
 
         return data
+
+    def _filter_mentions_to_organization(self, mention_ids: list[int], organization_id: str) -> list[int]:
+        if not mention_ids:
+            return []
+        valid_ids = set(
+            User.objects.filter(
+                id__in=mention_ids,
+                organization_membership__organization_id=organization_id,
+            ).values_list("id", flat=True)
+        )
+        return [uid for uid in mention_ids if uid in valid_ids]
 
     def create(self, validated_data: Any) -> Any:
         mentions: list[int] = validated_data.pop("mentions", [])
@@ -89,11 +187,14 @@ class CommentSerializer(serializers.ModelSerializer):
         slug: str = validated_data.pop("slug", "")
         validated_data["team_id"] = self.context["team_id"]
 
+        mentions = self._filter_mentions_to_organization(mentions, self.context["get_organization"]().id)
+
         comment = super().create(validated_data)
 
         if mentions:
             send_discussions_mentioned.delay(comment.id, mentions, slug)
             produce_discussion_mention_events(comment, mentions, slug)
+            send_mention_notifications(comment, mentions, slug)
 
         return comment
 
@@ -105,6 +206,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
         slug: str = validated_data.pop("slug", "")
         request = self.context["request"]
+
+        mentions = self._filter_mentions_to_organization(mentions, self.context["get_organization"]().id)
 
         with transaction.atomic():
             locked_instance = Comment.objects.select_for_update().get(pk=instance.pk)
@@ -121,6 +224,7 @@ class CommentSerializer(serializers.ModelSerializer):
         if mentions:
             send_discussions_mentioned.delay(updated_instance.id, mentions, slug)
             produce_discussion_mention_events(updated_instance, mentions, slug)
+            send_mention_notifications(updated_instance, mentions, slug)
 
         return updated_instance
 
@@ -130,12 +234,77 @@ class CommentPagination(pagination.CursorPagination):
     page_size = 100
 
 
-@extend_schema(tags=["core"])
+class CommentListQueryParamsSerializer(serializers.Serializer):
+    scope = serializers.CharField(
+        required=False,
+        help_text="Filter by resource type (e.g. Dashboard, FeatureFlag, Insight, Replay).",
+    )
+    item_id = serializers.CharField(required=False, help_text="Filter by the ID of the resource being commented on.")
+    search = serializers.CharField(required=False, help_text="Full-text search within comment content.")
+    source_comment = serializers.CharField(required=False, help_text="Filter replies to a specific parent comment.")
+    kind = serializers.ChoiceField(
+        required=False,
+        choices=["any", "comment", "task"],
+        help_text=(
+            "Filter by comment kind. 'task' returns only items intentionally created as actionable. "
+            "'comment' excludes tasks. Defaults to 'any' (no filter)."
+        ),
+    )
+    completed = serializers.ChoiceField(
+        required=False,
+        choices=["any", "open", "completed"],
+        help_text=(
+            "When kind=task, restrict to open (incomplete) or completed tasks. "
+            "Ignored when kind is not 'task'. Defaults to 'any' (no filter)."
+        ),
+    )
+
+
+@extend_schema(extensions={"x-product": "platform_features"})
 class CommentViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     pagination_class = CommentPagination
-    scope_object = "INTERNAL"
+    scope_object = "comment"
+    scope_object_read_actions = ["list", "retrieve", "thread", "count"]
+
+    @extend_schema(parameters=[CommentListQueryParamsSerializer])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def get_serializer_context(self) -> dict[str, Any]:
+        context = super().get_serializer_context()
+        context["get_user_access_control"] = lambda: self.user_access_control
+        return context
+
+    def _filter_ticket_scoped_queryset(self, queryset: QuerySet, item_id: str | None) -> QuerySet:
+        """conversations_ticket comments are ticket messages — restrict them to tickets the
+        caller has viewer access to, mirroring TicketViewSet's own object-level filtering."""
+        from products.conversations.backend.models.ticket import (  # noqa: PLC0415 — keeps the generic comments API decoupled from the conversations product, only imported for ticket-scoped reads
+            Ticket,
+        )
+
+        if item_id:
+            try:
+                ticket = Ticket.objects.get(team_id=self.team_id, id=item_id)
+            except (Ticket.DoesNotExist, ValueError, django_exceptions.ValidationError):
+                return queryset.none()
+            if not self.user_access_control.check_access_level_for_object(ticket, required_level="viewer"):
+                return queryset.none()
+            return queryset
+
+        # filter_queryset_by_access_level trusts the view to have enforced resource-level access
+        # already, and this view is authorized as `comment` — so a caller denied the ticket resource
+        # would otherwise get the unfiltered ticket queryset back here.
+        if not self.user_access_control.check_access_level_for_resource(
+            "ticket", "viewer"
+        ) and not self.user_access_control.has_any_specific_access_for_resource("ticket", "viewer"):
+            return queryset.none()
+
+        visible_ticket_ids = self.user_access_control.filter_queryset_by_access_level(
+            Ticket.objects.filter(team_id=self.team_id)
+        ).values_list("id", flat=True)
+        return queryset.filter(item_id__in=[str(ticket_id) for ticket_id in visible_ticket_ids])
 
     def safely_get_queryset(self, queryset: QuerySet) -> QuerySet:
         params = self.request.GET.dict()
@@ -146,8 +315,15 @@ class CommentViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, viewsets.ModelV
         if self.action != "partial_update" and params.get("deleted", "false") == "false":
             queryset = queryset.filter(deleted=False)
 
-        if params.get("scope"):
-            queryset = queryset.filter(scope=params.get("scope"))
+        scope = params.get("scope")
+        if scope:
+            queryset = queryset.filter(scope=scope)
+            if scope == "conversations_ticket":
+                queryset = self._filter_ticket_scoped_queryset(queryset, params.get("item_id"))
+        else:
+            # Exclude conversations_ticket comments by default - they use rich content
+            # from SupportEditor and should only be viewed in the conversations product
+            queryset = queryset.exclude(scope="conversations_ticket")
 
         if params.get("item_id"):
             queryset = queryset.filter(item_id=params.get("item_id"))
@@ -159,6 +335,20 @@ class CommentViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, viewsets.ModelV
             queryset = queryset.filter(
                 Q(item_context__isnull=True) | ~Q(item_context__has_key="is_emoji") | Q(item_context__is_emoji=False)
             )
+
+        kind = params.get("kind")
+        if kind == "task":
+            queryset = queryset.filter(is_task=True)
+        elif kind == "comment":
+            # Pre-migration rows have is_task=NULL; count them as comments.
+            queryset = queryset.filter(Q(is_task=False) | Q(is_task__isnull=True))
+
+        if kind == "task":
+            completed = params.get("completed")
+            if completed == "open":
+                queryset = queryset.filter(completed_at__isnull=True)
+            elif completed == "completed":
+                queryset = queryset.filter(completed_at__isnull=False)
 
         source_comment = params.get("source_comment")
         if self.action == "thread":
@@ -179,3 +369,78 @@ class CommentViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, viewsets.ModelV
         count = queryset.count()
 
         return Response({"count": count})
+
+    @extend_schema(
+        request=None,
+        responses=CommentSerializer,
+        description="Mark a task-comment as complete. Sets completed_at and completed_by. "
+        "400 if the comment is not a task or is already complete.",
+    )
+    @action(methods=["POST"], detail=True)
+    def complete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        comment = self.get_object()
+        if not comment.is_task:
+            raise exceptions.ValidationError("Only tasks can be marked complete")
+        if comment.scope == "conversations_ticket":
+            _require_ticket_editor_access(
+                team_id=self.team_id, item_id=comment.item_id, user_access_control=self.user_access_control
+            )
+        with transaction.atomic():
+            comment = Comment.objects.select_for_update().get(pk=comment.pk)
+            if comment.completed_at is not None:
+                raise exceptions.ValidationError("Task is already complete")
+            comment.completed_at = timezone.now()
+            comment.completed_by = cast(User, request.user)
+            comment.save(update_fields=["completed_at", "completed_by"])
+            self._log_task_state_change(comment, request, completed=True)
+        serializer = CommentSerializer(comment, context=self.get_serializer_context())
+        return Response(serializer.data)
+
+    @extend_schema(
+        request=None,
+        responses=CommentSerializer,
+        description="Reopen a completed task-comment. Clears completed_at and completed_by. "
+        "400 if the comment is not a task or is already open.",
+    )
+    @action(methods=["POST"], detail=True)
+    def reopen(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        comment = self.get_object()
+        if not comment.is_task:
+            raise exceptions.ValidationError("Only tasks can be reopened")
+        if comment.scope == "conversations_ticket":
+            _require_ticket_editor_access(
+                team_id=self.team_id, item_id=comment.item_id, user_access_control=self.user_access_control
+            )
+        with transaction.atomic():
+            comment = Comment.objects.select_for_update().get(pk=comment.pk)
+            if comment.completed_at is None:
+                raise exceptions.ValidationError("Task is already open")
+            comment.completed_at = None
+            comment.completed_by = None
+            comment.save(update_fields=["completed_at", "completed_by"])
+            self._log_task_state_change(comment, request, completed=False)
+        serializer = CommentSerializer(comment, context=self.get_serializer_context())
+        return Response(serializer.data)
+
+    @staticmethod
+    def _log_task_state_change(comment: Comment, request: Request, *, completed: bool) -> None:
+        log_activity(
+            organization_id=None,
+            team_id=comment.team_id,
+            user=cast(User, request.user),
+            was_impersonated=get_was_impersonated(),
+            item_id=cast(str, comment.source_comment_id) or comment.item_id,
+            scope=activity_log_scope_for(comment),
+            activity="completed task" if completed else "reopened task",
+            detail=Detail(
+                changes=[
+                    Change(
+                        type="Comment",
+                        field="completed_at",
+                        action="changed",
+                        before=None if completed else "completed",
+                        after="completed" if completed else None,
+                    )
+                ],
+            ),
+        )

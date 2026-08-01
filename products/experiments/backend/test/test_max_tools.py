@@ -1,5 +1,5 @@
 from insights.test.base import APIBaseTest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 from insights.schema import (
     MaxExperimentMetricResult,
@@ -7,10 +7,13 @@ from insights.schema import (
     MaxExperimentVariantResultFrequentist,
 )
 
-from insights.models import Experiment, FeatureFlag
+from insights.event_usage import EventSource
 
 from products.experiments.backend.max_tools import CreateExperimentTool, ExperimentSummaryTool
+from products.experiments.backend.models.experiment import Experiment
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
+from ee.hogai.utils.types import AssistantState
 
 
 class TestCreateExperimentTool(APIBaseTest):
@@ -138,6 +141,41 @@ class TestCreateExperimentTool(APIBaseTest):
         experiment = await Experiment.objects.select_related("feature_flag").aget(name="New Experiment", team=self.team)
         assert experiment.feature_flag.key == "existing-flag"
 
+    @patch("django.db.transaction.on_commit", side_effect=lambda func: func())
+    @patch("products.experiments.backend.experiment_service.report_user_action")
+    async def test_create_experiment_reports_insights_ai_source(self, mock_report_user_action, _mock_on_commit):
+        await self._create_multivariate_flag(key="tracked-experiment-flag")
+        tool = self._create_tool()
+
+        result, _artifact = await tool._arun_impl(
+            name="Tracked Experiment",
+            feature_flag_key="tracked-experiment-flag",
+        )
+
+        assert "Successfully created" in result
+
+        mock_report_user_action.assert_called_once()
+        assert mock_report_user_action.call_args.args[0] == self.user
+        assert mock_report_user_action.call_args.args[1] == "experiment created"
+        assert mock_report_user_action.call_args.args[2] == {
+            "experiment_id": ANY,
+            "experiment_name": "Tracked Experiment",
+            "feature_flag_key": "tracked-experiment-flag",
+            "type": "product",
+            "status": "draft",
+            "metrics_count": 0,
+            "secondary_metrics_count": 0,
+            "saved_metrics_count": 0,
+            "has_description": False,
+            "has_conclusion_comment": False,
+            "variant_count": 2,
+            "created_at": ANY,
+            "creation_mode": "new",
+            "source": EventSource.POSTFN_AI,
+        }
+        assert mock_report_user_action.call_args.kwargs["team"] == self.team
+        assert mock_report_user_action.call_args.kwargs["request"] is None
+
     async def test_create_experiment_flag_already_used(self):
         flag = await self._create_multivariate_flag(key="used-flag")
         await Experiment.objects.acreate(
@@ -171,12 +209,14 @@ class TestCreateExperimentTool(APIBaseTest):
         assert "Successfully created" in result
 
         experiment = await Experiment.objects.aget(name="Parameter Test", team=self.team)
-        assert experiment.parameters is not None
-        assert experiment.parameters["feature_flag_variants"] == [
+        # Variants live on the flag (the source of truth), not mirrored into `parameters`.
+        flag = await FeatureFlag.objects.aget(key="param-test", team=self.team)
+        assert flag.variants == [
             {"key": "control", "name": "Control", "rollout_percentage": 50},
             {"key": "test", "name": "Test", "rollout_percentage": 50},
         ]
-        assert experiment.parameters["minimum_detectable_effect"] == 30
+        assert "minimum_detectable_effect" not in (experiment.parameters or {})
+        assert experiment.running_time_calculation == {"minimum_detectable_effect": 30}
         assert experiment.metrics == []
         assert experiment.metrics_secondary == []
 
@@ -210,7 +250,7 @@ class TestCreateExperimentTool(APIBaseTest):
         )
 
         assert "Failed to create" in result
-        assert "must have multivariate variants" in result
+        assert "at least 2 variants" in result
         assert artifact is not None
         assert artifact.get("error") is not None
 
@@ -254,15 +294,19 @@ class TestCreateExperimentTool(APIBaseTest):
         assert "Successfully created" in result
 
         experiment = await Experiment.objects.aget(name="Custom Variants Test", team=self.team)
-        assert experiment.parameters is not None
-        assert len(experiment.parameters["feature_flag_variants"]) == 3
-        assert experiment.parameters["feature_flag_variants"][0]["key"] == "control"
-        assert experiment.parameters["feature_flag_variants"][0]["name"] == "Control"
-        assert experiment.parameters["feature_flag_variants"][0]["rollout_percentage"] == 33
-        assert experiment.parameters["feature_flag_variants"][1]["key"] == "variant_b"
-        assert experiment.parameters["feature_flag_variants"][2]["key"] == "variant_c"
+        # Variants live on the flag (the source of truth), not mirrored into `parameters`.
+        flag = await FeatureFlag.objects.aget(key="custom-variants-flag", team=self.team)
+        assert experiment.feature_flag_id == flag.id
+        variants = flag.variants
+        assert len(variants) == 3
+        assert variants[0]["key"] == "control"
+        assert variants[0]["name"] == "Control"
+        assert variants[0]["rollout_percentage"] == 33
+        assert variants[1]["key"] == "variant_b"
+        assert variants[2]["key"] == "variant_c"
 
     async def test_create_experiment_flag_without_control_variant(self):
+        # No 'control' variant is required; the baseline defaults to the first variant downstream.
         await self._create_multivariate_flag(
             key="no-control-flag",
             name="No Control Flag",
@@ -279,11 +323,14 @@ class TestCreateExperimentTool(APIBaseTest):
             feature_flag_key="no-control-flag",
         )
 
-        assert "Failed to create" in result
-        assert "must have 'control' as the first variant" in result
-        assert "Found 'baseline' instead" in result
-        assert artifact is not None
-        assert artifact.get("error") is not None
+        assert "Successfully created" in result
+
+        experiment = await Experiment.objects.aget(name="Test Experiment", team=self.team)
+        flag = await FeatureFlag.objects.aget(key="no-control-flag", team=self.team)
+        assert experiment.feature_flag_id == flag.id
+        assert [v["key"] for v in flag.variants] == ["baseline", "test"]
+        assert experiment.stats_config is not None
+        assert experiment.stats_config["baseline_variant_key"] == "baseline"
 
 
 class TestExperimentSummaryTool(APIBaseTest):
@@ -575,9 +622,7 @@ class TestExperimentSummaryTool(APIBaseTest):
         mock_context.stats_method = "bayesian"
         mock_context.variants = ["control", "test"]
 
-        with patch(
-            "products.experiments.backend.experiment_summary_data_service.ExperimentSummaryDataService"
-        ) as mock_service_class:
+        with patch("products.experiments.backend.max_tools.ExperimentSummaryDataService") as mock_service_class:
             mock_service = mock_service_class.return_value
             mock_service.fetch_experiment_data = AsyncMock(return_value=(mock_context, None, False))
 
@@ -590,9 +635,7 @@ class TestExperimentSummaryTool(APIBaseTest):
     async def test_fetch_and_format_handles_nonexistent_experiment(self):
         tool = self._create_tool({})
 
-        with patch(
-            "products.experiments.backend.experiment_summary_data_service.ExperimentSummaryDataService"
-        ) as mock_service_class:
+        with patch("products.experiments.backend.max_tools.ExperimentSummaryDataService") as mock_service_class:
             mock_service = mock_service_class.return_value
             mock_service.fetch_experiment_data = AsyncMock(
                 side_effect=ValueError("Experiment 99999 not found or access denied")

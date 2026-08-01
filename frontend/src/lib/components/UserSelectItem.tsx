@@ -1,6 +1,6 @@
 import { InputSelectOption } from 'lib/elements/InputSelect'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
-import { fullName } from 'lib/utils'
+import { fullName } from 'lib/utils/strings'
 
 import { UserBasicType, UserType } from '~/types'
 
@@ -19,7 +19,7 @@ export function UserSelectItem({ user }: UserSelectItemProps): JSX.Element {
     )
 }
 
-export function usersSelectOptions(
+export function usersLemonSelectOptions(
     users: (UserBasicType | UserType)[],
     key: 'email' | 'uuid' = 'email'
 ): InputSelectOption[] {

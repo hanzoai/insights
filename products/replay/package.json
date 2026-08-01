@@ -1,12 +1,15 @@
 {
     "name": "@hanzo/products-replay",
+    "scripts": {
+        "backend:test": "echo 'No backend tests'"
+    },
     "dependencies": {
         "kea": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/icons": "*",
+        "@hanzo/icons": "catalog:",
         "@types/react": "*",
         "clsx": "*",
         "fuse.js": "*",

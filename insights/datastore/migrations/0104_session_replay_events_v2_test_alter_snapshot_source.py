@@ -1,4 +1,4 @@
-from datastore_orm import Operation
+from infi.datastore_orm import Operation
 
 operations: list[Operation] = [
     # this was used for testing the migration to session replay v2 ingestion

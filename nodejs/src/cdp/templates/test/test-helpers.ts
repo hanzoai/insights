@@ -3,15 +3,19 @@ import { merge as mergeDeep } from 'lodash'
 import { Settings } from 'luxon'
 
 import { getTransformationFunctions } from '~/cdp/script-transformations/transformation-functions'
+import { CyclotronInputType } from '~/cdp/schema/cyclotron'
 import { formatLiquidInput } from '~/cdp/services/script-inputs.service'
 import { NativeDestinationExecutorService } from '~/cdp/services/native-destination-executor.service'
 import { isNativeInsightsFunction } from '~/cdp/utils'
-import { defaultConfig } from '~/config/config'
-import { CyclotronInputType } from '~/schema/cyclotron'
-import { GeoIPService, GeoIp } from '~/utils/geoip'
+import { defaultConfig } from '~/common/config/config'
+import { GeoIPService, GeoIp } from '~/common/utils/geoip'
 
-import { Hub } from '../../../types'
-import { ScriptExecutorService } from '../../services/script-executor.service'
+import { PluginsServerConfig } from '../../../types'
+import { HogExecutorService } from '../../services/script-executor.service'
+import { HogInputsService } from '../../services/script-inputs.service'
+import { EmailService } from '../../services/messaging/email.service'
+import { EmailTrackingCodeSigner } from '../../services/messaging/helpers/tracking-code'
+import { RecipientTokensService } from '../../services/messaging/recipient-tokens.service'
 import {
     CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
@@ -25,10 +29,10 @@ import {
     NativeTemplate,
 } from '../../types'
 import { cloneInvocation, createInvocation } from '../../utils/invocation-utils'
-import { compileFn } from '../compiler'
+import { compileHog } from '../compiler'
 
 /**
- * Sets templating value of 'fn' or 'liquid' on script inputs based on the template used.
+ * Sets templating value of 'script' or 'liquid' on script inputs based on the template used.
  */
 export function propagateTemplatingFromSchema(template: any, input: any): any {
     const templatedInputs = { ...input }
@@ -41,7 +45,7 @@ export function propagateTemplatingFromSchema(template: any, input: any): any {
                     if (!templatedInputs[field.key] || typeof templatedInputs[field.key] !== 'object') {
                         templatedInputs[field.key] = { value: templatedInputs[field.key] }
                     }
-                    templatedInputs[field.key]['templating'] = 'fn'
+                    templatedInputs[field.key]['templating'] = 'script'
                 }
                 // If False, do not set templating field
             } else {
@@ -66,7 +70,7 @@ export type DeepPartialInsightsFunctionInvocationGlobals = {
 const compileObject = async (
     obj: any,
     globals?: any,
-    templating_engine: boolean | 'fn' | 'liquid' = 'fn'
+    templating_engine: boolean | 'script' | 'liquid' = 'script'
 ): Promise<any> => {
     if (Array.isArray(obj)) {
         return Promise.all(obj.map((item) => compileObject(item, globals, templating_engine)))
@@ -80,9 +84,9 @@ const compileObject = async (
         // If the string looks like a Liquid template, render it first
         if (templating_engine === 'liquid') {
             const rendered = formatLiquidInput(obj, globals || createGlobals())
-            return await compileFn(`return f'${rendered}'`)
+            return await compileHog(`return f'${rendered}'`)
         }
-        return await compileFn(`return f'${obj}'`)
+        return await compileHog(`return f'${obj}'`)
     } else {
         return obj
     }
@@ -112,7 +116,7 @@ export const compileInputs = async (
             if (schema?.templating === false) {
                 return [key, value]
             }
-            return [key, await compileObject(value, globals, schema?.templating || 'fn')]
+            return [key, await compileObject(value, globals, schema?.templating || 'script')]
         })
     )
 
@@ -154,7 +158,7 @@ const createGlobals = (
         },
         source: {
             url: 'https://us.hanzo.ai/insights_functions/1234',
-            name: 'insights-function-name',
+            name: 'script-function-name',
             ...globals.source,
         },
     }
@@ -162,15 +166,20 @@ const createGlobals = (
 
 export class TemplateTester {
     public template: InsightsFunctionTemplateCompiled
-    private scriptExecutor: ScriptExecutorService
+    private hogExecutor: HogExecutorService
     private nativeExecutor: NativeDestinationExecutorService
-    private mockHub: Hub
+    private mockHub: PluginsServerConfig
 
     private geoipService?: GeoIPService
     public geoIp?: GeoIp
 
     public mockFetch = jest.fn()
     public mockPrint = jest.fn()
+    // Async functions (insightsGetAccount, insightsGetTicket, ...) resolve the team to read
+    // its secret_api_token — stub it so templates built on them are testable.
+    public mockTeamManager = {
+        getTeam: jest.fn().mockResolvedValue({ id: 1, secret_api_token: 'test-secret-token' }),
+    }
     constructor(private _template: InsightsFunctionTemplate) {
         this.template = {
             ..._template,
@@ -179,22 +188,60 @@ export class TemplateTester {
 
         this.mockHub = { ...defaultConfig } as any
 
-        this.scriptExecutor = new ScriptExecutorService(this.mockHub)
+        this.hogExecutor = this.createHogExecutor()
         this.nativeExecutor = new NativeDestinationExecutorService(defaultConfig)
     }
 
-    private getExecutor(): ScriptExecutorService | NativeDestinationExecutorService {
-        return isNativeInsightsFunction({ template_id: this.template.id }) ? this.nativeExecutor : this.scriptExecutor
+    private createHogExecutor(): HogExecutorService {
+        const config = this.mockHub
+        const recipientTokensService = new RecipientTokensService(config.ENCRYPTION_SALT_KEYS, config.SITE_URL)
+        const hogInputsService = new HogInputsService(undefined as any, recipientTokensService, undefined as any)
+        const emailService = new EmailService(
+            {
+                sesAccessKeyId: config.SES_ACCESS_KEY_ID,
+                sesSecretAccessKey: config.SES_SECRET_ACCESS_KEY,
+                sesRegion: config.SES_REGION,
+                sesEndpoint: config.SES_ENDPOINT,
+                sesTrackedConfigurationSet: config.SES_TRACKED_CONFIGURATION_SET,
+                sesUntrackedConfigurationSet: config.SES_UNTRACKED_CONFIGURATION_SET,
+                sesTenantAttributionEnabled: false,
+            },
+            undefined as any,
+            undefined as any,
+            config.ENCRYPTION_SALT_KEYS,
+            config.SITE_URL,
+            new EmailTrackingCodeSigner(config.ENCRYPTION_SALT_KEYS, config.CDP_EMAIL_TRACKING_URL),
+            undefined as any,
+            undefined as any
+        )
+        return new HogExecutorService(
+            {
+                hogCostTimingUpperMs: config.CDP_WATCHER_FN_COST_TIMING_UPPER_MS,
+                googleAdwordsDeveloperToken: config.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
+                fetchRetries: config.CDP_FETCH_RETRIES,
+                fetchBackoffBaseMs: config.CDP_FETCH_BACKOFF_BASE_MS,
+                fetchBackoffMaxMs: config.CDP_FETCH_BACKOFF_MAX_MS,
+            },
+            { teamManager: this.mockTeamManager as any, siteUrl: config.SITE_URL },
+            hogInputsService,
+            emailService,
+            recipientTokensService,
+            undefined as any
+        )
+    }
+
+    private getExecutor(): HogExecutorService | NativeDestinationExecutorService {
+        return isNativeInsightsFunction({ template_id: this.template.id }) ? this.nativeExecutor : this.hogExecutor
     }
 
     /*
     we need transformResult to be able to test the geoip template
-    the same way we did it here https://github.com/hanzoai/insights-plugin-geoip/blob/a5e9370422752eb7ea486f16c5cc8acf916b67b0/index.test.ts#L79
+    the same way we did it here https://github.com/Insights/insights-plugin-geoip/blob/a5e9370422752eb7ea486f16c5cc8acf916b67b0/index.test.ts#L79
     */
     async beforeEach() {
         Settings.defaultZone = 'UTC'
         if (!this.geoipService) {
-            this.geoipService = new GeoIPService(defaultConfig)
+            this.geoipService = new GeoIPService(defaultConfig.MMDB_FILE_LOCATION)
         }
 
         if (!this.geoIp) {
@@ -203,10 +250,10 @@ export class TemplateTester {
 
         this.template = {
             ...this._template,
-            bytecode: await compileFn(this._template.code),
+            bytecode: await compileHog(this._template.code),
         }
 
-        this.scriptExecutor = new ScriptExecutorService(this.mockHub)
+        this.hogExecutor = this.createHogExecutor()
         this.nativeExecutor = new NativeDestinationExecutorService(this.mockHub)
     }
 
@@ -245,7 +292,7 @@ export class TemplateTester {
             template_id: this.template.id,
         }
 
-        const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(insightsFunction, globals)
+        const globalsWithInputs = await this.hogExecutor.buildInputsWithGlobals(insightsFunction, globals)
         const invocation = createInvocation(globalsWithInputs, insightsFunction)
         const transformationFunctions = getTransformationFunctions(this.geoIp!)
         const extraFunctions = invocation.insightsFunction.type === 'transformation' ? transformationFunctions : {}
@@ -313,7 +360,7 @@ export class TemplateTester {
             mappings: [compiledMappingInputs],
         }
 
-        const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(
+        const globalsWithInputs = await this.hogExecutor.buildInputsWithGlobals(
             insightsFunction,
             this.createGlobals(_globals),
             compiledMappingInputs.inputs
@@ -326,7 +373,7 @@ export class TemplateTester {
 
     async invokeFetchResponse(
         invocation: CyclotronJobInvocationInsightsFunction,
-        response: { status: number; body: Record<string, any> }
+        response: { status: number; body: unknown }
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         const modifiedInvocation = cloneInvocation(invocation)
 
@@ -335,7 +382,7 @@ export class TemplateTester {
             body: response.body,
         })
 
-        const result = await this.scriptExecutor.execute(modifiedInvocation)
+        const result = await this.hogExecutor.execute(modifiedInvocation)
         result.logs = this.logsForSnapshot(result.logs)
 
         return result
@@ -372,6 +419,7 @@ export const createAdDestinationPayload = (
                 gclid: 'google-id',
                 sccid: 'snapchat-id',
                 rdt_cid: 'reddit-id',
+                msclkid: 'microsoft-id',
                 phone: '+1234567890',
                 external_id: '1234567890',
                 first_name: 'Max',

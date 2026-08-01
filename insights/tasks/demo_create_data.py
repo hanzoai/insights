@@ -2,16 +2,21 @@ from django.core.cache import cache
 
 from celery import shared_task
 
-from insights.demo.matrix import manager
-from insights.demo.products.hedgebox.matrix import HedgeboxMatrix
 from insights.models.team.team import Team
 from insights.models.user import User
+from insights.scoping_audit import skip_team_scope_audit
 
 
 @shared_task(ignore_result=True)
+@skip_team_scope_audit
 def create_data_for_demo_team(team_id: int, user_id: int, cache_key: str) -> None:
+    # Deferred: the demo matrix pulls mimesis (a fake-data generator). This task module is
+    # eager-imported by insights/tasks/__init__, so a module-level import drags mimesis onto
+    # every process's startup path. Only needed when actually generating demo data.
+    from products.demo.backend.facade.api import HedgeboxMatrix, MatrixManager  # noqa: PLC0415
+
     team = Team.objects.get(pk=team_id)
     user = User.objects.get(pk=user_id)
     if team and user:
-        manager.MatrixManager(HedgeboxMatrix(), use_pre_save=True).run_on_team(team, user)
+        MatrixManager(HedgeboxMatrix(), use_pre_save=True).run_on_team(team, user)
         cache.delete(cache_key)

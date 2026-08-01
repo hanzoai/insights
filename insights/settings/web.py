@@ -4,13 +4,21 @@ from datetime import timedelta
 
 import structlog
 from corsheaders.defaults import default_headers
+from whitenoise.compress import Compressor
 
 from insights.scopes import get_scope_descriptions
-from insights.settings.base_variables import BASE_DIR, DEBUG, TEST
-from insights.settings.utils import get_from_env, get_list, str_to_bool
+from insights.settings.base_variables import BASE_DIR, CLOUD_DEPLOYMENT, DEBUG, TEST
+from insights.settings.utils import generate_rsa_private_key_pem, get_from_env, get_list, str_to_bool
 from insights.utils_cors import CORS_ALLOWED_TRACING_HEADERS
 
 logger = structlog.get_logger(__name__)
+
+####
+# Deprecated insight `dashboards` field: session-authenticated callers always need to opt in with
+# `include_dashboards`. While False, API-token callers still receive the field; flipping to True
+# enforces the opt-in for them too. Env-toggleable so token enforcement can be reverted without a
+# code change.
+INSIGHT_DASHBOARDS_OPT_IN_ENFORCED = get_from_env("INSIGHT_DASHBOARDS_OPT_IN_ENFORCED", False, type_cast=str_to_bool)
 
 ####
 # django-axes
@@ -34,10 +42,13 @@ PRODUCTS_APPS = [
     "products.analytics_platform.backend.apps.AnalyticsPlatformConfig",
     "products.early_access_features.backend.apps.EarlyAccessFeaturesConfig",
     "products.tasks.backend.apps.TasksConfig",
+    "products.stamphog.backend.apps.StamphogConfig",
     "products.links.backend.apps.LinksConfig",
     "products.revenue_analytics.backend.apps.RevenueAnalyticsConfig",
     "products.user_interviews.backend.apps.UserInterviewsConfig",
+    "products.ai_observability.backend.apps.AIObservabilityConfig",
     "products.llm_analytics.backend.apps.LlmAnalyticsConfig",
+    "products.skills.backend.apps.SkillsConfig",
     "products.endpoints.backend.apps.EndpointsConfig",
     "products.marketing_analytics.backend.apps.MarketingAnalyticsConfig",
     "products.error_tracking.backend.apps.ErrorTrackingConfig",
@@ -45,7 +56,6 @@ PRODUCTS_APPS = [
     "products.surveys.backend.apps.SurveysConfig",
     "products.data_warehouse.backend.apps.DataWarehouseConfig",
     "products.data_modeling.backend.apps.DataModelingConfig",
-    "products.desktop_recordings.backend.apps.DesktopRecordingsConfig",
     "products.live_debugger.backend.apps.LiveDebuggerConfig",
     "products.experiments.backend.apps.ExperimentsConfig",
     "products.feature_flags.backend.apps.FeatureFlagsConfig",
@@ -54,16 +64,57 @@ PRODUCTS_APPS = [
     "products.slack_app.backend.apps.SlackAppConfig",
     "products.product_tours.backend.apps.ProductToursConfig",
     "products.workflows.backend.apps.WorkflowsConfig",
+    "products.cdp.backend.apps.CdpConfig",
     "products.insights_ai.backend.apps.InsightsAiConfig",
     "products.signals.backend.apps.SignalsConfig",
+    "products.replay_vision.backend.apps.ReplayVisionConfig",
+    "products.mcp_store.backend.apps.McpStoreConfig",
+    "products.event_definitions.backend.apps.EventDefinitionsConfig",
+    "products.review_hog.backend.apps.ReviewHogConfig",
+    "products.logs.backend.apps.LogsConfig",
+    "products.tracing.backend.apps.TracingConfig",
+    "products.metrics.backend.apps.MetricsConfig",
+    "products.notifications.backend.apps.NotificationsConfig",
+    "products.dashboards.backend.apps.DashboardsConfig",
+    "products.messaging.backend.apps.MessagingConfig",
+    "products.mcp_analytics.backend.apps.McpAnalyticsConfig",
+    "products.streamlit_apps.backend.apps.StreamlitAppsConfig",
+    "products.legal_documents.backend.apps.LegalDocumentsConfig",
+    "products.access_control.backend.apps.AccessControlConfig",
+    "products.warehouse_sources_queue.backend.apps.WarehouseSourcesQueueConfig",
+    "products.business_knowledge.backend.apps.BusinessKnowledgeConfig",
+    "products.web_analytics.backend.apps.WebAnalyticsConfig",
+    "products.warehouse_sources.backend.apps.WarehouseSourcesConfig",
+    "products.data_tools.backend.apps.DataToolsConfig",
+    "products.alerts.backend.apps.AlertsConfig",
+    "products.actions.backend.apps.ActionsConfig",
+    "products.product_analytics.backend.apps.ProductAnalyticsConfig",
+    "products.exports.backend.apps.ExportsConfig",
+    "products.annotations.backend.apps.AnnotationsConfig",
+    "products.batch_exports.backend.apps.BatchExportsConfig",
+    "products.engineering_analytics.backend.apps.EngineeringAnalyticsConfig",
+    "products.managed_migrations.backend.apps.ManagedMigrationsConfig",
+    "products.replay.backend.apps.ReplayConfig",
+    "products.cohorts.backend.apps.CohortsConfig",
+    "products.growth.backend.apps.GrowthConfig",
+    "products.reminders.backend.apps.RemindersConfig",
+    "products.approvals.backend.apps.ApprovalsConfig",
+    "products.pulse.backend.apps.PulseConfig",
+    "products.data_catalog.backend.apps.DataCatalogConfig",
 ]
 
 INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",  # makes sure that whitenoise handles static files in development
-    "django.contrib.admin",
+    # `SimpleAdminConfig` skips Django's eager `autodiscover_modules('admin')` at
+    # startup. We invoke autodiscover ourselves from `register_all_admin()` (called
+    # lazily via `LazyAdminRegistry` on first `admin.site._registry` access), which
+    # keeps every product/admin import out of `django.setup()`.
+    "django.contrib.admin.apps.SimpleAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
+    # Replaces django.contrib.sessions: a custom session model on the same django_session table
+    # (see insights/session). SessionMiddleware still works without the contrib app installed.
+    "insights.session",
     "django.contrib.messages",
     "django.contrib.postgres",
     "django.contrib.staticfiles",
@@ -97,23 +148,35 @@ MIDDLEWARE = [
     "django_structlog.middlewares.RequestMiddleware",
     "insights.middleware.Fix204Middleware",
     "django.middleware.security.SecurityMiddleware",
+    "insights.middleware.OAuthCoopMiddleware",
     # NOTE: we need healthcheck high up to avoid hitting middlewares that may be
     # using dependencies that the healthcheck should be checking. It should be
     # ok below the above middlewares however.
     "insights.health.healthcheck_middleware",
     "insights.middleware.ShortCircuitMiddleware",
-    "insights.middleware.V1InsightsRewriteMiddleware",
     "insights.middleware.AllowIPMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "insights.middleware.OAuthCorsPreflightMiddleware",  # Must precede CorsMiddleware — echoes custom headers on OAuth preflights
     "corsheaders.middleware.CorsMiddleware",
     "insights.middleware.CSPMiddleware",
     "django.middleware.common.CommonMiddleware",
+    # Below CorsMiddleware so responses get CORS headers; above auth/CSRF and URL
+    # resolution so the /api/environments → /api/projects rewrite is in place before the
+    # request is routed and authenticated.
+    "insights.middleware.EnvironmentsRewriteMiddleware",
     "insights.middleware.CsrfOrKeyViewMiddleware",
     "insights.middleware.QueryTimeCountingMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Must run immediately after AuthenticationMiddleware so downstream middleware
+    # (activity logging, structlog binding, etc.) sees the swapped staff user on /admin/* paths.
+    "insights.middleware.AdminImpersonationMiddleware",
+    "insights.api.query_coalescer.QueryCoalescingMiddleware",
     "insights.middleware.SocialAuthExceptionMiddleware",
     "insights.middleware.SessionAgeMiddleware",
+    "insights.middleware.KnownLoginDeviceCookieMiddleware",
+    "insights.session.middleware.UserAuthSessionActivityMiddleware",
+    "insights.session.middleware.SessionRiskMiddleware",
     "insights.middleware.ActivityLoggingMiddleware",
     "insights.middleware.user_logging_context_middleware",
     "django_otp.middleware.OTPMiddleware",
@@ -137,6 +200,14 @@ DJANGO_STRUCTLOG_CELERY_ENABLED = True
 if DEBUG:
     # rebase_migration command
     INSTALLED_APPS.append("django_linear_migrations")
+
+# Append Enterprise Edition as an app if available
+try:
+    from ee.apps import EnterpriseConfig  # noqa: F401
+except ImportError:
+    pass
+else:
+    INSTALLED_APPS.append("ee.apps.EnterpriseConfig")
 
 # Use django-extensions if it exists
 try:
@@ -164,6 +235,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "loginas.context_processors.impersonated_session_status",
+                "insights.helpers.impersonation.impersonation_context",
             ]
         },
     }
@@ -175,19 +247,12 @@ WSGI_APPLICATION = "insights.wsgi.application"
 # Authentication
 
 AUTHENTICATION_BACKENDS: list[str] = [
-    "axes.backends.AxesBackend",
-    "social_core.backends.open_id_connect.OpenIdConnectAuth",  # Hanzo IAM SSO (hanzo.id) — the single federated login
+    "axes.backends.AxesStandaloneBackend",
+    "social_core.backends.github.GithubOAuth2",
+    "social_core.backends.gitlab.GitLabOAuth2",
     "django.contrib.auth.backends.ModelBackend",
     "insights.auth.WebauthnBackend",
 ]
-
-# Hanzo IAM OIDC SSO (social-auth)
-SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: str | None = os.getenv("SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
-SOCIAL_AUTH_OIDC_KEY: str | None = os.getenv("SOCIAL_AUTH_OIDC_KEY")
-SOCIAL_AUTH_OIDC_SECRET: str | None = os.getenv("SOCIAL_AUTH_OIDC_SECRET")
-SOCIAL_AUTH_OIDC_SCOPE: list[str] = ["openid", "email", "profile"]
-SOCIAL_AUTH_OIDC_REDIRECT_URI: str | None = os.getenv("SOCIAL_AUTH_OIDC_REDIRECT_URI")
-SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER: str | None = os.getenv("SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER")
 
 AUTH_USER_MODEL = "insights.User"
 
@@ -195,26 +260,28 @@ LOGIN_URL = "/login"
 LOGOUT_URL = "/logout"
 LOGIN_REDIRECT_URL = "/"
 APPEND_SLASH = False
-CORS_URLS_REGEX = r"^(/site_app/|/array/|/static/|/api/(?!early_access_features|surveys|web_experiments).*$)"
+CORS_URLS_REGEX = r"^(/site_app/|/array/|/static/|/oauth/token/?|/toolbar_oauth/check|/api/(?!early_access_features|surveys|web_experiments).*$)"
 CORS_ALLOW_HEADERS = default_headers + CORS_ALLOWED_TRACING_HEADERS
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 SOCIAL_AUTH_USER_MODEL = "insights.User"
 SOCIAL_AUTH_REDIRECT_IS_HTTPS: bool = get_from_env("SOCIAL_AUTH_REDIRECT_IS_HTTPS", not DEBUG, type_cast=str_to_bool)
+# social-auth-core reads REQUESTS_TIMEOUT in BaseAuth.request(); without it a hung self-hosted
+# GitLab/OIDC provider can block a web worker forever.
+SOCIAL_AUTH_REQUESTS_TIMEOUT: float = get_from_env("SOCIAL_AUTH_REQUESTS_TIMEOUT", 10.0, type_cast=float)
 
 SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.social_details",
     "social_core.pipeline.social_auth.social_uid",
     "social_core.pipeline.social_auth.auth_allowed",
+    "ee.api.authentication.social_auth_allowed",
     "social_core.pipeline.social_auth.social_user",
     "social_core.pipeline.social_auth.associate_by_email",
     "insights.api.signup.social_create_user",
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
-    # Hanzo IAM: map OIDC org claim -> Insights Organization + Team + Membership
-    "insights.api.iam_org_pipeline.iam_org_assign",
     "insights.api.authentication.social_login_notification",
 )
 
@@ -227,14 +294,25 @@ SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = [
     "organization_name",
     "reauth",
 ]
+SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
+SOCIAL_AUTH_GITHUB_KEY: str | None = os.getenv("SOCIAL_AUTH_GITHUB_KEY")
+SOCIAL_AUTH_GITHUB_SECRET: str | None = os.getenv("SOCIAL_AUTH_GITHUB_SECRET")
+
+SOCIAL_AUTH_GITLAB_SCOPE = ["read_user"]
+SOCIAL_AUTH_GITLAB_KEY: str | None = os.getenv("SOCIAL_AUTH_GITLAB_KEY")
+SOCIAL_AUTH_GITLAB_SECRET: str | None = os.getenv("SOCIAL_AUTH_GITLAB_SECRET")
+SOCIAL_AUTH_GITLAB_API_URL: str = os.getenv("SOCIAL_AUTH_GITLAB_API_URL", "https://gitlab.com")
+
 LICENSE_SECRET_KEY = os.getenv("LICENSE_SECRET_KEY", "license-so-secret")
 
 # Cookie age in seconds (default 2 weeks) - these are the standard defaults for Django but having it here to be explicit
+SESSION_ENGINE = "insights.session.backend"
 SESSION_COOKIE_AGE = get_from_env("SESSION_COOKIE_AGE", 60 * 60 * 24 * 14, type_cast=int)
 
 # For sensitive actions we have an additional permission (default 2 hour)
 SESSION_SENSITIVE_ACTIONS_AGE = get_from_env("SESSION_SENSITIVE_ACTIONS_AGE", 60 * 60 * 2, type_cast=int)
 
+SESSION_COOKIE_NAME = get_from_env("SESSION_COOKIE_NAME", "sessionid")
 CSRF_COOKIE_NAME = "insights_csrftoken"
 CSRF_COOKIE_AGE = get_from_env("CSRF_COOKIE_AGE", SESSION_COOKIE_AGE, type_cast=int)
 
@@ -247,8 +325,7 @@ IMPERSONATION_COOKIE_LAST_ACTIVITY_KEY = get_from_env(
     "IMPERSONATION_COOKIE_LAST_ACTIVITY_KEY", "impersonation_last_activity"
 )
 # Disallow impersonating other staff
-CAN_LOGIN_AS = (
-    lambda request, target_user:
+CAN_LOGIN_AS = lambda request, target_user: (
     # user performing action must be a staff member
     request.user.is_staff
     # cannot impersonate other staff
@@ -260,6 +337,40 @@ CAN_LOGIN_AS = (
 LOGINAS_LOGIN_REASON_REQUIRED = True
 
 SESSION_COOKIE_CREATED_AT_KEY = get_from_env("SESSION_COOKIE_CREATED_AT_KEY", "session_created_at")
+# Master kill-switch for the session-risk middleware (insights/session/middleware.py). On by default,
+# off in the test suite (like AXES_ENABLED) so its per-request feature-flag check doesn't run during
+# tests that assert hanzo_insights.feature_enabled call counts.
+SESSION_RISK_ENABLED = get_from_env("SESSION_RISK_ENABLED", not TEST, type_cast=str_to_bool)
+# Kill switch for the real-time signup enrichment workflow (products/growth/backend/enrichment).
+# Off by default: it must stay off until the launch fill-rate/failure alert is in place, and v0 is
+# US-only. Fire-and-forget from signup, so this only gates whether the workflow is dispatched at all.
+GROWTH_SIGNUP_ENRICHMENT_ENABLED = get_from_env("GROWTH_SIGNUP_ENRICHMENT_ENABLED", False, type_cast=str_to_bool)
+# The internal analytics project the enrichment pipeline reads/writes bridge and mirror data
+# against (products/growth/backend/enrichment). Defaults to project 2, the internal project the
+# enrichment group properties are projected onto; env-overridable since that id differs across
+# cloud deployments.
+GROWTH_ENRICHMENT_INTERNAL_TEAM_ID = get_from_env("GROWTH_ENRICHMENT_INTERNAL_TEAM_ID", 2, type_cast=int)
+# Session keys for risk-based step-up (insights/session/risk.py). Named so every reader/writer shares
+# one source of truth, like SESSION_COOKIE_CREATED_AT_KEY above.
+SESSION_STEP_UP_REQUIRED_KEY = get_from_env("SESSION_STEP_UP_REQUIRED_KEY", "step_up_required")
+SESSION_LAST_REAUTH_AT_KEY = get_from_env("SESSION_LAST_REAUTH_AT_KEY", "last_reauth_at")
+# Dedup state for risk telemetry/enforcement: the last-emitted anomaly signature and when. A flagged
+# session is re-scored every request, but we only re-emit/re-enforce on a new signature or after the
+# cooldown, so one persistent anomaly can't fire on every request. Cleared on (re)login by post_login.
+SESSION_RISK_LAST_SIG_KEY = get_from_env("SESSION_RISK_LAST_SIG_KEY", "risk_last_sig")
+SESSION_RISK_LAST_EMIT_AT_KEY = get_from_env("SESSION_RISK_LAST_EMIT_AT_KEY", "risk_last_emit_at")
+
+# Impossible-travel risk thresholds (see insights/session/risk.py). Tunable without a code change.
+RISK_DISTANCE_FLOOR_KM = get_from_env("RISK_DISTANCE_FLOOR_KM", 500.0, type_cast=float)
+RISK_ELAPSED_FLOOR_S = get_from_env("RISK_ELAPSED_FLOOR_S", 300.0, type_cast=float)
+RISK_VELOCITY_MAX_KMH = get_from_env("RISK_VELOCITY_MAX_KMH", 1000.0, type_cast=float)
+# How often a low-risk request refreshes the known-good baseline snapshot (geo/UA + baseline_at).
+# Throttles the per-request write; the baseline geo lags by at most this interval, fine for scoring.
+RISK_BASELINE_REFRESH_S = get_from_env("RISK_BASELINE_REFRESH_S", 300.0, type_cast=float)
+# How long the same anomaly signature stays deduped before it re-emits telemetry / re-asserts step-up.
+# Bounds a persistent anomaly to one detection per window instead of one per request, while still
+# resurfacing a long-lived anomaly periodically.
+RISK_REEMIT_COOLDOWN_S = get_from_env("RISK_REEMIT_COOLDOWN_S", 3600.0, type_cast=float)
 
 PROJECT_SWITCHING_TOKEN_ALLOWLIST = get_list(os.getenv("PROJECT_SWITCHING_TOKEN_ALLOWLIST", "sTMFPsFhdP1Ssg"))
 
@@ -276,6 +387,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "insights.auth.ZxcvbnValidator"},
 ]
+
+if TEST:
+    # PBKDF2 is deliberately slow (~150ms per hash), which adds up because every
+    # per-test user creation hashes a password. MD5 keeps the same hasher API with
+    # none of the cost. Never used outside tests.
+    PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
 PASSWORD_RESET_TIMEOUT = 86_400  # 1 day
 
@@ -302,9 +419,23 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.ManifestStaticFilesStorage",
+        # CompressedManifest: collectstatic pre-generates .br and .gz (brotli is
+        # already a dependency) so WhiteNoise serves compressed bytes from disk and
+        # the envoy edge — which otherwise gzips static per request (Contour's
+        # default compression filter) — skips recompression since Content-Encoding
+        # is already set. Same Manifest base class: hashed names unchanged.
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if TEST
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
     },
 }
+# Never emit .map.gz/.map.br: the production image deletes *.map after the
+# sourcemap upload, and compressed variants would survive that cleanup and
+# leak the maps under /static. Also skips pointless build-time compression
+# of files that get deleted anyway.
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [*Compressor.SKIP_COMPRESS_EXTENSIONS, "map"]
 
 
 def static_varies_origin(headers, path, url):
@@ -312,6 +443,25 @@ def static_varies_origin(headers, path, url):
 
 
 WHITENOISE_ADD_HEADERS_FUNCTION = static_varies_origin
+
+# Non-hashed static files (notably the insights-js SDK bundles served to
+# end-user browsers) otherwise fall back to whitenoise's 60s default and
+# generate constant 304 revalidation churn (~a third of /static traffic).
+# Hashed manifest assets are unaffected — whitenoise already serves those
+# with far-future caching. One hour bounds how long a client that does not
+# cache-bust can hold a stale SDK bundle after a release.
+WHITENOISE_MAX_AGE = get_from_env("WHITENOISE_MAX_AGE", 3600, type_cast=int)
+
+# Per-IP signup throttle rate (see insights.rate_limit.SignupIPThrottle). Overridable per-env so
+# non-prod (e.g. dev deploy smoke-tests) can raise it without weakening the prod default.
+SIGNUP_IP_THROTTLE_RATE = get_from_env("SIGNUP_IP_THROTTLE_RATE", "5/day")
+
+# Email domains whose signups are created already-verified (skipping the email round-trip), so
+# non-prod deploy smoke-tests can sign up and act immediately. Empty by default — prod verifies
+# every signup.
+EMAIL_VERIFICATION_SKIP_FOR_DOMAINS = [
+    domain.lower() for domain in get_list(get_from_env("EMAIL_VERIFICATION_SKIP_FOR_DOMAINS", ""))
+]
 
 ####
 # REST framework
@@ -322,9 +472,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_RENDERER_CLASSES": ["insights.renderers.SafeJSONRenderer"],
     "PAGE_SIZE": 100,
-    "EXCEPTION_HANDLER": "insights.exceptions_handler.exception_handler",
+    "EXCEPTION_HANDLER": "insights.exceptions.exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "insights.api.documentation.InsightsAutoSchema",
     # These rate limits are defined in `rate_limit.py`, and they're only
     # applied if env variable `RATE_LIMIT_ENABLED` is set to True
     "DEFAULT_THROTTLE_CLASSES": [
@@ -342,21 +492,372 @@ if DEBUG:
 # DRF Spectacular
 
 SPECTACULAR_SETTINGS = {
+    "OAS_VERSION": "3.1.0",
     "AUTHENTICATION_WHITELIST": ["insights.auth.PersonalAPIKeyAuthentication"],
+    "GET_MOCK_REQUEST": "insights.api.documentation.build_openapi_mock_request",
     "PREPROCESSING_HOOKS": ["insights.api.documentation.preprocess_exclude_path_format"],
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.hooks.postprocess_schema_enums",
+        "products.dashboards.backend.widget_specs.pydantic_openapi.inject_widget_spec_pydantic_components",
         "insights.api.documentation.custom_postprocessing_hook",
+        # Runs last so it sees the final post-processed spec. Emits drf-spectacular warnings
+        # for self-inconsistencies (default not in enum, required not in properties, $ref siblings)
+        # so `--fail-on-warn` in `insightscli build:openapi-schema` catches them in CI.
+        "insights.api.documentation.lint_spec_consistency_hook",
     ],
     "ENUM_NAME_OVERRIDES": {
-        "DashboardRestrictionLevel": "insights.models.dashboard.Dashboard.RestrictionLevel",
-        "OrganizationMembershipLevel": "insights.models.organization.OrganizationMembership.Level",
+        # If CI is failing with "enum naming encountered a non-optimally resolvable
+        # collision" / "Format5eaEnum"-style warnings from `insightscli build:openapi-schema`,
+        # this is the dict you need to add an entry to. The warning fails CI because
+        # `--fail-on-warn` is set on the `spectacular` invocation in insightscli.yaml.
+        #
+        # Workflow to resolve a collision:
+        #   1. Run `python manage.py find_enum_collisions` — it prints the field name,
+        #      the auto-generated name (e.g. `Format5eaEnum`), the enum values, which
+        #      components share the hash, and a suggested override entry. The suggestion
+        #      is pastable as-is for inline-list collisions (type-hint enums and
+        #      ChoiceFields with plain `choices=["A", "B"]`); only ChoiceFields with
+        #      custom labels (TextChoices where labels differ from values) need the
+        #      Choices/Enum class path filled in.
+        #   2. Add the suggested entry below (pick the right category — see "hash trap"
+        #      note below). Optionally rename the key from the auto-generated name to a
+        #      more semantic one to improve the generated schema type's name.
+        #   3. Re-run `insightscli build:openapi-schema` locally to confirm the warning is gone.
+        #
+        # Full guide (when to use which pattern, anti-patterns, MCP/typegen implications):
+        #   /improving-drf-endpoints  (skill — invoke it for the walkthrough)
+        #
+        # Hash trap — overrides fall into two categories depending on how drf-spectacular
+        # hashes them, and using the wrong format silently fails (the override is ignored
+        # and the warning persists):
+        #
+        # 1. Model class paths — used for ChoiceField-backed enums whose labels differ
+        #    from their values (typical `TextChoices` with explicit labels). The override
+        #    must point to the same Choices/Enum class so _load_enum_name_overrides hashes
+        #    identically to the x-spec-enum-id.
+        #
+        # 2. Inline value lists — used for Enum type-hint enums (SerializerMethodField
+        #    return types) AND ChoiceFields whose choices are plain lists (labels equal
+        #    values). The override must be a plain value list, which
+        #    _load_enum_name_overrides normalizes to (value, value) tuples — matching
+        #    both the no-x-spec-enum-id type-hint path and the inline-choices ChoiceField
+        #    path (drf-spectacular generates the x-spec-enum-id from the same tuples).
+        # --- Model class paths (ChoiceField x-spec-enum-id hashes) ---
+        "SignalReportRefundReasonEnum": "products.signals.backend.models.SignalReportRefund.Reason",
+        "ScoutConfigStatusEnum": "products.signals.backend.models.SignalScoutConfig.Status",
+        "ScoutConfigPauseReasonEnum": "products.signals.backend.models.SignalScoutConfig.PauseReason",
+        "EngineeringAnalyticsPRStateEnum": "products.engineering_analytics.backend.facade.contracts.PRState",
+        "QuarantineModeEnum": "products.engineering_analytics.backend.facade.contracts.QuarantineMode",
+        "CITestRunnerEnum": "products.engineering_analytics.backend.facade.contracts.CITestRunner",
+        "RestrictionLevelEnum": "products.dashboards.backend.models.dashboard.Dashboard.RestrictionLevel",
+        "OrganizationMembershipLevelEnum": "insights.models.organization.OrganizationMembership.Level",
         "SetupTaskId": "insights.models.team.setup_tasks.SetupTaskId",
-        "SurveyType": "insights.models.surveys.survey.Survey.SurveyType",
+        "SurveyType": "products.surveys.backend.models.Survey.SurveyType",
+        "ConversationStatus": "products.insights_ai.backend.models.assistant.Conversation.Status",
+        "ConversationType": "products.insights_ai.backend.models.assistant.Conversation.Type",
+        "DetailModeEnum": "products.ai_observability.backend.summarization.models.SummarizationMode",
+        "SavedQueryStatusEnum": "products.data_modeling.backend.models.datawarehouse_saved_query.DataWarehouseSavedQuery.Status",
+        "PushTokenPlatformEnum": "insights.models.user_push_token.UserPushToken.Platform",
+        "PropertyDefinitionTypeEnum": "products.event_definitions.backend.models.property_definition.PropertyType",
+        "ExternalDataSourceTypeEnum": "products.warehouse_sources.backend.types.ExternalDataSourceType",
+        "ExperimentMetricKindEnum": "products.ai_observability.backend.models.score_definitions.ScoreDefinition.Kind",
+        "EvaluationTargetEnum": "products.ai_observability.backend.models.evaluations.EvaluationTarget",
+        "IntegrationKindEnum": "insights.models.integration.Integration.IntegrationKind",
+        "TicketStatusEnum": "products.conversations.backend.models.constants.Status",
+        "BatchImportStatusEnum": "products.managed_migrations.backend.models.batch_imports.BatchImport.Status",
+        # Shared by ExperimentMetricsRecalculation.status and ActiveRecalculationRun.status (same choice set).
+        "MetricsRecalculationStatusEnum": (
+            "products.experiments.backend.models.experiment.ExperimentMetricsRecalculation.Status"
+        ),
+        "AnnouncementStatusEnum": "products.customer_analytics.backend.models.announcement.Announcement.Status",
+        "AnnouncementDeliveryStatusEnum": "products.customer_analytics.backend.models.announcement_delivery.AnnouncementDelivery.Status",
+        "HealthIssueStatusEnum": "insights.models.health_issue.HealthIssue.Status",
+        "HealthIssueSeverityEnum": "insights.models.health_issue.HealthIssue.Severity",
+        "IngestionWarningSeverityEnum": "insights.api.ingestion_warnings_v2.INGESTION_WARNING_SEVERITIES",
+        # Disambiguates from the same-valued inline enum on the signals LogsAlertStateChangeSignalExtra contract.
+        "LogsAlertThresholdOperatorEnum": "products.logs.backend.models.LogsAlertConfiguration.ThresholdOperator",
+        # Shared by _LogsGroupByBody.groupBySource and _LogsGroupByDimension.source (labels == values).
+        "LogsGroupBySourceEnum": "products.logs.backend.group_by_query_runner.GROUP_SOURCES",
+        "LLMProviderEnum": "products.ai_observability.backend.models.provider_keys.LLMProvider",
+        "EvaluationReportFrequencyEnum": (
+            "products.ai_observability.backend.models.evaluation_reports.EvaluationReport.Frequency"
+        ),
+        "InsightsFlowStatusEnum": "products.workflows.backend.models.hog_flow.hog_flow.InsightsFlow.State",
+        "MCPAuthTypeEnum": "products.mcp_store.backend.models.AUTH_TYPE_CHOICES",
+        "UtmIssueKindEnum": "products.marketing_analytics.backend.services.types.UTM_ISSUE_KIND_CHOICES",
+        # Shared by ConversionGoalSummary.kind and GoalExplanation.kind (same choice set).
+        "ConversionGoalKindEnum": "products.marketing_analytics.backend.insightsql_queries.constants.CONVERSION_GOAL_KIND_CHOICES",
+        "MCPInstallationScopeEnum": ["personal", "shared"],
+        "MCPServiceAccountStatusEnum": "products.mcp_store.backend.models.SERVICE_ACCOUNT_STATUS_CHOICES",
+        "MCPServerCategoryEnum": "products.mcp_store.backend.models.CATEGORY_CHOICES",
+        "MCPToolApprovalStateEnum": "products.mcp_store.backend.models.APPROVAL_STATES",
+        "MCPPolicyPresetEnum": "products.mcp_store.backend.models.POLICY_PRESET_CHOICES",
+        "MCPAuditDecisionEnum": "products.mcp_store.backend.models.AUDIT_DECISION_CHOICES",
+        # Keeps agent_platform's approval-request enum on its pre-collision name now
+        # that mcp_store also has a "decision" field.
+        "DecisionEnum": ["approve", "reject"],
+        # Disambiguates from data_modeling's node_type (table/view/matview/endpoint).
+        "NotebookSQLV2NodeTypeEnum": ["insightsql", "python"],
+        "NotebookSQLV2RefKindEnum": ["insightsql", "local"],
+        "TaskRunStatusEnum": "products.tasks.backend.models.TaskRun.Status",
+        # Inline-choices variant of TaskRun.Status (labels == values), shared by
+        # TaskRunUpdate.status and ExperimentFlagCleanupTask.run_status.
+        "RunStatusEnum": ["not_started", "queued", "in_progress", "completed", "failed", "cancelled"],
+        "TaskRunEnvironmentEnum": "products.tasks.backend.models.TaskRun.Environment",
+        "ModelEnum": "products.batch_exports.backend.models.batch_export.BatchExport.Model",
+        "RecurrenceIntervalEnum": "products.reminders.backend.models.reminder.Reminder.RecurrenceInterval",
+        "ScannerModelEnum": "products.replay_vision.backend.models.replay_scanner.ScannerModel",
+        "ScannerTypeEnum": "products.replay_vision.backend.models.replay_scanner.ScannerType",
+        "ScannerProviderEnum": "products.replay_vision.backend.models.replay_scanner.ScannerProvider",
+        "ObservationStatusEnum": "products.replay_vision.backend.models.replay_observation.ObservationStatus",
+        "ObservationTriggerEnum": "products.replay_vision.backend.models.replay_observation.ObservationTrigger",
+        "ExportedRecordingStatusEnum": "products.replay.backend.models.exported_recording.ExportedRecording.Status",
+        "VisionActionRunStatusEnum": "products.replay_vision.backend.models.vision_action.VisionActionRunStatus",
+        "VisionAlertMetricEnum": "products.replay_vision.backend.models.vision_action.AlertMetric",
+        "VisionAlertDirectionEnum": "products.replay_vision.backend.models.vision_action.AlertDirection",
+        "AutonomyPriorityEnum": "products.signals.backend.models.AutonomyPriority",
+        "TriggerEnum": "products.experiments.backend.models.experiment.ExperimentMetricsRecalculation.Trigger",
+        "ProductBriefTriggerEnum": "products.pulse.backend.models.ProductBrief.Trigger",
+        "ProductBriefStatusEnum": "products.pulse.backend.models.ProductBrief.Status",
+        "UserInterviewSearchDocumentTypeEnum": "products.user_interviews.backend.facade.enums.SEARCH_DOCUMENT_TYPES",
+        "BatchExportRunStatusEnum": "products.batch_exports.backend.models.batch_export.BatchExportRun.Status",
+        "HeatmapType": "products.web_analytics.backend.models.heatmap_saved.SavedHeatmap.Type",
+        # Pin the subscriptions target enum to its existing name so adding customer_analytics'
+        # `target_type` (below, inline-list category) doesn't auto-rename this shared-basename enum
+        # and churn subscriptions' generated types.
+        "TargetTypeEnum": "products.exports.backend.models.subscription.Subscription.SubscriptionTarget",
+        # --- Inline value lists (type-hint enums, no x-spec-enum-id) ---
+        "PropertyGroupOperator": ["AND", "OR"],
+        # Account.slack_summary_cadence and AccountChannelSummary.cadence share the same
+        # daily/weekly/monthly choice set; pin one name for both.
+        "SlackSummaryCadenceEnum": ["daily", "weekly", "monthly"],
+        # ReviewHog findings expose the same priority set on two fields (effective_priority +
+        # reviewer_priority); pin one shared name for the choice set.
+        "ReviewIssuePriorityEnum": ["must_fix", "should_fix", "consider"],
+        # Pin the customer_analytics custom-property target so it doesn't auto-collide with the
+        # subscriptions `target_type` enum (which would rename subscriptions' generated type).
+        "CustomPropertyDefinitionTargetType": ["account", "person"],
+        # The metrics query's OTel metric-type filter; without a pinned name it
+        # collides with the experiments MetricTypeEnum (funnel/ratio/...).
+        "OtelMetricTypeEnum": ["gauge", "sum", "histogram", "exponential_histogram", "summary"],
+        # Staff flags-cache warm-run status; 'state'/'scope' are collision-prone field names.
+        "FlagsWarmRunStateEnum": ["running", "completed", "cancelled"],
+        "FlagsWarmRunScopeEnum": ["all_teams", "teams_with_flags"],
+        # bulk_update_tags exposes an identical add/remove/set `action` ChoiceField on both
+        # BulkUpdateTagsRequest and its UUID subclass, so the shared enum can't be component-prefixed
+        # unambiguously and auto-resolves to a hash name. Pin it to a stable name.
+        "BulkUpdateTagsActionEnum": ["add", "remove", "set"],
+        "ManagedWarehouseReadinessStateEnum": [
+            "not_configured",
+            "waiting",
+            "backfilling",
+            "up_to_date",
+            "needs_attention",
+            "sync_paused",
+        ],
+        # Full signal taxonomy on the report `signals` endpoint; the source-config serializer's
+        # subset enums keep their own auto-resolved names.
+        "SignalSourceProduct": "products.signals.backend.enums.SIGNAL_SOURCE_PRODUCT_VALUES",
+        "SignalSourceType": "products.signals.backend.enums.SIGNAL_SOURCE_TYPE_VALUES",
+        # Shared by alert checks and analytics anomaly-investigation signals.
+        "InvestigationVerdictEnum": ["true_positive", "false_positive", "inconclusive"],
+        # Preserve Replay Vision's existing verdict type name after introducing the shared enum above.
+        "VerdictEnum": ["yes", "no", "inconclusive"],
+        # Tracing's span-filter `type` and attribute-breakdown `breakdownType` share one
+        # choice set (top-level column vs span attribute vs resource attribute).
+        "SpanPropertyTypeEnum": ["span", "span_attribute", "span_resource_attribute"],
+        "LogsViewColumnTypeEnum": ["timestamp", "level", "source", "trace_id", "span_id", "message", "custom"],
+        # LoopTriggerWrite.type and LoopPreviewRequest.trigger_type share the same
+        # schedule/github/api choice set — pin them to a single named enum.
+        "LoopTriggerTypeEnum": ["schedule", "github", "api"],
+        "CustomPropertyDisplayTypeEnum": [
+            "text",
+            "number",
+            "currency",
+            "percent",
+            "date",
+            "datetime",
+            "boolean",
+            "select",
+        ],
+        # Pinned pre-emptively: the auto-name would be the collision-prone "ColorEnum", and adding a
+        # palette color later would change the hash and silently rename the generated type.
+        "CustomPropertyOptionColorEnum": [f"preset-{i}" for i in range(1, 11)],
+        # Experiment now has two serializers (full ExperimentSerializer + ExperimentBasicSerializer
+        # for the list endpoint) that both expose `type`/`status`. Pin both to their pre-existing
+        # generated names so the shared enums don't get component-prefixed auto-names on collision.
+        "ExperimentTypeEnum": ["web", "product", None],
+        "ExperimentStatusEnum": ["draft", "running", "paused", "exposure_frozen", "stopped"],
+        # Two `sync_frequency` ChoiceFields with different member sets: warehouse-source schemas
+        # accept sub-15min cadences, while saved-query (view) materialization floors at 15min.
+        # Pin both to stable names so neither gets a component-prefixed auto-name on collision.
+        # "SyncFrequencyEnum" keeps the source-schema enum at its pre-existing generated name.
+        "SyncFrequencyEnum": [
+            "never",
+            "1min",
+            "5min",
+            "15min",
+            "30min",
+            "1hour",
+            "6hour",
+            "12hour",
+            "24hour",
+            "7day",
+            "30day",
+        ],
+        "SavedQuerySyncFrequencyEnum": [
+            "never",
+            "15min",
+            "30min",
+            "1hour",
+            "6hour",
+            "12hour",
+            "24hour",
+            "7day",
+            "30day",
+        ],
+        # Signals now has two serializers (single SignalReportStateRequest + bulk
+        # SignalReportBulkStateRequest) that both expose the same `state` ChoiceField. Pin the
+        # shared enum to a stable name so it doesn't collide with the other `state` enums
+        # (tasks, cdp) into a component-prefixed auto-name.
+        "SignalReportStateEnum": ["suppressed", "potential", "resolved"],
+        # Two serializers now expose an `op` ChoiceField (metrics filters and email-template design
+        # patches). Pin both to stable names so neither gets a component-prefixed auto-name on collision.
+        # "OpEnum" keeps the metrics filter enum at its pre-existing generated name.
+        "OpEnum": ["eq", "neq", "regex", "not_regex"],
+        "EmailTemplateDesignOperationEnum": [
+            "update_content",
+            "update_column",
+            "update_row",
+            "update_body",
+            "add_content",
+            "remove_content",
+            "move_content",
+            "add_row",
+            "remove_row",
+        ],
+        "PropertyFilterTypeEnum": [
+            "event",
+            "event_metadata",
+            "feature",
+            "person",
+            "person_metadata",
+            "cohort",
+            "element",
+            "static-cohort",
+            "dynamic-cohort",
+            "precalculated-cohort",
+            "group",
+            "recording",
+            "log_entry",
+            "behavioral",
+            "session",
+            "insightsql",
+            "data_warehouse",
+            "data_warehouse_person_property",
+            "error_tracking_issue",
+            "log",
+            "log_attribute",
+            "log_resource_attribute",
+            "metric_attribute",
+            "span",
+            "span_attribute",
+            "span_resource_attribute",
+            "revenue_analytics",
+            "account_custom_property",
+            "flag",
+            "workflow_variable",
+        ],
+        "AssigneeTypeEnum": ["user", "role"],
+        "ScoutOriginEnum": ["canonical", "custom"],
+        "FileFormatEnum": ["Parquet", "JSONLines"],
+        "MetricAttributeScopeEnum": ["resource", "attribute", "auto"],
+        "MetricQueryIntervalEnum": ["second", "minute", "minute_5", "minute_15", "hour", "hour_6", "day", "week"],
+        "MetricAnomalyDirectionEnum": ["up", "down", "flat"],
+        "WoWChangeDirectionEnum": ["Up", "Down"],
+        "BatchExportIntervalEnum": ["hour", "day", "week", "every 5 minutes", "every 15 minutes"],
+        "ErrorTrackingIssueOrderByEnum": ["last_seen", "first_seen", "occurrences", "users", "sessions"],
+        "ErrorTrackingIssueStatusEnum": ["archived", "active", "resolved", "pending_release", "suppressed", "all"],
+        # Dashboard widget polymorphic OpenAPI: each per-type serializer uses a singleton
+        # widget_type ChoiceField (one value). drf-spectacular hashes enum value sets — without
+        # a per-type override they all collide into one mangled name. Override key is the
+        # stable component name; value is the singleton list even though length is 1.
+        "ActivityEventsListWidgetTypeEnum": ["activity_events_list"],
+        "ErrorTrackingListWidgetTypeEnum": ["error_tracking_list"],
+        "SessionReplayListWidgetTypeEnum": ["session_replay_list"],
+        "ExperimentsListWidgetTypeEnum": ["experiments_list"],
+        "ExperimentResultsWidgetTypeEnum": ["experiment_results"],
+        "SurveyResultsWidgetTypeEnum": ["survey_results"],
+        "LogsListWidgetTypeEnum": ["logs_list"],
+        "OrderByEnum": ["latest", "earliest"],
+        "PropertyGroupTypeEnum": ["cohort", "person", "group"],
+        "ExistenceOperatorEnum": ["is_set", "is_not_set"],
+        "TaskExecutionModeEnum": ["interactive", "background"],
+        # Shared by ClaudeTaskRunCreateSchema and SandboxOpen (the conversations `open` body).
+        "InitialPermissionModeEnum": ["default", "acceptEdits", "plan", "bypassPermissions", "auto"],
+        "InsightsFunctionTemplatingEnum": ["script", "liquid"],
+        "InsightsFlowEdgeTypeEnum": ["continue", "branch"],
+        "SourceMatchEnum": ["none", "auto", "mapped"],
+        "NotificationDestinationTypeEnum": ["slack", "webhook", "teams"],
+        "TaskRunArtifactTypeEnum": [
+            "plan",
+            "context",
+            "reference",
+            "output",
+            "artifact",
+            "tree_snapshot",
+            "user_attachment",
+            "skill_bundle",
+        ],
+        "AdapterEnum": ["slack_message", "slack_canvas", "slack_file", "document_connector", "github_pr"],
+        "TaskArtifactStatusEnum": ["active", "failed"],
+        # Same-value collisions: identical choice sets appear on fields with different names.
+        # href_matching, text_matching, url_matching on ActionStep all share the same choices.
+        "ActionStepMatchingEnum": ["contains", "regex", "exact"],
+        # effective_restriction_level and effective_privilege_level are SerializerMethodFields
+        # returning Dashboard.RestrictionLevel/PrivilegeLevel (IntegerChoices).  Since they
+        # go through the type-hint path (no x-spec-enum-id), they hash as (value, value).
+        "EffectivePrivilegeLevelEnum": [(21, 21), (37, 37)],
+        # effective_membership_level and level on OrganizationMember use the same int values.
+        "EffectiveMembershipLevelEnum": [(1, 1), (8, 8), (15, 15)],
+        # descriptionContentType and thankYouMessageDescriptionContentType share values.
+        "DescriptionContentTypeEnum": ["text", "html"],
+        # Field-name collisions: multiple different choice sets use the same field name
+        # across different serializer components.
+        "StringMatchOperatorEnum": [
+            "exact",
+            "is_not",
+            "icontains",
+            "not_icontains",
+            "starts_with",
+            "not_starts_with",
+            "ends_with",
+            "not_ends_with",
+            "regex",
+            "not_regex",
+        ],
+        # Survey url/device match types keep the operator subset without starts_with/ends_with.
+        "SurveyMatchTypeEnum": ["exact", "is_not", "icontains", "not_icontains", "regex", "not_regex"],
+        "DateOperatorEnum": ["is_date_exact", "is_date_before", "is_date_after"],
+        "DetailModeValueEnum": ["minimal", "detailed"],
+        "LogsAlertConfigurationStateEnum": "products.logs.backend.models.LogsAlertConfiguration.State",
+        # runtime_adapter on TaskRunCreateRequestSerializer (full set) vs
+        # ClaudeTaskRunCreateSchemaSerializer and CodexTaskRunCreateSchemaSerializer (subsets).
+        "RuntimeAdapterEnum": ["claude", "codex"],
+        "ClaudeRuntimeAdapterEnum": ["claude"],
+        "CodexRuntimeAdapterEnum": ["codex"],
+        # StaffCacheEntryResponse.source and StaffCacheEntryStatus.source share the same
+        # redis/miss choice set. Pin to a stable name so the collision doesn't auto-resolve
+        # to a hash name.
+        "StaffCacheSourceEnum": ["redis", "miss"],
+        # StaffCacheEntryQuery/Response's singular `cache` field and StaffCacheMutation's
+        # `caches` list item share the same evaluation/definitions choice set. Pin to a
+        # stable name so "cache" and "caches" don't collide into a hash name.
+        "StaffCacheKindEnum": ["evaluation", "definitions"],
     },
 }
 
-EXCEPTIONS_HANDLER = {"EXCEPTION_REPORTING": "insights.exceptions.exception_reporting"}
+EXCEPTIONS_HOG = {"EXCEPTION_REPORTING": "insights.exceptions.exception_reporting"}
 
 ####
 # Compression
@@ -379,6 +880,7 @@ GZIP_RESPONSE_ALLOW_LIST = get_list(
         "GZIP_RESPONSE_ALLOW_LIST",
         ",".join(
             [
+                "^/?external_surveys/[^/]+/?$",
                 "^/?api/plugin_config/\\d+/frontend/?$",
                 "^/?api/(environments|projects)/@current/property_definitions/?$",
                 "^/?api/(environments|projects)/\\d+/event_definitions/?$",
@@ -399,12 +901,14 @@ GZIP_RESPONSE_ALLOW_LIST = get_list(
                 "^/?api/(environments|projects)/\\d+/uploaded_media/?$",
                 "^/uploaded_media/.*$",
                 "^/api/element/stats/?$",
-                "^/api/(environments|projects)/\\d+/groups/property_definitions/?$",
                 "^/api/(environments|projects)/\\d+/cohorts/?$",
                 "^/api/(environments|projects)/\\d+/persons/?$",
                 "^/api/organizations/@current/plugins/?$",
                 "^api/(environments|projects)/@current/feature_flags/my_flags/?$",
                 "^/?api/(environments|projects)/\\d+/query/?$",
+                # Deploy-static source catalog (no user input or secrets reflected): several
+                # hundred KB of JSON that compresses ~7x.
+                "^/?api/(environments|projects)/(\\d+|@current)/external_data_sources/wizard/?$",
                 "^/?api/instance_status/?$",
                 "^/array/.*$",
             ]
@@ -445,7 +949,11 @@ DOMAIN_CONNECT_KEY_ID: str = os.getenv("DOMAIN_CONNECT_KEY_ID", "_dcpubkeyv1")
 ####
 # CDP
 
+# Deprecated compatibility fallback for the image CDN. New deployments should configure the
+# API-specific credentials below so a publishable key can never be reused for authenticated API calls.
 LOGO_DEV_TOKEN = get_from_env("LOGO_DEV_TOKEN", "")
+LOGO_DEV_PUBLISHABLE_KEY = get_from_env("LOGO_DEV_PUBLISHABLE_KEY", LOGO_DEV_TOKEN)
+LOGO_DEV_SECRET_KEY = get_from_env("LOGO_DEV_SECRET_KEY", "")
 
 ####
 # Feature flag billing analytics
@@ -467,6 +975,13 @@ REMOTE_CONFIG_CDN_PURGE_ENDPOINT = get_from_env("REMOTE_CONFIG_CDN_PURGE_ENDPOIN
 REMOTE_CONFIG_CDN_PURGE_TOKEN = get_from_env("REMOTE_CONFIG_CDN_PURGE_TOKEN", "")
 REMOTE_CONFIG_CDN_PURGE_DOMAINS = get_list(os.getenv("REMOTE_CONFIG_CDN_PURGE_DOMAINS", ""))
 
+# Versioned insights-js S3 bucket — enables versioned JS content serving when set
+POSTFN_JS_S3_BUCKET = get_from_env("POSTFN_JS_S3_BUCKET", "")
+# CDN cache control for array.js responses
+POSTFN_JS_CDN_MAX_AGE = int(os.getenv("POSTFN_JS_CDN_MAX_AGE", "3600"))
+POSTFN_JS_CDN_STALE_WHILE_REVALIDATE = int(os.getenv("POSTFN_JS_CDN_STALE_WHILE_REVALIDATE", "86400"))
+POSTFN_JS_CDN_STALE_IF_ERROR = int(os.getenv("POSTFN_JS_CDN_STALE_IF_ERROR", "86400"))
+
 ####
 # /capture
 
@@ -477,6 +992,23 @@ KAFKA_PRODUCE_ACK_TIMEOUT_SECONDS = int(os.getenv("KAFKA_PRODUCE_ACK_TIMEOUT_SEC
 
 # if `true` we highly increase the rate limit on /query endpoint and limit the number of concurrent queries
 API_QUERIES_ENABLED = get_from_env("API_QUERIES_ENABLED", False, type_cast=str_to_bool)
+
+####
+# /api/environments deprecation
+
+# Requests to /api/environments/* are served through the equivalent /api/projects/*
+# viewset via an in-process path rewrite — see insights.middleware.EnvironmentsRewriteMiddleware.
+# ISO date announced to integrators via the `Sunset` response header (RFC 8594) on
+# /api/environments/* responses. Empty string omits the header.
+API_ENVIRONMENTS_SUNSET_DATE = get_from_env("API_ENVIRONMENTS_SUNSET_DATE", "2026-07-31")
+
+# Query service SLO sampling rate. Each QueryRunner.run() call emits two events
+# (slo_operation_started + slo_operation_completed); unsampled, that's many millions of
+# events per day. The chosen rate is stamped on each event as `properties.sample_rate`
+# so dashboards can weight by 1/sample_rate to reconstruct true counts. Tunable via env
+# var without redeploy. 1.0 = emit every operation, 0.01 = 1% sample.
+# Defaults to 1.0 under TEST so assertions on emitted SLO events are deterministic.
+QUERY_SERVICE_SLO_SAMPLE_RATE = get_from_env("QUERY_SERVICE_SLO_SAMPLE_RATE", 1.0 if TEST else 0.01, type_cast=float)
 
 ####
 # Livestream
@@ -497,30 +1029,59 @@ PRESTOP_MARKER_FILE = get_from_env("PRESTOP_MARKER_FILE", "/tmp/insights_prestop
 # disables frontend side navigation hooks to make hot-reload work seamlessly
 DEV_DISABLE_NAVIGATION_HOOKS = get_from_env("DEV_DISABLE_NAVIGATION_HOOKS", False, type_cast=bool)
 
+# one-click passwordless login on the login page (also requires DEBUG)
+ALLOW_DEV_LOGIN = get_from_env("ALLOW_DEV_LOGIN", False, type_cast=str_to_bool)
+
 ####
 # Random/temporary
 # Everything that is supposed to be removed eventually
 
 # temporary flag to control new UUID version setting in insights-js
 # is set to v7 to test new generation but can be set to "og" to revert
-INSIGHTS_JS_UUID_VERSION = os.getenv("INSIGHTS_JS_UUID_VERSION", "v7")
+POSTFN_JS_UUID_VERSION = os.getenv("POSTFN_JS_UUID_VERSION", "v7")
 
 # Feature flag to enable InsightsFunctions daily digest email for specific teams
 # Comma-separated list of team IDs that should receive the digest
-INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS = get_list(get_from_env("INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS", ""))
+FN_FUNCTIONS_DAILY_DIGEST_TEAM_IDS = get_list(get_from_env("FN_FUNCTIONS_DAILY_DIGEST_TEAM_IDS", ""))
 
-# Comma-separated list of team ids allowed to receive the Error Tracking weekly digest
+# Maximum audience size for InsightsFlow batch triggers. Default that applies to all teams unless they
+# opt in to the elevated value below. Only used to inform the frontend UI; no backend enforcement.
+HOGFLOW_BATCH_TRIGGER_LIMIT = int(get_from_env("HOGFLOW_BATCH_TRIGGER_LIMIT", 50000))
+# Elevated maximum audience size, returned for teams listed in HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS.
+HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED = int(get_from_env("HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED", 100000))
+# Comma-separated list of team IDs that get the elevated batch trigger limit instead of the default.
+# Empty by default — everyone gets the 50k tier. Opt-in via env override for teams needing 100k.
+HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS: set[int] = {
+    int(team_id) for team_id in get_list(get_from_env("HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS", ""))
+}
+
+# Comma-separated list of org ids allowed to receive the Error Tracking weekly digest
 # "*" for all, empty to disable feature
-ERROR_TRACKING_WEEKLY_DIGEST_TEAM_IDS = get_list(get_from_env("ERROR_TRACKING_WEEKLY_DIGEST_TEAM_IDS", ""))
+ERROR_TRACKING_WEEKLY_DIGEST_ORG_IDS = get_list(get_from_env("ERROR_TRACKING_WEEKLY_DIGEST_ORG_IDS", ""))
 
 # Comma-separated list of email addresses allowed to receive the Error Tracking weekly digest
 # "*" for all
 ERROR_TRACKING_WEEKLY_DIGEST_ALLOWED_EMAILS = get_list(get_from_env("ERROR_TRACKING_WEEKLY_DIGEST_ALLOWED_EMAILS", ""))
 
+# webhook secret used initially for ET weekly digest workflow webhook but feel free to adopt it
+WORKFLOWS_WEBHOOK_SECRET = get_from_env("WORKFLOWS_WEBHOOK_SECRET", "")
+
 ####
 # OAuth
 
 OIDC_RSA_PRIVATE_KEY = os.getenv("OIDC_RSA_PRIVATE_KEY", "").replace("\\n", "\n")
+
+# Saving an RS256 OAuthApplication validates that this key is set, so a test run without one
+# (fork PRs, bare local environments) fails in every test that creates an OAuth app. Generate
+# an ephemeral key so tests never depend on an env-provided key.
+if TEST and not OIDC_RSA_PRIVATE_KEY:
+    OIDC_RSA_PRIVATE_KEY = generate_rsa_private_key_pem()
+
+OIDC_RSA_PRIVATE_KEY_INACTIVE_1 = os.getenv("OIDC_RSA_PRIVATE_KEY_INACTIVE_1", "").replace("\\n", "\n")
+OIDC_RSA_PRIVATE_KEY_INACTIVE_2 = os.getenv("OIDC_RSA_PRIVATE_KEY_INACTIVE_2", "").replace("\\n", "\n")
+OIDC_RSA_PRIVATE_KEYS_INACTIVE = [
+    key for key in (OIDC_RSA_PRIVATE_KEY_INACTIVE_1, OIDC_RSA_PRIVATE_KEY_INACTIVE_2) if key
+]
 
 OAUTH_EXPIRED_TOKEN_RETENTION_PERIOD = 60 * 60 * 24 * 30  # 30 days
 
@@ -528,12 +1089,17 @@ OAUTH2_PROVIDER = {
     "OIDC_ENABLED": True,
     "PKCE_REQUIRED": True,  # We require PKCE for all OAuth flows - including confidential clients
     "OIDC_RSA_PRIVATE_KEY": OIDC_RSA_PRIVATE_KEY,
+    "OIDC_RSA_PRIVATE_KEYS_INACTIVE": OIDC_RSA_PRIVATE_KEYS_INACTIVE,
     "SCOPES": {
         "openid": "OpenID Connect scope",
         "profile": "Access to user's profile",
         "email": "Access to user's email address",
         "introspection": "Access to introspect tokens",
         "*": "Full access to all scopes",
+        # Strict-excludes INTERNAL_API_SCOPE_OBJECTS (e.g. `signal_scout_internal`) so they
+        # can never be granted via the OAuth consent flow. The Signals scout harness token
+        # is minted by direct DB insert (insights/temporal/oauth.py) and never hits /authorize,
+        # so it does not need to appear here.
         **get_scope_descriptions(),
     },
     # Block dangerous URI schemes that could be used for attacks
@@ -569,10 +1135,123 @@ OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "insights.OAuthRefreshToken"
 OAUTH2_PROVIDER_ID_TOKEN_MODEL = "insights.OAuthIDToken"
 OAUTH2_PROVIDER_GRANT_MODEL = "insights.OAuthGrant"
 
+ID_JAG_ACCESS_TOKEN_TTL_SECONDS: int = get_from_env("ID_JAG_ACCESS_TOKEN_TTL_SECONDS", 60 * 60 * 2, type_cast=int)
+ID_JAG_CLOCK_SKEW_SECONDS: int = get_from_env("ID_JAG_CLOCK_SKEW_SECONDS", 30, type_cast=int)
+ID_JAG_JWKS_CACHE_TTL_SECONDS: int = get_from_env("ID_JAG_JWKS_CACHE_TTL_SECONDS", 60 * 60, type_cast=int)
+
+# Extra accepted ID-JAG `aud` values (the advertised authorization-server issuer) beyond SITE_URL —
+# e.g. the OAuth proxy "https://oauth.hanzo.ai" on Cloud. SITE_URL is always accepted.
+ID_JAG_ALLOWED_AUDIENCES: list[str] = get_list(get_from_env("ID_JAG_ALLOWED_AUDIENCES", ""))
+# Extra accepted ID-JAG `resource` values (the advertised resource-server identifier) beyond SITE_URL —
+# e.g. "https://mcp.hanzo.ai,https://mcp.us.hanzo.ai" on Cloud. SITE_URL is always accepted.
+ID_JAG_ALLOWED_RESOURCES: list[str] = get_list(get_from_env("ID_JAG_ALLOWED_RESOURCES", ""))
+
+TOOLBAR_OAUTH_STATE_TTL_SECONDS = 60 * 5
+TOOLBAR_OAUTH_EXCHANGE_TIMEOUT_SECONDS = 10
+TOOLBAR_OAUTH_APPLICATION_NAME = "Insights Toolbar"
+TOOLBAR_OAUTH_SCOPES = [
+    "openid",
+    "user:read",
+    "action:read",
+    "action:write",
+    "feature_flag:read",
+    "experiment:read",
+    "experiment:write",
+    "query:read",
+    "product_tour:read",
+    "product_tour:write",
+    "heatmap:read",
+    "element:read",
+    "uploaded_media:write",
+    "survey:read",
+    "survey:write",
+    "field_note:read",
+    "field_note:write",
+]
+
+ELEMENT_STATS_DEFAULT_LIMIT = get_from_env("ELEMENT_STATS_DEFAULT_LIMIT", 50_000, type_cast=int)
+
+# AI gateway internal admin API (wallet read + credit top-up from Django admin).
+# Server-side shared secret; never expose the token to the browser.
+AI_GATEWAY_INTERNAL_URL = get_from_env("AI_GATEWAY_INTERNAL_URL", "")
+AI_GATEWAY_INTERNAL_TOKEN = get_from_env("AI_GATEWAY_INTERNAL_TOKEN", "")
+
+# AI gateway inference endpoint: OpenAI-compatible URL (include /v1) + phs_ project
+# secret for routing LLM calls through the gateway. Unset = direct to the provider.
+AI_GATEWAY_URL = get_from_env("AI_GATEWAY_URL", "")
+AI_GATEWAY_API_KEY = get_from_env("AI_GATEWAY_API_KEY", "")
+
 # Sharing configuration settings
 SHARING_TOKEN_GRACE_PERIOD_SECONDS = 60 * 5  # 5 minutes
 
-SURVEYS_API_USE_HYPERCACHE_TOKENS = get_list(os.getenv("SURVEYS_API_USE_HYPERCACHE_TOKENS", ""))
-SURVEYS_API_USE_REMOTE_CONFIG_COMPARE = get_from_env(
-    "SURVEYS_API_USE_REMOTE_CONFIG_COMPARE", False, type_cast=str_to_bool
+# Teams force-enrolled in web analytics lazy precompute: the eligibility gate
+# bypasses the org rollout flag for these, and the eager warmer uses the same
+# list as its audience — one source of truth so warmer and reader cannot drift.
+# The default enrolls the Cloud dogfooding team (project 2) ONLY on Cloud —
+# never self-hosted, where lazy precompute is Cloud-only and project id 2 is an
+# arbitrary customer project. A comma-separated env var overrides it on any
+# deployment; changing enrollment is a deploy-time env-var change (Django +
+# Dagster), not runtime-overridable.
+_LAZY_PRECOMPUTE_DEFAULT_TEAM_IDS = (
+    "2" if (CLOUD_DEPLOYMENT or "").upper() in ("EU", "US", "DEV", "E2E") and not TEST else ""
 )
+WEB_ANALYTICS_LAZY_PRECOMPUTE_TEAM_IDS: list[int] = [
+    int(team_id)
+    for team_id in get_list(get_from_env("WEB_ANALYTICS_LAZY_PRECOMPUTE_TEAM_IDS", _LAZY_PRECOMPUTE_DEFAULT_TEAM_IDS))
+]
+
+# Upper bound on the number of distinct precompute shapes (query cache keys) a single
+# team may have live at once. Any filter combination becomes its own shape, so a
+# pathological team could otherwise mint unbounded namespaces. This is a coarse backstop,
+# not a quota: a team builds shapes freely until it reaches this many, after which only
+# *new* shapes fall back to the live query — existing shapes keep serving and refreshing.
+# Sized well above any realistic team; 0 disables the cap.
+WEB_ANALYTICS_PRECOMPUTE_MAX_SHAPES_PER_TEAM: int = get_from_env(
+    "WEB_ANALYTICS_PRECOMPUTE_MAX_SHAPES_PER_TEAM", 1000, type_cast=int
+)
+
+# Teams whose web analytics queries (overview, paths tile) skip the events↔sessions join
+# when nothing in the query (property filters, conversion goal, test-account filters,
+# sampling) constrains which sessions qualify. In that shape the join only multiplies
+# cost: the sessions-side subquery is re-executed per shard of the events cluster. Trial
+# rollout is per-team via comma-separated env var; defaults to the Cloud dogfooding team
+# (project 2, same default as the lazy precompute lists) so the fast paths activate there
+# on deploy, and to empty on self-hosted where project id 2 is an arbitrary customer.
+WEB_ANALYTICS_NO_JOIN_TEAM_IDS: list[int] = [
+    int(team_id)
+    for team_id in get_list(get_from_env("WEB_ANALYTICS_NO_JOIN_TEAM_IDS", _LAZY_PRECOMPUTE_DEFAULT_TEAM_IDS))
+]
+
+# Percentage-of-teams rollout for the no-join fast paths, on top of the explicit
+# allowlist above. Bucketing is deterministic per team (team_id % 100) so everyone
+# on a team sees numbers from the same code path. 0 disables (allowlist only),
+# 100 enrolls every team. Defaults to 100 on US and EU Cloud; self-hosted stays 0.
+# Env var overrides in either direction and is the kill switch.
+_NO_JOIN_DEFAULT_ROLLOUT_PERCENT = 100 if (CLOUD_DEPLOYMENT or "").upper() in ("US", "EU") and not TEST else 0
+WEB_ANALYTICS_NO_JOIN_ROLLOUT_PERCENT: int = get_from_env(
+    "WEB_ANALYTICS_NO_JOIN_ROLLOUT_PERCENT", _NO_JOIN_DEFAULT_ROLLOUT_PERCENT, type_cast=int
+)
+
+
+# Teams whose *filtered* web overview queries (event-property filters only) run as two
+# independent scans linked by a session-id set: the events side evaluates the filters and
+# collects the matching session ids, then the sessions side aggregates only over that id
+# set (pushed below the per-session GROUP BY, executed once via GLOBAL IN instead of per
+# shard). Allowlist only — no percent rollout yet. Defaults to the Cloud dogfooding team
+# (project 2) on US Cloud, where the pattern was validated against prod; empty on EU
+# (pending its Datastore upgrade + verification) and on self-hosted, where project id 2
+# is an arbitrary customer.
+_SESSION_ID_SET_DEFAULT_TEAM_IDS = "2" if (CLOUD_DEPLOYMENT or "").upper() == "US" and not TEST else ""
+WEB_ANALYTICS_SESSION_ID_SET_TEAM_IDS: list[int] = [
+    int(team_id)
+    for team_id in get_list(get_from_env("WEB_ANALYTICS_SESSION_ID_SET_TEAM_IDS", _SESSION_ID_SET_DEFAULT_TEAM_IDS))
+]
+# Admission control for long-lived SSE streams: the maximum number of streams
+# one worker process serves concurrently. Above the cap, sse_streaming_response()
+# returns 503 with a jittered Retry-After instead of opening the stream, keeping
+# processes unpinned and health probes responsive. Recovery depends on the
+# client: HTTP-level retriers honor Retry-After, but a native EventSource treats
+# any non-200 as fatal (readyState CLOSED, no auto-reconnect) and ignores the
+# header, so those consumers must reconnect from their onerror handler.
+# 0 rejects every stream (emergency lever).
+SSE_MAX_CONCURRENT_STREAMS_PER_PROCESS = get_from_env("SSE_MAX_CONCURRENT_STREAMS_PER_PROCESS", 500, type_cast=int)

@@ -1,19 +1,25 @@
 import { Message } from 'node-rdkafka'
 import { Counter } from 'prom-client'
 
-import { LegacyPluginAppMetrics } from '~/cdp/legacy-plugins/app-metrics'
+import { KafkaConsumerInterface, createKafkaConsumer } from '~/common/kafka/consumer'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
+import { PostgresUse } from '~/common/utils/db/postgres'
+import { parseJSON } from '~/common/utils/json-parse'
+import { LazyLoader } from '~/common/utils/lazy-loader'
+import { logger } from '~/common/utils/logger'
+import { PromiseScheduler } from '~/common/utils/promise-scheduler'
 
-import { StreamConsumer } from '../../stream/consumer'
-import { HealthCheckResult, Hub, ISOTimestamp, PostIngestionEvent, ProjectId, RawDatastoreEvent } from '../../types'
-import { PostgresUse } from '../../utils/db/postgres'
-import { parseJSON } from '../../utils/json-parse'
-import { LazyLoader } from '../../utils/lazy-loader'
-import { logger } from '../../utils/logger'
-import { PromiseScheduler } from '../../utils/promise-scheduler'
+import {
+    HealthCheckResult,
+    ISOTimestamp,
+    PluginsServerConfig,
+    PostIngestionEvent,
+    ProjectId,
+    RawDatastoreEvent,
+} from '../../types'
 import { LegacyWebhookService } from '../legacy-webhooks/legacy-webhook-service'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
-import {
+import type {
     CyclotronJobInvocation,
     CyclotronJobInvocationInsightsFunction,
     InsightsFunctionInvocationGlobals,
@@ -21,7 +27,7 @@ import {
 } from '../types'
 import { convertToInsightsFunctionInvocationGlobals } from '../utils'
 import { createInvocation } from '../utils/invocation-utils'
-import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
+import { CdpConsumerBase, CdpConsumerBaseConfig, CdpConsumerBaseDeps } from './cdp-base.consumer'
 import { counterParseError } from './metrics'
 
 export type LightweightPluginConfig = {
@@ -49,51 +55,36 @@ const legacyPluginExecutionResultCounter = new Counter({
     labelNames: ['result', 'template_id'],
 })
 
-/**
- * Hub type for CdpLegacyEventsConsumer.
- * Extends CdpConsumerBaseHub with legacy plugin-specific fields.
- */
-export type CdpLegacyEventsConsumerHub = CdpConsumerBaseHub &
-    Pick<
-        Hub,
-        | 'CDP_LEGACY_EVENT_CONSUMER_TOPIC'
-        | 'CDP_LEGACY_EVENT_CONSUMER_GROUP_ID'
-        | 'streamProducer'
-        | 'APP_METRICS_FLUSH_FREQUENCY_MS'
-        | 'APP_METRICS_FLUSH_MAX_QUEUE_SIZE'
-        | 'teamManager'
-        | 'SITE_URL'
-        // LegacyWebhookService
-        | 'groupTypeManager'
-        | 'groupRepository'
-    >
+export type CdpLegacyEventsConsumerConfig = CdpConsumerBaseConfig &
+    Pick<PluginsServerConfig, 'CDP_LEGACY_EVENT_CONSUMER_TOPIC' | 'CDP_LEGACY_EVENT_CONSUMER_GROUP_ID' | 'SITE_URL'>
 
 /**
  * This is a temporary consumer that hooks into the existing onevent consumer group
- * It currently just runs the same logic as the old one but with node-rdkafka as the consumer tech which should improve things
- * We can then use this to gradually move over to the new custom functions
+ * It currently just runs the same logic as the old one but with noderdkafka as the consumer tech which should improve things
+ * We can then use this to gradually move over to the new script functions
  */
-export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsConsumerHub> {
+export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsConsumerConfig> {
     protected name = 'CdpLegacyEventsConsumer'
     protected promiseScheduler = new PromiseScheduler()
-    protected streamConsumer: StreamConsumer
+    protected kafkaConsumer: KafkaConsumerInterface
 
     private pluginConfigsLoader: LazyLoader<PluginConfigInsightsFunction[]>
     private legacyPluginExecutor: LegacyPluginExecutorService
     private legacyWebhookService: LegacyWebhookService
 
-    private appMetrics: LegacyPluginAppMetrics
+    constructor(
+        config: CdpLegacyEventsConsumerConfig,
+        protected override deps: CdpConsumerBaseDeps
+    ) {
+        super(config, deps)
 
-    constructor(hub: CdpLegacyEventsConsumerHub) {
-        super(hub)
-
-        this.streamConsumer = new StreamConsumer({
-            groupId: hub.CDP_LEGACY_EVENT_CONSUMER_GROUP_ID,
-            topic: hub.CDP_LEGACY_EVENT_CONSUMER_TOPIC,
+        this.kafkaConsumer = createKafkaConsumer({
+            groupId: config.CDP_LEGACY_EVENT_CONSUMER_GROUP_ID,
+            topic: config.CDP_LEGACY_EVENT_CONSUMER_TOPIC,
         })
 
-        this.legacyPluginExecutor = new LegacyPluginExecutorService(hub.postgres, hub.geoipService)
-        this.legacyWebhookService = new LegacyWebhookService(hub)
+        this.legacyPluginExecutor = new LegacyPluginExecutorService(deps.postgres, deps.geoipService)
+        this.legacyWebhookService = new LegacyWebhookService(deps.postgres, deps.teamManager, deps.pubSub)
 
         this.pluginConfigsLoader = new LazyLoader({
             name: 'plugin_config_insights_functions',
@@ -102,16 +93,10 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             refreshBackgroundAgeMs: 300000, // 5 minutes
             bufferMs: 10, // 10ms buffer for batching
         })
-
-        this.appMetrics = new LegacyPluginAppMetrics(
-            hub.streamProducer,
-            hub.APP_METRICS_FLUSH_FREQUENCY_MS,
-            hub.APP_METRICS_FLUSH_MAX_QUEUE_SIZE
-        )
     }
 
     private async loadAndBuildInsightsFunctions(teamIds: string[]): Promise<Record<string, PluginConfigInsightsFunction[]>> {
-        const { rows } = await this.hub.postgres.query(
+        const { rows } = await this.deps.postgres.query(
             PostgresUse.COMMON_READ,
             `SELECT
                 insights_pluginconfig.id,
@@ -138,7 +123,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         const attachmentsMap: Record<number, Record<string, any>> = {}
 
         if (pluginConfigIds.length > 0) {
-            const { rows: attachmentRows } = await this.hub.postgres.query(
+            const { rows: attachmentRows } = await this.deps.postgres.query(
                 PostgresUse.COMMON_READ,
                 `SELECT plugin_config_id, key, contents
                 FROM insights_pluginattachment
@@ -177,7 +162,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             }
         }
 
-        // Group by team_id and build custom functions directly
+        // Group by team_id and build script functions directly
         const results: Record<string, PluginConfigInsightsFunction[]> = {}
 
         for (const row of rows) {
@@ -213,7 +198,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                     })
                 }
             } catch (error: any) {
-                logger.warn('Failed to convert plugin config to custom function', {
+                logger.warn('Failed to convert plugin config to script function', {
                     pluginConfigId: row.id,
                     error: error?.message,
                 })
@@ -239,7 +224,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         }
 
         // Extract plugin ID from URL (following the migration.py pattern)
-        const pluginId = pluginConfig.plugin.url.replace('inline://', '').replace('https://github.com/hanzoai/', '')
+        const pluginId = pluginConfig.plugin.url.replace('inline://', '').replace('https://github.com/Insights/', '')
 
         const templateId = `plugin-${pluginId}`
 
@@ -315,14 +300,15 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                 })
                 .inc()
 
-            void this.promiseScheduler.schedule(
-                this.appMetrics.queueMetric({
-                    teamId: event.teamId,
-                    pluginConfigId,
-                    category: 'onEvent',
-                    failures: error ? 1 : 0,
-                    successes: error ? 0 : 1,
-                })
+            this.insightsFunctionMonitoringService.queueAppMetric(
+                {
+                    team_id: event.teamId,
+                    app_source_id: String(pluginConfigId),
+                    metric_kind: error ? 'failure' : 'success',
+                    metric_name: error ? 'failed' : 'succeeded',
+                    count: 1,
+                },
+                'legacy_plugin'
             )
         }
     }
@@ -342,17 +328,17 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         }
     }
 
-    // This consumer always parses from stream
-    @instrumented('cdpConsumer.handleEachBatch.parseStreamMessages')
-    public async _parseStreamBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
+    // This consumer always parses from kafka
+    @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
+    public async _parseKafkaBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
         const events: InsightsFunctionInvocationGlobals[] = []
 
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
-                    const team = await this.hub.teamManager.getTeam(datastoreEvent.team_id)
+                    const team = await this.deps.teamManager.getTeam(clickHouseEvent.team_id)
 
                     if (!team) {
                         return
@@ -364,7 +350,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                         return
                     }
 
-                    events.push(convertToInsightsFunctionInvocationGlobals(datastoreEvent, team, this.hub.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.config.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()
@@ -404,11 +390,11 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         })
     }
 
-    public async start(): Promise<void> {
+    public override async start(): Promise<void> {
         await super.start()
         await this.legacyWebhookService.start()
         // Start consuming messages
-        await this.streamConsumer.connect(async (messages) => {
+        await this.kafkaConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, {
                 size: messages.length,
             })
@@ -416,26 +402,30 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             return await instrumentFn('cdpLegacyConsumer.handleEachBatch', async () => {
                 const [webhookBatch, pluginBatch] = await Promise.all([
                     this.legacyWebhookService.processBatch(messages),
-                    this._parseStreamBatch(messages).then((invocations) => this.processBatch(invocations)),
+                    this._parseKafkaBatch(messages).then((invocations) => this.processBatch(invocations)),
                 ])
-                return { backgroundTask: Promise.all([webhookBatch.backgroundTask, pluginBatch.backgroundTask]) }
+                return {
+                    backgroundTask: Promise.all([webhookBatch.backgroundTask, pluginBatch.backgroundTask]).then(() =>
+                        this.invocationResultsService.flush()
+                    ),
+                }
             })
         })
     }
 
-    public async stop(): Promise<void> {
+    public override async stop(): Promise<void> {
         logger.info('💤', 'Stopping consumer...')
-        await this.streamConsumer.disconnect()
+        await this.kafkaConsumer.disconnect()
         logger.info('💤', 'Stopping legacy webhook service...')
         await this.legacyWebhookService.stop()
-        logger.info('💤', 'Flushing app metrics before stopping...')
-        await this.appMetrics.flush()
+        logger.info('💤', 'Flushing invocation results before stopping...')
+        await this.invocationResultsService.flush()
         // IMPORTANT: super always comes last
         await super.stop()
         logger.info('💤', 'Consumer stopped!')
     }
 
     public isHealthy(): HealthCheckResult {
-        return this.streamConsumer.isHealthy()
+        return this.kafkaConsumer.isHealthy()
     }
 }

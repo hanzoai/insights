@@ -1,0 +1,28 @@
+{
+    "name": "@hanzo/products-replay-vision",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests -v --tb=short"
+    },
+    "dependencies": {
+        "@hanzo/quill-charts": "workspace:*",
+        "kea": "catalog:",
+        "kea-forms": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:",
+        "lodash.uniqby": "^4.7.0"
+    },
+    "devDependencies": {
+        "@testing-library/react": "^14.3.1",
+        "kea-test-utils": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/brand": "catalog:",
+        "@hanzo/icons": "catalog:",
+        "@hanzo/elements": "*",
+        "@storybook/react": "catalog:",
+        "@types/react": "*",
+        "clsx": "*",
+        "react": "*",
+        "typescript": "*"
+    }
+}

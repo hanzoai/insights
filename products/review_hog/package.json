@@ -1,0 +1,19 @@
+{
+    "name": "@hanzo/products-review-script",
+    "scripts": {
+        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests backend/reviewer/tests -v --tb=short"
+    },
+    "dependencies": {
+        "kea": "catalog:",
+        "kea-loaders": "catalog:",
+        "kea-router": "catalog:"
+    },
+    "devDependencies": {
+        "kea-test-utils": "catalog:"
+    },
+    "peerDependencies": {
+        "@hanzo/icons": "catalog:",
+        "@types/react": "*",
+        "react": "*"
+    }
+}

@@ -33,7 +33,7 @@ def argmax_select(
     │ b            │      3 │ -- argMax = 'b' because it the first not Null value, max(b) is from another row!
     └──────────────┴────────┘
 
-    see more: https://clickhouse.com/docs/sql-reference/aggregate-functions/reference/argmax
+    see more: https://datastore.com/docs/sql-reference/aggregate-functions/reference/argmax
 
     we use tuple to force nulls to be treated as values and tupleElement select it after the call
     """

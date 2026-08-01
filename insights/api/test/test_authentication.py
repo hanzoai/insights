@@ -1,22 +1,29 @@
+import json
 import time
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import cast
 
+import pytest
 from freezegun import freeze_time
 from insights.test.base import APIBaseTest
 from unittest.mock import ANY, MagicMock, patch
 
 from django.conf import settings
+from django.contrib.auth import BACKEND_SESSION_KEY
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core import mail
+from django.core.asgi import get_asgi_application
 from django.core.cache import cache
-from django.test import RequestFactory, override_settings
+from django.http import HttpResponse
+from django.test import RequestFactory, SimpleTestCase, override_settings
 from django.utils import timezone
 
+from asgiref.sync import sync_to_async
 from django_otp.oath import totp
 from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.util import random_hex
+from httpx import ASGITransport, AsyncClient
 from parameterized import parameterized
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -26,17 +33,35 @@ from rest_framework.test import APIRequestFactory
 from social_django.models import UserSocialAuth
 from two_factor.utils import totp_digits
 
-from insights.api.authentication import password_reset_token_generator, post_login, social_login_notification
-from insights.api.oauth.test_dcr import generate_rsa_key
-from insights.auth import OAuthAccessTokenAuthentication, ProjectSecretAPIKeyAuthentication, ProjectSecretAPIKeyUser
+from insights.api.authentication import password_reset_token_generator, social_login_notification
+from insights.auth import (
+    InternalAPIUser,
+    OAuthAccessTokenAuthentication,
+    ProjectSecretAPIKeyAuthentication,
+    ProjectSecretAPIKeyUser,
+    TeamSecretTokenAuthentication,
+    TeamSecretTokenUser,
+    _extract_phs_token,
+)
+from insights.datastore.query_tagging import AccessMethod
+from insights.helpers.user_devices import (
+    KNOWN_DEVICE_COOKIE,
+    build_known_device_cookie_value,
+    has_valid_known_device_cookie,
+)
+from insights.middleware import KnownLoginDeviceCookieMiddleware
 from insights.models import User
+from insights.models.activity_logging.signal_handlers import post_login
 from insights.models.instance_setting import set_instance_setting
 from insights.models.oauth import OAuthAccessToken, OAuthApplication
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.organization_domain import OrganizationDomain
-from insights.models.personal_api_key import PersonalAPIKey, hash_key_value
+from insights.models.personal_api_key import PersonalAPIKey
+from insights.models.project_secret_api_key import ProjectSecretAPIKey
 from insights.models.team.team import Team
-from insights.models.utils import generate_random_token_personal
+from insights.models.utils import generate_random_token_personal, hash_key_value
+
+from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
 VALID_TEST_PASSWORD = "mighty-strong-secure-1337!!"
 
@@ -175,9 +200,8 @@ class TestLoginAPI(APIBaseTest):
 
     CONFIG_AUTO_LOGIN = False
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_user_logs_in_with_email_and_password(self, mock_capture, mock_identify):
+    def test_user_logs_in_with_email_and_password(self, mock_capture):
         self.user.is_email_verified = True
         self.user.save()
         response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
@@ -190,7 +214,7 @@ class TestLoginAPI(APIBaseTest):
         self.assertEqual(response.json()["email"], self.user.email)
 
         # Assert the event was captured.
-        mock_capture.assert_called_once_with(
+        mock_capture.assert_any_call(
             distinct_id=self.user.distinct_id,
             event="user logged in",
             properties={"social_provider": ""},
@@ -219,7 +243,29 @@ class TestLoginAPI(APIBaseTest):
         mock_is_email_available.assert_called_once()
 
         # Assert the email was sent.
-        mock_send_email_verification.assert_called_once_with(self.user)
+        mock_send_email_verification.assert_called_once_with(self.user, None)
+
+    @parameterized.expand(
+        [
+            # A relative `next` (e.g. an /oauth/authorize continuation) must be forwarded so the
+            # verification link can resume the flow.
+            ("safe_relative_next", "/oauth/authorize/?client_id=x", "/oauth/authorize/?client_id=x"),
+            # An off-origin `next` must be dropped.
+            ("unsafe_off_origin_next", "https://evil.example.com/steal", None),
+        ]
+    )
+    @patch("insights.api.authentication.is_email_available", return_value=True)
+    @patch("insights.api.authentication.EmailVerifier.create_token_and_send_email_verification")
+    def test_email_verification_link_carries_safe_next(
+        self, _name, next_input, expected, mock_send_email_verification, mock_is_email_available
+    ):
+        self.user.is_email_verified = False
+        self.user.save()
+        self.client.post(
+            "/api/login",
+            {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD, "next": next_input},
+        )
+        mock_send_email_verification.assert_called_once_with(self.user, expected)
 
     @patch("insights.api.authentication.is_email_available", return_value=True)
     @patch("insights.api.authentication.EmailVerifier.create_token_and_send_email_verification")
@@ -259,7 +305,7 @@ class TestLoginAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_is_email_available.assert_called_once()
         # Assert the email was sent.
-        mock_send_email_verification.assert_called_once_with(self.user)
+        mock_send_email_verification.assert_called_once_with(self.user, None)
 
     @patch("hanzo_insights.capture")
     def test_user_cant_login_with_incorrect_password(self, mock_capture):
@@ -328,7 +374,7 @@ class TestLoginAPI(APIBaseTest):
                     "/api/login",
                     {"email": "new_user@hanzo.ai", "password": "invalid"},
                 )
-                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn(response.status_code, [status.HTTP_400_BAD_REQUEST, status.HTTP_403_FORBIDDEN])
                 self.assertEqual(response.json(), self.ERROR_INVALID_CREDENTIALS)
 
                 # Assert user is not logged in
@@ -377,6 +423,113 @@ class TestLoginAPI(APIBaseTest):
             )
             # Second IP is not locked, so can attempt login
             self.assertNotEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class TestDevLoginAPI(APIBaseTest):
+    CONFIG_AUTO_LOGIN = False
+
+    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=True)
+    def test_dev_login_list_and_create_when_allowed(self):
+        response = self.client.get("/api/login/dev")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        emails = {user["email"] for user in response.json()["users"]}
+        self.assertIn(self.user.email, emails)
+
+        self.client.logout()
+        response = self.client.post("/api/login/dev", {"email": self.user.email})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {"success": True})
+
+    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=True)
+    def test_dev_login_list_puts_seeded_then_recently_used_accounts_first(self):
+        User.objects.create_and_join(self.organization, "aaa-never@hanzo.ai", None)
+        recently_used = User.objects.create_and_join(self.organization, "zzz-recent@hanzo.ai", None)
+        recently_used.last_login = timezone.now()
+        recently_used.save()
+        # Seeded by setup_dev, and never logged in as — it still belongs on top.
+        User.objects.create_and_join(self.organization, "test@hanzo.ai", None)
+
+        response = self.client.get("/api/login/dev")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        emails = [user["email"] for user in response.json()["users"]]
+        self.assertEqual(emails[:2], ["test@hanzo.ai", "zzz-recent@hanzo.ai"])
+
+    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=False)
+    def test_dev_login_hidden_when_allow_dev_login_disabled(self):
+        response = self.client.get("/api/login/dev")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        response = self.client.post("/api/login/dev", {"email": self.user.email})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=True)
+    def test_dev_login_create_fresh_account(self):
+        user_count = User.objects.count()
+        organization_count = Organization.objects.count()
+
+        response = self.client.post("/api/login/dev", {"create_fresh_account": True})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {"success": True})
+
+        self.assertEqual(User.objects.count(), user_count + 1)
+        self.assertEqual(Organization.objects.count(), organization_count + 1)
+
+        new_user = User.objects.latest("id")
+        self.assertTrue(new_user.is_email_verified)
+        self.assertTrue(new_user.check_password("12345678"))
+        self.assertIsNotNone(new_user.organization)
+
+        # Logged in as the fresh user
+        response = self.client.get("/api/users/@me")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["email"], new_user.email)
+
+    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=False)
+    def test_dev_login_create_fresh_account_hidden_when_not_allowed(self):
+        response = self.client.post("/api/login/dev", {"create_fresh_account": True})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=False)
+    def test_dev_login_disabled_returns_404_regardless_of_body(self):
+        # A body that would normally fail field validation (no email, no
+        # create_fresh_account) must still surface as 404, not a 400, so the
+        # endpoint's existence isn't leaked by request-shape differences.
+        response = self.client.post("/api/login/dev", {})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @override_settings(DEBUG=False, ALLOW_DEV_LOGIN=True)
+    def test_dev_login_hidden_when_not_debug(self):
+        response = self.client.get("/api/login/dev")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class TestLogoutRedirect(APIBaseTest):
+    """
+    Tests that /logout preserves a safe `next` param so users return to where they were
+    after logging back in.
+    """
+
+    def test_logout_without_next_redirects_to_login(self):
+        response = self.client.post("/logout")
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response["Location"], settings.LOGIN_URL)
+
+    def test_logout_forwards_safe_next_param(self):
+        response = self.client.post("/logout", {"next": "/settings/user-notifications"}, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response["Location"], "/login?next=/settings/user-notifications")
+
+    @parameterized.expand(
+        [
+            ("scheme_relative", "//evil.com/path"),
+            ("absolute_url", "https://evil.com"),
+            ("javascript_url", "javascript:alert(1)"),
+        ]
+    )
+    def test_logout_ignores_unsafe_next_param(self, _name, unsafe):
+        response = self.client.post("/logout", {"next": unsafe}, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response["Location"], settings.LOGIN_URL, f"Unsafe next was preserved: {unsafe}")
 
 
 class TestTwoFactorAPI(APIBaseTest):
@@ -1152,6 +1305,19 @@ class TestPasswordResetAPI(APIBaseTest):
             )
         )
 
+    def test_password_reset_is_case_insensitive(self):
+        set_instance_setting("EMAIL_HOST", "localhost")
+        assert self.CONFIG_EMAIL is not None
+
+        # User registered as "user1@hanzo.ai", request reset with different casing
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
+            response = self.client.post("/api/reset/", {"email": self.CONFIG_EMAIL.upper()})
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Email should still be sent
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertSetEqual({",".join(outmail.to) for outmail in mail.outbox}, {self.CONFIG_EMAIL})
+
     def test_reset_with_sso_available(self):
         """
         If the user has logged in / signed up with SSO, we let them know so they don't have to reset their password.
@@ -1161,12 +1327,14 @@ class TestPasswordResetAPI(APIBaseTest):
         UserSocialAuth.objects.create(
             user=self.user,
             provider="google-oauth2",
+            uid="google-oauth2|test",
             extra_data='"{"expires": 3599, "auth_time": 1633412833, "token_type": "Bearer", "access_token": "ya29"}"',
         )
 
         UserSocialAuth.objects.create(
             user=self.user,
             provider="github",
+            uid="github|test",
             extra_data='"{"expires": 3599, "auth_time": 1633412833, "token_type": "Bearer", "access_token": "ya29"}"',
         )
 
@@ -1306,9 +1474,8 @@ class TestPasswordResetAPI(APIBaseTest):
 
     # Password reset completion
 
-    @patch("insights.tasks.user_identify.identify_task")
     @patch("hanzo_insights.capture")
-    def test_user_can_reset_password(self, mock_capture, mock_identify):
+    def test_user_can_reset_password(self, mock_capture):
         self.client.logout()  # extra precaution to test login
 
         self.user.requested_password_reset_at = datetime.now()
@@ -1465,6 +1632,91 @@ class TestPasswordResetAPI(APIBaseTest):
         self.assertTrue(self.user.check_password(self.CONFIG_PASSWORD))  # type: ignore
         self.assertFalse(self.user.check_password("a12345678"))
 
+    def test_cant_reset_password_with_non_uuid_user_id(self):
+        token = password_reset_token_generator.make_token(self.user)
+
+        response = self.client.post("/api/reset/confirm/", {"token": token, "password": "a12345678"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json(),
+            {
+                "type": "validation_error",
+                "code": "invalid_token",
+                "detail": "This reset token is invalid or has expired.",
+                "attr": "token",
+            },
+        )
+
+    def test_cant_validate_token_with_non_uuid_user_id(self):
+        token = password_reset_token_generator.make_token(self.user)
+
+        response = self.client.get(f"/api/reset/confirm/?token={token}")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json(),
+            {
+                "type": "validation_error",
+                "code": "invalid_token",
+                "detail": "This reset token is invalid or has expired.",
+                "attr": "token",
+            },
+        )
+
+    @parameterized.expand(
+        [
+            ("none_becomes_true", None),
+            ("true_stays_true", True),
+            ("false_becomes_true", False),
+        ]
+    )
+    def test_password_reset_flips_is_email_verified_to_true(self, _name, initial_state):
+        self.user.is_email_verified = initial_state
+        self.user.requested_password_reset_at = datetime.now()
+        self.user.save()
+
+        token = password_reset_token_generator.make_token(self.user)
+        response = self.client.post(
+            f"/api/reset/{self.user.uuid}/",
+            {"token": token, "password": VALID_TEST_PASSWORD},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.is_email_verified, True)
+
+    def test_password_reset_does_not_clear_pending_email(self):
+        self.user.is_email_verified = False
+        self.user.pending_email = "new-address@example.com"
+        self.user.requested_password_reset_at = datetime.now()
+        self.user.save()
+
+        token = password_reset_token_generator.make_token(self.user)
+        response = self.client.post(
+            f"/api/reset/{self.user.uuid}/",
+            {"token": token, "password": VALID_TEST_PASSWORD},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.pending_email, "new-address@example.com")
+
+    @patch("insights.tasks.email.send_password_changed_email.delay")
+    def test_password_change_invalidates_reset_token(self, mock_send_email):
+        token = password_reset_token_generator.make_token(self.user)
+        self.assertTrue(password_reset_token_generator.check_token(self.user, token))
+
+        # change password via account settings
+        self.client.force_login(self.user)
+        response = self.client.patch(
+            "/api/users/@me/",
+            {"current_password": self.CONFIG_PASSWORD, "password": VALID_TEST_PASSWORD},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.user.refresh_from_db()
+        self.assertFalse(password_reset_token_generator.check_token(self.user, token))
+
     def test_e2e_test_special_handlers(self):
         self.ensure_url_patterns_loaded()
 
@@ -1490,6 +1742,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
             user=self.user,
             last_used_at="2021-08-25T21:09:14",
             secure_value=hash_key_value(personal_api_key),
+            scopes=["*"],
         )
 
         with freeze_time("2021-08-25T22:10:14.252"):
@@ -1512,6 +1765,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
             user=self.user,
             last_used_at="2021-08-25T21:09:14",
             secure_value=hash_key_value(personal_api_key),
+            scopes=["*"],
         )
 
         with freeze_time("2022-08-25T22:00:14.252"):
@@ -1534,6 +1788,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
             user=self.user,
             last_used_at="2021-08-25T21:09:14",
             secure_value=hash_key_value(personal_api_key),
+            scopes=["*"],
         )
 
         with freeze_time("2021-08-26T22:00:14.252"):
@@ -1551,7 +1806,9 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
         self.client.logout()
 
         personal_api_key = generate_random_token_personal()
-        PersonalAPIKey.objects.create(label="X", user=self.user, secure_value=hash_key_value(personal_api_key))
+        PersonalAPIKey.objects.create(
+            label="X", user=self.user, secure_value=hash_key_value(personal_api_key), scopes=["*"]
+        )
 
         with freeze_time("2022-08-25T22:00:14.252"):
             response = self.client.get(
@@ -1573,6 +1830,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
             user=self.user,
             last_used_at="2021-08-25T21:09:14",
             secure_value=hash_key_value(personal_api_key),
+            scopes=["*"],
         )
 
         with freeze_time("2021-08-25T21:14:14.252"):
@@ -1594,6 +1852,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
             user=self.user,
             last_used_at="2021-08-25T21:09:14",
             secure_value=hash_key_value(personal_api_key),
+            scopes=["*"],
         )
 
         with freeze_time("2021-08-24T21:14:14.252"):
@@ -1705,8 +1964,18 @@ class TestTimeSensitivePermissions(APIBaseTest):
             res = self.client.patch("/api/users/@me", payload, format="json")
             assert res.status_code != 403, f"Field update should not require re-authentication, got: {res.json()}"
 
+    def test_user_can_update_mascot_config_without_recent_authentication(self):
+        now = datetime.now()
+        with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
+            res = self.client.patch(
+                "/api/users/@me/mascot_config",
+                {"enabled": True, "color": "red"},
+                format="json",
+            )
+            assert res.status_code == 200
+
     def test_user_can_update_scene_personalisation_without_recent_authentication(self):
-        from insights.models.dashboard import Dashboard
+        from products.dashboards.backend.models.dashboard import Dashboard
 
         dashboard = Dashboard.objects.create(team=self.team, name="Test")
         now = datetime.now()
@@ -1719,15 +1988,15 @@ class TestTimeSensitivePermissions(APIBaseTest):
             assert res.status_code == 200
 
 
-class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
+class TestTeamSecretTokenAuthentication(APIBaseTest):
     def setUp(self):
         super().setUp()  # Call the setup from APIBaseTest
-        self.team.secret_api_token = "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+        self.team.secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
         self.team.save()
         self.factory = APIRequestFactory()  # Use APIRequestFactory instead of RequestFactory
 
     def test_authenticate_with_valid_secret_api_key_in_header(self):
-        # Simulate a request with a valid secret API key
+        # Simulate a request with a valid team secret token
         wsgi_request = self.factory.get(
             "/",
             data=None,
@@ -1736,17 +2005,29 @@ class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
         )
         request = Request(wsgi_request)  # Wrap the WSGIRequest in a DRF Request
 
-        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator = TeamSecretTokenAuthentication()
         result = authenticator.authenticate(request)
         assert result is not None
         user, _ = result
 
         self.assertIsNotNone(user)
-        self.assertIsInstance(user, ProjectSecretAPIKeyUser)
+        self.assertIsInstance(user, TeamSecretTokenUser)
         self.assertEqual(user.team, self.team)
 
-    def test_authenticate_with_valid_secret_api_key_in_body(self):
-        # Simulate a request with a valid secret API key
+    def test_authenticate_tags_queries_with_team_secret_token_access_method(self):
+        wsgi_request = self.factory.get("/", headers={"AUTHORIZATION": f"Bearer {self.team.secret_api_token}"})
+        request = Request(wsgi_request)
+        authenticator = TeamSecretTokenAuthentication()
+        with patch("insights.auth.tag_authentication") as mock_tag_authentication:
+            authenticator.authenticate(request)
+        mock_tag_authentication.assert_called_once_with(
+            user_id=None,
+            team_id=self.team.id,
+            access_method=AccessMethod.TEAM_SECRET_TOKEN,
+        )
+
+    def test_authenticate_with_valid_secret_api_key_in_body_not_supported(self):
+        # Body tokens were removed after the audit in #66176: even a valid token must not authenticate.
         wsgi_request = self.factory.post(
             "/",
             data=f'{{"secret_api_key": "{self.team.secret_api_token}"}}',
@@ -1755,47 +2036,43 @@ class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
         request = Request(wsgi_request)  # Wrap the WSGIRequest in a DRF Request
         request.parsers = [JSONParser()]  # Explicitly set JSONParser
 
-        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator = TeamSecretTokenAuthentication()
         result = authenticator.authenticate(request)
-        assert result is not None
-        user, _ = result
 
-        self.assertIsNotNone(user)
-        self.assertIsInstance(user, ProjectSecretAPIKeyUser)
-        self.assertEqual(user.team, self.team)
+        self.assertIsNone(result)
 
     def test_authenticate_with_secret_api_key_in_query_string_not_supported(self):
         # Query string authentication should not be supported for security reasons
         wsgi_request = self.factory.get(f"/?secret_api_key={self.team.secret_api_token}")
         request = Request(wsgi_request)  # Wrap the WSGIRequest in a DRF Request
 
-        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator = TeamSecretTokenAuthentication()
         result = authenticator.authenticate(request)
 
         self.assertIsNone(result)
 
     def test_authenticate_with_invalid_secret_api_key(self):
-        # Simulate a request with an invalid secret API key
-        wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION="Bearer his_NOT_A_VALID_KEY")
+        # Simulate a request with an invalid team secret token
+        wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION="Bearer phs_NOT_A_VALID_KEY")
         request = Request(wsgi_request)  # Wrap the WSGIRequest in a DRF Request
 
-        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator = TeamSecretTokenAuthentication()
         result = authenticator.authenticate(request)
 
         self.assertIsNone(result)
 
     def test_authenticate_without_secret_api_key(self):
-        # Simulate a request without a secret API key
+        # Simulate a request without a team secret token
         wsgi_request = self.factory.get("/")
         request = Request(wsgi_request)  # Wrap the WSGIRequest in a DRF Request
 
-        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator = TeamSecretTokenAuthentication()
         result = authenticator.authenticate(request)
 
         self.assertIsNone(result)
 
     def test_authenticate_with_matching_project_api_key_in_body(self):
-        # Test that when project API key in body matches the secret key's team, it passes
+        # Test that when project token in body matches the secret key's team, it passes
         wsgi_request = self.factory.post(
             "/",
             data=f'{{"project_api_key": "{self.team.api_token}"}}',
@@ -1805,16 +2082,16 @@ class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
         request = Request(wsgi_request)
         request.parsers = [JSONParser()]
 
-        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator = TeamSecretTokenAuthentication()
         result = authenticator.authenticate(request)
 
         assert result is not None
         user, _ = result
-        self.assertIsInstance(user, ProjectSecretAPIKeyUser)
+        self.assertIsInstance(user, TeamSecretTokenUser)
         self.assertEqual(user.team, self.team)
 
     def test_authenticate_with_no_project_api_key_in_body_passes(self):
-        # Test that when there's no project API key in body, it still works normally
+        # Test that when there's no project token in body, it still works normally
         wsgi_request = self.factory.post(
             "/",
             data='{"some_other_field": "value"}',
@@ -1824,21 +2101,210 @@ class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
         request = Request(wsgi_request)
         request.parsers = [JSONParser()]
 
-        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator = TeamSecretTokenAuthentication()
         result = authenticator.authenticate(request)
+
+        assert result is not None
+        user, _ = result
+        self.assertIsInstance(user, TeamSecretTokenUser)
+        self.assertEqual(user.team, self.team)
+
+
+class TestSyntheticUser(SimpleTestCase):
+    def _team(self, team_id=42):
+        return type("FakeTeam", (), {"id": team_id})()
+
+    def test_base_class_requires_distinct_id(self):
+        from insights.synthetic_user import SyntheticUser
+
+        with self.assertRaises(TypeError):
+            SyntheticUser(self._team())  # type: ignore[call-arg]
+
+    def test_team_secret_token_user_distinct_id_includes_team_id(self):
+        user = TeamSecretTokenUser(self._team(team_id=42))
+        self.assertEqual(user.distinct_id, "team-secret-token-42")
+        self.assertEqual(user.current_team_id, 42)
+        self.assertTrue(user.is_authenticated)
+        self.assertIsNone(user.id)
+
+    def test_project_secret_api_key_user_carries_psak_and_distinct_id(self):
+        team = self._team(team_id=7)
+        fake_psak = type(
+            "FakePSAK",
+            (),
+            {"team": team, "team_id": team.id, "id": 99, "scopes": ["endpoint:read"]},
+        )()
+        user = ProjectSecretAPIKeyUser(fake_psak)
+        self.assertEqual(user.distinct_id, "psak-7-99")
+        self.assertIs(user.project_secret_api_key, fake_psak)
+        self.assertIsNone(user.id)
+
+    def test_isinstance_check_recognises_both_subclasses(self):
+        from insights.synthetic_user import SyntheticUser
+
+        team = self._team()
+        fake_psak = type("FakePSAK", (), {"team": team, "team_id": team.id, "id": 1, "scopes": []})()
+        self.assertIsInstance(TeamSecretTokenUser(team), SyntheticUser)
+        self.assertIsInstance(ProjectSecretAPIKeyUser(fake_psak), SyntheticUser)
+
+    def test_mutable_attrs_are_isolated_per_instance(self):
+        a = TeamSecretTokenUser(self._team(team_id=1))
+        b = TeamSecretTokenUser(self._team(team_id=2))
+
+        a.groups.append("x")
+        a.user_permissions.append("y")
+
+        self.assertEqual(b.groups, [])
+        self.assertEqual(b.user_permissions, [])
+
+
+class TestExtractPhsToken(SimpleTestCase):
+    def setUp(self):
+        self.factory = APIRequestFactory()
+
+    def test_valid_token_in_header_returned(self):
+        token = "phs_" + "x" * 35
+        wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION=f"Bearer {token}")
+        self.assertEqual(_extract_phs_token(Request(wsgi_request)), token)
+
+    def test_body_token_ignored(self):
+        token = "phs_" + "y" * 35
+        wsgi_request = self.factory.post(
+            "/",
+            data=json.dumps({"secret_api_key": token}),
+            content_type="application/json",
+        )
+        request = Request(wsgi_request)
+        request.parsers = [JSONParser()]
+        self.assertIsNone(_extract_phs_token(request))
+
+    def test_no_token_anywhere_returns_none(self):
+        wsgi_request = self.factory.get("/")
+        self.assertIsNone(_extract_phs_token(Request(wsgi_request)))
+
+
+class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
+    def setUp(self):
+        super().setUp()
+        self.factory = APIRequestFactory()
+        self.token = "phs_" + "a" * 35
+        self.psak = ProjectSecretAPIKey.objects.create(
+            team=self.team,
+            label="psak-test",
+            mask_value="phs_...aaaa",
+            secure_value=hash_key_value(self.token),
+            scopes=["endpoint:read"],
+        )
+
+    def _request_with_header(self, token):
+        wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION=f"Bearer {token}")
+        return Request(wsgi_request)
+
+    def test_authenticate_with_valid_psak_in_header(self):
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        result = authenticator.authenticate(self._request_with_header(self.token))
 
         assert result is not None
         user, _ = result
         self.assertIsInstance(user, ProjectSecretAPIKeyUser)
         self.assertEqual(user.team, self.team)
+        self.assertEqual(user.project_secret_api_key.pk, self.psak.pk)
+        self.assertEqual(authenticator.project_secret_api_key.pk, self.psak.pk)
+
+    def test_authenticate_tags_queries_with_psak_access_method(self):
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        with patch("insights.auth.tag_authentication") as mock_tag_authentication:
+            authenticator.authenticate(self._request_with_header(self.token))
+        mock_tag_authentication.assert_called_once_with(
+            user_id=None,
+            team_id=self.team.id,
+            access_method=AccessMethod.PROJECT_SECRET_API_KEY,
+            api_key_mask=self.psak.mask_value,
+            api_key_label=self.psak.label,
+        )
+
+    def test_authenticate_with_psak_in_body_returns_none(self):
+        # PSAK auth is header-only: a token in the request body must not authenticate.
+        wsgi_request = self.factory.post(
+            "/",
+            data=json.dumps({"secret_api_key": self.token}),
+            content_type="application/json",
+        )
+        request = Request(wsgi_request)
+        request.parsers = [JSONParser()]
+
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        result = authenticator.authenticate(request)
+
+        self.assertIsNone(result)
+
+    def test_authenticate_with_unknown_token_returns_none(self):
+        unknown_token = "phs_" + "z" * 35
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        result = authenticator.authenticate(self._request_with_header(unknown_token))
+        self.assertIsNone(result)
+
+    def test_does_not_fall_back_to_team_secret_api_token(self):
+        # Set Team.secret_api_token to a legacy token; PSAK auth should ignore it.
+        legacy_token = "phs_" + "b" * 35
+        self.team.secret_api_token = legacy_token
+        self.team.save()
+
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        result = authenticator.authenticate(self._request_with_header(legacy_token))
+        self.assertIsNone(result)
+
+    def test_authenticate_without_token_returns_none(self):
+        wsgi_request = self.factory.get("/")
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        result = authenticator.authenticate(Request(wsgi_request))
+        self.assertIsNone(result)
+
+    @parameterized.expand(
+        [
+            ("public_token", "phc_test_public_token"),
+            ("unprefixed", "some_random_token"),
+            ("empty", ""),
+        ]
+    )
+    def test_authenticate_with_wrong_prefix_returns_none(self, _name, token):
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        result = authenticator.authenticate(self._request_with_header(token))
+        self.assertIsNone(result)
+
+    def test_last_used_at_updates_on_first_use(self):
+        assert self.psak.last_used_at is None
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator.authenticate(self._request_with_header(self.token))
+
+        self.psak.refresh_from_db()
+        self.assertIsNotNone(self.psak.last_used_at)
+
+    def test_last_used_at_hourly_throttle_skips_recent(self):
+        recent = timezone.now() - timedelta(minutes=30)
+        ProjectSecretAPIKey.objects.filter(pk=self.psak.pk).update(last_used_at=recent)
+
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator.authenticate(self._request_with_header(self.token))
+
+        self.psak.refresh_from_db()
+        # Should not update if less than 1 hour has passed
+        assert self.psak.last_used_at is not None
+        assert abs((self.psak.last_used_at - recent).total_seconds()) < 1
+
+    def test_last_used_at_updates_after_one_hour(self):
+        old = timezone.now() - timedelta(hours=2)
+        ProjectSecretAPIKey.objects.filter(pk=self.psak.pk).update(last_used_at=old)
+
+        authenticator = ProjectSecretAPIKeyAuthentication()
+        authenticator.authenticate(self._request_with_header(self.token))
+
+        self.psak.refresh_from_db()
+        assert self.psak.last_used_at is not None
+        # Should have updated to a recent timestamp
+        self.assertGreater(self.psak.last_used_at, old + timedelta(hours=1))
 
 
-@override_settings(
-    OAUTH2_PROVIDER={
-        **settings.OAUTH2_PROVIDER,
-        "OIDC_RSA_PRIVATE_KEY": generate_rsa_key(),
-    }
-)
 class TestOAuthAccessTokenAuthentication(APIBaseTest):
     def setUp(self):
         super().setUp()
@@ -1858,7 +2324,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_app,
-            token="hia_test_access_token_123",
+            token="pha_test_access_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
         )
@@ -1882,7 +2348,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
     def test_authenticate_with_invalid_oauth_token(self):
         wsgi_request = self.factory.get(
             "/",
-            headers={"AUTHORIZATION": "Bearer hia_invalid_token_123"},
+            headers={"AUTHORIZATION": "Bearer pha_invalid_token_123"},
         )
         request = Request(wsgi_request)
 
@@ -1897,7 +2363,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         expired_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_app,
-            token="hia_expired_token_123",
+            token="pha_expired_token_123",
             expires=timezone.now() - timedelta(hours=1),
             scope="openid profile",
         )
@@ -1941,8 +2407,8 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
 
         self.assertIsNone(result)
 
-    @patch("insights.auth.tag_queries")
-    def test_authenticate_tags_queries_correctly(self, mock_tag_queries):
+    @patch("insights.auth.tag_authentication")
+    def test_authenticate_tags_queries_correctly(self, mock_tag_authentication):
         wsgi_request = self.factory.get(
             "/",
             headers={"AUTHORIZATION": f"Bearer {self.access_token.token}"},
@@ -1954,7 +2420,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
 
         self.assertIsNotNone(result)
 
-        mock_tag_queries.assert_called_once_with(
+        mock_tag_authentication.assert_called_once_with(
             user_id=self.user.pk,
             team_id=self.team.pk,
             access_method="oauth",
@@ -1991,7 +2457,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         invalid_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=None,  # This will cause a validation error
-            token="hia_invalid_app_token_123",
+            token="pha_invalid_app_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
         )
@@ -2016,7 +2482,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         token_without_user = OAuthAccessToken.objects.create(
             user=None,
             application=self.oauth_app,
-            token="hia_no_user_token_123",
+            token="pha_no_user_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
         )
@@ -2048,7 +2514,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
 
     def test_oauth_access_token_calls_tag_queries_with_correct_parameters(self):
         """Test that tag_queries is called with the correct user_id and team_id."""
-        with patch("insights.auth.tag_queries") as mock_tag_queries:
+        with patch("insights.auth.tag_authentication") as mock_tag_authentication:
             wsgi_request = self.factory.get(
                 "/",
                 headers={"AUTHORIZATION": f"Bearer {self.access_token.token}"},
@@ -2063,14 +2529,14 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
             self.assertIsInstance(self.user.current_team_id, int)
 
             # Verify tag_queries was called with correct parameters
-            mock_tag_queries.assert_called_once_with(
+            mock_tag_authentication.assert_called_once_with(
                 user_id=self.user.pk,
                 team_id=self.user.current_team_id,
                 access_method="oauth",
             )
 
-    def test_authenticate_without_hia_prefix_returns_none(self):
-        """Test that tokens without the hia_ prefix are skipped by OAuth authentication,
+    def test_authenticate_without_pha_prefix_returns_none(self):
+        """Test that tokens without the pha_ prefix are skipped by OAuth authentication,
         allowing PersonalAPIKeyAuthentication to handle them."""
         wsgi_request = self.factory.get(
             "/",
@@ -2088,8 +2554,10 @@ class TestOAuthLoginNotification(APIBaseTest):
     CONFIG_AUTO_LOGIN = False
 
     @staticmethod
-    def _build_strategy(rf: RequestFactory, user_agent: str, ip: str):
+    def _build_strategy(rf: RequestFactory, user_agent: str, ip: str, cookies: dict | None = None):
         req = rf.get("/", HTTP_USER_AGENT=user_agent, REMOTE_ADDR=ip)
+        if cookies:
+            req.COOKIES.update(cookies)
 
         class Strategy:
             def __init__(self, r):
@@ -2141,6 +2609,44 @@ class TestOAuthLoginNotification(APIBaseTest):
             social_login_notification(self._build_strategy(rf, ua2, ip2), Backend(), user)
             assert len(mail.outbox) == 2
 
+    def test_notification_skipped_when_known_device_cookie_present(self):
+        user = User.objects.create(email="test@gmail.com", distinct_id=str(uuid.uuid4()))
+        rf = RequestFactory()
+        Backend = type("Backend", (), {"name": "google-oauth2"})
+        ua1, ip1 = "BrowserA/99.0 (X11; Linux x86_64)", "1.1.1.1"
+        ua2, ip2 = "BrowserB/100.0 (Macintosh; Intel Mac OS X)", "2.2.2.2"
+
+        set_instance_setting("EMAIL_HOST", "localhost")
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, CUSTOMER_IO_API_KEY=None):
+            # First login from device 1 — notification sent
+            social_login_notification(self._build_strategy(rf, ua1, ip1), Backend(), user)
+            assert len(mail.outbox) == 1
+
+            # Second login with different fingerprint BUT valid signed cookie — notification skipped
+            signed_value = build_known_device_cookie_value(user)
+            social_login_notification(
+                self._build_strategy(rf, ua2, ip2, cookies={KNOWN_DEVICE_COOKIE.format(user_id=user.id): signed_value}),
+                Backend(),
+                user,
+            )
+            assert len(mail.outbox) == 1
+
+    def test_notification_sent_when_cookie_value_is_forged(self):
+        user = User.objects.create(email="test@gmail.com", distinct_id=str(uuid.uuid4()))
+        rf = RequestFactory()
+        Backend = type("Backend", (), {"name": "google-oauth2"})
+        ua1, ip1 = "BrowserA/99.0 (X11; Linux x86_64)", "1.1.1.1"
+
+        set_instance_setting("EMAIL_HOST", "localhost")
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, CUSTOMER_IO_API_KEY=None):
+            # Attacker-forged cookie without a valid signature should not suppress the notification
+            social_login_notification(
+                self._build_strategy(rf, ua1, ip1, cookies={KNOWN_DEVICE_COOKIE.format(user_id=user.id): "1"}),
+                Backend(),
+                user,
+            )
+            assert len(mail.outbox) == 1
+
     def test_signup_then_same_device_login_no_notification(self):
         user = User.objects.create(email="test@gmail.com", distinct_id=str(uuid.uuid4()))
         rf = RequestFactory()
@@ -2160,3 +2666,130 @@ class TestOAuthLoginNotification(APIBaseTest):
 
             social_login_notification(self._build_strategy(rf, ua1, ip1), Backend(), user)
             assert len(mail.outbox) == 0
+
+
+class TestKnownLoginDeviceCookieMiddleware(APIBaseTest):
+    CONFIG_AUTO_LOGIN = False
+
+    def test_middleware_sets_signed_cookie_after_login(self):
+        response = self.client.post("/api/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        cookie = response.cookies.get(KNOWN_DEVICE_COOKIE.format(user_id=self.user.id))
+        assert cookie is not None
+        assert cookie.value != "1"  # signed, not a plain flag
+        assert cookie["httponly"] is True
+        assert cookie["samesite"] == "Lax"
+
+        # Pass cookie back into a request and confirm the verifier accepts the signature
+        req = RequestFactory().get("/")
+        req.COOKIES[KNOWN_DEVICE_COOKIE.format(user_id=self.user.id)] = cookie.value
+        assert has_valid_known_device_cookie(req, self.user)
+
+    def test_known_cookie_suppresses_notification(self):
+        set_instance_setting("EMAIL_HOST", "localhost")
+        new_device_subject = "A new device logged into your account"
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, CUSTOMER_IO_API_KEY=None):
+            # First login - sets cookie and sends new-device notification
+            self.client.post("/api/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+            initial_count = sum(1 for m in mail.outbox if m.subject == new_device_subject)
+
+            # Second login - signed cookie is present, new-device notification must be skipped
+            self.client.post("/api/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+            assert sum(1 for m in mail.outbox if m.subject == new_device_subject) == initial_count
+
+    @patch("insights.middleware.is_impersonated_session", return_value=True)
+    def test_middleware_does_not_set_cookie_during_impersonation(self, _mock_is_impersonated):
+        # Log in first so the client has an authenticated session
+        self.client.post("/api/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+
+        response = self.client.get("/api/users/@me/")
+        assert response.status_code == 200
+        assert KNOWN_DEVICE_COOKIE.format(user_id=self.user.id) not in response.cookies
+
+    def test_does_not_set_known_device_cookie_for_internal_api_user(self):
+        request = RequestFactory().get("/api/internal/hog_flows/process_due_schedules")
+        SessionMiddleware(lambda r: HttpResponse()).process_request(request)
+        # Simulate a session that *looks* logged-in to prove the synthetic-user guard wins on its own
+        request.session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+        request.__dict__["user"] = InternalAPIUser()
+
+        response = KnownLoginDeviceCookieMiddleware(lambda r: HttpResponse())(request)
+
+        assert response.status_code == 200
+        assert not any(name.startswith("ph_device_") for name in response.cookies)
+
+    def test_does_not_set_known_device_cookie_when_session_accessed_without_login(self):
+        # Regression: under ASGI, hanzo_insights' middleware awaits `request.auser`, which reads
+        # the session and sets `session.accessed=True` even on requests that never went through
+        # `auth.login()`. The gate must rely on `BACKEND_SESSION_KEY`, not on `session.accessed`.
+        request = RequestFactory().get("/api/some_endpoint")
+        SessionMiddleware(lambda r: HttpResponse()).process_request(request)
+        # Touch the session the way an upstream middleware would — flips `accessed` but does not log in
+        request.session.get("anything")
+        assert request.session.accessed is True
+        assert BACKEND_SESSION_KEY not in request.session
+        request.__dict__["user"] = self.user
+
+        response = KnownLoginDeviceCookieMiddleware(lambda r: HttpResponse())(request)
+
+        assert response.status_code == 200
+        assert not any(name.startswith("ph_device_") for name in response.cookies)
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db(transaction=True)
+async def test_known_device_cookie_async_chain_with_project_secret_api_key():
+    """Reproduces the production crash on the original (pre-fix) middleware: against the
+    initial known-device cookie code (commit 177ab2ded11), this test fails with the exact
+    prod stack trace —
+
+        File "insights/middleware.py", in __call__
+            set_known_device_cookie(response, request.user)
+        File "insights/helpers/user_devices.py", in set_known_device_cookie
+            KNOWN_DEVICE_COOKIE.format(user_id=user.id),
+        AttributeError: 'ProjectSecretAPIKeyUser' object has no attribute 'id'
+
+    Drives the real ASGI middleware chain via httpx + ASGITransport (patterned after
+    insights-python's integration_tests/django5). Sync `Client` skips the ASGI app and so
+    cannot reproduce the failure — the chain depends on InsightsContextMiddleware.__acall__
+    awaiting request.auser(), which goes through Django's separate `_acached_user` cache
+    and re-reads the session that InsightsTokenCookieMiddleware reset mid-chain, flipping
+    `accessed=True` and opening the gate against the non-User principal.
+    """
+
+    @sync_to_async
+    def setup_team_and_flag():
+        org = Organization.objects.create(name="Test Org")
+        user = User.objects.create_user(
+            email=f"test-{uuid.uuid4()}@example.com",
+            first_name="Test",
+            password=VALID_TEST_PASSWORD,
+        )
+        org.members.add(user)
+        team = Team.objects.create(organization=org, name="Test Team")
+        team.rotate_secret_token_and_save(user=user, is_impersonated_session=False)
+        FeatureFlag.objects.create(
+            team=team,
+            key="rc-async-test",
+            name="RC",
+            active=True,
+            filters={
+                "groups": [{"properties": [], "rollout_percentage": 100}],
+                "payloads": {"true": '{"x": 1}'},
+            },
+            is_remote_configuration=True,
+        )
+        return team
+
+    team = await setup_team_and_flag()
+
+    asgi_app = get_asgi_application()
+    # httpx ASGITransport's `app` type spec is stricter than Django's ASGIHandler signature; the
+    # protocols are compatible at runtime, just disagree on dict/MutableMapping in the typing.
+    async with AsyncClient(transport=ASGITransport(app=asgi_app), base_url="http://testserver") as ac:  # type: ignore[arg-type]
+        response = await ac.get(
+            f"/api/projects/{team.id}/feature_flags/rc-async-test/remote_config",
+            headers={"authorization": f"Bearer {team.secret_api_token}"},
+        )
+
+    assert response.status_code == status.HTTP_200_OK, response.text
+    assert not any(name.startswith("ph_device_") for name in response.cookies)

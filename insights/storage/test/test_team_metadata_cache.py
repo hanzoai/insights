@@ -12,6 +12,7 @@ from django.test import override_settings
 
 from parameterized import parameterized
 
+import insights.storage.team_access_cache_signal_handlers  # noqa: F401 — registers PSAK delete handler
 from insights.models.team.team import Team
 from insights.storage.team_metadata_cache import (
     TEAM_METADATA_FIELDS,
@@ -23,6 +24,8 @@ from insights.storage.team_metadata_cache import (
     verify_team_metadata,
 )
 from insights.tasks.team_metadata import update_team_metadata_cache_task
+
+from products.feature_flags.backend.models.team_feature_flags_config import TeamFeatureFlagsConfig
 
 
 class TestTeamMetadataCache(BaseTest):
@@ -188,9 +191,8 @@ class TestTeamMetadataCacheSignals(BaseTest):
         # Cache should NOT be cleared
         mock_clear.assert_not_called()
 
-    @patch("insights.models.project_secret_api_key.invalidate_project_secret_api_key_cache")
-    def test_team_delete_clears_project_secret_api_key_cache(self, mock_invalidate):
-        """Test that deleting a team clears its project secret API key caches."""
+    @patch("insights.storage.team_access_cache.token_auth_cache")
+    def test_team_delete_clears_project_secret_api_key_cache(self, mock_token_cache):
         from insights.models.project_secret_api_key import ProjectSecretAPIKey
 
         team = Team.objects.create(
@@ -201,31 +203,51 @@ class TestTeamMetadataCacheSignals(BaseTest):
         ProjectSecretAPIKey.objects.create(
             team=team,
             label="Key 1",
-            secure_value="hashed_value_1",
+            secure_value="sha256$hashed_value_1",
         )
         ProjectSecretAPIKey.objects.create(
             team=team,
             label="Key 2",
-            secure_value="hashed_value_2",
+            secure_value="sha256$hashed_value_2",
         )
 
-        team.delete()
+        with self.captureOnCommitCallbacks(execute=True):
+            team.delete()
 
-        self.assertEqual(mock_invalidate.call_count, 2)
-        invalidated_values = {call.args[0] for call in mock_invalidate.call_args_list}
-        self.assertEqual(invalidated_values, {"hashed_value_1", "hashed_value_2"})
+        mock_token_cache.invalidate_tokens.assert_called_once()
+        invalidated_values = set(mock_token_cache.invalidate_tokens.call_args[0][0])
+        self.assertEqual(invalidated_values, {"sha256$hashed_value_1", "sha256$hashed_value_2"})
 
-    @patch("insights.models.project_secret_api_key.invalidate_project_secret_api_key_cache")
-    def test_team_delete_handles_no_project_secret_api_keys(self, mock_invalidate):
-        """Test that deleting a team without project secret API keys doesn't error."""
+    @patch("insights.storage.team_access_cache_signal_handlers.capture_exception")
+    @patch("insights.storage.team_access_cache.token_auth_cache")
+    def test_team_delete_psak_cache_handles_redis_failure(self, mock_token_cache, mock_capture):
+        from insights.models.project_secret_api_key import ProjectSecretAPIKey
+
+        mock_token_cache.is_configured = True
+        mock_token_cache.invalidate_tokens.side_effect = Exception("Redis down")
+
+        team = Team.objects.create(organization=self.organization, name="Test Team")
+        ProjectSecretAPIKey.objects.create(team=team, label="Key 1", secure_value="sha256$hashed_1")
+
+        with self.captureOnCommitCallbacks(execute=True):
+            team.delete()
+
+        mock_capture.assert_called_once()
+        args, _ = mock_capture.call_args
+        self.assertIsInstance(args[0], Exception)
+        self.assertEqual(str(args[0]), "Redis down")
+
+    @patch("insights.storage.team_access_cache.token_auth_cache")
+    def test_team_delete_handles_no_project_secret_api_keys(self, mock_token_cache):
         team = Team.objects.create(
             organization=self.organization,
             name="Test Team",
         )
 
-        team.delete()
+        with self.captureOnCommitCallbacks(execute=True):
+            team.delete()
 
-        mock_invalidate.assert_not_called()
+        mock_token_cache.invalidate_tokens.assert_not_called()
 
 
 class TestCacheStats(BaseTest):
@@ -337,6 +359,27 @@ class TestGetTeamsWithExpiringCaches(BaseTest):
 
         self.assertEqual(len(result), 0)
 
+    @patch("insights.storage.cache_expiry_manager.get_client")
+    def test_narrows_selected_columns_to_refresh_fields(self, mock_get_client):
+        """The refresh SELECT is narrowed via .only(), so a Team column the read replica
+        hasn't migrated yet can't turn the whole batch into an UndefinedColumn error.
+        Guards against reverting to a `SELECT *` that fetches every column."""
+        mock_redis = MagicMock()
+        mock_get_client.return_value = mock_redis
+        mock_redis.zrangebyscore.return_value = [self.team.api_token.encode()]
+
+        with self.assertNumQueries(1):
+            teams = get_teams_with_expiring_caches(ttl_threshold_hours=24)
+
+        self.assertEqual(len(teams), 1)
+        deferred = teams[0].get_deferred_fields()
+        # Columns outside the refresh set are deferred (not fetched) — a SELECT * regression
+        # would leave this empty.
+        self.assertTrue(deferred)
+        # Every column the refresh serializes is loaded, so serialization never triggers a
+        # per-field lazy load.
+        self.assertEqual(deferred & set(TEAM_METADATA_FIELDS), set())
+
 
 class TestVerifyTeamMetadata(BaseTest):
     """Test verify_team_metadata functionality."""
@@ -372,24 +415,29 @@ class TestVerifyTeamMetadata(BaseTest):
 
         self.assertEqual(result["status"], "match", f"Expected match but got {result}")
 
+    @parameterized.expand(
+        [
+            ("name", "Wrong Name"),
+            # minimal_flag_called_events isn't in TEAM_METADATA_FIELDS — it's added to
+            # fields_to_check separately, so it needs its own mismatch case.
+            ("minimal_flag_called_events", True),
+        ]
+    )
     @patch("insights.storage.team_metadata_cache.get_team_metadata")
-    def test_verify_detects_mismatch_in_tracked_fields(self, mock_get_metadata):
-        """Verify that mismatches in TEAM_METADATA_FIELDS are still detected."""
+    def test_verify_detects_mismatch_in_tracked_fields(self, field, wrong_value, mock_get_metadata):
         from insights.storage.team_metadata_cache import _serialize_team_to_metadata
 
-        # Get the actual serialized data for this team
         db_data = _serialize_team_to_metadata(self.team)
 
-        # Create cached data with a mismatch in a tracked field
         cached_data = db_data.copy()
-        cached_data["name"] = "Wrong Name"  # Mismatch in a tracked field
+        cached_data[field] = wrong_value
         mock_get_metadata.return_value = cached_data
 
         result = verify_team_metadata(self.team)
 
         self.assertEqual(result["status"], "mismatch")
         self.assertEqual(result["issue"], "DATA_MISMATCH")
-        self.assertIn("name", result["diff_fields"])
+        self.assertIn(field, result["diff_fields"])
 
     @patch("insights.storage.team_metadata_cache.get_team_metadata")
     def test_verify_returns_miss_when_no_cached_data(self, mock_get_metadata):
@@ -400,6 +448,51 @@ class TestVerifyTeamMetadata(BaseTest):
 
         self.assertEqual(result["status"], "miss")
         self.assertEqual(result["issue"], "CACHE_MISS")
+
+
+class TestMinimalFlagCalledEventsInMetadata(BaseTest):
+    """
+    minimal_flag_called_events lives on TeamFeatureFlagsConfig, not on Team, so it's
+    derived rather than pulled from TEAM_METADATA_FIELDS. Guards against the derivation
+    defaulting to the wrong value or the batch path (used by cache warming) drifting
+    from the single-team path (used by cache miss lookups).
+    """
+
+    def test_defaults_to_false_for_ungated_team(self):
+        from insights.storage.team_metadata_cache import _serialize_team_to_metadata
+
+        metadata = _serialize_team_to_metadata(self.team)
+
+        self.assertIs(metadata["minimal_flag_called_events"], False)
+
+    def test_reflects_gated_config_row(self):
+        from insights.storage.team_metadata_cache import _serialize_team_to_metadata
+
+        TeamFeatureFlagsConfig.objects.update_or_create(team=self.team, defaults={"minimal_flag_called_events": True})
+
+        metadata = _serialize_team_to_metadata(self.team)
+
+        self.assertIs(metadata["minimal_flag_called_events"], True)
+
+    def test_batch_load_matches_single_team_load(self):
+        from insights.storage.team_metadata_cache import _batch_load_team_metadata, _serialize_team_to_metadata
+
+        gated_team = self.organization.teams.create(name="Gated team")
+        TeamFeatureFlagsConfig.objects.update_or_create(team=gated_team, defaults={"minimal_flag_called_events": True})
+        ungated_team = self.organization.teams.create(name="Ungated team")
+
+        batch_result = _batch_load_team_metadata([gated_team, ungated_team])
+
+        self.assertEqual(
+            batch_result[gated_team.id]["minimal_flag_called_events"],
+            _serialize_team_to_metadata(gated_team)["minimal_flag_called_events"],
+        )
+        self.assertEqual(
+            batch_result[ungated_team.id]["minimal_flag_called_events"],
+            _serialize_team_to_metadata(ungated_team)["minimal_flag_called_events"],
+        )
+        self.assertIs(batch_result[gated_team.id]["minimal_flag_called_events"], True)
+        self.assertIs(batch_result[ungated_team.id]["minimal_flag_called_events"], False)
 
 
 @override_settings(FLAGS_REDIS_URL="redis://test:6379/0")
@@ -563,3 +656,13 @@ class TestSampleRateSerializationForRustCompatibility(BaseTest):
             self.team.full_clean()
 
         self.assertIn("session_recording_sample_rate", str(context.exception))
+
+
+# llm-gateway policy projection lives in its own cache (see
+# test_team_llm_gateway_policy_cache.py); we explicitly assert the field is NOT
+# in the shared team_metadata blob so the flags-pipeline consumers stay
+# unaffected by llm-gateway changes.
+class TestLLMGatewayFieldsNotInSharedProjection(BaseTest):
+    def test_llm_gateway_fields_excluded_from_shared_metadata(self):
+        self.assertNotIn("llm_gateway_enabled_at", TEAM_METADATA_FIELDS)
+        self.assertNotIn("llm_gateway_revoked_at", TEAM_METADATA_FIELDS)

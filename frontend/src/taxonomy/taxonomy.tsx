@@ -1,15 +1,12 @@
-import { DataWarehousePopoverField } from 'lib/components/TaxonomicFilter/types'
-import {
-    UTM_CAMPAIGN_NAME_SCHEMA_FIELD,
-    UTM_SOURCE_NAME_SCHEMA_FIELD,
-} from 'scenes/web-analytics/tabs/marketing-analytics/utils'
+import type { DataWarehousePopoverField } from 'lib/components/TaxonomicFilter/types'
 
+import { UTM_CAMPAIGN_NAME_SCHEMA_FIELD, UTM_SOURCE_NAME_SCHEMA_FIELD } from '~/taxonomy/marketingAnalytics'
 import { CoreFilterDefinition } from '~/types'
 
-import * as coreFilterDefinitionsByGroup from './core-filter-definitions-by-group.json'
+import coreFilterDefinitionsByGroup from './core-filter-definitions-by-group.json'
 import { transformFilterDefinitions } from './transformations'
 
-type CoreFilterDefinitionsGroup = keyof typeof coreFilterDefinitionsByGroup
+export type CoreFilterDefinitionsGroup = Exclude<keyof typeof coreFilterDefinitionsByGroup, '//'>
 
 export const CORE_FILTER_DEFINITIONS_BY_GROUP = Object.entries(coreFilterDefinitionsByGroup).reduce(
     (acc, [key, group]) => {
@@ -68,7 +65,7 @@ const BILLING_USAGE_CATEGORIES = [
     'usage_limit',
 ] as const
 
-export const CLOUD_INTERNAL_INSIGHTS_PROPERTY_KEYS = [
+export const CLOUD_INTERNAL_POSTFN_PROPERTY_KEYS = [
     'billing_period_end',
     'billing_period_start',
     'current_total_amount_usd',
@@ -82,7 +79,7 @@ export const CLOUD_INTERNAL_INSIGHTS_PROPERTY_KEYS = [
     ...BILLING_USAGE_CATEGORIES.flatMap((category) => BILLING_PRODUCTS.map((product) => `${category}.${product}`)),
 ]
 
-export const INSIGHTS_EVENT_PROMOTED_PROPERTIES = {
+export const POSTFN_EVENT_PROMOTED_PROPERTIES = {
     $pageview: ['$current_url', 'title', '$referrer'],
     $pageleave: ['$current_url', 'title', '$referrer'],
     $groupidentify: ['$group_type', '$group_key', '$group_set'],
@@ -116,19 +113,22 @@ export const INSIGHTS_EVENT_PROMOTED_PROPERTIES = {
         '$csp_user_agent',
     ],
     $set: ['$set', '$set_once'],
-    $exception: [
-        '$exception_issue_id',
-        '$exception_functions',
-        '$exception_sources',
-        '$exception_types',
-        '$exception_values',
+    $exception: ['$exception_functions', '$exception_sources', '$exception_types', '$exception_values'],
+    $mcp_tool_call: [
+        '$mcp_tool_name',
+        '$mcp_tool_category',
+        '$mcp_is_error',
+        '$mcp_error_type',
+        '$mcp_duration_ms',
+        '$mcp_client_name',
+        '$mcp_intent',
     ],
 }
-export type KNOWN_PROMOTED_PROPERTY_PARENTS = keyof typeof INSIGHTS_EVENT_PROMOTED_PROPERTIES
+export type KNOWN_PROMOTED_PROPERTY_PARENTS = keyof typeof POSTFN_EVENT_PROMOTED_PROPERTIES
 
 export function isInsightsProperty(propertyKey: string, isCloudOrDev: boolean | undefined = false): boolean {
     const isInsightsProperty = propertyKey.startsWith('$') || PROPERTY_KEYS.includes(propertyKey)
-    const isNonDollarInsightsProperty = isCloudOrDev && CLOUD_INTERNAL_INSIGHTS_PROPERTY_KEYS.includes(propertyKey)
+    const isNonDollarInsightsProperty = isCloudOrDev && CLOUD_INTERNAL_POSTFN_PROPERTY_KEYS.includes(propertyKey)
     return isInsightsProperty || isNonDollarInsightsProperty
 }
 
@@ -147,12 +147,10 @@ export const conversionGoalPopoverFields: DataWarehousePopoverField[] = [
         key: UTM_CAMPAIGN_NAME_SCHEMA_FIELD,
         label: 'UTM Campaign Name',
         type: 'string',
-        optional: true,
     },
     {
         key: UTM_SOURCE_NAME_SCHEMA_FIELD,
         label: 'UTM Source Name',
         type: 'string',
-        optional: true,
     },
 ]

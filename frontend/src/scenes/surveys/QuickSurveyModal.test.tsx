@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -6,8 +7,8 @@ import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 import { FeatureFlagType } from '~/types'
 
-import { QuickSurveyForm } from './QuickSurveyModal'
 import { QuickSurveyType } from './quick-create/types'
+import { QuickSurveyForm } from './QuickSurveyModal'
 import { FunnelContext } from './utils/opportunityDetection'
 
 jest.mock('scenes/surveys/SurveyAppearancePreview', () => ({
@@ -44,7 +45,7 @@ describe('QuickSurveyForm API payloads', () => {
                 '/api/projects/:team_id/surveys': () => [200, { id: 'new-survey' }],
             },
             patch: {
-                '/api/environments/@current/add_product_intent/': () => [200, {}],
+                '/api/environments/:team_id/add_product_intent/': () => [200, {}],
             },
         })
     })
@@ -57,8 +58,8 @@ describe('QuickSurveyForm API payloads', () => {
         let capturedRequest: any
         useMocks({
             post: {
-                '/api/projects/:team_id/surveys': async (req) => {
-                    capturedRequest = await req.json()
+                '/api/projects/:team_id/surveys': async ({ request }) => {
+                    capturedRequest = await request.json()
                     return [200, { id: 'new-survey' }]
                 },
             },
@@ -66,7 +67,7 @@ describe('QuickSurveyForm API payloads', () => {
 
         render(<QuickSurveyForm context={{ type: QuickSurveyType.FEATURE_FLAG, flag: mockFlag }} />)
 
-        await userEvent.click(screen.getByRole('button', { name: /create & launch/i }))
+        await userEvent.click(screen.getByText(/create & launch/i))
 
         await waitFor(() => {
             expect(capturedRequest).not.toBeUndefined()
@@ -82,8 +83,8 @@ describe('QuickSurveyForm API payloads', () => {
         let capturedRequest: any
         useMocks({
             post: {
-                '/api/projects/:team_id/surveys': async (req) => {
-                    capturedRequest = await req.json()
+                '/api/projects/:team_id/surveys': async ({ request }) => {
+                    capturedRequest = await request.json()
                     return [200, { id: 'new-survey' }]
                 },
             },
@@ -91,7 +92,7 @@ describe('QuickSurveyForm API payloads', () => {
 
         render(<QuickSurveyForm context={{ type: QuickSurveyType.FUNNEL, funnel: mockFunnel }} />)
 
-        await userEvent.click(screen.getByRole('button', { name: /create & launch/i }))
+        await userEvent.click(screen.getByText(/create & launch/i))
 
         await waitFor(() => {
             expect(capturedRequest).not.toBeUndefined()

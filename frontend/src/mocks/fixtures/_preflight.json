@@ -4,13 +4,13 @@
     "plugins": false,
     "celery": false,
     "db": true,
-    "clickhouse": true,
+    "datastore": true,
     "kafka": true,
     "initiated": true,
     "cloud": false,
     "demo": false,
     "object_storage": true,
-    "realm": "hosted-clickhouse",
+    "realm": "hosted-datastore",
     "region": "US",
     "available_social_auth_providers": {
         "github": false,
@@ -20,7 +20,7 @@
     },
     "can_create_org": false,
     "email_service_available": false,
-    "db_backend": "clickhouse",
+    "db_backend": "datastore",
     "available_timezones": {
         "Africa/Abidjan": 0.0,
         "Africa/Accra": 0.0,
@@ -464,10 +464,12 @@
     },
     "opt_out_capture": false,
     "is_debug": true,
+    "allow_dev_login": false,
     "licensed_users_available": 21311,
     "site_url": "http://localhost:6006",
     "instance_preferences": {
         "debug_queries": false,
-        "disable_paid_fs": false
+        "disable_paid_fs": false,
+        "cloudflare_proxy_enabled": true
     }
 }

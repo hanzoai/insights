@@ -1,4 +1,4 @@
-import { Meta, StoryFn, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 import * as React from 'react'
 
 import { IconDashboard } from '@hanzo/icons'
@@ -12,7 +12,7 @@ import * as icons from '../icons'
 const { IconWithCount } = icons
 
 const meta: Meta = {
-    title: 'Elements/Icons3',
+    title: 'Lemon UI/Icons3',
     parameters: {
         docs: {
             description: {
@@ -20,8 +20,8 @@ const meta: Meta = {
 
 [Related Figma area](https://www.figma.com/file/Y9G24U4r04nEjIDGIEGuKI/Insights-Design-System-One?node-id=3139%3A1388)
 
-Icons are generally [Material Icons](https://fonts.google.com/icons) with some matching in-house additions. 
-All should be based on a 24px (1.5rem) square viewbox, with icon contents fitting into a 20px (1.25rem) or smaller square. 
+Lemon Icons are generally [Material Icons](https://fonts.google.com/icons) with some matching in-house additions.
+All should be based on a 24px (1.5rem) square viewbox, with icon contents fitting into a 20px (1.25rem) or smaller square.
 
 When adding new icons from Figma please make sure to:
 - [ ] Export the item as an SVG using the 24x24 frame surrounding it
@@ -37,7 +37,8 @@ export default meta
 
 interface IconDefinition {
     name: string
-    icon: (...args: any[]) => JSX.Element
+    // ElementType also admits forwardRef-wrapped icons (e.g. IconUnverifiedEvent)
+    icon: React.ElementType
 }
 
 const allIcons: IconDefinition[] = Object.entries(icons)
@@ -46,7 +47,7 @@ const allIcons: IconDefinition[] = Object.entries(icons)
     .sort((a, b) => a.name.localeCompare(b.name))
 
 type LibraryType = StoryObj<{ letter?: string | null }>
-const LibraryTemplate: StoryFn<{ letter?: string | null }> = ({ letter }) => {
+const renderLibrary = ({ letter }: { letter?: string | null }): JSX.Element => {
     const [showBorder, setShowBorder] = React.useState(true)
     const filteredIcons =
         letter === undefined
@@ -106,33 +107,51 @@ const LibraryTemplate: StoryFn<{ letter?: string | null }> = ({ letter }) => {
     )
 }
 
-export const ShelfS: LibraryType = LibraryTemplate.bind({})
-ShelfS.args = { letter: 's' }
-ShelfS.parameters = { testOptions: { snapshotTargetSelector: '.Table tbody' } }
-export const ShelfT: LibraryType = LibraryTemplate.bind({})
-ShelfT.args = { letter: 't' }
-ShelfT.parameters = { testOptions: { snapshotTargetSelector: '.Table tbody' } }
-export const ShelfU: LibraryType = LibraryTemplate.bind({})
-ShelfU.args = { letter: 'u' }
-ShelfU.parameters = { testOptions: { snapshotTargetSelector: '.Table tbody' } }
-export const ShelfV: LibraryType = LibraryTemplate.bind({})
-ShelfV.args = { letter: 'v' }
-ShelfV.parameters = { testOptions: { snapshotTargetSelector: '.Table tbody' } }
-export const ShelfW: LibraryType = LibraryTemplate.bind({})
-ShelfW.args = { letter: 'w' }
-ShelfW.parameters = { testOptions: { snapshotTargetSelector: '.Table tbody' } }
-export const ShelfX: LibraryType = LibraryTemplate.bind({})
-ShelfX.args = { letter: 'x' }
-ShelfX.parameters = { testOptions: { snapshotTargetSelector: '.Table tbody' } }
-export const ShelfY: LibraryType = LibraryTemplate.bind({})
-ShelfY.args = { letter: 'y' }
-ShelfY.parameters = { testOptions: { snapshotTargetSelector: '.Table tbody' } }
-export const ShelfZ: LibraryType = LibraryTemplate.bind({})
-ShelfZ.args = { letter: 'z' }
-ShelfZ.parameters = { testOptions: { snapshotTargetSelector: '.Table tbody' } }
-export const ShelfOther: LibraryType = LibraryTemplate.bind({})
-ShelfOther.args = { letter: null }
-ShelfOther.parameters = { testOptions: { snapshotTargetSelector: '.Table tbody' } }
+export const ShelfS: LibraryType = {
+    render: renderLibrary,
+    args: { letter: 's' },
+    parameters: { testOptions: { snapshotTargetSelector: '.Table tbody' } },
+}
+export const ShelfT: LibraryType = {
+    render: renderLibrary,
+    args: { letter: 't' },
+    parameters: { testOptions: { snapshotTargetSelector: '.Table tbody' } },
+}
+export const ShelfU: LibraryType = {
+    render: renderLibrary,
+    args: { letter: 'u' },
+    parameters: { testOptions: { snapshotTargetSelector: '.Table tbody' } },
+}
+export const ShelfV: LibraryType = {
+    render: renderLibrary,
+    args: { letter: 'v' },
+    parameters: { testOptions: { snapshotTargetSelector: '.Table tbody' } },
+}
+export const ShelfW: LibraryType = {
+    render: renderLibrary,
+    args: { letter: 'w' },
+    parameters: { testOptions: { snapshotTargetSelector: '.Table tbody' } },
+}
+export const ShelfX: LibraryType = {
+    render: renderLibrary,
+    args: { letter: 'x' },
+    parameters: { testOptions: { snapshotTargetSelector: '.Table tbody' } },
+}
+export const ShelfY: LibraryType = {
+    render: renderLibrary,
+    args: { letter: 'y' },
+    parameters: { testOptions: { snapshotTargetSelector: '.Table tbody' } },
+}
+export const ShelfZ: LibraryType = {
+    render: renderLibrary,
+    args: { letter: 'z' },
+    parameters: { testOptions: { snapshotTargetSelector: '.Table tbody' } },
+}
+export const ShelfOther: LibraryType = {
+    render: renderLibrary,
+    args: { letter: null },
+    parameters: { testOptions: { snapshotTargetSelector: '.Table tbody' } },
+}
 
 export function IconWithCountBubble(): JSX.Element {
     return (

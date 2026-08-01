@@ -6,12 +6,13 @@ import datetime as dt
 import pytest
 
 from django.conf import settings
+from django.test import override_settings
 
 import psycopg
 import pytest_asyncio
 import temporalio.worker
 from asgiref.sync import sync_to_async
-from datastore_orm import Database
+from infi.datastore_orm import Database
 from psycopg import sql
 from temporalio.testing import ActivityEnvironment
 
@@ -26,10 +27,26 @@ from insights.temporal.tests.utils.events import generate_test_events_in_datasto
 
 from products.batch_exports.backend.temporal import ACTIVITIES, WORKFLOWS
 from products.batch_exports.backend.temporal.metrics import BatchExportsMetricsInterceptor
-from products.batch_exports.backend.tests.temporal.utils.persons import (
-    generate_test_person_distinct_id2_in_datastore,
-    generate_test_persons_in_datastore,
+from products.batch_exports.backend.tests.temporal.utils.datastore import (
+    truncate_events,
+    truncate_persons,
+    truncate_sessions,
 )
+from products.batch_exports.backend.tests.temporal.utils.persons import (
+    PersonDistinctId2Values,
+    PersonValues,
+    generate_test_person_distinct_id2,
+    generate_test_persons_in_datastore,
+    insert_person_distinct_id2_values_in_datastore,
+)
+
+
+@pytest_asyncio.fixture
+async def truncate_datastore_tables(datastore_client):
+    yield
+    await truncate_events(datastore_client)
+    await truncate_persons(datastore_client)
+    await truncate_sessions(datastore_client)
 
 
 @pytest.fixture(scope="package", autouse=True)
@@ -42,12 +59,27 @@ def datastore_create_db_and_tables():
         cluster=settings.DATASTORE_CLUSTER,
         verify_ssl_cert=settings.DATASTORE_VERIFY,
         randomize_replica_paths=True,
+        # don't use the egress proxy, datastore is internal
+        trust_env=False,
     )
 
     database.create_database()  # Create database if it doesn't exist
     create_datastore_tables()  # Create all expected tables
 
     yield
+
+
+@pytest.fixture(autouse=True)
+def reduced_staging_partitions():
+    """Cap CH→S3 staging fan-out at 2 partition files instead of the production default of 10.
+
+    Ten concurrent S3 writers per tiny staging insert, multiplied across xdist workers, contends on
+    the shared CI objectstorage and produces 20s+ staging stalls that trip workflow execution
+    timeouts. Two partitions keep the multi-file read path exercised; tests that assert partition
+    behavior set their own override.
+    """
+    with override_settings(BATCH_EXPORT_DATASTORE_S3_PARTITIONS=2):
+        yield
 
 
 @pytest.fixture
@@ -134,7 +166,6 @@ async def temporal_client():
         settings.TEMPORAL_HOST,
         settings.TEMPORAL_PORT,
         settings.TEMPORAL_NAMESPACE,
-        settings.TEMPORAL_CLIENT_ROOT_CA,
         settings.TEMPORAL_CLIENT_CERT,
         settings.TEMPORAL_CLIENT_KEY,
     )
@@ -336,7 +367,7 @@ def test_properties(request, session_id):
         "$os": "Mac OS X",
         "prop": "value",
         "$session_id": session_id,
-        "$current_url": "insights.com",
+        "$current_url": "hanzo.ai",
     }
 
 
@@ -376,6 +407,43 @@ def events_table(request) -> str | None:
     except AttributeError:
         pass
     return None
+
+
+async def _insert_person_distinct_ids_for_persons(
+    datastore_client: DatastoreClient, team_id: int, persons: list[PersonValues]
+) -> list[PersonDistinctId2Values]:
+    person_distinct_ids: list[PersonDistinctId2Values] = []
+    other_team_person_distinct_ids: list[PersonDistinctId2Values] = []
+
+    for person in persons:
+        person_id = uuid.UUID(person["id"])
+        timestamp = dt.datetime.fromisoformat(person["_timestamp"])
+        distinct_id = f"distinct-id-{person_id}"
+
+        person_distinct_ids.append(
+            generate_test_person_distinct_id2(
+                count=1,
+                team_id=team_id,
+                person_id=person_id,
+                distinct_id=distinct_id,
+                timestamp=timestamp,
+            )
+        )
+        other_team_person_distinct_ids.append(
+            generate_test_person_distinct_id2(
+                count=1,
+                team_id=team_id + random.randint(1, 1000),
+                person_id=person_id,
+                distinct_id=distinct_id,
+                timestamp=timestamp,
+            )
+        )
+
+    await insert_person_distinct_id2_values_in_datastore(
+        client=datastore_client,
+        persons=person_distinct_ids + other_team_person_distinct_ids,
+    )
+    return person_distinct_ids
 
 
 @pytest.fixture
@@ -454,14 +522,8 @@ async def generate_test_data(
     )
 
     persons_to_export_created = []
-    for person in persons:
-        person_distinct_id, _ = await generate_test_person_distinct_id2_in_datastore(
-            client=datastore_client,
-            team_id=ateam.pk,
-            person_id=uuid.UUID(person["id"]),
-            distinct_id=f"distinct-id-{uuid.UUID(person['id'])}",
-            timestamp=dt.datetime.fromisoformat(person["_timestamp"]),
-        )
+    person_distinct_ids = await _insert_person_distinct_ids_for_persons(datastore_client, ateam.pk, persons)
+    for person, person_distinct_id in zip(persons, person_distinct_ids, strict=True):
         person_to_export = {
             "team_id": person["team_id"],
             "person_id": person["id"],
@@ -488,14 +550,8 @@ async def generate_test_persons_data(ateam, datastore_client, data_interval_star
     )
 
     persons_to_export_created = []
-    for person in persons:
-        person_distinct_id, _ = await generate_test_person_distinct_id2_in_datastore(
-            client=datastore_client,
-            team_id=ateam.pk,
-            person_id=uuid.UUID(person["id"]),
-            distinct_id=f"distinct-id-{uuid.UUID(person['id'])}",
-            timestamp=dt.datetime.fromisoformat(person["_timestamp"]),
-        )
+    person_distinct_ids = await _insert_person_distinct_ids_for_persons(datastore_client, ateam.pk, persons)
+    for person, person_distinct_id in zip(persons, person_distinct_ids, strict=True):
         person_to_export = {
             "team_id": person["team_id"],
             "person_id": person["id"],
