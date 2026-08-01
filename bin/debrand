@@ -1,0 +1,536 @@
+#!/usr/bin/env python3
+"""Turn an upstream PostHog tree into the Hanzo Insights tree.
+
+This is the single source of truth for the fork's rename. Convergence with
+upstream is a recurring job, so the rename is a program, not a memory: point
+this at a freshly-imported upstream tree and it reproduces our naming exactly.
+
+    bin/debrand              rewrite content, then rename paths
+    bin/debrand --check      assert the invariants; exit 1 on violation
+    bin/debrand --stat       report what would change, touch nothing
+
+Idempotent: applying it to an already-debranded tree is a no-op. That holds
+because no rule's replacement contains another rule's pattern, and the rules
+are applied longest-pattern-first so `posthog` is consumed before the bare
+`hog` rule can see it.
+
+Rules are derived from the shipped fork, not invented. `bin/debrand --verify`
+in the convergence notes explains how to re-measure them against a known-good
+tree when upstream renames something out from under us.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+
+# --- content rules ------------------------------------------------------
+#
+# Order is load-bearing where a pattern is a prefix of another; the table is
+# grouped most-specific-first and the bare brand rules come last. `com -> ai`
+# is NOT a rule: it only ever appears inside the domain, so it lives there.
+
+CONTENT_RULES: list[tuple[str, str]] = [
+    # Domains and social handles.
+    ("posthog.com", "hanzo.ai"),
+    ("PostHog.com", "Hanzo.ai"),
+    ("app.posthog", "app.insights"),
+    # npm scopes. The design system is `elements`; icons keep their name.
+    ("@posthog/lemon-ui", "@hanzo/elements"),
+    ("@posthog/hogvm", "@hanzo/scriptvm"),
+    ("@posthog/icons", "@hanzo/icons"),
+    ("@posthog/", "@hanzo/"),
+    # SDKs. The python SDK package is `hanzo_insights`; the browser SDK keeps
+    # the product name.
+    ("posthoganalytics", "hanzo_insights"),
+    ("posthog-js", "insights-js"),
+    ("posthog_js", "insights_js"),
+    # Query language.
+    ("hogql_queries", "insightsql_queries"),
+    ("hogql_parser", "insightsql_parser"),
+    ("HogQLX", "InsightsQLX"),
+    ("HOGQL", "INSIGHTSQL"),
+    ("HogQL", "InsightsQL"),
+    ("hogql", "insightsql"),
+    # Warehouse. We say datastore everywhere.
+    ("CLICKHOUSE", "DATASTORE"),
+    ("ClickHouse", "Datastore"),
+    ("Clickhouse", "Datastore"),
+    ("clickhouse", "datastore"),
+    # Script VM, flows, functions.
+    ("hog-transformations", "script-transformations"),
+    ("hog-functions", "insights-functions"),
+    ("hog_functions", "insights_functions"),
+    ("HogFunction", "InsightsFunction"),
+    ("hogFunction", "insightsFunction"),
+    ("hog_function", "insights_function"),
+    ("hogflows", "insightsflows"),
+    ("HogFlow", "InsightsFlow"),
+    ("hogvm", "scriptvm"),
+    ("HogVM", "ScriptVM"),
+    ("HOG_", "FN_"),
+    # Mascot, CLI, person service.
+    ("Hedgehog", "Mascot"),
+    ("HedgeHog", "Mascot"),
+    ("hedgehog", "mascot"),
+    ("hogli", "insightscli"),
+    ("personhog", "personinsights"),
+    ("PostholgStories", "InsightsStories"),
+    ("PosthogStories", "InsightsStories"),
+    # Design system.
+    ("lemon-ui", "elements"),
+    ("lemonToast", "toast"),
+    # Core brand. Last, so the compounds above win.
+    ("POSTHOG", "INSIGHTS"),
+    ("PostHog", "Insights"),
+    ("Posthog", "Insights"),
+    # camelCase identifiers: postHogStatusTooltip -> insightsStatusTooltip.
+    ("postHog", "insights"),
+    ("posthog", "insights"),
+]
+
+# Applied after the table above. `Lemon<Component>` is the design-system
+# prefix strip: LemonButton -> Button. `hog` alone means a script.
+CONTENT_REGEX: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"\bLemon(?=[A-Z][A-Za-z0-9]*)"), ""),
+    (re.compile(r"\bhog\b"), "script"),
+    (re.compile(r"\bHog\b"), "Script"),
+]
+
+# --- path rules ---------------------------------------------------------
+#
+# Deliberately NOT the content table. `kafka` is the wire protocol and stays
+# in code; only the directory that wraps it is ours to name. Conversely the
+# `hog -> script` word rule must never touch a path, where it would maul
+# unrelated names.
+
+PATH_RULES: list[tuple[str, str]] = [
+    ("posthog.com", "hanzo.ai"),
+    ("hogql_queries", "insightsql_queries"),
+    ("hogql_parser", "insightsql_parser"),
+    ("hog-transformations", "script-transformations"),
+    ("hog-functions", "insights-functions"),
+    ("hog_functions", "insights_functions"),
+    ("hog_function", "insights_function"),
+    ("HogFunction", "InsightsFunction"),
+    ("hog_flow", "insights_flow"),
+    ("HogFlow", "InsightsFlow"),
+    ("hogflows", "insightsflows"),
+    ("hogflow", "insightsflow"),
+    ("hoghooks", "insightshooks"),
+    ("PosthogStories", "InsightsStories"),
+    ("personhog", "personinsights"),
+    ("Hedgehog", "Mascot"),
+    ("HedgeHog", "Mascot"),
+    ("hedgehog", "mascot"),
+    ("hogql", "insightsql"),
+    ("HogQL", "InsightsQL"),
+    ("hogvm", "scriptvm"),
+    ("hogli", "insightscli"),
+    ("lemon-ui", "elements"),
+    ("clickhouse", "datastore"),
+    ("ClickHouse", "Datastore"),
+    ("posthoganalytics", "hanzo_insights"),
+    ("posthog-js", "insights-js"),
+    ("@posthog", "@hanzo"),
+    ("PostHog", "Insights"),
+    ("Posthog", "Insights"),
+    ("posthog", "insights"),
+]
+
+# A bare `hog` in a path means different things in different places, so it is
+# never rewritten blanket. Sprite assets are the mascot, script programs carry
+# the query-language extension, and everything else is spelled out above.
+PATH_SCOPED_RULES: list[tuple[str, str]] = [
+    ("-hog-", "-mascot-"),
+    ("_hog_", "_iql_"),
+]
+
+PATH_SUFFIX_RULES: list[tuple[str, str]] = [
+    (".hoge", ".iqle"),
+    (".hog", ".iql"),
+]
+
+# Directory renames that are ours by convention rather than by branding.
+# `kafka` is scoped to the client wrapper so real vendored Kafka code and the
+# livestream Go bindings keep their upstream names.
+PATH_DIR_RULES: list[tuple[str, str]] = [
+    ("nodejs/src/kafka/", "nodejs/src/stream/"),
+    ("nodejs/src/session-recording/kafka/", "nodejs/src/session-recording/stream/"),
+]
+
+# Compose files follow the house convention.
+PATH_EXACT_RULES: dict[str, str] = {
+    "docker-compose.base.yml": "compose.base.yml",
+    "docker-compose.dev.yml": "compose.dev.yml",
+    "docker-compose.dev-full.yml": "compose.dev-full.yml",
+    "docker-compose.dev-minimal.yml": "compose.dev-minimal.yml",
+    "docker-compose.dev-coordinator.yml": "compose.dev-coordinator.yml",
+    "docker-compose.hobby.yml": "compose.hobby.yml",
+    "docker-compose.playwright.yml": "compose.playwright.yml",
+}
+
+# --- scope --------------------------------------------------------------
+#
+# Upstream ships products we do not run. Carrying them costs review surface,
+# CI time and image size, and each one is a Django app that must import
+# cleanly at boot. Dropping them is the same decision the fork made before,
+# re-derived: every entry here is a product absent from the shipped tree.
+#
+# Not listed, and deliberately kept: alerts, annotations, subscriptions,
+# exports, event_definitions, access_control, notifications, messaging and
+# session_replay. Upstream is mid-extraction on those — the implementation
+# still also lives in the core app, which we DO run, so dropping the
+# products/ half risks removing live code rather than dead weight.
+
+DROP_DIRS: list[tuple[str, str]] = [
+    ("products/warehouse_sources", "managed warehouse connectors; we do not run them"),
+    ("products/warehouse_sources_queue", "queue for the above"),
+    ("products/desktop", "desktop recorder app"),
+    ("products/ai_observability", "we run LLM observability on Hanzo o11y"),
+    ("products/replay_vision", "vision model over replays"),
+    ("products/review_hog", "upstream code-review bot"),
+    ("products/engineering_analytics", "upstream-internal engineering metrics"),
+    ("products/mcp_analytics", "upstream MCP analytics"),
+    ("products/mcp_store", "upstream MCP registry"),
+    ("products/tracing", "we trace on Hanzo o11y"),
+    ("products/metrics", "we meter on Hanzo o11y"),
+    ("products/visual_review", "visual regression review"),
+    ("products/business_knowledge", "knowledge base product"),
+    ("products/data_catalog", "catalog product"),
+    ("products/stamphog", "upstream stamp/rewards toy"),
+    ("products/legal_documents", "upstream legal doc workflow"),
+    ("products/streamlit_apps", "arbitrary Streamlit hosting"),
+    ("products/skills", "agent skill registry"),
+    ("products/pulse", "upstream internal pulse survey"),
+    ("products/demo", "upstream demo-data product"),
+    ("products/wizard", "upstream onboarding wizard"),
+    ("products/approvals", "approval workflow product"),
+    ("products/reminders", "reminder product"),
+    ("products/data_tools", "misc data tooling product"),
+    ("products/platform_features", "upstream platform feature registry"),
+    ("products/field_notes", "field notes product"),
+    ("products/ai_gateway", "we route models through the Hanzo gateway"),
+    ("products/ingestion", "ingestion product shell"),
+    ("products/support", "upstream support product"),
+    ("products/integrations", "upstream integration shell"),
+    ("ee", "enterprise-licensed tree; we run none of it and it is not installed"),
+    ("posthog/migrations", "replaced by our squashed initial migration"),
+]
+
+# Directories that are build or test caches. They regenerate, and carrying a
+# stale one is worse than carrying none.
+DROP_GLOBS: list[tuple[str, str]] = [
+    (".sqlx/", "sqlx offline query cache; regenerated from the database"),
+]
+
+# --- allowlist ----------------------------------------------------------
+#
+# Content that legitimately still says the upstream name. Each entry is a
+# path and the reason it is exempt. This list is the whole exemption surface:
+# anything not named here must come out clean, and --check enforces that.
+
+CONTENT_ALLOWLIST: dict[str, str] = {
+    "bin/debrand": (
+        "This file. The rules are the upstream names, so it necessarily "
+        "spells them out."
+    ),
+    "LLM.md": (
+        "States which upstream commit we last converged from. Naming the "
+        "upstream is the point of the sentence."
+    ),
+    "insights/management/commands/migrate_datastore.py": (
+        "LEGACY_PACKAGE_NAMES reads historical rows already written to the "
+        "datastore migrations table under their original package names. "
+        "Renaming these strings would orphan every applied migration."
+    ),
+    "rust/common/symbol_data/tests/static/sourcemap_with_nulls.jsdata": (
+        "Gzipped fixture. The old name is inside the compressed bytes; "
+        "rewriting it would corrupt the archive the test decompresses."
+    ),
+    "rust/cymbal/tests/static/sourcemap_with_nulls.jsdata": (
+        "Gzipped fixture, same reason as the symbol_data copy."
+    ),
+}
+
+# Never rewrite bytes in these. Lockfiles pin upstream package identities we
+# genuinely depend on; binaries and archives are not text.
+SKIP_CONTENT_SUFFIX = (
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".svg.gz", ".woff", ".woff2",
+    ".ttf", ".eot", ".mp4", ".webm", ".mp3", ".wav", ".pdf", ".zip", ".gz", ".br",
+    ".bz2", ".zst", ".tar", ".whl", ".so", ".dylib", ".dll", ".wasm", ".bin",
+    ".jsdata", ".parquet", ".avro", ".pyc",
+)
+SKIP_CONTENT_NAMES = {"pnpm-lock.yaml", "uv.lock", "Cargo.lock", "package-lock.json", "poetry.lock"}
+
+
+def tracked_files(root: str) -> list[str]:
+    out = subprocess.run(
+        ["git", "ls-files", "-z"], cwd=root, capture_output=True, check=True
+    ).stdout
+    return [p.decode() for p in out.split(b"\0") if p]
+
+
+# Identities that belong to someone else, in the files where they must still
+# resolve. Renaming an upstream GitHub org or a tag cut in their repo invents
+# a URL that 404s, and it surfaces far away as an unresolvable dependency.
+# Scoped to manifests on purpose: a link in prose is a doc link and gets
+# rewritten like everything else, but a dependency source has to fetch.
+# Pointing one of these at a repo we host instead is a curated decision that
+# belongs in the manifest, not something a rename can derive.
+PRESERVE: list[re.Pattern[str]] = [
+    re.compile(r"https?://(?:www\.)?github\.com/PostHog[\w.\-/]*"),
+    re.compile(r"\bv[\d.]+-posthog\.\d+\b"),
+]
+
+MANIFESTS = {"pyproject.toml", "Cargo.toml", "package.json"}
+
+
+def rewrite_text(s: str, path: str = "") -> str:
+    if os.path.basename(path) not in MANIFESTS:
+        for old, new in CONTENT_RULES:
+            s = s.replace(old, new)
+        for pat, rep in CONTENT_REGEX:
+            s = pat.sub(rep, s)
+        return s
+    return _rewrite_manifest(s)
+
+
+def _rewrite_manifest(s: str) -> str:
+    held: list[str] = []
+
+    def hold(mm: re.Match[str]) -> str:
+        held.append(mm.group(0))
+        return f"\0{len(held) - 1}\0"
+
+    for pat in PRESERVE:
+        s = pat.sub(hold, s)
+    for old, new in CONTENT_RULES:
+        s = s.replace(old, new)
+    for pat, rep in CONTENT_REGEX:
+        s = pat.sub(rep, s)
+    for i, original in enumerate(held):
+        s = s.replace(f"\0{i}\0", original)
+    return s
+
+
+def rewrite_path(p: str) -> str:
+    for old, new in PATH_DIR_RULES:
+        if p.startswith(old):
+            p = new + p[len(old):]
+    base = os.path.basename(p)
+    if base in PATH_EXACT_RULES:
+        p = os.path.join(os.path.dirname(p), PATH_EXACT_RULES[base])
+    for old, new in PATH_RULES:
+        p = p.replace(old, new)
+    for old, new in PATH_SCOPED_RULES:
+        p = p.replace(old, new)
+    for old, new in PATH_SUFFIX_RULES:
+        if p.endswith(old):
+            p = p[: -len(old)] + new
+    return p
+
+
+def skip_content(path: str) -> bool:
+    return path.endswith(SKIP_CONTENT_SUFFIX) or os.path.basename(path) in SKIP_CONTENT_NAMES
+
+
+IMPORT_RE = re.compile(r"(?:from|import)\s+products\.([a-z_]+)")
+
+
+def drop_closure(root: str, files: list[str]) -> tuple[set[str], dict[str, int]]:
+    """Narrow the product drop list to what nothing we keep still imports.
+
+    Upstream keeps weaving products back into the core app, so a drop list
+    written once goes stale silently and the first symptom is a
+    ModuleNotFoundError at Django startup. Deleting a product that kept code
+    imports is a refactor, not a delete, so this refuses to do it and says
+    which product held on and how hard.
+    """
+    wanted = {d.split("/", 1)[1] for d, _ in DROP_DIRS if d.startswith("products/")}
+    imports: list[tuple[str, set[str]]] = []
+    for f in files:
+        if not f.endswith(".py"):
+            continue
+        try:
+            src = open(os.path.join(root, f), encoding="utf-8", errors="ignore").read()
+        except OSError:
+            continue
+        found = {mm.group(1) for mm in IMPORT_RE.finditer(src)} & wanted
+        if found:
+            imports.append((f, found))
+
+    drop = set(wanted)
+    while True:
+        held: dict[str, int] = {}
+        for f, used in imports:
+            owner = f.split("/")[1] if f.startswith("products/") and "/" in f[9:] else None
+            if owner in drop:            # a doomed product may cite another
+                continue
+            for p in used & drop:
+                held[p] = held.get(p, 0) + 1
+        if not held:
+            return drop, {}
+        drop -= set(held)
+        if not held:
+            break
+    return drop, held
+
+
+def prune(root: str, dry: bool) -> int:
+    """Drop products we do not run, and unwire them from Django.
+
+    Order matters: this runs while paths still carry upstream names, so the
+    drop list reads the way upstream ships it and needs no translation.
+    """
+    files = tracked_files(root)
+    drop_products, _ = drop_closure(root, files)
+    wanted = {d.split("/", 1)[1] for d, _ in DROP_DIRS if d.startswith("products/")}
+    retained = sorted(wanted - drop_products)
+    if retained:
+        print(f"kept {len(retained)} products the core still imports: {', '.join(retained)}")
+    active = [
+        d for d, _ in DROP_DIRS
+        if not d.startswith("products/") or d.split("/", 1)[1] in drop_products
+    ]
+    doomed = [
+        f for f in files
+        if any(f == d or f.startswith(d + "/") for d in active)
+        or any(g in f for g, _ in DROP_GLOBS)
+    ]
+    # Report what actually went, not what matched: on a converged tree the
+    # list still matches and a count of matches would read as work done.
+    doomed = [f for f in doomed if os.path.lexists(os.path.join(root, f))]
+    if not dry and doomed:
+        for i in range(0, len(doomed), 2000):
+            subprocess.run(["git", "rm", "-q", "--cached", "--"] + doomed[i:i + 2000],
+                           cwd=root, check=True, capture_output=True)
+        for f in doomed:
+            p = os.path.join(root, f)
+            if os.path.lexists(p):
+                os.remove(p)
+
+    # Django holds a hand-written list of product apps. A dropped product left
+    # in INSTALLED_APPS is an ImportError at boot, so the two move together.
+    settings = os.path.join(root, "posthog/settings/web.py")
+    removed_apps = 0
+    if os.path.exists(settings):
+        dropped = drop_products
+        keep, lines = [], open(settings, encoding="utf-8").read().splitlines(keepends=True)
+        for line in lines:
+            mm = re.search(r'"products\.([a-z_]+)\.', line)
+            if mm and mm.group(1) in dropped:
+                removed_apps += 1
+                continue
+            keep.append(line)
+        if removed_apps and not dry:
+            open(settings, "w", encoding="utf-8").write("".join(keep))
+    print(f"{'would drop' if dry else 'dropped'} {len(doomed)} files, "
+          f"{removed_apps} INSTALLED_APPS entries")
+    return len(doomed)
+
+
+def apply(root: str, dry: bool) -> tuple[int, int]:
+    files = tracked_files(root)
+    edited = renamed = 0
+    for rel in files:
+        src = os.path.join(root, rel)
+        if not os.path.isfile(src) or os.path.islink(src):
+            continue
+        if not skip_content(rel) and rel not in CONTENT_ALLOWLIST:
+            try:
+                raw = open(src, "rb").read()
+                text = raw.decode("utf-8")
+            except (UnicodeDecodeError, OSError):
+                text = None
+            if text is not None:
+                new = rewrite_text(text, rel)
+                if new != text:
+                    edited += 1
+                    if not dry:
+                        open(src, "w", encoding="utf-8").write(new)
+    moves = [(r, rewrite_path(r)) for r in files]
+    moves = [(a, b) for a, b in moves if a != b]
+    renamed = len(moves)
+    if not dry:
+        # Rename in-process and stage once at the end. Shelling out per file
+        # costs a process per rename, which on a full-tree convergence is
+        # thousands of them for no gain.
+        for a, b in moves:
+            src, dst = os.path.join(root, a), os.path.join(root, b)
+            # lexists, not exists: a symlink whose target this pass has already
+            # renamed is dangling, and exists() follows the link and says no.
+            if not os.path.lexists(src):
+                continue
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            os.replace(src, dst)
+        subprocess.run(["git", "add", "-A", "."], cwd=root, check=True, capture_output=True)
+    return edited, renamed
+
+
+def check(root: str) -> int:
+    bad = 0
+    paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
+    if paths:
+        bad += 1
+        print(f"FAIL: {len(paths)} tracked paths still name the upstream brand")
+        for p in paths[:20]:
+            print(f"    {p}")
+    hits = subprocess.run(
+        ["git", "grep", "-ilI", "posthog"], cwd=root, capture_output=True, text=True
+    ).stdout.split()
+    # Manifests and lockfiles are reported, never allowlisted. They name
+    # packages that have to resolve, so each one is either a repo we host
+    # under our own name or a dependency we still take from upstream — a
+    # decision per entry, and outstanding work until someone makes it.
+    # Calling that an exemption would hide it.
+    def is_manifest(p: str) -> bool:
+        b = os.path.basename(p)
+        return b in MANIFESTS or b in SKIP_CONTENT_NAMES
+
+    pending = sorted(h for h in hits if h not in CONTENT_ALLOWLIST and is_manifest(h))
+    leaked = [h for h in hits if h not in CONTENT_ALLOWLIST and not is_manifest(h)]
+    if pending:
+        print(f"PENDING: {len(pending)} dependency manifests still name upstream packages.")
+        print("    Each needs a decision: take it from upstream, or host it under our name.")
+        for p in pending:
+            print(f"    {p}")
+    if leaked:
+        bad += 1
+        print(f"FAIL: {len(leaked)} files carry the upstream brand and are not allowlisted")
+        for p in leaked[:20]:
+            print(f"    {p}")
+    stale = [p for p in CONTENT_ALLOWLIST if p not in set(tracked_files(root))]
+    if stale:
+        bad += 1
+        print("FAIL: allowlist names files that no longer exist (it must not rot)")
+        for p in stale:
+            print(f"    {p}")
+    if not bad:
+        print(f"ok: no upstream brand in paths; {len(CONTENT_ALLOWLIST)} allowlisted files, each justified")
+    return 1 if bad else 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--check", action="store_true", help="verify invariants only")
+    ap.add_argument("--stat", action="store_true", help="report, change nothing")
+    ap.add_argument("--rename-only", action="store_true", help="skip the prune phase")
+    ap.add_argument("--root", default=".", help="repo root")
+    a = ap.parse_args()
+    root = os.path.abspath(a.root)
+    if a.check:
+        return check(root)
+    if not a.rename_only:
+        prune(root, dry=a.stat)
+    edited, renamed = apply(root, dry=a.stat)
+    verb = "would rewrite" if a.stat else "rewrote"
+    print(f"{verb} {edited} files, {'would rename' if a.stat else 'renamed'} {renamed} paths")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
