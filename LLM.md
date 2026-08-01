@@ -209,16 +209,52 @@ having. `@hanzo/event` already sends the pre-login id beside the subject and
 Cloud stores it as `anonymous_id` — the alias just writes the join down where the
 query engine reads it.
 
-`user_mv`/`user_alias_mv` backfills are safe to re-run; `event_mv`'s is not. That
-is the collapse key, not a policy: `person` collapses on `(team_id, id)` and the
-overrides on `(team_id, distinct_id)`, both deterministic functions of the source
-row, while `sharded_events` collapses on a key containing the `team_id` a
-re-projection changes (see `0220`).
+**A version is a PRECEDENCE, not a clock.** A ReplacingMergeTree keeps the
+largest `version`, so that column decides which row is true. It is banded —
+`BAND = 1 << 61`, anonymous < identified < override — and the clock inside a
+band is `ingested_at`, a column DEFAULT (`now64(3)`) that nothing on the wire can
+reach. Two consequences worth knowing before editing it:
+
+- **Identification outranks time**, so a user we have ever known by name stays
+  known. It has to: the reduced lane stamps the subject into `distinct_id` and
+  leaves `person_id` empty, and a caller may send any `distinct_id` it likes, so
+  rows CAN share a key and disagree about `is_identified`. Per-row derivation is
+  not enough; the band is what settles it.
+- **The top band is reserved and the plane never writes it.** A projected row
+  whose version is a function of its own event is otherwise immortal — no
+  tombstone, no richer source, no correction can bid higher. The first cut
+  anchored at the top of the UInt64 and the only way to fix it was to delete
+  1348 rows (`0222`).
+
+Never use `time` here. It is the caller's — `clampTS` only pulls the future back
+— and under a first-wins rule a back-dated row outranks every genuine one forever.
+
+**Deleting a projected user needs `retire_projected_users`.** The fork's
+`delete_person` is driven by a Django instance and its tombstone travels by
+Kafka; a projected user has no Postgres row and this deployment runs no Kafka, so
+that path finds nothing and lands nothing — `bulk_delete` used to answer 202
+having deleted nothing. Projected users are retired in the override band, which
+is what makes the deletion survive the next backfill.
+
+`user_mv`/`user_alias_mv` backfills are safe to re-run **for as long as the
+routing is unchanged**; `event_mv`'s is never. `person` collapses on
+`(team_id, id)` and the overrides on `(team_id, distinct_id)` — the same shape as
+`sharded_events`, so the difference is not the collapse key alone: `team_id` is
+`transform(org, …)` over `org_team`, the table `0220` exists to mutate. Re-route
+an org that already has events and the old rows stay under the old team.
+
+That is live here, and it is the plane's one known inconsistency: `0220` moved
+`$public` to team 0 after `event_mv` had written its events under team 1, so
+**~92% of team 1's events point at users team 1 cannot see** (4791 of 5191). The
+users are right; the events are stale. Reconciling them is the deliberate
+operator delete `0221` spells out, not a backfill.
 
 An MV over `event.event` runs inside Cloud's INSERT, so **an expression that can
 throw takes down fleet-wide ingest.** Every expression in the projection is total
-over any input. Verify `POST /v1/event` still answers `accepted:1` after touching
-these views.
+over any input — including a negative clock, which is why the band clamps at zero.
+Confirm ingest by watching real traffic land (`event.event` growing, new rows in
+the live bands); do NOT send probe events. A probe is a real user row in a real
+tenant, and four of them ended up bound to an actual customer's account.
 
 ## Django migrations — squashed to a clean baseline (v1.52.0)
 
