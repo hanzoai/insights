@@ -1663,6 +1663,7 @@ dependencies = [
  "redis",
  "reqwest 0.12.28",
  "serde",
+ "serde-pickle",
  "serde_json",
  "serde_urlencoded",
  "sha2",
